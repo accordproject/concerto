@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.20.2",
+  "version": "0.30.0",
   "description": "Hyperledger Composer Concerto, model manager.",
   "engines": {
     "node": ">=8",
