@@ -1,9 +1,0 @@
-{
-    "composer": {
-        "wallet": {
-            "type": "composer-wallet-redis",
-            "desc": "Uses a local redis instance",
-            "options":{}
-        }
-    }
-}
