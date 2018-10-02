@@ -62,19 +62,5 @@ jspm_packages
 
 # vscode folder
 .vscode
-
-#Broken link report
-packages/composer-website/linkresults.txt
-
-packages/composer-website/jsondata
-packages/composer-website/jekylldocs/api-doc-inline
-packages/composer-website/jekylldocs/jsdoc
-
-packages/composer-systests/systestv1/tls/ca/fabric-ca-server.db
-packages/composer-runtime-hlfv1/vendor/github.com/
-packages/composer-runtime-hlfv1/vendor/gopkg.in/sourcemap.v1/
-
-packages/composer-playground/e2e/downloads/
-
 package-lock.json
-packages/composer-tests-functional/storage
+out
