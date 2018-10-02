@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
- // From: https://gitlab.com/dominicp/node-job-queue/blob/master/test/job-queue.js
+// From: https://gitlab.com/dominicp/node-job-queue/blob/master/test/job-queue.js
 
 'use strict';
 

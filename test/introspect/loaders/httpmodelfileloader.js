@@ -88,9 +88,9 @@ describe('HTTPModeFilelLoader', () => {
 
             const ml = new HTTPModelFileLoader(modelManager);
             return ml.load('https://raw.githubusercontent.com/accordproject/models/master/usa/business.cto')
-            .then((mf) => {
-                mf.getDefinitions().should.be.deep.equal(model);
-            });
+                .then((mf) => {
+                    mf.getDefinitions().should.be.deep.equal(model);
+                });
         });
     });
 });

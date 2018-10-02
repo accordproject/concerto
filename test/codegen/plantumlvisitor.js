@@ -28,7 +28,7 @@ describe('PlantUMLVisitor', function(){
 
         const animaltrackingModel = fs.readFileSync(path.resolve(__dirname, '../data/model/animaltracking.cto'), 'utf8');
 
-            // create and populate the ModelManager with a model file
+        // create and populate the ModelManager with a model file
         const modelManager = new ModelManager();
         modelManager.addModelFile(animaltrackingModel,'animaltracking.cto');
 
@@ -37,7 +37,7 @@ describe('PlantUMLVisitor', function(){
         parameters.fileWriter = new FileWriter('./out/animaltracking');
         modelManager.accept(visitor, parameters);
 
-            // check the file exists
+        // check the file exists
         fs.accessSync('./out/animaltracking/model.uml', fs.F_OK);
     });
 

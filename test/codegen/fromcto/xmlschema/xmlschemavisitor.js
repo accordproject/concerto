@@ -139,8 +139,8 @@ describe('XmlSchemaVisitor', function () {
 
             param.fileWriter.openFile.withArgs('org.hyperledger.composer.system.xsd').calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version=\"1.0\"?>']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system=\"org.hyperledger.composer.system\" targetNamespace=\"org.hyperledger.composer.system\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" ']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system" targetNamespace="org.hyperledger.composer.system" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '>']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:schema>']);
 
@@ -190,15 +190,15 @@ describe('XmlSchemaVisitor', function () {
 
             param.fileWriter.openFile.withArgs('org.foo.xsd').calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(10);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version=\"1.0\"?>']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.foo=\"org.foo\" targetNamespace=\"org.foo\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" ']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'xmlns:org.hyperledger.composer.system=\"org.hyperledger.composer.system\"']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '<xmlns:org.imported=\"org.imported\"']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xmlns:org.different=\"org.different\"']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.foo="org.foo" targetNamespace="org.foo" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system"']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '<xmlns:org.imported="org.imported"']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xmlns:org.different="org.different"']);
             param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '>']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '<xs:import namespace=\"org.hyperledger.composer.system\" schemaLocation=\"org.hyperledger.composer.system.xsd\"/>']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '<xs:import namespace=\"org.imported\" schemaLocation=\"org.imported.xsd\"/>']);
-            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([0, '<xs:import namespace=\"org.different\" schemaLocation=\"org.different.xsd\"/>']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '<xs:import namespace="org.hyperledger.composer.system" schemaLocation="org.hyperledger.composer.system.xsd"/>']);
+            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '<xs:import namespace="org.imported" schemaLocation="org.imported.xsd"/>']);
+            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([0, '<xs:import namespace="org.different" schemaLocation="org.different.xsd"/>']);
             param.fileWriter.writeLine.getCall(9).args.should.deep.equal([0, '</xs:schema>']);
 
             param.fileWriter.closeFile.calledOnce.should.be.ok;
@@ -230,8 +230,8 @@ describe('XmlSchemaVisitor', function () {
             xmlSchemaVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(5);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:simpleType name=\"Person\">']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:restriction base=\"xs:string\">']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:simpleType name="Person">']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:restriction base="xs:string">']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '</xs:restriction>']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:simpleType>']);
 
@@ -268,12 +268,12 @@ describe('XmlSchemaVisitor', function () {
             xmlSchemaVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(9);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:simpleType name=\"Person_Own\">']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:restriction base=\"xs:string\">']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:simpleType name="Person_Own">']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:restriction base="xs:string">']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '</xs:restriction>']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:simpleType>']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:simpleType name=\"Person\" type=\"org.acme:Person_Own\">']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, '<xs:union memberTypes=\"org.acme:Person_Own  org.acme:Human\">']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:simpleType name="Person" type="org.acme:Person_Own">']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, '<xs:union memberTypes="org.acme:Person_Own  org.acme:Human">']);
             param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, '</xs:union>']);
             param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '</xs:simpleType>']);
 
@@ -302,7 +302,7 @@ describe('XmlSchemaVisitor', function () {
             xmlSchemaVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(5);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:complexType name=\"Person\">']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:complexType name="Person">']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:sequence>']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '</xs:sequence>']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:complexType>']);
@@ -340,9 +340,9 @@ describe('XmlSchemaVisitor', function () {
             xmlSchemaVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(9);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:complexType name=\"Person\">']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:complexType name="Person">']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:complexContent>']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '<xs:extension base=\"org.acme:Human\">']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '<xs:extension base="org.acme:Human">']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '<xs:sequence>']);
             param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '</xs:sequence>']);
             param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, '</xs:extension>']);

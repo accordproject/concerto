@@ -52,15 +52,15 @@ describe('APISignatureGenerator', function () {
             let classes = [
                 {
                     methods:[
-                            {name:'methodname1',visibility:'public',methodArgs:['string','int'],throws:'error'},
-                            {name:'methodname2',visibility:'public',methodArgs:['string','int']}
+                        {name:'methodname1',visibility:'public',methodArgs:['string','int'],throws:'error'},
+                        {name:'methodname2',visibility:'public',methodArgs:['string','int']}
                     ],
                     name:'aclass'
                 },
                 {
                     methods:[
-                            {name:'methodname1',visibility:'public',methodArgs:['string','int'],throws:'error'},
-                            {name:'methodname2',visibility:'public',methodArgs:['string','int']}
+                        {name:'methodname1',visibility:'public',methodArgs:['string','int'],throws:'error'},
+                        {name:'methodname2',visibility:'public',methodArgs:['string','int']}
                     ],
                     name:'asubclass',
                     superClass :'aclass'

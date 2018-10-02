@@ -224,7 +224,7 @@ describe('JavascriptParser', () => {
                             'name': 'String',
                             'type': 'NameExpression'
                         },
-                            'name': 'farmerId' },
+                        'name': 'farmerId' },
                         { 'title': 'returns',
                             'description': 'the animals that belong to the farmer',
                             'type': {
@@ -782,7 +782,7 @@ describe('JavascriptParser', () => {
             `;
             sandbox.stub(doctrine,'parse').returns({tags:[ {type:{none:' '} } ] });
             (()=>{JavascriptParser.getThrows(comment);})
-            .should.throws(/Malformed JSDoc comment/);
+                .should.throws(/Malformed JSDoc comment/);
         });
     });
 
@@ -898,7 +898,7 @@ describe('JavascriptParser', () => {
             `;
             sandbox.stub(doctrine,'parse').returns({tags:[ {type:{name:' '} } ] });
             (()=>{JavascriptParser.getMethodArguments(comment);})
-            .should.throws(/Malformed JSDoc comment/);
+                .should.throws(/Malformed JSDoc comment/);
         });
 
         it('Cope with different types of tag type', () => {

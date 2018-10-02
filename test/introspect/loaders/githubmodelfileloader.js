@@ -82,9 +82,9 @@ describe('GitHubModelFileLoader', () => {
 
             const ml = new GitHubModelFileLoader(modelManager);
             return ml.load( 'github://accordproject/models/master/usa/business.cto', {foo: 'bar' })
-            .then((mf) => {
-                mf.getDefinitions().should.be.deep.equal(model);
-            });
+                .then((mf) => {
+                    mf.getDefinitions().should.be.deep.equal(model);
+                });
         });
     });
 });

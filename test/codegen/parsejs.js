@@ -35,7 +35,7 @@ describe('parsejs', function () {
 
     describe('#maintest', function() {
         it('main path', function() {
-           // require('../../lib/codegen/parsejs.js');
+            // require('../../lib/codegen/parsejs.js');
         });
     });
 

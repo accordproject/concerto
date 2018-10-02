@@ -254,7 +254,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field model has value \"2016-10-13T14:49:47.971Z\" \(object\) expected type String/);
+            }).should.throw(/Model violation in instance TEST field model has value "2016-10-13T14:49:47.971Z" \(object\) expected type String/);
         });
 
         it('should detect using a boolean type for a string field', function () {

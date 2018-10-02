@@ -56,9 +56,9 @@ concept Foo {}`, 'fake.cto', true);
             // download all the external models for the model manager (there are none!)
             const mfd = new ModelFileDownloader(ml);
             return mfd.downloadExternalDependencies(modelManager.getModelFiles(), {})
-            .then((result) => {
-                result.should.deep.equal([]);
-            });
+                .then((result) => {
+                    result.should.deep.equal([]);
+                });
         });
 
         it('should download a model file and its external dependencies', function() {
@@ -96,10 +96,10 @@ concept Foo {}`, 'fake.cto', true);
             // download all the external models for the model manager
             const mfd = new ModelFileDownloader(ml);
             return mfd.downloadExternalDependencies(modelManager.getModelFiles())
-            .then((result) => {
+                .then((result) => {
                 // there should be 2 (externalModelFile and externalModelFile2)
-                result.should.deep.equal([externalModelFile,externalModelFile2]);
-            });
+                    result.should.deep.equal([externalModelFile,externalModelFile2]);
+                });
         });
 
         it('should handle loader errors', function() {
@@ -120,7 +120,7 @@ concept Foo {}`, 'fake.cto', true);
 
             const mfd = new ModelFileDownloader(ml);
             return mfd.downloadExternalDependencies(modelManager.getModelFiles())
-            .should.be.rejectedWith(Error, 'Failed to load model file.');
+                .should.be.rejectedWith(Error, 'Failed to load model file.');
         });
     });
 });

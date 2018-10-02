@@ -52,7 +52,7 @@ describe('RelationshipDeclaration', function () {
             const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
-          // stub the getType method to return null
+            // stub the getType method to return null
             sinon.stub(field, 'getType', function(){return null;});
             (function () {
                 field.validate(vehicleDeclaration);

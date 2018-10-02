@@ -222,7 +222,7 @@ describe('GoLangVisitor', function () {
             goVisit.visitModelFile(mockModelFileDefinition, param);
             param.fileWriter.openFile.withArgs('space.go').calledOnce.should.be.ok;
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'package main']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import \"time"']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import "time"']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(goVisit, param).calledTwice.should.be.ok;
         });

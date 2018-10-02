@@ -88,7 +88,7 @@ describe('EventDeclaration', () => {
             (()=>{
                 modelManager.addModelFile(model, 'awesome.cto' );
             })
-            .should.throw(/Event should not specify an identifying field/);
+                .should.throw(/Event should not specify an identifying field/);
 
         });
 

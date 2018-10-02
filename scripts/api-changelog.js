@@ -26,31 +26,31 @@ if (fs.existsSync(apiSignatureFile)) {
 }
 
 return Promise.resolve()
-.then(() => {
-    return new Promise((resolve, reject) => {
-        const parsejs = path.resolve(parentDirectory, 'lib', 'codegen', 'parsejs.js');
-        const command = child_process.fork(parsejs, ['--format', 'APISignature', '--inputDir', path.resolve(parentDirectory, 'lib'), '--outputDir', parentDirectory]);
-        command.on('exit', (code) => {
-            if (code !== 0) {
-                process.exit(code);
-            }
-            resolve();
+    .then(() => {
+        return new Promise((resolve, reject) => {
+            const parsejs = path.resolve(parentDirectory, 'lib', 'codegen', 'parsejs.js');
+            const command = child_process.fork(parsejs, ['--format', 'APISignature', '--inputDir', path.resolve(parentDirectory, 'lib'), '--outputDir', parentDirectory]);
+            command.on('exit', (code) => {
+                if (code !== 0) {
+                    process.exit(code);
+                }
+                resolve();
+            });
         });
-    });
-})
-.then(() => {
-    return new Promise((resolve, reject) => {
-        const changelog = path.resolve(parentDirectory, 'lib', 'tools', 'changelog.js');
-        const command = child_process.fork(changelog, ['--api', apiSignatureFile, '--changelog', path.resolve(parentDirectory, 'changelog.txt')]);
-        command.on('exit', (code) => {
-            if (code !== 0) {
-                process.exit(code);
-            }
-            resolve();
+    })
+    .then(() => {
+        return new Promise((resolve, reject) => {
+            const changelog = path.resolve(parentDirectory, 'lib', 'tools', 'changelog.js');
+            const command = child_process.fork(changelog, ['--api', apiSignatureFile, '--changelog', path.resolve(parentDirectory, 'changelog.txt')]);
+            command.on('exit', (code) => {
+                if (code !== 0) {
+                    process.exit(code);
+                }
+                resolve();
+            });
         });
+    })
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
     });
-})
-.catch((error) => {
-    console.error(error);
-    process.exit(1);
-});

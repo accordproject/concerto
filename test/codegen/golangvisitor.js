@@ -63,7 +63,7 @@ describe('GoLangVisitor', function(){
             (()=>{
                 visitor.visit(fakeObj,{});
             })
-            .should.throw(/Unrecognised type/);
+                .should.throw(/Unrecognised type/);
         });
 
     });

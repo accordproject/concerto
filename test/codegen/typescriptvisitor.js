@@ -74,7 +74,7 @@ describe('TypescriptVisitor', function(){
             (()=>{
                 visitor.visit(fakeObj,{});
             })
-            .should.throw(/Unrecognised type/);
+                .should.throw(/Unrecognised type/);
         });
 
 

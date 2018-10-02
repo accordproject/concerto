@@ -554,23 +554,23 @@ concept Bar {
             // import all external models
             const options = {};
             return modelManager.updateExternalModels(options, mfd)
-            .then(() => {
-                // model should be loaded and tagged as external
-                modelManager.getModelFile('org.external').isExternal().should.be.true;
-
-                // root model should still be there, and tagged as internal
-                modelManager.getModelFile('org.acme').isExternal().should.be.false;
-
-                // second update, with the external model already loaded
-                return modelManager.updateExternalModels(options, mfd)
                 .then(() => {
-                    // model should be loaded and tagged as external
-                    modelManager.getModelFile('org.acme').isExternal().should.be.false;
+                // model should be loaded and tagged as external
+                    modelManager.getModelFile('org.external').isExternal().should.be.true;
 
                     // root model should still be there, and tagged as internal
-                    modelManager.getModelFile('org.external').isExternal().should.be.true;
+                    modelManager.getModelFile('org.acme').isExternal().should.be.false;
+
+                    // second update, with the external model already loaded
+                    return modelManager.updateExternalModels(options, mfd)
+                        .then(() => {
+                            // model should be loaded and tagged as external
+                            modelManager.getModelFile('org.acme').isExternal().should.be.false;
+
+                            // root model should still be there, and tagged as internal
+                            modelManager.getModelFile('org.external').isExternal().should.be.true;
+                        });
                 });
-            });
         });
 
         it('should rollback changes on error', () => {
@@ -580,7 +580,7 @@ concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
-                // disable validation, we are using an external model
+            // disable validation, we are using an external model
             modelManager.addModelFile(`namespace org.acme
 import org.external.* from github://external.cto
 
@@ -589,7 +589,7 @@ concept Bar {
 }`, 'internal.cto', true);
             modelManager.getModelFile('org.acme').should.not.be.null;
 
-                // import all external models
+            // import all external models
             const options = {};
             return modelManager.updateExternalModels(options, mfd)
                 .catch((err) => {
