@@ -1,7 +1,7 @@
 {
   "name": "composer-concerto",
   "version": "0.31.0",
-  "description": "Hyperledger Composer Concerto, model manager.",
+  "description": "Hyperledger Composer Concerto",
   "engines": {
     "node": ">=8",
     "npm": ">=5"
@@ -119,10 +119,11 @@
   "nyc": {
     "exclude": [
       "coverage/**",
+      "index.js",
+      "webpack.config.js",
+      "lib/codegen/codegen.js",
       "lib/codegen/javascriptparser.js",
       "lib/introspect/parser.js",
-      "lib/acl/parser.js",
-      "lib/query/parser.js",
       "out/**",
       "scripts/**",
       "systest/**",

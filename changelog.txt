@@ -27,5 +27,8 @@
 Version 0.31.0 {49a049f639606b7435e0f4cebd58fe12} 2018-10-03
 - Remove built-in system model file 
 
+Version 0.30.1 {fd4b813bc0bda4042db3c4657893593f} 2018-10-03
+- Remove Wallet
+
 Version 0.30.0 {785896a0c4c91e70dcbbfcc5bab33938} 2018-10-02
 - Refactor to make model manager its own module
