@@ -9,6 +9,8 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
+    "build": "webpack --config webpack.config.js --mode production",
+    "prepublishOnly": "npm run build",
     "prepublish": "node ./scripts/systemmodelgen.js && pegjs ./lib/introspect/parser.pegjs && node ./scripts/tsgen.js",
     "pretest": "npm run prepublish && npm run lint",
     "lint": "eslint .",
@@ -35,8 +37,6 @@
   "devDependencies": {
     "ajv": "6.5.4",
     "babel-preset-latest": "6.24.1",
-    "babelify": "10.0.0",
-    "browserfs": "1.4.3",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -50,34 +50,29 @@
     "nunjucks": "3.1.3",
     "nyc": "13.0.1",
     "pegjs": "0.10.0",
-    "rimraf": "2.6.2",
     "sinon": "2.3.8",
-    "sinon-chai": "3.2.0"
+    "sinon-chai": "3.2.0",
+    "webpack": "4.20.2",
+    "webpack-cli": "3.1.2"
   },
   "dependencies": {
     "acorn": "5.1.2",
     "axios": "0.18.0",
-    "comment-parser": "0.5.0",
-    "config": "2.0.1",
+    "commander": "2.18.0",
     "debug": "4.0.1",
     "doctrine": "2.1.0",
     "fs-extra": "1.0.0",
-    "js-yaml": "3.12.0",
-    "jsrsasign": "8.0.12",
-    "jszip": "3.1.5",
     "lodash.clonedeep": "4.5.0",
     "lodash.padstart": "4.6.1",
     "lorem-ipsum": "1.0.6",
-    "minimatch": "3.0.4",
     "mkdirp": "0.5.1",
     "npm-paths": "1.0.0",
     "semver": "5.5.1",
     "sprintf-js": "1.1.1",
-    "thenify": "3.3.0",
-    "thenify-all": "1.6.0",
     "urijs": "1.19.1",
     "uuid": "3.3.2",
-    "winston": "3.1.0"
+    "winston": "3.1.0",
+    "yargs": "12.0.2"
   },
   "license-check-and-add-config": {
     "folder": "./lib",
@@ -132,7 +127,8 @@
       "out/**",
       "scripts/**",
       "systest/**",
-      "test/**"
+      "test/**",
+      "umd/**"
     ],
     "reporter": [
       "text-summary",
