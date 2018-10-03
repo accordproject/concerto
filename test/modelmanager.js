@@ -136,13 +136,13 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file', ()=>{
             (() => {
-                modelManager.addModelFile(mockSystemModelFile);
+                modelManager.addModelFile(mockSystemModelFile, null, null, true);
             }).should.throw(/Cannot add a model file with the reserved system namespace/);
         });
 
         it('should not be possible to add a system model file (via string)', ()=>{
             (() => {
-                modelManager.addModelFile('namespace org.hyperledger.composer.system','fakesysnamespace.cto');
+                modelManager.addModelFile('namespace org.hyperledger.composer.system','fakesysnamespace.cto', null, true);
             }).should.throw(/Cannot add a model file with the reserved system namespace/);
         });
 
@@ -285,13 +285,13 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file', ()=>{
             (() => {
-                modelManager.addModelFiles([mockSystemModelFile]);
+                modelManager.addModelFiles([mockSystemModelFile], null, null, true);
             }).should.throw();
         });
 
         it('should not be possible to add a system model file (via string)', ()=>{
             (() => {
-                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto']);
+                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, true);
             }).should.throw(/System namespace can not be updated/);
         });
 

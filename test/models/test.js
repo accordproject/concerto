@@ -330,7 +330,9 @@ describe('Test Model', function(){
             modelFile.isLocalType('MyParticipant').should.equal(false);
             modelFile.isImportedType('MyParticipant').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
-                return !element.startsWith(ModelUtil.getSystemNamespace());
+                const importNamespace = ModelUtil.getNamespace(element);
+                const modelFile = modelManager.getModelFile(importNamespace);
+                return !modelFile.isSystemModelFile();
             });
             imprts.length.should.equal(1);
             modelFile.getImports().includes('composer.MyParticipant').should.equal(true);
@@ -367,7 +369,9 @@ describe('Test Model', function(){
             modelFile.isLocalType('Business').should.equal(true);
             modelFile.isImportedType('Person').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
-                return !element.startsWith(ModelUtil.getSystemNamespace());
+                const importNamespace = ModelUtil.getNamespace(element);
+                const modelFile = modelManager.getModelFile(importNamespace);
+                return !modelFile.isSystemModelFile();
             });
             imprts.length.should.equal(2);
         });
