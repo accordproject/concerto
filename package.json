@@ -63,16 +63,13 @@
     "debug": "4.0.1",
     "doctrine": "2.1.0",
     "fs-extra": "1.0.0",
-    "lodash.clonedeep": "4.5.0",
     "lodash.padstart": "4.6.1",
     "lorem-ipsum": "1.0.6",
     "mkdirp": "0.5.1",
     "npm-paths": "1.0.0",
     "semver": "5.5.1",
-    "sprintf-js": "1.1.1",
     "urijs": "1.19.1",
     "uuid": "3.3.2",
-    "winston": "3.1.0",
     "yargs": "12.0.2"
   },
   "license-check-and-add-config": {
