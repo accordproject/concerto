@@ -20,8 +20,6 @@ const sinon = require('sinon');
 
 const XmlSchemaVisitor = require('../../../../lib/codegen/fromcto/xmlschema/xmlschemavisitor.js');
 
-const ModelUtil = require('../../../../lib/modelutil');
-
 const ModelManager = require('../../../../lib/modelmanager');
 const ModelFile = require('../../../../lib/introspect/modelfile');
 const ClassDeclaration = require('../../../../lib/introspect/classdeclaration');
@@ -130,7 +128,7 @@ describe('XmlSchemaVisitor', function () {
             mockModelFile.accept = function(visitor, parameters) {
                 return visitor.visit(this, parameters);
             };
-            mockModelFile.getNamespace.returns(ModelUtil.getSystemNamespace());
+            mockModelFile.getNamespace.returns('org.hyperledger.composer.system');
             mockModelFile.isSystemModelFile.returns(true);
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
             mockModelManager.getModelFiles.returns([mockModelFile]);
@@ -158,6 +156,21 @@ describe('XmlSchemaVisitor', function () {
                 return visitor.visit(this, parameters);
             };
 
+            let mockSystemClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockSystemClassDeclaration.getNamespace.returns('org.hyperledger.composer');
+            mockSystemClassDeclaration.getName.returns('Asset');
+            mockModelManager.getType.withArgs('org.hyperledger.composer').returns(mockSystemClassDeclaration);
+
+            let mockSystemModelFile = sinon.createStubInstance(ModelFile);
+            mockSystemModelFile.getModelManager.returns(mockModelManager);
+            mockSystemModelFile.isSystemModelFile.returns(true);
+            mockSystemModelFile.accept = function(visitor, parameters) {
+                return visitor.visit(this, parameters);
+            };
+            mockSystemModelFile.getImports.returns([]);
+            mockSystemModelFile.getNamespace.returns('org.hyperledger.composer');
+            mockSystemModelFile.getAllDeclarations.returns([]);
+
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.getNamespace.returns('org.imported');
             mockClassDeclaration.getName.returns('ImportedType');
@@ -184,7 +197,7 @@ describe('XmlSchemaVisitor', function () {
             };
             mockModelFile.getNamespace.returns('org.foo');
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
-            mockModelManager.getModelFiles.returns([mockModelFile]);
+            mockModelManager.getModelFiles.returns([mockSystemModelFile, mockModelFile]);
 
             xmlSchemaVisitor.visitModelManager(mockModelManager, param);
 
