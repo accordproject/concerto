@@ -1,4 +1,3 @@
-#!/bin/bash
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +12,11 @@
 # limitations under the License.
 #
 
-# Exit on first error, print all commands.
-set -ev
-set -o pipefail
-
-# Bring in the standard set of script utilities
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-source ${DIR}/.travis/base.sh
-# ----
-env | grep TRAVIS
-
-# Run the unit tests.
-npm test 2>&1
-
-_exit "All complete" 0
+coverage
+node_modules
+out
+lib/introspect/parser.js
+lib/acl/parser.js
+lib/query/parser.js
+test/data
+umd

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +14,29 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
+const chai = require('chai');
+chai.should();
+chai.use(require('chai-as-promised'));
+chai.use(require('chai-things'));
+const sinon = require('sinon');
 
-const packageDirectory = path.resolve('.');
-const packageConfigFile = path.resolve(packageDirectory, 'package.json');
-const packageConfig = require(packageConfigFile);
-const targetVersion = semver.inc(packageConfig.version, 'patch');
-packageConfig.version = targetVersion;
-fs.writeFileSync(packageConfigFile, JSON.stringify(packageConfig, null, 2), 'utf8');
+
+describe('parsejs', function () {
+
+    let sandbox;
+
+    beforeEach(() => {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
+    describe('#maintest', function() {
+        it('main path', function() {
+            // require('../../lib/codegen/parsejs.js');
+        });
+    });
+
+});

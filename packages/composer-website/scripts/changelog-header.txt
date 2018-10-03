@@ -1,6 +1,0 @@
----
-layout: default
-title: Hyperledger Composer Release Change Log
-category: support
-excerpt: Hyperledger Composer Release Change Log
----

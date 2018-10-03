@@ -1,33 +1,33 @@
 {
-  "devDependencies": {
-    "colors": "1.1.2",
-    "lerna": "2.0.0",
-    "licensecheck": "1.3.0",
-    "semver": "5.3.0",
-    "moment": "2.19.3",
-    "sleep-promise": "2.0.0",
-    "license-check-and-add": "2.3.1"
+  "name": "composer-concerto",
+  "version": "0.31.0",
+  "description": "Hyperledger Composer Concerto, model manager.",
+  "engines": {
+    "node": ">=8",
+    "npm": ">=5"
   },
-  "name": "composer",
-  "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-  "version": "0.20.2",
   "main": "index.js",
-  "private": true,
+  "typings": "index.d.ts",
   "scripts": {
-    "postinstall": "npm run pkgcheck && npm run bootstrap",
-    "repoclean": "lerna clean",
-    "bootstrap": "lerna bootstrap",
-    "pretest": "npm run depcheck & npm run licchk",
+    "build": "webpack --config webpack.config.js --mode production",
+    "prepublishOnly": "npm run build",
+    "prepublish": "node ./scripts/systemmodelgen.js && pegjs ./lib/introspect/parser.pegjs && node ./scripts/tsgen.js",
+    "pretest": "npm run prepublish && npm run lint",
+    "lint": "eslint .",
+    "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
-    "test": "lerna run test",
-    "pkgcheck": "node ./scripts/pkgcheck.js",
-    "pkgstamp": "node ./scripts/pkgstamp.js",
-    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
-    "depcheck": "node ./scripts/depcheck.js"
+    "postlicchk": "npm run doc",
+    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
+    "test": "node ./scripts/api-changelog.js && nyc mocha --recursive -t 10000",
+    "test:watch": "nyc mocha --watch --recursive -t 10000",
+    "mocha": "mocha --recursive -t 10000",
+    "nyc": "nyc mocha --recursive -t 10000",
+    "regenmodel": "node ./scripts/systemmodelgen.js",
+    "pkgbump": "node ./scripts/pkgbump.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperledger/composer.git"
+    "url": "https://github.com/hyperledger/composer-concerto.git"
   },
   "keywords": [
     "blockchain",
@@ -36,48 +36,108 @@
   ],
   "author": "Hyperledger Composer",
   "license": "Apache-2.0",
-  "dependencies": {},
+  "devDependencies": {
+    "ajv": "6.5.4",
+    "babel-preset-latest": "6.24.1",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
+    "chai-things": "0.2.0",
+    "eslint": "5.6.1",
+    "jsdoc": "3.5.5",
+    "license-check-and-add": "2.3.6",
+    "mocha": "5.2.0",
+    "mockery": "2.1.0",
+    "moxios": "0.4.0",
+    "node-plantuml": "0.7.0",
+    "nunjucks": "3.1.3",
+    "nyc": "13.0.1",
+    "pegjs": "0.10.0",
+    "sinon": "2.3.8",
+    "sinon-chai": "3.2.0",
+    "webpack": "4.20.2",
+    "webpack-cli": "3.1.2"
+  },
+  "dependencies": {
+    "acorn": "5.1.2",
+    "axios": "0.18.0",
+    "commander": "2.18.0",
+    "debug": "4.0.1",
+    "doctrine": "2.1.0",
+    "fs-extra": "1.0.0",
+    "lodash.padstart": "4.6.1",
+    "lorem-ipsum": "1.0.6",
+    "mkdirp": "0.5.1",
+    "npm-paths": "1.0.0",
+    "semver": "5.5.1",
+    "urijs": "1.19.1",
+    "uuid": "3.3.2",
+    "yargs": "12.0.2"
+  },
   "license-check-and-add-config": {
-    "folder": ".",
+    "folder": "./lib",
     "license": "LICENSE.txt",
     "exact_paths_method": "EXCLUDE",
     "exact_paths": [
-      ".git",
+      "api.txt",
+      "composer-logs",
+      "coverage",
+      "index.d.ts",
+      "./system",
+      "./introspect/parser.js",
+      "LICENSE.txt",
       "node_modules",
-      "packages",
-      "softhsm",
-      "build.cfg",
-      "ISSUE_TEMPLATE.md",
-      "NOTICES.md",
-      "PULL_REQUEST_TEMPLATE.md",
-      "contrib-notes/QA-CHECKLIST-TEMPLATE.md",
-      "markdown-license.txt"
+      ".nyc-output",
+      "out",
+      ".tern-project"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [
       ".yml",
-      ".log",
-      ".enc",
-      ".xmind",
-      ".deb"
+      ".yaml",
+      ".zip",
+      ".tgz"
     ],
     "insert_license": false,
     "license_formats": {
-      "js": {
+      "js|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {
           "prepend": " * "
         }
       },
-      "gitattributes|cfg": {
+      "npmrc|editorconfig|txt": {
         "eachLine": {
           "prepend": "# "
         }
       },
       "md": {
-        "file": "markdown-license.txt"
+        "file": "./markdown-license.txt"
       }
     }
+  },
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "lib/codegen/javascriptparser.js",
+      "lib/introspect/parser.js",
+      "lib/acl/parser.js",
+      "lib/query/parser.js",
+      "out/**",
+      "scripts/**",
+      "systest/**",
+      "test/**",
+      "umd/**"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
   }
 }
