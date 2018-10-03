@@ -18,7 +18,7 @@
       "dateFormat": "ddd MMM Do YYYY",
       "outputSourceFiles": true,
       "outputSourcePath": true,
-      "systemName": "Hyperledger Composer",
+      "systemName": "Hyperledger Concerto",
       "footer": "",
       "copyright": "Released under the Apache License v2.0",
       "navType": "vertical",

@@ -185,12 +185,3 @@ class Serializer {
    + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean) throws Error
    + Resource fromJSON(Object,Object,boolean,boolean) 
 }
-class Wallet {
-   + Wallet getWallet() 
-   + void setWallet(Wallet) 
-   + Promise listNames() 
-   + Promise contains(string) 
-   + Promise get(string) 
-   + Promise put(string,string,Object) 
-   + Promise remove(string) 
-}
