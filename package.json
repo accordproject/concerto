@@ -122,6 +122,7 @@
       "index.js",
       "webpack.config.js",
       "lib/codegen/codegen.js",
+      "lib/codegen/parsejs.js",
       "lib/codegen/javascriptparser.js",
       "lib/introspect/parser.js",
       "out/**",
@@ -131,8 +132,9 @@
       "umd/**"
     ],
     "reporter": [
-      "text-summary",
-      "html"
+      "text",
+      "html",
+      "lcov"
     ],
     "all": true,
     "check-coverage": true,

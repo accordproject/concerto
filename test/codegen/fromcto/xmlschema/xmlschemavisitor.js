@@ -106,6 +106,46 @@ describe('XmlSchemaVisitor', function () {
         });
     });
 
+    describe('visitModelManager', () => {
+        it('should visit each of the model files in a ModelManager', () => {
+            let param = {
+                fileWriter: mockFileWriter
+            };
+
+            let mockModelManager = sinon.createStubInstance(ModelManager);
+
+            mockModelManager.accept = function(visitor, parameters) {
+                return visitor.visit(this, parameters);
+            };
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.getNamespace.returns('org.imported');
+            mockModelManager.getType.returns(mockClassDeclaration);
+
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.getModelManager.returns(mockModelManager);
+
+            mockModelFile.accept = function(visitor, parameters) {
+                return visitor.visit(this, parameters);
+            };
+            mockModelFile.getNamespace.returns('org.hyperledger.composer.system');
+            mockModelFile.isSystemModelFile.returns(true);
+            mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
+            mockModelManager.getModelFiles.returns([mockModelFile]);
+
+            xmlSchemaVisitor.visit(mockModelManager, param);
+
+            param.fileWriter.openFile.withArgs('org.hyperledger.composer.system.xsd').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system" targetNamespace="org.hyperledger.composer.system" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '>']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:schema>']);
+
+            param.fileWriter.closeFile.calledOnce.should.be.ok;
+        });
+    });
+
     describe('visitModelFile', () => {
         it('should handle system namespace', () => {
             let param = {
@@ -156,20 +196,10 @@ describe('XmlSchemaVisitor', function () {
                 return visitor.visit(this, parameters);
             };
 
-            let mockSystemClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockSystemClassDeclaration.getNamespace.returns('org.hyperledger.composer');
-            mockSystemClassDeclaration.getName.returns('Asset');
-            mockModelManager.getType.withArgs('org.hyperledger.composer').returns(mockSystemClassDeclaration);
-
             let mockSystemModelFile = sinon.createStubInstance(ModelFile);
             mockSystemModelFile.getModelManager.returns(mockModelManager);
             mockSystemModelFile.isSystemModelFile.returns(true);
-            mockSystemModelFile.accept = function(visitor, parameters) {
-                return visitor.visit(this, parameters);
-            };
-            mockSystemModelFile.getImports.returns([]);
-            mockSystemModelFile.getNamespace.returns('org.hyperledger.composer');
-            mockSystemModelFile.getAllDeclarations.returns([]);
+            mockSystemModelFile.getNamespace.returns('org.hyperledger.composer.system');
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.getNamespace.returns('org.imported');
@@ -197,7 +227,8 @@ describe('XmlSchemaVisitor', function () {
             };
             mockModelFile.getNamespace.returns('org.foo');
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
-            mockModelManager.getModelFiles.returns([mockSystemModelFile, mockModelFile]);
+            mockModelManager.getModelFiles.returns([mockModelFile]);
+            mockModelManager.getSystemModelFiles.returns([mockSystemModelFile]);
 
             xmlSchemaVisitor.visitModelManager(mockModelManager, param);
 
