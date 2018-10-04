@@ -617,6 +617,14 @@ concept Bar {
         });
     });
 
+    describe('#getSystemModelFiles', () => {
+        it('should only list all system model files', () => {
+            modelManager.addModelFile(modelBase);
+            modelManager.getModelFiles().length.should.equal(2);
+            modelManager.getSystemModelFiles().length.should.equal(1);
+        });
+    });
+
     describe('#getNamespaces', () => {
 
         it('should list all of the namespaces', () => {

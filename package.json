@@ -23,7 +23,8 @@
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
     "regenmodel": "node ./scripts/systemmodelgen.js",
-    "pkgbump": "node ./scripts/pkgbump.js"
+    "pkgbump": "node ./scripts/pkgbump.js",
+    "pkgstamp": "node ./scripts/pkgstamp.js"
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,7 @@
     "lodash.padstart": "4.6.1",
     "lorem-ipsum": "1.0.6",
     "mkdirp": "0.5.1",
+    "moment": "2.22.2",
     "npm-paths": "1.0.0",
     "semver": "5.5.1",
     "urijs": "1.19.1",
@@ -122,6 +124,7 @@
       "index.js",
       "webpack.config.js",
       "lib/codegen/codegen.js",
+      "lib/codegen/parsejs.js",
       "lib/codegen/javascriptparser.js",
       "lib/introspect/parser.js",
       "out/**",
@@ -132,7 +135,8 @@
     ],
     "reporter": [
       "text-summary",
-      "html"
+      "html",
+      "lcov"
     ],
     "all": true,
     "check-coverage": true,

@@ -41,6 +41,18 @@ describe('ParseException', function () {
             exc.message.should.match(/message Line 1 column 1/);
         });
 
+        it('should have a message with a file location with offsets', function () {
+            let offsetFileLocation = {start: {column: 1, line: 1, offset: 1}, end: {column: 1, line: 1, offset: 2}};
+            let exc = new ParseException('message', offsetFileLocation);
+            exc.message.should.match(/message Line 1 column 1/);
+        });
+
+        it('should have a message with a file location with offsets greater than 1', function () {
+            let offsetFileLocation = {start: {column: 1, line: 1, offset: 1}, end: {column: 1, line: 1, offset: 3}};
+            let exc = new ParseException('message', offsetFileLocation);
+            exc.message.should.match(/message Line 1 column 1/);
+        });
+
         it('should have a message with a file name', function () {
             let exc = new ParseException('message', null, 'foo.cto');
             exc.message.should.match(/message File foo.cto/);
