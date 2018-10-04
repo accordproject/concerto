@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.31.0-20181004123305",
+  "version": "0.31.0",
   "description": "Hyperledger Composer Concerto",
   "engines": {
     "node": ">=8",
