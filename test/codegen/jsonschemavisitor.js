@@ -20,6 +20,7 @@ const fs = require('fs');
 const JSONSchemaVisitor = require('../../lib/codegen/fromcto/jsonschema/jsonschemavisitor');
 const ModelManager = require('../../lib/modelmanager');
 const path = require('path');
+const Util = require('../composer/systemmodelutility');
 
 const schema = require('ajv/lib/refs/json-schema-draft-04.json');
 
@@ -40,6 +41,7 @@ describe('JSONSchemaVisitor', () => {
         ajv.addMetaSchema(schema);
         mockFileWriter = sinon.createStubInstance(FileWriter);
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/model-base.cto'), 'utf8'), 'model-base.cto');
         visitor = new JSONSchemaVisitor();
         sandbox = sinon.sandbox.create();

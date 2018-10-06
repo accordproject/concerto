@@ -19,6 +19,7 @@ const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const IntrospectUtils = require('./introspectutils');
+const Util = require('../composer/systemmodelutility');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -32,6 +33,7 @@ describe('TransactionDeclaration', () => {
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         mockSystemTransaction = sinon.createStubInstance(TransactionDeclaration);
         mockSystemTransaction.getFullyQualifiedName.returns('org.hyperledger.composer.system.Transaction');
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
@@ -43,21 +45,6 @@ describe('TransactionDeclaration', () => {
     });
 
     describe('#validate', () => {
-
-        it('should throw error name is Transaction', () => {
-            const model = `
-            namespace com.test
-
-            transaction Transaction {
-            }`;
-
-            const modelFile = new ModelFile(modelManager, model);
-            const p = modelFile.getTransactionDeclarations()[0];
-
-            (() => {
-                p.validate();
-            }).should.throw(/Transaction is a reserved type name./);
-        });
 
         it('should cover the other error paths', () => {
             const model = `

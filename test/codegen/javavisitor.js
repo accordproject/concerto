@@ -19,6 +19,7 @@ const ModelManager = require('../../lib/modelmanager');
 const Introspector = require('../../lib/introspect/introspector');
 const JavaVisitor = require('../../lib/codegen/fromcto/java/javavisitor');
 const FileWriter = require('../../lib/codegen/filewriter');
+const Util = require('../composer/systemmodelutility');
 
 const fs = require('fs');
 const path = require('path');
@@ -40,6 +41,7 @@ describe('JavaVisitor', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
             modelManager.addModelFiles([carleaseModel,composerModel], ['carlease.cto', 'composer.cto']);

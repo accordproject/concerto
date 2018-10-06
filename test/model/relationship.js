@@ -16,6 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const Relationship = require('../../lib/model/relationship');
+const Util = require('../composer/systemmodelutility');
 
 const chai = require('chai');
 chai.should();
@@ -38,6 +39,7 @@ describe('Relationship', function () {
 
     before(function () {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
     });
 
     beforeEach(function () {

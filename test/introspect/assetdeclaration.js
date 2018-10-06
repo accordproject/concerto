@@ -19,6 +19,7 @@ const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
+const Util = require('../composer/systemmodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -36,6 +37,7 @@ describe('AssetDeclaration', () => {
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
         mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
         mockModelManager.getSystemTypes.returns([mockSystemAsset]);
+        mockModelManager.getSystemModelTable.returns(Util.getSystemModelTable());
         mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);

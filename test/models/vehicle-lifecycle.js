@@ -19,11 +19,13 @@ const ModelManager = require('../../lib/modelmanager');
 const Factory = require('../../lib/factory');
 const Serializer = require('../../lib/serializer');
 const fs = require('fs');
+const Util = require('../composer/systemmodelutility');
 
 describe('Vehicle-Lifecycle Model', function() {
     describe('#model validation', function() {
         it('check create complex resource and roundtrip to JSON', function() {
             let modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
 
             // parse a model file from disk and add to the ModelManager

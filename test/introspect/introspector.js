@@ -16,6 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const Introspector = require('../../lib/introspect/introspector');
+const Util = require('../composer/systemmodelutility');
 
 const fs = require('fs');
 
@@ -45,6 +46,7 @@ describe('Introspector', () => {
         it('should return all class declarations', () => {
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
 
             let modelBase = fs.readFileSync('./test/data/model/model-base.cto', 'utf8');
@@ -64,6 +66,7 @@ describe('Introspector', () => {
         it('should be able to get a single class declaration', () => {
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
 
             let modelBase = fs.readFileSync('./test/data/model/model-base.cto', 'utf8');
@@ -79,6 +82,7 @@ describe('Introspector', () => {
 
         it('should return the model manager', () => {
             const modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             const introspector = new Introspector(modelManager);
             introspector.getModelManager().should.equal(modelManager);
         });

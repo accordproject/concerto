@@ -18,6 +18,7 @@ const Factory = require('../../lib/factory');
 const fs = require('fs');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
+const Util = require('../composer/systemmodelutility');
 
 require('chai').should();
 
@@ -29,6 +30,7 @@ describe('Wildcards Model', function () {
 
     beforeEach(() => {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
         const files = [

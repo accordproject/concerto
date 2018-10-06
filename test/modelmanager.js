@@ -28,6 +28,8 @@ const ParticipantDeclaration = require('../lib/introspect/participantdeclaration
 const Serializer = require('../lib/serializer');
 const TransactionDeclaration = require('../lib/introspect/transactiondeclaration');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
+const ModelUtil = require('../lib/modelutil');
+const Util = require('./composer/systemmodelutility');
 
 const chai = require('chai');
 const should = chai.should();
@@ -49,6 +51,7 @@ describe('ModelManager', () => {
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         mockSystemModelFile = sinon.createStubInstance(ModelFile);
         mockSystemModelFile.isLocalType.withArgs('Asset').returns(true);
         mockSystemModelFile.getNamespace.returns('org.hyperledger.composer.system');
@@ -134,16 +137,13 @@ describe('ModelManager', () => {
             res.should.equal(mf1);
         });
 
-        it('should not be possible to add a system model file', ()=>{
-            (() => {
-                modelManager.addModelFile(mockSystemModelFile, null, null, true);
-            }).should.throw(/Cannot add a model file with the reserved system namespace/);
-        });
-
-        it('should not be possible to add a system model file (via string)', ()=>{
-            (() => {
-                modelManager.addModelFile('namespace org.hyperledger.composer.system','fakesysnamespace.cto', null, true);
-            }).should.throw(/Cannot add a model file with the reserved system namespace/);
+        it('should not be possible to add a system model file explicit system model table', ()=>{
+            let mf1 = sinon.createStubInstance(ModelFile);
+            mf1.getNamespace.returns('org.doge');
+            let res = modelManager.addModelFile(mf1, null, null, ModelUtil.getIdentitySystemModelTable());
+            sinon.assert.calledOnce(mf1.validate);
+            modelManager.modelFiles['org.doge'].should.equal(mf1);
+            res.should.equal(mf1);
         });
 
         it('should return error for duplicate namespaces for a string', () => {
@@ -285,13 +285,19 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file', ()=>{
             (() => {
-                modelManager.addModelFiles([mockSystemModelFile], null, null, true);
+                modelManager.addModelFiles([mockSystemModelFile]);
             }).should.throw();
         });
 
         it('should not be possible to add a system model file (via string)', ()=>{
             (() => {
                 modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, true);
+            }).should.throw(/System namespace can not be updated/);
+        });
+
+        it('should not be possible to add a system model file (via string) with explicit system model table', ()=>{
+            (() => {
+                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, ModelUtil.getIdentitySystemModelTable());
             }).should.throw(/System namespace can not be updated/);
         });
 

@@ -17,6 +17,7 @@
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
+const Util = require('../composer/systemmodelutility');
 
 require('chai').should();
 
@@ -26,6 +27,7 @@ describe('ParticipantDeclaration', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
     });
 
     let loadParticipantDeclaration = (modelFileName) => {
@@ -48,15 +50,6 @@ describe('ParticipantDeclaration', () => {
         it('should return Participant', () => {
             let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.valid.cto');
             p.getSystemType().should.equal('Participant');
-        });
-    });
-
-    describe('#validate', () => {
-        it('should throw error if system type and name Participant', () => {
-            let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.systypename.cto');
-            (() => {
-                p.validate();
-            }).should.throw(/Participant is a reserved type name./);
         });
     });
 

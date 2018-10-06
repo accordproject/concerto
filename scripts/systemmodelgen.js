@@ -18,9 +18,9 @@ const fs = require('fs');
 const path = require('path');
 const nunjucks=require('nunjucks');
 
-const targetFile = path.resolve(__dirname, '..', 'lib','systemmodel.js');
-const templatePath = path.resolve(__dirname, '..', 'lib','_template');
-const modelDirectory = path.resolve(__dirname, '..', 'lib','system');
+const targetFile = path.resolve(__dirname, '../test/composer','systemmodel.js');
+const templatePath = path.resolve(__dirname, '../test/composer','_template');
+const modelDirectory = path.resolve(__dirname, '../test/composer/models/', 'system');
 const modelFiles = fs.readdirSync(modelDirectory).filter((f)=>{  return path.extname(f)==='.cto';});
 
 // nunjucks is already used in other parts of the codebase

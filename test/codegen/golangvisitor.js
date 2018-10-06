@@ -18,6 +18,7 @@ require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
 const GoLangVisitor = require('../../lib/codegen/fromcto/golang/golangvisitor');
 const FileWriter = require('../../lib/codegen/filewriter');
+const Util = require('../composer/systemmodelutility');
 
 const fs = require('fs');
 const path = require('path');
@@ -43,6 +44,7 @@ describe('GoLangVisitor', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
             modelManager.addModelFiles([carleaseModel,composerModel], ['carlease.cto', 'composer.cto']);

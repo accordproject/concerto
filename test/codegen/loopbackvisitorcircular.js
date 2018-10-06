@@ -20,6 +20,7 @@ const LoopbackVisitor = require('../../lib/codegen/fromcto/loopback/loopbackvisi
 // const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const path = require('path');
+const Util = require('../composer/systemmodelutility');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -39,6 +40,7 @@ describe('LoopbackVisitor with Circular Model', () => {
             beforeEach(() => {
                 mockFileWriter = sinon.createStubInstance(FileWriter);
                 modelManager = new ModelManager();
+                Util.addComposerSystemModels(modelManager);
                 modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/circular.cto'), 'utf8'), 'model-base.cto');
                 visitor = new LoopbackVisitor(namespaces);
                 sandbox = sinon.sandbox.create();

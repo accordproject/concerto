@@ -17,12 +17,15 @@
 require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
+const Util = require('../composer/systemmodelutility');
+
 const fs = require('fs');
 
 describe('Farm2Fork Model', function() {
     describe('#getModelManagerFarm2Fork', function() {
         it('check parsing and model manager', function() {
             let modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
 
             // parse a model file from disk and add to the ModelManager

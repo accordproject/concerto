@@ -18,6 +18,7 @@ require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
 const PlantUMLVisitor = require('../../lib/codegen/fromcto/plantuml/plantumlvisitor');
 const FileWriter = require('../../lib/codegen/filewriter');
+const Util = require('../composer/systemmodelutility');
 
 const fs = require('fs');
 const path = require('path');
@@ -30,6 +31,7 @@ describe('PlantUMLVisitor', function(){
 
         // create and populate the ModelManager with a model file
         const modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         modelManager.addModelFile(animaltrackingModel,'animaltracking.cto');
 
         let visitor = new PlantUMLVisitor();

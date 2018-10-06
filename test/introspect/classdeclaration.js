@@ -25,6 +25,7 @@ const IntrospectUtils = require('./introspectutils');
 
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const Util = require('../composer/systemmodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -37,6 +38,7 @@ describe('ClassDeclaration', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = new ModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
     });

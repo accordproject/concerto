@@ -18,6 +18,7 @@ require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
 const TypescriptVisitor = require('../../lib/codegen/fromcto/typescript/typescriptvisitor');
 const FileWriter = require('../../lib/codegen/filewriter');
+const Util = require('../composer/systemmodelutility');
 
 const fs = require('fs');
 const path = require('path');
@@ -33,6 +34,7 @@ const initSampleNetworkModel = (mockFileWriter) => {
 
     // create and populate the ModelManager with a model file
     let modelManager = new ModelManager();
+    Util.addComposerSystemModels(modelManager);
     modelManager.should.not.be.null;
     modelManager.clearModelFiles();
     modelManager.addModelFiles([carleaseModel,composerModel], ['carlease.cto', 'composer.cto']);

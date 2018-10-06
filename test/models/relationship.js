@@ -18,12 +18,14 @@ const assert = require('assert');
 require('chai').should();
 const fs = require('fs');
 const ModelManager = require('../../lib/modelmanager');
+const Util = require('../composer/systemmodelutility');
 
 describe('Test Relationships', function(){
     describe('#validate', function() {
         it('check that relationships to primitives are illegal', function() {
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 

@@ -17,6 +17,7 @@
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
+const Util = require('../composer/systemmodelutility');
 
 const assert = require('assert');
 require('chai').should();
@@ -27,6 +28,7 @@ describe('Model Tests', function(){
     describe('#validation', function() {
         it('check property validation', function() {
             const modelManager = new ModelManager();
+            Util.addComposerSystemModels(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 

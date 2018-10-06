@@ -19,7 +19,7 @@ const JSONGenerator = require('../../lib/serializer/jsongenerator');
 const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ModelUtil = require('../../lib/modelutil');
-
+const Util = require('../composer/systemmodelutility');
 
 let chai = require('chai'), should = chai.should();
 const sinon = require('sinon');
@@ -37,6 +37,7 @@ describe('JSONGenerator', () => {
 
     before(() => {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         modelManager.addModelFile(`
             namespace org.acme
             asset MyAsset1 identified by assetId {

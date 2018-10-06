@@ -17,6 +17,8 @@
 const ModelManager = require('../../lib/modelmanager');
 const ValidatedConcept = require('../../lib/model/validatedconcept');
 const ResourceValidator = require('../../lib/serializer/resourcevalidator');
+const Util = require('../composer/systemmodelutility');
+
 const sinon = require('sinon');
 const chai = require('chai');
 chai.should();
@@ -41,6 +43,7 @@ describe('ValidatedConcept', function () {
 
     before(function () {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
     });
 
     beforeEach(function () {

@@ -18,6 +18,7 @@ const Factory = require('../lib/factory');
 const ModelManager = require('../lib/modelmanager');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const uuid = require('uuid');
+const Util = require('./composer/systemmodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -32,6 +33,7 @@ describe('Factory', function() {
 
     before(() => {
         modelManager = new ModelManager();
+        Util.addComposerSystemModels(modelManager);
         modelManager.addModelFile(`
         namespace org.acme.test
         abstract concept AbstractConcept {
