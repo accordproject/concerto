@@ -21,52 +21,10 @@ const path = require('path');
 
 const timestamp = moment().format('YYYYMMDDHHmmss');
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-lernaConfig.version.replace(/-.*/, '');
-const targetVersion = lernaConfig.version + '-' + timestamp;
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
-
-const masterPackageFile = path.resolve(lernaDirectory, 'package.json');
-const masterPackage = require(masterPackageFile);
-masterPackage.version = targetVersion;
-fs.writeFileSync(masterPackageFile, JSON.stringify(masterPackage, null, 2), 'utf8');
-
-const packagesDirectory = path.resolve(lernaDirectory, 'packages');
-const packageNames = fs.readdirSync(packagesDirectory);
-const packages = {};
-packageNames.forEach((packageName) => {
-    const packageFile = path.resolve(packagesDirectory, packageName, 'package.json');
-    const thisPackage = require(packageFile);
-    thisPackage.version = targetVersion;
-    packages[packageName] = thisPackage;
-});
-
-for (const i in packages) {
-    const currentPackage = packages[i];
-    for (const j in packages) {
-        const otherPackage = packages[j];
-        for (const dependency in currentPackage.dependencies) {
-            const currentValue = currentPackage.dependencies[dependency];
-            if (dependency === otherPackage.name) {
-                currentPackage.dependencies[dependency] = targetVersion;
-            }
-        }
-        for (const dependency in currentPackage.devDependencies) {
-            const currentValue = currentPackage.devDependencies[dependency];
-            if (dependency === otherPackage.name) {
-                currentPackage.devDependencies[dependency] = targetVersion;
-            }
-        }
-        for (const dependency in currentPackage.peerDependencies) {
-            const currentValue = currentPackage.peerDependencies[dependency];
-            if (dependency === otherPackage.name) {
-                currentPackage.peerDependencies[dependency] = targetVersion;
-            }
-        }        
-    }
-    const packageFile = path.resolve(packagesDirectory, i, 'package.json');
-    fs.writeFileSync(packageFile, JSON.stringify(currentPackage, null, 2), 'utf8');
-}
+const packageDirectory = path.resolve('.');
+const packageConfigFile = path.resolve(packageDirectory, 'package.json');
+const packageConfig = require(packageConfigFile);
+packageConfig.version.replace(/-.*/, '');
+const targetVersion = packageConfig.version + '-' + timestamp;
+packageConfig.version = targetVersion;
+fs.writeFileSync(packageConfigFile, JSON.stringify(packageConfig, null, 2), 'utf8');

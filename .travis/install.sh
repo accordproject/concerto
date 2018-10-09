@@ -22,8 +22,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 source ${DIR}/.travis/base.sh
 # ----
 
-# Use lerna bootstrap and not npm install; it's a lot faster in Travis.
+# Install all dependencies
 cd ${DIR}
-lerna bootstrap 2>&1
+npm install 2>&1
 
 _exit "All Complete" 0

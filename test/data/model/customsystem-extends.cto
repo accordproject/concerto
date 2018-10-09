@@ -1,0 +1,9 @@
+namespace org.acme
+
+asset YourAsset {}
+
+participant YourParticipant {}
+
+transaction YourTransaction {}
+
+event YourEvent {}

@@ -19,9 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-const targetVersion = semver.inc(lernaConfig.version, 'patch');
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
+const packageDirectory = path.resolve('.');
+const packageConfigFile = path.resolve(packageDirectory, 'package.json');
+const packageConfig = require(packageConfigFile);
+const targetVersion = semver.inc(packageConfig.version, 'patch');
+packageConfig.version = targetVersion;
+fs.writeFileSync(packageConfigFile, JSON.stringify(packageConfig, null, 2), 'utf8');
