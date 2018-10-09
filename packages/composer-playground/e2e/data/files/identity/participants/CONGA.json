@@ -1,6 +1,0 @@
-{
-  "$class": "org.acme.sample.SampleParticipant",
-  "participantId": "CONGA",
-  "firstName": "Conga",
-  "lastName": "Block"
-}

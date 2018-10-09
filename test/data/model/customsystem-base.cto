@@ -1,0 +1,19 @@
+namespace org.hyperledger.composer.customsystem
+
+asset MyAsset identified by myAssetId { 
+  o String myAssetId
+}
+
+participant MyParticipant identified by myParticipantId {  
+  o String myParticipantId
+}
+
+transaction MyTransaction identified by myTransactionId {
+  o String myTransactionId
+  o DateTime timestamp
+}
+
+event MyEvent identified by myEventId {
+  o String myEventId
+  o DateTime timestamp
+}

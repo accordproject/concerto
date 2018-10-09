@@ -1,0 +1,342 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+'use strict';
+
+const SYSTEM_MODELS = [
+
+    {
+        namespace: 'org.hyperledger.composer.system',
+        fileName: 'org.hyperledger.composer.system.cto',
+        contents: `/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+namespace org.hyperledger.composer.system
+
+/**
+ * Abstract system asset that all assets extend.
+ * Has no properties, and is soley used as a basis to model other assets.
+ */
+@docs('asset.md')
+abstract asset Asset {  }
+
+/**
+ * Abstract system participant that all participants extend.
+ * Has no properties, and is soley used as a basis to model other assets.
+ */
+@docs('participant.md')
+abstract participant Participant {   }
+
+/**
+ * Abstract transaction that all transactions, including system ones, extend.
+ *
+ * Has two properties that are used set and are accessible in all transactions.
+ *
+ *
+ * @param {String} transactionId Identifier for this transaction
+ * @param {DateTime} timestamp   Timestamp for this transaction
+ */
+@docs('transaction.md')
+abstract transaction Transaction identified by transactionId {
+  o String transactionId
+  o DateTime timestamp
+}
+
+/**
+ * Abstract event that all events, including system ones, extend.
+ *
+ * Has two properties that are used set and are accessible in all transactions.
+ *
+ * @param {String} eventId Identifier for this event
+ * @param {DateTime} timestamp   Timestamp for this event
+ */
+@docs('event.md')
+abstract event Event identified by eventId {
+  o String eventId
+  o DateTime timestamp
+}
+
+/**
+ * Abstract Registry asset, that is used as the basis for all types of registries.
+ *
+ * @param {String} registryId identity
+ * @param {String} name Name of the registry
+ * @param {String} type type of the registry
+ * @param {Boolean} system Is this a system registry?
+ */
+@docs('registry.md')
+abstract asset Registry identified by registryId {
+  o String registryId
+  o String name
+  o String type
+  o Boolean system
+}
+
+/**
+ * AssetRegistry extends the Registry to define the type that of all registries
+ * that are primarily intended for storing Assets.
+ *
+ */
+@docs('assetRegistry.md')
+asset AssetRegistry extends Registry { }
+
+/**
+ * ParticipantRegistry extends the Registry to define the type that of all registries
+ * that are primarily intended for storing Participants
+ */
+@docs('participantRegistry.md')
+asset ParticipantRegistry extends Registry { }
+
+/**
+ * TransactionRegistry extends the Registry to define the type that of all registries
+ * that are primarily intended for storing Transactions
+ */
+@docs('transactionRegistry.md')
+asset TransactionRegistry extends Registry { }
+
+
+/**
+ * Asset to represent the idea of a Business Network.
+ * All actions will require participants to have access to this Asset. Failure to have at least *READ* access
+ * will mean that participants are unable to access the network.
+ *
+ * Participants who are authorized administrators, can be granted *UPDATE* and/or *DELETE* permissions
+
+ * @param {String} networkId of the business network
+ */
+@docs('network.md')
+asset Network identified by networkId {
+  o String networkId
+  o String runtimeVersion
+}
+
+/**
+ * A predefined participant that can be given the authority to adiminister the Business Network
+ *
+ * @param {String} participantId Identifier fields of the participant
+ */
+@docs('networkAdmin.md')
+participant NetworkAdmin identified by participantId {
+    o String participantId
+}
+
+// -----------------------------------------------------------------------------
+// Historian
+
+/**
+ * Asset to represent each historian registry entry
+ *
+ * @param {String} transactionId Using the transaction id as the uuid
+ * @param {Transaction} transactionInvoked Relationship to transaction
+ * @param {Participant} participantInvoking Participant who invoked this transaction
+ * @param {Identity} identityUsed The identity that was used by the participant
+ * @param {Event[]} eventsEmitted The events that were emitted by this transactionId
+ * @param {DateTime} transactionTimestamp Use the transaction's timestamp
+ */
+@docs('historian.md')
+@docsuri('Composer Documentation','../business-network/historian')
+asset HistorianRecord identified by transactionId {
+  o String        transactionId
+  o String        transactionType
+  --> Transaction transactionInvoked
+  --> Participant participantInvoking  optional
+  --> Identity    identityUsed         optional
+  o Event[]       eventsEmitted        optional
+  o DateTime      transactionTimestamp
+}
+
+// -----------------------------------------------------------------------------
+// System transactions that act on Registries of any type
+/**
+ * An abstract definition of a transaction that affects a registry in some way
+ * @param {Registry} targetRegistry Registry that will be manipulated
+ */
+@docs('registryTransaction.md')
+abstract transaction RegistryTransaction {
+  --> Registry targetRegistry
+}
+
+/**
+ * An abstract definition of a transaction that affects assets in a registry in some way
+ * @param {Asset[]} resources Resources that will be manipulated
+ */
+@docs('assetTransaction.md')
+abstract transaction AssetTransaction extends RegistryTransaction {
+   o Asset[] resources
+}
+
+/**
+ * An abstract definition of a transaction that affects participants in a registry in some way
+ * @param {Participant[]} resources participants that will be manipulated
+ */
+@docs('participantTransaction.md')
+abstract transaction ParticipantTransaction extends RegistryTransaction {
+  o Participant[] resources
+}
+
+/**
+ * Transaction that will add asset(s) to a registry
+ */
+transaction AddAsset extends AssetTransaction { }
+
+/**
+ * Transaction that will update asset(s) in a registry
+ */
+transaction UpdateAsset extends AssetTransaction { }
+
+/**
+ * Transaction that will remove asset(s) from a registry
+ * @param {String[]} resourceIds Identifiers of the assets to remove
+ */
+transaction RemoveAsset extends AssetTransaction {
+ o String[] resourceIds
+}
+
+/**
+ * Transaction that will add participants(s) to a registry
+ */
+transaction AddParticipant extends ParticipantTransaction { }
+
+/**
+ * Transaction that will update participants(s) in a registry
+ */
+transaction UpdateParticipant extends ParticipantTransaction { }
+
+/**
+ * Transaction that will remove participants(s) from a registry
+ * @param {String[]} resourceIds Identifiers of the participants to remove
+ */
+transaction RemoveParticipant extends ParticipantTransaction {
+ o String[] resourceIds
+}
+
+
+// -----------------------------------------------------------------------------
+// Identity
+
+/** The valid states of an identity
+ * @enum {ISSUED} identity has been issued
+ * @enum {BOUND} identity has been bound to a participant
+ * @enum {ACTIVATED} identity has been activated
+ * @enum {REVOKED} identity has been revoked
+ */
+@docs('identityState.md')
+enum IdentityState {
+    o ISSUED
+    o BOUND
+    o ACTIVATED
+    o REVOKED
+}
+
+/**
+ * Asset representing the idea of an Identity
+ *
+ * @param {String} identityId   Unique Identifiers
+ * @param {String} name         Name given to this identity
+ * @param {String} issuer       The issuer
+ * @param {String} certificate  The certificate
+ * @param {IdentityState} state      State the identity is in
+ * @param {Participant} participant  Associated participant
+ */
+@docs('identity.md')
+asset Identity identified by identityId {
+    o String identityId
+    o String name
+    o String issuer
+    o String certificate
+    o IdentityState state
+    --> Participant participant
+}
+
+/**
+ * Transaction that will issue the identity
+ * @param {Participant} participant to issue the identity to
+ * @param {String} identityName  name to use for this identity
+ */
+@docs('issueIdentity.md')
+transaction IssueIdentity {
+    --> Participant participant
+    o String identityName
+}
+
+/**
+ * Transaction that will bind the identity
+ * @param {Participant} participant to issue bind identity to
+ * @param {String} certificate to use
+ */
+@docs('bindIdentity.md')
+transaction BindIdentity {
+    --> Participant participant
+    o String certificate
+}
+
+/**
+ * Transaction that will activate the current the identity
+ */
+@docs('activateIdentity.md')
+transaction ActivateCurrentIdentity { }
+
+/**
+ * Transaction that will revoke the identity
+ * @param {Identity} identity to revoke
+ */
+@docs('revokeIdentity.md')
+transaction RevokeIdentity {
+    --> Identity identity
+}
+
+/**
+ * Transaction that will Start a business network
+ * @param {Transaction[]} [bootstrapTransactions] optional transactions to use to bootstrap the network
+ * @param {String} [logLevel] Log level to use optionally
+ *
+ */
+@docs('startBusinessNetwork.md')
+transaction StartBusinessNetwork {
+  o String logLevel optional
+  o Transaction[] bootstrapTransactions optional
+}
+
+/**
+ * Transaction that will Reset a business network. This removes all the data but leaves the structure of the business network intact
+ */
+@docs('resetBusinessNetwork.md')
+transaction ResetBusinessNetwork {
+
+}
+
+/**
+ * Sets the log level of the Business Network runtime to that specified
+ * @param {String} newLogLevel a valid debug string
+ */
+@docs('setLogLevel.md')
+transaction SetLogLevel {
+  o String newLogLevel
+}
+`
+    }
+
+];
+
+module.exports = SYSTEM_MODELS;
