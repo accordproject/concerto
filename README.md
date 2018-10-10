@@ -15,10 +15,10 @@ Things you can do using Concerto:
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
-# Projects using Concerto
-- Hyperleger Concerto
-- Accord Project Cicero and Ergo
-- Clause.io
+# Projects and Companies using Concerto
+- [Hyperleger Composer](https://hyperledger.github.io/composer/latest/)
+- [Accord Project Cicero and Ergo](https://docs.accordproject.org)
+- [Clause.io](https://clause.io)
 
 # Installation
 
