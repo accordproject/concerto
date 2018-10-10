@@ -1,42 +1,11 @@
 language: node_js
 node_js:
     - '8'
-dist: trusty
-addons:
-    apt:
-        packages:
-            - graphviz
-before_install: |
-    set -ev
-    date
-    ./.travis/before-install.sh
-    date
-install: |
-    set -ev
-    date
-    ./.travis/install.sh
-    date
-script: ./.travis/script.sh
-after_failure: |
-    tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
 deploy:
-    provider: script
-    script: ./.travis/deploy.sh
-    skip_cleanup: true
-    on:
-        all_branches: true
-cache:
-  directories:
-    - node_modules
-sudo: required
-notifications:
-  pushover:
-    api_key: ayq7zvsxc641sfna65njkik1x9y25b
-  webhooks:
-    urls:
-      - https://chat.hyperledger.org/hooks/BG3PeSerMSWRDSceE/GPCnCSqxMoyfqaTvLePSGudWjoCBwAcCT6bAKYRjK2sKSCM9
-    on_success: always # default: always
-    on_failure: always # default: always
-    on_start: always   # default: never
-    on_cancel: always # default: always
-    on_error: always # default: always
+  provider: npm
+  email: danscode@selman.org
+  api_key:
+    secure: GFABi0jztXUGJLmIT1CMFlPeI/CV6acitk4DToA80UYZh88ONKx8Or7ipYQKisjPmQMKd1xLiUu2J4S4amhktmOfB3IJf4ZUdPfh7U1E2ESTLIwBjlXbJA9XLPhEkOcHeU91ZgRYI9cPPbCH4LR8LHQPcu7gRg11ApGVVq+zSdaEj+hrIbH8T3m8ZLVwcivfI92YgnQqY3+5S9UYUGt3cEVT1cPlNlpFn01Hpvfqo1x0hPOOT/Q4yavhc10wyvKc/iuw8QZV+tt+vlzytraldVhC6zojPDx3elk1soz/cFIWNFNi7GZJQuEUS02X9jVuCVapH48DI1J4xUxTj3tQvuLK8q31XHR5Uj6OWZQ3miGLRYRAGXAQKdOwPMK8ptOTs+RrA1sOae6R7+wCtWWvYh89SI2Q0ihLZVS7Faig7OE3YZXYIB5166QYfC5iY4N8t1r2fzJnrf/AOWuS/qiK24E23QAgG5bl+txUtV9DuVRqkDLK5pmJa93mianH+OsHTS9Pgz05o5qgJEvBmzuGGX17NwYCvHBmqtU6b0YokeLPuDF+ZCw6sWjyV2/qaTUl5UVB6xHjUO4xRsp9zdXQy6ki13RxzZ1ItclD9HWHqCpr0PKkdGF+1D9j+UODFvjz5fhPvGfwfKNOAl2nlly9ugJTi4uSpyAj4LBp7DGSZNE=
+  on:
+    tags: true
+    repo: hyperledger/composer-concerto
