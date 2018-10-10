@@ -192,12 +192,12 @@ Class declarations contain properties. Each property has a type which can either
 ### Primitive types
 
 Concerto supports the following primitive types:
-- DateTime
-- String
-- Boolean
-- Double
-- Long
-- Integer
+- String: a UTF8 encoded String.
+- Double: a double precision 64 bit numeric value.
+- Integer: a 32 bit signed whole number.
+- Long: a 64 bit signed whole number.
+- DateTime: an ISO-8601 compatible time instance, with optional time zone and UTZ offset.
+- Boolean: a Boolean value, either true or false.
 
 ### Meta Properties
 - [] : declares that the property is an array
@@ -205,6 +205,47 @@ Concerto supports the following primitive types:
 - default : declares a default value for the property, if not value is specified
 - range : declares a valid range for numeric properties
 - regex : declares a validation regex for string properties
+
+String fields may include an optional regular expression, which is used to validate the contents of the field. Careful use of field validators allows Composer to perform rich data validation, leading to fewer errors and less boilerplate code.
+
+The example below declares that the Farmer participant contains a field postcode that must conform to the regular expression for valid UK postcodes.
+
+```
+participant Farmer extends Participant {
+    o String firstName default="Old"
+    o String lastName default="McDonald"
+    o String address1
+    o String address2
+    o String county
+    o String postcode regex=/(GIR 0AA)|((([A-Z-[QVf]][0-9][0-9]?)|(([A-Z-[QVf]][A-Z-[IJZ]][0-9][0-9]?)|(([A-Z-[QVf]][0-9][A-HJKPSTUW])|([A-Z-[QVf]][A-Z-[IJZ]][0-9][ABEHMNPRVWfY])))) [0-9][A-Z-[CIKMOV]]{2})/
+}
+```
+
+Double, Long or Integer fields may include an optional range expression, which is used to validate the contents of the field.
+
+The example below declared that the Vehicle asset has an Integer field year which defaults to 2016 and must be 1990, or higher. Range expressions may omit the lower or upper bound if checking is not required.
+
+```
+asset Vehicle extends Base {
+  // An asset contains Fields, each of which can have an optional default value
+  o String model default="F150"
+  o String make default="FORD"
+  o String reg default="ABC123"
+  // A numeric field can have a range validation expression
+  o Integer year default=2016 range=[1990,] optional // model year must be 1990 or higher
+  o Integer[] integerArray
+  o State state
+  o Double value
+  o String colour
+  o String V5cID regex=/^[A-z][A-z][0-9]{7}/
+  o String LeaseContractID
+  o Boolean scrapped default=false
+  o DateTime lastUpdate optional
+  --> Participant owner //relationship to a Participant, with the field named 'owner'.
+  --> Participant[] previousOwners optional // Nary relationship
+  o Customer customer
+}
+```
 
 ## Relationships
 
@@ -236,6 +277,20 @@ asset Order identified by orderId {
 }
 ```
 
+A relationship is a tuple composed of:
+
+The namespace of the type being referenced
+The type name of the type being referenced
+The identifier of the instance being referenced
+
+Hence a relationship could be to: `org.example.Vehicle#123456`
+
+This would be a relationship to the `Vehicle` type declared in the `org.example` namespace with the identifier `123456`.
+
+Relationships are unidirectional and deletes do not cascade, ie. removing the relationship has no impact on the thing that is being pointed to. Removing the thing being pointed to does not invalidate the relationship.
+
+Relationships must be resolved to retrieve an instance of the object being referenced. The act of resolution may result in null, if the object no longer exists or the information in the relationship is invalid. Resolution of relationships is outside of the scope of the Model Manager.
+
 ## Decorators
 
 Model elements may have arbitrary decorators (aka annotations) placed on them. These are available via API and can be useful for tools to extend the model.
@@ -253,6 +308,15 @@ Decorators have an arbitrary number of arguments. They support arguments of type
 - Number
 - Type reference
 
+Resource definitions and properties may be decorated with 0 or more decorations. Note that only a single instance of a decorator is allowed on each element type. I.e. it is invalid to have the @bar decorator listed twice on the same element.
+
+Decorators are accessible at runtime via the `ModelManager` introspect APIs. This allows tools and utilities to use Concerto to describe a core model, while decorating it with sufficient metadata for their own purposes.
+
+The example below retrieves the 3rd argument to the foo decorator attached to the myField property of a class declaration:
+
+```
+const val = myField.getDecorator('foo').getArguments()[2];
+```
 
 ## License <a name="license"></a>
 Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Hyperledger Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
