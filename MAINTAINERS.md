@@ -1,6 +1,6 @@
-# Maintainers for Hyperledger Composer
+# Maintainers for Concerto
 
-This file is the official list of maintainers for the Hyperledger Composer project.
+This file is the official list of maintainers for the Concerto project.
 Changes to this list should be submitted by submitting a pull request that changes this file, and requesting reviews on that pull request from all of the current maintainers.
 The maintainers are listed in alphabetical order.
 

@@ -1,10 +1,8 @@
-# Contributing to Composer
+# Contributing to Concerto
 * [Step-by-step development environment setup](./getting-started.md)
 * [Suggested IDE setup](./ide-setup.md)
 * [Coding Guidelines](./coding-guidelines.md)
 * Currently reading -> [Pull Request Guidelines](./submitting-pull-request.md)
-* [Release process](./release-process/weekly-qa-validation.md)
-
 
 # Submitting a Pull Request
 

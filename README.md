@@ -2,7 +2,7 @@
 
 Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±50KB.
 
-> Note that this module originated as part of Hyperledger Composer, but it no longer has **any** dependencies on any blockchain technology.
+> Note that this module originated as part of Concerto, but it no longer has **any** dependencies on any blockchain technology.
 
 Things you can do using Concerto:
 - Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
@@ -16,7 +16,7 @@ Things you can do using Concerto:
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
 # Projects using Concerto
-- Hyperleger Composer
+- Hyperleger Concerto
 - Accord Project Cicero and Ergo
 - Clause.io
 

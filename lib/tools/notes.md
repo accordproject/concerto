@@ -5,7 +5,7 @@
 ### Example file
 ```
 #
-# This is the changelog for Hyperledger Composer. It lists all significant changes to
+# This is the changelog for Concerto. It lists all significant changes to
 # functionality and public API.
 #
 #

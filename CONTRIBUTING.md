@@ -1,20 +1,20 @@
-# Contributing to Hyperledger Composer
+# Contributing to Concerto
 
 We welcome contributions to the code base. There is a contributors [RocketChat channel](https://chat.hyperledger.org/channel/composer-dev) that we would encourage you to join and introduce yourself on.
 
-There are multiple components within Composer, which can be conceptually viewed using the mindmap.
+There are multiple components within Concerto, which can be conceptually viewed using the mindmap.
 
-![alt text](./contrib-notes/Features.png "Composer Mindmap")
+![alt text](./contrib-notes/Features.png "Concerto Mindmap")
 
-These components are split across multiple Composer repositories within the Hyperledger project. The repositories are:
+These components are split across multiple Concerto repositories within the Hyperledger project. The repositories are:
 
 - [hyperledger/composer](https://github.com/hyperledger/composer) All the code, cli and documentation
 - [hyperledger/composer-sample-models](https://github.com/hyperledger/composer-sample-models) Sample Business Models
 - [hyperledger/composer-sample-networks](https://github.com/hyperledger/composer-sample-networks) Sample Business Networks
-- [hyperledger/composer-sample-applications](https://github.com/hyperledger/composer-sample-applications) Sample Applications using the Composer API
+- [hyperledger/composer-sample-applications](https://github.com/hyperledger/composer-sample-applications) Sample Applications using the Concerto API
 - [hyperledger/composer-atom-plugin](https://github.com/hyperledger/composer-atom-plugin) Plugin for the Atom editor
 - [hyperledger/composer-vscode-plugin](https://github.com/hyperledger/composer-vscode-plugin) Plugin for the VS Code editor
-- [hyperledger/composer-tools](https://github.com/hyperledger/composer-tools) Additional tools to help working with Composer
+- [hyperledger/composer-tools](https://github.com/hyperledger/composer-tools) Additional tools to help working with Concerto
 
 ## Raising an Issue
 
@@ -22,9 +22,9 @@ If you have a question or problem that relates to general support, please ask th
 
 If you find a bug in the source code, an error in any documentation, or would like a new feature, you can help us by [raising an issue](./contrib-notes/raising-issues.md) to our GitHub Repository or delivering a fix via a [pull request](./contrib-notes/submitting-pull-request.md).
 
-## Raising a Composer Improvement Proposal
+## Raising a Concerto Improvement Proposal
 
-If you have a suggestion for a Composer Improvement Proposal (CIP), for a feature that is not yet present and you would like to have, please raise an issue using a [CIP template](./contrib-notes/cip-template.md) and tag the issue with the label `improvement proposal`. We endevour to have all CIP items discussed on community calls, so expect to have an invite once raised!
+If you have a suggestion for a Concerto Improvement Proposal (CIP), for a feature that is not yet present and you would like to have, please raise an issue using a [CIP template](./contrib-notes/cip-template.md) and tag the issue with the label `improvement proposal`. We endevour to have all CIP items discussed on community calls, so expect to have an invite once raised!
 
 ## Getting Started
 
