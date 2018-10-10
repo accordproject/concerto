@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.31.1",
+  "version": "0.31.2",
   "description": "Hyperledger Composer Concerto",
   "engines": {
     "node": ">=8",
@@ -9,10 +9,8 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.config.js --mode production",
-    "prepublishOnly": "npm run build",
-    "prepublish": "pegjs ./lib/introspect/parser.pegjs && node ./scripts/tsgen.js",
-    "pretest": "npm run prepublish && npm run lint",
+    "prepublishOnly": "webpack --config webpack.config.js --mode production",
+    "prepare": "pegjs ./lib/introspect/parser.pegjs && node ./scripts/tsgen.js",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
@@ -22,13 +20,12 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "regenmodel": "node ./scripts/systemmodelgen.js",
     "pkgbump": "node ./scripts/pkgbump.js",
     "pkgstamp": "node ./scripts/pkgstamp.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperledger/composer-concerto.git"
+    "url": "https://github.com/dselman/composer-concerto.git"
   },
   "keywords": [
     "blockchain",
