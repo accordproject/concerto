@@ -76,9 +76,6 @@ console.log(JSON.stringify(plainJsObject, null, 4);
 # Deserialize an Instance from JSON
 
 ```
-const Serializer = require('composer-concerto').Serializer;
-
-const serializer = new Serializer(factory, modelManager);
 const postalAddress = serializer.fromJSON(plainJsObject); // JSON will be validated
 console.log(postalAddress.streetAddress);
 ```
