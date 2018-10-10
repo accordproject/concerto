@@ -13,7 +13,7 @@ Things you can do using Concerto:
 - Introspect the model using a powerful set of APIs
 - Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML...
 - Import models from URLs
-- Publish your models to the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
+- Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
 # Projects using Concerto
 - Hyperleger Composer
