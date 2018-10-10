@@ -1,4 +1,4 @@
-# Composer Improvement Proposal
+# Concerto Improvement Proposal
 
 All CIPs should follow the specified template below. It is used to help cover all aspects behind the reasoning for the CIP, and bring in considerations that might otherwise have been neglected. Most of all we want all CIPs to be absolutely transparent, so that the community can see the justification behind all CIPs that are delivered.
 

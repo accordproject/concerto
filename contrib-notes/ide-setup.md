@@ -1,25 +1,25 @@
-# Contributing to Composer
+# Contributing to Concerto
 * [Step-by-step development environment setup](./getting-started.md)
 * Currently reading ->  [Suggested IDE setup](./ide-setup.md)
 * [Coding Guidelines](./coding-guidelines.md)
 * [Pull Request Guidelines](./submitting-pull-request.md)
 * [Release process](./release-process/weekly-qa-validation.md)
 
-# IDE setup for Hyperledger Composer development
+# IDE setup for Concerto development
 
-Both Atom.io and VS Code are popular editors amongst the Hyperledger Composer contributors.
+Both Atom.io and VS Code are popular editors amongst the Concerto contributors.
 
 # Using Atom
 
-[Atom](https://atom.io/) is the preferred code editor for contributors the Hyperledger Composer project.  Many developers find Atom especially productive due to the wide range of plugins availability to assist with code development activities. These include syntax highlighting for node.js code, JavaScript and the Hyperledger Composer modeling language, or *linting* to help eliminate potential bugs and ensure a consistent coding style. Developers can also develop their own plugins. Here's a list of Atom plugins for you consider as you develop within the Hyperledger Composer project.
+[Atom](https://atom.io/) is the preferred code editor for contributors the Concerto project.  Many developers find Atom especially productive due to the wide range of plugins availability to assist with code development activities. These include syntax highlighting for node.js code, JavaScript and the Concerto modeling language, or *linting* to help eliminate potential bugs and ensure a consistent coding style. Developers can also develop their own plugins. Here's a list of Atom plugins for you consider as you develop within the Concerto project.
 
 ## JavaScript and Node.js linting
 
 Use the [linter-eslint plugin](https://atom.io/packages/linter-eslint) to help with linting node.js and JavaScript code. For an example of the eslinter config file see [here](../packages/composer-admin/.eslintrc.yml).
 
-## Hyperledger Composer modelling language
+## Concerto modelling language
 
-Use the [composer-atom plugin](https://github.com/hyperledger/composer-atom-plugin) for syntax highlighting of the Hyperledger Composer modelling language.  Follow the instructions in the README to install the plugin.
+Use the [composer-atom plugin](https://github.com/hyperledger/composer-atom-plugin) for syntax highlighting of the Concerto modelling language.  Follow the instructions in the README to install the plugin.
 
 ## Find unfinished work items
 

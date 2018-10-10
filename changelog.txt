@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This is the changelog for Hyperledger Composer. It lists all significant changes to
+# This is the changelog for Hyperledger Concerto. It lists all significant changes to
 # functionality and public API.
 #
 # The most recent entry in the changelog should be at the top of this file
