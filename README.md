@@ -206,7 +206,7 @@ Concerto supports the following primitive types:
 - range : declares a valid range for numeric properties
 - regex : declares a validation regex for string properties
 
-String fields may include an optional regular expression, which is used to validate the contents of the field. Careful use of field validators allows Composer to perform rich data validation, leading to fewer errors and less boilerplate code.
+String fields may include an optional regular expression, which is used to validate the contents of the field. Careful use of field validators allows Concerto to perform rich data validation, leading to fewer errors and less boilerplate application code.
 
 The example below declares that the Farmer participant contains a field postcode that must conform to the regular expression for valid UK postcodes.
 
