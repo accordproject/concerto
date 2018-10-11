@@ -1,6 +1,6 @@
 # Concerto
 
-Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±50KB.
+Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
 
 > Note that this module originated as part of Hyperledger Composer, but it no longer has **any** dependencies on any blockchain technology.
 
