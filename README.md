@@ -10,6 +10,7 @@ Things you can do using Concerto:
 - Create runtime instances of your model
 - Serialize your instances to JSON
 - Deserialize (and optionally validate) instances from JSON
+- Instances are JS objects so they are easy to pass around your application
 - Introspect the model using a powerful set of APIs
 - Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML...
 - Import models from URLs
