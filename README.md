@@ -101,7 +101,7 @@ The Concerto metamodel contains:
 namespace foo
 ```
 
-Every Concerto file starts with the name of a single namespace. All the definitions within a single file therefore belong to the same namespace. The `ModelManager` will refuse to load to model files that have the same namespace.
+Every Concerto file starts with the name of a single namespace. All the definitions within a single file therefore belong to the same namespace. The `ModelManager` will refuse to load two model files that have the same namespace.
 
 ## Imports
 
@@ -132,7 +132,7 @@ The Model Manager will resolve all imports to ensure that the set of declaration
 Concepts are similar to class declarations in most object-oriented languages, in that they may have a super-type and a set of typed properties:
 
 ```
-asbtract concept Animal {
+abstract concept Animal {
   o DateTime dob
 }
 
@@ -153,6 +153,8 @@ asset Vehicle identified by vin {
 }
 ```
 
+Assets are typically used in your models for the long-lived identifiable Things (or nouns) in the model: cars, orders, shipping containers, products etc.
+
 ## Participants
 
 An participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
@@ -163,6 +165,8 @@ participant Customer identified by email {
 }
 ```
 
+Participants are typically used in your models for the identifiable people or organizations in the model: person, customer, company, business, auditor etc.
+
 ## Transactions
 
 An transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
@@ -172,6 +176,8 @@ transaction Order identified by orderId {
   o String orderId
 }
 ```
+
+Transactions are typically used in your models for the identifiable business events or messages that are submitted by Participants to change the state of Assets: cart check out, change of address, identity verification, place order etc.
 
 ## Enumerations & Enumeration Values
 
