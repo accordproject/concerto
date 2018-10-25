@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - '8'
+- '8'
 dist: trusty
 before_install: |
   set -e
@@ -12,16 +12,19 @@ install: |
   date
   ./.travis/install.sh
   date
-script: ./.travis/script.sh
-after_failure: |
-  tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
+script: "./.travis/script.sh"
+after_failure: tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
 deploy:
   provider: script
-  script: ./.travis/deploy.sh
+  script: "./.travis/deploy.sh"
   skip_cleanup: true
   on:
-      all_branches: true
+    all_branches: true
 cache:
   directories:
-    - node_modules
+  - node_modules
 sudo: required
+env:
+  global:
+  - secure: Zhx/6jTAdpXVNBbjU3JcXatfDa4h2qST2iOFJx82Bt0xnfhVfsHRB/nQZHhZHo56sG9TEBMbGvTP2GRIs5qskzMkbGShFz3eo96b4bhrX8FVQj4Z4Gk18cVPkZzsacgSieQhPuVFbaf1CJbqzGUH2YXfOEhp+F2lRXMYkZliUuE3UpgXwhKg+zuJ0Cuw7VEp5qQowW7jXbjdCD44QacqJJ2uVcBglQxO3H2fo6gSYQT3LAkLuZZD6xPERYuPIWb8ZqcqNIh6tFFC0pxtYn0DXP9ZxVGB1sMzpSUG1xf0GhQEqzGNCwyf9HIckHvcLbAPvZQA3GsUP3iJdP4UcFpCh6xTlHCRo9/dyzD7qhnyIYnSpRjBkVY9ieqwRvAkeRGdYMGseZTs9JxtkMFLt6G1Gqo4mcPWaZ7YaTBjwVlREoAIbHfvhYcVXV6onjJZ2yIbEhW2UYB3jviioHQg2E9/b7kGH2yvglTKWkV6D2SCcK/bSxJpxn4l4n7565vBgK8EFjGkk8yVvTWj3ocamczYs1csssshKUn4sCMHJ6UVZepiGF3uP19lZYgtgB+M/YalDlpwyYx3Xj5gcUjVmnMGiTEuvBXF3irqSpRt3QzZG454DEGfg8Rkg3OnYyB3bd6y7m5HDQ7DAY9q5pJQyeemaQaVO8e4jWTvn0Ag1nkK0HM=
+  - secure: djW0qWh3Mg1aI4bjV3PD+wtFf1d47h8oqRO7W47DLZwUxxFYQf3n2zc5TJWPggiAyOniIJvHr9pkQC7UrsSrYZjesUUIbTFSPpwWDUNE0Wg7bOH8wf0tomrPcM9Xp9h5v9kCESrR5DTDeGISWzTnMiTRCEy+JtMwZSRuyNW2UuTiOvjB0MH5FTDE1eyle7i69vsw245cIp49rtQd4POGJGPC4FxUi4mtfZcJqoAKI7wnKzTsPr7G00oxXf7cFH8QSnPtJYboA3dBeA9F0HAWoE/q0Tne24eNkx2YmML4aCvr+9MbkAoAmseQT32G/kOCgR/3M1mnYkqnwR/ejUfLFOFyX1vsORfjcjcTN3E1NZOOq3yLH/hRurv++X2d0imOIfeZMBffVdpjqiXM9HzdO61oJEvkk1RkMuiJL6b3W6kZzo0jlzWgyar1PG6ClHarjF9aNsUsr0nL17KEkZ81Ovt8a6hdwNp7gvNLDocEQuV6scr7Ma+WVegbRNO/ODQCNZvbBkbytfKIsszYCL9tDTyrI3LIHB1jotfbA/LqwIK5qE4Orywwj7PBtwhLfVyHMDNAv3I4TwTCPRUK3f047QlND8GoXfk+CaYFam7920gyULPdkN5SP5W3I4FBUjWVwsh5wZ/kHjahgzvxqO39TMzypIZ/WBwqnMS49PRMmfc=
