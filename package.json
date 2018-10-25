@@ -21,7 +21,8 @@
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
     "pkgbump": "node ./scripts/pkgbump.js",
-    "pkgstamp": "node ./scripts/pkgstamp.js"
+    "pkgstamp": "node ./scripts/pkgstamp.js",
+    "pkgset": "node ./scripts/pkgset.js"
   },
   "repository": {
     "type": "git",
