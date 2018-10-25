@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - '8'
+- '8'
 dist: trusty
 before_install: |
   set -e
@@ -12,16 +12,18 @@ install: |
   date
   ./.travis/install.sh
   date
-script: ./.travis/script.sh
-after_failure: |
-  tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
+script: "./.travis/script.sh"
+after_failure: 'tail -n +1 -- /home/travis/.npm/_logs/*-debug.log'
 deploy:
   provider: script
-  script: ./.travis/deploy.sh
+  script: "./.travis/deploy.sh"
   skip_cleanup: true
   on:
-      all_branches: true
+    all_branches: true
 cache:
   directories:
-    - node_modules
+  - node_modules
 sudo: required
+env:
+  global:
+    secure: Zhx/6jTAdpXVNBbjU3JcXatfDa4h2qST2iOFJx82Bt0xnfhVfsHRB/nQZHhZHo56sG9TEBMbGvTP2GRIs5qskzMkbGShFz3eo96b4bhrX8FVQj4Z4Gk18cVPkZzsacgSieQhPuVFbaf1CJbqzGUH2YXfOEhp+F2lRXMYkZliUuE3UpgXwhKg+zuJ0Cuw7VEp5qQowW7jXbjdCD44QacqJJ2uVcBglQxO3H2fo6gSYQT3LAkLuZZD6xPERYuPIWb8ZqcqNIh6tFFC0pxtYn0DXP9ZxVGB1sMzpSUG1xf0GhQEqzGNCwyf9HIckHvcLbAPvZQA3GsUP3iJdP4UcFpCh6xTlHCRo9/dyzD7qhnyIYnSpRjBkVY9ieqwRvAkeRGdYMGseZTs9JxtkMFLt6G1Gqo4mcPWaZ7YaTBjwVlREoAIbHfvhYcVXV6onjJZ2yIbEhW2UYB3jviioHQg2E9/b7kGH2yvglTKWkV6D2SCcK/bSxJpxn4l4n7565vBgK8EFjGkk8yVvTWj3ocamczYs1csssshKUn4sCMHJ6UVZepiGF3uP19lZYgtgB+M/YalDlpwyYx3Xj5gcUjVmnMGiTEuvBXF3irqSpRt3QzZG454DEGfg8Rkg3OnYyB3bd6y7m5HDQ7DAY9q5pJQyeemaQaVO8e4jWTvn0Ag1nkK0HM=
