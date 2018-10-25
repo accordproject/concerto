@@ -85,7 +85,7 @@ if [[ "${BUILD_RELEASE}" = "stable" ]]; then
     git clean -d -f
 
     # Bump the version number.
-    npm run pkgbump
+    npm run pkgset
     export NEW_VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
 
     # Add the version number changes and push them to Git.
