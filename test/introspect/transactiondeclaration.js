@@ -75,15 +75,5 @@ describe('TransactionDeclaration', () => {
                 td.validate();
             }).should.throw(/Transaction should not specify an identifying field./);
         });
-
-        it('should throw if transaction specifies and identifying field', () => {
-            const introspectUtils = new IntrospectUtils();
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/transactiondeclaration.definesidentifier.cto', TransactionDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Transaction should not specify an identifying field./);
-        });
-
     });
-
 });
