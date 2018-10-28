@@ -59,21 +59,5 @@ describe('TransactionDeclaration', () => {
             td.validate();
 
         });
-
-        it('should cover the other error paths', () => {
-            const model = `
-            namespace org.acme
-            transaction T identified by id{
-               o String id
-            }
-            `;
-
-            const modelFile = new ModelFile(modelManager, model);
-            let td = modelFile.getTransactionDeclaration('T');
-
-            (() => {
-                td.validate();
-            }).should.throw(/Transaction should not specify an identifying field./);
-        });
     });
 });
