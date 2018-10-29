@@ -10,10 +10,8 @@ participant MyParticipant identified by myParticipantId {
 
 transaction MyTransaction identified by myTransactionId {
   o String myTransactionId
-  o DateTime timestamp
 }
 
 event MyEvent identified by myEventId {
   o String myEventId
-  o DateTime timestamp
 }

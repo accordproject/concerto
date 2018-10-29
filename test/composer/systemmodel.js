@@ -55,12 +55,10 @@ abstract participant Participant {   }
  *
  *
  * @param {String} transactionId Identifier for this transaction
- * @param {DateTime} timestamp   Timestamp for this transaction
  */
 @docs('transaction.md')
 abstract transaction Transaction identified by transactionId {
   o String transactionId
-  o DateTime timestamp
 }
 
 /**
@@ -69,12 +67,10 @@ abstract transaction Transaction identified by transactionId {
  * Has two properties that are used set and are accessible in all transactions.
  *
  * @param {String} eventId Identifier for this event
- * @param {DateTime} timestamp   Timestamp for this event
  */
 @docs('event.md')
 abstract event Event identified by eventId {
   o String eventId
-  o DateTime timestamp
 }
 
 /**
