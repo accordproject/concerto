@@ -43,21 +43,6 @@ describe('EventDeclaration', () => {
     });
 
     describe('#validate', () => {
-        it('Give an event an id field',()=>{
-            let model = `
-            namespace com.test
-
-            event E identified by euid {
-                o String euid
-            }`;
-            const modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
-            (()=>{
-                modelManager.addModelFile(model, 'awesome.cto' );
-            })
-                .should.throw(/Event should not specify an identifying field/);
-
-        });
 
         it('Check the system type',()=>{
             let model = `
