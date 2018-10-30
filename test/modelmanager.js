@@ -866,7 +866,6 @@ concept Bar {
                 decls.should.all.be.an.instanceOf(ConceptDeclaration);
                 decls.length.should.equal(numberSystemConcepts+numberModelBaseConcepts);
             });
-
         });
 
         describe('#getConceptDeclarationsWithParameterFalse', () => {
