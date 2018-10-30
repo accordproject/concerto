@@ -12,7 +12,7 @@ Things you can do using Concerto:
 - Deserialize (and optionally validate) instances from JSON
 - Instances are JS objects so they are easy to pass around your application
 - Introspect the model using a powerful set of APIs
-- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML...
+- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/hyperledger/composer-concerto-tools).
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
