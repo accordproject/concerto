@@ -15,17 +15,16 @@
 'use strict';
 
 /**
- * Hyperledger-Composer module. Hyperledger-Composer is a framework for creating
- * blockchain backed digital networks and exchanging assets between participants
- * via processing transactions.
- * @module composer-common
+ * Concerto module. Concerto is a framework for defining domain
+ * specific models.
+ *
+ * @module composer-concerto
  */
 
 module.exports.AssetDeclaration = require('./lib/introspect/assetdeclaration');
 module.exports.BaseException = require('./lib/baseexception');
 module.exports.BaseFileException = require('./lib/basefileexception');
 module.exports.ClassDeclaration = require('./lib/introspect/classdeclaration');
-module.exports.CodeGen = require('./lib/codegen/codegen.js');
 module.exports.Concept = require('./lib/model/concept');
 module.exports.ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
 module.exports.EnumDeclaration = require('./lib/introspect/enumdeclaration');
@@ -35,7 +34,6 @@ module.exports.Field = require('./lib/introspect/field');
 module.exports.Factory = require('./lib/factory');
 module.exports.Globalize = require('./lib/globalize');
 module.exports.Introspector = require('./lib/introspect/introspector');
-module.exports.LoopbackVisitor = require('./lib/codegen/fromcto/loopback/loopbackvisitor');
 module.exports.ModelFile = require('./lib/introspect/modelfile');
 module.exports.ModelManager = require('./lib/modelmanager');
 module.exports.ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
@@ -47,7 +45,5 @@ module.exports.SecurityException = require('./lib/securityexception');
 module.exports.Serializer = require('./lib/serializer');
 module.exports.TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
 module.exports.Typed = require('./lib/model/typed');
-module.exports.TypescriptVisitor = require('./lib/codegen/fromcto/typescript/typescriptvisitor');
 module.exports.ModelUtil = require('./lib/modelutil');
-module.exports.Writer = require('./lib/codegen/writer.js');
 module.exports.version = require('./package.json');
