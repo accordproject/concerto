@@ -20,6 +20,7 @@ const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ModelUtil = require('../../lib/modelutil');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment');
 
 let chai = require('chai'), should = chai.should();
 const sinon = require('sinon');
@@ -144,8 +145,8 @@ describe('JSONGenerator', () => {
         });
 
         it('should convert a date time object to ISOString', () => {
-            let date = new Date('Wed, 09 Aug 1995 00:00:00 GMT');
-            jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T00:00:00.000Z');
+            let date = Moment.parseZone('Wed, 09 Aug 1995 00:00:00 GMT');
+            jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T00:00:00Z');
         });
 
         it('should pass through a boolean object', () => {

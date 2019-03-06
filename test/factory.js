@@ -19,6 +19,7 @@ const ModelManager = require('../lib/modelmanager');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const uuid = require('uuid');
 const Util = require('./composer/systemmodelutility');
+const Moment = require('moment');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -289,14 +290,14 @@ describe('Factory', function() {
             let resource = factory.newTransaction(namespace, 'MyTransaction');
             resource.transactionId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
             should.equal(resource.newValue, undefined);
-            resource.timestamp.should.be.an.instanceOf(Date);
+            resource.timestamp.should.be.an.instanceOf(Moment);
         });
 
         it('should create a new instance with a specified ID', () => {
             let resource = factory.newTransaction(namespace, 'MyTransaction', 'MY_ID_1');
             resource.transactionId.should.equal('MY_ID_1');
             should.equal(resource.newValue, undefined);
-            resource.timestamp.should.be.an.instanceOf(Date);
+            resource.timestamp.should.be.an.instanceOf(Moment);
         });
 
         it('should pass options onto newResource', () => {
@@ -330,13 +331,13 @@ describe('Factory', function() {
         it('should create a new instance with a generated ID', () => {
             let resource = factory.newEvent(namespace, 'MyEvent');
             resource.eventId.should.equal('valid');
-            resource.timestamp.should.be.an.instanceOf(Date);
+            resource.timestamp.should.be.an.instanceOf(Moment);
         });
 
         it('should create a new instance with a specified ID', () => {
             let resource = factory.newEvent(namespace, 'MyEvent', 'MY_ID_1');
             resource.eventId.should.equal('MY_ID_1');
-            resource.timestamp.should.be.an.instanceOf(Date);
+            resource.timestamp.should.be.an.instanceOf(Moment);
         });
 
         it('should pass options onto newEvent', () => {

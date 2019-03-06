@@ -51,10 +51,9 @@
     "mkdirp": "0.5.1",
     "mocha": "5.2.0",
     "mockery": "2.1.0",
-    "moment": "2.22.2",
     "moxios": "0.4.0",
     "node-plantuml": "0.7.0",
-    "nyc": "13.0.1",
+    "nyc": "13.3.0",
     "pegjs": "0.10.0",
     "semver": "5.5.1",
     "sinon": "2.3.8",
@@ -70,6 +69,7 @@
     "lorem-ipsum": "1.0.6",
     "npm-paths": "1.0.0",
     "urijs": "1.19.1",
+    "moment": "2.22.2",
     "uuid": "3.3.2"
   },
   "license-check-and-add-config": {

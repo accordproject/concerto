@@ -23,6 +23,7 @@ const Resource = require('../../lib/model/resource');
 const TypedStack = require('../../lib/serializer/typedstack');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -101,7 +102,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03Z');
-            value.getTime().should.equal(new Date('2016-10-20T05:34:03Z').getTime());
+            value.format().should.equal(Moment.parseZone('2016-10-20T05:34:03Z').format());
         });
 
         it('should convert to integers from strings', () => {
