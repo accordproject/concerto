@@ -148,6 +148,10 @@ describe('JSONGenerator', () => {
             let date = Moment.parseZone('Wed, 09 Aug 1995 00:00:00 GMT');
             jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T00:00:00Z');
         });
+        it('should convert a date time object to ISOString in a different timezone', () => {
+            let date = Moment.parseZone('Wed, 09 Aug 1995 00:00:00 -0500');
+            jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T00:00:00-05:00');
+        });
 
         it('should pass through a boolean object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Boolean'; } }, true).should.equal(true);
