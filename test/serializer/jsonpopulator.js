@@ -105,6 +105,13 @@ describe('JSONPopulator', () => {
             value.format().should.equal(Moment.parseZone('2016-10-20T05:34:03Z').format());
         });
 
+        it('should convert to dates from moments', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            let value = jsonPopulator.convertToObject(field, Moment.parseZone('2016-10-20T05:34:03Z'));
+            value.format().should.equal(Moment.parseZone('2016-10-20T05:34:03Z').format());
+        });
+
         it('should convert to integers from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
