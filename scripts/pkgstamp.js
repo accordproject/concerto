@@ -16,7 +16,7 @@
 'use strict';
 
 const fs = require('fs');
-const moment = require('moment');
+const moment = require('moment-mini');
 const path = require('path');
 
 const timestamp = moment().format('YYYYMMDDHHmmss');
