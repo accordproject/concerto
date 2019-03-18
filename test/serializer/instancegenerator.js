@@ -20,7 +20,7 @@ const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ValueGenerator = require('../../lib/serializer/valuegenerator');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 const chai = require('chai');
 const should = chai.should();

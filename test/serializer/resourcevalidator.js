@@ -25,7 +25,7 @@ const Resource = require('../../lib/model/resource');
 const ModelUtil = require('../../lib/modelutil');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 const sinon = require('sinon');
 const chai = require('chai');

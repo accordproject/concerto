@@ -17,7 +17,7 @@
 const ModelManager = require('../../lib/modelmanager');
 const Typed = require('../../lib/model/typed');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 require('chai').should();
 

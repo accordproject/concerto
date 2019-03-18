@@ -17,7 +17,7 @@
 const ModelManager = require('../../lib/modelmanager');
 const Resource = require('../../lib/model/resource');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 const chai = require('chai');
 chai.should();

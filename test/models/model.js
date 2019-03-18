@@ -18,7 +18,7 @@ const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 const assert = require('assert');
 require('chai').should();

@@ -23,7 +23,7 @@ const Resource = require('../../lib/model/resource');
 const TypedStack = require('../../lib/serializer/typedstack');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -22,7 +22,7 @@ const Serializer = require('../../lib/serializer');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const fs = require('fs');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 require('chai').should();
 

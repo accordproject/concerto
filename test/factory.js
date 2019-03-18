@@ -19,7 +19,7 @@ const ModelManager = require('../lib/modelmanager');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const uuid = require('uuid');
 const Util = require('./composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 const should = require('chai').should();
 const sinon = require('sinon');

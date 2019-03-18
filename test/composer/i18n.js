@@ -24,7 +24,7 @@ const Serializer = require('./../../lib/serializer');
 const ModelManager = require('./../../lib/modelmanager');
 const ModelUtil = require('./../../lib/modelutil');
 const Util = require('../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 describe('Globalization', function() {
 

@@ -19,7 +19,7 @@ const ModelManager = require('../../../lib/modelmanager');
 const Serializer = require('../../../lib/serializer');
 const fs = require('fs');
 const Util = require('../../composer/systemmodelutility');
-const Moment = require('moment');
+const Moment = require('moment-mini');
 
 let chai = require('chai');
 chai.should();
