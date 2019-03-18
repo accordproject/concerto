@@ -104,7 +104,7 @@ describe('Typed', () => {
                 const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
                 const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
                 typed.assignFieldDefaults();
-                if (typed.value instanceof Moment) {
+                if (Moment.isMoment(typed.value)) {
                     typed.value.format().should.equal(defaultValue);
                 } else {
                     typed.value.should.equal(defaultValue);
