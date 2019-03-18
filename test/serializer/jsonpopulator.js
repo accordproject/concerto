@@ -23,6 +23,7 @@ const Resource = require('../../lib/model/resource');
 const TypedStack = require('../../lib/serializer/typedstack');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -100,8 +101,15 @@ describe('JSONPopulator', () => {
         it('should convert to dates from ISO8601 strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03Z');
-            value.getTime().should.equal(new Date('2016-10-20T05:34:03Z').getTime());
+            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519Z');
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.519Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
+        });
+
+        it('should convert to dates from moments', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            let value = jsonPopulator.convertToObject(field, Moment.parseZone('2016-10-20T05:34:03Z'));
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
         it('should convert to integers from strings', () => {

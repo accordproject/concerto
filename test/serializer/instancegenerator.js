@@ -20,6 +20,7 @@ const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ValueGenerator = require('../../lib/serializer/valuegenerator');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 const chai = require('chai');
 const should = chai.should();
@@ -63,7 +64,7 @@ describe('InstanceGenerator', () => {
 
         it('should throw on unrecognized thing', () => {
             (() => {
-                visitor.visit(new Date(), {});
+                visitor.visit(Moment.parseZone(), {});
             }).should.throw(/Unrecognised/);
         });
 
@@ -148,7 +149,7 @@ describe('InstanceGenerator', () => {
                 o String assetId
                 o DateTime theValue
             }`);
-            resource.theValue.should.be.an.instanceOf(Date);
+            resource.theValue.should.be.an.instanceOf(Moment);
         });
 
         it('should generate one default value for a date/time array property', () => {
@@ -158,7 +159,7 @@ describe('InstanceGenerator', () => {
                 o DateTime[] theValues
             }`);
             resource.theValues.should.be.a('Array').and.have.lengthOf(1);
-            resource.theValues[0].should.be.a('Date');
+            resource.theValues[0].should.be.an.instanceOf(Moment);
         });
 
         it('should generate a default value for an integer property', () => {

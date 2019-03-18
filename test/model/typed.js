@@ -17,6 +17,7 @@
 const ModelManager = require('../../lib/modelmanager');
 const Typed = require('../../lib/model/typed');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 require('chai').should();
 
@@ -78,7 +79,7 @@ describe('Typed', () => {
         const defaultValues = {
             'Boolean': true,
             'String': 'foobar',
-            'DateTime': '2017-09-26T22:35:53.871Z',
+            'DateTime': '2017-09-26T22:35:53Z',
             'Double': 3.142,
             'Integer': 32768,
             'Long': 10485760,
@@ -103,8 +104,8 @@ describe('Typed', () => {
                 const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
                 const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
                 typed.assignFieldDefaults();
-                if (typed.value instanceof Date) {
-                    typed.value.toISOString().should.equal(defaultValue);
+                if (Moment.isMoment(typed.value)) {
+                    typed.value.format().should.equal(defaultValue);
                 } else {
                     typed.value.should.equal(defaultValue);
                 }

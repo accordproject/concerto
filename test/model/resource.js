@@ -17,6 +17,7 @@
 const ModelManager = require('../../lib/modelmanager');
 const Resource = require('../../lib/model/resource');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 const chai = require('chai');
 chai.should();
@@ -80,7 +81,7 @@ describe('Resource', function () {
             const classDecl = modelManager.getType('org.acme.l1.ScrapCar');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789' );
             resource.transactionId = '789';
-            resource.timestamp = new Date(0);
+            resource.timestamp = Moment(0).utc();
             resource.car = modelManager.getFactory().newRelationship('org.acme.l1', 'Car', '456');
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.ScrapCar',

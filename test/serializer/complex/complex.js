@@ -19,6 +19,7 @@ const ModelManager = require('../../../lib/modelmanager');
 const Serializer = require('../../../lib/serializer');
 const fs = require('fs');
 const Util = require('../../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 let chai = require('chai');
 chai.should();
@@ -81,7 +82,7 @@ describe('Test generating deduplicated JSON for complex models', () => {
             logEntry.vehicle = wrapper.transaction.vehicle;
             logEntry.buyer = wrapper.transaction.buyer;
             logEntry.seller = wrapper.transaction.seller;
-            logEntry.timestamp = new Date();
+            logEntry.timestamp = Moment();
             wrapper.transaction.vehicle.logEntries= [logEntry];
 
             const obj = serializer.toJSON(wrapper, {deduplicateResources: true, permitResourcesForRelationships: true});

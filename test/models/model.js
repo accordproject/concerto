@@ -18,6 +18,7 @@ const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 const assert = require('assert');
 require('chai').should();
@@ -98,7 +99,7 @@ describe('Model Tests', function(){
             assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /.+expected type Boolean/, 'did not throw with expected message');
 
             // o DateTime dateTimeProperty
-            const dateTime = new Date('2016-10-11T02:30:26.571Z');
+            const dateTime = Moment.parseZone('2016-10-11T02:30:26.262Z');
             resource.setPropertyValue('dateTimeProperty', dateTime );
             resource.dateTimeProperty.should.equal(dateTime);
             assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /.+expected type DateTime/, 'did not throw with expected message');
@@ -200,7 +201,7 @@ describe('Model Tests', function(){
             let json = serializer.toJSON(resource);
 
             // assert on the entire format of the JSON serialization
-            JSON.stringify(json).should.be.equal('{"$class":"org.acme.base.BaseAsset","stringProperty":"string","integerProperty":999,"doubleProperty":10,"booleanProperty":true,"dateTimeProperty":"2016-10-11T02:30:26.571Z","longProperty":100,"stateProperty":"GOLD","stringArrayProperty":["string"],"integerArrayProperty":[999],"doubleArrayProperty":[999],"booleanArrayProperty":[true,false],"dateTimeArrayProperty":["2016-10-11T02:30:26.571Z"],"longArrayProperty":[1,2,3],"stateArrayProperty":["GOLD","SILVER"],"singlePerson":"resource:org.acme.base.Person#DAN","personArray":["resource:org.acme.base.Person#DAN","resource:org.acme.base.Person#DAN"],"myPerson":{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}},"myPeople":[{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}},{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}}]}');
+            JSON.stringify(json).should.be.equal('{"$class":"org.acme.base.BaseAsset","stringProperty":"string","integerProperty":999,"doubleProperty":10,"booleanProperty":true,"dateTimeProperty":"2016-10-11T02:30:26.262Z","longProperty":100,"stateProperty":"GOLD","stringArrayProperty":["string"],"integerArrayProperty":[999],"doubleArrayProperty":[999],"booleanArrayProperty":[true,false],"dateTimeArrayProperty":["2016-10-11T02:30:26.262Z"],"longArrayProperty":[1,2,3],"stateArrayProperty":["GOLD","SILVER"],"singlePerson":"resource:org.acme.base.Person#DAN","personArray":["resource:org.acme.base.Person#DAN","resource:org.acme.base.Person#DAN"],"myPerson":{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}},"myPeople":[{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}},{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"}}]}');
 
             // check we can convert back to an object
             const newResource = serializer.fromJSON(json);

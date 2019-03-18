@@ -22,6 +22,7 @@ const Serializer = require('../../lib/serializer');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const fs = require('fs');
 const Util = require('../composer/systemmodelutility');
+const Moment = require('moment-mini');
 
 require('chai').should();
 
@@ -61,7 +62,7 @@ describe('Test Model', function(){
             // now try some invalid values
             ( function() {cObject.setPropertyValue('model', 1);}).should.throw(/.+expected type String/);
             ( function() {cObject.setPropertyValue('model', true);}).should.throw(/.+expected type String/);
-            ( function() {cObject.setPropertyValue('model', new Date());}).should.throw(/.+expected type String/);
+            ( function() {cObject.setPropertyValue('model', Moment());}).should.throw(/.+expected type String/);
             ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw(/.+expected type String/);
         });
     });
@@ -173,7 +174,7 @@ describe('Test Model', function(){
             serializer.should.not.be.null;
             cObject.should.not.be.null;
 
-            cObject.lastUpdate = new Date();
+            cObject.lastUpdate = Moment();
             cObject.year = 2014;
             cObject.integerArray = [1,2,3];
             cObject.state = 'REGISTERED';
@@ -198,8 +199,8 @@ describe('Test Model', function(){
             cObject.model = true;
             ( function() {serializer.toJSON(cObject);}).should.throw(/.+expected type String/);
 
-            // set model to a Date
-            cObject.model = new Date();
+            // set model to a DateTime
+            cObject.model = Moment();
             ( function() {serializer.toJSON(cObject);}).should.throw(/.+expected type String/);
 
             // set model to an object

@@ -43,7 +43,7 @@ describe('ValueGenerator', function() {
         };
 
         it('getDateTime should return a Date', function() {
-            assertFunctionReturnsType('getDateTime', 'Date');
+            assertFunctionReturnsType('getDateTime', 'Object');
         });
 
         it('getInteger should return a number', function() {
