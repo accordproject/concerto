@@ -86,7 +86,7 @@ describe('Resource', function () {
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.ScrapCar',
                 car: 'resource:org.acme.l1.Car#456',
-                timestamp: '1970-01-01T00:00:00Z',
+                timestamp: '1970-01-01T00:00:00.000Z',
                 transactionId: '789'
             });
         });
