@@ -23,7 +23,7 @@ const sinon = require('sinon');
 const fs = require('fs');
 const PlantUMLGenerator = require('../../../lib/codegen/fromjs/plantumlgenerator');
 const path = require('path');
-const FileWriter = require('composer-concerto-tools').FileWriter;
+const FileWriter = require('../../../lib/codegen/filewriter');
 const mkdirp = require('mkdirp');
 
 describe('PlantUMLGenerator', function () {

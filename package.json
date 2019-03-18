@@ -42,7 +42,6 @@
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "commander": "2.18.0",
-    "composer-concerto-tools": "0.50.1",
     "doctrine": "2.1.0",
     "eslint": "5.6.1",
     "fs-extra": "1.0.0",

@@ -22,7 +22,7 @@ const sinon = require('sinon');
 
 const fs = require('fs');
 const APISignatureGenerator = require('../../../lib/codegen/fromjs/apisignaturegenerator');
-const Writer = require('composer-concerto-tools').Writer;
+const Writer = require('../../../lib/codegen/writer');
 
 describe('APISignatureGenerator', function () {
 
