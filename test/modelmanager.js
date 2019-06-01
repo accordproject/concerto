@@ -49,7 +49,7 @@ describe('ModelManager', () => {
     let sandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
         Util.addComposerSystemModels(modelManager);
         mockSystemModelFile = sinon.createStubInstance(ModelFile);

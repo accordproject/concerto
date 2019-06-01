@@ -36,7 +36,7 @@ describe('composer cli', () => {
             warnOnReplace: false,
             warnOnUnregistered: false
         });
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         sandbox.stub(yargs, 'options').returns(yargs);
         sandbox.stub(yargs, 'usage').returns(yargs);
         sandbox.stub(process, 'exit');

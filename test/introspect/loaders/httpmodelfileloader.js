@@ -49,7 +49,7 @@ describe('HTTPModeFilelLoader', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         moxios.install();
     });
 

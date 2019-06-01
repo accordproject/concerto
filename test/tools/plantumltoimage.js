@@ -41,7 +41,7 @@ describe('PlantUmlToImage', () => {
         });
 
 
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         // setup the stubs for handling yargs and the process exit
         sandbox.stub(yargs, 'options').returns(yargs(['--inputDir=path/to/dir', '--outputDir=path/to/output', '--format=svg']));
         sandbox.stub(yargs, 'usage').returns(yargs);

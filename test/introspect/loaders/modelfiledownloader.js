@@ -32,7 +32,7 @@ describe('ModelFileDownloader', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {

@@ -36,7 +36,7 @@ describe('ConfigMediator', function() {
             warnOnReplace: false,
             warnOnUnregistered: false
         });
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {

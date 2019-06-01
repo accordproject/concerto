@@ -34,7 +34,7 @@ describe('JavascriptParser', () => {
     let sandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {
@@ -46,7 +46,7 @@ describe('JavascriptParser', () => {
         let sandbox;
 
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
+            sandbox = sinon.createSandbox();
         });
 
         afterEach(() => {
@@ -78,7 +78,8 @@ describe('JavascriptParser', () => {
             const contents = `
             `;
 
-            sandbox.stub(acorn,'startNode').returns({body:[]});
+            sandbox.stub(acorn.Parser.prototype,'startNode').returns({body:[]});
+            sandbox.stub(acorn.Parser.prototype,'finishNode').returns({body:[]});
             new JavascriptParser(contents, false, 5);
 
         });
@@ -510,7 +511,7 @@ describe('JavascriptParser', () => {
         let sandbox;
 
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
+            sandbox = sinon.createSandbox();
         });
 
         afterEach(() => {
@@ -705,7 +706,7 @@ describe('JavascriptParser', () => {
         let sandbox;
 
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
+            sandbox = sinon.createSandbox();
         });
 
         afterEach(() => {
@@ -790,7 +791,7 @@ describe('JavascriptParser', () => {
         let sandbox;
 
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
+            sandbox = sinon.createSandbox();
         });
 
         afterEach(() => {

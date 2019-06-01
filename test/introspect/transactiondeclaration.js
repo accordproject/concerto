@@ -31,7 +31,7 @@ describe('TransactionDeclaration', () => {
     let modelManager;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
         Util.addComposerSystemModels(modelManager);
         mockSystemTransaction = sinon.createStubInstance(TransactionDeclaration);

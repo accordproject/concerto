@@ -54,7 +54,7 @@ describe('RelationshipDeclaration', function () {
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
             // stub the getType method to return null
-            sinon.stub(field, 'getType', function(){return null;});
+            sinon.stub(field, 'getType').callsFake(function(){return null;});
             (function () {
                 field.validate(vehicleDeclaration);
             }).should.throw(/Relationship must have a type/);

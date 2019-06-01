@@ -33,7 +33,7 @@ describe('JSONGenerator', function () {
     let processSpy;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
 
         writeFileSync = sandbox.stub(fs, 'writeFileSync');
         writeFileSync.returns;
