@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.70.3",
+  "version": "0.70.4",
   "description": "Concerto",
   "engines": {
     "node": ">=8",
