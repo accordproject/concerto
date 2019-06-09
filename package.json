@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.70.3",
+  "version": "0.70.5",
   "description": "Concerto",
   "engines": {
     "node": ">=8",
@@ -64,8 +64,8 @@
     "lorem-ipsum": "1.0.6",
     "mkdirp": "0.5.1",
     "moment-mini": "2.22.1",
-    "npm-paths": "1.0.0",
     "node-plantuml": "0.7.0",
+    "npm-paths": "1.0.0",
     "semver": "5.5.1",
     "urijs": "1.19.1",
     "uuid": "3.3.2",
