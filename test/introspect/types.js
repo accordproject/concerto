@@ -46,7 +46,7 @@ describe('ModelFile type parsing', () => {
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {

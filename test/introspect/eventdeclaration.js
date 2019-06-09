@@ -30,7 +30,7 @@ describe('EventDeclaration', () => {
     let sandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         mockModelManager = sinon.createStubInstance(ModelManager);
         mockSystemEvent = sinon.createStubInstance(EventDeclaration);
         mockSystemEvent.getFullyQualifiedName.returns('org.hyperledger.composer.system.Event');

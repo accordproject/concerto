@@ -48,7 +48,7 @@ describe('PlantUMLGenerator', function () {
 
     describe('#generate', function() {
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
+            sandbox = sinon.createSandbox();
         });
 
         afterEach(() => {

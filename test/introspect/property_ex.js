@@ -54,7 +54,7 @@ describe('Property', function () {
             const person = modelManager.getType('org.acme.l1.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
-            sinon.stub(field, 'getParent', function(){return null;});
+            sinon.stub(field, 'getParent').callsFake(function(){return null;});
 
             (function () {
                 field.getFullyQualifiedTypeName();
@@ -64,7 +64,7 @@ describe('Property', function () {
             const person = modelManager.getType('org.acme.l1.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
-            sinon.stub(person, 'getModelFile', function(){return null;});
+            sinon.stub(person, 'getModelFile').callsFake(function(){return null;});
 
             (function () {
                 field.getFullyQualifiedTypeName();
@@ -74,7 +74,7 @@ describe('Property', function () {
             const person = modelManager.getType('org.acme.l1.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
-            sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName', function(){return null;});
+            sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(function(){return null;});
 
             (function () {
                 field.getFullyQualifiedTypeName();

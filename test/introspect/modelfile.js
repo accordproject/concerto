@@ -42,7 +42,7 @@ describe('ModelFile', () => {
     beforeEach(() => {
         modelManager = new ModelManager();
         Util.addComposerSystemModels(modelManager);
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {

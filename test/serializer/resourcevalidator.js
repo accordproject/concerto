@@ -104,7 +104,7 @@ describe('ResourceValidator', function () {
     }`;
 
     before(function () {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         resourceValidator = new ResourceValidator();
         modelManager = new ModelManager();
         Util.addComposerSystemModels(modelManager);

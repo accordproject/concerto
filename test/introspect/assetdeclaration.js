@@ -32,7 +32,7 @@ describe('AssetDeclaration', () => {
     let sandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         mockModelManager =  sinon.createStubInstance(ModelManager);
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
         mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');

@@ -49,7 +49,7 @@ describe('Test generating deduplicated JSON for complex models', () => {
     });
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {

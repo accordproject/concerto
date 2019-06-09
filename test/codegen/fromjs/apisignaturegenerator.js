@@ -29,7 +29,7 @@ describe('APISignatureGenerator', function () {
     let sandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {
@@ -92,7 +92,7 @@ describe('APISignatureGenerator', function () {
             let appendFileSync = sandbox.stub(fs, 'appendFileSync');
             appendFileSync.returns;
 
-            let writeLine = sandbox.stub(Writer,'writeLine');
+            let writeLine = sandbox.stub(Writer.prototype,'writeLine');
             writeLine.returns;
 
             let program = {outdir:'outdir'};

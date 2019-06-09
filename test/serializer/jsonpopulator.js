@@ -77,7 +77,7 @@ describe('JSONPopulator', () => {
     });
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         mockFactory = sinon.createStubInstance(Factory);
         jsonPopulator = new JSONPopulator();
     });

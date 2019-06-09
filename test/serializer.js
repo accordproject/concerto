@@ -34,7 +34,7 @@ describe('Serializer', () => {
     let serializer;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
 
         modelManager = new ModelManager();
         Util.addComposerSystemModels(modelManager);

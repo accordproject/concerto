@@ -106,7 +106,7 @@ describe('JSONGenerator', () => {
     });
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
         jsonGenerator = new JSONGenerator();
     });
 
