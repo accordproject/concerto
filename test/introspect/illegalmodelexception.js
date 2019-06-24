@@ -37,6 +37,13 @@ describe('IllegalModelException', function () {
         it('should return an instance of BaseFileException', function () {
             let exc = new IllegalModelException('message', modelFile, fileLocation);
             exc.should.be.an.instanceOf(BaseFileException);
+            exc.component.should.equal('composer-concerto');
+        });
+
+        it('should return an instance of BaseFileException for another component', function () {
+            let exc = new IllegalModelException('message', modelFile, fileLocation, 'foo');
+            exc.should.be.an.instanceOf(BaseFileException);
+            exc.component.should.equal('foo');
         });
 
         it('should have a message', function () {

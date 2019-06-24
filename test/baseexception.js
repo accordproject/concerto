@@ -25,6 +25,13 @@ describe('BaseException', function () {
         it('should return an instance of Error', function () {
             let exc = new BaseException('hello world');
             exc.should.be.an.instanceOf(Error);
+            exc.component.should.equal('composer-concerto');
+        });
+
+        it('should return an instance of Error for another component', function () {
+            let exc = new BaseException('hello world','foo');
+            exc.should.be.an.instanceOf(Error);
+            exc.component.should.equal('foo');
         });
 
         it('should have a name', function () {
