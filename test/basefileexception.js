@@ -43,6 +43,11 @@ describe('BaseFileException', function () {
             exc.stack.should.be.a('string');
         });
 
+        it('should have a file name', function () {
+            let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message', 'file name');
+            exc.getFileName().should.be.equal('file name');
+        });
+
         it('should use message over fullMessage', () => {
             let exc = new BaseFileException('message', {start: 1, end: 2});
             exc.message.should.equal('message');
