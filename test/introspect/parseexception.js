@@ -31,6 +31,13 @@ describe('ParseException', function () {
             exc.should.be.an.instanceOf(BaseFileException);
         });
 
+        it('should return an instance of BaseFileException for another component', function () {
+            let exc = new ParseException('message', fileLocation, 'foo.cto', 'foo');
+            exc.should.be.an.instanceOf(BaseFileException);
+            exc.fileLocation.fileName.should.equal('foo.cto');
+            exc.component.should.equal('foo');
+        });
+
         it('should cope without an file location or file name', function () {
             let exc = new ParseException('message', null);
             exc.message.should.not.be.null;
@@ -60,6 +67,7 @@ describe('ParseException', function () {
 
         it('should have a message with a file location and file name', function () {
             let exc = new ParseException('message', fileLocation, 'foo.cto');
+            exc.fileLocation.fileName.should.equal('foo.cto');
             exc.message.should.match(/message File foo.cto line 1 column 1/);
         });
 

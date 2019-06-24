@@ -59,7 +59,7 @@ class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
 }
 class EventDeclaration extends ClassDeclaration {
-   + void constructor(ModelFile,Object) throws InvalidModelException
+   + void constructor(ModelFile,Object) throws IllegalModelException
    + string getSystemType() 
    + boolean isEvent() 
 }

@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 0.70.5 {db48b7eb8404d9206e9bc8efb3de0009} 2019-06-23
+- Update exception triggered when creating EventDeclaration class
+
 Version 0.31.0 {82c0c10648bd10fb79b84db3fcda1776} 2018-10-03
 - Remove built-in system model file 
 
