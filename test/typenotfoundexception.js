@@ -25,12 +25,21 @@ describe('TypeNotFoundException', function() {
             const typeName = 'namespace.TypeName';
             const obj = new TypeNotFoundException(typeName);
             obj.toString().should.include(typeName);
+            obj.component.should.equal('composer-concerto');
         });
 
         it('with two arguments', function() {
             const message = 'MESSAGE_TEXT';
             const obj = new TypeNotFoundException('namespace.TypeName', message);
             obj.toString().should.include(message);
+            obj.component.should.equal('composer-concerto');
+        });
+
+        it('with three arguments', function() {
+            const message = 'MESSAGE_TEXT';
+            const obj = new TypeNotFoundException('namespace.TypeName', message, 'foo');
+            obj.toString().should.include(message);
+            obj.component.should.equal('foo');
         });
     });
 

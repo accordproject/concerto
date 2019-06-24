@@ -26,6 +26,13 @@ describe('BaseFileException', function () {
         it('should return an instance of BaseFileException', function () {
             let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message');
             exc.should.be.an.instanceOf(BaseException);
+            exc.component.should.equal('composer-concerto');
+        });
+
+        it('should return an instance of BaseFileException for another component', function () {
+            let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message', 'foo');
+            exc.should.be.an.instanceOf(BaseException);
+            exc.component.should.equal('foo');
         });
 
         it('should have a fileLocation', function () {
