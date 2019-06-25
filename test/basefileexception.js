@@ -30,7 +30,7 @@ describe('BaseFileException', function () {
         });
 
         it('should return an instance of BaseFileException for another component', function () {
-            let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message', 'foo');
+            let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message', 'file', 'foo');
             exc.should.be.an.instanceOf(BaseException);
             exc.component.should.equal('foo');
         });
@@ -48,6 +48,11 @@ describe('BaseFileException', function () {
         it('should have a stack trace', function () {
             let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message');
             exc.stack.should.be.a('string');
+        });
+
+        it('should have a file name', function () {
+            let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message', 'file name');
+            exc.getFileName().should.be.equal('file name');
         });
 
         it('should use message over fullMessage', () => {
