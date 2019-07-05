@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.71.5",
+  "version": "0.71.6",
   "description": "Concerto",
   "engines": {
     "node": ">=8",
@@ -36,7 +36,6 @@
   "author": "Hyperledger Composer",
   "license": "Apache-2.0",
   "devDependencies": {
-    "acorn": "5.1.2",
     "babel-preset-env": "1.7.0",
     "babel-preset-latest": "6.24.1",
     "chai": "4.2.0",
@@ -62,6 +61,7 @@
     "yargs": "13.2.4"
   },
   "dependencies": {
+    "acorn": "5.1.2",
     "axios": "0.19.0",
     "debug": "4.1.1",
     "lodash.padstart": "4.6.1",
