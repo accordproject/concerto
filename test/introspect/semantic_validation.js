@@ -63,7 +63,7 @@ describe('ModelFile semantic validation', () => {
                 mf.validate();
             }
             catch(error) {
-                error.getModelFile().getName().should.equal('invalid.cto');
+                error.fileName.should.equal('invalid.cto');
                 error.getFileLocation().start.line.should.equal(22);
                 error.getFileLocation().start.column.should.equal(1);
                 error.getFileLocation().end.line.should.equal(24);
