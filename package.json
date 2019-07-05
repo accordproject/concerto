@@ -1,6 +1,6 @@
 {
   "name": "composer-concerto",
-  "version": "0.71.3",
+  "version": "0.71.4",
   "description": "Concerto",
   "engines": {
     "node": ">=8",
@@ -43,7 +43,6 @@
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "commander": "2.20.0",
-    "doctrine": "3.0.0",
     "eslint": "6.0.0",
     "fs-extra": "8.0.1",
     "jsdoc": "3.6.2",
@@ -71,7 +70,8 @@
     "moment-mini": "2.22.1",
     "semver": "6.1.2",
     "urijs": "1.19.1",
-    "uuid": "3.3.2"
+    "uuid": "3.3.2",
+    "doctrine": "3.0.0"
   },
   "license-check-and-add-config": {
     "folder": "./lib",
