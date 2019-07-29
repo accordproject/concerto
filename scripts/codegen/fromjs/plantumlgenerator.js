@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const FileWriter = require('../filewriter');
+const FileWriter = require('../../../lib/codegen/filewriter');
 
 /**
  * Converts the includes, classes and methods in a Javascript

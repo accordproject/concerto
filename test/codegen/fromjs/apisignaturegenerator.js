@@ -21,7 +21,7 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const fs = require('fs');
-const APISignatureGenerator = require('../../../lib/codegen/fromjs/apisignaturegenerator');
+const APISignatureGenerator = require('../../../scripts/codegen/fromjs/apisignaturegenerator');
 const Writer = require('../../../lib/codegen/writer');
 
 describe('APISignatureGenerator', function () {

@@ -15,7 +15,7 @@
 'use strict';
 
 const fs = require('fs');
-const Writer = require('../writer');
+const Writer = require('../../../lib/codegen/writer');
 
 /**
  * Converts an array of parameter types to a string
