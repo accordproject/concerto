@@ -18,10 +18,10 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const program = require('commander');
-const PlantUMLGenerator = require('./fromjs/plantumlgenerator');
-const APISignatureGenerator = require('./fromjs/apisignaturegenerator');
-const JavaScriptParser = require('./javascriptparser');
-const JSONGenerator = require('./fromjs/jsongenerator');
+const PlantUMLGenerator = require('../lib/codegen/fromjs/plantumlgenerator');
+const APISignatureGenerator = require('../lib/codegen/fromjs/apisignaturegenerator');
+const JavaScriptParser = require('../lib/codegen/javascriptparser');
+const JSONGenerator = require('../lib/codegen/fromjs/jsongenerator');
 
 /**
  * Processes a single Javascript file (.js extension)
