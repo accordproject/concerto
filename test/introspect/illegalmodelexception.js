@@ -51,9 +51,9 @@ describe('IllegalModelException', function () {
             exc.message.should.match(/message File 'model.cto': line 1 column 1, to line 1 column 1./);
         });
 
-        it('should have a modelfile', function () {
+        it('should have a file name', function () {
             let exc = new IllegalModelException('message', modelFile, fileLocation);
-            exc.getModelFile().should.equal(modelFile);
+            exc.fileName.should.equal(modelFile.getName());
         });
 
         it('should have a stack trace', function () {
