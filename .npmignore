@@ -31,6 +31,11 @@ lib-cov
 .eslintignore
 .eslintrc.yml
 .tern-project
+.github
+.travis
+webpack.config.js
+github_deploy_key.pub
+
 
 # test directory
 test
@@ -70,7 +75,6 @@ out
 **/.DS_Store
 
 *.swp
-
 # Build generated files should be ignored by git, but not by npm.
 # lib/acl/parser.js
 # lib/introspect/parser.js

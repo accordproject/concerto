@@ -21,7 +21,7 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const fs = require('fs');
-const PlantUMLGenerator = require('../../../lib/codegen/fromjs/plantumlgenerator');
+const PlantUMLGenerator = require('../../../scripts/codegen/fromjs/plantumlgenerator');
 const path = require('path');
 const FileWriter = require('../../../lib/codegen/filewriter');
 const mkdirp = require('mkdirp');
