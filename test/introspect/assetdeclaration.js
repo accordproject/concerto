@@ -152,4 +152,22 @@ describe('AssetDeclaration', () => {
 
     });
 
+    describe('#hasInstance', () => {
+        it('should return true for a valid Asset Declaration', () => {
+            let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
+            (asset instanceof AssetDeclaration).should.be.true;
+        });
+
+        it('should return true for a valid Asset Declaration using a different module instance', () => {
+            /* eslint-disable require-jsdoc */
+            class MyAssetDeclaration {
+                constructor(){
+                    this._isAssetDeclaration = true;
+                }
+            }
+            const asset = new MyAssetDeclaration();
+            (asset instanceof AssetDeclaration).should.be.true;
+        });
+    });
+
 });
