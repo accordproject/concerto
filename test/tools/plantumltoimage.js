@@ -84,8 +84,8 @@ describe('PlantUmlToImage', () => {
     });
 
     it('Should set up yargs correctly and log an error in the console if directory cannot be read', () => {
-        delete require.cache[path.resolve(__dirname, '../../lib/tools/plantumltoimage.js')];
-        require('../../lib/tools/plantumltoimage.js');
+        delete require.cache[path.resolve(__dirname, '../../scripts/tools/plantumltoimage.js')];
+        require('../../scripts/tools/plantumltoimage.js');
 
         // trigger the callback for the list of files
         fsextraStubs.readdir.yield('Directory cannot be read', []);
@@ -95,8 +95,8 @@ describe('PlantUmlToImage', () => {
     });
 
     it('Should set up yargs correctly and not call other functions if elements are not a directory or file', function () {
-        delete require.cache[path.resolve(__dirname, '../../lib/tools/plantumltoimage.js')];
-        require('../../lib/tools/plantumltoimage.js');
+        delete require.cache[path.resolve(__dirname, '../../scripts/tools/plantumltoimage.js')];
+        require('../../scripts/tools/plantumltoimage.js');
 
         statsStub.isFile.returns(false);
         statsStub.isDirectory.returns(false);
@@ -108,8 +108,8 @@ describe('PlantUmlToImage', () => {
     });
 
     it('Should set up yargs correctly and call processDirectory with each sub-directory', function () {
-        delete require.cache[path.resolve(__dirname, '../../lib/tools/plantumltoimage.js')];
-        require('../../lib/tools/plantumltoimage.js');
+        delete require.cache[path.resolve(__dirname, '../../scripts/tools/plantumltoimage.js')];
+        require('../../scripts/tools/plantumltoimage.js');
 
         statsStub.isDirectory.returns(true);
 
@@ -122,8 +122,8 @@ describe('PlantUmlToImage', () => {
     });
 
     it('Should set up yargs correctly and call the processFile with each found file and do action when uml', function () {
-        delete require.cache[path.resolve(__dirname, '../../lib/tools/plantumltoimage.js')];
-        require('../../lib/tools/plantumltoimage.js');
+        delete require.cache[path.resolve(__dirname, '../../scripts/tools/plantumltoimage.js')];
+        require('../../scripts/tools/plantumltoimage.js');
 
         statsStub.isFile.returns(true);
 
@@ -153,8 +153,8 @@ describe('PlantUmlToImage', () => {
     });
 
     it('Should set up yargs correctly and call the processFile with each found file and not do action when not uml', function () {
-        delete require.cache[path.resolve(__dirname, '../../lib/tools/plantumltoimage.js')];
-        require('../../lib/tools/plantumltoimage.js');
+        delete require.cache[path.resolve(__dirname, '../../scripts/tools/plantumltoimage.js')];
+        require('../../scripts/tools/plantumltoimage.js');
 
         statsStub.isFile.returns(true);
 
