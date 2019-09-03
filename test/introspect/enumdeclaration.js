@@ -16,6 +16,7 @@
 
 const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
 const EventDeclaration = require('../../lib/introspect/eventdeclaration');
+const EnumValueDeclaration = require('../../lib/introspect/enumvaluedeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
@@ -73,6 +74,16 @@ describe('EnumDeclaration', () => {
         it('should give the correct value', () => {
             let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
             declaration.toString().should.equal('EnumDeclaration {id=org.acme.ConcreteEnum}');
+        });
+    });
+
+    describe('#hasInstance', () => {
+        it('should return true for a valid Enum Declaration', () => {
+            let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
+            (declaration instanceof EnumDeclaration).should.be.true;
+
+            let value = declaration.getProperties();
+            (value[0] instanceof EnumValueDeclaration).should.be.true;
         });
     });
 });

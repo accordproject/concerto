@@ -1036,4 +1036,10 @@ concept Foo {
 
     });
 
+    describe('#hasInstance', () => {
+        it('should return true for a valid ModelManager', () => {
+            (modelManager instanceof ModelManager).should.be.true;
+        });
+    });
+
 });
