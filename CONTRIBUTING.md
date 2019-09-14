@@ -16,7 +16,7 @@ today! Here are the guidelines we'd like you to follow:
 
 ## <a name="coc"></a> Code of Conduct
 
-Help us keep Cicero open and inclusive. Please read and follow our [Code of Conduct][coc].
+Help us keep Concerto open and inclusive. Please read and follow our [Code of Conduct][coc].
 
 ## <a name="requests"></a> Questions, Bugs, Features
 
@@ -38,7 +38,7 @@ support and redirect people to the section you are reading right now.
 
 Other channels for support are:
 
-* Technology-Models Slack Channel on the [Accord Project Slack][apslack]
+* Concerto Slack Channel on the [Accord Project Slack][apslack]
 
 ### <a name="issue"></a> Found an Issue or Bug?
 
@@ -196,7 +196,7 @@ Accord Project source code files are made available under the [Apache License, V
 Accord Project documentation files are made available under the [Creative Commons Attribution 4.0 International License][creativecommons] (CC-BY-4.0).
 
 [coc]: https://github.com/accordproject/docs/blob/master/Accord%20Project%20Code%20of%20Conduct.pdf
-[stackoverflow]: http://stackoverflow.com/questions/tagged/cicero
+[stackoverflow]: http://stackoverflow.com/questions/tagged/concerto
 [apslack]: https://accord-project-slack-signup.herokuapp.com
 
 [contribute.coc]: CONTRIBUTING.md#coc
