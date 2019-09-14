@@ -9,7 +9,7 @@
 
 As a summary:
 
- - All changes should be developed in a fork of the relevant Hyperledger Concero repository, and the changes submitted for approval in the form of pull requests.
+ - All changes should be developed in a fork of the relevant Concero repository, and the changes submitted for approval in the form of pull requests.
  - All commits require DCO sign-off
  - All pull request must be linked to an issue
  - All delivered code must follow the linting rules
@@ -19,18 +19,18 @@ As a summary:
 
 ## GitHub usage
 
-Here is the preferred workflow involved in making a pull request to the Concerto Project - this is based around making a change in the `hyperledger/composer-concerto` repository. The same would apply for any of the other related repositories.
+Here is the preferred workflow involved in making a pull request to the Concerto Project - this is based around making a change in the `accordproject/concerto` repository. The same would apply for any of the other related repositories.
 
 A first step is ensuring that you have a local development environment configured.
 
-- You must fork the `hyperledger/composer-concerto` repository to your own github organization. This is most easily achieved using the [github web-ui](https://help.github.com/articles/fork-a-repo/).
+- You must fork the `accordproject/concerto` repository to your own github organization. This is most easily achieved using the [github web-ui](https://help.github.com/articles/fork-a-repo/).
 - Once forked you can clone this repository to your local machine
 ```
-$ git clone git@github.com:MyGitName/composer.git
+$ git clone git@github.com:MyGitName/concerto.git
 ```
 - This will configure the `origin` to be your fork of the Concerto repository. You must create an `upstream` target to refer to main Concerto repository. [the terms origin and upstream are conventions and could be anything. But as in any convention the purpose is to avoid confusion]
 ```
-$ git remote add upstream git@github.com:hyperledger/composer.git
+$ git remote add upstream git@github.com:accordproject/concerto.git
 ```
 - As this is just forked it will be up-to-date. But if you did this previously and now starting on something new, the the next step is to update your master branch.
 
@@ -79,11 +79,9 @@ We welcome contributions of new features. Please look over the github issues, sp
 
 When you start working on new issue, please do the following:
 
-- Use the [mailing list](https://lists.hyperledger.org/mailman/listinfo/hyperledger-composer) to notify the community that you are planning to start _feature_ work and notify that the design has been placed in the GitHub issue
+- Use [slack](https://accord-project-slack-signup.herokuapp.com) to notify the community that you are planning to start _feature_ work and notify that the design has been placed in the GitHub issue
   - this is to ensure that there is a persistent record of what is happening
-- Say hello, on the composer-dev channel on RocketChat
 - At noteable points please join the weekly community call to share what you have done.
-
 
 ### Good Coding Practices Using ESLint
 
@@ -118,7 +116,7 @@ The default configuration is set to target the Chrome browser, and this is the t
 
 ### Simplify writing tests using the chai assertion library, chai-things and sinon
 
-Concerto tests use an assertion library called [chai](http://chaijs.com/) to help write these tests, which run in the mocha. Chai allows developers to easily write tests that verify the behaviour of their code using `should`, `expect` and `assert` interfaces. [chai-things](https://www.npmjs.com/package/chai-things) is a chai extension which helps writing units tests involving arrays. Concerto sometimes relies on external systems like Hyperledger and to enable the creation of unit tests, Concerto [sinon](https://www.npmjs.com/package/sinon) to create realistic units tests which do not draw in huge amounts of infrastructure.  sinon has technology called "test spies", "stubs" and "mocks" which greatly help this process.
+Concerto tests use an assertion library called [chai](http://chaijs.com/) to help write these tests, which run in the mocha. Chai allows developers to easily write tests that verify the behaviour of their code using `should`, `expect` and `assert` interfaces. [chai-things](https://www.npmjs.com/package/chai-things) is a chai extension which helps writing units tests involving arrays. Concerto sometimes relies on external systems to enable the creation of unit tests, Concerto uses [sinon](https://www.npmjs.com/package/sinon) to create realistic units tests which do not draw in huge amounts of infrastructure.  sinon has technology called "test spies", "stubs" and "mocks" which greatly help this process.
 
 ### Code Coverage Using Istanbul
 
@@ -128,4 +126,5 @@ The Concerto project uses a code coverage tool called [Istanbul](https://gotwarl
 Move on to read [Pull Request Guidelines](./submitting-pull-request.md)
 
 ## License <a name="license"></a>
-Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Hyperledger Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
+Accord Project source code files are made available under the [Apache License, Version 2.0][apache].
+Accord Project documentation files are made available under the [Creative Commons Attribution 4.0 International License][creativecommons] (CC-BY-4.0).
