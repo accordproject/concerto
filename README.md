@@ -2,24 +2,17 @@
 
 Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
 
-> Note that this module originated as part of Hyperledger Composer, but it no longer has **any** dependencies on any blockchain technology.
-
 Things you can do using Concerto:
 - Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
-- Optionall edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=HyperledgerComposer.composer-support-client) with syntax highlighting and validation
+- Optionall edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
 - Create runtime instances of your model
 - Serialize your instances to JSON
 - Deserialize (and optionally validate) instances from JSON
 - Instances are JS objects so they are easy to pass around your application
 - Introspect the model using a powerful set of APIs
-- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/hyperledger/composer-concerto-tools).
+- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/accordproject/concerto-tools).
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
-
-# Projects and Companies using Concerto
-- [Hyperleger Composer](https://hyperledger.github.io/composer/latest/)
-- [Accord Project Cicero and Ergo](https://docs.accordproject.org)
-- [Clause.io](https://clause.io)
 
 # Installation
 
@@ -326,4 +319,4 @@ const val = myField.getDecorator('foo').getArguments()[2];
 ```
 
 ## License <a name="license"></a>
-Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Hyperledger Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
+Accord Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Accord Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.

@@ -22,9 +22,8 @@
 
 ## Existing issues
 <!-- Have you searched for any existing issues or are their any similar issues that you've found? -->
-- [ ] [Stack Overflow issues](http://stackoverflow.com/tags/hyperledger-composer)
-- [ ] [GitHub Issues](https://github.com/hyperledger/composer/issues)
-- [ ] [Rocket Chat history](https://chat.hyperledger.org/channel/composer)
+- [ ] [Stack Overflow issues](http://stackoverflow.com/tags/concerto)
+- [ ] [GitHub Issues](https://github.com/accordproject/concerto/issues)
 
 <!-- please include any links to issues here -->
 
