@@ -1,5 +1,5 @@
 {
-  "name": "composer-concerto",
+  "name": "concerto",
   "version": "0.71.7",
   "description": "Concerto",
   "engines": {
@@ -10,7 +10,7 @@
   "typings": "index.d.ts",
   "scripts": {
     "prepublishOnly": "webpack --config webpack.config.js --mode production",
-    "prepare": "pegjs ./lib/introspect/parser.pegjs && node ./scripts/tsgen.js",
+    "prepare": "pegjs ./lib/introspect/parser.pegjs",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
@@ -26,14 +26,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperledger/composer-concerto.git"
+    "url": "https://github.com/accordproject/concerto.git"
   },
   "keywords": [
     "blockchain",
     "hyperledger",
     "solutions"
   ],
-  "author": "Hyperledger Composer",
+  "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
     "babel-preset-env": "1.7.0",

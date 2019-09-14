@@ -18,7 +18,7 @@
  * Concerto module. Concerto is a framework for defining domain
  * specific models.
  *
- * @module composer-concerto
+ * @module concerto
  */
 
 module.exports.AssetDeclaration = require('./lib/introspect/assetdeclaration');
