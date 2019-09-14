@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+# 
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -12,4 +12,15 @@
 # limitations under the License.
 #
 
-ABORT_BUILD=true
+# Exit on first error, print all commands.
+set -ev
+date
+echo "Tag is " $1
+echo "NPM_TOKEN " ${NPM_TOKEN}
+
+# Set the NPM access token we will use to publish.
+npm config set registry https://registry.npmjs.org/
+npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+
+npm publish --tag="${NPM_TAG}" 2>&1
+echo "Published to npm."

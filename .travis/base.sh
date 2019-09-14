@@ -12,7 +12,7 @@
 # limitations under the License.
 #
 
-## this is a script soley for inclusion in the main build scripts. 
+## this is a script soley for inclusion in the main build scripts.
 ## Common functions that are executed both all types of builds
 
 ME=`basename "$0"`
