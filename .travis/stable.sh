@@ -1,4 +1,3 @@
-#!/bin/bash
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,15 +14,13 @@
 
 # Exit on first error, print all commands.
 set -ev
-set -o pipefail
+date
+echo "Tag is " $1
+echo "NPM_TOKEN " ${NPM_TOKEN}
 
-# Bring in the standard set of script utilities
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-source ${DIR}/.travis/base.sh
-# ----
-env | grep TRAVIS
+# Set the NPM access token we will use to publish.
+npm config set registry https://registry.npmjs.org/
+npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
 
-# Run the unit tests.
-npm test 2>&1
-
-_exit "All complete" 0
+npm publish --tag="${NPM_TAG}" 2>&1
+echo "Published to npm."

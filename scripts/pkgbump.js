@@ -19,9 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 
-const packageDirectory = path.resolve('.');
-const packageConfigFile = path.resolve(packageDirectory, 'package.json');
-const packageConfig = require(packageConfigFile);
-const targetVersion = semver.inc(packageConfig.version, 'patch');
-packageConfig.version = targetVersion;
-fs.writeFileSync(packageConfigFile, JSON.stringify(packageConfig, null, 2), 'utf8');
+const npmDirectory = path.resolve('.');
+const npmConfigFile = path.resolve(npmDirectory, 'package.json');
+const npmConfig = require(npmConfigFile);
+const targetVersion = semver.inc(npmConfig.version, 'patch');
+npmConfig.version = targetVersion;
+fs.writeFileSync(npmConfigFile, JSON.stringify(npmConfig, null, 2), 'utf8');

@@ -18,13 +18,15 @@
 const fs = require('fs');
 const moment = require('moment-mini');
 const path = require('path');
+const semver = require('semver');
 
 const timestamp = moment().format('YYYYMMDDHHmmss');
 
-const packageDirectory = path.resolve('.');
-const packageConfigFile = path.resolve(packageDirectory, 'package.json');
-const packageConfig = require(packageConfigFile);
-packageConfig.version.replace(/-.*/, '');
-const targetVersion = packageConfig.version + '-' + timestamp;
-packageConfig.version = targetVersion;
-fs.writeFileSync(packageConfigFile, JSON.stringify(packageConfig, null, 2), 'utf8');
+const npmDirectory = path.resolve('.');
+const npmConfigFile = path.resolve(npmDirectory, 'package.json');
+const npmConfig = require(npmConfigFile);
+npmConfig.version.replace(/-.*/, '');
+const targetVersion = semver.inc(npmConfig.version, 'patch') + '-' + timestamp;
+npmConfig.version = targetVersion;
+fs.writeFileSync(npmConfigFile, JSON.stringify(npmConfig, null, 2), 'utf8');
+

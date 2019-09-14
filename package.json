@@ -20,9 +20,11 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "pkgbump": "node ./scripts/pkgbump.js",
+    "pkgcheck": "node ./scripts/pkgcheck.js",
     "pkgstamp": "node ./scripts/pkgstamp.js",
-    "pkgset": "node ./scripts/pkgset.js"
+    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
+    "pkgset": "node ./scripts/pkgset.js",
+    "depcheck": "node ./scripts/depcheck.js"
   },
   "repository": {
     "type": "git",

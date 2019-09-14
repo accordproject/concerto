@@ -27,7 +27,7 @@ source ${DIR}/.travis/base.sh
 # ----
 
 # Check that this is the main repository.
-if [[ "${TRAVIS_REPO_SLUG}" != hyperledger* ]]; then
+if [[ "${TRAVIS_REPO_SLUG}" != accordproject* ]]; then
     _exit "Skipping deploy; wrong repository slug." 0
 fi
 
@@ -48,51 +48,55 @@ set-up-ssh --key "$encrypted_573c42e37d8c_key" \
 # Test the GitHub deploy key.
 git ls-remote
 
-if [ "${BUILD_RELEASE}" = 'unstable' ]; then
+# Determine the details of the suffixes NPM tags
+if [[ "${BUILD_RELEASE}" == "unstable" ]]; then
+
     # Set the prerelease version.
     npm run pkgstamp
+   
+    TAG="unstable"
+elif  [[ "${BUILD_RELEASE}" == "stable" ]]; then
+    TAG="latest"
+else 
+    _exit "Unknown build focus" 1 
 fi
 
-# Which tag to use for npm and docker publish
-if [ "${BUILD_FOCUS}" = 'latest' ]; then
-    [ "${BUILD_RELEASE}" = 'stable' ] && NPM_TAG='latest' || NPM_TAG='unstable'
-else
-    [ "${BUILD_RELEASE}" = 'stable' ] && NPM_TAG='legacy' || NPM_TAG='legacy-unstable'
-fi
-
-# Hold onto the version number & package name
-export VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
-export PACKAGE_NAME=$(node -e "console.log(require('${DIR}/package.json').name)")
-
-echo "Checking for existence of npm module ${m}"
-if npm view ${PACKAGE_NAME}@${VERSION} | grep dist-tags > /dev/null 2>&1; then
-    _exit "${PACKAGE_NAME}@${VERSION} already exists, skipping publish phase"
-fi
-
-echo "Publishing to npm with tag ${NPM_TAG}"
-npm publish --tag="${NPM_TAG}" 2>&1
-
-## Stable releases only: clean up git, and bump version number
+## Stable releases only; both latest and next then clean up git, and bump version number
 if [[ "${BUILD_RELEASE}" = "stable" ]]; then
-    [ "${BUILD_FOCUS}" = 'latest' ] && GIT_BRANCH='master' || GIT_BRANCH="${BUILD_FOCUS}.x"
-    echo "Running version bump on Git branch: ${GIT_BRANCH}"
 
     # Configure the Git repository and clean any untracked and unignored build files.
     git config user.name "${GH_USER_NAME}"
     git config user.email "${GH_USER_EMAIL}"
-    git checkout -b "${GIT_BRANCH}"
+    git checkout -b master
     git reset --hard
     git clean -d -f
 
-    # Bump the version number.
-    npm run pkgset
+    # Set the version number.
+    npm run pkgset ${TRAVIS_TAG}
     export NEW_VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
 
     # Add the version number changes and push them to Git.
     git add .
     git commit -m "Automatic version bump to ${NEW_VERSION}"
-    git push origin "${GIT_BRANCH}"
+    git push origin master
 
 fi
+
+# Hold onto the version number
+export VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
+
+# Publish with tag
+echo "Pushing with tag ${TAG}"
+npm publish --tag="${TAG}" 2>&1
+
+# Check that all required modules have been published to npm and are retrievable
+for j in ${NPM_MODULES}; do
+    # check the next in the list
+    while ! npm view ${j}@${VERSION} | grep dist-tags > /dev/null 2>&1; do
+        sleep 10
+    done
+done
+
+
 
 _exit "All complete" 0

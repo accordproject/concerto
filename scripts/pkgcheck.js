@@ -15,15 +15,28 @@
 
 'use strict';
 
+const child_process = require('child_process');
+const colors = require('colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver')
 
+const packages = {};
+const fix = (process.argv.indexOf('--fix') !== -1);
+
 const npmDirectory = path.resolve('.');
 const npmConfigFile = path.resolve(npmDirectory, 'package.json');
 const npmConfig = require(npmConfigFile);
-npmConfig.version.replace(/-.*/, '');
-const targetVersion = semver.clean(process.argv[2]);
-npmConfig.version = targetVersion;
-fs.writeFileSync(npmConfigFile, JSON.stringify(npmConfig, null, 2), 'utf8');
+const targetVersion = npmConfig.version;
+const targetDependency = `${targetVersion}`;
+packages['package.json'] = npmConfig;
+
+if (!semver.valid(targetVersion)) {
+    console.error(`Error: the version "${targetVersion}" in "${npmConfigFile}" is invalid!`);
+    process.exit(1);
+}
+
+const masterPackageFile = path.resolve(npmDirectory, 'package.json');
+const masterPackage = require(masterPackageFile);
+packages['package.json'] = masterPackage;
 
