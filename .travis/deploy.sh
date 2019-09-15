@@ -87,7 +87,7 @@ export VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
 
 # Publish with tag
 echo "Pushing with tag ${TAG}"
-npm publish --tag="${TAG}" 2>&1
+npm publish --tag="${TAG}" --access public 2>&1
 
 # Check that all required modules have been published to npm and are retrievable
 for j in ${NPM_MODULES}; do
