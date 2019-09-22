@@ -73,4 +73,13 @@ describe('cicero-cli', () => {
             dir.cleanup();
         });
     });
+
+    describe('#getExternalModels', () => {
+        it('should save external dependencies', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            await Commands.getExternalModels(models, dir.path);
+            fs.readdirSync(dir.path).length.should.be.above(2);
+            dir.cleanup();
+        });
+    });
 });

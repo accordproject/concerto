@@ -36,6 +36,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
+const tmp = require('tmp-promise');
 
 describe('ModelManager', () => {
 
@@ -657,11 +658,99 @@ concept Foo {
         });
     });
 
+    describe('#writeModelsToFileSystem', () => {
+        beforeEach(async () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+        });
+
+        it('should write models to the file system', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir);
+            fs.readdirSync(dir.path).length.should.be(2);
+            dir.cleanup();
+        });
+
+        it('should write models to the file system, without external models', () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir, {
+                includeExternalModels: false
+            });
+            fs.readdirSync(dir.path).length.should.be(1);
+            dir.cleanup();
+        });
+
+        it('should write models to the file system, without system models', () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir, {
+                includeSystemModels: true
+            });
+            fs.readdirSync(dir.path).length.should.be.above(2);
+            dir.cleanup();
+        });
+    });
+
     describe('#getSystemModelFiles', () => {
         it('should only list all system model files', () => {
             modelManager.addModelFile(modelBase);
             modelManager.getModelFiles().length.should.equal(2);
             modelManager.getSystemModelFiles().length.should.equal(1);
+        });
+    });
+
+    describe('#getModels', () => {
+        it('should return a list of name / content pairs', () => {
+            modelManager.addModelFile(modelBase);
+            const models = modelManager.getModels()
+            models.length.should.equal(1);
+            models[0].should.deep.equal({
+                name: 'model-base.cto', content: modelBase
+            });
+        });
+        it('should return a list of name / content pairs, with System Models', () => {
+            modelManager.addModelFile(modelBase);
+            const models = modelManager.getModels({
+                includeSystemModels: true
+            })
+            models.length.should.equal(2);
+        });
+        it('should return a list of name / content pairs, with System Models', () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+            const models = modelManager.getModels({
+                includeSystemModels: true,
+            })
+            models.length.should.equal(3);
         });
     });
 
