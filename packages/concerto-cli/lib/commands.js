@@ -85,6 +85,25 @@ class Commands {
             return 'Unrecognized code generator: ' + format;
         }
     }
+
+    /**
+     * Fetches all external dependencies and saves them to the target directory
+     *
+     * @param {string[]} ctoFiles the local CTO files
+     * @param {string} outputDirectory the output directory
+     */
+    static async getExternalModels(ctoFiles, outputDirectory) {
+
+        const modelManager = new ModelManager();
+
+        const modelFiles = ctoFiles.map((ctoFile) => {
+            return fs.readFileSync(ctoFile, 'utf8');
+        });
+        modelManager.addModelFiles(modelFiles, ctoFiles, true);
+        await modelManager.updateExternalModels();
+
+        modelManager.writeModelsToFileSystem(outputDirectory);
+    }
 }
 
 module.exports = Commands;

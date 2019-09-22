@@ -54,6 +54,28 @@ require('yargs')
                 console.log(err.message + ' ' + err);
             });
     })
+    .command('saveExternal', 'save local copies of external model dependencies', (yargs) => {
+        yargs.option('ctoFiles', {
+            describe: 'array of local CTO files',
+            type: 'string',
+            array: true,
+            default: '.'
+        });
+        yargs.option('outputDirectory', {
+            describe: 'output directory path',
+            type: 'string',
+            default: './'
+        });
+    }, (argv) => {
+        if (argv.verbose) {
+            console.log(`Saving external models into directory: ${argv.outputDirectory}`);
+        }
+
+        return Commands.getExternalModels(argv.ctoFiles, argv.outputDirectory)
+            .catch((err) => {
+                console.log(err.message + ' ' + err);
+            });
+    })
     .option('verbose', {
         alias: 'v',
         default: false

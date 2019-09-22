@@ -14,6 +14,9 @@
 
 'use strict';
 
+const fs = require('fs');
+const fsPath = require('path');
+
 const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -365,6 +368,38 @@ class ModelManager {
     }
 
     /**
+     * Write all models in this model manager to the specified path in the file system
+     *
+     * @param {String} path to a local directory
+     * @param {Object} [options] - Options object 
+     * @param {boolean} options.includeExternalModels - 
+     *  If true, external models are written to the file system. Defaults to true
+     * @param {boolean} options.includeSystemModels - 
+     *  If true, system models are written to the file system. Defaults to false
+     */
+    writeModelsToFileSystem(path, options) {
+        if(!path){
+            throw new Error('`path` is a required parameter of writeModelsToFileSystem')
+        }
+
+        const opts = {
+            includeExternalModels: true,
+            includeSystemModels: false,
+            ...options,
+        }
+
+        this.modelFiles.forEach(function (file) {
+            if (file.isSystemModelFile() && !opts.includeSystemModels) {
+                return;
+            }
+            if (file.isExternal() && !opts.includeExternalModels) {
+                return;
+            }
+            fs.writeFileSync(path + fsPath.fileSeparator + file.name, file.content);
+        });
+    }
+
+    /**
      * Get the array of model file instances
      * Note - this is an internal method and therefore will return the system model
      * as well as any network defined models.
@@ -399,6 +434,42 @@ class ModelManager {
             });
     }
 
+    /**
+     * Gets all the CTO models
+     * @param {Object} [options] - Options object 
+     * @param {boolean} options.includeExternalModels - 
+     *  If true, external models are written to the file system. Defaults to true
+     * @param {boolean} options.includeSystemModels - 
+     *  If true, system models are written to the file system. Defaults to false
+     * @return {Array<{name:string, content:string}>} the name and content of each CTO file
+     */
+    getModels(options) {
+        const modelFiles = this.getModelFiles();
+        let models = [];
+        const opts = {
+            includeExternalModels: true,
+            includeSystemModels: false,
+            ...options,
+        }
+            
+        modelFiles.forEach(function (file) {
+            if (file.isSystemModelFile() && !opts.includeSystemModels) {
+                return;
+            }
+            if (file.isExternal() && !opts.includeExternalModels) {
+                return;
+            }
+            let fileName;
+            if (file.fileName === 'UNKNOWN' || file.fileName === null || !file.fileName) {
+                fileName = file.namespace + '.cto';
+            } else {
+                let fileIdentifier = file.fileName;
+                fileName = fsPath.basename(fileIdentifier);
+            }
+            models.push({ 'name' : fileName, 'content' : file.definitions });
+        });
+        return models;
+    }
 
     /**
      * Check that the type is valid and returns the FQN of the type.
