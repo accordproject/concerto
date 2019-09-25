@@ -32,7 +32,7 @@ if [[ "${TRAVIS_REPO_SLUG}" != accordproject* ]]; then
 fi
 
 # Check that this is not a Pull Request.
-if [[ "${TRAVIS_PULL_REQUEST}" != "false"]]; then
+if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
     _exit "Skipping deploy; this is a pull request." 0
 fi
 
