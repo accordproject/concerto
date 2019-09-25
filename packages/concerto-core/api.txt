@@ -9,7 +9,7 @@ class AssetDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean isRelationshipTarget() 
    + string getSystemType() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,string) throws IllegalModelException
@@ -37,12 +37,12 @@ class ClassDeclaration extends Decorated {
    + Property[] getProperties() 
    + Property getNestedProperty(string) throws IllegalModelException
    + String toString() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean isConcept() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class Decorator {
    + void constructor(Object) throws IllegalModelException
@@ -57,17 +57,17 @@ class EnumDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean isEnum() 
    + String toString() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class EventDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string getSystemType() 
    + boolean isEvent() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class Introspector {
    + void constructor(ModelManager) 
@@ -96,13 +96,13 @@ class ModelFile {
    + ClassDeclaration[] getAllDeclarations() 
    + string getDefinitions() 
    + boolean isSystemModelFile() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class ParticipantDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean isRelationshipTarget() 
    + string getSystemType() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
@@ -116,17 +116,17 @@ class Property extends Decorated {
    + boolean isArray() 
    + boolean isTypeEnum() 
    + boolean isPrimitive() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class RelationshipDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    + String toString() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class TransactionDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string getSystemType() 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class Concept extends Typed {
    + boolean isConcept() 
@@ -176,6 +176,8 @@ class ModelManager {
    + Object[] addModelFiles(string[],undefined,boolean,boolean) 
    + void validateModelFiles() 
    + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
+   + void writeModelsToFileSystem(String,Object,boolean,boolean) 
+   + Object[] getModels(Object,boolean,boolean) 
    + void clearModelFiles() 
    + string[] getNamespaces() 
    + ClassDeclaration[] getSystemTypes() 
@@ -189,7 +191,7 @@ class ModelManager {
    + Serializer getSerializer() 
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
-   + boolean undefined(object) 
+   + boolean hasInstance(object) 
 }
 class Serializer {
    + void constructor(Factory,ModelManager) 

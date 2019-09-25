@@ -681,27 +681,31 @@ concept Bar {
 
         it('should write models to the file system', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            modelManager.writeModelsToFileSystem(dir);
-            fs.readdirSync(dir.path).length.should.be(2);
+            modelManager.writeModelsToFileSystem(dir.path);
+            fs.readdirSync(dir.path).length.should.equal(2);
             dir.cleanup();
         });
 
-        it('should write models to the file system, without external models', () => {
+        it('should write models to the file system, without external models', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            modelManager.writeModelsToFileSystem(dir, {
+            modelManager.writeModelsToFileSystem(dir.path, {
                 includeExternalModels: false
             });
-            fs.readdirSync(dir.path).length.should.be(1);
+            fs.readdirSync(dir.path).length.should.equal(1);
             dir.cleanup();
         });
 
-        it('should write models to the file system, without system models', () => {
+        it('should write models to the file system, without system models', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            modelManager.writeModelsToFileSystem(dir, {
+            modelManager.writeModelsToFileSystem(dir.path, {
                 includeSystemModels: true
             });
             fs.readdirSync(dir.path).length.should.be.above(2);
             dir.cleanup();
+        });
+
+        it('should throw an error if the path is not provided', async () => {
+            (() => modelManager.writeModelsToFileSystem(null)).should.throw('`path` is a required parameter of writeModelsToFileSystem');
         });
     });
 
@@ -716,20 +720,42 @@ concept Bar {
     describe('#getModels', () => {
         it('should return a list of name / content pairs', () => {
             modelManager.addModelFile(modelBase);
-            const models = modelManager.getModels()
+            const models = modelManager.getModels();
             models.length.should.equal(1);
             models[0].should.deep.equal({
-                name: 'model-base.cto', content: modelBase
+                name: 'org.acme.base.cto', content: modelBase
             });
         });
         it('should return a list of name / content pairs, with System Models', () => {
             modelManager.addModelFile(modelBase);
             const models = modelManager.getModels({
                 includeSystemModels: true
-            })
+            });
             models.length.should.equal(2);
         });
-        it('should return a list of name / content pairs, with System Models', () => {
+        it('should return a list of name / content pairs, with External Models', async () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+            const models = modelManager.getModels();
+            models.length.should.equal(2);
+        });
+
+        it('should return a list of name / content pairs, without External Models', async () => {
             const externalModelFile = new ModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
@@ -748,9 +774,9 @@ concept Bar {
             const options = {};
             await modelManager.updateExternalModels(options, mfd);
             const models = modelManager.getModels({
-                includeSystemModels: true,
-            })
-            models.length.should.equal(3);
+                includeExternalModels: false
+            });
+            models.length.should.equal(1);
         });
     });
 
