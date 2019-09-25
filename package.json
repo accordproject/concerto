@@ -1,7 +1,9 @@
 {
-  "name": "root",
   "private": true,
   "devDependencies": {
     "lerna": "^3.13.0"
-  }
+  },
+  "name": "concerto",
+  "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
+  "version": "0.80.1"
 }
