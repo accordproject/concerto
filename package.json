@@ -1,23 +1,33 @@
 {
   "private": true,
   "devDependencies": {
-    "lerna": "^3.13.0"
+    "colors": "^1.4.0",
+    "eslint": "6.0.1",
+    "istanbul-combine": "^0.3.0",
+    "jsdoc": "3.6.3",
+    "lerna": "^3.13.0",
+    "license-check-and-add": "2.3.6",
+    "moment-mini": "^2.22.1",
+    "nyc": "14.1.1",
+    "semver": "^6.3.0"
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
   "version": "0.80.1",
-  "coverage": "istanbul-combine -d coverage -r lcov packages/concerto-cli/coverage/*.json packages/concerto-core/coverage/*.json  packages/concerto-tools/coverage/*.json && cat ./coverage/lcov.info | coveralls",
-  "postinstall": "npm run pkgcheck && npm run bootstrap",
-  "bootstrap": "lerna bootstrap",
-  "pretest": "npm run doc && npm run licchk",
-  "test": "lerna exec -- npm run test:cov",
-  "test:cli": "lerna exec --scope @accordproject/concerto-cli -- npm run test:mocha",
-  "publish": "./scripts/manualrelease.sh",
-  "repoclean": "lerna clean",
-  "licchk": "license-check-and-add",
-  "pkgcheck": "node ./scripts/pkgcheck.js",
-  "pkgstamp": "node ./scripts/pkgstamp.js",
-  "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
-  "pkgset": "node ./scripts/pkgset.js",
-  "depcheck": "node ./scripts/depcheck.js"
+  "scripts": {
+    "coverage": "istanbul-combine -d coverage -r lcov packages/concerto-cli/coverage/*.json packages/concerto-core/coverage/*.json  packages/concerto-tools/coverage/*.json && cat ./coverage/lcov.info | coveralls",
+    "postinstall": "npm run pkgcheck && npm run bootstrap",
+    "bootstrap": "lerna bootstrap",
+    "pretest": "npm run doc && npm run licchk",
+    "test": "lerna exec -- npm run test:cov",
+    "test:cli": "lerna exec --scope @accordproject/concerto-cli -- npm run test:mocha",
+    "publish": "./scripts/manualrelease.sh",
+    "repoclean": "lerna clean",
+    "licchk": "license-check-and-add",
+    "pkgcheck": "node ./scripts/pkgcheck.js",
+    "pkgstamp": "node ./scripts/pkgstamp.js",
+    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
+    "pkgset": "node ./scripts/pkgset.js",
+    "depcheck": "node ./scripts/depcheck.js"
+  }
 }
