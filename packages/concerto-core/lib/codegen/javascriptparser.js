@@ -1,4 +1,4 @@
- /*
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,12 +251,17 @@ class JavaScriptParser {
                                 throws = JavaScriptParser.getThrows(comment);
                                 example = JavaScriptParser.getExample(comment);
                             }
+                            let name = thing.key.name;
+                            if(!thing.key.name && thing.key.property.name){
+                                name = thing.key.property.name;
+                            }
+
                             commentData = commentData || [];
                             if (visibility === '+' || visibility === '~' || includePrivates) {
                                 const method = {
                                     visibility: visibility,
                                     returnType: returnType,
-                                    name: thing.key.name,
+                                    name: name,
                                     methodArgs: methodArgs,
                                     decorators: decorators,
                                     throws: throws,
@@ -464,7 +469,11 @@ class JavaScriptParser {
                 if (tag.type.name) {
                     result = tag.type.name;
                 } else if (tag.type.applications) {
-                    result = tag.type.applications[0].name + '[]';
+                    if(!tag.type.applications[0].name && tag.type.applications[0].type === 'RecordType'){
+                        result = 'Object[]';
+                    } else {
+                        result = tag.type.applications[0].name + '[]';
+                    }
                 } else if (tag.type.expression) {
                     result = tag.type.expression.name;
 

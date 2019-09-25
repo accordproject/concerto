@@ -371,31 +371,31 @@ class ModelManager {
      * Write all models in this model manager to the specified path in the file system
      *
      * @param {String} path to a local directory
-     * @param {Object} [options] - Options object 
-     * @param {boolean} options.includeExternalModels - 
+     * @param {Object} [options] - Options object
+     * @param {boolean} options.includeExternalModels -
      *  If true, external models are written to the file system. Defaults to true
-     * @param {boolean} options.includeSystemModels - 
+     * @param {boolean} options.includeSystemModels -
      *  If true, system models are written to the file system. Defaults to false
      */
-    writeModelsToFileSystem(path, options) {
+    writeModelsToFileSystem(path, options = {}) {
         if(!path){
-            throw new Error('`path` is a required parameter of writeModelsToFileSystem')
+            throw new Error('`path` is a required parameter of writeModelsToFileSystem');
         }
 
-        const opts = {
+        const opts = Object.assign({
             includeExternalModels: true,
             includeSystemModels: false,
-            ...options,
-        }
+        }, options);
 
-        this.modelFiles.forEach(function (file) {
+        this.getModelFiles().forEach(function (file) {
             if (file.isSystemModelFile() && !opts.includeSystemModels) {
                 return;
             }
             if (file.isExternal() && !opts.includeExternalModels) {
                 return;
             }
-            fs.writeFileSync(path + fsPath.fileSeparator + file.name, file.content);
+
+            fs.writeFileSync(path + fsPath.sep + file.fileName, file.content);
         });
     }
 
@@ -436,22 +436,21 @@ class ModelManager {
 
     /**
      * Gets all the CTO models
-     * @param {Object} [options] - Options object 
-     * @param {boolean} options.includeExternalModels - 
+     * @param {Object} [options] - Options object
+     * @param {boolean} options.includeExternalModels -
      *  If true, external models are written to the file system. Defaults to true
-     * @param {boolean} options.includeSystemModels - 
+     * @param {boolean} options.includeSystemModels -
      *  If true, system models are written to the file system. Defaults to false
      * @return {Array<{name:string, content:string}>} the name and content of each CTO file
      */
     getModels(options) {
         const modelFiles = this.getModelFiles();
         let models = [];
-        const opts = {
+        const opts = Object.assign({
             includeExternalModels: true,
             includeSystemModels: false,
-            ...options,
-        }
-            
+        }, options);
+
         modelFiles.forEach(function (file) {
             if (file.isSystemModelFile() && !opts.includeSystemModels) {
                 return;

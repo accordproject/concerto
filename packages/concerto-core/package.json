@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto",
-  "version": "0.80.0",
+  "version": "0.80.1",
   "description": "Concerto Modeling Language",
   "engines": {
     "node": ">=8",
@@ -58,6 +58,7 @@
     "pegjs": "0.10.0",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
+    "tmp-promise": "2.0.2",
     "webpack": "4.35.2",
     "webpack-cli": "3.3.5",
     "yargs": "13.2.4"
