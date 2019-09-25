@@ -31,6 +31,11 @@ if [[ "${TRAVIS_REPO_SLUG}" != accordproject* ]]; then
     _exit "Skipping deploy; wrong repository slug." 0
 fi
 
+# Check that this is not a Pull Request.
+if [[ "${TRAVIS_PULL_REQUEST}" != "false"]]; then
+    _exit "Skipping deploy; this is a pull request." 0
+fi
+
 ## Start of release process
 
 # Set the NPM access token we will use to publish.
@@ -87,7 +92,7 @@ export VERSION=$(node -e "console.log(require('${DIR}/package.json').version)")
 
 # Publish with tag
 echo "Pushing with tag ${TAG}"
-npm publish --tag="${TAG}" --access public 2>&1
+lerna exec -- npm publish --tag="${TAG}" 2>&1
 
 # Check that all required modules have been published to npm and are retrievable
 for j in ${NPM_MODULES}; do
