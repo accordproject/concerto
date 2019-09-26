@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +14,10 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
+/**
+ * Concerto Tools module.
+ * @module concerto-tools
+ */
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-const targetVersion = semver.inc(lernaConfig.version, 'patch');
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
+module.exports.CodeGen = require('./lib/codegen/codegen.js');
+module.exports.version = require('./package.json');

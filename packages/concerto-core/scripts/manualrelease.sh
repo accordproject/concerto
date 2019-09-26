@@ -28,12 +28,12 @@ git pull origin master
 
 # Increase the version number
 npm run pkgbump
-TARGET_VERSION=$( jq -r '.version' lerna.json )
+TARGET_VERSION=$( jq -r '.version' package.json )
 git add package.json
-git commit -m "chore(release): Bump Cicero source version" -s
+git commit -m "chore(release): Bump Concerto source version" -s
 
 # Publish each package to NPM registry. Generate changelog and update package.json files
-lerna publish --conventional-commits -m 'chore(release): publish %s' --force-publish=* --repo-version ${TARGET_VERSION} --yes
+npm publish --tag="${TARGET_VERSION}" 2>&1
 
 # Fix DCO sign-off
 git commit --amend -s --no-edit

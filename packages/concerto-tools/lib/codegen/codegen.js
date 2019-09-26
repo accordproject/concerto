@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +14,11 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
+module.exports.AbstractPlugin = require('./abstractplugin');
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-const targetVersion = semver.inc(lernaConfig.version, 'patch');
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
+module.exports.GoLangVisitor = require('./fromcto/golang/golangvisitor');
+module.exports.JSONSchemaVisitor = require('./fromcto/jsonschema/jsonschemavisitor');
+module.exports.XmlSchemaVisitor = require('./fromcto/xmlschema/xmlschemavisitor');
+module.exports.PlantUMLVisitor = require('./fromcto/plantuml/plantumlvisitor');
+module.exports.TypescriptVisitor = require('./fromcto/typescript/typescriptvisitor');
+module.exports.JavaVisitor = require('./fromcto/java/javavisitor');

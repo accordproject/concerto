@@ -17,11 +17,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const semver = require('semver');
+const semver = require('semver')
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-const targetVersion = semver.inc(lernaConfig.version, 'patch');
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
+const npmDirectory = path.resolve('.');
+const npmConfigFile = path.resolve(npmDirectory, 'package.json');
+const npmConfig = require(npmConfigFile);
+npmConfig.version.replace(/-.*/, '');
+const targetVersion = semver.clean(process.argv[2]);
+npmConfig.version = targetVersion;
+fs.writeFileSync(npmConfigFile, JSON.stringify(npmConfig, null, 2), 'utf8');
+

@@ -21,9 +21,59 @@ const path = require('path');
 
 const packages = {};
 
-const npmDirectory = path.resolve('.');
+const lernaDirectory = path.resolve('.');
 
-const masterPackageFile = path.resolve(npmDirectory, 'package.json');
+const masterPackageFile = path.resolve(lernaDirectory, 'package.json');
 const masterPackage = require(masterPackageFile);
 packages['package.json'] = masterPackage;
 
+const packagesDirectory = path.resolve(lernaDirectory, 'packages');
+const packageNames = fs.readdirSync(packagesDirectory);
+packageNames.forEach((packageName) => {
+    const packageFile = path.resolve(packagesDirectory, packageName, 'package.json');
+    const thisPackage = require(packageFile);
+    packages[packageName] = thisPackage;
+});
+
+// Not going to catch ranges but unlikely to see those anyway
+const badDependencies = {};
+const checkValue = function checkValue(packageIndex, dependency, currentValue) {
+    if (isNaN(currentValue.slice(0,1))) {
+        if (!badDependencies[packageIndex]) {
+            badDependencies[packageIndex] = [];
+        }
+        badDependencies[packageIndex].push({ dependency: dependency, currentValue: currentValue });
+    }
+};
+
+for (const packageIndex in packages) {
+    const currentPackage = packages[packageIndex];
+    for (const dependency in currentPackage.dependencies) {
+        checkValue(packageIndex, dependency, currentPackage.dependencies[dependency]);
+    }
+    for (const dependency in currentPackage.devDependencies) {
+        checkValue(packageIndex, dependency, currentPackage.devDependencies[dependency]);
+    }
+    for (const dependency in currentPackage.peerDependencies) {
+        checkValue(packageIndex, dependency, currentPackage.peerDependencies[dependency]);
+    }    
+}
+
+if (Object.keys(badDependencies).length > 0) {
+    console.error('Error: there is a mismatch between the versions of the packages in this repository!\n');
+    for (const i in packages) {
+        if (badDependencies[i]) {
+            const currentPackage = packages[i];
+            console.error(`  ${i} ${currentPackage.version.green}`);
+            if (badDependencies[i]) {
+                badDependencies[i].forEach((badDependency) => {
+                    console.error(`    ${badDependency.dependency}@${badDependency.currentValue.red} (should be exact)`);
+                });
+            }
+        }
+    }
+    console.error('\n');
+    process.exit(1);
+} else {
+    console.log('Status: no problems detected!');
+}

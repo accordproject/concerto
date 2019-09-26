@@ -15,13 +15,15 @@
 
 'use strict';
 
+const colors = require('colors');
 const fs = require('fs');
 const path = require('path');
-const semver = require('semver');
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-const targetVersion = semver.inc(lernaConfig.version, 'patch');
-lernaConfig.version = targetVersion;
-fs.writeFileSync(lernaConfigFile, JSON.stringify(lernaConfig, null, 2), 'utf8');
+const packages = {};
+
+const npmDirectory = path.resolve('.');
+
+const masterPackageFile = path.resolve(npmDirectory, 'package.json');
+const masterPackage = require(masterPackageFile);
+packages['package.json'] = masterPackage;
+
