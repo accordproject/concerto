@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
@@ -682,7 +682,10 @@ concept Bar {
         it('should write models to the file system', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
             modelManager.writeModelsToFileSystem(dir.path);
-            fs.readdirSync(dir.path).length.should.equal(2);
+            fs.readdirSync(dir.path).should.eql([
+                '@external.cto',
+                'internal.cto',
+            ]);
             dir.cleanup();
         });
 
@@ -691,16 +694,22 @@ concept Bar {
             modelManager.writeModelsToFileSystem(dir.path, {
                 includeExternalModels: false
             });
-            fs.readdirSync(dir.path).length.should.equal(1);
+            fs.readdirSync(dir.path).should.eql([
+                'internal.cto',
+            ]);
             dir.cleanup();
         });
 
-        it('should write models to the file system, without system models', async () => {
+        it('should write models to the file system, with system models', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
             modelManager.writeModelsToFileSystem(dir.path, {
                 includeSystemModels: true
             });
-            fs.readdirSync(dir.path).length.should.be.above(2);
+            fs.readdirSync(dir.path).should.eql([
+                '@external.cto',
+                'internal.cto',
+                'org.hyperledger.composer.system.cto'
+            ]);
             dir.cleanup();
         });
 

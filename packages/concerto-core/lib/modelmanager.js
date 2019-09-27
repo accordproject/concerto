@@ -394,8 +394,8 @@ class ModelManager {
             if (file.isExternal() && !opts.includeExternalModels) {
                 return;
             }
-
-            fs.writeFileSync(path + fsPath.sep + file.name, file.content);
+            const filename = file.fileName.split(fsPath.sep).pop();
+            fs.writeFileSync(path + fsPath.sep + filename, file.content);
         });
     }
 
