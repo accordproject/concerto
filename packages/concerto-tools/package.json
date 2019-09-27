@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-tools",
-  "version": "0.80.1",
+  "version": "0.80.2",
   "description": "Tools for the Concerto Modeling Language",
   "engines": {
     "node": ">=8",
@@ -60,7 +60,7 @@
     "webpack-cli": "3.1.2"
   },
   "dependencies": {
-    "@accordproject/concerto": "0.80.1",
+    "@accordproject/concerto": "0.80.2",
     "debug": "4.1.0",
     "mkdirp": "0.5.1",
     "yargs": "13.2.2"

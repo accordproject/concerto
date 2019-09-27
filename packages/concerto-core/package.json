@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto",
-  "version": "0.80.1",
+  "version": "0.80.2",
   "description": "Concerto Modeling Language",
   "engines": {
     "node": ">=8",
