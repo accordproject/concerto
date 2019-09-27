@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 const chai = require('chai');
 const path = require('path');
@@ -70,6 +70,19 @@ describe('cicero-cli', () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
             await Commands.generate('BLAH', models, dir.path, true);
             fs.readdirSync(dir.path).length.should.be.equal(0);
+            dir.cleanup();
+        });
+    });
+
+    describe('#getExternalModels', () => {
+        it('should save external dependencies', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            await Commands.getExternalModels(models, dir.path);
+            fs.readdirSync(dir.path).should.eql([
+                '@models.accordproject.org.cicero.contract.cto',
+                'dom.cto',
+                'money.cto'
+            ]);
             dir.cleanup();
         });
     });

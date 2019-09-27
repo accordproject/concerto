@@ -24,6 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 0.80.1 {297c88d29ce911ec6efc0f28ceeeb660} 2019-08-24
+- Adds getModels and writeModelsToFileSystem functions to ModelManager
+- Fixes API generation for hasSymbol function
+
 Version 0.71.7 {2b5649f2b8f13d52241959f613cbfdd7} 2019-07-29
 - Add static hasInstance as alternative instanceof implementation for AssetDeclaration, ClassDeclaration, EnumDeclaration, ConceptDeclaration, EnumValueDeclaration, Field, ModelFile, ModelManager, RelationshipDeclaration, TransactionDeclaration
 

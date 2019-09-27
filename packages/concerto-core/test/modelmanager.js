@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
@@ -36,6 +36,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
+const tmp = require('tmp-promise');
 
 describe('ModelManager', () => {
 
@@ -657,11 +658,134 @@ concept Foo {
         });
     });
 
+    describe('#writeModelsToFileSystem', () => {
+        beforeEach(async () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+        });
+
+        it('should write models to the file system', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir.path);
+            fs.readdirSync(dir.path).should.eql([
+                '@external.cto',
+                'internal.cto',
+            ]);
+            dir.cleanup();
+        });
+
+        it('should write models to the file system, without external models', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir.path, {
+                includeExternalModels: false
+            });
+            fs.readdirSync(dir.path).should.eql([
+                'internal.cto',
+            ]);
+            dir.cleanup();
+        });
+
+        it('should write models to the file system, with system models', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            modelManager.writeModelsToFileSystem(dir.path, {
+                includeSystemModels: true
+            });
+            fs.readdirSync(dir.path).should.eql([
+                '@external.cto',
+                'internal.cto',
+                'org.hyperledger.composer.system.cto'
+            ]);
+            dir.cleanup();
+        });
+
+        it('should throw an error if the path is not provided', async () => {
+            (() => modelManager.writeModelsToFileSystem(null)).should.throw('`path` is a required parameter of writeModelsToFileSystem');
+        });
+    });
+
     describe('#getSystemModelFiles', () => {
         it('should only list all system model files', () => {
             modelManager.addModelFile(modelBase);
             modelManager.getModelFiles().length.should.equal(2);
             modelManager.getSystemModelFiles().length.should.equal(1);
+        });
+    });
+
+    describe('#getModels', () => {
+        it('should return a list of name / content pairs', () => {
+            modelManager.addModelFile(modelBase);
+            const models = modelManager.getModels();
+            models.length.should.equal(1);
+            models[0].should.deep.equal({
+                name: 'org.acme.base.cto', content: modelBase
+            });
+        });
+        it('should return a list of name / content pairs, with System Models', () => {
+            modelManager.addModelFile(modelBase);
+            const models = modelManager.getModels({
+                includeSystemModels: true
+            });
+            models.length.should.equal(2);
+        });
+        it('should return a list of name / content pairs, with External Models', async () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+            const models = modelManager.getModels();
+            models.length.should.equal(2);
+        });
+
+        it('should return a list of name / content pairs, without External Models', async () => {
+            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            concept Foo{ o String baz }`, '@external.cto');
+            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
+
+            // disable validation, we are using an external model
+            modelManager.addModelFile(`namespace org.acme
+import org.external.* from github://external.cto
+
+concept Bar {
+    o Foo foo
+}`, 'internal.cto', true);
+            modelManager.getModelFile('org.acme').should.not.be.null;
+
+            // import all external models
+            const options = {};
+            await modelManager.updateExternalModels(options, mfd);
+            const models = modelManager.getModels({
+                includeExternalModels: false
+            });
+            models.length.should.equal(1);
         });
     });
 
