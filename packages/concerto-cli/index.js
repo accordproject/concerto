@@ -54,14 +54,14 @@ require('yargs')
                 console.log(err.message + ' ' + err);
             });
     })
-    .command('saveExternal', 'save local copies of external model dependencies', (yargs) => {
+    .command('get', 'save local copies of external model dependencies', (yargs) => {
         yargs.option('ctoFiles', {
             describe: 'array of local CTO files',
             type: 'string',
             array: true,
             default: '.'
         });
-        yargs.option('outputDirectory', {
+        yargs.option('out', {
             describe: 'output directory path',
             type: 'string',
             default: './'
