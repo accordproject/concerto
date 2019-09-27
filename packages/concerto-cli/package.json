@@ -5,6 +5,9 @@
   "homepage": "https://github.com/accordproject/concerto#readme",
   "license": "Apache-2.0",
   "main": "index.js",
+  "bin": {
+    "concerto": "./index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/accordproject/concerto.git"
