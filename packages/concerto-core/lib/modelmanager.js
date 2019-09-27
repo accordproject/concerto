@@ -395,7 +395,7 @@ class ModelManager {
                 return;
             }
 
-            fs.writeFileSync(path + fsPath.sep + file.fileName, file.content);
+            fs.writeFileSync(path + fsPath.sep + file.name, file.content);
         });
     }
 
