@@ -19,7 +19,6 @@
     "url": "https://github.com/accordproject/concerto/issues"
   },
   "devDependencies": {
-    "@accordproject/concerto-tools": "0.80.3",
     "ajv": "6.5.4",
     "babel-preset-latest": "6.24.1",
     "chai": "4.2.0",
@@ -42,6 +41,7 @@
   },
   "dependencies": {
     "@accordproject/concerto": "0.80.3",
+    "@accordproject/concerto-tools": "0.80.3",
     "debug": "4.1.0",
     "mkdirp": "0.5.1",
     "yargs": "13.2.2"

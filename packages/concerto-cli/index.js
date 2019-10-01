@@ -18,8 +18,6 @@
 
 const Commands = require('./lib/commands');
 
-console.log('yargs');
-
 require('yargs')
     .scriptName('cli')
     .usage('$0 <cmd> [args]')
@@ -71,7 +69,7 @@ require('yargs')
             console.log(`Saving external models into directory: ${argv.outputDirectory}`);
         }
 
-        return Commands.getExternalModels(argv.ctoFiles, argv.outputDirectory)
+        return Commands.getExternalModels(argv.ctoFiles, argv.out)
             .catch((err) => {
                 console.log(err.message + ' ' + err);
             });
