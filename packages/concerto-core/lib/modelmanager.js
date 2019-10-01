@@ -395,7 +395,7 @@ class ModelManager {
                 return;
             }
             const filename = file.fileName.split(fsPath.sep).pop();
-            fs.writeFileSync(path + fsPath.sep + filename, file.content);
+            fs.writeFileSync(path + fsPath.sep + filename, file.definitions);
         });
     }
 
