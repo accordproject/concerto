@@ -18,7 +18,7 @@ const fs = require('fs');
 
 const ModelManager = require('@accordproject/concerto').ModelManager;
 const ModelFile = require('@accordproject/concerto').ModelFile;
-const DefaultModelFileLoader = require('@accordproject/concerto').DefaultModelFileLoader;
+const DefaultModelFileLoader = require('@accordproject/concerto-core').DefaultModelFileLoader;
 const FileWriter = require('@accordproject/concerto').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
