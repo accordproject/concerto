@@ -1147,15 +1147,13 @@ describe('LoopbackVisitor', () => {
         it('should return a JSON schema for an enumeration', () => {
             let param = {};
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-            mockAccept.withArgs(loopbackVisit, param).returns({
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.accept.withArgs(loopbackVisit, param).returns({
                 type: 'Square'
             });
-
-            let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
             mockModelFile.getType.withArgs('Acreage').returns({
-                accept: mockAccept
+                accept: mockModelFile.accept
             });
 
             let mockField = sinon.createStubInstance(Field);
@@ -1179,15 +1177,13 @@ describe('LoopbackVisitor', () => {
         it('should return a JSON schema for an enumeration with a default value', () => {
             let param = {};
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-            mockAccept.withArgs(loopbackVisit, param).returns({
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.accept.withArgs(loopbackVisit, param).returns({
                 type: 'Square'
             });
-
-            let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
             mockModelFile.getType.withArgs('Acreage').returns({
-                accept: mockAccept
+                accept: mockModelFile.accept
             });
 
             let mockField = sinon.createStubInstance(Field);
@@ -1213,12 +1209,10 @@ describe('LoopbackVisitor', () => {
         it('should return a JSON schema for a class using type', () => {
             let param = {};
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
             mockModelFile.getType.withArgs('Acreage').returns({
-                accept: mockAccept
+                accept: mockModelFile.accept
             });
 
             let mockField = sinon.createStubInstance(Field);
@@ -1238,18 +1232,16 @@ describe('LoopbackVisitor', () => {
                 required: true
             });
 
-            mockAccept.withArgs(loopbackVisit, param).calledOnce.should.be.ok;
+            mockModelFile.accept.withArgs(loopbackVisit, param).calledOnce.should.be.ok;
         });
 
         it('should return a JSON schema for a class using FQN', () => {
             let param = {};
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
             mockModelFile.getType.withArgs('Acreage').returns({
-                accept: mockAccept
+                accept: mockModelFile.accept
             });
 
             let mockField = sinon.createStubInstance(Field);
@@ -1271,7 +1263,7 @@ describe('LoopbackVisitor', () => {
                 required: true
             });
 
-            mockAccept.withArgs(loopbackVisit, param).calledOnce.should.be.ok;
+            mockModelFile.accept.withArgs(loopbackVisit, param).calledOnce.should.be.ok;
         });
 
         it('should return a JSON schema for a class without calling accept', () => {
@@ -1279,12 +1271,10 @@ describe('LoopbackVisitor', () => {
                 'org.acme.Horse.Acreage': 'Something'
             };
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
             mockModelFile.getType.withArgs('Acreage').returns({
-                accept: mockAccept
+                accept: mockModelFile.accept
             });
 
             let mockField = sinon.createStubInstance(Field);
@@ -1304,7 +1294,7 @@ describe('LoopbackVisitor', () => {
                 required: true
             });
 
-            mockAccept.callCount.should.deep.equal(0);
+            mockModelFile.accept.callCount.should.deep.equal(0);
         });
 
         it('should return a JSON schema for a primitive that is an array', () => {
@@ -1335,17 +1325,15 @@ describe('LoopbackVisitor', () => {
         it('should create a JSON schema for an enum declaration', () => {
             let param = {};
 
-            let mockAccept = sinon.stub(ModelFile, 'accept');
-            mockAccept.withArgs(loopbackVisit, param).returns('Duck');
-
             let mockEnumDecl = sinon.createStubInstance(EnumDeclaration);
+            mockEnumDecl.accept.withArgs(loopbackVisit, param).returns('Duck');
             mockEnumDecl._isEnumDeclaration = true;
             mockEnumDecl.getProperties.returns([
                 {
-                    accept: mockAccept
+                    accept: mockEnumDecl.accept
                 },
                 {
-                    accept: mockAccept
+                    accept: mockEnumDecl.accept
                 }
             ]);
 
