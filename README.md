@@ -1,11 +1,13 @@
-# Concerto
+<h1 align = "center">
+    Concerto
+</h1>
 
-
-![Build Status](https://travis-ci.org/accordproject/concerto.svg?branch=master)
-[![downloads](https://img.shields.io/npm/dm/@accordproject/concerto)](https://www.npmjs.com/package/@accordproject/concerto)
-[![npm version](https://badge.fury.io/js/%40accordproject%2Fconcerto.svg)](https://badge.fury.io/js/%40accordproject%2Fconcerto)
-
-
+<p align="center">
+    <a href="https://travis-ci.org/accordproject/concerto.svg"><img src="https://travis-ci.org/accordproject/concerto.svg?branch=master" alt="Build Status"></a>
+    <a href="https://www.npmjs.com/package/@accordproject/concerto?"><img src="https://img.shields.io/npm/dm/@accordproject/concerto" alt="downloads"></a>
+    <a href="https://badge.fury.io/js/%40accordproject%2Fconcerto"><img src="https://badge.fury.io/js/%40accordproject%2Fconcerto.svg" alt="npm version"></a>
+</p>
+    
 Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
 
 Things you can do using Concerto:
