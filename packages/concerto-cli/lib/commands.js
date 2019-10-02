@@ -12,11 +12,13 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 const fs = require('fs');
 
 const ModelManager = require('@accordproject/concerto').ModelManager;
+const ModelFile = require('@accordproject/concerto').ModelFile;
+const DefaultModelFileLoader = require('@accordproject/concerto').DefaultModelFileLoader;
 const FileWriter = require('@accordproject/concerto').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
@@ -87,21 +89,30 @@ class Commands {
     }
 
     /**
-     * Fetches all external dependencies and saves them to the target directory
+     * Fetches all external for a set of models dependencies and
+     * saves all the models to a target directory
      *
-     * @param {string[]} ctoFiles the local CTO files
+     * @param {string[]} ctoFiles the CTO files (can be local file paths or URLs)
      * @param {string} outputDirectory the output directory
      */
     static async getExternalModels(ctoFiles, outputDirectory) {
 
         const modelManager = new ModelManager();
+        const modelFileLoader = new DefaultModelFileLoader(modelManager);
 
-        const modelFiles = ctoFiles.map((ctoFile) => {
-            return fs.readFileSync(ctoFile, 'utf8');
-        });
-        modelManager.addModelFiles(modelFiles, ctoFiles, true);
+        for( let ctoFile of ctoFiles ) {
+            let modelFile = null;
+            if(modelFileLoader.accepts(ctoFile)) {
+                modelFile = await modelFileLoader.load(ctoFile);
+            } else {
+                const content = fs.readFileSync(ctoFile, 'utf8');
+                modelFile = new ModelFile(modelManager, content, ctoFile);
+            }
+
+            modelManager.addModelFile(modelFile, modelFile.getName(), true);
+        }
+
         await modelManager.updateExternalModels();
-
         modelManager.writeModelsToFileSystem(outputDirectory);
     }
 }

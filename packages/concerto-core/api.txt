@@ -168,3 +168,34 @@ class ValidatedResource extends Resource {
    + void addArrayValue(string,string) throws Error
    + void validate() throws Error
 }
+class ModelManager {
+   + void validateModelFile(string,string) throws IllegalModelException
+   + Object addModelFile(string,string,boolean,boolean) throws IllegalModelException
+   + Object updateModelFile(string,string,boolean) throws IllegalModelException
+   + void deleteModelFile(string) 
+   + Object[] addModelFiles(string[],undefined,boolean,boolean) 
+   + void validateModelFiles() 
+   + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
+   + void writeModelsToFileSystem(String,Object,boolean,boolean) 
+   + Object[] getModels(Object,boolean,boolean) 
+   + void clearModelFiles() 
+   + string[] getNamespaces() 
+   + ClassDeclaration[] getSystemTypes() 
+   + AssetDeclaration[] getAssetDeclarations(Boolean) 
+   + TransactionDeclaration[] getTransactionDeclarations(Boolean) 
+   + EventDeclaration[] getEventDeclarations(Boolean) 
+   + ParticipantDeclaration[] getParticipantDeclarations(Boolean) 
+   + EnumDeclaration[] getEnumDeclarations(Boolean) 
+   + ConceptDeclaration[] getConceptDeclarations(Boolean) 
+   + Factory getFactory() 
+   + Serializer getSerializer() 
+   + DecoratorFactory[] getDecoratorFactories() 
+   + void addDecoratorFactory(DecoratorFactory) 
+   + boolean hasInstance(object) 
+}
+class Serializer {
+   + void constructor(Factory,ModelManager) 
+   + void setDefaultOptions(Object) 
+   + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean) throws Error
+   + Resource fromJSON(Object,Object,boolean,boolean) 
+}

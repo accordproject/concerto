@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 /**
  * Concerto module. Concerto is a framework for defining domain
@@ -38,6 +38,7 @@ module.exports.Globalize = require('./lib/globalize');
 module.exports.Introspector = require('./lib/introspect/introspector');
 module.exports.ModelFile = require('./lib/introspect/modelfile');
 module.exports.ModelManager = require('./lib/modelmanager');
+module.exports.DefaultModelFileLoader = require('./lib/introspect/loaders/defaultmodelfileloader');
 module.exports.ParseException = require('./lib/introspect/parseexception');
 module.exports.ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
 module.exports.Property = require('./lib/introspect/property');
