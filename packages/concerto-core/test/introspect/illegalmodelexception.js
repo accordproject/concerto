@@ -37,7 +37,7 @@ describe('IllegalModelException', function () {
         it('should return an instance of BaseFileException', function () {
             let exc = new IllegalModelException('message', modelFile, fileLocation);
             exc.should.be.an.instanceOf(BaseFileException);
-            exc.component.should.equal('@accordproject/concerto');
+            exc.component.should.equal('@accordproject/concerto-core');
         });
 
         it('should return an instance of BaseFileException for another component', function () {
