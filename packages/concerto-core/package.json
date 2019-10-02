@@ -1,5 +1,5 @@
 {
-  "name": "@accordproject/concerto",
+  "name": "@accordproject/concerto-core",
   "version": "0.80.3",
   "description": "Concerto Modeling Language",
   "engines": {
