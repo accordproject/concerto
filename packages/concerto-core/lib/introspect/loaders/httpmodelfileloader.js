@@ -22,7 +22,7 @@ const url = require('url');
  * Loads ModelFiles from an HTTP(S) URL using the axios library.
  * @class
  * @private
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class HTTPModelFileLoader {
     /**

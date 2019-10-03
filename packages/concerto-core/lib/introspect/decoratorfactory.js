@@ -18,7 +18,7 @@
  * An interface for a class that processes a decorator and returns a specific
  * implementation class for that decorator.
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class DecoratorFactory {
 

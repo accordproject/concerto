@@ -32,7 +32,7 @@ const Typed = require('./typed');
  * @extends Typed
  * @see See  {@link Resource}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Concept extends Typed {
     /**

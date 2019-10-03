@@ -21,7 +21,7 @@ const HTTPModelFileLoader = require('./httpmodelfileloader');
  *
  * @class
  * @private
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class GitHubModelFileLoader extends HTTPModelFileLoader {
     /**

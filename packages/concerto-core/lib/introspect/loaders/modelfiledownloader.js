@@ -21,7 +21,7 @@ const debug = require('debug')('concerto:ModelFileDownloader');
  * Downloads the transitive closure of a set of model files.
  * @class
  * @private
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class ModelFileDownloader extends JobQueue {
 

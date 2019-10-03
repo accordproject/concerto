@@ -26,7 +26,7 @@ const GitHubModelFileLoader = require('./githubmodelfileloader');
  * @private
  * @class
  * @see See {@link CompositeModelFileLoader}
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class DefaultModelFileLoader extends CompositeModelFileLoader {
 

@@ -33,7 +33,7 @@ const RelationshipDeclaration = require('./relationshipdeclaration');
  *
  * @abstract
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class ClassDeclaration extends Decorated {
 

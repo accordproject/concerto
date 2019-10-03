@@ -32,7 +32,7 @@ const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
 /**
  * Utility class that implements the commands exposed by the CLI.
  * @class
- * @memberof module:concerto-tools
+ * @memberof module:concerto-cli
  */
 class Commands {
 

@@ -48,7 +48,7 @@ const debug = require('debug')('concerto:ModelManager');
  *
  *
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class ModelManager {
     /**

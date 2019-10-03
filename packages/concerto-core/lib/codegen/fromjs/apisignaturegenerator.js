@@ -42,7 +42,7 @@ function paramsToString(paramTypes) {
  * output directory.
  * @private
  * @class
- * @memberof module:module
+ * @memberof module:concerto-core
  */
 class APISignatureGenerator {
 

@@ -22,7 +22,7 @@ const Globalize = require('./globalize');
  * @extends BaseException
  * @see see {@link BaseException}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  * @private
  */
 class TypeNotFoundException extends BaseException {

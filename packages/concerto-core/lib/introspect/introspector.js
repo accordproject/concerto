@@ -19,7 +19,7 @@
  * Provides access to the structure of transactions, assets and participants.
  *
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Introspector {
     /**

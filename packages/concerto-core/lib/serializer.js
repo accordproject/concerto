@@ -34,7 +34,7 @@ const baseDefaultOptions = {
  * (e.g. on the blockchain).
  *
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Serializer {
 

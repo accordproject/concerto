@@ -19,7 +19,7 @@
  * <p><a href="./diagrams-private/util.svg"><img src="./diagrams-private/util.svg" style="height:100%;"/></a></p>
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Util {
 

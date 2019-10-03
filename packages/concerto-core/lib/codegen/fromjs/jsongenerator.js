@@ -20,7 +20,7 @@ const path = require('path');
 /**
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class JSONGenerator {
     /**

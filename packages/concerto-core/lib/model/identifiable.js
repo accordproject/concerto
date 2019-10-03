@@ -24,7 +24,7 @@ const Typed = require('./typed');
  * @extends Typed
  * @abstract
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Identifiable extends Typed {
     /**
