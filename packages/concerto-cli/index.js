@@ -19,7 +19,7 @@
 const Commands = require('./lib/commands');
 
 require('yargs')
-    .scriptName('cli')
+    .scriptName('concerto')
     .usage('$0 <cmd> [args]')
     .command('generate', 'generate code from model files', (yargs) => {
 
