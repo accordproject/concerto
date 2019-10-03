@@ -5,7 +5,7 @@
     "eslint": "6.0.1",
     "istanbul-combine": "^0.3.0",
     "jsdoc": "3.6.3",
-    "lerna": "^3.13.0",
+    "lerna": "3.15.0",
     "license-check-and-add": "2.3.6",
     "moment-mini": "2.22.1",
     "nyc": "14.1.1",
