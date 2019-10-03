@@ -83,16 +83,16 @@ console.log(postalAddress.streetAddress);
 # Metamodel
 
 The Concerto metamodel contains:
-- Namespaces
-- Imports
-- Concepts
-- Assets
-- Participants
-- Transactions
-- Enumerations & Enumeration Values
-- Properties & Meta Properties
-- Relationships
-- Decorators
+- [Namespaces](#namespaces)
+- [Imports](#imports)
+- [Concepts](#concepts)
+- [Assets](#assets)
+- [Participants](#participants)
+- [Transactions](#transactions)
+- [Enumerations & Enumeration Values](#enumerations--enumeration-values)
+- [Properties & Meta Properties](#properties-and-meta-properties)
+- [Relationships](#relationships)
+- [Decorators](#decorators)
 
 ## Namespaces
 
@@ -198,12 +198,15 @@ Class declarations contain properties. Each property has a type which can either
 ### Primitive types
 
 Concerto supports the following primitive types:
-- String: a UTF8 encoded String.
-- Double: a double precision 64 bit numeric value.
-- Integer: a 32 bit signed whole number.
-- Long: a 64 bit signed whole number.
-- DateTime: an ISO-8601 compatible time instance, with optional time zone and UTZ offset.
-- Boolean: a Boolean value, either true or false.
+
+   |Type | Description|
+   |--- | ---|   
+|String | a UTF8 encoded String.
+|Double | a double precision 64 bit numeric value.
+|Integer | a 32 bit signed whole number.
+|Long | a 64 bit signed whole number.
+|DateTime | an ISO-8601 compatible time instance, with optional time zone and UTZ offset.
+|Boolean | a Boolean value, either true or false.
 
 ### Meta Properties
 - [] : declares that the property is an array
