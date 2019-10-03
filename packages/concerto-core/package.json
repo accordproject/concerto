@@ -11,6 +11,7 @@
   "scripts": {
     "prepublishOnly": "webpack --config webpack.config.js --mode production",
     "prepare": "pegjs ./lib/introspect/parser.pegjs",
+    "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
@@ -19,12 +20,7 @@
     "test": "node ./scripts/api-changelog.js && nyc mocha --recursive -t 10000",
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "pkgcheck": "node ./scripts/pkgcheck.js",
-    "pkgstamp": "node ./scripts/pkgstamp.js",
-    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
-    "pkgset": "node ./scripts/pkgset.js",
-    "depcheck": "node ./scripts/depcheck.js"
+    "nyc": "nyc mocha --recursive -t 10000"
   },
   "repository": {
     "type": "git",

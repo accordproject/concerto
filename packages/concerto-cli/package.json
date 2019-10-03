@@ -13,6 +13,11 @@
     "url": "git+https://github.com/accordproject/concerto.git"
   },
   "scripts": {
+    "lint": "eslint .",
+    "postlint": "npm run licchk",
+    "licchk": "license-check-and-add",
+    "postlicchk": "npm run doc",
+    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "mocha --recursive -t 10000"
   },
   "bugs": {
