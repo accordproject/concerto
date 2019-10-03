@@ -60,7 +60,7 @@
     "webpack-cli": "3.3.5"
   },
   "dependencies": {
-    "@accordproject/concerto": "0.80.3",
+    "@accordproject/concerto-core": "0.80.3",
     "debug": "4.1.1",
     "mkdirp": "0.5.1",
     "yargs": "13.2.4"
