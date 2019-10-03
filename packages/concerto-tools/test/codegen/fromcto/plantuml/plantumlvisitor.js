@@ -20,17 +20,17 @@ const sinon = require('sinon');
 
 const PlantUMLVisitor = require('../../../../lib/codegen/fromcto/plantuml/plantumlvisitor.js');
 
-const ModelFile = require('@accordproject/concerto').ModelFile;
-const ModelManager = require('@accordproject/concerto').ModelManager;
-const AssetDeclaration = require('@accordproject/concerto').AssetDeclaration;
-const ParticipantDeclaration = require('@accordproject/concerto').ParticipantDeclaration;
-const ClassDeclaration = require('@accordproject/concerto').ClassDeclaration;
-const EnumDeclaration = require('@accordproject/concerto').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto').EnumValueDeclaration;
-const Field = require('@accordproject/concerto').Field;
-const RelationshipDeclaration = require('@accordproject/concerto').RelationshipDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto').TransactionDeclaration;
-const fileWriter = require('@accordproject/concerto').FileWriter;
+const ModelFile = require('@accordproject/concerto-core').ModelFile;
+const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
+const ParticipantDeclaration = require('@accordproject/concerto-core').ParticipantDeclaration;
+const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
+const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
+const Field = require('@accordproject/concerto-core').Field;
+const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
+const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
+const fileWriter = require('@accordproject/concerto-core').FileWriter;
 
 describe('PlantUMLVisitor', function () {
     let plantUMLvisitor;

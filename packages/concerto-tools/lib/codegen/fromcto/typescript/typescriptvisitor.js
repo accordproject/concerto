@@ -14,14 +14,14 @@
 
 'use strict';
 
-const ModelManager = require('@accordproject/concerto').ModelManager;
-const ModelUtil = require('@accordproject/concerto').ModelUtil;
-const ModelFile = require('@accordproject/concerto').ModelFile;
-const ClassDeclaration = require('@accordproject/concerto').ClassDeclaration;
-const Field = require('@accordproject/concerto').Field;
-const RelationshipDeclaration = require('@accordproject/concerto').RelationshipDeclaration;
-const EnumDeclaration = require('@accordproject/concerto').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto').EnumValueDeclaration;
+const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
+const ModelFile = require('@accordproject/concerto-core').ModelFile;
+const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
+const Field = require('@accordproject/concerto-core').Field;
+const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
+const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const util = require('util');
 
 /**

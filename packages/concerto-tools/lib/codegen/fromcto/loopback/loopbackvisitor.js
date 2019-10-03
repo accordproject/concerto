@@ -14,17 +14,17 @@
 
 'use strict';
 
-const AssetDeclaration = require('@accordproject/concerto').AssetDeclaration;
-const ParticipantDeclaration = require('@accordproject/concerto').ParticipantDeclaration;
-const ConceptDeclaration = require('@accordproject/concerto').ConceptDeclaration;
-const EnumDeclaration = require('@accordproject/concerto').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto').EnumValueDeclaration;
-const EventDeclaration = require('@accordproject/concerto').EventDeclaration;
-const Field = require('@accordproject/concerto').Field;
-const ModelFile = require('@accordproject/concerto').ModelFile;
-const ModelManager = require('@accordproject/concerto').ModelManager;
-const RelationshipDeclaration = require('@accordproject/concerto').RelationshipDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto').TransactionDeclaration;
+const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
+const ParticipantDeclaration = require('@accordproject/concerto-core').ParticipantDeclaration;
+const ConceptDeclaration = require('@accordproject/concerto-core').ConceptDeclaration;
+const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
+const EventDeclaration = require('@accordproject/concerto-core').EventDeclaration;
+const Field = require('@accordproject/concerto-core').Field;
+const ModelFile = require('@accordproject/concerto-core').ModelFile;
+const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
+const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const debug = require('debug')('concerto:loopbackvisitor');
 const util = require('util');
 

@@ -21,9 +21,9 @@ const sinon = require('sinon');
 const JavaVisitor = require('../../../../lib/codegen/fromcto/java/javavisitor.js');
 const AbstractPlugin = require('../../../../lib/codegen/abstractplugin.js');
 
-const ClassDeclaration = require('@accordproject/concerto').ClassDeclaration;
-const EnumDeclaration = require('@accordproject/concerto').EnumDeclaration;
-const fileWriter = require('@accordproject/concerto').FileWriter;
+const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
+const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+const fileWriter = require('@accordproject/concerto-core').FileWriter;
 
 describe('JavaMissingPlugin', function () {
     let javaVisit;
