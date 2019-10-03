@@ -20,17 +20,17 @@ const sinon = require('sinon');
 
 const JSONSchemaVisitor = require('../../../../lib/codegen/fromcto/jsonschema/jsonschemavisitor.js');
 
-const AssetDeclaration = require('@accordproject/concerto').AssetDeclaration;
-const ClassDeclaration = require('@accordproject/concerto').ClassDeclaration;
-const EnumDeclaration = require('@accordproject/concerto').EnumDeclaration;
-const ConceptDeclaration = require('@accordproject/concerto').ConceptDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto').EnumValueDeclaration;
-const Field = require('@accordproject/concerto').Field;
-const ModelFile = require('@accordproject/concerto').ModelFile;
-const ModelManager = require('@accordproject/concerto').ModelManager;
-const RelationshipDeclaration = require('@accordproject/concerto').RelationshipDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto').TransactionDeclaration;
-const fileWriter = require('@accordproject/concerto').FileWriter;
+const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
+const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
+const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+const ConceptDeclaration = require('@accordproject/concerto-core').ConceptDeclaration;
+const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
+const Field = require('@accordproject/concerto-core').Field;
+const ModelFile = require('@accordproject/concerto-core').ModelFile;
+const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
+const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
+const fileWriter = require('@accordproject/concerto-core').FileWriter;
 
 describe('JSONSchema', function () {
     let jsonSchemaVisit;
