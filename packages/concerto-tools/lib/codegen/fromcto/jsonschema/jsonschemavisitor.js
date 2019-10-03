@@ -24,7 +24,7 @@ const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
-const debug = require('debug')('concerto:jsonschemavisitor');
+const debug = require('debug')('concerto-core:jsonschemavisitor');
 const util = require('util');
 
 /**

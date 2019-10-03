@@ -20,7 +20,7 @@ const Validator = require('./validator');
  * A Validator to enforce that a string matches a regex
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class StringValidator extends Validator{
 

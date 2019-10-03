@@ -33,7 +33,7 @@ const TypedStack = require('../serializer/typedstack');
  * @extends Concept
  * @see See {@link Resource}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class ValidatedConcept extends Concept {
     /**

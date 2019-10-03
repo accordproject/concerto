@@ -23,7 +23,7 @@ const IllegalModelException = require('./illegalmodelexception');
  * @private
  * @abstract
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Decorated {
 

@@ -42,7 +42,7 @@ const Moment = require('moment-mini');
  * and assets.
  *
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Factory {
 

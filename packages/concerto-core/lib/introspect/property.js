@@ -22,7 +22,7 @@ const ModelUtil = require('../modelutil');
  * either a Field or a Relationship.
  *
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Property extends Decorated {
 

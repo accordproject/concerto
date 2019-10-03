@@ -72,7 +72,7 @@ function validateProperties(properties, classDeclaration) {
  * 'modelManager' - the ModelManager instance to use to resolve classes
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class JSONPopulator {
 

@@ -21,7 +21,7 @@
  * </p>
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class CompositeModelFileLoader {
 

@@ -20,7 +20,7 @@ const packageJson = require('../package.json');
 * A base class for all Concerto exceptions
 * @extends Error
 * @class
-* @memberof module:concerto
+* @memberof module:concerto-core
 * @private
 */
 class BaseException extends Error {

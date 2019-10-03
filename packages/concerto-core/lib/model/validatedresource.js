@@ -24,7 +24,7 @@ const Resource = require('./resource');
  * @extends Resource
  * @see See {@link Resource}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class ValidatedResource extends Resource {
     /**

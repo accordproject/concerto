@@ -29,7 +29,7 @@ const ResourceId = require('./resourceid');
  * @extends Identifiable
  * @see See {@link Identifiable}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Relationship extends Identifiable {
     /**

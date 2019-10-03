@@ -28,7 +28,7 @@ const Writer = require('./writer');
  * @extends Writer
  * @see See {@link Writer}
  * @class
- * @memberof module:concerto-tools
+ * @memberof module:concerto-core
  */
 class FileWriter extends Writer {
 

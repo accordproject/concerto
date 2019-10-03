@@ -17,7 +17,7 @@
 /**
  * Decorator encapsulates a decorator (annotation) on a class or property.
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class Decorator {
 

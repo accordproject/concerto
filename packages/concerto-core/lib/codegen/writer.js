@@ -19,7 +19,7 @@
  * indentation and tracks the number of lines written.
  * @private
  * @class
- * @memberof module:concerto-tools
+ * @memberof module:concerto-core
  */
 class Writer {
 

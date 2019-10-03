@@ -28,7 +28,7 @@ const Globalize = require('../globalize');
  * updated with either default values or generated sample data.
  * @private
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class InstanceGenerator {
 

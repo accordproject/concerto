@@ -20,7 +20,7 @@ const ClassDeclaration = require('./classdeclaration');
  * @extends ClassDeclaration
  * @see See  {@link ClassDeclaration}
  * @class
- * @memberof module:concerto
+ * @memberof module:concerto-core
  */
 class EventDeclaration extends ClassDeclaration {
     /**
