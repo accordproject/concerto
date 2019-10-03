@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-
+'use strict';
 
 const chai = require('chai');
 const path = require('path');

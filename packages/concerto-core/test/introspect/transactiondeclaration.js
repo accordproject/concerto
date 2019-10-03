@@ -18,7 +18,6 @@ const TransactionDeclaration = require('../../lib/introspect/transactiondeclarat
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
-const IntrospectUtils = require('./introspectutils');
 const Util = require('../composer/systemmodelutility');
 
 require('chai').should();

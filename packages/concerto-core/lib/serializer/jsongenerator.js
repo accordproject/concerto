@@ -23,7 +23,6 @@ const Typed = require('../model/typed');
 const Concept = require('../model/concept');
 const ModelUtil = require('../modelutil');
 const Util = require('../util');
-const Moment = require('moment-mini');
 
 /**
  * Converts the contents of a Resource to JSON. The parameters

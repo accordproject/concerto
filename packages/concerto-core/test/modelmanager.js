@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-
+'use strict';
 
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
