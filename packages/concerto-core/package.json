@@ -7,7 +7,7 @@
     "npm": ">=5"
   },
   "main": "index.js",
-  "typings": "index.d.ts",
+  "typings": "types/index.d.ts",
   "scripts": {
     "prepublishOnly": "webpack --config webpack.config.js --mode production",
     "prepare": "pegjs ./lib/introspect/parser.pegjs",
