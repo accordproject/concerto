@@ -209,11 +209,14 @@ Concerto supports the following primitive types:
 |Boolean | a Boolean value, either true or false.
 
 ### Meta Properties
-- [] : declares that the property is an array
-- optional : declares that the property is not required for the instance to be valid
-- default : declares a default value for the property, if not value is specified
-- range : declares a valid range for numeric properties
-- regex : declares a validation regex for string properties
+
+|Property|Description|
+|---|---|
+|[] | declares that the property is an array|
+|optional | declares that the property is not required for the instance to be valid|
+| default | declares a default value for the property, if not value is specified|
+| range | declares a valid range for numeric properties|
+| regex | declares a validation regex for string properties|
 
 String fields may include an optional regular expression, which is used to validate the contents of the field. Careful use of field validators allows Concerto to perform rich data validation, leading to fewer errors and less boilerplate application code.
 
