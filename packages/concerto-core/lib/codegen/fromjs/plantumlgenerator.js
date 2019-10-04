@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const Logger = require('../../logger');
 const FileWriter = require('../filewriter');
 
 /**
@@ -39,11 +40,11 @@ class PlantUMLGenerator {
         if (classes.length > 0) {
             let fileWriter = new FileWriter(program.outputDir);
             const umlFilename = this.toUMLFilename(program.inputDir, program.outputDir, file);
-            console.log('open file: ' + umlFilename);
+            Logger.info('open file: ' + umlFilename);
             fileWriter.openFile(umlFilename);
 
             fileWriter.writeLine(0, '@startuml');
-            console.log('+');
+            Logger.info('+');
             fileWriter.writeLine(0, '!include ' + program.outputDir + '/../../jsdoc-template/umlstyle.uml');
             for (let n = 0; n < includes.length; n++) {
                 // only include files that exist
@@ -102,12 +103,12 @@ class PlantUMLGenerator {
      * @private
      */
     toUMLFilename(inputDir, outputDir, filename) {
-        console.log('inputDir' + inputDir);
-        console.log('outputDir' + outputDir);
-        console.log('filename' + filename);
+        Logger.info('inputDir' + inputDir);
+        Logger.info('outputDir' + outputDir);
+        Logger.info('filename' + filename);
 
         let index = filename.indexOf(inputDir);
-        console.log('index ' + index);
+        Logger.info('index ' + index);
         let rest = filename.substr(index + 1 + inputDir.length);
         // let out = outputDir + '/' + rest;
         let i = rest.lastIndexOf('.');

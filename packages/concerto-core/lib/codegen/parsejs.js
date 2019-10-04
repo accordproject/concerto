@@ -18,6 +18,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const program = require('commander');
+const Logger = require('../logger');
 const PlantUMLGenerator = require('./fromjs/plantumlgenerator');
 const APISignatureGenerator = require('./fromjs/apisignaturegenerator');
 const JavaScriptParser = require('./javascriptparser');
@@ -100,11 +101,11 @@ case 'JSON':
 
 if (program.inputDir) {
     // Loop through all the files in the input directory
-    console.log('Input dir ' + program.inputDir);
+    Logger.info('Input dir ' + program.inputDir);
     processDirectory(program.inputDir, fileProcessor);
 } else if (program.single) {
-    console.log('Single file ' + program.single);
+    Logger.info('Single file ' + program.single);
     processFile(path.resolve(program.single), fileProcessor);
 } else {
-    console.log('no file option given');
+    Logger.info('no file option given');
 }
