@@ -105,5 +105,22 @@ describe('cicero-cli', () => {
             ]);
             dir.cleanup();
         });
+
+        it('should save external dependencies for an external model', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            await Commands.getExternalModels(['https://models.accordproject.org/patents/patent.cto'], dir.path);
+            fs.readdirSync(dir.path).should.eql([
+                "@models.accordproject.org.address.cto",
+                "@models.accordproject.org.geo.cto",
+                "@models.accordproject.org.money.cto",
+                "@models.accordproject.org.organization.cto",
+                "@models.accordproject.org.patents.patent.cto",
+                "@models.accordproject.org.person.cto",
+                "@models.accordproject.org.product.cto",
+                "@models.accordproject.org.usa.residency.cto",
+                "@models.accordproject.org.value.cto"
+            ]);
+            dir.cleanup();
+        });
     });
 });
