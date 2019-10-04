@@ -16,6 +16,7 @@
 
 const crypto = require('crypto');
 const semver = require('semver');
+const Logger = require('../logger');
 
 /**
  * Checks that a change log file takes into account
@@ -89,7 +90,7 @@ class VersionChecker {
             throw new Error('Did not find any version in changelog');
         }
         else {
-            console.log('SUCCESS: validated public API against package.json and changelog.txt.');
+            Logger.info('SUCCESS: validated public API against package.json and changelog.txt.');
         }
 
         return true;

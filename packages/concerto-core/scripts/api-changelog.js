@@ -17,6 +17,7 @@
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const Logger = require('../lib/logger');
 
 const parentDirectory = path.resolve(__dirname, '..');
 const apiSignatureFile = path.resolve(parentDirectory, 'api.txt');
@@ -51,6 +52,6 @@ return Promise.resolve()
         });
     })
     .catch((error) => {
-        console.error(error);
+        Logger.error(error);
         process.exit(1);
     });

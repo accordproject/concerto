@@ -19,8 +19,6 @@ const path = require('path');
 const yargs = require('yargs');
 const plantuml = require('node-plantuml');
 
-
-
 /**
  * Generate an image file from a PlantUML source file
  * @private

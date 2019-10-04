@@ -15,7 +15,7 @@
 
 'use strict';
 
-
+const Logger = require('@accordproject/concerto-core').Logger;
 const Commands = require('./lib/commands');
 
 require('yargs')
@@ -35,15 +35,15 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            console.log(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
+            Logger.info(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
         }
 
         return Commands.validate(argv.sample, argv.ctoFiles)
             .then((result) => {
-                console.log(result);
+                Logger.info(result);
             })
             .catch((err) => {
-                console.log(err.message + ' ' + err);
+                Logger.error(err.message);
             });
     })
     .command('generate', 'generate code from model files', (yargs) => {
@@ -65,15 +65,15 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            console.log(`generate code in format ${argv.format} from the models ${argv.ctoFiles} into directory ${argv.outputDirectory}`);
+            Logger.info(`generate code in format ${argv.format} from the models ${argv.ctoFiles} into directory ${argv.outputDirectory}`);
         }
 
         return Commands.generate(argv.format, argv.ctoFiles, argv.outputDirectory)
             .then((result) => {
-                console.log(result);
+                Logger.info(result);
             })
             .catch((err) => {
-                console.log(err.message + ' ' + err);
+                Logger.error(err.message);
             });
     })
     .command('get', 'save local copies of external model dependencies', (yargs) => {
@@ -90,12 +90,12 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            console.log(`Saving external models from ${argv.ctoFiles} into directory: ${argv.outputDirectory}`);
+            Logger.info(`Saving external models from ${argv.ctoFiles} into directory: ${argv.outputDirectory}`);
         }
 
         return Commands.getExternalModels(argv.ctoFiles, argv.outputDirectory)
             .catch((err) => {
-                console.log(err.message + ' ' + err);
+                Logger.error(err.message);
             });
     })
     .option('verbose', {

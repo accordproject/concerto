@@ -36,6 +36,7 @@ module.exports.FileWriter = require('./lib/codegen/filewriter');
 module.exports.Factory = require('./lib/factory');
 module.exports.Globalize = require('./lib/globalize');
 module.exports.Introspector = require('./lib/introspect/introspector');
+module.exports.Logger = require('./lib/logger');
 module.exports.ModelFile = require('./lib/introspect/modelfile');
 module.exports.ModelManager = require('./lib/modelmanager');
 module.exports.DefaultModelFileLoader = require('./lib/introspect/loaders/defaultmodelfileloader');

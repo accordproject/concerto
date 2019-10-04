@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const yargs = require('yargs');
+const Logger = require('../logger');
 const VersionChecker = require('./versionchecker');
 
 /**
@@ -40,6 +41,6 @@ try {
     VersionChecker.check(changelog, publicApi, packageJson);
 }
 catch(err) {
-    console.log(err);
+    Logger.error(err);
     process.exit(1);
 }
