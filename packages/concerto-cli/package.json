@@ -18,7 +18,7 @@
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "mocha --recursive -t 10000"
+    "test": "nyc mocha --recursive -t 10000"
   },
   "bugs": {
     "url": "https://github.com/accordproject/concerto/issues"
