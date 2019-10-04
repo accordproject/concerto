@@ -1,4 +1,4 @@
-# Concerto
+<h1 align="center">Concerto</h1>
 
 <p align="center">
   <a href="https://travis-ci.org/accordproject/concerto"><img src="https://travis-ci.org/accordproject/concerto.svg?branch=master" alt="Build Status"></a>
