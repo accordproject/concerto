@@ -27,6 +27,26 @@ const Commands = require('../lib/commands');
 
 describe('cicero-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
+    const sample1 = path.resolve(__dirname, 'data/sample1.json');
+    const sample2 = path.resolve(__dirname, 'data/sample2.json');
+    const sampleText1 = fs.readFileSync(sample1, 'utf8');
+    const sampleText2 = fs.readFileSync(sample2, 'utf8');
+
+    describe('#validate', () => {
+        it('should validate against a model', async () => {
+            const result = await Commands.validate(sample1, models);
+            JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
+        });
+
+        it('should fail to validate against a model', async () => {
+            try {
+                const result = await Commands.validate(sample2, models);
+                JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
+            } catch (err) {
+                err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
+            }
+        });
+    });
 
     describe('#generate', () => {
 

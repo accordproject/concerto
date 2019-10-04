@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const { ModelManager, Factory, Serializer } = require('@accordproject/concerto-core');
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const DefaultModelFileLoader = require('@accordproject/concerto-core').DefaultModelFileLoader;
 const FileWriter = require('@accordproject/concerto-core').FileWriter;
@@ -37,13 +37,28 @@ const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
 class Commands {
 
     /**
-     * Converts the model for a template into code
+     * Validate a sample JSON against the model
      *
-     * @param {string} format the format to generate
+     * @param {string} sample the sample to validate
      * @param {string[]} ctoFiles the CTO files to convert to code
-     * @param {string} outputDirectory the output directory
-     * @returns {string} Result of code generation
+     * @returns {string} serialized form of the validated JSON
      */
+    static async validate(sample, ctoFiles, out) {
+        const json = JSON.parse(fs.readFileSync(sample, 'utf8'));
+
+        const modelManager = new ModelManager();
+        const factory = new Factory(modelManager);
+        const serializer = new Serializer(factory, modelManager);
+
+        const modelFiles = ctoFiles.map((ctoFile) => {
+            return fs.readFileSync(ctoFile, 'utf8');
+        });
+        modelManager.addModelFiles(modelFiles, ctoFiles, true);
+        await modelManager.updateExternalModels();
+        const object = serializer.fromJSON(json);
+        return JSON.stringify(serializer.toJSON(object));
+    }
+
     static async generate(format, ctoFiles, outputDirectory) {
 
         const modelManager = new ModelManager();

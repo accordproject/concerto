@@ -8,6 +8,7 @@ Command line tool for Concerto.
 concerto <cmd> [args]
 
 Commands:
+  concerto validate  validate JSON against model files
   concerto generate  generate code from model files
   concerto get       save local copies of external model dependencies
 
@@ -15,6 +16,23 @@ Options:
   --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
   --help         Show help                                             [boolean]
+```
+
+### Concerto validate
+
+The validator lets you check whether a JSON sample is a valid instance of the given model.
+
+```
+concerto validate
+
+validate JSON against model files
+
+Options:
+  --version      Show version number                                   [boolean]
+  --verbose, -v                                                 [default: false]
+  --help         Show help                                             [boolean]
+  --sample       sample JSON to validate       [string] [default: "sample.json"]
+  --ctoFiles     array of CTO files                       [array] [default: "."]
 ```
 
 ### Concerto generate
