@@ -21,8 +21,32 @@ const Commands = require('./lib/commands');
 require('yargs')
     .scriptName('concerto')
     .usage('$0 <cmd> [args]')
-    .command('generate', 'generate code from model files', (yargs) => {
+    .command('validate', 'validate JSON against model files', (yargs) => {
+        yargs.option('sample', {
+            describe: 'sample JSON to validate',
+            type: 'string',
+            default: 'sample.json'
+        });
+        yargs.option('ctoFiles', {
+            describe: 'array of CTO files',
+            type: 'string',
+            array: true,
+            default: '.'
+        });
+    }, (argv) => {
+        if (argv.verbose) {
+            console.log(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
+        }
 
+        return Commands.validate(argv.sample, argv.ctoFiles)
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((err) => {
+                console.log(err.message + ' ' + err);
+            });
+    })
+    .command('generate', 'generate code from model files', (yargs) => {
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
@@ -41,7 +65,7 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            console.log(`generate code in format ${argv.format} from the model for template ${argv.template} into directory ${argv.outputDirectory}`);
+            console.log(`generate code in format ${argv.format} from the models ${argv.ctoFiles} into directory ${argv.outputDirectory}`);
         }
 
         return Commands.generate(argv.format, argv.ctoFiles, argv.outputDirectory)
@@ -59,17 +83,17 @@ require('yargs')
             array: true,
             default: '.'
         });
-        yargs.option('out', {
+        yargs.option('outputDirectory', {
             describe: 'output directory path',
             type: 'string',
             default: './'
         });
     }, (argv) => {
         if (argv.verbose) {
-            console.log(`Saving external models into directory: ${argv.outputDirectory}`);
+            console.log(`Saving external models from ${argv.ctoFiles} into directory: ${argv.outputDirectory}`);
         }
 
-        return Commands.getExternalModels(argv.ctoFiles, argv.out)
+        return Commands.getExternalModels(argv.ctoFiles, argv.outputDirectory)
             .catch((err) => {
                 console.log(err.message + ' ' + err);
             });
