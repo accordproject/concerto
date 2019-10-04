@@ -105,25 +105,19 @@
     }
   },
   "nyc": {
-    "exclude": [
-      "coverage/**",
-      "index.js",
-      "cli.js",
-      "webpack.config.js",
-      "lib/codegen/codegen.js",
-      "lib/codegen/parsejs.js",
-      "lib/codegen/javascriptparser.js",
-      "lib/introspect/parser.js",
-      "out/**",
-      "scripts/**",
-      "systest/**",
-      "test/**",
-      "umd/**"
-    ],
+    "produce-source-map": "true",
+    "sourceMap": "inline",
     "reporter": [
+      "lcov",
       "text-summary",
       "html",
-      "lcov"
+      "json"
+    ],
+    "include": [
+      "lib/**/*.js"
+    ],
+    "exclude": [
+      "lib/codegen/codegen.js"
     ],
     "all": true,
     "check-coverage": true,
