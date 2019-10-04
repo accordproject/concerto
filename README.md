@@ -2,8 +2,10 @@
 
 
 ![Build Status](https://travis-ci.org/accordproject/concerto.svg?branch=master)
+[![GitHub license](https://img.shields.io/github/license/accordproject/concerto?color=bright-green)](./LICENSE)
 [![downloads](https://img.shields.io/npm/dm/@accordproject/concerto)](https://www.npmjs.com/package/@accordproject/concerto)
 [![npm version](https://badge.fury.io/js/%40accordproject%2Fconcerto.svg)](https://badge.fury.io/js/%40accordproject%2Fconcerto)
+[![join slack](https://img.shields.io/badge/Slack-Join%20Slack-blue)](https://accord-project-slack-signup.herokuapp.com/)
 
 
 Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
