@@ -2,6 +2,7 @@
   "name": "@accordproject/concerto-tools",
   "version": "0.80.3",
   "description": "Tools for the Concerto Modeling Language",
+  "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=8",
     "npm": ">=5"

@@ -20,10 +20,30 @@ Things you can do using Concerto:
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
+## Documentation
+
+This mono-repo contains the following packages:
+
+* concerto-core : core library for model management/parsing/validation/serialization
+* concerto-tools : model converters and tools for Concerto model files
+* concerto-cli : command-line interface for Concerto
+
 # Installation
 
+To install the command-line interface:
+
 ```
-npm install @accordproject/concerto --save
+npm install -g @accordproject/concerto-cli
+```
+
+To install the core model library in your project:
+```
+npm install @accordproject/concerto-core --save
+```
+
+To install the tools library in your project:
+```
+npm install @accordproject/concerto-tools --save
 ```
 
 # Create a Concerto File
@@ -47,7 +67,7 @@ concept PostalAddress {
 # Create a Model Manager
 
 ```
-const ModelManager = require('@accordproject/concerto').ModelManager;
+const ModelManager = require('@accordproject/concerto-core').ModelManager;
 
 const modelManager = new ModelManager();
 modelManager.addModelFile( concertoFileText, 'filename.cto');
@@ -56,7 +76,7 @@ modelManager.addModelFile( concertoFileText, 'filename.cto');
 # Create an Instance
 
 ```
-const Factory = require('@accordproject/concerto').Factory;
+const Factory = require('@accordproject/concerto-core').Factory;
 
 const factory = new Factory(modelManager);
 const postalAddress = factory.newConcept('org.acme.address', 'PostalAddress');
@@ -66,7 +86,7 @@ postalAddress.streetAddress = '1 Maine Street';
 # Serialize an Instance to JSON
 
 ```
-const Serializer = require('@accordproject/concerto').Serializer;
+const Serializer = require('@accordproject/concerto-core').Serializer;
 
 const serializer = new Serializer(factory, modelManager);
 const plainJsObject = serializer.toJSON(postalAddress); // instance will be validated
