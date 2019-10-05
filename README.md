@@ -14,7 +14,7 @@ Concerto is a lightweight 100% JavaScript schema language and runtime. It works 
 
 Things you can do using Concerto:
 - Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
-- Optional edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
+- Optionally edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
 - Create runtime instances of your model
 - Serialize your instances to JSON
 - Deserialize (and optionally validate) instances from JSON
