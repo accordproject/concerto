@@ -43,7 +43,7 @@ require('yargs')
             Logger.info(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
         }
 
-        return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
+        return Commands.validate(argv.sample, argv.ctoFiles)
             .then((result) => {
                 Logger.info(result);
             })
@@ -78,7 +78,7 @@ require('yargs')
             Logger.info(`generate code in format ${argv.format} from the models ${argv.ctoFiles} into directory ${argv.outputDirectory}`);
         }
 
-        return Commands.generate(argv.format, argv.ctoFiles, argv.outputDirectory)
+        return Commands.generate(argv.format, argv.ctoSystem, argv.ctoFiles, argv.outputDirectory)
             .then((result) => {
                 Logger.info(result);
             })
