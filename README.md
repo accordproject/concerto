@@ -36,17 +36,17 @@ This mono-repo contains the following packages:
 
 To install the command-line interface:
 
-```js
+```
 npm install -g @accordproject/concerto-cli
 ```
 
 To install the core model library in your project:
-```js
+```
 npm install @accordproject/concerto-core --save
 ```
 
 To install the tools library in your project:
-```js
+```
 npm install @accordproject/concerto-tools --save
 ```
 
