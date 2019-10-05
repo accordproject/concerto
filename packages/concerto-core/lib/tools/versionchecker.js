@@ -76,7 +76,7 @@ class VersionChecker {
                     if (digest !== md5) {
                         throw new Error('Computed public API digest did not match the digest in the changelog for the most recent version. ' +
                         'Increment the version number and add a new entry to the changelog (explaining your public API change) using the digest ' + digest +
-                        '. Run \'git diff api.txt\' to understand the pubic API changes.');
+                        '. Run \'git diff api.txt\' to understand the pubic API changes. Please ensure that TypeScript definitions are up to date by updating packages/concerto-core/types/index.ds');
                     }
 
                     // we're done here...
@@ -87,7 +87,7 @@ class VersionChecker {
 
         }
         if (!result) {
-            throw new Error('Did not find any version in changelog');
+            throw new Error('Did not find any version in changelog.');
         }
         else {
             Logger.info('SUCCESS: validated public API against package.json and changelog.txt.');
