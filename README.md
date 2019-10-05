@@ -20,7 +20,7 @@ Things you can do using Concerto:
 - Deserialize (and optionally validate) instances from JSON
 - Instances are JS objects so they are easy to pass around your application
 - Introspect the model using a powerful set of APIs
-- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/accordproject/concerto-tools).
+- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/accordproject/concerto/tree/master/packages/concerto-tools).
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
@@ -28,9 +28,9 @@ Things you can do using Concerto:
 
 This mono-repo contains the following packages:
 
-* concerto-core : core library for model management/parsing/validation/serialization
-* concerto-tools : model converters and tools for Concerto model files
-* concerto-cli : command-line interface for Concerto
+* [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
+* [concerto-tools](https://github.com/accordproject/concerto/tree/master/packages/concerto-tools) : model converters and tools for Concerto model files
+* [concerto-cli](https://github.com/accordproject/concerto/tree/master/packages/concerto-cli) : command-line interface for Concerto
 
 # Installation
 
@@ -52,7 +52,7 @@ npm install @accordproject/concerto-tools --save
 
 # Create a Concerto File
 
-```
+```js
 namespace org.acme.address
 
 /**
@@ -70,7 +70,7 @@ concept PostalAddress {
 
 # Create a Model Manager
 
-```
+```js
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 
 const modelManager = new ModelManager();
@@ -79,7 +79,7 @@ modelManager.addModelFile( concertoFileText, 'filename.cto');
 
 # Create an Instance
 
-```
+```js
 const Factory = require('@accordproject/concerto-core').Factory;
 
 const factory = new Factory(modelManager);
@@ -89,7 +89,7 @@ postalAddress.streetAddress = '1 Maine Street';
 
 # Serialize an Instance to JSON
 
-```
+```js
 const Serializer = require('@accordproject/concerto-core').Serializer;
 
 const serializer = new Serializer(factory, modelManager);
@@ -99,7 +99,7 @@ console.log(JSON.stringify(plainJsObject, null, 4);
 
 # Deserialize an Instance from JSON
 
-```
+```js
 const postalAddress = serializer.fromJSON(plainJsObject); // JSON will be validated
 console.log(postalAddress.streetAddress);
 ```
@@ -120,7 +120,7 @@ The Concerto metamodel contains:
 
 ## Namespaces
 
-```
+```js
 namespace foo
 ```
 
@@ -132,17 +132,17 @@ To reference types defined in one namespace in another namespace the types must 
 
 Imports can either be qualified, or can use wildcards.
 
-```
+```js
 import org.accordproject.address.PostalAddress
 ```
 
-```
+```js
 import org.accordproject.address.*
 ```
 
 Imports can also use the optional `from` declaration to import a model files that has been deployed to a URL.
 
-```
+```js
 import org.accordproject.address.PostalAddress from https://models.accordproject.org/address.cto
 ```
 
@@ -154,7 +154,7 @@ The Model Manager will resolve all imports to ensure that the set of declaration
 
 Concepts are similar to class declarations in most object-oriented languages, in that they may have a super-type and a set of typed properties:
 
-```
+```js
 abstract concept Animal {
   o DateTime dob
 }
@@ -170,7 +170,7 @@ A concept can be declared `abstract` is it should not be instantiated (must be s
 
 An asset is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getAssetDeclarations` API to look up all assets.
 
-```
+```js
 asset Vehicle identified by vin {
   o String vin
 }
@@ -182,7 +182,7 @@ Assets are typically used in your models for the long-lived identifiable Things 
 
 An participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
 
-```
+```js
 participant Customer identified by email {
   o String email
 }
@@ -194,7 +194,7 @@ Participants are typically used in your models for the identifiable people or or
 
 An transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
 
-```
+```js
 transaction Order identified by orderId {
   o String orderId
 }
@@ -206,7 +206,7 @@ Transactions are typically used in your models for the identifiable business eve
 
 Use enumerations to capture lists of domain values.
 
-```
+```js
 enum Gender {
   o MALE
   o FEMALE
@@ -246,7 +246,7 @@ String fields may include an optional regular expression, which is used to valid
 
 The example below declares that the Farmer participant contains a field postcode that must conform to the regular expression for valid UK postcodes.
 
-```
+```js
 participant Farmer extends Participant {
     o String firstName default="Old"
     o String lastName default="McDonald"
@@ -261,7 +261,7 @@ Double, Long or Integer fields may include an optional range expression, which i
 
 The example below declared that the Vehicle asset has an Integer field year which defaults to 2016 and must be 1990, or higher. Range expressions may omit the lower or upper bound if checking is not required.
 
-```
+```js
 asset Vehicle extends Base {
   // An asset contains Fields, each of which can have an optional default value
   o String model default="F150"
@@ -289,7 +289,7 @@ A property of a class may be declared as a relationship using the `-->` syntax i
 
 This model declares that an `Order` has-an array of `OrderLine` concepts. When the `Order` is deleted all the `OrderLines` will also be deleted.
 
-```
+```js
 concept OrderLine {
   o String sku
 }
@@ -301,7 +301,7 @@ asset Order identified by orderId {
 
 Whereas this model declares that an `Order` has-an array of reference to `OrderLine`s. Deleting the `Order` has no impact on the `OrderLine`. When the `Order` is serialized the JSON only the IDs of the `OrderLines` are stored within the `Order`, not the `OrderLines` themselves.
 
-```
+```js
 asset OrderLine identified by orderLineId {
   o String orderLineId
   o String sku
@@ -331,7 +331,7 @@ Relationships must be resolved to retrieve an instance of the object being refer
 
 Model elements may have arbitrary decorators (aka annotations) placed on them. These are available via API and can be useful for tools to extend the model.
 
-```
+```js
 @foo("arg1", 2)
 asset Order identified by orderId {
   o String orderId
@@ -350,7 +350,7 @@ Decorators are accessible at runtime via the `ModelManager` introspect APIs. Thi
 
 The example below retrieves the 3rd argument to the foo decorator attached to the myField property of a class declaration:
 
-```
+```js
 const val = myField.getDecorator('foo').getArguments()[2];
 ```
 
