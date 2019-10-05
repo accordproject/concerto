@@ -20,12 +20,17 @@ const Commands = require('./lib/commands');
 
 require('yargs')
     .scriptName('concerto')
-    .usage('$0 <cmd> [args]')
+    .usage('$0 <cmd> [manager] [args]')
     .command('validate', 'validate JSON against model files', (yargs) => {
         yargs.option('sample', {
             describe: 'sample JSON to validate',
             type: 'string',
             default: 'sample.json'
+        });
+        yargs.option('ctoSystem', {
+            describe: 'system model to be used',
+            type: 'string'
+            default: 'org.accordproject.base.cto'
         });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
@@ -38,7 +43,7 @@ require('yargs')
             Logger.info(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
         }
 
-        return Commands.validate(argv.sample, argv.ctoFiles)
+        return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
             .then((result) => {
                 Logger.info(result);
             })
@@ -47,6 +52,11 @@ require('yargs')
             });
     })
     .command('generate', 'generate code from model files', (yargs) => {
+        yargs.option('ctoSystem', {
+            describe: 'system model to be used',
+            type: 'string'
+            default: 'org.accordproject.base.cto'
+        });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
