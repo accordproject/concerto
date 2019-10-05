@@ -180,7 +180,7 @@ Assets are typically used in your models for the long-lived identifiable Things 
 
 ## Participants
 
-An participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
+A participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
 
 ```
 participant Customer identified by email {
@@ -192,7 +192,7 @@ Participants are typically used in your models for the identifiable people or or
 
 ## Transactions
 
-An transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
+A transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
 
 ```
 transaction Order identified by orderId {
@@ -315,9 +315,9 @@ asset Order identified by orderId {
 
 A relationship is a tuple composed of:
 
-The namespace of the type being referenced
-The type name of the type being referenced
-The identifier of the instance being referenced
+- The namespace of the type being referenced
+- The type name of the type being referenced
+- The identifier of the instance being referenced
 
 Hence a relationship could be to: `org.example.Vehicle#123456`
 
