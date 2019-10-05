@@ -29,6 +29,16 @@ const PlantUMLVisitor = CodeGen.PlantUMLVisitor;
 const TypescriptVisitor = CodeGen.TypescriptVisitor;
 const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
 
+const systemModel = `namespace org.accordproject.base
+abstract asset Asset {  }
+abstract participant Participant {  }
+abstract transaction Transaction identified by transactionId {
+  o String transactionId
+}
+abstract event Event identified by eventId {
+  o String eventId
+}`;
+
 /**
  * Utility class that implements the commands exposed by the CLI.
  * @class
@@ -59,9 +69,10 @@ class Commands {
         return JSON.stringify(serializer.toJSON(object));
     }
 
-    static async generate(format, ctoFiles, outputDirectory) {
+    static async generate(format, ctoSystem, ctoFiles, outputDirectory) {
 
         const modelManager = new ModelManager();
+        modelManager.addModelFile(systemModel, ctoSystem, false, true);
 
         const modelFiles = ctoFiles.map((ctoFile) => {
             return fs.readFileSync(ctoFile, 'utf8');
