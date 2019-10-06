@@ -26,7 +26,8 @@ const TransactionDeclaration = require('./introspect/transactiondeclaration');
 const TypedStack = require('./serializer/typedstack');
 
 const baseDefaultOptions = {
-    validate: true
+    validate: true,
+    ergo: false
 };
 
 /**
@@ -81,6 +82,8 @@ class Serializer {
      * @param {boolean} [options.deduplicateResources] - Generate $id for resources and
      * if a resources appears multiple times in the object graph only the first instance is
      * serialized in full, subsequent instances are replaced with a reference to the $id
+     * @param {boolean} [options.convertResourcesToId] - Convert resources that
+     * are specified for relationship fields into their id, false by default.
      * @return {Object} - The Javascript Object that represents the resource
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
@@ -108,7 +111,9 @@ class Serializer {
         const generator = new JSONGenerator(
             options.convertResourcesToRelationships === true,
             options.permitResourcesForRelationships === true,
-            options.deduplicateResources === true
+            options.deduplicateResources === true,
+            options.convertResourcesToId === true,
+            options.ergo === true
         );
 
         parameters.stack.clear();
@@ -173,7 +178,7 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true);
+        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.ergo === true);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model

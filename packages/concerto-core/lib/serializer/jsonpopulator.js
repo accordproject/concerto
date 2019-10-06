@@ -80,9 +80,11 @@ class JSONPopulator {
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
      * place of relationships, false by default.
+     * @param {boolean} [ergo] target ergo.
      */
-    constructor(acceptResourcesForRelationships) {
+    constructor(acceptResourcesForRelationships, ergo) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
+        this.ergo = ergo;
     }
 
     /**
@@ -221,7 +223,7 @@ class JSONPopulator {
             break;
         case 'Integer':
         case 'Long':
-            result = parseInt(json);
+            result = this.ergo ? parseInt(json.nat) : parseInt(json);
             break;
         case 'Double':
             result = parseFloat(json);
@@ -232,11 +234,20 @@ class JSONPopulator {
         case 'String':
             result = json.toString();
             break;
-        default:
+        default: {
             // everything else should be an enumerated value...
-            result = json;
+            if (this.ergo) {
+                // unpack the enum
+                let current = json.data;
+                while (!current.left) {
+                    current = current.right;
+                }
+                result = current.left;
+            } else {
+                result = json;
+            }
         }
-
+        }
         return result;
     }
 
