@@ -196,6 +196,6 @@ class ModelManager {
 class Serializer {
    + void constructor(Factory,ModelManager) 
    + void setDefaultOptions(Object) 
-   + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean) throws Error
+   + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean,boolean) throws Error
    + Resource fromJSON(Object,Object,boolean,boolean) 
 }

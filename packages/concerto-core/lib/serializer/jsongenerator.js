@@ -45,11 +45,16 @@ class JSONGenerator {
      * @param {boolean} [deduplicateResources] If resources appear several times
      * in the object graph only the first instance is serialized, with only the $id
      * written for subsequent instances, false by default.
+     * @param {boolean} [convertResourcesToId] Convert resources that
+     * are specified for relationship fields into their id, false by default.
+     * @param {boolean} [ergo] target ergo.
      */
-    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources) {
+    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
+        this.convertResourcesToId = convertResourcesToId;
+        this.ergo = ergo;
     }
 
     /**
@@ -141,8 +146,27 @@ class JSONGenerator {
                 }
             }
             result = array;
-        } else if (field.isPrimitive() || ModelUtil.isEnum(field)) {
+        } else if (field.isPrimitive()) {
             result = this.convertToJSON(field, obj);
+        } else if (ModelUtil.isEnum(field)) {
+            if (this.ergo) {
+                // Boxes an enum value to the expected combination of sum types
+                const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
+                const enumName = enumDeclaration.getFullyQualifiedName();
+                const properties = enumDeclaration.getProperties();
+                let either = { 'left' : obj };
+                for(let n=0; n < properties.length; n++) {
+                    const property = properties[n];
+                    if(property.getName() === obj) {
+                        break;
+                    } else {
+                        either = { 'right' : either };
+                    }
+                }
+                result = { 'type' : [enumName], 'data': either };
+            } else {
+                result = this.convertToJSON(field, obj);
+            }
         } else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
@@ -163,10 +187,20 @@ class JSONGenerator {
         switch (field.getType()) {
         case 'DateTime':
         {
-            return obj.isUtc() ? obj.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : obj.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+            if (this.ergo) {
+                return obj;
+            } else {
+                return obj.isUtc() ? obj.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : obj.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+            }
         }
         case 'Integer':
-        case 'Long':
+        case 'Long': {
+            if (this.ergo) {
+                return { nat: obj };
+            } else {
+                return obj;
+            }
+        }
         case 'Double':
         case 'Boolean':
         default:
@@ -243,7 +277,11 @@ class JSONGenerator {
                 throw new Error('Did not find a relationship for ' + relationshipDeclaration.getFullyQualifiedTypeName() + ' found ' + relationshipOrResource);
             }
         }
-        return relationshipOrResource.toURI();
+        if (this.convertResourcesToId) {
+            return relationshipOrResource.getIdentifier();
+        } else {
+            return relationshipOrResource.toURI();
+        }
     }
 }
 

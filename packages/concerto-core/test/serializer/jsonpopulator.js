@@ -33,6 +33,7 @@ describe('JSONPopulator', () => {
     let modelManager;
     let mockFactory;
     let jsonPopulator;
+    let ergoJsonPopulator;
     let sandbox;
     let assetDeclaration1;
     let relationshipDeclaration1;
@@ -80,6 +81,7 @@ describe('JSONPopulator', () => {
         sandbox = sinon.createSandbox();
         mockFactory = sinon.createStubInstance(Factory);
         jsonPopulator = new JSONPopulator();
+        ergoJsonPopulator = new JSONPopulator(null,true);
     });
 
     afterEach(() => {
@@ -117,12 +119,16 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             let value = jsonPopulator.convertToObject(field, '32768');
             value.should.equal(32768);
+            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
+            value.should.equal(32768);
         });
 
         it('should convert to integers from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
             let value = jsonPopulator.convertToObject(field, 32768);
+            value.should.equal(32768);
+            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
             value.should.equal(32768);
         });
 
@@ -131,12 +137,16 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             let value = jsonPopulator.convertToObject(field, '32768');
             value.should.equal(32768);
+            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
+            value.should.equal(32768);
         });
 
         it('should convert to longs from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             let value = jsonPopulator.convertToObject(field, 32768);
+            value.should.equal(32768);
+            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
             value.should.equal(32768);
         });
 
