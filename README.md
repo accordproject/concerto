@@ -1,5 +1,5 @@
-# Concerto
-
+﻿<h1 align="center">Concerto
+</h1> 
 <p align="center">
   <a href="https://travis-ci.org/accordproject/concerto"><img src="https://travis-ci.org/accordproject/concerto.svg?branch=master" alt="Build Status"></a>
   <a href="https://coveralls.io/github/accordproject/concerto?branch=master"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
