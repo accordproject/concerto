@@ -14,7 +14,7 @@ Concerto is a lightweight 100% JavaScript schema language and runtime. It works 
 
 Things you can do using Concerto:
 - Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
-- Optionally edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
+- Optionall edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
 - Create runtime instances of your model
 - Serialize your instances to JSON
 - Deserialize (and optionally validate) instances from JSON
@@ -180,7 +180,7 @@ Assets are typically used in your models for the long-lived identifiable Things 
 
 ## Participants
 
-A participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
+An participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
 
 ```js
 participant Customer identified by email {
@@ -192,7 +192,7 @@ Participants are typically used in your models for the identifiable people or or
 
 ## Transactions
 
-A transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
+An transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
 
 ```js
 transaction Order identified by orderId {
@@ -287,7 +287,7 @@ asset Vehicle extends Base {
 
 A property of a class may be declared as a relationship using the `-->` syntax instead of the `o` syntax. The `o` syntax declares that the class contains (has-a) property of that type, whereas the `-->` syntax declares a typed pointer to an external identifiable instance.
 
-This model declares that an `Order` has an array of `OrderLine` concepts. When the `Order` is deleted all the `OrderLines` will also be deleted.
+This model declares that an `Order` has-an array of `OrderLine` concepts. When the `Order` is deleted all the `OrderLines` will also be deleted.
 
 ```js
 concept OrderLine {
@@ -299,7 +299,7 @@ asset Order identified by orderId {
 }
 ```
 
-Whereas this model declares that an `Order` has an array of reference to `OrderLine`s. Deleting the `Order` has no impact on the `OrderLine`. When the `Order` is serialized the JSON only the IDs of the `OrderLines` are stored within the `Order`, not the `OrderLines` themselves.
+Whereas this model declares that an `Order` has-an array of reference to `OrderLine`s. Deleting the `Order` has no impact on the `OrderLine`. When the `Order` is serialized the JSON only the IDs of the `OrderLines` are stored within the `Order`, not the `OrderLines` themselves.
 
 ```js
 asset OrderLine identified by orderLineId {
