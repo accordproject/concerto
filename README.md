@@ -16,7 +16,7 @@ This is why you should care: https://www.accordproject.org/news/strongly-typed-d
 
 Things you can do using Concerto:
 - Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
-- Optionall edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
+- Optionally edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
 - Create runtime instances of your model
 - Serialize your instances to JSON
 - Deserialize (and optionally validate) instances from JSON
@@ -182,7 +182,7 @@ Assets are typically used in your models for the long-lived identifiable Things 
 
 ## Participants
 
-An participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
+A participant is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getParticipantDeclarations` API to look up all participants.
 
 ```js
 participant Customer identified by email {
@@ -194,7 +194,7 @@ Participants are typically used in your models for the identifiable people or or
 
 ## Transactions
 
-An transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
+A transaction is a class declaration that has a single `String` property that acts as an identifier. Use the `modelManager.getTransactionDeclarations` API to look up all transactions.
 
 ```js
 transaction Order identified by orderId {
