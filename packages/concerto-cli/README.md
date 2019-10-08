@@ -32,6 +32,7 @@ Options:
   --verbose, -v                                                 [default: false]
   --help         Show help                                             [boolean]
   --sample       sample JSON to validate       [string] [default: "sample.json"]
+  --ctoSystem    system model to be used                                [string]
   --ctoFiles     array of CTO files                       [array] [default: "."]
 ```
 
@@ -49,6 +50,7 @@ Options:
   --version          Show version number                               [boolean]
   --verbose, -v                                                 [default: false]
   --help             Show help                                         [boolean]
+  --ctoSystem        system model to be used                            [string]
   --ctoFiles         array of CTO files                   [array] [default: "."]
   --format           format of the code to generate
                                                 [string] [default: "JSONSchema"]
@@ -101,10 +103,11 @@ concerto get
 save local copies of external model dependencies
 
 Options:
-  --version      Show version number                                   [boolean]
+  --version          Show version number                               [boolean]
   --verbose, -v                                                 [default: false]
-  --help         Show help                                             [boolean]
-  --ctoFiles     array of local CTO files                 [array] [default: "."]
-  --out          output directory path                  [string] [default: "./"]
+  --help             Show help                                         [boolean]
+  --ctoFiles         array of local CTO files             [array] [default: "."]
+  --ctoSystem        system model to be used                            [string]
+  --outputDirectory  output directory path              [string] [default: "./"]
 ```
 
