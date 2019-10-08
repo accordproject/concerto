@@ -20,7 +20,7 @@ const Commands = require('./lib/commands');
 
 require('yargs')
     .scriptName('concerto')
-    .usage('$0 <cmd> [manager] [args]')
+    .usage('$0 <cmd> [args]')
     .command('validate', 'validate JSON against model files', (yargs) => {
         yargs.option('sample', {
             describe: 'sample JSON to validate',
@@ -30,7 +30,6 @@ require('yargs')
         yargs.option('ctoSystem', {
             describe: 'system model to be used',
             type: 'string'
-            default: 'org.accordproject.base.cto'
         });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
@@ -43,7 +42,7 @@ require('yargs')
             Logger.info(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
         }
 
-        return Commands.validate(argv.sample, argv.ctoFiles)
+        return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
             .then((result) => {
                 Logger.info(result);
             })
@@ -55,7 +54,6 @@ require('yargs')
         yargs.option('ctoSystem', {
             describe: 'system model to be used',
             type: 'string'
-            default: 'org.accordproject.base.cto'
         });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
@@ -93,6 +91,10 @@ require('yargs')
             array: true,
             default: '.'
         });
+        yargs.option('ctoSystem', {
+            describe: 'system model to be used',
+            type: 'string'
+        });
         yargs.option('outputDirectory', {
             describe: 'output directory path',
             type: 'string',
@@ -103,7 +105,10 @@ require('yargs')
             Logger.info(`Saving external models from ${argv.ctoFiles} into directory: ${argv.outputDirectory}`);
         }
 
-        return Commands.getExternalModels(argv.ctoFiles, argv.outputDirectory)
+        return Commands.getExternalModels(argv.ctoSystem, argv.ctoFiles, argv.outputDirectory)
+            .then((result) => {
+                Logger.info(result);
+            })
             .catch((err) => {
                 Logger.error(err.message);
             });

@@ -27,6 +27,7 @@ const Commands = require('../lib/commands');
 
 describe('cicero-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
+    const hlModel = path.resolve(__dirname, 'models/org.hyperledger.composer.system.cto');
     const sample1 = path.resolve(__dirname, 'data/sample1.json');
     const sample2 = path.resolve(__dirname, 'data/sample2.json');
     const sampleText1 = fs.readFileSync(sample1, 'utf8');
@@ -34,13 +35,13 @@ describe('cicero-cli', () => {
 
     describe('#validate', () => {
         it('should validate against a model', async () => {
-            const result = await Commands.validate(sample1, models);
+            const result = await Commands.validate(sample1, null, models);
             JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
         });
 
         it('should fail to validate against a model', async () => {
             try {
-                const result = await Commands.validate(sample2, models);
+                const result = await Commands.validate(sample2, null, models);
                 JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
             } catch (err) {
                 err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
@@ -52,43 +53,43 @@ describe('cicero-cli', () => {
 
         it('should generate a Go model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('Go', models, dir.path, true);
+            await Commands.generate('Go', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should generate a PlantUML model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('PlantUML', models, dir.path, true);
+            await Commands.generate('PlantUML', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should generate a Typescript model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('Typescript', models, dir.path, true);
+            await Commands.generate('Typescript', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should generate a Java model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('Java', models, dir.path, true);
+            await Commands.generate('Java', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should generate a JSONSchema model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('JSONSchema', models, dir.path, true);
+            await Commands.generate('JSONSchema', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should generate a XMLSchema model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('XMLSchema', models, dir.path, true);
+            await Commands.generate('XMLSchema', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should not generate an unknown model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.generate('BLAH', models, dir.path, true);
+            await Commands.generate('BLAH', null, models, dir.path);
             fs.readdirSync(dir.path).length.should.be.equal(0);
             dir.cleanup();
         });
@@ -97,7 +98,7 @@ describe('cicero-cli', () => {
     describe('#getExternalModels', () => {
         it('should save external dependencies', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.getExternalModels(models, dir.path);
+            await Commands.getExternalModels(null, models, dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@models.accordproject.org.cicero.contract.cto',
                 'dom.cto',
@@ -108,7 +109,7 @@ describe('cicero-cli', () => {
 
         it('should save external dependencies for an external model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.getExternalModels(['https://models.accordproject.org/patents/patent.cto'], dir.path);
+            await Commands.getExternalModels(null,['https://models.accordproject.org/patents/patent.cto'], dir.path);
             fs.readdirSync(dir.path).should.eql([
                 "@models.accordproject.org.address.cto",
                 "@models.accordproject.org.geo.cto",
@@ -121,6 +122,15 @@ describe('cicero-cli', () => {
                 "@models.accordproject.org.value.cto"
             ]);
             dir.cleanup();
+        });
+
+        it('should fail saving external dependencies for an external model but with the wrong system model', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            try {
+                await Commands.getExternalModels(hlModel,['https://models.accordproject.org/patents/patent.cto'], dir.path);
+            } catch (err) {
+                err.message.should.contain('Relationship transactionInvoked must be to an asset or participant, but is to org.hyperledger.composer.system.Transaction');
+            }
         });
     });
 });
