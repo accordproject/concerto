@@ -33,19 +33,19 @@ To create a Github account, follow the instructions [here][github-signup].
 Afterwards, go ahead and [fork][github-forking] the
 [main Concerto repository][github].
 
-### Building Cicero
+### Building Concerto
 
 To build Concerto, you clone the source code repository and use lerna to build:
 
 ```shell
 # Clone your Github repository:
-git clone https://github.com/<github username>/cicero.git
+git clone https://github.com/<github username>/concerto.git
 
-# Go to the Cicero directory:
-cd cicero
+# Go to the Concerto directory:
+cd Concerto
 
-# Add the main Cicero repository as an upstream remote to your repository:
-git remote add upstream "https://github.com/acccordproject/cicero.git"
+# Add the main Concerto repository as an upstream remote to your repository:
+git remote add upstream "https://github.com/accordproject/concerto.git"
 
 # Install node.js dependencies:
 npm install -g lerna
