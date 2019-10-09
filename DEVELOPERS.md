@@ -1,4 +1,4 @@
-# Developing Cicero
+# Developing Concerto
 
 * [Development Setup][developers.setup]
 * [Coding Rules][developers.rules]
@@ -7,12 +7,12 @@
 
 ## <a name="setup"> Development Setup
 
-This document describes how to set up your development environment to build and test Cicero, and
+This document describes how to set up your development environment to build and test Concerto, and
 explains the basic mechanics of using `git`, `node`, `lerna`.
 
 ### Installing Dependencies
 
-Before you can build Cicero, you must install and configure the following dependencies on your
+Before you can build Concerto, you must install and configure the following dependencies on your
 machine:
 
 * [Git][git]: The [Github Guide to Installing Git][git-setup] is a good source of information.
@@ -24,28 +24,28 @@ machine:
   We recommend using [nvm][nvm] (or [nvm-windows][nvm-windows])
   to manage and install Node.js, which makes it easy to change the version of Node.js per project.
 
-### Forking Cicero on Github
+### Forking Concerto on Github
 
-To contribute code to Cicero, you must have a GitHub account so you can push code to your own
-fork of Cicero and open Pull Requests in the [GitHub Repository][github].
+To contribute code to Concerto, you must have a GitHub account so you can push code to your own
+fork of Concerto and open Pull Requests in the [GitHub Repository][github].
 
 To create a Github account, follow the instructions [here][github-signup].
 Afterwards, go ahead and [fork][github-forking] the
-[main Cicero repository][github].
+[main Concerto repository][github].
 
-### Building Cicero
+### Building Concerto
 
-To build Cicero, you clone the source code repository and use lerna to build:
+To build Concerto, you clone the source code repository and use lerna to build:
 
 ```shell
 # Clone your Github repository:
-git clone https://github.com/<github username>/cicero.git
+git clone https://github.com/<github username>/Concerto.git
 
-# Go to the Cicero directory:
-cd cicero
+# Go to the Concerto directory:
+cd Concerto
 
-# Add the main Cicero repository as an upstream remote to your repository:
-git remote add upstream "https://github.com/acccordproject/cicero.git"
+# Add the main Concerto repository as an upstream remote to your repository:
+git remote add upstream "https://github.com/accordproject/Concerto.git"
 
 # Install node.js dependencies:
 npm install -g lerna
@@ -92,7 +92,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 
 We have very precise rules over how our git commit messages can be formatted.  This leads to **more
 readable messages** that are easy to follow when looking through the **project history** and **git logs**.  
-But also, we use the git commit messages to **generate the Cicero change log**.
+But also, we use the git commit messages to **generate the Concerto change log**.
 
 The commit message formatting can be added using a version of typical git workflow.
 
@@ -171,14 +171,14 @@ When approved and ready to merge, a Pull Request should be squashed down to a si
 
 ## <a name="documentation"></a> Writing Documentation
 
-The Cicero project uses [jsdoc][jsdoc] for all of its code
+The Concerto project uses [jsdoc][jsdoc] for all of its code
 documentation.
 
 This means that all the docs are stored inline in the source code and so are kept in sync as it
 changes.
 
 This means that since we generate the documentation from the source code, we can easily provide
-version-specific documentation by simply checking out a version of Cicero and running the build.
+version-specific documentation by simply checking out a version of Concerto and running the build.
 
 ## License <a name="license"></a>
 
