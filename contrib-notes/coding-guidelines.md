@@ -32,7 +32,7 @@ $ git clone git@github.com:MyGitName/concerto.git
 ```
 $ git remote add upstream git@github.com:accordproject/concerto.git
 ```
-- As this is just forked it will be up-to-date. But if you did this previously and now starting on something new, the the next step is to update your master branch.
+- As this is just forked it will be up-to-date. But if you did this previously and now starting on something new, the next step is to update your master branch.
 
   *This is the point you would come to generally when starting anything new, a new clone/fork every time is not necessary*
 
@@ -48,7 +48,7 @@ $ git checkout -b defect-1234    # Including reference to the git issue is usefu
 - As you commit changes to your local repository ensure you provide sign-off for that commit using the `-s` option of
 `git commit`. For more information see https://github.com/probot/dco#how-it-works
 
-- Time passes, and you now have a change that you are happy with. Next step is to push this to your local repository. First step is to ensure that your branch is update.
+- Time passes, and you now have a change that you are happy with. Next step is to push this to your local repository. First step is to ensure that your branch is updated.
 ```
 $ git pull upstream master
 ```
@@ -61,7 +61,7 @@ $ git push origin defect-1234   # note the branch you have been working on
 - The next step is to go to the Github web-ui and create a pull request to the master repository for this fork.
 - ...screen shots needed here - wip...
 - All Pull Requests should be linked to the issue they are addressing
-- All Pull Requests should have a review by another comitter on the Concerto project
+- All Pull Requests should have a review by another committer on the Concerto project
 - Any API, CLI, or major change should be mentioned to a maintainer to ensure consistency
 
 ### Important Reminders
