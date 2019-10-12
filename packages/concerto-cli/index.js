@@ -20,6 +20,9 @@ const Commands = require('./lib/commands');
 
 require('yargs')
     .scriptName('concerto')
+    .demandCommand(1, '# Please specify a command')
+    .recommendCommands()
+    .strict()
     .usage('$0 <cmd> [args]')
     .command('validate', 'validate JSON against model files', (yargs) => {
         yargs.option('sample', {
