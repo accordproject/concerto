@@ -21,7 +21,7 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const fs = require('fs');
-const JSONGenerator = require('../../../lib/codegen/fromjs/jsongenerator');
+const JSONGenerator = require('../../scripts/jsongenerator');
 const path = require('path');
 
 describe('JSONGenerator', function () {

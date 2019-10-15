@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const yargs = require('yargs');
-const Logger = require('../logger');
+const Logger = require('../lib/logger');
 const VersionChecker = require('./versionchecker');
 
 /**

@@ -161,5 +161,4 @@ class JSONGenerator {
 
 }
 
-
 module.exports = JSONGenerator;

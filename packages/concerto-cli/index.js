@@ -42,7 +42,7 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`validate sample in ${argv.format} against the models ${argv.ctoFiles}`);
+            Logger.info(`validate sample in ${argv.sample} against the models ${argv.ctoFiles}`);
         }
 
         return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
@@ -53,7 +53,7 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
-    .command('generate', 'generate code from model files', (yargs) => {
+    .command('compile', 'generate code for a target platform', (yargs) => {
         yargs.option('ctoSystem', {
             describe: 'system model to be used',
             type: 'string'
@@ -64,22 +64,22 @@ require('yargs')
             array: true,
             default: '.'
         });
-        yargs.option('format', {
-            describe: 'format of the code to generate',
+        yargs.option('target', {
+            describe: 'target of the code generation',
             type: 'string',
             default: 'JSONSchema'
         });
-        yargs.option('outputDirectory', {
+        yargs.option('output', {
             describe: 'output directory path',
             type: 'string',
             default: './output/'
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`generate code in format ${argv.format} from the models ${argv.ctoFiles} into directory ${argv.outputDirectory}`);
+            Logger.info(`generate code in format ${argv.format} from models ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.generate(argv.format, argv.ctoSystem, argv.ctoFiles, argv.outputDirectory)
+        return Commands.compile(argv.format, argv.ctoSystem, argv.ctoFiles, argv.output)
             .then((result) => {
                 Logger.info(result);
             })
@@ -98,17 +98,17 @@ require('yargs')
             describe: 'system model to be used',
             type: 'string'
         });
-        yargs.option('outputDirectory', {
+        yargs.option('output', {
             describe: 'output directory path',
             type: 'string',
             default: './'
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`Saving external models from ${argv.ctoFiles} into directory: ${argv.outputDirectory}`);
+            Logger.info(`saving external models from ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.getExternalModels(argv.ctoSystem, argv.ctoFiles, argv.outputDirectory)
+        return Commands.get(argv.ctoSystem, argv.ctoFiles, argv.output)
             .then((result) => {
                 Logger.info(result);
             })

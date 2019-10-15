@@ -18,11 +18,10 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const program = require('commander');
-const Logger = require('../logger');
-const PlantUMLGenerator = require('./fromjs/plantumlgenerator');
-const APISignatureGenerator = require('./fromjs/apisignaturegenerator');
+const Logger = require('../lib/logger');
+const APISignatureGenerator = require('./apisignaturegenerator');
 const JavaScriptParser = require('./javascriptparser');
-const JSONGenerator = require('./fromjs/jsongenerator');
+const JSONGenerator = require('./jsongenerator');
 
 /**
  * Processes a single Javascript file (.js extension)
@@ -67,10 +66,10 @@ function processDirectory(path, fileProcessor) {
 }
 
 /**
- * Generates Plant UML files from Javascript source files
+ * Generates documentation files from Javascript source files
  *
- * node ./lib/codegen/umlgen.js
- * --outputDir <location to write UML files>
+ * node ./scripts/parsejs.js
+ * --outputDir <location to write output files>
  * --inputDir <location to recursively read .js files>
  */
 program
@@ -80,16 +79,13 @@ program
     .option('-o, --outputDir <outputDir>', 'Output directory')
     .option('-i, --inputDir <inputDir>', 'Input source directory')
     .option('-s, --single <singlefile>', 'Single file to process')
-    .option('-f, --format <format>', 'Format of code to generate. Defaults to PlantUML.', 'PlantUML')
+    .option('-f, --format <format>', 'Format of code to generate. Defaults to APISignature.', 'APISignature')
     .option('-p, --private', 'Include classes that have the @private JSDoc annotation')
     .parse(process.argv);
 
 let fileProcessor;
 
 switch (program.format) {
-case 'PlantUML':
-    fileProcessor = new PlantUMLGenerator();
-    break;
 case 'APISignature':
     fileProcessor = new APISignatureGenerator();
     break;
@@ -97,7 +93,6 @@ case 'JSON':
     fileProcessor = new JSONGenerator();
     break;
 }
-
 
 if (program.inputDir) {
     // Loop through all the files in the input directory

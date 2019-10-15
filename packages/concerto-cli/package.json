@@ -14,6 +14,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "pretest": "npm run lint",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
