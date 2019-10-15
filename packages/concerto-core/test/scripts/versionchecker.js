@@ -14,7 +14,7 @@
 
 'use strict';
 
-const VersionChecker = require('../../lib/tools/versionchecker');
+const VersionChecker = require('../../scripts/versionchecker');
 require('chai').should();
 
 describe('VersionChecker', () => {

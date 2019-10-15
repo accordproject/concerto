@@ -17,7 +17,7 @@
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 const path = require('path');
-const Writer = require('./writer');
+const Writer = require('@accordproject/concerto-core').Writer;
 
 /**
  * FileWriter creates text files under a directory tree. It can be used

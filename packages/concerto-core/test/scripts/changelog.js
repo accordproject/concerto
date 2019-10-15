@@ -23,7 +23,7 @@ const path = require('path');
 
 const yargs = require('yargs');
 const mockery = require('mockery');
-const VersionChecker = require('../../lib/tools/versionchecker');
+const VersionChecker = require('../../scripts/versionchecker');
 
 
 describe('composer cli', () => {
@@ -60,16 +60,16 @@ describe('composer cli', () => {
 
     it('Should set up yargs correctly and call the main version checker code', function () {
         sandbox.stub(VersionChecker,'check');
-        delete require.cache[path.resolve(__dirname,  '../../lib/tools/changelog.js')];
-        require('../../lib/tools/changelog.js');
+        delete require.cache[path.resolve(__dirname,  '../../scripts/changelog.js')];
+        require('../../scripts/changelog.js');
         sinon.assert.calledThrice(stubreadfile);
 
     });
 
     it('Should handle if VersionChecker throws an error', () => {
         sandbox.stub(VersionChecker,'check').throws(new Error());
-        delete require.cache[path.resolve(__dirname,  '../../lib/tools/changelog.js')];
-        require('../../lib/tools/changelog.js');
+        delete require.cache[path.resolve(__dirname,  '../../scripts/changelog.js')];
+        require('../../scripts/changelog.js');
         sinon.assert.calledWith(process.exit, 1);
         sinon.assert.calledThrice(stubreadfile);
 

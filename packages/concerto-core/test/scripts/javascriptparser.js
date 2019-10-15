@@ -14,7 +14,7 @@
 
 'use strict';
 
-const JavascriptParser = require('./../../lib/codegen/javascriptparser');
+const JavascriptParser = require('../../scripts/javascriptparser');
 const fs = require('fs');
 const path = require('path');
 const doctrine = require('doctrine');

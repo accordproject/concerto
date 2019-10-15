@@ -16,7 +16,7 @@
 
 const crypto = require('crypto');
 const semver = require('semver');
-const Logger = require('../logger');
+const Logger = require('../lib/logger');
 
 /**
  * Checks that a change log file takes into account

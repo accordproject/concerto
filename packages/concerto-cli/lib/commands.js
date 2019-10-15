@@ -20,7 +20,7 @@ const mkdirp = require('mkdirp');
 const { ModelManager, Factory, Serializer } = require('@accordproject/concerto-core');
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const DefaultModelFileLoader = require('@accordproject/concerto-core').DefaultModelFileLoader;
-const FileWriter = require('@accordproject/concerto-core').FileWriter;
+const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
 const GoLangVisitor = CodeGen.GoLangVisitor;
@@ -39,7 +39,7 @@ abstract transaction Transaction identified by transactionId {
 abstract event Event identified by eventId {
   o String eventId
 }`;
-const defaultSystemName = `@org.accordproject.base`
+const defaultSystemName = '@org.accordproject.base';
 
 /**
  * Utility class that implements the commands exposed by the CLI.
@@ -50,11 +50,11 @@ class Commands {
 
     /**
      * Add model file
-     * 
-     * @param {object} modelFileLoader the model loader
-     * @param {object} modelManager the model manager
-     * @param {string} ctoFile the model file
-     * @param {boolean} system whether this is a system model
+     *
+     * @param {object} modelFileLoader - the model loader
+     * @param {object} modelManager - the model manager
+     * @param {string} ctoFile - the model file
+     * @param {boolean} system - whether this is a system model
      * @return {object} the model manager
      */
     static async addModel(modelFileLoader, modelManager, ctoFile, system) {
@@ -76,12 +76,12 @@ class Commands {
 
         return modelManager;
     }
-    
+
     /**
      * Load system and models in a new model manager
-     * 
-     * @param {string} ctoSystemFile the system model
-     * @param {string[]} ctoFiles the CTO files (can be local file paths or URLs)
+     *
+     * @param {string} ctoSystemFile - the system model file
+     * @param {string[]} ctoFiles - the CTO files (can be local file paths or URLs)
      * @return {object} the model manager
      */
     static async loadModelManager(ctoSystemFile, ctoFiles) {
@@ -104,12 +104,12 @@ class Commands {
     /**
      * Validate a sample JSON against the model
      *
-     * @param {string} sample the sample to validate
-     * @param {string} ctoSystem the system model
-     * @param {string[]} ctoFiles the CTO files to convert to code
+     * @param {string} sample - the sample to validate
+     * @param {string} ctoSystemFile - the system model file
+     * @param {string[]} ctoFiles - the CTO files to convert to code
      * @returns {string} serialized form of the validated JSON
      */
-    static async validate(sample, ctoSystemFile, ctoFiles, out) {
+    static async validate(sample, ctoSystemFile, ctoFiles) {
         const json = JSON.parse(fs.readFileSync(sample, 'utf8'));
 
         const modelManager = await Commands.loadModelManager(ctoSystemFile, ctoFiles);
@@ -121,19 +121,19 @@ class Commands {
     }
 
     /**
-     * Generate code from models for a given format
+     * Compile the model for a given target
      *
-     * @param {string} the format of the code to generate
-     * @param {string} ctoSystem the system model
-     * @param {string[]} ctoFiles the CTO files to convert to code
-     * @param {string} outputDirectory the output directory
+     * @param {string} target - the target of the code to compile
+     * @param {string} ctoSystemFile - the system model file
+     * @param {string[]} ctoFiles - the CTO files to convert to code
+     * @param {string} output the output directory
      */
-    static async generate(format, ctoSystemFile, ctoFiles, outputDirectory) {
+    static async compile(target, ctoSystemFile, ctoFiles, output) {
         const modelManager = await Commands.loadModelManager(ctoSystemFile, ctoFiles);
 
         let visitor = null;
 
-        switch(format) {
+        switch(target) {
         case 'Go':
             visitor = new GoLangVisitor();
             break;
@@ -156,12 +156,12 @@ class Commands {
 
         if(visitor) {
             let parameters = {};
-            parameters.fileWriter = new FileWriter(outputDirectory);
+            parameters.fileWriter = new FileWriter(output);
             modelManager.accept(visitor, parameters);
-            return `Generated ${format} code in '${outputDirectory}'.`;
+            return `Compiled to ${target} in '${output}'.`;
         }
         else {
-            return 'Unrecognized code generator: ' + format;
+            return 'Unrecognized target: ' + target;
         }
     }
 
@@ -171,13 +171,13 @@ class Commands {
      *
      * @param {string} ctoSystemFile the system model
      * @param {string[]} ctoFiles the CTO files (can be local file paths or URLs)
-     * @param {string} outputDirectory the output directory
+     * @param {string} output the output directory
      */
-    static async getExternalModels(ctoSystemFile, ctoFiles, outputDirectory) {
+    static async get(ctoSystemFile, ctoFiles, output) {
         const modelManager = await Commands.loadModelManager(ctoSystemFile, ctoFiles);
-        mkdirp.sync(outputDirectory);
-        modelManager.writeModelsToFileSystem(outputDirectory);
-        return `Loaded external models in '${outputDirectory}'.`;
+        mkdirp.sync(output);
+        modelManager.writeModelsToFileSystem(output);
+        return `Loaded external models in '${output}'.`;
     }
 }
 

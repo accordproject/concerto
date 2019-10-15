@@ -19,7 +19,7 @@ const should = chai.should();
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const Writer = require('../../lib/codegen/writer');
+const Writer = require('../lib/writer');
 
 describe('Writer', function () {
 

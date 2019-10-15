@@ -32,7 +32,7 @@ const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
-const fileWriter = require('@accordproject/concerto-core').FileWriter;
+const fileWriter = require('../../../../lib/filewriter');
 
 describe('LoopbackVisitor', () => {
     let loopbackVisit;
