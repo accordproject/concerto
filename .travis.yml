@@ -1,7 +1,11 @@
 language: node_js
 node_js:
-- '8'
-dist: trusty
+  - '8'
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: windows
 before_install: |
   set -e
   export PATH="./$HOME/node_modules/.bin:$PATH"
@@ -16,15 +20,14 @@ install: |
 script: npm run test 2>&1
 deploy:
   provider: script
-  script:
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./.travis/deploy.sh; fi
+  script: 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./.travis/deploy.sh; fi'
   skip_cleanup: true
   on:
     all_branches: true
     repo: accordproject/concerto
+    condition: "$TRAVIS_OS_NAME = linux"
 after_failure: tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
 after_success: if [ $TRAVIS_OS_NAME = 'linux' ] && [ $TRAVIS_REPO_SLUG = 'accordproject/concerto' ]; then npm run coverage; fi
 cache:
   directories:
   - node_modules
-services:
