@@ -26,6 +26,32 @@ Things you can do using Concerto:
 - Import models from URLs
 - Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
 
+Table of Contents
+=================
+
+  
+   * [Documentation](#documentation)
+   * [Installation](#installation)
+   * [Create a Concerto File](#create-a-concerto-file)
+   * [Create a Model Manager](#create-a-model-manager)
+   * [Create an Instance](#create-an-instance)
+   * [Serialize an Instance to JSON](#serialize-an-instance-to-json)
+   * [Deserialize an Instance from JSON](#deserialize-an-instance-from-json)
+   * [Metamodel](#metamodel)
+      * [Namespaces](#namespaces)
+      * [Imports](#imports)
+      * [Concepts](#concepts)
+      * [Assets](#assets)
+      * [Participants](#participants)
+      * [Transactions](#transactions)
+      * [Enumerations &amp; Enumeration Values](#enumerations--enumeration-values)
+      * [Properties and Meta Properties](#properties-and-meta-properties)
+         * [Primitive types](#primitive-types)
+         * [Meta Properties](#meta-properties)
+      * [Relationships](#relationships)
+      * [Decorators](#decorators)
+* [License <a name="user-content-license"></a>](#license-)
+      
 ## Documentation
 
 This mono-repo contains the following packages:
