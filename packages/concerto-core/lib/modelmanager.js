@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const fsPath = require('path');
+const slash = require('slash');
 
 const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
 const Factory = require('./factory');
@@ -394,7 +395,8 @@ class ModelManager {
             if (file.isExternal() && !opts.includeExternalModels) {
                 return;
             }
-            const filename = file.fileName.split(fsPath.sep).pop();
+            // Always assume file names have been normalized from `\` to `/`
+            const filename = slash(file.fileName).split('/').pop();
             fs.writeFileSync(path + fsPath.sep + filename, file.definitions);
         });
     }
