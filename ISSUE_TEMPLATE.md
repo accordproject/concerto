@@ -21,7 +21,7 @@
 4.
 
 ## Existing issues
-<!-- Have you searched for any existing issues or are their any similar issues that you've found? -->
+<!-- Have you searched for any existing issues or are there any similar issues that you've found? -->
 - [ ] [Stack Overflow issues](http://stackoverflow.com/tags/concerto)
 - [ ] [GitHub Issues](https://github.com/accordproject/concerto/issues)
 

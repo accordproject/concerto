@@ -1,4 +1,4 @@
-﻿<h1 align="center">Concerto
+<h1 align="center">Concerto
 </h1> 
 <p align="center">
   <a href="https://travis-ci.org/accordproject/concerto"><img src="https://travis-ci.org/accordproject/concerto.svg?branch=master" alt="Build Status"></a>
@@ -364,7 +364,7 @@ Accord Project documentation files are made available under the [Creative Common
 Copyright 2018-2019 Clause, Inc. All trademarks are the property of their respective owners. See [LF Projects Trademark Policy](https://lfprojects.org/policies/trademark-policy/).
 
 [linuxfound]: https://www.linuxfoundation.org
-[charter]: https://github.com/accordproject/cicero/blob/master/CHARTER.md
+[charter]: https://github.com/accordproject/concerto/blob/master/CHARTER.md
 [apmain]: https://accordproject.org/ 
 [apworkgroup]: https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=MjZvYzIzZHVrYnI1aDVzbjZnMHJqYmtwaGlfMjAxNzExMTVUMjEwMDAwWiBkYW5AY2xhdXNlLmlv&tmsrc=dan%40clause.io
 [apblog]: https://medium.com/@accordhq
@@ -381,8 +381,8 @@ Copyright 2018-2019 Clause, Inc. All trademarks are the property of their respec
 [doccicero]: https://docs.accordproject.org/docs/basic-use.html
 [docstudio]: https://docs.accordproject.org/docs/advanced-latedelivery.html
 
-[contributing]: https://github.com/accordproject/cicero/blob/master/CONTRIBUTING.md
-[developers]: https://github.com/accordproject/cicero/blob/master/DEVELOPERS.md
+[contributing]: https://github.com/accordproject/concerto/blob/master/CONTRIBUTING.md
+[developers]: https://github.com/accordproject/concerto/blob/master/DEVELOPERS.md
 
-[apache]: https://github.com/accordproject/template-studio-v2/blob/master/LICENSE
+[apache]: https://github.com/accordproject/concerto/blob/master/LICENSE
 [creativecommons]: http://creativecommons.org/licenses/by/4.0/

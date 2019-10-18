@@ -35,7 +35,7 @@ Afterwards, go ahead and [fork][github-forking] the
 
 ### Building Concerto
 
-To build Concerto, you clone the source code repository and use lerna to build:
+To build Concerto, clone the source code repository and use lerna to build:
 
 ```shell
 # Clone your Github repository:
@@ -139,7 +139,7 @@ The subject contains succinct description of the change:
 * no dot (.) at the end
 
 ### Footer
-The footer should contain [reference GitHub Issues that this commit addresses][github-issues].
+The footer should contain [reference GitHub Issues][github-issues] that this commit addresses.
 
 ## <a name="pullrequests"></a> GitHub Pull Request Guidelines
 Pull Requests should consist of a complete addition to the code which contains value. 
