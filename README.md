@@ -1,13 +1,13 @@
 <h1 align="center">Concerto
-</h1> 
+</h1>
 <p align="center">
   <a href="https://travis-ci.org/accordproject/concerto"><img src="https://travis-ci.org/accordproject/concerto.svg?branch=master" alt="Build Status"></a>
   <a href="https://coveralls.io/github/accordproject/concerto?branch=master"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/accordproject/concerto?color=bright-green" alt="GitHub license"></a>
-  <a href="https://www.npmjs.com/package/@accordproject/concerto-cli"><img src="https://img.shields.io/npm/dm/@accordproject/concerto-cli" alt="downloads"></a>
   <a href="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli"><img src="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli.svg" alt="npm version"></a>
-  <a href="https://accord-project-slack-signup.herokuapp.com/"><img src="https://img.shields.io/badge/Slack-Join%20Slack-blue" alt="join slack"></a>
+  <a href="https://www.npmjs.com/package/@accordproject/concerto-cli"><img src="https://img.shields.io/npm/dm/@accordproject/concerto-cli" alt="downloads"></a>
   <a href="https://lerna.js.org"><img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg" alt="lerna"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/accordproject/concerto?color=bright-green" alt="GitHub license"></a>
+  <a href="https://accord-project-slack-signup.herokuapp.com/"><img src="https://img.shields.io/badge/Slack-Join%20Slack-blue" alt="join slack"></a>
 </p>
 
 Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
