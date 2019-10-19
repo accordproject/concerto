@@ -67,3 +67,7 @@ out
 
 # umd build folder
 umd
+
+# windowsjunk
+
+thumbs.db
