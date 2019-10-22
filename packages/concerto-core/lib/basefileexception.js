@@ -22,7 +22,6 @@ const BaseException = require('./baseexception');
  * @see {@link BaseException}
  * @class
  * @memberof module:concerto-core
- * @private
  */
 class BaseFileException extends BaseException {
 

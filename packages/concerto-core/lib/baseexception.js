@@ -21,7 +21,6 @@ const packageJson = require('../package.json');
 * @extends Error
 * @class
 * @memberof module:concerto-core
-* @private
 */
 class BaseException extends Error {
 

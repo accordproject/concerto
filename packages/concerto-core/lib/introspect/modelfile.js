@@ -38,7 +38,6 @@ class ModelFile {
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
-     * @private
      * @param {ModelManager} modelManager - the ModelManager that manages this
      * ModelFile
      * @param {string} definitions - The DSL model as a string.

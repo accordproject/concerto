@@ -50,7 +50,6 @@ class Factory {
      * Create the factory.
      *
      * @param {ModelManager} modelManager - The ModelManager to use for this registry
-     * @private
      */
     constructor(modelManager) {
         this.modelManager = modelManager;

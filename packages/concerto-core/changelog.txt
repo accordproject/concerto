@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 0.82.1 {cb6c3b228035279e6997a4e3a34ef348} 2019-10-22
+- Make several constructors public
+
 Version 0.80.3 {6f5a9ab45943cb76732c14b11f47d044} 2019-08-24
 - Add Ergo option to serializer
 

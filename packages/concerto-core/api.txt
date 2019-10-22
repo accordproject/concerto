@@ -1,4 +1,14 @@
+class BaseException extends Error {
+   + void constructor(string,string) 
+}
+class BaseFileException extends BaseException {
+   + void constructor(string,string,string,string,string) 
+   + string getFileLocation() 
+   + string getShortMessage() 
+   + string getFileName() 
+}
 class Factory {
+   + void constructor(ModelManager) 
    + Resource newResource(String,String,String,Object,boolean,String,boolean,boolean) throws TypeNotFoundException
    + Resource newConcept(String,String,Object,boolean,String,boolean) throws TypeNotFoundException
    + Relationship newRelationship(String,String,String) throws TypeNotFoundException
@@ -75,6 +85,7 @@ class Introspector {
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
 class ModelFile {
+   + void constructor(ModelManager,string,string,boolean) throws IllegalModelException
    + boolean isExternal() 
    + ModelManager getModelManager() 
    + string[] getImports() 
@@ -169,6 +180,7 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelManager {
+   + void constructor() 
    + void validateModelFile(string,string) throws IllegalModelException
    + Object addModelFile(string,string,boolean,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
@@ -192,6 +204,9 @@ class ModelManager {
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean hasInstance(object) 
+}
+class SecurityException extends BaseException {
+   + void constructor(string) 
 }
 class Serializer {
    + void constructor(Factory,ModelManager) 
