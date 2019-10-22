@@ -216,7 +216,8 @@ Accord Project is an open source, non-profit, initiative working to transform co
     <tr>
       <td headers>Markdown Editor</td>
       <td headers><a href="https://github.com/accordproject/markdown-editor">markdown-editor</a></td>
-      <td headers><img src="https://badge.fury.io/js/%40accordproject%2Fmarkdown-editor.svg" alt="npm version"></a></td>
+      <td headers> <a href="https://badge.fury.io/js/%40accordproject%2Fmarkdown-editor">
+      <img src="https://badge.fury.io/js/%40accordproject%2Fmarkdown-editor.svg" alt="npm version"></a></td>
       <td headers>WYSIWYG rich text web editor for markdown based on Slate.js</td>
     </tr>
      <tr>
