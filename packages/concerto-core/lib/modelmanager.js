@@ -33,12 +33,10 @@ const debug = require('debug')('concerto:ModelManager');
 /**
  * Manages the Concerto model files.
  *
- *
  * The structure of {@link Resource}s (Assets, Transactions, Participants) is modelled
  * in a set of Concerto files. The contents of these files are managed
  * by the {@link ModelManager}. Each Concerto file has a single namespace and contains
  * a set of asset, transaction and participant type definitions.
- *
  *
  * Concerto applications load their Concerto files and then call the {@link ModelManager#addModelFile addModelFile}
  * method to register the Concerto file(s) with the ModelManager. The ModelManager
@@ -46,15 +44,12 @@ const debug = require('debug')('concerto:ModelManager');
  * to other Concerto services, such as the {@link Serializer} (to convert instances to/from JSON)
  * and {@link Factory} (to create instances).
  *
- *
- *
  * @class
  * @memberof module:concerto-core
  */
 class ModelManager {
     /**
      * Create the ModelManager.
-     * @private
      */
     constructor() {
         this.modelFiles = {};
