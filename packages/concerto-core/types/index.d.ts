@@ -1,7 +1,7 @@
 
 import { EventEmitter } from 'events';
 
-declare module '@accordproject/concerto' {
+declare module '@accordproject/concerto-core' {
 
   // Exceptions
 
