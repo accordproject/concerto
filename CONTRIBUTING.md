@@ -188,6 +188,17 @@ After your pull request is merged, you can safely delete your branch and pull th
     git merge --ff-only upstream/master
     git push origin master
   ```
+  
+## <a name="cla"></a> Signing the Contributor License Agreement \(CLA\)
+
+Upon submitting a Pull Request, a friendly bot will ask you to sign our CLA if you haven't done so before. Unfortunately, this is necessary for documentation changes, too. It's a quick process, we promise!
+
+* For individuals, we have a [simple click-through form](http://code.google.com/legal/individual-cla-v1.0.html).
+* For corporations, we'll need you to
+
+  [print, sign and one of scan+email, fax or mail the form](http://code.google.com/legal/corporate-cla-v1.0.html).
+
+[Stack Overflow][stackoverflow]
 
 ## License <a name="license"></a>
 
