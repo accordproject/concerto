@@ -11,7 +11,7 @@
   "typings": "types/index.d.ts",
   "scripts": {
     "prepublishOnly": "webpack --config webpack.config.js --mode production",
-    "prepare": "pegjs ./lib/introspect/parser.pegjs",
+    "prepare": "pegjs --optimize size ./lib/introspect/parser.pegjs",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
