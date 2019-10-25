@@ -362,7 +362,7 @@ public abstract class Resource
     toJavaType(type) {
         switch(type) {
         case 'DateTime':
-            return 'java.util.Instant';
+            return 'java.time.Instant';
         case 'Boolean':
             return 'boolean';
         case 'String':
