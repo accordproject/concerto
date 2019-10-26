@@ -14,13 +14,14 @@
 
 'use strict';
 
+const fs = require('fs');
+
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
 const DecoratorFactory = require('../lib/introspect/decoratorfactory');
 const EnumDeclaration = require('../lib/introspect/enumdeclaration');
 const EventDeclaration = require('../lib/introspect/eventdeclaration');
 const Factory = require('../lib/factory');
-const fs = require('fs');
 const ModelFile = require('../lib/introspect/modelfile');
 const ModelFileDownloader = require('../lib/introspect/loaders/modelfiledownloader');
 const ModelManager = require('../lib/modelmanager');

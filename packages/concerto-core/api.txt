@@ -179,6 +179,9 @@ class ValidatedResource extends Resource {
    + void addArrayValue(string,string) throws Error
    + void validate() throws Error
 }
+class ModelLoader {
+   + object loadModelManager(string,string[]) 
+}
 class ModelManager {
    + void constructor() 
    + void validateModelFile(string,string) throws IllegalModelException
