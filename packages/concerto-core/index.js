@@ -37,6 +37,7 @@ module.exports.Globalize = require('./lib/globalize');
 module.exports.Introspector = require('./lib/introspect/introspector');
 module.exports.Logger = require('./lib/logger');
 module.exports.ModelFile = require('./lib/introspect/modelfile');
+module.exports.ModelLoader = require('./lib/modelloader');
 module.exports.ModelManager = require('./lib/modelmanager');
 module.exports.DefaultModelFileLoader = require('./lib/introspect/loaders/defaultmodelfileloader');
 module.exports.ParseException = require('./lib/introspect/parseexception');
