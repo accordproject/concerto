@@ -76,10 +76,10 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`generate code in format ${argv.format} from models ${argv.ctoFiles} into directory: ${argv.output}`);
+            Logger.info(`generate code for target ${argv.target} from models ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.compile(argv.format, argv.ctoSystem, argv.ctoFiles, argv.output)
+        return Commands.compile(argv.target, argv.ctoSystem, argv.ctoFiles, argv.output)
             .then((result) => {
                 Logger.info(result);
             })
