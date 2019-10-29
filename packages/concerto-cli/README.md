@@ -9,7 +9,7 @@ concerto <cmd> [args]
 
 Commands:
   concerto validate  validate JSON against model files
-  concerto generate  generate code from model files
+  concerto compile   generate code for a target platform
   concerto get       save local copies of external model dependencies
 
 Options:
@@ -20,7 +20,7 @@ Options:
 
 ### Concerto validate
 
-The validator lets you check whether a JSON sample is a valid instance of the given model.
+The `validate` command lets you check whether a JSON sample is a valid instance of the given model.
 
 ```
 concerto validate
@@ -36,66 +36,64 @@ Options:
   --ctoFiles     array of CTO files                       [array] [default: "."]
 ```
 
-### Concerto generate
+### Concerto compile
 
-The code generator take an array of local CTO files, download any external dependencies (imports) and then convert all the model
-in the `ModelManager` to the target format.
+The `compile` command takes an array of local CTO files, download any external dependencies (imports) and then convert all the model in the `ModelManager` to the target format.
 
 ```
-concerto generate
+concerto compile
 
-generate code from model files
+generate code for a target platform
 
 Options:
-  --version          Show version number                               [boolean]
+  --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
-  --help             Show help                                         [boolean]
-  --ctoSystem        system model to be used                            [string]
-  --ctoFiles         array of CTO files                   [array] [default: "."]
-  --format           format of the code to generate
-                                                [string] [default: "JSONSchema"]
-  --outputDirectory  output directory path       [string] [default: "./output/"]
+  --help         Show help                                             [boolean]
+  --ctoSystem    system model to be used                                [string]
+  --ctoFiles     array of CTO files                       [array] [default: "."]
+  --target       target of the code generation  [string] [default: "JSONSchema"]
+  --output       output directory path           [string] [default: "./output/"]
 ```
 
-### Go Lang
+#### Go Lang
 
 ```
-concerto generate --ctoFiles modelfile.cto --format Go
+concerto compile --ctoFiles modelfile.cto --target Go
 ```
 
-### Plant UML
+#### Plant UML
 
 ```
-concerto generate --ctoFiles modelfile.cto --format PlantUML
+concerto compile --ctoFiles modelfile.cto --target PlantUML
 ```
 
-### Typescript
+#### Typescript
 
 ```
-concerto generate --ctoFiles modelfile.cto --format Typescript
+concerto compile --ctoFiles modelfile.cto --target Typescript
 ```
 
-### Java
+#### Java
 
 ```
-concerto generate --ctoFiles modelfile.cto --format Java
+concerto compile --ctoFiles modelfile.cto --target Java
 ```
 
-### JSONSchema
+#### JSONSchema
 
 ```
-concerto generate --ctoFiles modelfile.cto --format JSONSchema
+concerto compile --ctoFiles modelfile.cto --target JSONSchema
 ```
 
-### XMLSchema
+#### XMLSchema
 
 ```
-concerto generate --ctoFiles modelfile.cto --format XMLSchema
+concerto compile --ctoFiles modelfile.cto --target XMLSchema
 ```
 
 ### Concerto Get
 
-Concerto get allows you to resolve and download external models from a set of local CTO files.
+The `get` command allows you to resolve and download external models from a set of local CTO files.
 
 ```
 concerto get
@@ -103,12 +101,12 @@ concerto get
 save local copies of external model dependencies
 
 Options:
-  --version          Show version number                               [boolean]
+  --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
-  --help             Show help                                         [boolean]
-  --ctoFiles         array of local CTO files             [array] [default: "."]
-  --ctoSystem        system model to be used                            [string]
-  --outputDirectory  output directory path              [string] [default: "./"]
+  --help         Show help                                             [boolean]
+  --ctoFiles     array of local CTO files                 [array] [default: "."]
+  --ctoSystem    system model to be used                                [string]
+  --output       output directory path                  [string] [default: "./"]
 ```
 
 ## License <a name="license"></a>
