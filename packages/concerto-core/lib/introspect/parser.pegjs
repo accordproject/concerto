@@ -12,60 +12,7 @@
  * limitations under the License.
  */
 
-/*
- * JavaScript Grammar
- * ==================
- *
- * Based on grammar from ECMA-262, 5.1 Edition [1]. Generated parser builds a
- * syntax tree compatible with Mozilla SpiderMonkey Parser API [2]. Properties
- * and node types reflecting features not present in ECMA-262 are not included.
- *
- * Limitations:
- *
- *   * Non-BMP characters are completely ignored to avoid surrogate pair
- *     handling.
- *
- *   * One can create identifiers containing illegal characters using Unicode
- *     escape sequences. For example, "abcd\u0020efgh" is not a valid
- *     identifier, but it is accepted by the parser.
- *
- *   * Strict mode is not recognized. This means that within strict mode code,
- *     "implements", "interface", "let", "package", "private", "protected",
- *     "public", "static" and "yield" can be used as names. Many other
- *     restrictions and exceptions from Annex C are also not applied.
- *
- * All the limitations could be resolved, but the costs would likely outweigh
- * the benefits.
- *
- * Many thanks to inimino [3] for his grammar [4] which helped me to solve some
- * problems (such as automatic semicolon insertion) and also served to double
- * check that I converted the original grammar correctly.
- *
- * [1] http://www.ecma-international.org/publications/standards/Ecma-262.htm
- * [2] https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API
- * [3] http://inimino.org/~inimino/blog/
- * [4] http://boshi.inimino.org/3box/asof/1270029991384/PEG/ECMAScript_unified.peg
- */
-
 {
-  var TYPES_TO_PROPERTY_NAMES = {
-    CallExpression:   "callee",
-    MemberExpression: "object",
-  };
-
-  function filledArray(count, value) {
-    var result = new Array(count), i;
-
-    for (i = 0; i < count; i++) {
-      result[i] = value;
-    }
-
-    return result;
-  }
-
-  function extractOptional(optional, index) {
-    return optional ? optional[index] : null;
-  }
 
   function extractList(list, index) {
     var result = new Array(list.length), i;
@@ -441,7 +388,6 @@ FalseToken      = "false"      !IdentifierPart
 ImportToken     = "import"     !IdentifierPart
 NullToken       = "null"       !IdentifierPart
 TrueToken       = "true"       !IdentifierPart
-VoidToken       = "void"       !IdentifierPart
 
 /* Skipped */
 
@@ -1228,20 +1174,4 @@ SourceElement
   / ParticipantDeclaration
   / EnumDeclaration
   / ConceptDeclaration
-
-/* ----- A.6 Universal Resource Identifier Character Classes ----- */
-
-/* Irrelevant. */
-
-/* ----- A.7 Regular Expressions ----- */
-
-/* Irrelevant. */
-
-/* ----- A.8 JSON ----- */
-
-/* Irrelevant. */
-
-
-
-
 
