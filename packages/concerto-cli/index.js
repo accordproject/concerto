@@ -27,8 +27,7 @@ require('yargs')
     .command('validate', 'validate JSON against model files', (yargs) => {
         yargs.option('sample', {
             describe: 'sample JSON to validate',
-            type: 'string',
-            default: 'sample.json'
+            type: 'string'
         });
         yargs.option('ctoSystem', {
             describe: 'system model to be used',
@@ -37,23 +36,29 @@ require('yargs')
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
-            array: true,
-            default: '.'
+            array: true
         });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`validate sample in ${argv.sample} against the models ${argv.ctoFiles}`);
         }
 
-        return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
-            .then((result) => {
-                Logger.info(result);
-            })
-            .catch((err) => {
-                Logger.error(err.message);
-            });
+        try {
+            argv = Commands.validateValidateArgs(argv);
+            return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
+                .then((result) => {
+                    Logger.info(result);
+                })
+                .catch((err) => {
+                    Logger.error(err.message);
+                });
+        } catch (err){
+            Logger.error(err.message);
+            return;
+        }
     })
     .command('compile', 'generate code for a target platform', (yargs) => {
+        yargs.demandOption(['ctoFiles'], 'Please provide at least the CTO files');
         yargs.option('ctoSystem', {
             describe: 'system model to be used',
             type: 'string'
@@ -61,8 +66,7 @@ require('yargs')
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
-            array: true,
-            default: '.'
+            array: true
         });
         yargs.option('target', {
             describe: 'target of the code generation',
@@ -88,11 +92,11 @@ require('yargs')
             });
     })
     .command('get', 'save local copies of external model dependencies', (yargs) => {
+        yargs.demandOption(['ctoFiles'], 'Please provide at least the CTO files');
         yargs.option('ctoFiles', {
             describe: 'array of local CTO files',
             type: 'string',
-            array: true,
-            default: '.'
+            array: true
         });
         yargs.option('ctoSystem', {
             describe: 'system model to be used',

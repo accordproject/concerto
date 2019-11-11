@@ -33,6 +33,25 @@ describe('cicero-cli', () => {
     const sampleText1 = fs.readFileSync(sample1, 'utf8');
     const sampleText2 = fs.readFileSync(sample2, 'utf8');
 
+    describe('#validateValidateArgs', () => {
+        it('no args specified', () => {
+            process.chdir(path.resolve(__dirname, 'data'));
+            const args  = Commands.validateValidateArgs({
+                _: ['validate'],
+            });
+            args.sample.should.match(/sample.json$/);
+        });
+
+        it('all args specified', () => {
+            process.chdir(path.resolve(__dirname, 'data'));
+            const args  = Commands.validateValidateArgs({
+                _: ['validate'],
+                sample: 'sample1.json'
+            });
+            args.sample.should.match(/sample1.json$/);
+        });
+    });
+
     describe('#validate', () => {
         it('should validate against a model', async () => {
             const result = await Commands.validate(sample1, null, models);
@@ -46,6 +65,30 @@ describe('cicero-cli', () => {
             } catch (err) {
                 err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
             }
+        });
+
+        it('verbose flag specified', () => {
+            process.chdir(path.resolve(__dirname, 'data'));
+            Commands.validateValidateArgs({
+                _: ['validate'],
+                verbose: true
+            });
+        });
+
+        it('bad sample.json', () => {
+            process.chdir(path.resolve(__dirname, 'data'));
+            (() => Commands.validateValidateArgs({
+                _: ['validate'],
+                sample: 'sample_en.json'
+            })).should.throw('A sample.json file is required. Try the --sample flag or create a sample.json file.');
+        });
+
+        it('bad ctoFiles', () => {
+            process.chdir(path.resolve(__dirname, 'data'));
+            (() => Commands.validateValidateArgs({
+                _: ['validate'],
+                ctoFiles: ['missing.cto']
+            })).should.throw('A model.cto file is required. Try the --ctoFiles flag or create a model.cto file.');
         });
     });
 
