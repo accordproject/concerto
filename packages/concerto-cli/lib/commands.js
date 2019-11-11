@@ -15,8 +15,10 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const mkdirp = require('mkdirp');
 
+const Logger = require('@accordproject/concerto-core').Logger;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
@@ -36,6 +38,61 @@ const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
  * @memberof module:concerto-cli
  */
 class Commands {
+    /**
+     * Set a default for a file argument
+     *
+     * @param {object} argv - the inbound argument values object
+     * @param {string} argName - the argument name
+     * @param {string} argDefaultName - the argument default name
+     * @param {Function} argDefaultFun - how to compute the argument default
+     * @param {object} argDefaultValue - an optional default value if all else fails
+     * @returns {object} a modified argument object
+     */
+    static setDefaultFileArg(argv, argName, argDefaultName, argDefaultFun) {
+        if(!argv[argName]){
+            Logger.info(`Loading a default ${argDefaultName} file.`);
+            argv[argName] = argDefaultFun(argv, argDefaultName);
+        }
+
+        let argExists = true;
+        if (Array.isArray(argv[argName])) {
+            // All files should exist
+            for (let i = 0; i < argv[argName].length; i++) {
+                if (fs.existsSync(argv[argName][i]) && argExists) {
+                    argExists = true;
+                } else {
+                    argExists = false;
+                }
+            }
+        } else {
+            // This file should exist
+            argExists = fs.existsSync(argv[argName]);
+        }
+
+        if (!argExists){
+            throw new Error(`A ${argDefaultName} file is required. Try the --${argName} flag or create a ${argDefaultName} file.`);
+        } else {
+            return argv;
+        }
+    }
+
+    /**
+     * Set default params before we parse a sample text using a template
+     *
+     * @param {object} argv - the inbound argument values object
+     * @returns {object} a modfied argument object
+     */
+    static validateValidateArgs(argv) {
+        argv = Commands.setDefaultFileArg(argv, 'sample', 'sample.json', ((argv, argDefaultName) => { return path.resolve('.',argDefaultName); }));
+        argv = Commands.setDefaultFileArg(argv, 'ctoFiles', 'model.cto', ((argv, argDefaultName) => { return [path.resolve('.',argDefaultName)]; }));
+
+        if(argv.verbose) {
+            Logger.info(`parse sample ${argv.sample} using a template ${argv.template}`);
+        }
+
+        return argv;
+    }
+
     /**
      * Validate a sample JSON against the model
      *
