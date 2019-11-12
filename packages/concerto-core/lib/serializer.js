@@ -55,6 +55,7 @@ class Serializer {
         this.factory = factory;
         this.modelManager = modelManager;
         this.defaultOptions = Object.assign({}, baseDefaultOptions);
+        this._isSerializer = true;
     }
 
     /**
@@ -187,6 +188,17 @@ class Serializer {
         }
 
         return resource;
+    }
+
+    /**
+     * Alternative instanceof that is reliable across different module instances
+     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     *
+     * @param {object} object - The object to test against
+     * @returns {boolean} - True, if the object is an instance of a Serializer
+     */
+    static [Symbol.hasInstance](object){
+        return typeof object !== 'undefined' && object !== null && Boolean(object._isSerializer);
     }
 }
 
