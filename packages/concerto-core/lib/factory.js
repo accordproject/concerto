@@ -53,6 +53,7 @@ class Factory {
      */
     constructor(modelManager) {
         this.modelManager = modelManager;
+        this._isFactory = true;
     }
 
     /**
@@ -317,6 +318,17 @@ class Factory {
         return generateParams;
     }
 
+
+    /**
+     * Alternative instanceof that is reliable across different module instances
+     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     *
+     * @param {object} object - The object to test against
+     * @returns {boolean} - True, if the object is an instance of a Factory
+     */
+    static [Symbol.hasInstance](object){
+        return typeof object !== 'undefined' && object !== null && Boolean(object._isFactory);
+    }
 }
 
 module.exports = Factory;
