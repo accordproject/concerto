@@ -222,17 +222,41 @@ class JSONPopulator {
             }
             break;
         case 'Integer':
-        case 'Long':
-            result = this.ergo ? parseInt(json.nat) : parseInt(json);
+        case 'Long': {
+            const num = this.ergo ? json.nat : json;
+            if (typeof num === 'number') {
+                if (Math.trunc(num) !== num) {
+                    throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                } else {
+                    result = num;
+                }
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
-        case 'Double':
-            result = parseFloat(json);
+        case 'Double': {
+            if (typeof json === 'number') {
+                result = parseFloat(json);
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
-        case 'Boolean':
-            result = (json === true || json === 'true');
+        case 'Boolean': {
+            if (typeof json === 'boolean') {
+                result = json;
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
         case 'String':
-            result = json.toString();
+            if (typeof json === 'string') {
+                result = json;
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
             break;
         default: {
             // everything else should be an enumerated value...
