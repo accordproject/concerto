@@ -123,12 +123,52 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /Expected value "foo" to be of type DateTime/);
         });
 
+        it('should not convert to dates from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type DateTime/);
+        });
+
+        it('should not convert to dates from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type DateTime/);
+        });
+
+        it('should not convert to dates when not in ISO 8601 format', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, 'December 17, 1995 03:24:00');
+            }).should.throw(ValidationException, /Expected value "December 17, 1995 03:24:00" to be of type DateTime/);
+        });
+
         it('should not convert to integers from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
             (() => {
                 jsonPopulator.convertToObject(field, '32768');
             }).should.throw(ValidationException, /Expected value "32768" to be of type Integer/);
+        });
+
+        it('should not convert to integer from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Integer/);
+        });
+
+        it('should not convert to integer from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Integer/);
         });
 
         it('should convert to integers from numbers', () => {
@@ -148,6 +188,22 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /Expected value "32768" to be of type Long/);
         });
 
+        it('should not convert to long from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Long/);
+        });
+
+        it('should not convert to long from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Long/);
+        });
+
         it('should convert to longs from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
@@ -157,7 +213,7 @@ describe('JSONPopulator', () => {
             value.should.equal(32768);
         });
 
-        it('should convert to longs from numbers that are not integers', () => {
+        it('should not convert to longs from numbers that are not integers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             (() => {
@@ -171,6 +227,22 @@ describe('JSONPopulator', () => {
             (() => {
                 jsonPopulator.convertToObject(field, '32.768');
             }).should.throw(ValidationException, /Expected value "32.768" to be of type Double/);
+        });
+
+        it('should not convert to double from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Double');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Double/);
+        });
+
+        it('should not convert to double from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Double');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Double/);
         });
 
         it('should convert to doubles from numbers', () => {
@@ -203,6 +275,22 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /Expected value 32.768 to be of type Boolean/);
         });
 
+        it('should not convert to boolean from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Boolean');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Boolean/);
+        });
+
+        it('should not convert to boolean from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Boolean');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Boolean/);
+        });
+
         it('should convert to strings from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
@@ -216,6 +304,22 @@ describe('JSONPopulator', () => {
             (() => {
                 jsonPopulator.convertToObject(field, 32.768);
             }).should.throw(ValidationException, /Expected value 32.768 to be of type String/);
+        });
+
+        it('should not convert to string from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('String');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type String/);
+        });
+
+        it('should not convert to string from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('String');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type String/);
         });
 
     });
