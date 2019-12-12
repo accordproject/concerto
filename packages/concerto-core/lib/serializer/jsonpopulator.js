@@ -214,12 +214,17 @@ class JSONPopulator {
         let result = null;
 
         switch(field.getType()) {
-        case 'DateTime':
+        case 'DateTime': {
             if (Moment.isMoment(json)) {
                 result = json;
             } else {
-                result = new Moment.parseZone(json);
+                // Uses strict mode
+                result = new Moment.parseZone(json, Moment.ISO_8601, true);
             }
+            if (!result.isValid()) {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
         case 'Integer':
         case 'Long': {
