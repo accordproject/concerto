@@ -115,6 +115,14 @@ describe('JSONPopulator', () => {
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
+        it('should not convert to dates from invalid moments', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, 'foo');
+            }).should.throw(ValidationException, /Expected value "foo" to be of type DateTime/);
+        });
+
         it('should not convert to integers from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
