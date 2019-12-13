@@ -299,12 +299,16 @@ class ResourceValidator {
                     invalid = true;
                 }
                 break;
-            case 'Double':
             case 'Long':
             case 'Integer':
+            case 'Double': {
                 if(dataType !== 'number') {
                     invalid = true;
                 }
+                if (!isFinite(obj)) {
+                    invalid = true;
+                }
+            }
                 break;
             case 'Boolean':
                 if(dataType !== 'boolean') {
@@ -421,7 +425,11 @@ class ResourceValidator {
         else {
             if(value) {
                 try {
-                    value = JSON.stringify(value);
+                    if (typeof value === 'number' && !isFinite(value)) {
+                        value = value.toString();
+                    } else {
+                        value = JSON.stringify(value);
+                    }
                 }
                 catch(err) {
                     value = value.toString();
