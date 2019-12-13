@@ -74,6 +74,7 @@ describe('ResourceValidator', function () {
     import org.acme.l1.Person
     asset Vehicle extends Base  {
       o Integer numberOfWheels
+      o Double milage
     }
     participant PrivateOwner identified by employeeId extends Person {
       o String employeeId
@@ -414,6 +415,7 @@ describe('ResourceValidator', function () {
             vehicle.$identifier = ''; // empty the identifier
             vehicle.model = 'Ford';
             vehicle.numberOfWheels = 4;
+            vehicle.milage = 3.14;
             const typedStack = new TypedStack(vehicle);
             const assetDeclaration = modelManager.getType('org.acme.l3.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
@@ -421,6 +423,21 @@ describe('ResourceValidator', function () {
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
             }).should.throw(/has an empty identifier/);
+        });
+
+        it('should reject a Double which is not finite', function () {
+            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            vehicle.$identifier = '42';
+            vehicle.model = 'Ford';
+            vehicle.numberOfWheels = 4;
+            vehicle.milage = NaN; // NaN
+            const typedStack = new TypedStack(vehicle);
+            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            (() => {
+                assetDeclaration.accept(resourceValidator,parameters);
+            }).should.throw(/Model violation in instance org.acme.l3.Car#42 field milage has value NaN/);
         });
 
         it('should report undeclared field if not identifiable', () => {
