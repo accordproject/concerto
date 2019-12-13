@@ -45,6 +45,7 @@ describe('Serializer', () => {
         o String assetId
         --> SampleParticipant owner
         o String stringValue
+        o Double doubleValue
         }
 
         participant SampleParticipant identified by participantId {
@@ -61,6 +62,7 @@ describe('Serializer', () => {
         concept Address {
             o String city
             o String country
+            o Double elevation
         }
 
         event SampleEvent{
@@ -113,6 +115,7 @@ describe('Serializer', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = 'the value';
+            resource.doubleValue = 3.14;
             let json = serializer.toJSON(resource, {
                 validate: true
             });
@@ -120,8 +123,39 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.SampleAsset',
                 assetId: '1',
                 owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
-                stringValue: 'the value'
+                stringValue: 'the value',
+                doubleValue: 3.14
             });
+        });
+
+        it('should throw validation errors during JSON object generation if Double is NaN', () => {
+            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            resource.stringValue = 'the value';
+            resource.doubleValue = NaN;
+            (() => {
+                serializer.toJSON(resource);
+            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value NaN/);
+        });
+
+        it('should throw validation errors during JSON object generation if Double is Infinity', () => {
+            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            resource.stringValue = 'the value';
+            resource.doubleValue = Infinity;
+            (() => {
+                serializer.toJSON(resource);
+            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value Infinity/);
+        });
+
+        it('should throw validation errors during JSON object generation if Double is -Infinity', () => {
+            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            resource.stringValue = 'the value';
+            resource.doubleValue = -Infinity;
+            (() => {
+                serializer.toJSON(resource);
+            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value -Infinity/);
         });
 
         it('should throw validation errors during JSON object generation if the validate flag is not specified and errors are present', () => {
@@ -175,10 +209,12 @@ describe('Serializer', () => {
             let address = factory.newConcept('org.acme.sample', 'Address');
             address.city = 'Winchester';
             address.country = 'UK';
+            address.elevation = 3.14;
             const json = serializer.toJSON(address);
             json.should.deep.equal({
                 $class: 'org.acme.sample.Address',
                 country: 'UK',
+                elevation: 3.14,
                 city: 'Winchester'
             });
         });
@@ -187,6 +223,7 @@ describe('Serializer', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = '';
+            resource.doubleValue = 3.14;
             let json = serializer.toJSON(resource, {
                 validate: true
             });
@@ -194,7 +231,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.SampleAsset',
                 assetId: '1',
                 owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
-                stringValue: ''
+                stringValue: '',
+                doubleValue: 3.14
             });
         });
     });
@@ -222,13 +260,15 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.SampleAsset',
                 assetId: '1',
                 owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
-                stringValue: 'the value'
+                stringValue: 'the value',
+                doubleValue: 3.14
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.assetId.should.equal('1');
             resource.owner.should.be.an.instanceOf(Relationship);
             resource.stringValue.should.equal('the value');
+            resource.doubleValue.should.equal(3.14);
         });
 
         it('should deserialize a valid transaction', () => {
@@ -263,12 +303,14 @@ describe('Serializer', () => {
             let json = {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
-                country: 'UK'
+                country: 'UK',
+                elevation: 3.14
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Concept);
             resource.city.should.equal('Winchester');
             resource.country.should.equal('UK');
+            resource.elevation.should.equal(3.14);
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {
