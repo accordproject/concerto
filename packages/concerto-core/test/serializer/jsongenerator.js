@@ -135,7 +135,7 @@ describe('JSONGenerator', () => {
             ergoJsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).nat.should.equal(123456);
         });
 
-        it('should pass through a double object', () => {
+        it('should pass through a finite double object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Double'; } }, 3.142).should.equal(3.142);
         });
 
