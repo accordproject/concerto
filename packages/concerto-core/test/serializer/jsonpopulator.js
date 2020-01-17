@@ -176,7 +176,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             let value = jsonPopulator.convertToObject(field, 32768);
             value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':32768});
+            value = ergoJsonPopulator.convertToObject(field, {'$nat':32768});
             value.should.equal(32768);
         });
 
@@ -209,7 +209,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             let value = jsonPopulator.convertToObject(field, 32768);
             value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':32768});
+            value = ergoJsonPopulator.convertToObject(field, {'$nat':32768});
             value.should.equal(32768);
         });
 

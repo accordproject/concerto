@@ -228,7 +228,7 @@ class JSONPopulator {
             break;
         case 'Integer':
         case 'Long': {
-            const num = this.ergo ? json.nat : json;
+            const num = this.ergo ? json.$nat : json;
             if (typeof num === 'number') {
                 if (Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
@@ -267,11 +267,11 @@ class JSONPopulator {
             // everything else should be an enumerated value...
             if (this.ergo) {
                 // unpack the enum
-                let current = json.data;
-                while (!current.left) {
-                    current = current.right;
+                let current = json.$data;
+                while (!current.$left) {
+                    current = current.$right;
                 }
-                result = current.left;
+                result = current.$left;
             } else {
                 result = json;
             }
