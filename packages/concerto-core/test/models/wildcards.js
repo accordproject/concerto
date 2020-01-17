@@ -86,7 +86,7 @@ describe('Wildcards Model', function () {
             assetId: '1',
             concept: {
                 $class: 'org.acme.wildcards.MyConcept',
-                gender: { 'type': 'stdlib.base.Gender', 'data': { 'right' : { 'left': 'FEMALE' } } }
+                gender: { '$class': 'stdlib.base.Gender', '$data': { '$right' : { '$left': 'FEMALE' } } }
             },
             participant: {
                 $class: 'org.acme.wildcards.MyParticipant',
