@@ -154,16 +154,16 @@ class JSONGenerator {
                 const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
                 const enumName = enumDeclaration.getFullyQualifiedName();
                 const properties = enumDeclaration.getProperties();
-                let either = { 'left' : obj };
+                let either = { '$left' : obj };
                 for(let n=0; n < properties.length; n++) {
                     const property = properties[n];
                     if(property.getName() === obj) {
                         break;
                     } else {
-                        either = { 'right' : either };
+                        either = { '$right' : either };
                     }
                 }
-                result = { 'type' : [enumName], 'data': either };
+                result = { '$class' : [enumName], '$data': either };
             } else {
                 result = this.convertToJSON(field, obj);
             }
@@ -196,7 +196,7 @@ class JSONGenerator {
         case 'Integer':
         case 'Long': {
             if (this.ergo) {
-                return { nat: obj };
+                return { $nat: obj };
             } else {
                 return obj;
             }

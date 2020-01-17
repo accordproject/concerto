@@ -132,7 +132,7 @@ describe('JSONGenerator', () => {
 
         it('should pass through an integer object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).should.equal(123456);
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).nat.should.equal(123456);
+            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).$nat.should.equal(123456);
         });
 
         it('should pass through a finite double object', () => {
@@ -141,7 +141,7 @@ describe('JSONGenerator', () => {
 
         it('should pass through a long object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Long'; } }, 1234567890).should.equal(1234567890);
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Long'; } }, 1234567890).nat.should.equal(1234567890);
+            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Long'; } }, 1234567890).$nat.should.equal(1234567890);
         });
 
         it('should pass through a string object', () => {
@@ -399,7 +399,7 @@ describe('JSONGenerator', () => {
                 seenResources: new Set()
             };
             parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).nat, 2);
+            should.equal(ergoJsonGenerator.visitField(field, parameters).$nat, 2);
         });
 
         it('should populate if a primitive double', () => {
@@ -450,7 +450,7 @@ describe('JSONGenerator', () => {
                 seenResources: new Set()
             };
             parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).nat, 1234567890);
+            should.equal(ergoJsonGenerator.visitField(field, parameters).$nat, 1234567890);
         });
 
         it('should populate if a primitive Boolean', () => {
@@ -522,13 +522,13 @@ describe('JSONGenerator', () => {
             };
             parameters.stack.push(primitive);
             let result = ergoJsonGenerator.visitField(field, parameters);
-            result.should.have.property('type');
-            result.should.have.property('data');
-            result.type[0].should.equal('MyEnum');
-            result.data.should.have.property('right');
-            result.data.right.should.have.property('right');
-            result.data.right.right.should.have.property('left');
-            result.data.right.right.left.should.equal('WONGA-1');
+            result.should.have.property('$class');
+            result.should.have.property('$data');
+            result.$class[0].should.equal('MyEnum');
+            result.$data.should.have.property('$right');
+            result.$data.$right.should.have.property('$right');
+            result.$data.$right.$right.should.have.property('$left');
+            result.$data.$right.$right.$left.should.equal('WONGA-1');
         });
 
         it('should recurse if an object', () => {
@@ -590,7 +590,7 @@ describe('JSONGenerator', () => {
             let result = ergoJsonGenerator.visitField(field,parameters);
             result.should.deep.equal({ '$class': 'org.acme.sample.Car',
                 color: 'GREEN',
-                numberOfSeats: { 'nat' : '2' },
+                numberOfSeats: { '$nat' : '2' },
                 numberPlate: 'PENGU1N' });
             spy.callCount.should.equal(4); // We call it once at the start, then it recurses three times
         });
