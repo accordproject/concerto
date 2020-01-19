@@ -172,7 +172,15 @@ class JSONGenerator {
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
             result = classDeclaration.accept(this, parameters);
         }
-
+        if (field.isOptional()) {
+            if (this.ergo) {
+                if (result) {
+                    result = { '$left' : result };
+                } else {
+                    result = { '$right' : result };
+                }
+            }
+        }
         return result;
     }
 

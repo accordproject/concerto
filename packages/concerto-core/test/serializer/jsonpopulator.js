@@ -47,6 +47,7 @@ describe('JSONPopulator', () => {
             namespace org.acme
             asset MyAsset1 identified by assetId {
                 o String assetId
+                o Integer assetValue optional
             }
             asset MyAsset2 identified by assetId {
                 o String assetId
@@ -355,6 +356,78 @@ describe('JSONPopulator', () => {
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
                 $class: 'org.acme.MyAsset1',
                 assetId: 'asset1'
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = jsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: 1
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional intege (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: { '$left' : { '$nat' : 1 } }
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer (null)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = jsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: null
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer (null) (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: { '$right' : null }
             }, options);
             resource.should.be.an.instanceOf(Resource);
             sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
