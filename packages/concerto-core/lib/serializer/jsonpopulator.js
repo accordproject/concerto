@@ -156,15 +156,27 @@ class JSONPopulator {
     }
 
     /**
-    *
-    * @param {Field} field - the field of the item being converted
-    * @param {Object} jsonItem - the JSON object of the item being converted
-    * @param {Object} parameters - the parameters
-    * @return {Object} - the populated object.
-    */
+     *
+     * @param {Field} field - the field of the item being converted
+     * @param {Object} jsonItem - the JSON object of the item being converted
+     * @param {Object} parameters - the parameters
+     * @return {Object} - the populated object.
+     */
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
+        if (field.isOptional()) { // XXX Unpack optionals
+            if (this.ergo) {
+                if (Object.prototype.hasOwnProperty.call(jsonItem,'$left')) {
+                    jsonItem = jsonItem.$left;
+                } else if (Object.prototype.hasOwnProperty.call(jsonItem,'$right')) {
+                    jsonItem = jsonItem.$right;
+                }
+            }
+            if (jsonItem === null) {
+                return null;
+            }
+        }
         if(!field.isPrimitive() && !field.isTypeEnum()) {
             let typeName = jsonItem.$class;
             if(!typeName) {
