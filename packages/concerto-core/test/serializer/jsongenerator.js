@@ -354,6 +354,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive string', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'String';}
             };
@@ -368,9 +369,82 @@ describe('JSONGenerator', () => {
             should.equal(jsonGenerator.visitField(field, parameters), 'WONGA-1');
         });
 
+        it('should populate if an optional primitive string', () => {
+            let field = {
+                'isArray':function(){return false;},
+                'isOptional':function(){return true;},
+                'isPrimitive':function(){return true;},
+                'getType':function(){return 'String';}
+            };
+            isEnumStub.returns(false);
+            let primitive = 'WONGA-1';
+            let parameters = {
+                stack: new TypedStack({}),
+                modelManager: modelManager,
+                seenResources: new Set()
+            };
+            parameters.stack.push(primitive);
+            should.equal(jsonGenerator.visitField(field, parameters), 'WONGA-1');
+        });
+
+        it('should populate if an optional primitive string (null)', () => {
+            let field = {
+                'isArray':function(){return false;},
+                'isOptional':function(){return true;},
+                'isPrimitive':function(){return true;},
+                'getType':function(){return 'String';}
+            };
+            isEnumStub.returns(false);
+            let primitive = null;
+            let parameters = {
+                stack: new TypedStack({}),
+                modelManager: modelManager,
+                seenResources: new Set()
+            };
+            parameters.stack.push(primitive);
+            should.equal(jsonGenerator.visitField(field, parameters), null);
+        });
+
+        it('should populate if an optional primitive string (Ergo)', () => {
+            let field = {
+                'isArray':function(){return false;},
+                'isOptional':function(){return true;},
+                'isPrimitive':function(){return true;},
+                'getType':function(){return 'String';}
+            };
+            isEnumStub.returns(false);
+            let primitive = 'WONGA-1';
+            let parameters = {
+                stack: new TypedStack({}),
+                modelManager: modelManager,
+                seenResources: new Set()
+            };
+            parameters.stack.push(primitive);
+            should.equal(ergoJsonGenerator.visitField(field, parameters).$left, 'WONGA-1');
+        });
+
+        it('should populate if an optional primitive string (null) (Ergo)', () => {
+            let field = {
+                'isArray':function(){return false;},
+                'isOptional':function(){return true;},
+                'isPrimitive':function(){return true;},
+                'getType':function(){return 'String';}
+            };
+            isEnumStub.returns(false);
+            let primitive = null;
+            let parameters = {
+                stack: new TypedStack({}),
+                modelManager: modelManager,
+                seenResources: new Set()
+            };
+            parameters.stack.push(primitive);
+            should.equal(ergoJsonGenerator.visitField(field, parameters).$right, null);
+        });
+
         it('should populate if a primitive integer', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Integer';}
             };
@@ -388,6 +462,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive integer (Ergo)', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Integer';}
             };
@@ -405,6 +480,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive double', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Double';}
             };
@@ -422,6 +498,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive Long', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Long';}
             };
@@ -439,6 +516,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive Long', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Long';}
             };
@@ -456,6 +534,7 @@ describe('JSONGenerator', () => {
         it('should populate if a primitive Boolean', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'Boolean';}
             };
@@ -473,6 +552,7 @@ describe('JSONGenerator', () => {
         it('should populate if an Enum', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getType':function(){return 'String';}
             };
@@ -491,6 +571,7 @@ describe('JSONGenerator', () => {
         it('should populate if an Enum (Ergo)', () => {
             let field = {
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getType':function(){return 'String';},
                 'getParent':function(){
@@ -535,6 +616,7 @@ describe('JSONGenerator', () => {
             let field = {
                 'getName':function(){return 'vehicle';},
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getParent':function(){return 'vehicle';},
                 'getType':function(){return 'String';}
@@ -567,6 +649,7 @@ describe('JSONGenerator', () => {
             let field = {
                 'getName':function(){return 'vehicle';},
                 'isArray':function(){return false;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getParent':function(){return 'vehicle';},
                 'getType':function(){return 'String';}
@@ -598,6 +681,7 @@ describe('JSONGenerator', () => {
         it('should populate an array if array contains primitives', () => {
             let field = {
                 'isArray':function(){return true;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return true;},
                 'getType':function(){return 'String';}
             };
@@ -618,6 +702,7 @@ describe('JSONGenerator', () => {
             let field = {
                 'getName':function(){return 'vehicle';},
                 'isArray':function(){return true;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getParent':function(){return 'vehicle';},
                 'getType':function(){return 'Integer';}
@@ -643,6 +728,7 @@ describe('JSONGenerator', () => {
             let field = {
                 'getName':function(){return 'vehicle';},
                 'isArray':function(){return true;},
+                'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getParent':function(){return 'vehicle';},
                 'getType':function(){return 'String';}

@@ -27,10 +27,6 @@ describe('TypedStack', function () {
             assert.throws( function() {ts.push(1, String);}, /.+Did not find expected type Function as argument to push. Found: 1/, 'did not throw with expected message');
         });
 
-        it('check push with null', function() {
-            const ts = new TypedStack('ROOT');
-            assert.throws( function() {ts.push(null);}, /.+Pushing null data!/, 'did not throw with expected message');
-        });
     });
 
     describe('#pop', function() {
@@ -47,13 +43,9 @@ describe('TypedStack', function () {
     });
 
     describe('#peek', () => {
-        it('should throw an error if value given is null', () => {
+        it('should throw an error if value given has wrong types', () => {
             const ts = new TypedStack('ROOT');
-            (() => {
-                // Set the top of the stack to null
-                ts.stack = [null];
-                ts.peek(null);
-            }).should.throw(/Pop returned invalid data/);
+            assert.throws( function() {ts.peek(Number);}, /.+Found: ROOT/, 'did not throw with expected message');
         });
     });
 });

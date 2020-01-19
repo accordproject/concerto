@@ -14,8 +14,6 @@
 
 'use strict';
 
-const Util = require('../util');
-
 /**
  * Tracks a stack of typed instances. The type information is used to detect
  * overflow / underflow bugs by the caller. It also performs basic sanity
@@ -43,10 +41,6 @@ class TypedStack {
     push(obj, expectedType) {
         if(expectedType && !(obj instanceof expectedType)) {
             throw new Error('Did not find expected type ' + expectedType.constructor.name + ' as argument to push. Found: ' + obj.toString());
-        }
-
-        if(Util.isNull(obj)) {
-            throw new Error('Pushing null data!');
         }
 
         this.stack.push(obj);
@@ -79,10 +73,6 @@ class TypedStack {
         const result = this.stack[this.stack.length-1];
         if(expectedType && !(result instanceof expectedType)) {
             throw new Error('Did not find expected type ' + expectedType + ' on head of stack. Found: ' + result);
-        }
-
-        if(Util.isNull(result)) {
-            throw new Error('Pop returned invalid data');
         }
 
         return result;
