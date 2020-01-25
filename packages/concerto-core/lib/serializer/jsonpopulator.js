@@ -121,10 +121,19 @@ class JSONPopulator {
         validateProperties(properties, classDeclaration);
 
         properties.forEach((property) => {
-            const value = jsonObj[property];
-            parameters.jsonStack.push(value);
-            const classProperty = classDeclaration.getProperty(property);
-            resourceObj[property] = classProperty.accept(this,parameters);
+            let value = jsonObj[property];
+            if (this.ergo) { // XXX Unpack optionals
+                if (Object.prototype.hasOwnProperty.call(value,'$left')) {
+                    value = value.$left;
+                } else if (Object.prototype.hasOwnProperty.call(value,'$right')) {
+                    value = value.$right;
+                }
+            }
+            if (value !== null) {
+                parameters.jsonStack.push(value);
+                const classProperty = classDeclaration.getProperty(property);
+                resourceObj[property] = classProperty.accept(this,parameters);
+            }
         });
 
         return resourceObj;
@@ -165,18 +174,6 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if (field.isOptional()) { // XXX Unpack optionals
-            if (this.ergo) {
-                if (Object.prototype.hasOwnProperty.call(jsonItem,'$left')) {
-                    jsonItem = jsonItem.$left;
-                } else if (Object.prototype.hasOwnProperty.call(jsonItem,'$right')) {
-                    jsonItem = jsonItem.$right;
-                }
-            }
-            if (jsonItem === null) {
-                return null;
-            }
-        }
         if(!field.isPrimitive() && !field.isTypeEnum()) {
             let typeName = jsonItem.$class;
             if(!typeName) {
