@@ -32,7 +32,6 @@ class ClassDeclaration extends Decorated {
    + boolean isEvent() 
    + boolean isRelationshipTarget() 
    + boolean isSystemRelationshipTarget() 
-   + boolean isSystemType() 
    + boolean isSystemCoreType() 
    + string getName() 
    + String getNamespace() 

@@ -328,23 +328,13 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Returns true is this type is in the system namespace
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isSystemType() {
-        return this.modelFile.isSystemModelFile();
-    }
-
-    /**
      * Returns true if this class is a system core type - both in the system
      * namespace, and also one of the system core types (Asset, Participant, etc).
      *
      * @return {boolean} true if the class may be pointed to by a relationship
      */
     isSystemCoreType() {
-        return this.isSystemType() &&
-            this.getSystemType() === this.getName();
+        return this.getSystemType() === this.getName();
     }
 
     /**
