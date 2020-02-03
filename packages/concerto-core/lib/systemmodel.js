@@ -14,18 +14,16 @@
 
 'use strict';
 
-const debug = require('debug')('concerto-core:systemmodelutility');
+const systemNamespace = 'org.accordproject.base';
+const systemFileName = '@' + systemNamespace + '.cto';
+const systemModel = `namespace org.accordproject.base
+abstract asset Asset {  }
+abstract participant Participant {  }
+abstract transaction Transaction identified by transactionId {
+  o String transactionId
+}
+abstract event Event identified by eventId {
+  o String eventId
+}`;
 
-const SYSTEM_MODELS = require('./systemmodel');
-
-module.exports = {
-    addComposerSystemModels: (modelManager) => {
-        SYSTEM_MODELS.forEach((SYSTEM_MODEL) => {
-            debug('addComposerSystemModels', SYSTEM_MODEL);
-            modelManager.addModelFile(SYSTEM_MODEL.contents, SYSTEM_MODEL.fileName, true);
-        });
-
-        // now validate all the models
-        modelManager.validateModelFiles();
-    },
-};
+module.exports = { systemNamespace, systemFileName, systemModel };

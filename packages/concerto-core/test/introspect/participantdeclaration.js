@@ -39,13 +39,6 @@ describe('ParticipantDeclaration', () => {
         return assets[0];
     };
 
-    describe('#isRelationshipTarget', () => {
-        it('should return true', () => {
-            let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.valid.cto');
-            p.isRelationshipTarget().should.be.true;
-        });
-    });
-
     describe('#getSystemType', () => {
         it('should return Participant', () => {
             let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.valid.cto');

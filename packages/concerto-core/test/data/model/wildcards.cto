@@ -20,8 +20,7 @@ concept MyConcept {
   o Gender gender
 }
 
-participant MyParticipant identified by participantId extends Person {
-  o String participantId
+participant MyParticipant extends Person {
 }
 
 asset MyAsset identified by assetId {

@@ -33,8 +33,7 @@ participant Par2 identified by id {
   o String address
 }
 
-transaction BaseTransaction identified by transactionId {
-  o String transactionId
+transaction BaseTransaction {
 }
 
 transaction UpdateOrderTransaction extends BaseTransaction {
@@ -44,8 +43,7 @@ transaction UpdateOrderTransaction extends BaseTransaction {
   o SomeTransmission transmission
 }
 
-event UpdateOrderEvent identified by eventId {
-  o String eventId
+event UpdateOrderEvent {
   --> SomeTransmission transmission
 }
 
