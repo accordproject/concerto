@@ -1,0 +1,5 @@
+namespace org.accordproject.base
+abstract asset Asset {  }
+abstract participant Participant {  }
+abstract transaction Transaction {  }
+abstract event Event {  }

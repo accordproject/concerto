@@ -20,7 +20,6 @@ const ModelManager = require('../../lib/modelmanager');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const fs = require('fs');
 const path = require('path');
-const Util = require('../composer/systemmodelutility');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -44,7 +43,6 @@ describe('ModelFile semantic validation', () => {
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
         mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
         mockModelManager.getSystemTypes.returns([mockSystemAsset]);
-        mockModelManager.getSystemModelTable.returns(Util.getSystemModelTable());
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);

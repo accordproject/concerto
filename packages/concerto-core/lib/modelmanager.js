@@ -56,7 +56,6 @@ class ModelManager {
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this);
         this.decoratorFactories = [];
-        this.systemModelTable = new Map();
         this._isModelManager = true;
     }
 
@@ -115,28 +114,18 @@ class ModelManager {
      * @param {string} modelFile - The Concerto file as a string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
-     * @param {boolean} [systemModelTable] - A table that maps classes in the new models to system types
+     * @param {boolean} [isSystemModelFile] - If true, this is a system model file, defaults to false
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addModelFile(modelFile, fileName, disableValidation,systemModelTable) {
+    addModelFile(modelFile, fileName, disableValidation, isSystemModelFile = false) {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
         let m = null;
 
-        // Update the system model table with either the provided table or the default one
-        const isSystemModelFile = typeof systemModelTable !== 'undefined';
-        if(isSystemModelFile) {
-            if(typeof systemModelTable === 'object') {
-                systemModelTable.forEach((key, value) => this.systemModelTable.set(key, value));
-            } else {
-                ModelUtil.getIdentitySystemModelTable().forEach((key, value) => this.systemModelTable.set(key, value));
-            }
-        }
-
         if (typeof modelFile === 'string') {
-            m = new ModelFile(this, modelFile, fileName, systemModelTable !== undefined);
+            m = new ModelFile(this, modelFile, fileName, isSystemModelFile);
         } else {
             m = modelFile;
         }
@@ -151,14 +140,6 @@ class ModelManager {
         }
 
         return m;
-    }
-
-    /**
-     * @return {Map} A table that maps classes in the new models to system types
-     * @private
-     */
-    getSystemModelTable() {
-        return this.systemModelTable;
     }
 
     /**
@@ -215,29 +196,17 @@ class ModelManager {
      * @param {string[]} [fileNames] - An optional array of file names to
      * associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
-     * @param {boolean} [systemModelTable] - A table that maps classes in the new models to system types
+     * @param {boolean} [isSystemModelFile] - If true, this is a system model file, defaults to false
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles, fileNames, disableValidation,systemModelTable) {
+    addModelFiles(modelFiles, fileNames, disableValidation, isSystemModelFile = false) {
         const NAME = 'addModelFiles';
         debug(NAME, 'addModelFiles', modelFiles, fileNames);
         const originalModelFiles = {};
-        const originalSystemModelTable = {};
         Object.assign(originalModelFiles, this.modelFiles);
-        Object.assign(originalSystemModelTable, this.systemModelTable);
         let newModelFiles = [];
 
         try {
-            // Update the system model table with either the provided table or the default one
-            const isSystemModelFile = typeof systemModelTable !== 'undefined';
-            if(isSystemModelFile) {
-                if(typeof systemModelTable === 'object') {
-                    systemModelTable.forEach((key, value) => this.systemModelTable.set(key, value));
-                } else {
-                    ModelUtil.getIdentitySystemModelTable().forEach((key, value) => this.systemModelTable.set(key, value));
-                }
-            }
-
             // create the model files
             for (let n = 0; n < modelFiles.length; n++) {
                 const modelFile = modelFiles[n];
@@ -280,9 +249,7 @@ class ModelManager {
             return newModelFiles;
         } catch (err) {
             this.modelFiles = {};
-            this.systemModelTable = {};
             Object.assign(this.modelFiles, originalModelFiles);
-            Object.assign(this.systemModelTable, originalSystemModelTable);
             throw err;
         } finally {
             debug(NAME, newModelFiles);

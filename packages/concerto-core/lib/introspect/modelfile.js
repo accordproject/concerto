@@ -217,7 +217,6 @@ class ModelFile {
      * @private
      */
     validate() {
-
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         this.imports.forEach((importName) => {
@@ -580,7 +579,7 @@ class ModelFile {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
-            if(classDeclaration instanceof type && (includeSystemType || !classDeclaration.isSystemType())) {
+            if(classDeclaration instanceof type && (includeSystemType || !classDeclaration.isSystemCoreType())) {
                 result.push(classDeclaration);
             }
         }
