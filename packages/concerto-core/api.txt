@@ -18,7 +18,6 @@ class Factory {
 }
 class AssetDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean isRelationshipTarget() 
    + string getSystemType() 
    + boolean hasInstance(object) 
 }
@@ -30,8 +29,6 @@ class ClassDeclaration extends Decorated {
    + boolean isEnum() 
    + boolean isConcept() 
    + boolean isEvent() 
-   + boolean isRelationshipTarget() 
-   + boolean isSystemRelationshipTarget() 
    + boolean isSystemCoreType() 
    + string getName() 
    + String getNamespace() 
@@ -111,7 +108,6 @@ class ModelFile {
 }
 class ParticipantDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean isRelationshipTarget() 
    + string getSystemType() 
    + boolean hasInstance(object) 
 }
@@ -180,16 +176,16 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + object loadModelManager(string,string[]) 
-   + object loadModelManagerFromModelFiles(string,object[],undefined) 
+   + object loadModelManager(string[]) 
+   + object loadModelManagerFromModelFiles(object[],undefined) 
 }
 class ModelManager {
    + void constructor() 
    + void validateModelFile(string,string) throws IllegalModelException
-   + Object addModelFile(string,string,boolean,boolean) throws IllegalModelException
+   + Object addModelFile(string,string,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
    + void deleteModelFile(string) 
-   + Object[] addModelFiles(object[],undefined,boolean,boolean) 
+   + Object[] addModelFiles(object[],undefined,boolean) 
    + void validateModelFiles() 
    + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
    + void writeModelsToFileSystem(String,Object,boolean,boolean) 

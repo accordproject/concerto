@@ -24,7 +24,8 @@ import stdlib.base.Address
 /**
  * An abstract participant type in this business network
  */
-abstract participant Business {
+abstract participant Business identified by businessId {
+  o String businessId
   o Address headquarters optional
   o String name optional
   --> Manager[] managers optional
