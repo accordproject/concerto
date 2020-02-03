@@ -55,9 +55,9 @@ describe('Introspector', () => {
             modelManager.addModelFile(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
             let classDecl = introspector.getClassDeclarations().filter( (element) => {
-                return !element.isSystemType();
+                return !element.isSystemCoreType();
             });
-            classDecl.length.should.equal(13);
+            classDecl.length.should.equal(38);
         });
     });
 

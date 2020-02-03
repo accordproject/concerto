@@ -382,7 +382,7 @@ describe('InstanceGenerator', () => {
                 o String id
                 --> Asset theValue
             }`);
-            resource.theValue.getType().should.equal('MyAsset');
+            resource.theValue.getType().should.equal('AssetRegistry');
         });
 
     });
