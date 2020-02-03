@@ -73,8 +73,6 @@ declare module '@accordproject/concerto-core' {
     isEnum(): boolean;
     isConcept(): boolean;
     isEvent(): boolean;
-    isRelationshipTarget(): boolean;
-    isSystemRelationshipTarget(): boolean;
     isSystemCoreType(): boolean;
     getName(): string;
     getNamespace(): string;
@@ -319,11 +317,11 @@ declare module '@accordproject/concerto-core' {
     private accept(visitor: any, parameters: any): any;
     validateModelFile(modelFile: string, fileName?: string): void;
     private _throwAlreadyExists(modelFile: ModelFile): void;
-    addModelFile(modelFile: string, fileName?: string, disableValidation?: boolean, systemModelTable?: boolean): any;
+    addModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
     private getSystemModelTable(): any;
     updateModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
     deleteModelFile(namespace: string): void;
-    addModelFiles(modelFiles: string[], fileNames?: string[], disableValidation?: boolean, systemModelTable?: boolean): any[];
+    addModelFiles(modelFiles: string[], fileNames?: string[], disableValidation?: boolean): any[];
     validateModelFiles(): void;
     updateExternalModels(options?: any, modelFileDownloader?: ModelFileDownloader): Promise<ModelFile[]>;
     writeModelsToFileSystem(path: string, options?: IncludeModelsOptions): void;

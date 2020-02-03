@@ -378,11 +378,12 @@ describe('InstanceGenerator', () => {
 
         it('should generate concrete subclass for abstract reference', function () {
             let resource = test(`namespace org.acme.test
+            event MyEvent extends Event {}
             asset MyAsset identified by id {
                 o String id
-                --> Asset theValue
+                --> Event theValue
             }`);
-            resource.theValue.getType().should.equal('AssetRegistry');
+            resource.theValue.getType().should.equal('MyEvent');
         });
 
     });

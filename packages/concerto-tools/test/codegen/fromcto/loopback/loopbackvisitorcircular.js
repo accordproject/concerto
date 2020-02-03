@@ -38,7 +38,6 @@ describe('LoopbackVisitor with Circular Model', () => {
             beforeEach(() => {
                 mockFileWriter = sinon.createStubInstance(FileWriter);
                 modelManager = new ModelManager();
-                modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/base.cto'), 'utf8'), 'base.cto', false, true);
                 modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/circular.cto'), 'utf8'), 'circular.cto');
                 visitor = new LoopbackVisitor(namespaces);
                 sandbox = sinon.sandbox.create();

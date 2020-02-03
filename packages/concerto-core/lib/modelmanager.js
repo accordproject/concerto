@@ -27,6 +27,9 @@ const ModelFileDownloader = require('./introspect/loaders/modelfiledownloader');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
+const systemNamespace = require('./systemmodel').systemNamespace;
+const systemFileName = require('./systemmodel').systemFileName;
+const systemModel = require('./systemmodel').systemModel;
 
 const debug = require('debug')('concerto:ModelManager');
 
@@ -57,6 +60,8 @@ class ModelManager {
         this.serializer = new Serializer(this.factory, this);
         this.decoratorFactories = [];
         this._isModelManager = true;
+        // Always add the systems model
+        this.addModelFile(new ModelFile(this, systemModel, systemFileName, true), systemFileName, true);
     }
 
     /**
@@ -114,18 +119,17 @@ class ModelManager {
      * @param {string} modelFile - The Concerto file as a string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
-     * @param {boolean} [isSystemModelFile] - If true, this is a system model file, defaults to false
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addModelFile(modelFile, fileName, disableValidation, isSystemModelFile = false) {
+    addModelFile(modelFile, fileName, disableValidation) {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
         let m = null;
 
         if (typeof modelFile === 'string') {
-            m = new ModelFile(this, modelFile, fileName, isSystemModelFile);
+            m = new ModelFile(this, modelFile, fileName);
         } else {
             m = modelFile;
         }
@@ -160,18 +164,19 @@ class ModelManager {
             let m = new ModelFile(this, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
         } else {
+            if (modelFile.getNamespace() === systemNamespace) {
+                throw new Error(`System namespace ${systemNamespace} cannot be updated`);
+            }
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
-                throw new Error('model file does not exist');
-            } else if (existing.isSystemModelFile()) {
-                throw new Error('System namespace can not be updated');
+                throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
             }
             if (!disableValidation) {
                 modelFile.validate();
             }
-            this.modelFiles[modelFile.getNamespace()] = modelFile;
-            return modelFile;
         }
+        this.modelFiles[modelFile.getNamespace()] = modelFile;
+        return modelFile;
     }
 
     /**
@@ -181,8 +186,8 @@ class ModelManager {
      */
     deleteModelFile(namespace) {
         if (!this.modelFiles[namespace]) {
-            throw new Error('model file does not exist');
-        } else if (this.modelFiles[namespace].isSystemModelFile()) {
+            throw new Error('Model file does not exist');
+        } else if (namespace === systemNamespace) {
             throw new Error('Cannot delete system namespace');
         } else {
             delete this.modelFiles[namespace];
@@ -196,10 +201,9 @@ class ModelManager {
      * @param {string[]} [fileNames] - An optional array of file names to
      * associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
-     * @param {boolean} [isSystemModelFile] - If true, this is a system model file, defaults to false
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles, fileNames, disableValidation, isSystemModelFile = false) {
+    addModelFiles(modelFiles, fileNames, disableValidation) {
         const NAME = 'addModelFiles';
         debug(NAME, 'addModelFiles', modelFiles, fileNames);
         const originalModelFiles = {};
@@ -216,27 +220,15 @@ class ModelManager {
                     fileName = fileNames[n];
                 }
 
-                if (typeof modelFile === 'string') {
-                    let m = new ModelFile(this, modelFile, fileName, isSystemModelFile);
-                    if (m.isSystemModelFile()) {
-                        throw new Error('System namespace can not be updated');
-                    }
-                    if (!this.modelFiles[m.getNamespace()]) {
-                        this.modelFiles[m.getNamespace()] = m;
-                        newModelFiles.push(m);
-                    } else {
-                        this._throwAlreadyExists(m);
-                    }
+                const m = typeof modelFile === 'string' ? new ModelFile(this, modelFile, fileName) : modelFile;
+                if (m.getNamespace() === systemNamespace) {
+                    throw new Error('System namespace can not be updated');
+                }
+                if (!this.modelFiles[m.getNamespace()]) {
+                    this.modelFiles[m.getNamespace()] = m;
+                    newModelFiles.push(m);
                 } else {
-                    if (modelFile.isSystemModelFile()) {
-                        throw new Error('System namespace can not be updated');
-                    }
-                    if (!this.modelFiles[modelFile.getNamespace()]) {
-                        this.modelFiles[modelFile.getNamespace()] = modelFile;
-                        newModelFiles.push(modelFile);
-                    } else {
-                        this._throwAlreadyExists(modelFile);
-                    }
+                    this._throwAlreadyExists(m);
                 }
             }
 
