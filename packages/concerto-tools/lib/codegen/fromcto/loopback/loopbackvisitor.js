@@ -383,8 +383,10 @@ class LoopbackVisitor {
             // The ID field will be supplied at submission time, not by the client.
             jsonSchema.forceId = true;
             const identifierFieldName = classDeclaration.getIdentifierFieldName();
-            jsonSchema.properties[identifierFieldName].generated = true;
-            jsonSchema.properties[identifierFieldName].required = false;
+            if (jsonSchema.properties[identifierFieldName]) {
+                jsonSchema.properties[identifierFieldName].generated = true;
+                jsonSchema.properties[identifierFieldName].required = false;
+            }
 
             // The timestamp can be supplied by the client, but does not have to be.
             jsonSchema.properties.timestamp.required = false;

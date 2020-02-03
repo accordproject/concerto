@@ -50,8 +50,7 @@ class ParticipantDeclaration extends ClassDeclaration {
      * @return {string} the short name of the base system type
      */
     getSystemType() {
-        let systemType = this.modelFile.getModelManager().getSystemModelTable().get('Participant');
-        return systemType !== undefined ? systemType : null;
+        return 'Participant';
     }
 
     /**

@@ -25,17 +25,11 @@ describe('Custom System Model', function() {
             let modelManager = new ModelManager();
             modelManager.should.not.be.null;
 
-            const table = new Map();
-            table.set('MyTransaction', 'Transaction');
-            table.set('MyAsset', 'Asset');
-            table.set('MyEvent', 'Event');
-            table.set('MyParticipant', 'Participant');
-
             // parse a model file from disk and add to the ModelManager
             let fileName = './test/data/model/customsystem-base.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName, false, table);
+            modelManager.addModelFile(systemModel,fileName, false, true);
 
             fileName = './test/data/model/customsystem-extends.cto';
             let file = fs.readFileSync(fileName, 'utf8');
@@ -52,11 +46,10 @@ describe('Custom System Model', function() {
             systemModelFile.getEventDeclarations().length.should.equal(1);
             systemModelFile.getParticipantDeclarations().length.should.equal(1);
 
-            let myAsset = systemModelFile.getAssetDeclaration('MyAsset');
+            let myAsset = systemModelFile.getAssetDeclaration('Asset');
             (myAsset.getSuperType()=== null).should.be.true;
-            myAsset.isSystemType().should.be.true;
             myAsset.isSystemCoreType().should.be.true;
-            myAsset.getSystemType().should.equal('MyAsset');
+            myAsset.getSystemType().should.equal('Asset');
 
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
@@ -70,7 +63,7 @@ describe('Custom System Model', function() {
             yourAsset.should.not.be.null;
             yourAsset.getIdentifierFieldName().should.equal('myAssetId');
             yourAsset.getProperties().length.should.equal(1);
-            yourAsset.getSystemType().should.equal('MyAsset');
+            yourAsset.getSystemType().should.equal('Asset');
 
             // validator, default
             let identifierField = yourAsset.getProperty('myAssetId');

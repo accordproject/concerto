@@ -52,8 +52,7 @@ class TransactionDeclaration extends ClassDeclaration {
      * @return {string} the short name of the base system type
      */
     getSystemType() {
-        let systemType = this.modelFile.getModelManager().getSystemModelTable().get('Transaction');
-        return systemType !== undefined ? systemType : null;
+        return 'Transaction';
     }
 
     /**
