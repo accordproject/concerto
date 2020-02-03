@@ -35,7 +35,6 @@ describe('EventDeclaration', () => {
         mockSystemEvent = sinon.createStubInstance(EventDeclaration);
         mockSystemEvent.getFullyQualifiedName.returns('org.hyperledger.composer.system.Event');
         mockModelManager.getSystemTypes.returns([mockSystemEvent]);
-        mockModelManager.getSystemModelTable.returns(Util.getSystemModelTable());
     });
 
     afterEach(() => {

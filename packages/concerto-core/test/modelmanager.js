@@ -29,7 +29,6 @@ const ParticipantDeclaration = require('../lib/introspect/participantdeclaration
 const Serializer = require('../lib/serializer');
 const TransactionDeclaration = require('../lib/introspect/transactiondeclaration');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
-const ModelUtil = require('../lib/modelutil');
 const Util = require('./composer/systemmodelutility');
 
 const chai = require('chai');
@@ -142,7 +141,7 @@ describe('ModelManager', () => {
         it('should not be possible to add a system model file explicit system model table', ()=>{
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
-            let res = modelManager.addModelFile(mf1, null, null, ModelUtil.getIdentitySystemModelTable());
+            let res = modelManager.addModelFile(mf1, null, null, true);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
@@ -299,7 +298,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file (via string) with explicit system model table', ()=>{
             (() => {
-                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, ModelUtil.getIdentitySystemModelTable());
+                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, true);
             }).should.throw(/System namespace can not be updated/);
         });
 
@@ -818,18 +817,18 @@ concept Bar {
 
     describe('#getDeclarations', () => {
 
-        const numberSystemAssets = 8;
-        const numberSystemEnums = 1;
-        const numberSystemParticipants = 2;
+        const numberSystemAssets = 1;
+        const numberSystemEnums = 0;
+        const numberSystemParticipants = 1;
         const numberSystemEvents = 1;
-        const numberSystemTransactions = 17;
+        const numberSystemTransactions = 1;
         const numberSystemConcepts = 0;
 
-        const numberModelBaseAssets = 5;
-        const numberModelBaseEnums = 1;
-        const numberModelBaseParticipants = 2;
+        const numberModelBaseAssets = 12;
+        const numberModelBaseEnums = 2;
+        const numberModelBaseParticipants = 3;
         const numberModelBaseEvents = 0;
-        const numberModelBaseTransactions = 3;
+        const numberModelBaseTransactions = 19;
         const numberModelBaseConcepts = 2;
 
 
@@ -851,10 +850,10 @@ concept Bar {
                 let decls = modelManager.getAssetDeclarations(false);
                 decls.should.all.be.an.instanceOf(AssetDeclaration);
                 decls.length.should.equal(numberModelBaseAssets);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -888,10 +887,10 @@ concept Bar {
                 let decls = modelManager.getEnumDeclarations(false);
                 decls.should.all.be.an.instanceOf(EnumDeclaration);
                 decls.length.should.equal(numberModelBaseEnums);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -925,10 +924,10 @@ concept Bar {
                 let decls = modelManager.getParticipantDeclarations(false);
                 decls.should.all.be.an.instanceOf(ParticipantDeclaration);
                 decls.length.should.equal(numberModelBaseParticipants);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -998,10 +997,10 @@ concept Bar {
                 let decls = modelManager.getTransactionDeclarations(false);
                 decls.should.all.be.an.instanceOf(TransactionDeclaration);
                 decls.length.should.equal(numberModelBaseTransactions);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });

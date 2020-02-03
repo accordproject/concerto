@@ -87,7 +87,7 @@ class ModelLoader {
         modelManager = await ModelLoader.addModel(modelFileLoader,modelManager,ctoSystemFile,true);
 
         // Load user models
-        for( let ctoFile of ctoFiles ) {
+        for(let ctoFile of ctoFiles) {
             modelManager = await ModelLoader.addModel(modelFileLoader,modelManager,ctoFile,false);
         }
 

@@ -75,7 +75,6 @@ declare module '@accordproject/concerto-core' {
     isEvent(): boolean;
     isRelationshipTarget(): boolean;
     isSystemRelationshipTarget(): boolean;
-    isSystemType(): boolean;
     isSystemCoreType(): boolean;
     getName(): string;
     getNamespace(): string;
