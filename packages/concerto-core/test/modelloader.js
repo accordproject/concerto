@@ -37,35 +37,35 @@ describe('ModelLoader', () => {
 
     describe('#loadModelManager', function() {
         it('should load models', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (function() {
                 modelManager.getType('String');
             }).should.throw(TypeNotFoundException);
         });
 
         it('should throw an error for a namespace that does not exist', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (function() {
                 modelManager.getType('org.acme.nosuchns.SimpleAsset');
             }).should.throw(TypeNotFoundException, /org.acme.nosuchns/);
         });
 
         it('should throw an error for an empty namespace', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (function() {
                 modelManager.getType('NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should throw an error for a type that does not exist', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (function() {
                 modelManager.getType('org.acme.base.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should return the class declaration for a valid type', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const declaration = modelManager.getType('org.acme.base.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
         });
@@ -73,51 +73,51 @@ describe('ModelLoader', () => {
 
     describe('#loadModelManagerFromModelFiles', function() {
         it('should load models', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
                 .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
-            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
                 modelManager2.getType('String');
             }).should.throw(TypeNotFoundException);
         });
 
         it('should throw an error for a namespace that does not exist', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
                 .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
-            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
                 modelManager2.getType('org.acme.nosuchns.SimpleAsset');
             }).should.throw(TypeNotFoundException, /org.acme.nosuchns/);
         });
 
         it('should throw an error for an empty namespace', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
                 .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
-            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
                 modelManager2.getType('NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should throw an error for a type that does not exist', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
                 .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
-            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
                 modelManager2.getType('org.acme.base.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should return the class declaration for a valid type', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const declaration = modelManager.getType('org.acme.base.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
         });
@@ -125,7 +125,7 @@ describe('ModelLoader', () => {
 
     describe('#loadModelFromUrl', function() {
         it('should load models', async function() {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelUrl]);
+            const modelManager = await ModelLoader.loadModelManager([modelUrl]);
             (modelManager instanceof ModelManager).should.be.true;
         });
     });
@@ -133,7 +133,7 @@ describe('ModelLoader', () => {
     describe('#getFactory', () => {
 
         it('should return a factory', async () => {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             modelManager.getFactory().should.be.an.instanceOf(Factory);
         });
 
@@ -142,7 +142,7 @@ describe('ModelLoader', () => {
     describe('#getSerializer', () => {
 
         it('should return a serializer', async () => {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             modelManager.getSerializer().should.be.an.instanceOf(Serializer);
         });
 
@@ -150,7 +150,7 @@ describe('ModelLoader', () => {
 
     describe('#hasInstance', () => {
         it('should return true for a valid ModelManager', async () => {
-            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (modelManager instanceof ModelManager).should.be.true;
         });
     });

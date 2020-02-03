@@ -105,12 +105,11 @@ describe('RelationshipDeclaration', function () {
             const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
-            mockClassDeclaration.isRelationshipTarget.returns(false);
             field.getParent().getModelFile().getType = () => {return mockClassDeclaration;};
 
             (function () {
                 field.validate(vehicleDeclaration);
-            }).should.throw(/Relationship owner must be to an asset or participant/);
+            }).should.throw(/Relationship owner must be to a class that has an identifier/);
         });
     });
 });

@@ -60,7 +60,7 @@ describe('Wildcards Model', function () {
             },
             participant: {
                 $class: 'org.acme.wildcards.MyParticipant',
-                participantId: '1',
+                personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',
                 contactDetails: {
@@ -73,7 +73,7 @@ describe('Wildcards Model', function () {
         const resource = serializer.fromJSON(json);
         resource.assetId.should.equal('1');
         resource.concept.gender.should.equal('FEMALE');
-        resource.participant.participantId.should.equal('1');
+        resource.participant.personId.should.equal('1');
         resource.participant.firstName.should.equal('Alice');
         resource.participant.lastName.should.equal('A');
         resource.participant.contactDetails.email.should.equal('alice@email.com');
@@ -90,7 +90,7 @@ describe('Wildcards Model', function () {
             },
             participant: {
                 $class: 'org.acme.wildcards.MyParticipant',
-                participantId: '1',
+                personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',
                 contactDetails: {
@@ -103,7 +103,7 @@ describe('Wildcards Model', function () {
         const resource = ergoSerializer.fromJSON(json);
         resource.assetId.should.equal('1');
         resource.concept.gender.should.equal('FEMALE');
-        resource.participant.participantId.should.equal('1');
+        resource.participant.personId.should.equal('1');
         resource.participant.firstName.should.equal('Alice');
         resource.participant.lastName.should.equal('A');
         resource.participant.contactDetails.email.should.equal('alice@email.com');
@@ -131,7 +131,7 @@ describe('Wildcards Model', function () {
             },
             participant: {
                 $class: 'org.acme.wildcards.MyParticipant',
-                participantId: '1',
+                personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',
                 contactDetails: {

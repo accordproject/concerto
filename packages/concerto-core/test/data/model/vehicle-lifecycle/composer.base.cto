@@ -23,7 +23,8 @@ enum Gender {
  o OTHER
 }
 
-abstract participant Person {
+abstract participant Person identified by personId {
+	o String personId
   o String title optional
   o String firstName  optional
   o String lastName  optional

@@ -97,16 +97,15 @@ class Commands {
      * Validate a sample JSON against the model
      *
      * @param {string} sample - the sample to validate
-     * @param {string} ctoSystemFile - the system model file
      * @param {string[]} ctoFiles - the CTO files to convert to code
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      * @returns {string} serialized form of the validated JSON
      */
-    static async validate(sample, ctoSystemFile, ctoFiles, options) {
+    static async validate(sample, ctoFiles, options) {
         const json = JSON.parse(fs.readFileSync(sample, 'utf8'));
 
-        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles, options);
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
         const factory = new Factory(modelManager);
         const serializer = new Serializer(factory, modelManager);
 
@@ -118,14 +117,13 @@ class Commands {
      * Compile the model for a given target
      *
      * @param {string} target - the target of the code to compile
-     * @param {string} ctoSystemFile - the system model file
      * @param {string[]} ctoFiles - the CTO files to convert to code
      * @param {string} output the output directory
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      */
-    static async compile(target, ctoSystemFile, ctoFiles, output, options) {
-        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles, options);
+    static async compile(target, ctoFiles, output, options) {
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
 
         let visitor = null;
 
@@ -165,12 +163,11 @@ class Commands {
      * Fetches all external for a set of models dependencies and
      * saves all the models to a target directory
      *
-     * @param {string} ctoSystemFile the system model
      * @param {string[]} ctoFiles the CTO files (can be local file paths or URLs)
      * @param {string} output the output directory
      */
-    static async get(ctoSystemFile, ctoFiles, output) {
-        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles);
+    static async get(ctoFiles, output) {
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles);
         mkdirp.sync(output);
         modelManager.writeModelsToFileSystem(output);
         return `Loaded external models in '${output}'.`;
