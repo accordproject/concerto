@@ -35,42 +35,12 @@ const SYSTEM_MODELS = [
 namespace org.hyperledger.composer.system
 
 /**
- * Abstract system asset that all assets extend.
- * Has no properties, and is soley used as a basis to model other assets.
- */
-@docs('asset.md')
-abstract asset Asset {  }
-
-/**
  * Abstract system participant that all participants extend.
  * Has no properties, and is soley used as a basis to model other assets.
  */
 @docs('participant.md')
-abstract participant Participant {   }
-
-/**
- * Abstract transaction that all transactions, including system ones, extend.
- *
- * Has two properties that are used set and are accessible in all transactions.
- *
- *
- * @param {String} transactionId Identifier for this transaction
- */
-@docs('transaction.md')
-abstract transaction Transaction identified by transactionId {
-  o String transactionId
-}
-
-/**
- * Abstract event that all events, including system ones, extend.
- *
- * Has two properties that are used set and are accessible in all transactions.
- *
- * @param {String} eventId Identifier for this event
- */
-@docs('event.md')
-abstract event Event identified by eventId {
-  o String eventId
+abstract participant HLParticipant identified by participantId {
+  o String participantId
 }
 
 /**
@@ -153,13 +123,13 @@ participant NetworkAdmin identified by participantId {
 @docs('historian.md')
 @docsuri('Composer Documentation','../business-network/historian')
 asset HistorianRecord identified by transactionId {
-  o String        transactionId
-  o String        transactionType
-  --> Transaction transactionInvoked
-  --> Participant participantInvoking  optional
-  --> Identity    identityUsed         optional
-  o Event[]       eventsEmitted        optional
-  o DateTime      transactionTimestamp
+  o String          transactionId
+  o String          transactionType
+  --> Transaction   transactionInvoked
+  --> HLParticipant participantInvoking  optional
+  --> Identity      identityUsed         optional
+  o Event[]         eventsEmitted        optional
+  o DateTime        transactionTimestamp
 }
 
 // -----------------------------------------------------------------------------
@@ -262,7 +232,7 @@ asset Identity identified by identityId {
     o String issuer
     o String certificate
     o IdentityState state
-    --> Participant participant
+    --> HLParticipant participant
 }
 
 /**
@@ -272,7 +242,7 @@ asset Identity identified by identityId {
  */
 @docs('issueIdentity.md')
 transaction IssueIdentity {
-    --> Participant participant
+    --> HLParticipant participant
     o String identityName
 }
 
@@ -283,7 +253,7 @@ transaction IssueIdentity {
  */
 @docs('bindIdentity.md')
 transaction BindIdentity {
-    --> Participant participant
+    --> HLParticipant participant
     o String certificate
 }
 

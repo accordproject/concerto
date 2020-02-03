@@ -40,7 +40,7 @@ describe('Farm2Fork Model', function() {
             modelManager.addModelFile(file,fileName);
             modelManager.getModelFiles().filter((modelFile) => {
                 return !modelFile.isSystemModelFile();
-            }).length.should.equal(2);
+            }).length.should.equal(3);
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
 

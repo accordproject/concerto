@@ -28,7 +28,6 @@ const Commands = require('../lib/commands');
 describe('cicero-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
     const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
-    const hlModel = path.resolve(__dirname, 'models/org.hyperledger.composer.system.cto');
     const sample1 = path.resolve(__dirname, 'data/sample1.json');
     const sample2 = path.resolve(__dirname, 'data/sample2.json');
     const sampleText1 = fs.readFileSync(sample1, 'utf8');
@@ -55,13 +54,13 @@ describe('cicero-cli', () => {
 
     describe('#validate', () => {
         it('should validate against a model', async () => {
-            const result = await Commands.validate(sample1, null, models, {offline:false});
+            const result = await Commands.validate(sample1, models, {offline:false});
             JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
         });
 
         it('should fail to validate against a model', async () => {
             try {
-                const result = await Commands.validate(sample2, null, models, {offline:false});
+                const result = await Commands.validate(sample2, models, {offline:false});
                 JSON.parse(result).should.deep.equal(JSON.parse(sampleText2));
             } catch (err) {
                 err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
@@ -69,7 +68,7 @@ describe('cicero-cli', () => {
         });
 
         it('should validate against a model (offline)', async () => {
-            const result = await Commands.validate(sample1, null, offlineModels, {offline:true});
+            const result = await Commands.validate(sample1, offlineModels, {offline:true});
             JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
         });
 
@@ -111,43 +110,43 @@ describe('cicero-cli', () => {
 
         it('should compile to a Go model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('Go', null, models, dir.path, {offline:false});
+            await Commands.compile('Go', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a PlantUML model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('PlantUML', null, models, dir.path, {offline:false});
+            await Commands.compile('PlantUML', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a Typescript model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('Typescript', null, models, dir.path, {offline:false});
+            await Commands.compile('Typescript', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a Java model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('Java', null, models, dir.path);
+            await Commands.compile('Java', models, dir.path);
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a JSONSchema model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('JSONSchema', null, models, dir.path, {offline:false});
+            await Commands.compile('JSONSchema', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a XMLSchema model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('XMLSchema', null, models, dir.path, {offline:false});
+            await Commands.compile('XMLSchema', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should not compile to an unknown model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.compile('BLAH', null, models, dir.path, {offline:false});
+            await Commands.compile('BLAH', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.equal(0);
             dir.cleanup();
         });
@@ -156,7 +155,7 @@ describe('cicero-cli', () => {
     describe('#get', () => {
         it('should save external dependencies', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.get(null, models, dir.path);
+            await Commands.get(models, dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@models.accordproject.org.cicero.contract.cto',
                 'dom.cto',
@@ -167,7 +166,7 @@ describe('cicero-cli', () => {
 
         it('should save external dependencies for an external model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
-            await Commands.get(null,['https://models.accordproject.org/patents/patent.cto'], dir.path);
+            await Commands.get(['https://models.accordproject.org/patents/patent.cto'], dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@models.accordproject.org.address.cto',
                 '@models.accordproject.org.geo.cto',
@@ -180,15 +179,6 @@ describe('cicero-cli', () => {
                 '@models.accordproject.org.value.cto'
             ]);
             dir.cleanup();
-        });
-
-        it('should fail saving external dependencies for an external model but with the wrong system model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
-            try {
-                await Commands.get(hlModel,['https://models.accordproject.org/patents/patent.cto'], dir.path);
-            } catch (err) {
-                err.message.should.contain('Relationship transactionInvoked must be to an asset or participant, but is to org.hyperledger.composer.system.Transaction');
-            }
         });
     });
 });

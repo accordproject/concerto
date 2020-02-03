@@ -309,25 +309,6 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Returns true if this class can be pointed to by a relationship
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isRelationshipTarget() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class can be pointed to by a relationship in a
-     * system model
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isSystemRelationshipTarget() {
-        return this.isRelationshipTarget();
-    }
-
-    /**
      * Returns true if this class is a system core type - both in the system
      * namespace, and also one of the system core types (Asset, Participant, etc).
      *
