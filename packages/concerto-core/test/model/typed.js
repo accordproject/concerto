@@ -16,7 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const Typed = require('../../lib/model/typed');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 require('chai').should();
@@ -30,7 +30,7 @@ describe('Typed', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.addModelFile(`
         namespace org.acme.base
         abstract asset BaseAsset {

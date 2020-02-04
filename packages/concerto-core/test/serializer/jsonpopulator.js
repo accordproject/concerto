@@ -23,7 +23,7 @@ const Resource = require('../../lib/model/resource');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ValidationException = require('../../lib/serializer/validationexception');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 require('chai').should();
@@ -42,7 +42,7 @@ describe('JSONPopulator', () => {
 
     before(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.addModelFile(`
             namespace org.acme
             asset MyAsset1 identified by assetId {
