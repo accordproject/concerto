@@ -19,7 +19,7 @@ const InstanceGenerator = require('../../lib/serializer/instancegenerator');
 const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ValueGenerator = require('../../lib/serializer/valuegenerator');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 const chai = require('chai');
@@ -41,7 +41,7 @@ describe('InstanceGenerator', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
         parameters = {
             modelManager: modelManager,
