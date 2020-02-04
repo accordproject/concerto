@@ -17,7 +17,7 @@
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 const assert = require('assert');
@@ -29,7 +29,7 @@ describe('Model Tests', function(){
     describe('#validation', function() {
         it('check property validation', function() {
             const modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 

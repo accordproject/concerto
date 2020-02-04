@@ -19,13 +19,13 @@ const ModelManager = require('../../lib/modelmanager');
 const Factory = require('../../lib/factory');
 const Serializer = require('../../lib/serializer');
 const fs = require('fs');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 describe('Dependencies2 Model', function() {
     describe('#model', function() {
         it('create instance', function() {
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
 
             // parse a model file from disk and add to the ModelManager

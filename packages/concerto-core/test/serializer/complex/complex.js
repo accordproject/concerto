@@ -18,7 +18,7 @@ const Factory = require('../../../lib/factory');
 const ModelManager = require('../../../lib/modelmanager');
 const Serializer = require('../../../lib/serializer');
 const fs = require('fs');
-const Util = require('../../composer/systemmodelutility');
+const Util = require('../../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 let chai = require('chai');
@@ -34,7 +34,7 @@ describe('Test generating deduplicated JSON for complex models', () => {
 
     before(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
 
         const base = fs.readFileSync('./test/serializer/complex/vehicle-lifecycle/base.cto', 'utf8');
         const business = fs.readFileSync('./test/serializer/complex/vehicle-lifecycle/business.cto', 'utf8');

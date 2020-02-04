@@ -29,8 +29,8 @@ const ParticipantDeclaration = require('../lib/introspect/participantdeclaration
 const Serializer = require('../lib/serializer');
 const TransactionDeclaration = require('../lib/introspect/transactiondeclaration');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
-const Util = require('./composer/systemmodelutility');
-const SYSTEM_MODELS = require('./composer/systemmodel');
+const Util = require('./composer/composermodelutility');
+const COMPOSER_MODEL = require('./composer/composermodel');
 
 const chai = require('chai');
 const should = chai.should();
@@ -53,7 +53,7 @@ describe('ModelManager', () => {
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         mockSystemModelFile = sinon.createStubInstance(ModelFile);
         mockSystemModelFile.isLocalType.withArgs('Asset').returns(true);
         mockSystemModelFile.getNamespace.returns('org.accordproject.base');
@@ -721,7 +721,7 @@ concept Bar {
             const models = modelManager.getModels();
             models.length.should.equal(2);
             models[0].should.deep.equal({
-                name: 'org.hyperledger.composer.system.cto', content: SYSTEM_MODELS[0].contents
+                name: 'org.hyperledger.composer.system.cto', content: COMPOSER_MODEL.contents
             }, {
                 name: 'org.acme.base.cto', content: modelBase
             });

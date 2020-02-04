@@ -18,7 +18,7 @@ const ModelManager = require('../../lib/modelmanager');
 const sinon = require('sinon');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');
 chai.should();
@@ -42,7 +42,7 @@ describe('RelationshipDeclaration', function () {
 
     beforeEach(function () {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockClassDeclaration.getModelFile.returns(mockClassDeclaration);
     });

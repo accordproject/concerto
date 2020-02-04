@@ -24,7 +24,7 @@ const Field = require('../../lib/introspect/field');
 const Resource = require('../../lib/model/resource');
 const ModelUtil = require('../../lib/modelutil');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 const sinon = require('sinon');
@@ -108,7 +108,7 @@ describe('ResourceValidator', function () {
         sandbox = sinon.createSandbox();
         resourceValidator = new ResourceValidator();
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
     });
 

@@ -21,7 +21,7 @@ const Resource = require('../lib/model/resource');
 const Concept = require('../lib/model/concept');
 const Serializer = require('../lib/serializer');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
-const Util = require('./composer/systemmodelutility');
+const Util = require('./composer/composermodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -37,7 +37,7 @@ describe('Serializer', () => {
         sandbox = sinon.createSandbox();
 
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.addModelFile(`
         namespace org.acme.sample
 
