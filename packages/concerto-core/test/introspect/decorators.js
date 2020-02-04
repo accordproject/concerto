@@ -19,7 +19,7 @@ const DecoratorFactory = require('../../lib/introspect/decoratorfactory');
 const ModelManager = require('../../lib/modelmanager');
 const Introspector = require('../../lib/introspect/introspector');
 const fs = require('fs');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -81,7 +81,7 @@ describe('Decorators', () => {
         it('should allow all valid syntax and attach to model elements', () => {
 
             const modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             let modelDefinitions = fs.readFileSync('test/data/decorators/model.cto', 'utf8');
             modelManager.addModelFile(modelDefinitions);
             const introspector = new Introspector(modelManager);
@@ -168,7 +168,7 @@ describe('Decorators', () => {
 
             (() => {
                 const modelManager = new ModelManager();
-                Util.addComposerSystemModels(modelManager);
+                Util.addComposerModel(modelManager);
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid.cto', 'utf8');
                 modelManager.addModelFile(modelDefinitions);
             }).should.throw(/Duplicate decorator/);
@@ -214,7 +214,7 @@ describe('Decorators', () => {
             });
 
             const modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.addDecoratorFactory(decoratorFactory);
             let modelDefinitions = fs.readFileSync('test/data/decorators/model.cto', 'utf8');
             modelManager.addModelFile(modelDefinitions);

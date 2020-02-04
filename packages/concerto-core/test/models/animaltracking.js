@@ -23,7 +23,7 @@ const Relationship = require('../../lib/model/relationship');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
 const Serializer = require('../../lib/serializer');
 const fs = require('fs');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 describe('animaltracking Model', function(){
 
@@ -35,7 +35,7 @@ describe('animaltracking Model', function(){
 
     beforeEach(function(){
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.should.not.be.null;
 
         animaltrackingModel = fs.readFileSync('./test/data/model/animaltracking.cto', 'utf8');
