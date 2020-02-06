@@ -15,7 +15,7 @@
 'use strict';
 
 /** Prefix to use for all the config names
- * @prvate
+ * @private
 */
 const PREFIX='composer.';
 
