@@ -182,6 +182,7 @@ class ValidatedResource extends Resource {
 }
 class ModelLoader {
    + object loadModelManager(string,string[]) 
+   + object loadModelManagerFromModelFiles(string,object[],undefined) 
 }
 class ModelManager {
    + void constructor() 
@@ -189,7 +190,7 @@ class ModelManager {
    + Object addModelFile(string,string,boolean,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
    + void deleteModelFile(string) 
-   + Object[] addModelFiles(string[],undefined,boolean,boolean) 
+   + Object[] addModelFiles(object[],undefined,boolean,boolean) 
    + void validateModelFiles() 
    + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
    + void writeModelsToFileSystem(String,Object,boolean,boolean) 

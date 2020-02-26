@@ -324,7 +324,7 @@ declare module '@accordproject/concerto-core' {
     private getSystemModelTable(): any;
     updateModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
     deleteModelFile(namespace: string): void;
-    addModelFiles(modelFiles: string[], fileNames?: string[], disableValidation?: boolean, systemModelTable?: boolean): any[];
+    addModelFiles(modelFiles: (string|ModelFile)[], fileNames?: string[], disableValidation?: boolean, systemModelTable?: boolean): any[];
     validateModelFiles(): void;
     updateExternalModels(options?: any, modelFileDownloader?: ModelFileDownloader): Promise<ModelFile[]>;
     writeModelsToFileSystem(path: string, options?: IncludeModelsOptions): void;

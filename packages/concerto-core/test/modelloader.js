@@ -35,7 +35,7 @@ describe('ModelLoader', () => {
     afterEach(() => {
     });
 
-    describe('#loadModelFromFile', function() {
+    describe('#loadModelManager', function() {
         it('should load models', async function() {
             const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
             (function() {
@@ -61,6 +61,58 @@ describe('ModelLoader', () => {
             const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
             (function() {
                 modelManager.getType('org.acme.base.NoSuchAsset');
+            }).should.throw(TypeNotFoundException, /NoSuchAsset/);
+        });
+
+        it('should return the class declaration for a valid type', async function() {
+            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const declaration = modelManager.getType('org.acme.base.AbstractAsset');
+            declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+        });
+    });
+
+    describe('#loadModelManagerFromModelFiles', function() {
+        it('should load models', async function() {
+            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const files = modelManager.getModelFiles()
+                .filter(f => !f.isSystemModelFile())
+                .map(f => f.definitions);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            (function() {
+                modelManager2.getType('String');
+            }).should.throw(TypeNotFoundException);
+        });
+
+        it('should throw an error for a namespace that does not exist', async function() {
+            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const files = modelManager.getModelFiles()
+                .filter(f => !f.isSystemModelFile())
+                .map(f => f.definitions);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            (function() {
+                modelManager2.getType('org.acme.nosuchns.SimpleAsset');
+            }).should.throw(TypeNotFoundException, /org.acme.nosuchns/);
+        });
+
+        it('should throw an error for an empty namespace', async function() {
+            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const files = modelManager.getModelFiles()
+                .filter(f => !f.isSystemModelFile())
+                .map(f => f.definitions);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            (function() {
+                modelManager2.getType('NoSuchAsset');
+            }).should.throw(TypeNotFoundException, /NoSuchAsset/);
+        });
+
+        it('should throw an error for a type that does not exist', async function() {
+            const modelManager = await ModelLoader.loadModelManager(null, [modelBase]);
+            const files = modelManager.getModelFiles()
+                .filter(f => !f.isSystemModelFile())
+                .map(f => f.definitions);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(null, files);
+            (function() {
+                modelManager2.getType('org.acme.base.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
