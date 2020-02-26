@@ -210,15 +210,13 @@ class ModelManager {
 
     /**
      * Add a set of Concerto files to the model manager.
-     * @param {string[]} modelFiles - An array of Concerto files as
-     * strings.
-     * @param {string[]} [fileNames] - An optional array of file names to
-     * associate with the model files
+     * @param {object[]} modelFiles - An array of Concerto files as strings or ModelFile objects.
+     * @param {string[]} [fileNames] - An optional array of file names to associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @param {boolean} [systemModelTable] - A table that maps classes in the new models to system types
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles, fileNames, disableValidation,systemModelTable) {
+    addModelFiles(modelFiles, fileNames, disableValidation, systemModelTable) {
         const NAME = 'addModelFiles';
         debug(NAME, 'addModelFiles', modelFiles, fileNames);
         const originalModelFiles = {};

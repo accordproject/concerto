@@ -94,6 +94,29 @@ class ModelLoader {
         return modelManager;
     }
 
+    /**
+     * Load system and models in a new model manager from model files objects
+     *
+     * @param {string} ctoSystemFile - the system model file
+     * @param {object[]} modelFiles - An array of Concerto files as strings or ModelFile objects.
+     * @param {string[]} [fileNames] - An optional array of file names to associate with the model files
+     * @return {object} the model manager
+     */
+    static async loadModelManagerFromModelFiles(ctoSystemFile, modelFiles, fileNames) {
+        let modelManager = new ModelManager();
+        const modelFileLoader = new DefaultModelFileLoader(modelManager);
+
+        // Load system model
+        modelManager = await ModelLoader.addModel(modelFileLoader,modelManager,ctoSystemFile,true);
+        modelManager.addModelFiles(modelFiles, fileNames);
+
+        // Load user models
+
+        // Validate update models
+        await modelManager.updateExternalModels();
+        return modelManager;
+    }
+
 }
 
 module.exports = ModelLoader;
