@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 0.82.6 {3c1aa02078a519b7cf950ff1a1558569} 2012-03-01
+- Add Logger API
+
 Version 0.82.5 {d4d49fabba1c6ce465c446e2dccad488} 2019-11-10
 - Add instance of alternatives to Factory and Serializer
 

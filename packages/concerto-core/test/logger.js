@@ -15,7 +15,6 @@
 'use strict';
 
 const Logger = require('../lib/logger');
-const Fs = require('fs');
 const Chai = require('chai');
 
 Chai.should();
@@ -95,30 +94,6 @@ describe('logger', () => {
         it('should call logger.info', async function () {
             process.env.NODE_ENV = 'production';
             Logger.info('This is logging some useful information');
-        });
-    });
-    describe('#setuplogger', () => {
-        const logDir = 'log';
-        const logDirTest = 'logtest';
-        it('should setup logger', async function () {
-            Logger.setup(process,'development',logDir);
-        });
-        it('should setup logger (production)', async function () {
-            Logger.setup(process,'production',logDir);
-        });
-        it('should setup logger with log directory', async function () {
-            Logger.setup(process,'development',logDirTest);
-            Fs.existsSync(logDir).should.be.true;
-            try { Fs.unlinkSync(`${logDirTest}/trace.log`); } catch (err) { Logger.info(err); }
-            try { Fs.rmdirSync(logDirTest, (err) => {}); } catch (err) { Logger.info(err); }
-            Logger.setup(process,'development',logDir);
-        });
-        it('should setup logger with log directory (in production)', async function () {
-            Logger.setup(process,'production',logDirTest);
-            Fs.existsSync(logDir).should.be.true;
-            try { Fs.unlinkSync(`${logDirTest}/trace.log`); } catch (err) { Logger.info(err); }
-            try { Fs.rmdirSync(logDirTest, (err) => {}); } catch (err) { Logger.info(err); }
-            Logger.setup(process,'development',logDir);
         });
     });
 });
