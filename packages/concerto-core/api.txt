@@ -152,6 +152,13 @@ class TransactionDeclaration extends ClassDeclaration {
    + string getSystemType() 
    + boolean hasInstance(object) 
 }
+class Logger {
+   + void debug(any) 
+   + void info(any) 
+   + void log(any) 
+   + void error(any) 
+   + void warn(any) 
+}
 class Concept extends Typed {
    + boolean isConcept() 
 }
