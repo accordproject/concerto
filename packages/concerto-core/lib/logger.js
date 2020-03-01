@@ -14,32 +14,32 @@
 
 'use strict';
 
-const winston = require('winston');
-const {
-    LEVEL,
-    MESSAGE
-} = require('triple-beam');
-const jsonStringify = require('fast-safe-stringify');
+/* eslint-disable no-console */
+/* eslint-disable no-use-before-define */
+
+const { configs } = require('triple-beam');
+const colors = require('colors/safe');
 const jsome = require('jsome');
-const fs = require('fs');
-const env = process.env.NODE_ENV || 'development';
-const logsFolder = process.env.CONCERTO_LOG_FOLDER_PATH || '';
-const path = require('path');
-const tsFormat = () => (new Date()).toLocaleTimeString();
+
+jsome.params.lintable = true;
+
+const timestamp = () => (new Date()).toLocaleTimeString();
+const colorMap = configs.cli.colors;
+const colorize = level => colors[colorMap[level]](level.toUpperCase());
 
 /**
- * Helper function to test is a string is a stringified version of a JSON object
- * @param {string} str - the input string to test
- * @returns {boolean} - true iff the string can be parsed as JSON
- * @private
- */
-function isJSON(str) {
+* Helper function to test if a string is a stringified version of a JSON object
+* @param {string} str - the input string to test
+* @returns {boolean} - true iff the string can be parsed as JSON
+* @private
+*/
+const isJson = (str) => {
     try {
         return (JSON.parse(str) && !!str);
     } catch (e) {
         return false;
     }
-}
+};
 
 jsome.params.lintable = true;
 
@@ -59,83 +59,75 @@ const jsonColor = winston.format(info => {
         } else {
             info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message}`;
         }
-        return info;
+        first = padding ? `${padding} ${first}` : first;
     }
 
-    const stringifiedRest = jsonStringify(Object.assign({}, info, {
-        level: undefined,
-        message: undefined,
-        splat: undefined
-    }));
+    data.unshift(first);
 
-    if (stringifiedRest !== '{}') {
-        info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message} ${stringifiedRest}`;
-    } else {
-        info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message}`;
-    }
-    return info;
+    const shim = ['error', 'warn'].includes(mutatedLevel) ? console.error : console.log;
 
-});
+    shim(
+        `${timestamp()} - ${colorize(mutatedLevel)}:`,
+        ...data
+            .map(obj => obj instanceof Error ? `${obj.message}\n${obj.stack}`: obj)
+            .map(prettifyJson)
+    );
+};
 
-const enumerateErrorFormat = winston.format(info => {
-    if (info.message instanceof Error) {
-        info.message = Object.assign({
-            message: info.message.message,
-            stack: info.message.stack
-        }, info.message);
-    }
+/**
+ * A utility class with static function that print to the console
+ */
+class Logger {
 
-    if (info instanceof Error) {
-        return Object.assign({
-            message: info.message,
-            stack: info.stack
-        }, info);
-    }
+    /**
+     * Write a debug statement to the console.
+     *
+     * Prints to `stdout` with newline.
+     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
+     * @param {any} args -
+     * @returns {undefined} -
+     */
+    static debug(...args){ return log('debug', ...args); }
 
-    return info;
-});
+    /**
+     * Write an info statement to the console.
+     *
+     * Prints to `stdout` with newline.
+     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
+     * @param {any} args -
+     * @returns {undefined} -
+     */
+    static info(...args){ return log('info', ...args); }
 
-let logger = winston.createLogger({
-    format: winston.format.combine(
-        winston.format.json(),
-        enumerateErrorFormat(),
-        winston.format.colorize(),
-        jsonColor(),
-    ),
-    transports: [
-        new winston.transports.Console({
-            level: 'info',
-        }),
-    ]
-});
+    /**
+     * Write an info statement to the console. Alias for `logger.log`
+     *
+     * Prints to `stdout` with newline.
+     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
+     * @param {any} args -
+     * @returns {undefined} -
+     */
+    static log(...args){ return this.info(...args); }
 
-// Only write log files to disk if we're running in development
-// and not in a browser (webpack or browserify)
-const setupLogger = ((process, env, logDir) => {
-    if (env === 'development' && !process.browser) {
-        // Create the log directory if it does not exist
+    /**
+     * Write an error statement to the console.
+     *
+     * Prints to `stderr` with newline.
+     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
+     * @param {any} args -
+     * @returns {undefined} -
+     */
+    static error(...args){ return log('error', ...args); }
 
-        try {
-            if (!fs.existsSync(logDir)) {
-                fs.mkdirSync(logDir);
-            }
+    /**
+     * Write an warning statement to the console.
+     *
+     * Prints to `stderr` with newline.
+     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
+     * @param {any} args -
+     * @returns {undefined} -
+     */
+    static warn(...args){ return log('warn', ...args); }
+}
 
-            logger.add(new winston.transports.File({
-                name: 'logs-file',
-                filename: `${logDir}/trace.log`,
-                level: 'debug'
-            }));
-        }
-        catch(error) {
-            console.log('Failed to create log directory. File logging disabled.');
-        }
-    }
-});
-
-const logDir = logsFolder ? path.normalize(logsFolder + '/log') : 'log';
-setupLogger(process, env, logDir);
-logger.setup = setupLogger;
-logger.entry = logger.debug;
-logger.exit = logger.debug;
-
-module.exports = logger;
+module.exports = Logger;
