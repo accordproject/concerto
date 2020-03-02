@@ -90,10 +90,34 @@ describe('logger', () => {
             });
         });
     });
-    describe('#logger.info (in production)', function () {
-        it('should call logger.info', async function () {
-            process.env.NODE_ENV = 'production';
-            Logger.info('This is logging some useful information');
+    describe('#logger.verbose', function () {
+        it('should call logger.verbose', async function () {
+            Logger.verbose('This is logging some verbose message');
+        });
+        it('should call logger.verbose with an Error object', async function () {
+            Logger.verbose(new Error('This is some verbose message'));
+        });
+    });
+    describe('#logger.silly', function () {
+        it('should call logger.silly', async function () {
+            Logger.silly('This is logging some silly message');
+        });
+        it('should call logger.silly with an Error object', async function () {
+            Logger.silly(new Error('This is some silly message'));
+        });
+    });
+    describe('#logger.add', function () {
+        it('should add a custom transport', async function () {
+            const messages = [];
+            Logger.transports = [];
+            Logger.add({
+                info: (...args) => {
+                    messages.push(args);
+                }
+            });
+            Logger.info('This is logging to the default logger and my custom tranport');
+            Logger.info(new Error('This is some silly message'));
+            messages.should.have.lengthOf(2);
         });
     });
 });
