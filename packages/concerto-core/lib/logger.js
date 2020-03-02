@@ -135,7 +135,9 @@ class Logger {
         }
 
         this.transports.forEach(t => {
-            t[level](...args);
+            if(t[level]){
+                t[level](...args);
+            }
         });
     }
 
