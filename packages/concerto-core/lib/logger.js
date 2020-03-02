@@ -158,7 +158,7 @@ class Logger {
      * @returns {void} -
      * @private
      */
-    static error(...args){ return this.log('error', ...args); }
+    static error(...args){ return this.dispatch('error', ...args); }
 
     /**
      * Write a warning statement to the console.
