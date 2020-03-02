@@ -114,10 +114,17 @@ describe('logger', () => {
             Logger.http(new Error('This is some http message'));
         });
     });
+    describe('#logger.dispatch', function () {
+        it('should fail to call logger.foo', async function () {
+            Logger.http('This is logging some http message');
+        });
+        it('should call logger.http with an Error object', async function () {
+            Logger.http(new Error('This is some http message'));
+        });
+    });
     describe('#logger.add', function () {
         it('should add a custom transport', async function () {
             const messages = [];
-            Logger.transports = [];
             Logger.add({
                 info: (...args) => {
                     messages.push(args);
