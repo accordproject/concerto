@@ -54,7 +54,8 @@ describe('Serializer', () => {
         o String lastName
         }
 
-        transaction SampleTransaction {
+        transaction SampleTransaction identified by transactionId {
+        o String transactionId
         --> SampleAsset asset
         o String newValue
         }
@@ -65,7 +66,8 @@ describe('Serializer', () => {
             o Double elevation
         }
 
-        event SampleEvent{
+        event SampleEvent identified by eventId {
+        o String eventId
         --> SampleAsset asset
         o String newValue
         }

@@ -111,7 +111,8 @@ transaction ApplicationForVehicleRegistrationCertificate {
   o String previousPostCode optional
 }
 
-abstract transaction VehicleTransaction  {
+abstract transaction VehicleTransaction identified by transactionId {
+	o String transactionId
   --> Vehicle vehicle
 }
 
