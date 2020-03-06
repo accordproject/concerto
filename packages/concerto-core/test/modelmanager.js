@@ -56,7 +56,7 @@ describe('ModelManager', () => {
         Util.addComposerModel(modelManager);
         mockSystemModelFile = sinon.createStubInstance(ModelFile);
         mockSystemModelFile.isLocalType.withArgs('Asset').returns(true);
-        mockSystemModelFile.getNamespace.returns('org.accordproject.base');
+        mockSystemModelFile.getNamespace.returns('system');
         mockSystemModelFile.isSystemModelFile.returns(true);
     });
 
@@ -284,7 +284,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file (via string)', ()=>{
             (() => {
-                modelManager.addModelFiles(['namespace org.accordproject.base'],['fakesysnamespace.cto'], null);
+                modelManager.addModelFiles(['namespace system'],['fakesysnamespace.cto'], null);
             }).should.throw(/System namespace can not be updated/);
         });
 
@@ -489,7 +489,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to update a system model file (via string)', ()=>{
             (() => {
-                modelManager.updateModelFile('namespace org.accordproject.base','fakesysnamespace.cto');
+                modelManager.updateModelFile('namespace system','fakesysnamespace.cto');
             }).should.throw();
         });
 
@@ -520,7 +520,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to delete a system model file', ()=>{
             (() => {
-                modelManager.deleteModelFile('org.accordproject.base');
+                modelManager.deleteModelFile('system');
             }).should.throw(/Cannot delete system namespace/);
         });
 
@@ -695,7 +695,7 @@ concept Bar {
             });
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
-                '@org.accordproject.base.cto',
+                '@system.cto',
                 'internal.cto',
                 'org.hyperledger.composer.system.cto'
             ]);
@@ -801,7 +801,7 @@ concept Bar {
         it('should return all of the system core types', () => {
             modelManager.getSystemTypes().map((classDeclaration) => {
                 return classDeclaration.getName();
-            }).should.deep.equal(['Asset', 'Participant', 'Transaction', 'Event']);
+            }).should.deep.equal(['Asset', 'Transaction', 'Event', 'Participant']);
         });
 
     });
@@ -819,7 +819,7 @@ concept Bar {
         const numberModelBaseEnums = 2;
         const numberModelBaseParticipants = 4;
         const numberModelBaseEvents = 0;
-        const numberModelBaseTransactions = 19;
+        const numberModelBaseTransactions = 20;
         const numberModelBaseConcepts = 2;
 
 

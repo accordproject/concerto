@@ -33,7 +33,8 @@ describe('Resource', function () {
     o String vin
     -->Person owner
   }
-  transaction ScrapCar {
+  transaction ScrapCar identified by transactionId {
+    o String transactionId
     -->Car car
   }
   `;

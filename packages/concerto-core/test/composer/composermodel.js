@@ -41,6 +41,9 @@ namespace org.hyperledger.composer.system
 abstract participant ComposerParticipant identified by participantId {
   o String participantId
 }
+abstract transaction ComposerTransaction identified by transactionId {
+  o String transactionId
+}
 
 /**
  * Abstract Registry asset, that is used as the basis for all types of registries.
@@ -113,7 +116,7 @@ participant NetworkAdmin identified by participantId {
  * Asset to represent each historian registry entry
  *
  * @param {String} transactionId Using the transaction id as the uuid
- * @param {Transaction} transactionInvoked Relationship to transaction
+ * @param {ComposerTransaction} transactionInvoked Relationship to transaction
  * @param {Participant} participantInvoking Participant who invoked this transaction
  * @param {Identity} identityUsed The identity that was used by the participant
  * @param {Event[]} eventsEmitted The events that were emitted by this transactionId
@@ -124,7 +127,7 @@ participant NetworkAdmin identified by participantId {
 asset HistorianRecord identified by transactionId {
   o String                transactionId
   o String                transactionType
-  --> Transaction         transactionInvoked
+  --> ComposerTransaction         transactionInvoked
   --> ComposerParticipant participantInvoking  optional
   --> Identity            identityUsed         optional
   o Event[]               eventsEmitted        optional
@@ -138,7 +141,8 @@ asset HistorianRecord identified by transactionId {
  * @param {Registry} targetRegistry Registry that will be manipulated
  */
 @docs('registryTransaction.md')
-abstract transaction RegistryTransaction {
+abstract transaction RegistryTransaction identified by transactionId {
+  o String transactionId
   --> Registry targetRegistry
 }
 
@@ -240,7 +244,8 @@ asset Identity identified by identityId {
  * @param {String} identityName  name to use for this identity
  */
 @docs('issueIdentity.md')
-transaction IssueIdentity {
+transaction IssueIdentity identified by transactionId {
+   o String transactionId
     --> ComposerParticipant participant
     o String identityName
 }
@@ -251,7 +256,8 @@ transaction IssueIdentity {
  * @param {String} certificate to use
  */
 @docs('bindIdentity.md')
-transaction BindIdentity {
+transaction BindIdentity identified by transactionId {
+    o String transactionId
     --> ComposerParticipant participant
     o String certificate
 }
@@ -260,7 +266,9 @@ transaction BindIdentity {
  * Transaction that will activate the current the identity
  */
 @docs('activateIdentity.md')
-transaction ActivateCurrentIdentity { }
+transaction ActivateCurrentIdentity identified by transactionId {
+  o String transactionId
+}
 
 /**
  * Transaction that will revoke the identity

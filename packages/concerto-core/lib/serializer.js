@@ -154,15 +154,15 @@ class Serializer {
         // create a new instance, using the identifier field name as the ID.
         let resource;
         if (classDeclaration instanceof TransactionDeclaration) {
-            resource = this.factory.newTransaction( classDeclaration.getNamespace(),
+            resource = this.factory.newTransaction(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
         } else if (classDeclaration instanceof EventDeclaration) {
-            resource = this.factory.newEvent( classDeclaration.getNamespace(),
+            resource = this.factory.newEvent(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
         } else if (classDeclaration instanceof ConceptDeclaration) {
-            resource = this.factory.newConcept( classDeclaration.getNamespace(),
+            resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName() );
         } else if (classDeclaration instanceof EnumDeclaration) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');

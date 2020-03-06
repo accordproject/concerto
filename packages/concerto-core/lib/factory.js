@@ -78,24 +78,6 @@ class Factory {
         const method = 'newResource';
         options = options || {};
 
-        if(typeof(id) !== 'string') {
-            let formatter = Globalize.messageFormatter('factory-newinstance-invalididentifier');
-            throw new Error(formatter({
-                namespace: ns,
-                type: type
-            }));
-        }
-
-        if(!(options.allowEmptyId && id==='')) {
-            if(id.trim().length === 0) {
-                let formatter = Globalize.messageFormatter('factory-newinstance-missingidentifier');
-                throw new Error(formatter({
-                    namespace: ns,
-                    type: type
-                }));
-            }
-        }
-
         const qualifiedName = ModelUtil.getFullyQualifiedName(ns, type);
         const classDecl = this.modelManager.getType(qualifiedName);
 
@@ -106,9 +88,30 @@ class Factory {
                 type: type
             }));
         }
-
         if(classDecl.isConcept()) {
             throw new Error('Use newConcept to create concepts ' + classDecl.getFullyQualifiedName());
+        }
+
+        let idField = classDecl.getIdentifierFieldName();
+        if (idField) {
+            id = id === null || id === undefined ? uuid.v4() : id;
+            if(typeof(id) !== 'string') {
+                let formatter = Globalize.messageFormatter('factory-newinstance-invalididentifier');
+                throw new Error(formatter({
+                    namespace: ns,
+                    type: type
+                }));
+            }
+
+            if(!(options.allowEmptyId && id==='')) {
+                if(id.trim().length === 0) {
+                    let formatter = Globalize.messageFormatter('factory-newinstance-missingidentifier');
+                    throw new Error(formatter({
+                        namespace: ns,
+                        type: type
+                    }));
+                }
+            }
         }
 
         let newObj = null;
@@ -121,10 +124,11 @@ class Factory {
         newObj.assignFieldDefaults();
         this.initializeNewObject(newObj, classDecl, options);
 
-        // if we have an identifier, we set it now
-        let idField = classDecl.getIdentifierFieldName();
-        newObj[idField] = id;
-        debug(method, 'Factory.newResource created', id );
+        if (idField) {
+            // if we have an identifier, we set it now
+            newObj[idField] = id;
+        }
+        debug(method, 'Factory.newResource created ', id || 'valid');
         return newObj;
     }
 
@@ -196,8 +200,7 @@ class Factory {
     }
 
     /**
-     * Create a new transaction object. The identifier of the transaction is
-     * set to a UUID.
+     * Create a new transaction object. The identifier of the transaction is set to a UUID.
      * @param {String} ns - the namespace of the transaction.
      * @param {String} type - the type of the transaction.
      * @param {String} [id] - an optional identifier for the transaction; if you do not specify
@@ -218,7 +221,6 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        id = id || uuid.v4();
         let transaction = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
 
@@ -255,7 +257,6 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        id = id || 'valid';
         let event = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
 
