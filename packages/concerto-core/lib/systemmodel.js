@@ -14,16 +14,12 @@
 
 'use strict';
 
-const systemNamespace = 'org.accordproject.base';
+const systemNamespace = 'system';
 const systemFileName = '@' + systemNamespace + '.cto';
-const systemModel = `namespace org.accordproject.base
+const systemModel = `namespace system
 abstract asset Asset {  }
-abstract participant Participant {  }
-abstract transaction Transaction identified by transactionId {
-  o String transactionId
-}
-abstract event Event identified by eventId {
-  o String eventId
-}`;
+abstract transaction Transaction { }
+abstract event Event { }
+abstract participant Participant {  }`;
 
 module.exports = { systemNamespace, systemFileName, systemModel };

@@ -51,10 +51,12 @@ describe('Factory', function() {
             o String newValue
             o String optionalValue optional
         }
-        transaction MyTransaction {
+        transaction MyTransaction identified by transactionId {
+            o String transactionId
             o String newValue
         }
-        event MyEvent {
+        event MyEvent identified by eventId {
+            o String eventId
             o String value
         }`);
         factory = new Factory(modelManager);
@@ -80,12 +82,6 @@ describe('Factory', function() {
             (() => {
                 factory.newResource(namespace, assetName, '     ', {});
             }).should.throw(/Missing identifier/);
-        });
-
-        it('should throw creating a new instance with a null ID', function() {
-            (() => {
-                factory.newResource(namespace, assetName, null);
-            }).should.throw(/Invalid or missing identifier/);
         });
 
         it('should throw creating a new instance with an ID of an invalid type', function() {
@@ -302,9 +298,10 @@ describe('Factory', function() {
 
         it('should pass options onto newResource', () => {
             let spy = sandbox.spy(factory, 'newResource');
-            factory.newTransaction(namespace, 'MyTransaction', null, { hello: 'world' });
+            let resource = factory.newTransaction(namespace, 'MyTransaction', null, { hello: 'world' });
             sinon.assert.calledOnce(spy);
-            sinon.assert.calledWith(spy, namespace, 'MyTransaction', '5604bdfe-7b96-45d0-9883-9c05c18fe638', { hello: 'world' });
+            sinon.assert.calledWith(spy, namespace, 'MyTransaction', null, { hello: 'world' });
+            resource.transactionId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
         });
 
     });
@@ -330,7 +327,7 @@ describe('Factory', function() {
 
         it('should create a new instance with a generated ID', () => {
             let resource = factory.newEvent(namespace, 'MyEvent');
-            resource.eventId.should.equal('valid');
+            resource.eventId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
             resource.timestamp.should.be.an.instanceOf(Moment);
         });
 
@@ -342,9 +339,10 @@ describe('Factory', function() {
 
         it('should pass options onto newEvent', () => {
             let spy = sandbox.spy(factory, 'newResource');
-            factory.newEvent(namespace, 'MyEvent', null, { hello: 'world' });
+            let resource = factory.newEvent(namespace, 'MyEvent', null, { hello: 'world' });
             sinon.assert.calledOnce(spy);
-            sinon.assert.calledWith(spy, namespace, 'MyEvent', 'valid', { hello: 'world' });
+            sinon.assert.calledWith(spy, namespace, 'MyEvent', null, { hello: 'world' });
+            resource.eventId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
         });
     });
 

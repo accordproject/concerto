@@ -18,6 +18,7 @@ participant BaseMember identified by id {
     o String id
 }
 
-transaction BaseTransaction  {
+transaction BaseTransaction identified by transactionId {
+	o String transactionId
   --> BaseMember invoker
 }
