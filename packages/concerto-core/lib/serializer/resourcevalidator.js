@@ -102,7 +102,7 @@ class ResourceValidator {
         }
 
         if(!found) {
-            ResourceValidator.reportInvalidEnumValue( parameters.rootResourceIdentifier, enumDeclaration, obj );
+            ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj);
         }
 
         return null;
@@ -145,7 +145,7 @@ class ResourceValidator {
             if(!this.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(obj instanceof Identifiable) {
+                    if(classDeclaration.getIdentifierFieldName()) {
                         ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
                     }
                     else {
@@ -155,7 +155,7 @@ class ResourceValidator {
             }
         }
 
-        if(obj instanceof Identifiable) {
+        if(classDeclaration.getIdentifierFieldName()) {
             const id = obj.getIdentifier();
 
             // prevent empty identifiers

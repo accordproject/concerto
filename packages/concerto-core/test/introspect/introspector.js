@@ -57,7 +57,7 @@ describe('Introspector', () => {
             let classDecl = introspector.getClassDeclarations().filter( (element) => {
                 return !element.isSystemCoreType();
             });
-            classDecl.length.should.equal(39);
+            classDecl.length.should.equal(40);
         });
     });
 

@@ -216,7 +216,7 @@ describe('ClassDeclaration', () => {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'org.accordproject.base.Participant');
+            should.equal(superclassName,'system.Participant');
         });
 
         it('toString',()=>{
@@ -281,7 +281,7 @@ describe('ClassDeclaration', () => {
     describe('#_resolveSuperType', () => {
 
         it('should return null if no super type', () => {
-            let classDecl = modelManager.getType('org.accordproject.base.Asset');
+            let classDecl = modelManager.getType('system.Asset');
             should.equal(classDecl._resolveSuperType(), null);
         });
 
@@ -290,7 +290,7 @@ describe('ClassDeclaration', () => {
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            superClassDecl.getFullyQualifiedName().should.equal('org.accordproject.base.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
@@ -318,7 +318,7 @@ describe('ClassDeclaration', () => {
     describe('#getSuperTypeDeclaration', () => {
 
         it('should return null if no super type', () => {
-            let classDecl = modelManager.getType('org.accordproject.base.Asset');
+            let classDecl = modelManager.getType('system.Asset');
             should.equal(classDecl.getSuperTypeDeclaration(), null);
         });
 
@@ -329,7 +329,7 @@ describe('ClassDeclaration', () => {
             classDecl.superTypeDeclaration = null;
             let spy = sinon.spy(classDecl, '_resolveSuperType');
             let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('org.accordproject.base.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
             sinon.assert.calledOnce(spy);
         });
 
@@ -339,7 +339,7 @@ describe('ClassDeclaration', () => {
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let spy = sinon.spy(classDecl, '_resolveSuperType');
             let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('org.accordproject.base.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
             sinon.assert.notCalled(spy);
         });
 

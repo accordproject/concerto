@@ -221,15 +221,6 @@ class ClassDeclaration extends Decorated {
                     //}
                 }
             }
-        } else {
-            if (this.isAbstract() === false && this.isEnum() === false && this.isConcept() === false) {
-                if (this.getIdentifierFieldName() === null) {
-                    let formatter = Globalize('en').messageFormatter('classdeclaration-validate-missingidentifier');
-                    throw new IllegalModelException(formatter({
-                        'class': this.name
-                    }), this.modelFile, this.ast.location);
-                }
-            }
         }
 
         // we also have to check fields defined in super classes

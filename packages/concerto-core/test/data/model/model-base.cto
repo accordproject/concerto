@@ -82,8 +82,8 @@ asset DerivedAsset extends BaseAsset {
   o String anotherStringProperty default="defaultString"
 }
 
-transaction MyBasicTransaction  {
-    
+transaction MyBasicTransaction identified by transactionId {
+	o String transactionId
 }
 
 asset DerivedDerivedAsset extends DerivedAsset {
