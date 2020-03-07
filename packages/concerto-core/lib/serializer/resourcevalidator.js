@@ -171,9 +171,6 @@ class ResourceValidator {
         for(let n=0; n < properties.length; n++) {
             const property = properties[n];
             const value = obj[property.getName()];
-            // if(typeof value === 'function'){
-            //     ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, property.getName(), obj, property);
-            // }
             if(!Util.isNull(value)) {
                 parameters.stack.push(value);
                 property.accept(this,parameters);
