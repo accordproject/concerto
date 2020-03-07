@@ -16,6 +16,7 @@
 
 const loremIpsum = require('lorem-ipsum');
 const Moment = require('moment-mini');
+const RandExp = require('randexp');
 
 /**
  * Empty value generator.
@@ -94,6 +95,56 @@ class EmptyValueGenerator {
      */
     getArray(valueSupplier) {
         return [];
+    }
+
+    /**
+     * Get a default Regex value.
+     * @param {RegExp} regex A regular expression.
+     * @return {string} a String value.
+     */
+    getRegex(regex) {
+        return new RandExp(regex).gen();
+    }
+
+    /**
+     * Get a default range value.
+     * @param {number} lowerBound the lower bound on the range.
+     * @param {number} upperBound the upper bound on the range.
+     * @param {string} type the number type for the range
+     * @return {number} a String value.
+     */
+    getRange(lowerBound, upperBound, type) {
+        let min = lowerBound;
+        let max = upperBound;
+
+        switch(type){
+        case 'Long':
+            if (min === null) {
+                min = -Math.pow(2, 32);
+            }
+            if (max === null) {
+                max = Math.pow(2, 32);
+            }
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        case 'Integer': {
+            if (min === null) {
+                min = -Math.pow(2, 16);
+            }
+            if (max === null) {
+                max = Math.pow(2, 16);
+            }
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+        case 'Double': {
+            if (min === null) {
+                min = -Math.pow(2, 8);
+            }
+            if (max === null) {
+                max = Math.pow(2, 8);
+            }
+            return Number((Math.random() * (max - min) + min).toFixed(3));
+        }
+        }
     }
 }
 
@@ -174,6 +225,56 @@ class SampleValueGenerator extends EmptyValueGenerator {
      */
     getArray(valueSupplier) {
         return [valueSupplier()];
+    }
+
+    /**
+     * Get a default Regex value.
+     * @param {RegExp} regex A regular expression.
+     * @return {string} a String value.
+     */
+    getRegex(regex) {
+        return new RandExp(regex).gen();
+    }
+
+    /**
+     * Get a default range value.
+     * @param {number} lowerBound the lower bound on the range.
+     * @param {number} upperBound the upper bound on the range.
+     * @param {string} type the number type for the range
+     * @return {number} a String value.
+     */
+    getRange(lowerBound, upperBound, type) {
+        let min = lowerBound;
+        let max = upperBound;
+
+        switch(type){
+        case 'Long':
+            if (min === null) {
+                min = -Math.pow(2, 32);
+            }
+            if (max === null) {
+                max = Math.pow(2, 32);
+            }
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        case 'Integer': {
+            if (min === null) {
+                min = -Math.pow(2, 16);
+            }
+            if (max === null) {
+                max = Math.pow(2, 16);
+            }
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+        case 'Double': {
+            if (min === null) {
+                min = -Math.pow(2, 8);
+            }
+            if (max === null) {
+                max = Math.pow(2, 8);
+            }
+            return Number((Math.random() * (max - min) + min).toFixed(3));
+        }
+        }
     }
 }
 
