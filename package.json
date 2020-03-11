@@ -1,7 +1,8 @@
 {
   "private": true,
   "devDependencies": {
-    "colors": "^1.4.0",
+    "colors": "1.4.0",
+    "eslint": "6.0.1",
     "coveralls": "3.0.4",
     "eslint": "6.0.1",
     "istanbul-combine": "0.3.0",
