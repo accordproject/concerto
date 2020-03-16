@@ -48,6 +48,12 @@ To install the command-line interface:
 npm install -g @accordproject/concerto-cli
 ```
 
+You may also set a custom folder to keep the log files by setting the following environment variable:
+
+```
+export CONCERTO_LOG_FOLDER_PATH="/tmp"
+```
+
 ---
 
 <p align="center">

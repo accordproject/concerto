@@ -15,11 +15,16 @@
 'use strict';
 
 const winston = require('winston');
-const { LEVEL, MESSAGE } = require('triple-beam');
+const {
+    LEVEL,
+    MESSAGE
+} = require('triple-beam');
 const jsonStringify = require('fast-safe-stringify');
 const jsome = require('jsome');
 const fs = require('fs');
 const env = process.env.NODE_ENV || 'development';
+const logsFolder = process.env.CONCERTO_LOG_FOLDER_PATH || '';
+const path = require('path');
 const tsFormat = () => (new Date()).toLocaleTimeString();
 
 /**
@@ -38,19 +43,19 @@ function isJSON(str) {
 
 jsome.params.lintable = true;
 
-const jsonColor =  winston.format(info => {
+const jsonColor = winston.format(info => {
     const padding = info.padding && info.padding[info.level] || '';
 
-    if(info[LEVEL] === 'error' && info.stack) {
+    if (info[LEVEL] === 'error' && info.stack) {
         info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message}\n${info.stack}`;
         return info;
     }
 
     if (info[LEVEL] === 'info' || info[LEVEL] === 'warn') {
-        if(typeof info.message === 'object') {
+        if (typeof info.message === 'object') {
             info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding}\n${jsome.getColoredString(info.message, null, 2)}`;
-        } else if(isJSON(info.message)) {
-            info[MESSAGE] =`${tsFormat()} - ${info.level}:${padding}\n${jsome.getColoredString(JSON.parse(info.message), null, 2)}`;
+        } else if (isJSON(info.message)) {
+            info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding}\n${jsome.getColoredString(JSON.parse(info.message), null, 2)}`;
         } else {
             info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message}`;
         }
@@ -106,7 +111,7 @@ let logger = winston.createLogger({
 
 // Only write log files to disk if we're running in development
 // and not in a browser (webpack or browserify)
-const setupLogger = ((process,env,logDir) => {
+const setupLogger = ((process, env, logDir) => {
     if (env === 'development' && !process.browser) {
         // Create the log directory if it does not exist
         if (!fs.existsSync(logDir)) {
@@ -121,8 +126,8 @@ const setupLogger = ((process,env,logDir) => {
     }
 });
 
-const logDir = 'log';
-setupLogger(process,env,logDir);
+const logDir = logsFolder ? path.normalize(logsFolder + '/log') : 'log';
+setupLogger(process, env, logDir);
 logger.setup = setupLogger;
 logger.entry = logger.debug;
 logger.exit = logger.debug;
