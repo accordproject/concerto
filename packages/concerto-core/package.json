@@ -35,7 +35,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "acorn": "5.1.2",
+    "acorn": "5.7.4",
     "babel-preset-env": "1.7.0",
     "babel-preset-latest": "6.24.1",
     "chai": "4.2.0",
