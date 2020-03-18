@@ -225,7 +225,7 @@ describe('ValueGenerator', function() {
             ].forEach(([min, max]) => {
                 const output = ValueGeneratorFactory.sample().getRange(min, max, 'Double');
                 expect(output).to.be.a('number');
-                const absoluteMax = Math.pow(2, 32);
+                const absoluteMax = Math.pow(2, 8);
                 const atLeastValue = min ? Math.min(Math.max(min, -absoluteMax), absoluteMax): -absoluteMax;
                 const atMostValue = max ? Math.max(Math.min(max, absoluteMax), -absoluteMax): absoluteMax;
                 expect(output).to.be.at.least(atLeastValue);

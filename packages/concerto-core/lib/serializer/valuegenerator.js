@@ -56,7 +56,7 @@ const getRange = (lowerBound, upperBound, type) => {
         // IEEE 754 numbers can be larger,
         // but we don't need the whole range when generating a sample random number
         return Number(
-            randomNumberInRangeWithPrecision(min, max, 0.0001, -Math.pow(2, 32), Math.pow(2, 32))
+            randomNumberInRangeWithPrecision(min, max, 0.0001, -Math.pow(2, 8), Math.pow(2, 8))
                 .toFixed(3)
         );
     }
