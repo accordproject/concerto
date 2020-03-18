@@ -18,39 +18,47 @@ const loremIpsum = require('lorem-ipsum');
 const Moment = require('moment-mini');
 const RandExp = require('randexp');
 
+const randomNumberInRangeWithPrecision = function (userMin, userMax, precision, systemMin, systemMax) {
+    if (userMin === null) {
+        userMin = systemMin;
+    }
+    userMin = Math.min(Math.max(userMin, systemMin), systemMax);
+    if (userMax === null || userMax > systemMax) {
+        userMax = systemMax;
+    }
+    userMax = Math.max(Math.min(userMax, systemMax), systemMin);
+    userMax += precision;
+    userMax = userMax / precision;
+    userMin = userMin / precision;
+    let randomNumber = (Math.random() * (userMax - userMin) + userMin);
+    const temp = randomNumber / (1 / precision);
+    return temp;
+};
+
 const getRange = (lowerBound, upperBound, type) => {
-    let max = upperBound;
     let min = lowerBound;
-    if (max && min && max < min){
+    let max = upperBound;
+    if (max !== null && min !== null && max < min) {
         min = upperBound;
         max = lowerBound;
     }
     switch(type){
     case 'Long':
-        if (min === null) {
-            min = -Math.pow(2, 32);
-        }
-        if (max === null) {
-            max = Math.pow(2, 32);
-        }
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        return Math.floor(
+            randomNumberInRangeWithPrecision(min, max, 1, -Math.pow(2, 32), Math.pow(2, 32))
+        );
     case 'Integer': {
-        if (min === null) {
-            min = -Math.pow(2, 16);
-        }
-        if (max === null) {
-            max = Math.pow(2, 16);
-        }
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        return Math.floor(
+            randomNumberInRangeWithPrecision(min, max, 1, -Math.pow(2, 16), Math.pow(2, 16))
+        );
     }
     case 'Double': {
-        if (min === null) {
-            min = -Math.pow(2, 8);
-        }
-        if (max === null) {
-            max = Math.pow(2, 8);
-        }
-        return Number((Math.random() * (max - min) + min).toFixed(3));
+        // IEEE 754 numbers can be larger,
+        // but we don't need the whole range when generating a sample random number
+        return Number(
+            randomNumberInRangeWithPrecision(min, max, 0.0001, -Math.pow(2, 32), Math.pow(2, 32))
+                .toFixed(3)
+        );
     }
     default:
         return 0;
