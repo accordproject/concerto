@@ -100,7 +100,7 @@ class Serializer {
         parameters.modelManager = this.modelManager;
         parameters.seenResources = new Set();
         parameters.dedupeResources = new Set();
-        const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
+        const classDeclaration = this.modelManager.getType( resource._getFullyQualifiedType() );
 
         // validate the resource against the model
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
@@ -184,7 +184,7 @@ class Serializer {
 
         // validate the resource against the model
         if(options.validate) {
-            resource.validate();
+            resource._validate();
         }
 
         return resource;

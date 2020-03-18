@@ -50,7 +50,7 @@ class Identifiable extends Typed {
      * Get the identifier of this instance
      * @return {string} The identifier for this object
      */
-    getIdentifier() {
+    _getIdentifier() {
         return this.$identifier;
     }
 
@@ -58,10 +58,10 @@ class Identifiable extends Typed {
      * Set the identifier of this instance
      * @param {string} id - the new identifier for this object
      */
-    setIdentifier(id) {
+    _setIdentifier(id) {
         this.$identifier = id;
-        const modelFile = this.$modelManager.getModelFile(this.getNamespace());
-        const typeDeclaration = modelFile.getType(this.getFullyQualifiedType());
+        const modelFile = this.$modelManager.getModelFile(this._getNamespace());
+        const typeDeclaration = modelFile.getType(this._getFullyQualifiedType());
         const idField = typeDeclaration.getIdentifierFieldName();
         this[idField] = id;
     }
@@ -71,8 +71,8 @@ class Identifiable extends Typed {
      * (namespace '.' type '#' identifier).
      * @return {string} the fully qualified identifier of this instance
      */
-    getFullyQualifiedIdentifier() {
-        return this.getFullyQualifiedType() + '#' + this.$identifier;
+    _getFullyQualifiedIdentifier() {
+        return this._getFullyQualifiedType() + '#' + this.$identifier;
     }
 
     /**
@@ -80,7 +80,7 @@ class Identifiable extends Typed {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'Identifiable {id=' + this.getFullyQualifiedIdentifier() +'}';
+        return 'Identifiable {id=' + this._getFullyQualifiedIdentifier() +'}';
     }
 
     /**
@@ -88,7 +88,7 @@ class Identifiable extends Typed {
      * @return {boolean} True if this identifiable is a relationship,
      * false if not.
      */
-    isRelationship() {
+    _isRelationship() {
         return false;
     }
 
@@ -97,7 +97,7 @@ class Identifiable extends Typed {
      * @return {boolean} True if this identifiable is a resource,
      * false if not.
      */
-    isResource() {
+    _isResource() {
         return false;
     }
 
@@ -105,10 +105,10 @@ class Identifiable extends Typed {
      * Returns a URI representation of a reference to this identifiable
      * @return {String} the URI for the identifiable
      */
-    toURI() {
-        const resourceId = new ResourceId(this.getNamespace(), this.getType(), this.getIdentifier());
+    _toURI() {
+        const resourceId = new ResourceId(this._getNamespace(), this._getType(), this._getIdentifier());
         const result = resourceId.toURI();
-        //console.log( '***** URI for ' + this.toString() + ' is ' + result );
+        //console.log( '***** URI for ' + this._toString() + ' is ' + result );
         return result;
     }
 }

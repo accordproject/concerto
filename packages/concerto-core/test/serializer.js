@@ -107,7 +107,7 @@ describe('Serializer', () => {
 
         it('should throw if the class declaration cannot be found', () => {
             let mockResource = sinon.createStubInstance(Resource);
-            mockResource.getFullyQualifiedType.returns('org.acme.sample.NoSuchAsset');
+            mockResource._getFullyQualifiedType.returns('org.acme.sample.NoSuchAsset');
             (() => {
                 serializer.toJSON(mockResource);
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);

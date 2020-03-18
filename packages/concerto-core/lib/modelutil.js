@@ -74,13 +74,13 @@ class ModelUtil {
     static isMatchingType(type, fqn) {
 
         // Instance of type before any complex string operations.
-        if (type.instanceOf(fqn)) {
+        if (type._instanceOf(fqn)) {
             // matching type or subtype
             return true;
         }
 
         let ns = ModelUtil.getNamespace(fqn);
-        let typeNS = type.getNamespace();
+        let typeNS = type._getNamespace();
 
         if (ModelUtil.isWildcardName(fqn) && typeNS === ns) {
             // matching namespace

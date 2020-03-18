@@ -58,12 +58,12 @@ describe('Vehicle-Lifecycle Model', function() {
             const privateOwner = factory.newRelationship('org.acme.vehicle.lifecycle', 'PrivateOwner', 'dan');
             vehicle.owner = privateOwner;
 
-            vehicle.validate();
+            vehicle._validate();
             const jsonObj = serializer.toJSON(vehicle);
             //console.log(JSON.stringify(jsonObj));
             const result = serializer.fromJSON(jsonObj);
-            result.getType().should.equal('Vehicle');
-            result.validate();
+            result._getType().should.equal('Vehicle');
+            result._validate();
         });
     });
 });

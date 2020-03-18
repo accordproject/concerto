@@ -55,8 +55,8 @@ describe('InstanceGenerator', () => {
         modelManager.addModelFile(modelFile);
         let resource = factory.newResource('org.acme.test', 'MyAsset', 'asset1');
         parameters.stack = new TypedStack(resource);
-        parameters.seen = [resource.getFullyQualifiedType()];
-        let classDeclaration = resource.getClassDeclaration();
+        parameters.seen = [resource._getFullyQualifiedType()];
+        let classDeclaration = resource._getClassDeclaration();
         return classDeclaration.accept(visitor, parameters);
     };
 
@@ -273,7 +273,7 @@ describe('InstanceGenerator', () => {
                 o String assetId
                 --> MyAsset theValue
             }`);
-            resource.theValue.getIdentifier().should.match(/^\d{4}$/);
+            resource.theValue._getIdentifier().should.match(/^\d{4}$/);
         });
 
         it('should generate a default value for a relationship array property', () => {
@@ -283,7 +283,7 @@ describe('InstanceGenerator', () => {
                 --> MyAsset[] theValues
             }`);
             resource.theValues.should.be.a('Array').and.have.lengthOf(1);
-            resource.theValues[0].getIdentifier().should.match(/^\d{4}$/);
+            resource.theValues[0]._getIdentifier().should.match(/^\d{4}$/);
         });
 
         it('should generate a default value for a resource property', () => {
@@ -296,7 +296,7 @@ describe('InstanceGenerator', () => {
                 o String assetId
                 o MyInnerAsset theValue
             }`);
-            resource.theValue.getIdentifier().should.match(/^\d{4}$/);
+            resource.theValue._getIdentifier().should.match(/^\d{4}$/);
             resource.theValue.theValue.should.be.a('string');
         });
 
@@ -311,7 +311,7 @@ describe('InstanceGenerator', () => {
                 o MyInnerAsset[] theValues
             }`);
             resource.theValues.should.be.a('Array').and.have.lengthOf(1);
-            resource.theValues[0].getIdentifier().should.match(/^\d{4}$/);
+            resource.theValues[0]._getIdentifier().should.match(/^\d{4}$/);
             resource.theValues[0].theValue.should.be.a('string');
         });
 
@@ -338,7 +338,7 @@ describe('InstanceGenerator', () => {
                 o String id
                 o BaseConcept aConcept
             }`);
-            resource.aConcept.getType().should.equal('MyConcept');
+            resource.aConcept._getType().should.equal('MyConcept');
         });
 
         it('should throw an error when trying to generate a resource from a model that uses an Abstract type with no concrete Implementing type', () => {
@@ -385,7 +385,7 @@ describe('InstanceGenerator', () => {
                 o String id
                 --> MyEvent theValue
             }`);
-            resource.theValue.getType().should.equal('MyEvent');
+            resource.theValue._getType().should.equal('MyEvent');
         });
 
     });

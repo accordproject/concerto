@@ -53,7 +53,7 @@ class Typed {
      * @return {Object} the result of visiting or null
      * @private
      */
-    accept(visitor,parameters) {
+    _accept(visitor,parameters) {
         return visitor.visit(this, parameters);
     }
 
@@ -62,7 +62,7 @@ class Typed {
      * @return {ModelManager} The ModelManager for this object
      * @private
      */
-    getModelManager() {
+    _getModelManager() {
         return this.$modelManager;
     }
 
@@ -70,7 +70,7 @@ class Typed {
      * Get the type of the instance (a short name, not including namespace).
      * @return {string} The type of this object
      */
-    getType() {
+    _getType() {
         return this.$type;
     }
 
@@ -78,7 +78,7 @@ class Typed {
      * Get the fully-qualified type name of the instance (including namespace).
      * @return {string} The fully-qualified type name of this object
      */
-    getFullyQualifiedType() {
+    _getFullyQualifiedType() {
         return this.$classDeclaration.getFullyQualifiedName();
     }
 
@@ -86,7 +86,7 @@ class Typed {
      * Get the namespace of the instance.
      * @return {string} The namespace of this object
      */
-    getNamespace() {
+    _getNamespace() {
         return this.$namespace;
     }
 
@@ -96,7 +96,7 @@ class Typed {
      * @return {ClassDeclaration} - the class declaration for this instance
      * @private
      */
-    getClassDeclaration() {
+    _getClassDeclaration() {
         return this.$classDeclaration;
     }
 
@@ -105,7 +105,7 @@ class Typed {
      * @param {string} propName - the name of the field
      * @param {string} value - the value of the property
      */
-    setPropertyValue(propName, value) {
+    _setPropertyValue(propName, value) {
         this[propName] = value;
     }
 
@@ -114,7 +114,7 @@ class Typed {
      * @param {string} propName - the name of the field
      * @param {string} value - the value of the property
      */
-    addArrayValue(propName, value) {
+    _addArrayValue(propName, value) {
         if(this[propName]) {
             this[propName].push(value);
         }
@@ -127,8 +127,8 @@ class Typed {
      * Sets the fields to their default values, based on the model
      * @private
      */
-    assignFieldDefaults() {
-        let classDeclaration = this.getClassDeclaration();
+    _assignFieldDefaults() {
+        let classDeclaration = this._getClassDeclaration();
         let fields = classDeclaration.getProperties();
 
         for (let n = 0; n < fields.length; n++) {
@@ -138,21 +138,21 @@ class Typed {
 
                 if (defaultValue) {
                     if (field.getType() === 'String') {
-                        this.setPropertyValue(field.getName(), defaultValue);
+                        this._setPropertyValue(field.getName(), defaultValue);
                     } else if (field.getType() === 'Integer') {
-                        this.setPropertyValue(field.getName(), parseInt(defaultValue));
+                        this._setPropertyValue(field.getName(), parseInt(defaultValue));
                     } else if (field.getType() === 'Long') {
-                        this.setPropertyValue(field.getName(), parseInt(defaultValue));
+                        this._setPropertyValue(field.getName(), parseInt(defaultValue));
                     } else if (field.getType() === 'Double') {
-                        this.setPropertyValue(field.getName(), parseFloat(defaultValue));
+                        this._setPropertyValue(field.getName(), parseFloat(defaultValue));
                     } else if (field.getType() === 'Boolean') {
-                        this.setPropertyValue(field.getName(), (defaultValue === 'true'));
+                        this._setPropertyValue(field.getName(), (defaultValue === 'true'));
                     } else if (field.getType() === 'DateTime') {
                         const dateTime = Moment.parseZone(defaultValue);
-                        this.setPropertyValue(field.getName(), dateTime);
+                        this._setPropertyValue(field.getName(), dateTime);
                     } else {
                         // following precident set in jsonpopulator.js - if we get this far the field should be an enum
-                        this.setPropertyValue(field.getName(), defaultValue);
+                        this._setPropertyValue(field.getName(), defaultValue);
                     }
                 }
             }
@@ -166,9 +166,9 @@ class Typed {
      * @returns {boolean} True if this instance is an instance of the specified fully
      * qualified type name, false otherwise.
      */
-    instanceOf(fqt) {
+    _instanceOf(fqt) {
         // Check to see if this is an exact instance of the specified type.
-        const classDeclaration = this.getClassDeclaration();
+        const classDeclaration = this._getClassDeclaration();
         if (classDeclaration.getFullyQualifiedName() === fqt) {
             return true;
         }
@@ -188,7 +188,7 @@ class Typed {
      * without using the Serializer.
      * @private
      */
-    toJSON() {
+    _toJSON() {
         throw new Error('Use Serializer.toJSON to convert resource instances to JSON objects.');
     }
 }

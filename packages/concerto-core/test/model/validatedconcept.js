@@ -61,45 +61,45 @@ describe('ValidatedConcept', function () {
     describe('#getClassDeclaration', function() {
         it('should return the class declaraction', function () {
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
-            resource.getClassDeclaration().should.equal(classDecl);
+            resource._getClassDeclaration().should.equal(classDecl);
         });
     });
 
     describe('#setPropertyValue', () => {
         it (' should accept valid property - value', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
-            resource.setPropertyValue('name','Fred Bloggs');
+            resource._setPropertyValue('name','Fred Bloggs');
         });
         it (' should throw error for invalid property name', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
             ( () => {
-                resource.setPropertyValue('namenamename','Fred Bloggs');
+                resource._setPropertyValue('namenamename','Fred Bloggs');
             }).should.throw(/Trying to set field namenamename which is not declared in the model/);
         });
         it (' should throw error for array', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
             ( () => {
-                resource.addArrayValue('name',['Fred','Bloggs']);
+                resource._addArrayValue('name',['Fred','Bloggs']);
             }).should.throw(/Trying to add array item name which is not declared as an array in the model/);
         });
         it (' correct path for adding an array', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
-            resource.addArrayValue('arrayName',['Fred','Bloggs']);
+            resource._addArrayValue('arrayName',['Fred','Bloggs']);
         });
         it (' should throw error for invalid property name', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
             (()=>{
-                resource.addArrayValue('invalid','Fred');
+                resource._addArrayValue('invalid','Fred');
             }).should.throw(/Trying to set field invalid which is not declared in the model/);
         });
         it (' validate', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
-            resource.validate();
+            resource._validate();
         });
         it (' add two elements separately to an array property', function (){
             const resource = new ValidatedConcept(modelManager, classDecl, 'org.acme.l1', 'Person' ,mockResourceValidator);
-            resource.addArrayValue('arrayName','Fred');
-            resource.addArrayValue('arrayName','Bloggs');
+            resource._addArrayValue('arrayName','Fred');
+            resource._addArrayValue('arrayName','Bloggs');
         });
 
     });

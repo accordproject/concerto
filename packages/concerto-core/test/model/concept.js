@@ -58,7 +58,7 @@ describe('Concept', function () {
     describe('#getClassDeclaration', function() {
         it('should return the class declaraction', function () {
             const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person' );
-            resource.getClassDeclaration().should.equal(classDecl);
+            resource._getClassDeclaration().should.equal(classDecl);
         });
     });
 
@@ -66,7 +66,7 @@ describe('Concept', function () {
         it('should throw if toJSON is called', function () {
             const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person');
             (function () {
-                resource.toJSON();
+                resource._toJSON();
             }).should.throw(/Use Serializer.toJSON to convert resource instances to JSON objects./);
         });
 
@@ -105,7 +105,7 @@ describe('Concept', function () {
             const serializer = new Serializer(factory, modelManager);
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.MakerInventory","makerId":"123","invSets":[{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}]}');
             const obj = serializer.fromJSON(jsObject);
-            obj.getIdentifier().should.equal('123');
+            obj._getIdentifier().should.equal('123');
         });
 
         it('should generate a concept from JSON', function () {
@@ -115,7 +115,7 @@ describe('Concept', function () {
             const serializer = new Serializer(factory, modelManager);
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}');
             const obj = serializer.fromJSON(jsObject);
-            obj.isConcept().should.be.true;
+            obj._isConcept().should.be.true;
         });
 
         it('should generate an error trying to create an ENUM from JSON', function () {
@@ -134,7 +134,7 @@ describe('Concept', function () {
     describe('#isConcept', () => {
         it('should be true', () => {
             const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person');
-            resource.isConcept().should.be.true;
+            resource._isConcept().should.be.true;
         });
     });
 });

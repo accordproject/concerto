@@ -94,7 +94,7 @@ class JSONGenerator {
         let id = null;
 
         if (obj instanceof Identifiable && this.deduplicateResources) {
-            id = obj.toURI();
+            id = obj._toURI();
             if( parameters.dedupeResources.has(id)) {
                 return id;
             }
@@ -139,7 +139,7 @@ class JSONGenerator {
                 const item = obj[index];
                 if (!field.isPrimitive() && !ModelUtil.isEnum(field)) {
                     parameters.stack.push(item, Typed);
-                    const classDeclaration = parameters.modelManager.getType(item.getFullyQualifiedType());
+                    const classDeclaration = parameters.modelManager.getType(item._getFullyQualifiedType());
                     array.push(classDeclaration.accept(this, parameters));
                 } else {
                     array.push(this.convertToJSON(field, item));
@@ -169,7 +169,7 @@ class JSONGenerator {
             }
         } else {
             parameters.stack.push(obj);
-            const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
+            const classDeclaration = parameters.modelManager.getType(obj._getFullyQualifiedType());
             result = classDeclaration.accept(this, parameters);
         }
         if (field.isOptional()) {
@@ -235,7 +235,7 @@ class JSONGenerator {
             for (let index in obj) {
                 const item = obj[index];
                 if (this.permitResourcesForRelationships && item instanceof Resource) {
-                    let fqi = item.getFullyQualifiedIdentifier();
+                    let fqi = item._getFullyQualifiedIdentifier();
                     if (parameters.seenResources.has(fqi)) {
                         let relationshipText = this.getRelationshipText(relationshipDeclaration, item);
                         array.push(relationshipText);
@@ -253,7 +253,7 @@ class JSONGenerator {
             }
             result = array;
         } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
-            let fqi = obj.getFullyQualifiedIdentifier();
+            let fqi = obj._getFullyQualifiedIdentifier();
             if (parameters.seenResources.has(fqi)) {
                 let relationshipText = this.getRelationshipText(relationshipDeclaration, obj);
                 result = relationshipText;
@@ -286,9 +286,9 @@ class JSONGenerator {
             }
         }
         if (this.convertResourcesToId) {
-            return relationshipOrResource.getIdentifier();
+            return relationshipOrResource._getIdentifier();
         } else {
-            return relationshipOrResource.toURI();
+            return relationshipOrResource._toURI();
         }
     }
 }

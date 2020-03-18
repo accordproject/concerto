@@ -125,10 +125,10 @@ class ResourceValidator {
         }
 
         if(obj instanceof Identifiable) {
-            parameters.rootResourceIdentifier = obj.getFullyQualifiedIdentifier();
+            parameters.rootResourceIdentifier = obj._getFullyQualifiedIdentifier();
         }
 
-        const toBeAssignedClassDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
+        const toBeAssignedClassDeclaration = parameters.modelManager.getType(obj._getFullyQualifiedType());
         const toBeAssignedClassDecName = toBeAssignedClassDeclaration.getFullyQualifiedName();
 
         // is the type we are assigning to abstract?
@@ -146,7 +146,7 @@ class ResourceValidator {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
                     if(classDeclaration.getIdentifierFieldName()) {
-                        ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
+                        ResourceValidator.reportUndeclaredField(obj._getIdentifier(), propName, toBeAssignedClassDecName);
                     }
                     else {
                         ResourceValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName);
@@ -156,14 +156,14 @@ class ResourceValidator {
         }
 
         if(classDeclaration.getIdentifierFieldName()) {
-            const id = obj.getIdentifier();
+            const id = obj._getIdentifier();
 
             // prevent empty identifiers
             if(!id || id.trim().length === 0) {
                 ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier);
             }
 
-            parameters.currentIdentifier = obj.getFullyQualifiedIdentifier();
+            parameters.currentIdentifier = obj._getFullyQualifiedIdentifier();
         }
 
         // now validate each property
@@ -335,7 +335,7 @@ class ResourceValidator {
             let classDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
             if(obj instanceof Identifiable) {
                 try {
-                    classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
+                    classDeclaration = parameters.modelManager.getType(obj._getFullyQualifiedType());
                 } catch (err) {
                     ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
                 }
@@ -394,13 +394,13 @@ class ResourceValidator {
             ResourceValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
         }
 
-        const relationshipType = parameters.modelManager.getType(obj.getFullyQualifiedType());
+        const relationshipType = parameters.modelManager.getType(obj._getFullyQualifiedType());
 
         if(relationshipType.isConcept()) {
             throw new Error('Cannot have a relationship to a concept. Relationships must be to resources.');
         }
 
-        if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj.getFullyQualifiedType(), relationshipDeclaration)) {
+        if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj._getFullyQualifiedType(), relationshipDeclaration)) {
             ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
         }
     }
@@ -419,8 +419,8 @@ class ResourceValidator {
         let typeOfValue = typeof value;
 
         if(value instanceof Identifiable) {
-            typeOfValue = value.getFullyQualifiedType();
-            value = value.getFullyQualifiedIdentifier();
+            typeOfValue = value._getFullyQualifiedType();
+            value = value._getFullyQualifiedIdentifier();
         }
         else {
             if(value) {
@@ -572,7 +572,7 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: resourceId,
             propertyName: propName,
-            objectType: obj.getFullyQualifiedType(),
+            objectType: obj._getFullyQualifiedType(),
             fieldType: typeName
         }));
     }

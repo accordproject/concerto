@@ -121,7 +121,7 @@ class Factory {
         else {
             newObj = new ValidatedResource(this.modelManager, classDecl, ns, type, id, new ResourceValidator());
         }
-        newObj.assignFieldDefaults();
+        newObj._assignFieldDefaults();
         this.initializeNewObject(newObj, classDecl, options);
 
         if (idField) {
@@ -172,7 +172,7 @@ class Factory {
         else {
             newObj = new ValidatedConcept(this.modelManager, classDecl, ns, type, new ResourceValidator());
         }
-        newObj.assignFieldDefaults();
+        newObj._assignFieldDefaults();
         this.initializeNewObject(newObj, classDecl, options);
 
         debug(method, 'created concept', classDecl.getFullyQualifiedName() );
@@ -222,10 +222,10 @@ class Factory {
             throw new Error('type not specified');
         }
         let transaction = this.newResource(ns, type, id, options);
-        const classDeclaration = transaction.getClassDeclaration();
+        const classDeclaration = transaction._getClassDeclaration();
 
         if (!(classDeclaration instanceof TransactionDeclaration)) {
-            throw new Error(transaction.getClassDeclaration().getFullyQualifiedName() + ' is not a transaction');
+            throw new Error(transaction._getClassDeclaration().getFullyQualifiedName() + ' is not a transaction');
         }
 
         // set the timestamp
@@ -258,10 +258,10 @@ class Factory {
             throw new Error('type not specified');
         }
         let event = this.newResource(ns, type, id, options);
-        const classDeclaration = event.getClassDeclaration();
+        const classDeclaration = event._getClassDeclaration();
 
         if (!(classDeclaration instanceof EventDeclaration)) {
-            throw new Error(event.getClassDeclaration().getFullyQualifiedName() + ' is not an event');
+            throw new Error(event._getClassDeclaration().getFullyQualifiedName() + ' is not an event');
         }
 
         // set the timestamp
@@ -283,7 +283,7 @@ class Factory {
         const generateParams = this.parseGenerateOptions(clientOptions);
         if (generateParams) {
             generateParams.stack = new TypedStack(newObject);
-            generateParams.seen = [newObject.getFullyQualifiedType()];
+            generateParams.seen = [newObject._getFullyQualifiedType()];
             const visitor = new InstanceGenerator();
             classDeclaration.accept(visitor, generateParams);
         }

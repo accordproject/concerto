@@ -57,7 +57,7 @@ class Relationship extends Identifiable {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'Relationship {id=' + this.getFullyQualifiedIdentifier() + '}';
+        return 'Relationship {id=' + this._getFullyQualifiedIdentifier() + '}';
     }
 
     /**
@@ -65,7 +65,7 @@ class Relationship extends Identifiable {
      * @return {boolean} True if this identifiable is a relationship,
      * false if not.
      */
-    isRelationship() {
+    _isRelationship() {
         return true;
     }
 
@@ -77,7 +77,7 @@ class Relationship extends Identifiable {
      * @param {String} [defaultType] - default type to use for backwards compatability (optional)
      * @return {Relationship} the relationship
      */
-    static fromURI(modelManager, uriAsString, defaultNamespace, defaultType) {
+    static _fromURI(modelManager, uriAsString, defaultNamespace, defaultType) {
         const resourceId = ResourceId.fromURI(uriAsString, defaultNamespace, defaultType);
         let fqt = ModelUtil.getFullyQualifiedName(resourceId.namespace, resourceId.type);
         let classDeclaration = modelManager.getType(fqt);

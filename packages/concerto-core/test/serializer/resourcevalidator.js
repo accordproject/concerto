@@ -463,8 +463,8 @@ describe('ResourceValidator', function () {
         });
 
         it('should get fully qualified type and name if Identifiable', () => {
-            mockIdentifiable.getFullyQualifiedType.returns('doge');
-            mockIdentifiable.getFullyQualifiedIdentifier.returns('com.doge');
+            mockIdentifiable._getFullyQualifiedType.returns('doge');
+            mockIdentifiable._getFullyQualifiedIdentifier.returns('com.doge');
             (() => {
                 ResourceValidator.reportFieldTypeViolation('id', 'property', mockIdentifiable, mockField);
             }).should.throw(/property has value com.doge \(doge\)/);

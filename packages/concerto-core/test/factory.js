@@ -128,12 +128,12 @@ describe('Factory', function() {
 
         it('should create a new validating instance by default', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1');
-            should.not.equal(resource.validate, undefined);
+            should.not.equal(resource._validate, undefined);
         });
 
         it('should create a new non-validating instance', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1', { disableValidation: true });
-            should.equal(resource.validate, undefined);
+            should.equal(resource._validate, undefined);
         });
 
         it('should not define fields if \'generate\' option is not set', function() {
@@ -228,19 +228,19 @@ describe('Factory', function() {
         it('should create a new concept', () => {
             let resource = factory.newConcept(namespace, 'MyConcept');
             should.equal(resource.newValue, undefined);
-            should.not.equal(resource.validate, undefined);
+            should.not.equal(resource._validate, undefined);
         });
 
         it('should create a new non-validating concept', () => {
             let resource = factory.newConcept(namespace, 'MyConcept', { disableValidation: true });
             should.equal(resource.newValue, undefined);
-            should.equal(resource.validate, undefined);
+            should.equal(resource._validate, undefined);
         });
 
         it('should create a new concept with generated data', () => {
             let resource = factory.newConcept(namespace, 'MyConcept', { generate: true });
             resource.newValue.should.be.a('string');
-            should.not.equal(resource.validate, undefined);
+            should.not.equal(resource._validate, undefined);
         });
 
     });
@@ -258,7 +258,7 @@ describe('Factory', function() {
 
         it('should succeed for a valid type', function() {
             const relationship = factory.newRelationship(namespace, assetName, 'id');
-            relationship.isRelationship().should.be.true;
+            relationship._isRelationship().should.be.true;
         });
     });
 

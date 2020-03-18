@@ -59,7 +59,7 @@ class Resource extends Identifiable {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'Resource {id=' + this.getFullyQualifiedIdentifier() +'}';
+        return 'Resource {id=' + this._getFullyQualifiedIdentifier() +'}';
     }
 
     /**
@@ -67,7 +67,7 @@ class Resource extends Identifiable {
      * @return {boolean} True if this identifiable is a resource,
      * false if not.
      */
-    isResource() {
+    _isResource() {
         return true;
     }
 
@@ -77,8 +77,8 @@ class Resource extends Identifiable {
      * for the serializer, use the {@link Serializer#toJSON} method instead.
      * @return {Object} A JavaScript object suitable for serialization to JSON.
      */
-    toJSON() {
-        return this.getModelManager().getSerializer().toJSON(this);
+    _toJSON() {
+        return this._getModelManager().getSerializer().toJSON(this);
     }
 
 }

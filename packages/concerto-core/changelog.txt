@@ -24,12 +24,21 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 1.0.0-alpha.1 {600981cec064c51343729a0421ed6e3f} 2020-03-18
+- Add _ prefix to all built-in functions for Typed class and it's subclasses
+
 Version 0.82.7 {1589a150da7411d75b7c8a864af17206} 2020-02-02
 - Remove notion of system table
 - Remove user ability to change system model
 - Update JsDoc for ModelManager.addModelFiles
 - Add Logger API
 - Add instanceof alternatives to Factory and Serializer
+
+Version 0.82.6 {03fa6481ffdf0e58cb110c6f24009d18} 2020-02-26
+- Update JsDoc for ModelManager.addModelFiles
+
+Version 0.82.5 {d4d49fabba1c6ce465c446e2dccad488} 2019-11-10
+- Add instance of alternatives to Factory and Serializer
 
 Version 0.82.1 {dee013e99a3c2d6acc4eddfb00aad2a2} 2019-10-22
 - Make several constructors public

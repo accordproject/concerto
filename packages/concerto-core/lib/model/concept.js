@@ -58,7 +58,7 @@ class Concept extends Typed {
      * @return {boolean} True if this typed is a concept,
      * false if not.
      */
-    isConcept() {
+    _isConcept() {
         return true;
     }
 }

@@ -87,7 +87,7 @@ describe('animaltracking Model', function(){
             const myField = factory.newResource('com.hyperledger.composer.animaltracking', 'Field', 'MY_FIELD');
             myField.should.not.be.null;
             myField.cph.should.equal('MY_FIELD');
-            myField.setPropertyValue('name', 'Big Field');
+            myField._setPropertyValue('name', 'Big Field');
             const businessRelationship = factory.newRelationship('com.hyperledger.composer.animaltracking', 'Business', 'MY_BUSINESS');
             myField.business = businessRelationship;
 
@@ -116,12 +116,12 @@ describe('animaltracking Model', function(){
             newAnimal.productionType.should.equal('MEAT');
 
             // check that relationships have been replaced by a Relationship class instance
-            newAnimal.location.getFullyQualifiedIdentifier().should.equal('com.hyperledger.composer.animaltracking.Field#MY_FIELD');
+            newAnimal.location._getFullyQualifiedIdentifier().should.equal('com.hyperledger.composer.animaltracking.Field#MY_FIELD');
 
             const myBusiness = factory.newResource('com.hyperledger.composer.animaltracking', 'Business', 'MY_BUSINESS');
             myBusiness.should.not.be.null;
             myBusiness.sbi.should.equal('MY_BUSINESS');
-            myBusiness.setPropertyValue('postcode', 'SO225GB');
+            myBusiness._setPropertyValue('postcode', 'SO225GB');
             myBusiness.address1 = 'Add1';
             myBusiness.address2 = 'Add2';
             myBusiness.county = 'Hampshire';
@@ -129,13 +129,13 @@ describe('animaltracking Model', function(){
             myBusiness.owner = ownerRelationship;
 
             const animalRelationship = factory.newRelationship('com.hyperledger.composer.animaltracking', 'Animal', 'SHEEP_001');
-            myBusiness.addArrayValue('incomingAnimals', animalRelationship);
+            myBusiness._addArrayValue('incomingAnimals', animalRelationship);
             myBusiness.incomingAnimals.length.should.equal(1);
             (myBusiness.incomingAnimals[0] instanceof Relationship).should.be.true;
 
             // add a second relationship
             const animalRelationship2 = factory.newRelationship('com.hyperledger.composer.animaltracking', 'Animal', 'SHEEP_002');
-            myBusiness.addArrayValue('incomingAnimals', animalRelationship2);
+            myBusiness._addArrayValue('incomingAnimals', animalRelationship2);
             myBusiness.incomingAnimals.length.should.equal(2);
             (myBusiness.incomingAnimals[1] instanceof Relationship).should.be.true;
 

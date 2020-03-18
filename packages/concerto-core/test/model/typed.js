@@ -54,22 +54,22 @@ describe('Typed', () => {
 
         it('should return true for a matching type', () => {
             let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base', 'BaseAsset');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            typed._instanceOf('org.acme.base.BaseAsset').should.be.true;
         });
 
         it('should return true for a matching super type', () => {
             let typed = new Typed(modelManager, baseAsset2ClassDecl, 'org.acme.base', 'BaseAsset2');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            typed._instanceOf('org.acme.base.BaseAsset').should.be.true;
         });
 
         it('should return false for a non-matching sub type', () => {
             let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base', 'BaseAsset');
-            typed.instanceOf('org.acme.base.BaseAsset2').should.be.false;
+            typed._instanceOf('org.acme.base.BaseAsset2').should.be.false;
         });
 
         it('should return true for a matching nested super type', () => {
             let typed = new Typed(modelManager, asset2ClassDecl, 'org.acme.ext', 'Asset2');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            typed._instanceOf('org.acme.base.BaseAsset').should.be.true;
         });
 
     });
@@ -103,7 +103,7 @@ describe('Typed', () => {
                 }`);
                 const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
                 const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
-                typed.assignFieldDefaults();
+                typed._assignFieldDefaults();
                 if (Moment.isMoment(typed.value)) {
                     typed.value.format().should.equal(defaultValue);
                 } else {

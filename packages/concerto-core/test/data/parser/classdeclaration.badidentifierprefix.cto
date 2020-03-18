@@ -11,16 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-/*eslint-disable no-unused-vars*/
-/**
- * This is a transaction processor function
- *
- * @param { org.acme.TestTransaction } testTransaction - this is a sample transaction
- * @transaction
- */
-function onTestTransactionLulz(testTransaction) {
-    console.log('onTestTransaction');
+namespace com.testing
+
+asset Asset identified by id {
+  o String id
+  o String validate // This is ok
+  o String _validate // This is not ok
 }
-/*eslint-enable no-unused-vars*/

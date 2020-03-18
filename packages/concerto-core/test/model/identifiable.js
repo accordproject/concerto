@@ -52,8 +52,8 @@ describe('Identifiable', function () {
     describe('#setIdentifier', () => {
         it('should be able to set identifier', function () {
             let id = new Identifiable(modelManager, modelManager.getType('com.composer.Farmer'), 'com.composer', 'Farmer', '123' );
-            id.setIdentifier('321');
-            id.getIdentifier().should.equal('321');
+            id._setIdentifier('321');
+            id._getIdentifier().should.equal('321');
         });
     });
 
@@ -62,7 +62,7 @@ describe('Identifiable', function () {
             const id = new Identifiable(modelManager, classDecl, 'com.composer', 'Farmer', '123' );
             const visitor = {visit: function(obj,parameters){}};
             const spy = sinon.spy(visitor, 'visit');
-            id.accept(visitor, {});
+            id._accept(visitor, {});
             spy.calledOnce.should.be.true;
         });
     });
@@ -71,7 +71,7 @@ describe('Identifiable', function () {
         it('should throw is toJSON is called', function () {
             const id = new Identifiable(modelManager, classDecl, 'com.composer', 'Farmer', '123' );
             (function () {
-                id.toJSON();
+                id._toJSON();
             }).should.throw(/Use Serializer.toJSON to convert resource instances to JSON objects./);
         });
     });
@@ -79,14 +79,14 @@ describe('Identifiable', function () {
     describe('#isRelationship', () => {
         it('should be false', () => {
             const id = new Identifiable(modelManager, classDecl, 'com.composer', 'Farmer', '123' );
-            id.isRelationship().should.be.false;
+            id._isRelationship().should.be.false;
         });
     });
 
     describe('#isResource', () => {
         it('should be false', () => {
             const id = new Identifiable(modelManager, classDecl, 'com.composer', 'Farmer', '123' );
-            id.isResource().should.be.false;
+            id._isResource().should.be.false;
         });
     });
 });

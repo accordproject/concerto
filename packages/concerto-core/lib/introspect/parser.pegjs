@@ -119,7 +119,6 @@ IdentifierName "identifier"
 IdentifierStart
   = UnicodeLetter
   / "$"
-  / "_"
   / "\\" sequence:UnicodeEscapeSequence { return sequence; }
 
 IdentifierPart

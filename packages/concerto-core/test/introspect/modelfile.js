@@ -160,6 +160,15 @@ describe('ModelFile', () => {
             }).should.throw(/BlahType/);
         });
 
+
+        it('should throw when an idenfifier includes a reserved character', () => {
+            const badIdentifierModel = fs.readFileSync(path.resolve(__dirname, '../data/parser/classdeclaration.badidentifierprefix.cto'), 'utf8');
+            (() => {
+                new ModelFile(modelManager, badIdentifierModel);
+            }).should.throw(/Expected "\[\]", comment, end of line, identifier, or whitespace but "_" found. Line 20 column 12/);
+        });
+
+
     });
 
     describe('#accept', () => {

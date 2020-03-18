@@ -56,14 +56,14 @@ describe('Test Model', function(){
 
             // model is defined as a string
             // set model to a number
-            cObject.setPropertyValue('model', 'CAPRI');
+            cObject._setPropertyValue('model', 'CAPRI');
             cObject.model.should.equal('CAPRI');
 
             // now try some invalid values
-            ( function() {cObject.setPropertyValue('model', 1);}).should.throw(/.+expected type String/);
-            ( function() {cObject.setPropertyValue('model', true);}).should.throw(/.+expected type String/);
-            ( function() {cObject.setPropertyValue('model', Moment());}).should.throw(/.+expected type String/);
-            ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw(/.+expected type String/);
+            ( function() {cObject._setPropertyValue('model', 1);}).should.throw(/.+expected type String/);
+            ( function() {cObject._setPropertyValue('model', true);}).should.throw(/.+expected type String/);
+            ( function() {cObject._setPropertyValue('model', Moment());}).should.throw(/.+expected type String/);
+            ( function() {cObject._setPropertyValue('model', [1,2,3]);}).should.throw(/.+expected type String/);
         });
     });
 
@@ -128,9 +128,9 @@ describe('Test Model', function(){
 
             // now deserialize and check the round-trip worked
             let cObject2 = serializer.fromJSON(jsonText);
-            cObject.getNamespace().should.equal(cObject2.getNamespace());
-            cObject.getType().should.equal(cObject2.getType());
-            cObject.getIdentifier().should.equal(cObject2.getIdentifier());
+            cObject._getNamespace().should.equal(cObject2._getNamespace());
+            cObject._getType().should.equal(cObject2._getType());
+            cObject._getIdentifier().should.equal(cObject2._getIdentifier());
             cObject2.make.should.equal('Renault');
         });
     });
@@ -165,7 +165,7 @@ describe('Test Model', function(){
             // vin is the identifying field for Vehicles, so should have been
             // set during object creation
             cObject.vin.should.equal('CAR_123');
-            cObject.getFullyQualifiedIdentifier().should.equal('org.acme.Vehicle#CAR_123');
+            cObject._getFullyQualifiedIdentifier().should.equal('org.acme.Vehicle#CAR_123');
 
             cObject.make = 'Renault';
 

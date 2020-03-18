@@ -48,12 +48,12 @@ describe('Dependencies2 Model', function() {
             // const participant = factory.newResource('org.acme.base', 'ClientAdminMember', 'testadmin');
             const transaction = factory.newTransaction('org.acme.core', 'BaseTransaction', 'testing');
             transaction.invoker = factory.newRelationship('org.acme.base', 'ClientAdminMember', 'testadmin');
-            transaction.validate();
+            transaction._validate();
             const jsonObj = serializer.toJSON(transaction);
             //console.log(JSON.stringify(jsonObj));
             const result = serializer.fromJSON(jsonObj);
-            result.getType().should.equal('BaseTransaction');
-            result.validate();
+            result._getType().should.equal('BaseTransaction');
+            result._validate();
         });
     });
 });

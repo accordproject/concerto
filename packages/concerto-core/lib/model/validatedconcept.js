@@ -61,24 +61,21 @@ class ValidatedConcept extends Concept {
      * @param {string} value - the value of the property
      * @throws {Error} if the value is not compatible with the model definition for the field
      */
-    setPropertyValue(propName, value) {
-        let classDeclaration = this.getClassDeclaration();
+    _setPropertyValue(propName, value) {
+        let classDeclaration = this._getClassDeclaration();
         let field = classDeclaration.getProperty(propName);
 
         if (!field) {
             throw new Error('Trying to set field ' +
                 propName + ' which is not declared in the model.');
         }
-        // else {
-        //     this.log( 'Validating field ' + field + ' with data ' + value );
-        // }
 
         const parameters = {};
         parameters.stack = new TypedStack(value);
-        parameters.modelManager = this.getModelManager();
+        parameters.modelManager = this._getModelManager();
         parameters.rootResourceIdentifier = 'undefined';
         field.accept(this.$validator, parameters);
-        super.setPropertyValue(propName,value);
+        super._setPropertyValue(propName,value);
     }
 
     /**
@@ -87,8 +84,8 @@ class ValidatedConcept extends Concept {
      * @param {string} value - the value of the property
      * @throws {Error} if the value is not compatible with the model definition for the field
      */
-    addArrayValue(propName, value) {
-        let classDeclaration = this.getClassDeclaration();
+    _addArrayValue(propName, value) {
+        let classDeclaration = this._getClassDeclaration();
         let field = classDeclaration.getProperty(propName);
 
         if (!field) {
@@ -108,10 +105,10 @@ class ValidatedConcept extends Concept {
         }
         newArray.push(value);
         parameters.stack = new TypedStack(newArray);
-        parameters.modelManager = this.getModelManager();
+        parameters.modelManager = this._getModelManager();
         parameters.rootResourceIdentifier = 'undefined';
         field.accept(this.$validator, parameters);
-        super.addArrayValue(propName, value);
+        super._addArrayValue(propName, value);
     }
 
     /**
@@ -119,11 +116,11 @@ class ValidatedConcept extends Concept {
      *
      * @throws {Error} - if the instance if invalid with respect to the model
      */
-    validate() {
-        const classDeclaration = this.getClassDeclaration();
+    _validate() {
+        const classDeclaration = this._getClassDeclaration();
         const parameters = {};
         parameters.stack = new TypedStack(this);
-        parameters.modelManager = this.getModelManager();
+        parameters.modelManager = this._getModelManager();
         parameters.rootResourceIdentifier = 'undefined';
         classDeclaration.accept(this.$validator, parameters);
     }

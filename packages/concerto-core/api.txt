@@ -136,44 +136,44 @@ class TransactionDeclaration extends ClassDeclaration {
    + boolean hasInstance(object) 
 }
 class Concept extends Typed {
-   + boolean isConcept() 
+   + boolean _isConcept() 
 }
 class Identifiable extends Typed {
-   + string getIdentifier() 
-   + void setIdentifier(string) 
-   + string getFullyQualifiedIdentifier() 
+   + string _getIdentifier() 
+   + void _setIdentifier(string) 
+   + string _getFullyQualifiedIdentifier() 
    + String toString() 
-   + boolean isRelationship() 
-   + boolean isResource() 
-   + String toURI() 
+   + boolean _isRelationship() 
+   + boolean _isResource() 
+   + String _toURI() 
 }
 class Relationship extends Identifiable {
    + String toString() 
-   + boolean isRelationship() 
-   + Relationship fromURI(ModelManager,String,String,String) 
+   + boolean _isRelationship() 
+   + Relationship _fromURI(ModelManager,String,String,String) 
 }
 class Resource extends Identifiable {
    + String toString() 
-   + boolean isResource() 
-   + Object toJSON() 
+   + boolean _isResource() 
+   + Object _toJSON() 
 }
 class Typed {
-   + string getType() 
-   + string getFullyQualifiedType() 
-   + string getNamespace() 
-   + void setPropertyValue(string,string) 
-   + void addArrayValue(string,string) 
-   + boolean instanceOf(String) 
+   + string _getType() 
+   + string _getFullyQualifiedType() 
+   + string _getNamespace() 
+   + void _setPropertyValue(string,string) 
+   + void _addArrayValue(string,string) 
+   + boolean _instanceOf(String) 
 }
 class ValidatedConcept extends Concept {
-   + void setPropertyValue(string,string) throws Error
-   + void addArrayValue(string,string) throws Error
-   + void validate() throws Error
+   + void _setPropertyValue(string,string) throws Error
+   + void _addArrayValue(string,string) throws Error
+   + void _validate() throws Error
 }
 class ValidatedResource extends Resource {
-   + void setPropertyValue(string,string) throws Error
-   + void addArrayValue(string,string) throws Error
-   + void validate() throws Error
+   + void _setPropertyValue(string,string) throws Error
+   + void _addArrayValue(string,string) throws Error
+   + void _validate() throws Error
 }
 class ModelLoader {
    + object loadModelManager(string[]) 

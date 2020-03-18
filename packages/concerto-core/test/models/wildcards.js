@@ -77,7 +77,7 @@ describe('Wildcards Model', function () {
         resource.participant.firstName.should.equal('Alice');
         resource.participant.lastName.should.equal('A');
         resource.participant.contactDetails.email.should.equal('alice@email.com');
-        resource.person.getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
+        resource.person._getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
     });
 
     it('should parse a resource using types from a wildcard import (Ergo)', () => {
@@ -107,7 +107,7 @@ describe('Wildcards Model', function () {
         resource.participant.firstName.should.equal('Alice');
         resource.participant.lastName.should.equal('A');
         resource.participant.contactDetails.email.should.equal('alice@email.com');
-        resource.person.getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
+        resource.person._getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
     });
 
     it('should serialize a resource using types from a wildcard import', () => {

@@ -51,7 +51,7 @@ describe('Resource', function () {
         it('should return the class declaraction', function () {
             const classDecl = modelManager.getType('org.acme.l1.Person');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person', '123' );
-            resource.getClassDeclaration().should.equal(classDecl);
+            resource._getClassDeclaration().should.equal(classDecl);
         });
     });
 
@@ -61,7 +61,7 @@ describe('Resource', function () {
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Car', '456' );
             resource.vin = '456';
             resource.owner = modelManager.getFactory().newRelationship('org.acme.l1', 'Person', '123');
-            resource.toJSON().should.deep.equal({
+            resource._toJSON().should.deep.equal({
                 $class: 'org.acme.l1.Car',
                 owner: 'resource:org.acme.l1.Person#123',
                 vin: '456'
@@ -72,7 +72,7 @@ describe('Resource', function () {
             const classDecl = modelManager.getType('org.acme.l1.Person');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person', '123' );
             resource.ssn = '123';
-            resource.toJSON().should.deep.equal({
+            resource._toJSON().should.deep.equal({
                 $class: 'org.acme.l1.Person',
                 ssn: '123'
             });
@@ -84,7 +84,7 @@ describe('Resource', function () {
             resource.transactionId = '789';
             resource.timestamp = Moment(0).utc();
             resource.car = modelManager.getFactory().newRelationship('org.acme.l1', 'Car', '456');
-            resource.toJSON().should.deep.equal({
+            resource._toJSON().should.deep.equal({
                 $class: 'org.acme.l1.ScrapCar',
                 car: 'resource:org.acme.l1.Car#456',
                 timestamp: '1970-01-01T00:00:00.000Z',
@@ -97,7 +97,7 @@ describe('Resource', function () {
         it('should be false', () => {
             const classDecl = modelManager.getType('org.acme.l1.Person');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person', '123' );
-            resource.isRelationship().should.be.false;
+            resource._isRelationship().should.be.false;
         });
     });
 
@@ -105,7 +105,7 @@ describe('Resource', function () {
         it('should be true', () => {
             const classDecl = modelManager.getType('org.acme.l1.Person');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person', '123' );
-            resource.isResource().should.be.true;
+            resource._isResource().should.be.true;
         });
     });
 });

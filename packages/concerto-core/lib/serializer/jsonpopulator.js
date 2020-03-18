@@ -312,7 +312,7 @@ class JSONPopulator {
             for(let n=0; n < jsonObj.length; n++) {
                 let jsonItem = jsonObj[n];
                 if (typeof jsonItem === 'string') {
-                    result.push(Relationship.fromURI(parameters.modelManager, jsonItem, defaultNamespace, defaultType ));
+                    result.push(Relationship._fromURI(parameters.modelManager, jsonItem, defaultNamespace, defaultType ));
                 } else {
                     if (!this.acceptResourcesForRelationships) {
                         throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
@@ -337,7 +337,7 @@ class JSONPopulator {
         }
         else {
             if (typeof jsonObj === 'string') {
-                result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
+                result = Relationship._fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
             } else {
                 if (!this.acceptResourcesForRelationships) {
                     throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
