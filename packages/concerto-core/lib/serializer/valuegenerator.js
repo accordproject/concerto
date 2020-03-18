@@ -18,6 +18,45 @@ const loremIpsum = require('lorem-ipsum');
 const Moment = require('moment-mini');
 const RandExp = require('randexp');
 
+const getRange = (lowerBound, upperBound, type) => {
+    let max = upperBound;
+    let min = lowerBound;
+    if (max && min && max < min){
+        min = upperBound;
+        max = lowerBound;
+    }
+    switch(type){
+    case 'Long':
+        if (min === null) {
+            min = -Math.pow(2, 32);
+        }
+        if (max === null) {
+            max = Math.pow(2, 32);
+        }
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    case 'Integer': {
+        if (min === null) {
+            min = -Math.pow(2, 16);
+        }
+        if (max === null) {
+            max = Math.pow(2, 16);
+        }
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+    case 'Double': {
+        if (min === null) {
+            min = -Math.pow(2, 8);
+        }
+        if (max === null) {
+            max = Math.pow(2, 8);
+        }
+        return Number((Math.random() * (max - min) + min).toFixed(3));
+    }
+    default:
+        return 0;
+    }
+};
+
 /**
  * Empty value generator.
  * @private
@@ -103,7 +142,7 @@ class EmptyValueGenerator {
      * @return {string} a String value.
      */
     getRegex(regex) {
-        return new RandExp(regex).gen();
+        return regex ? new RandExp(regex).gen() : '';
     }
 
     /**
@@ -111,40 +150,10 @@ class EmptyValueGenerator {
      * @param {number} lowerBound the lower bound on the range.
      * @param {number} upperBound the upper bound on the range.
      * @param {string} type the number type for the range
-     * @return {number} a String value.
+     * @return {number} a number.
      */
     getRange(lowerBound, upperBound, type) {
-        let min = lowerBound;
-        let max = upperBound;
-
-        switch(type){
-        case 'Long':
-            if (min === null) {
-                min = -Math.pow(2, 32);
-            }
-            if (max === null) {
-                max = Math.pow(2, 32);
-            }
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        case 'Integer': {
-            if (min === null) {
-                min = -Math.pow(2, 16);
-            }
-            if (max === null) {
-                max = Math.pow(2, 16);
-            }
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        }
-        case 'Double': {
-            if (min === null) {
-                min = -Math.pow(2, 8);
-            }
-            if (max === null) {
-                max = Math.pow(2, 8);
-            }
-            return Number((Math.random() * (max - min) + min).toFixed(3));
-        }
-        }
+        return getRange(lowerBound, upperBound, type);
     }
 }
 
@@ -233,7 +242,7 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @return {string} a String value.
      */
     getRegex(regex) {
-        return new RandExp(regex).gen();
+        return regex ? new RandExp(regex).gen() : '';
     }
 
     /**
@@ -241,40 +250,10 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @param {number} lowerBound the lower bound on the range.
      * @param {number} upperBound the upper bound on the range.
      * @param {string} type the number type for the range
-     * @return {number} a String value.
+     * @return {number} a number.
      */
     getRange(lowerBound, upperBound, type) {
-        let min = lowerBound;
-        let max = upperBound;
-
-        switch(type){
-        case 'Long':
-            if (min === null) {
-                min = -Math.pow(2, 32);
-            }
-            if (max === null) {
-                max = Math.pow(2, 32);
-            }
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        case 'Integer': {
-            if (min === null) {
-                min = -Math.pow(2, 16);
-            }
-            if (max === null) {
-                max = Math.pow(2, 16);
-            }
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        }
-        case 'Double': {
-            if (min === null) {
-                min = -Math.pow(2, 8);
-            }
-            if (max === null) {
-                max = Math.pow(2, 8);
-            }
-            return Number((Math.random() * (max - min) + min).toFixed(3));
-        }
-        }
+        return getRange(lowerBound, upperBound, type);
     }
 }
 
