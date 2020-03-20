@@ -18,6 +18,16 @@ const loremIpsum = require('lorem-ipsum');
 const Moment = require('moment-mini');
 const RandExp = require('randexp');
 
+/**
+ * Generate a random number within a given range with
+ * a prescribed precision and inside a global range
+ * @param {*} userMin - Lower bound on the range, inclusive. Defaults to systemMin
+ * @param {*} userMax - Upper bound on the range, inclusive. Defaults to systemMax
+ * @param {*} precision - The precision of values returned, e.g. a value of `1` returns only whole numbers
+ * @param {*} systemMin - Global minimum on the range, takes precidence over the userMin
+ * @param {*} systemMax - Global maximum on the range, takes precidence over the userMax
+ * @return {number} a number
+ */
 const randomNumberInRangeWithPrecision = function (userMin, userMax, precision, systemMin, systemMax) {
     if (userMin === null) {
         userMin = systemMin;
@@ -31,10 +41,18 @@ const randomNumberInRangeWithPrecision = function (userMin, userMax, precision, 
     userMax = userMax / precision;
     userMin = userMin / precision;
     let randomNumber = (Math.random() * (userMax - userMin) + userMin);
-    const temp = randomNumber / (1 / precision);
-    return temp;
+    return randomNumber / (1 / precision);
 };
 
+/**
+ * Get a random value from the range.
+ * @param {number} lowerBound the lower bound on the range, inclusive.
+ * @param {number} upperBound the upper bound on the range, inclusive.
+ * @param {string} type the number type for the range,
+ *  `'Long'`, `'Double'`, or `'Integer'`
+ * @return {number} a number.
+ * @private
+ */
 const getRange = (lowerBound, upperBound, type) => {
     let min = lowerBound;
     let max = upperBound;
@@ -154,10 +172,11 @@ class EmptyValueGenerator {
     }
 
     /**
-     * Get a default range value.
-     * @param {number} lowerBound the lower bound on the range.
-     * @param {number} upperBound the upper bound on the range.
-     * @param {string} type the number type for the range
+     * Get a random value from the range.
+     * @param {number} lowerBound the lower bound on the range, inclusive.
+     * @param {number} upperBound the upper bound on the range, inclusive.
+     * @param {string} type the number type for the range,
+     *  `'Long'`, `'Double'`, or `'Integer'`
      * @return {number} a number.
      */
     getRange(lowerBound, upperBound, type) {
@@ -254,10 +273,11 @@ class SampleValueGenerator extends EmptyValueGenerator {
     }
 
     /**
-     * Get a default range value.
-     * @param {number} lowerBound the lower bound on the range.
-     * @param {number} upperBound the upper bound on the range.
-     * @param {string} type the number type for the range
+     * Get a random value from the range.
+     * @param {number} lowerBound the lower bound on the range, inclusive.
+     * @param {number} upperBound the upper bound on the range, inclusive.
+     * @param {string} type the number type for the range,
+     *  `'Long'`, `'Double'`, or `'Integer'`
      * @return {number} a number.
      */
     getRange(lowerBound, upperBound, type) {
