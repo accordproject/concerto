@@ -16,6 +16,72 @@
 
 const loremIpsum = require('lorem-ipsum');
 const Moment = require('moment-mini');
+const RandExp = require('randexp');
+
+/**
+ * Generate a random number within a given range with
+ * a prescribed precision and inside a global range
+ * @param {*} userMin - Lower bound on the range, inclusive. Defaults to systemMin
+ * @param {*} userMax - Upper bound on the range, inclusive. Defaults to systemMax
+ * @param {*} precision - The precision of values returned, e.g. a value of `1` returns only whole numbers
+ * @param {*} systemMin - Global minimum on the range, takes precidence over the userMin
+ * @param {*} systemMax - Global maximum on the range, takes precidence over the userMax
+ * @return {number} a number
+ */
+const randomNumberInRangeWithPrecision = function (userMin, userMax, precision, systemMin, systemMax) {
+    if (userMin === null) {
+        userMin = systemMin;
+    }
+    userMin = Math.min(Math.max(userMin, systemMin), systemMax);
+    if (userMax === null || userMax > systemMax) {
+        userMax = systemMax;
+    }
+    userMax = Math.max(Math.min(userMax, systemMax), systemMin);
+    userMax += precision;
+    userMax = userMax / precision;
+    userMin = userMin / precision;
+    let randomNumber = (Math.random() * (userMax - userMin) + userMin);
+    return randomNumber / (1 / precision);
+};
+
+/**
+ * Get a random value from the range.
+ * @param {number} lowerBound the lower bound on the range, inclusive.
+ * @param {number} upperBound the upper bound on the range, inclusive.
+ * @param {string} type the number type for the range,
+ *  `'Long'`, `'Double'`, or `'Integer'`
+ * @return {number} a number.
+ * @private
+ */
+const getRange = (lowerBound, upperBound, type) => {
+    let min = lowerBound;
+    let max = upperBound;
+    if (max !== null && min !== null && max < min) {
+        min = upperBound;
+        max = lowerBound;
+    }
+    switch(type){
+    case 'Long':
+        return Math.floor(
+            randomNumberInRangeWithPrecision(min, max, 1, -Math.pow(2, 32), Math.pow(2, 32))
+        );
+    case 'Integer': {
+        return Math.floor(
+            randomNumberInRangeWithPrecision(min, max, 1, -Math.pow(2, 16), Math.pow(2, 16))
+        );
+    }
+    case 'Double': {
+        // IEEE 754 numbers can be larger,
+        // but we don't need the whole range when generating a sample random number
+        return Number(
+            randomNumberInRangeWithPrecision(min, max, 0.0001, -Math.pow(2, 8), Math.pow(2, 8))
+                .toFixed(3)
+        );
+    }
+    default:
+        return 0;
+    }
+};
 
 /**
  * Empty value generator.
@@ -94,6 +160,27 @@ class EmptyValueGenerator {
      */
     getArray(valueSupplier) {
         return [];
+    }
+
+    /**
+     * Get a default Regex value.
+     * @param {RegExp} regex A regular expression.
+     * @return {string} a String value.
+     */
+    getRegex(regex) {
+        return regex ? new RandExp(regex).gen() : '';
+    }
+
+    /**
+     * Get a random value from the range.
+     * @param {number} lowerBound the lower bound on the range, inclusive.
+     * @param {number} upperBound the upper bound on the range, inclusive.
+     * @param {string} type the number type for the range,
+     *  `'Long'`, `'Double'`, or `'Integer'`
+     * @return {number} a number.
+     */
+    getRange(lowerBound, upperBound, type) {
+        return getRange(lowerBound, upperBound, type);
     }
 }
 
@@ -174,6 +261,27 @@ class SampleValueGenerator extends EmptyValueGenerator {
      */
     getArray(valueSupplier) {
         return [valueSupplier()];
+    }
+
+    /**
+     * Get a default Regex value.
+     * @param {RegExp} regex A regular expression.
+     * @return {string} a String value.
+     */
+    getRegex(regex) {
+        return regex ? new RandExp(regex).gen() : '';
+    }
+
+    /**
+     * Get a random value from the range.
+     * @param {number} lowerBound the lower bound on the range, inclusive.
+     * @param {number} upperBound the upper bound on the range, inclusive.
+     * @param {string} type the number type for the range,
+     *  `'Long'`, `'Double'`, or `'Integer'`
+     * @return {number} a number.
+     */
+    getRange(lowerBound, upperBound, type) {
+        return getRange(lowerBound, upperBound, type);
     }
 }
 
