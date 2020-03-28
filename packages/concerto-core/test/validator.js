@@ -57,6 +57,18 @@ participant Customer extends Person {
 
             validate(obj, modelManager);
         });
+
+        it('should fail an invalid obj', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                name: 'Dan',
+            };
+
+            (() => {
+                validate(obj, modelManager);
+            }).should.throw(/Instance 123456789 has a property named name which is not declared in org.accordproject.test.Customer/);
+        });
     });
 
 });
