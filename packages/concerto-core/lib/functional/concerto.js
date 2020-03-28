@@ -14,106 +14,161 @@
 
 'use strict';
 
+const ModelUtil = require('../modelutil');
+const TypedStack = require('../serializer/typedstack');
+
+const RESOURCE_SCHEME = 'resource';
+
 /**
- * Tests whether an object is a concept
+ * Tests whether an object is a valid Concerto object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
- * @returns {boolean} true if the object is a concept
+ * @returns {*} the ClassDeclaration for the type
+ * @throws an error if the object does not have a $class attribute
  */
-function isConcept(obj, modelManager) {
-    const concepts = modelManager.getConceptDeclarations();
-    return concepts.filter( clazz => clazz.getFullyQualifiedName() === obj.$class ).length > 0;
+function checkConcertoObject(obj, modelManager) {
+    if(!obj.$class) {
+        throw new Error('Input object does not have a $class attribute.');
+    }
+
+    const typeDeclaration = modelManager.getType(obj.$class);
+
+    if(!typeDeclaration) {
+        throw new Error(`Type ${obj.$class} is not declared in the model manager`);
+    }
+
+    return typeDeclaration;
 }
 
 /**
- * Tests whether an object is a concept
+ * Gets the identifier for an object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
+ * @return {string} The identifier for this object
  */
 function getIdentifier(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    const typeDeclaration = modelManager.getType(obj.$class);
+    const idField = typeDeclaration.getIdentifierFieldName();
+    return obj[idField];
+}
+
+
+/**
+ * Gets the identifier for an object
+ * @param {*} obj the input object
+ * @param {*} modelManager the model manager
+ * @param {string} id the new identifier
+ */
+function setIdentifier(obj, modelManager, id ) {
+    checkConcertoObject(obj, modelManager);
+    const typeDeclaration = modelManager.getType(obj.$class);
+    const idField = typeDeclaration.getIdentifierFieldName();
+    obj[idField] = id;
 }
 
 /**
- * Tests whether an object is a concept
+ * Returns the fully qualified identifier for an object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
+ * @returns {string} the fully qualified identifier
  */
 function getFullyQualifiedIdentifier(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return `${obj.$class}#${getIdentifier(obj, modelManager)}`;
 }
 
 /**
- * Tests whether an object is a concept
+ * Tests whether an object is a relationship
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
+ * @returns {boolean} true if the object is a relationship
  */
 function isRelationship(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return obj.$relationship === 'true'; // REVIEW (DCS) - this used to be 'Relationship'
 }
 
 /**
- * Tests whether an object is a concept
+ * Returns a URI for an object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
- */
-function isResource(obj, modelManager) {
-}
-
-/**
- * Tests whether an object is a concept
- * @param {*} obj the input object
- * @param {*} modelManager the model manager
+ * @return {string} the URI for the object
  */
 function toURI(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return `${RESOURCE_SCHEME}:${obj.$class}#${encodeURI(this.id)}`;
 }
 
 /**
- * Tests whether an object is a concept
+ * Returns the short type name
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
+ * @returns {string} the short type name
  */
 function getType(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return ModelUtil.getShortName(obj.$class);
 }
 
 /**
- * Tests whether an object is a concept
+ * Returns the namespace for the object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
- */
-function getFullyQualifiedType(obj, modelManager) {
-}
-
-/**
- * Tests whether an object is a concept
- * @param {*} obj the input object
- * @param {*} modelManager the model manager
+ * @returns {string} the namespace
  */
 function getNamespace(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return ModelUtil.getNamespace(obj.$class);
 }
 
 /**
- * Tests whether an object is a concept
- * @param {*} obj the input object
- * @param {*} modelManager the model manager
- * @param {string} typeName the name of the type to test
- */
-function instanceOf(obj, modelManager, typeName) {
+     * Check to see if this instance is an instance of the specified fully qualified
+     * type name.
+     * @param {*} obj the input object
+     * @param {*} modelManager the model manager
+     * @param {String} fqt The fully qualified type name.
+     * @returns {boolean} True if this instance is an instance of the specified fully
+     * qualified type name, false otherwise.
+     */
+function instanceOf(obj, modelManager, fqt) {
+    // Check to see if this is an exact instance of the specified type.
+    const classDeclaration = checkConcertoObject(obj, modelManager);
+    if (classDeclaration.getFullyQualifiedName() === fqt) {
+        return true;
+    }
+    // Now walk the class hierachy looking to see if it's an instance of the specified type.
+    let superTypeDeclaration = classDeclaration.getSuperTypeDeclaration();
+    while (superTypeDeclaration) {
+        if (superTypeDeclaration.getFullyQualifiedName() === fqt) {
+            return true;
+        }
+        superTypeDeclaration = superTypeDeclaration.getSuperTypeDeclaration();
+    }
+    return false;
 }
 
 /**
- * Tests whether an object is a concept
+ * Validates the instance against its model.
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
+ * @throws {Error} - if the instance if invalid with respect to the model
  */
 function validate(obj, modelManager) {
+    const classDeclaration = checkConcertoObject(obj, modelManager);
+    const parameters = {};
+    parameters.stack = new TypedStack(obj);
+    parameters.modelManager = modelManager;
+    parameters.rootResourceIdentifier = getIdentifier(obj, modelManager);
+    classDeclaration.accept(this.$validator, parameters);
 }
 
-module.exports.isConcept = isConcept;
 module.exports.getIdentifier = getIdentifier;
+module.exports.setIdentifier = setIdentifier;
 module.exports.getFullyQualifiedIdentifier = getFullyQualifiedIdentifier;
 module.exports.isRelationship = isRelationship;
-module.exports.isResource = isResource;
 module.exports.toURI = toURI;
 module.exports.getType = getType;
-module.exports.getFullyQualifiedType = getFullyQualifiedType;
 module.exports.getNamespace = getNamespace;
 module.exports.instanceOf = instanceOf;
 module.exports.validate = validate;
