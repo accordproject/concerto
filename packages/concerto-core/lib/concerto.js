@@ -21,8 +21,8 @@ const RESOURCE_SCHEME = 'resource';
  * Tests whether an object is a valid Concerto object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
- * @returns {*} the ClassDeclaration for the type
- * @throws an error if the object does not have a $class attribute
+ * @throw {Error} an error if the object does not have a $class attribute
+ * @return {*} the ClassDeclaration for the type
  */
 function checkConcertoObject(obj, modelManager) {
     if(!obj.$class) {

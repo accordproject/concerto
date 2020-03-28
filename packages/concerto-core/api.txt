@@ -7,6 +7,16 @@ class BaseFileException extends BaseException {
    + string getShortMessage() 
    + string getFileName() 
 }
+   + void checkConcertoObject() 
+   + string getIdentifier() 
+   + boolean isIdentifiable() 
+   + boolean isRelationship() 
+   + void setIdentifier() 
+   + string getFullyQualifiedIdentifier() 
+   + string toURI() 
+   + string getType() 
+   + string getNamespace() 
+   + boolean instanceOf() 
 class Factory {
    + void constructor(ModelManager) 
    + Resource newResource(String,String,String,Object,boolean,String,boolean,boolean) throws TypeNotFoundException
@@ -220,3 +230,4 @@ class Serializer {
    + Resource fromJSON(Object,Object,boolean,boolean) 
    + boolean hasInstance(object) 
 }
+   + void validate() throws Error
