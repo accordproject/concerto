@@ -26,7 +26,6 @@ const toURI = require('../lib/concerto').toURI;
 const getType = require('../lib/concerto').getType;
 const getNamespace = require('../lib/concerto').getNamespace;
 const instanceOf = require('../lib/concerto').instanceOf;
-const validate = require('../lib/validator').validate;
 
 describe('concerto', () => {
 
@@ -150,18 +149,4 @@ participant Customer extends Person {
             result.should.be.true;
         });
     });
-
-    describe('#validate', () => {
-
-        it('should validate a valid obj', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Customer',
-                ssn: '123456789',
-                customerId: '001',
-            };
-
-            validate(obj, modelManager);
-        });
-    });
-
 });
