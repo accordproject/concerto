@@ -14,9 +14,7 @@
 
 'use strict';
 
-const ModelUtil = require('../modelutil');
-const TypedStack = require('../serializer/typedstack');
-
+const ModelUtil = require('./modelutil');
 const RESOURCE_SCHEME = 'resource';
 
 /**
@@ -50,12 +48,38 @@ function getIdentifier(obj, modelManager) {
     checkConcertoObject(obj, modelManager);
     const typeDeclaration = modelManager.getType(obj.$class);
     const idField = typeDeclaration.getIdentifierFieldName();
+    if(!idField) {
+        throw new Error('Object is not identifiable.');
+    }
     return obj[idField];
 }
 
+/**
+ * Returns true if the object has an identifier
+ * @param {*} obj the input object
+ * @param {*} modelManager the model manager
+ * @return {boolean} is the object has been defined with an identifier in the model
+ */
+function isIdentifiable(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    const typeDeclaration = modelManager.getType(obj.$class);
+    const idField = typeDeclaration.getIdentifierFieldName();
+    return idField !== null;
+}
 
 /**
- * Gets the identifier for an object
+ * Returns true if the object is a relationship
+ * @param {*} obj the input object
+ * @param {*} modelManager the model manager
+ * @return {boolean} true if the object is a relationship
+ */
+function isRelationship(obj, modelManager) {
+    checkConcertoObject(obj, modelManager);
+    return obj.$relationship === true;
+}
+
+/**
+ * Set the identifier for an object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
  * @param {string} id the new identifier
@@ -79,17 +103,6 @@ function getFullyQualifiedIdentifier(obj, modelManager) {
 }
 
 /**
- * Tests whether an object is a relationship
- * @param {*} obj the input object
- * @param {*} modelManager the model manager
- * @returns {boolean} true if the object is a relationship
- */
-function isRelationship(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
-    return obj.$relationship === 'true'; // REVIEW (DCS) - this used to be 'Relationship'
-}
-
-/**
  * Returns a URI for an object
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
@@ -97,7 +110,7 @@ function isRelationship(obj, modelManager) {
  */
 function toURI(obj, modelManager) {
     checkConcertoObject(obj, modelManager);
-    return `${RESOURCE_SCHEME}:${obj.$class}#${encodeURI(this.id)}`;
+    return `${RESOURCE_SCHEME}:${obj.$class}#${encodeURI(getIdentifier(obj, modelManager))}`;
 }
 
 /**
@@ -148,27 +161,13 @@ function instanceOf(obj, modelManager, fqt) {
     return false;
 }
 
-/**
- * Validates the instance against its model.
- * @param {*} obj the input object
- * @param {*} modelManager the model manager
- * @throws {Error} - if the instance if invalid with respect to the model
- */
-function validate(obj, modelManager) {
-    const classDeclaration = checkConcertoObject(obj, modelManager);
-    const parameters = {};
-    parameters.stack = new TypedStack(obj);
-    parameters.modelManager = modelManager;
-    parameters.rootResourceIdentifier = getIdentifier(obj, modelManager);
-    classDeclaration.accept(this.$validator, parameters);
-}
-
+module.exports.checkConcertoObject = checkConcertoObject;
 module.exports.getIdentifier = getIdentifier;
 module.exports.setIdentifier = setIdentifier;
 module.exports.getFullyQualifiedIdentifier = getFullyQualifiedIdentifier;
-module.exports.isRelationship = isRelationship;
 module.exports.toURI = toURI;
 module.exports.getType = getType;
 module.exports.getNamespace = getNamespace;
 module.exports.instanceOf = instanceOf;
-module.exports.validate = validate;
+module.exports.isIdentifiable = isIdentifiable;
+module.exports.isRelationship = isRelationship;
