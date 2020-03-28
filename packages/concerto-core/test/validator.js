@@ -15,7 +15,6 @@
 'use strict';
 
 const chai = require('chai');
-const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
