@@ -15,6 +15,9 @@
 'use strict';
 
 const chai = require('chai');
+const expect = chai.expect;
+// eslint-disable-next-line no-unused-vars
+const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
@@ -137,7 +140,7 @@ participant Customer extends Person {
 
     describe('#instanceOf', () => {
 
-        it('should get instanceOf', () => {
+        it('should get instanceOf for sub type', () => {
             const obj = {
                 $class : 'org.accordproject.test.Customer',
                 ssn: '123456789',
@@ -147,6 +150,28 @@ participant Customer extends Person {
 
             const result = instanceOf(obj, modelManager, 'org.accordproject.test.Person');
             result.should.be.true;
+        });
+
+        it('should get instanceOf for type', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                customerId: '001',
+                name: 'Dan Selman'
+            };
+
+            const result = instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            result.should.be.true;
+        });
+
+        it('should not get instanceOf for derived type', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789'
+            };
+
+            const result = instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            expect(result).to.be.false;
         });
     });
 });
