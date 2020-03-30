@@ -65,5 +65,6 @@ module.exports.Concerto = {
     instanceOf : require('./lib/concerto').instanceOf,
     isIdentifiable : require('./lib/concerto').isIdentifiable,
     isRelationship : require('./lib/concerto').isRelationship,
+    isObject : require('./lib/concerto').isObject,
     validate : require('./lib/validator').validate,
 };
