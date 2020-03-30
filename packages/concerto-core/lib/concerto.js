@@ -16,6 +16,17 @@
 
 const RESOURCE_SCHEME = 'resource';
 
+
+/**
+ * Returns true if the input object is a Concerto object
+ * @param {*} obj the input object
+ * @param {*} modelManager the model manager
+ * @return {boolean} true if the object has a $class attribute
+ */
+function isObject(obj, modelManager) {
+    return typeof obj === 'object' && obj.$class;
+}
+
 /**
  * Returns the ClassDeclaration for an object, or throws an exception
  * @param {*} obj the input object
@@ -25,7 +36,13 @@ const RESOURCE_SCHEME = 'resource';
  */
 function getTypeDeclaration(obj, modelManager) {
     if(!obj.$class) {
-        throw new Error('Input object does not have a $class attribute.');
+        try {
+            throw new Error('Input object does not have a $class attribute.');
+        }
+        catch(err) {
+            console.log(err);
+            throw err;
+        }
     }
 
     const typeDeclaration = modelManager.getType(obj.$class);
@@ -47,7 +64,7 @@ function getIdentifier(obj, modelManager) {
     const typeDeclaration =  getTypeDeclaration(obj, modelManager);
     const idField = typeDeclaration.getIdentifierFieldName();
     if(!idField) {
-        throw new Error('Object is not identifiable.');
+        throw new Error(`Object does not have an identifier: ${JSON.stringify(obj)}`);
     }
     return obj[idField];
 }
@@ -59,10 +76,8 @@ function getIdentifier(obj, modelManager) {
  * @return {boolean} is the object has been defined with an identifier in the model
  */
 function isIdentifiable(obj, modelManager) {
-    getTypeDeclaration(obj, modelManager);
-    const typeDeclaration = modelManager.getType(obj.$class);
-    const idField = typeDeclaration.getIdentifierFieldName();
-    return idField !== null;
+    const typeDeclaration = getTypeDeclaration(obj, modelManager);
+    return typeDeclaration.getIdentifierFieldName() !== null;
 }
 
 /**
@@ -83,8 +98,7 @@ function isRelationship(obj, modelManager) {
  * @param {string} id the new identifier
  */
 function setIdentifier(obj, modelManager, id ) {
-    getTypeDeclaration(obj, modelManager);
-    const typeDeclaration = modelManager.getType(obj.$class);
+    const typeDeclaration = getTypeDeclaration(obj, modelManager);
     const idField = typeDeclaration.getIdentifierFieldName();
     obj[idField] = id;
 }
@@ -167,3 +181,4 @@ module.exports.getNamespace = getNamespace;
 module.exports.instanceOf = instanceOf;
 module.exports.isIdentifiable = isIdentifiable;
 module.exports.isRelationship = isRelationship;
+module.exports.isObject = isObject;

@@ -7,6 +7,7 @@ class BaseFileException extends BaseException {
    + string getShortMessage() 
    + string getFileName() 
 }
+   + boolean isObject() 
    + void getTypeDeclaration() 
    + string getIdentifier() 
    + boolean isIdentifiable() 

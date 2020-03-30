@@ -14,6 +14,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 // eslint-disable-next-line no-unused-vars
@@ -26,26 +27,39 @@ const Concerto = require('../index').Concerto;
 
 describe('concerto', () => {
 
+    let concertoModel = fs.readFileSync('./test/data/model/concerto.cto', 'utf8');
     let modelManager;
 
     beforeEach(() => {
         modelManager = new ModelManager();
-
-        modelManager.addModelFile( `
-namespace org.accordproject.test
-
-participant Person identified by ssn {
-    o String ssn
-}
-
-participant Customer extends Person {
-    o String customerId
-}
-
-`, 'test.cto');
+        modelManager.addModelFile( concertoModel, 'test.cto');
     });
 
     afterEach(() => {
+    });
+
+    describe('#isIdentifiable', () => {
+
+        it('should return the identifier', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789',
+                name: 'Dan Selman'
+            };
+
+            Concerto.isIdentifiable(obj, modelManager).should.be.true;
+        });
+
+        it('should not return the identifier', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Product',
+                sku: '001',
+                description: 'Widgets'
+            };
+
+            Concerto.isIdentifiable(obj, modelManager).should.be.false;
+        });
+
     });
 
     describe('#getIdentifier', () => {
@@ -60,6 +74,19 @@ participant Customer extends Person {
             const ssn = Concerto.getIdentifier(obj, modelManager);
             ssn.should.equal('123456789');
         });
+
+        it('should not return the identifier', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Product',
+                sku: '001',
+                description: 'Widgets'
+            };
+
+            (() => {
+                Concerto.getIdentifier(obj, modelManager);
+            }).should.throw(/Object does not have an identifier/);
+        });
+
     });
 
     describe('#setIdentifier', () => {
@@ -171,26 +198,105 @@ participant Customer extends Person {
 
     describe('#validate', () => {
 
-        it('should validate a valid obj', () => {
+        it('should validate data that conforms to model', () => {
             const obj = {
                 $class : 'org.accordproject.test.Customer',
                 ssn: '123456789',
                 customerId: '001',
+                department: 'ENGINEERING'
             };
 
             Concerto.validate(obj, modelManager);
         });
 
-        it('should fail an invalid obj', () => {
+        it('should fail with extra property', () => {
             const obj = {
                 $class : 'org.accordproject.test.Customer',
                 ssn: '123456789',
                 name: 'Dan',
+                department: 'ENGINEERING'
             };
 
             (() => {
                 Concerto.validate(obj, modelManager);
             }).should.throw(/Instance 123456789 has a property named name which is not declared in org.accordproject.test.Customer/);
         });
+
+        it('should fail with extra property (concept)', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Product',
+                sku: '001',
+                description: 'Widget',
+                price: 100
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Instance undefined has a property named price which is not declared in org.accordproject.test.Product/);
+        });
+
+        it('should fail with invalid enum', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                department: 'FOO',
+                customerId: 'A'
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Instance org.accordproject.test.Customer#123456789 invalid enum value FOO for field Department/);
+        });
+
+        it('should fail with empty identifier', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '',
+                department: 'HR',
+                customerId: 'A'
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Instance org.accordproject.test.Customer# has an empty identifier./);
+        });
+
+        it('should fail with missing required property', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '001',
+                customerId: 'A'
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Instance org.accordproject.test.Customer#001 missing required field department/);
+        });
+
+        it('should fail with string used for string[]', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Employee',
+                ssn: '001',
+                department: 'ENGINEERING',
+                pets: 'cat'
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Model violation in instance org.accordproject.test.Employee#001 field pets has value/);
+        });
+
+        it('should fail with abstract type', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789',
+                department: 'ENGINEERING',
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/The class org.accordproject.test.Person is abstract. Should not have an instance!/);
+        });
+
     });
 });

@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 0.82.7 {a746636c9e994d3a89dd9377007b3a43} 2020-03-28
+Version 0.82.7 {ff306a366f28fd82f15f2aa9571e2604} 2020-03-28
 - Added functional API
 
 Version 0.82.6 {03fa6481ffdf0e58cb110c6f24009d18} 2020-02-26
