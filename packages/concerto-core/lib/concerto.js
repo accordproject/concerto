@@ -14,17 +14,16 @@
 
 'use strict';
 
-const ModelUtil = require('./modelutil');
 const RESOURCE_SCHEME = 'resource';
 
 /**
- * Tests whether an object is a valid Concerto object
+ * Returns the ClassDeclaration for an object, or throws an exception
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
  * @throw {Error} an error if the object does not have a $class attribute
  * @return {*} the ClassDeclaration for the type
  */
-function checkConcertoObject(obj, modelManager) {
+function getTypeDeclaration(obj, modelManager) {
     if(!obj.$class) {
         throw new Error('Input object does not have a $class attribute.');
     }
@@ -45,8 +44,7 @@ function checkConcertoObject(obj, modelManager) {
  * @return {string} The identifier for this object
  */
 function getIdentifier(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
-    const typeDeclaration = modelManager.getType(obj.$class);
+    const typeDeclaration =  getTypeDeclaration(obj, modelManager);
     const idField = typeDeclaration.getIdentifierFieldName();
     if(!idField) {
         throw new Error('Object is not identifiable.');
@@ -61,7 +59,7 @@ function getIdentifier(obj, modelManager) {
  * @return {boolean} is the object has been defined with an identifier in the model
  */
 function isIdentifiable(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
+    getTypeDeclaration(obj, modelManager);
     const typeDeclaration = modelManager.getType(obj.$class);
     const idField = typeDeclaration.getIdentifierFieldName();
     return idField !== null;
@@ -74,7 +72,7 @@ function isIdentifiable(obj, modelManager) {
  * @return {boolean} true if the object is a relationship
  */
 function isRelationship(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
+    getTypeDeclaration(obj, modelManager);
     return obj.$relationship === true;
 }
 
@@ -85,7 +83,7 @@ function isRelationship(obj, modelManager) {
  * @param {string} id the new identifier
  */
 function setIdentifier(obj, modelManager, id ) {
-    checkConcertoObject(obj, modelManager);
+    getTypeDeclaration(obj, modelManager);
     const typeDeclaration = modelManager.getType(obj.$class);
     const idField = typeDeclaration.getIdentifierFieldName();
     obj[idField] = id;
@@ -98,7 +96,7 @@ function setIdentifier(obj, modelManager, id ) {
  * @returns {string} the fully qualified identifier
  */
 function getFullyQualifiedIdentifier(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
+    getTypeDeclaration(obj, modelManager);
     return `${obj.$class}#${getIdentifier(obj, modelManager)}`;
 }
 
@@ -109,7 +107,7 @@ function getFullyQualifiedIdentifier(obj, modelManager) {
  * @return {string} the URI for the object
  */
 function toURI(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
+    getTypeDeclaration(obj, modelManager);
     return `${RESOURCE_SCHEME}:${obj.$class}#${encodeURI(getIdentifier(obj, modelManager))}`;
 }
 
@@ -120,8 +118,7 @@ function toURI(obj, modelManager) {
  * @returns {string} the short type name
  */
 function getType(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
-    return ModelUtil.getShortName(obj.$class);
+    return getTypeDeclaration(obj, modelManager).getName();
 }
 
 /**
@@ -131,8 +128,7 @@ function getType(obj, modelManager) {
  * @returns {string} the namespace
  */
 function getNamespace(obj, modelManager) {
-    checkConcertoObject(obj, modelManager);
-    return ModelUtil.getNamespace(obj.$class);
+    return getTypeDeclaration(obj, modelManager).getNamespace();
 }
 
 /**
@@ -146,7 +142,7 @@ function getNamespace(obj, modelManager) {
      */
 function instanceOf(obj, modelManager, fqt) {
     // Check to see if this is an exact instance of the specified type.
-    const classDeclaration = checkConcertoObject(obj, modelManager);
+    const classDeclaration = getTypeDeclaration(obj, modelManager);
     if (classDeclaration.getFullyQualifiedName() === fqt) {
         return true;
     }
@@ -161,7 +157,7 @@ function instanceOf(obj, modelManager, fqt) {
     return false;
 }
 
-module.exports.checkConcertoObject = checkConcertoObject;
+module.exports.getTypeDeclaration = getTypeDeclaration;
 module.exports.getIdentifier = getIdentifier;
 module.exports.setIdentifier = setIdentifier;
 module.exports.getFullyQualifiedIdentifier = getFullyQualifiedIdentifier;
