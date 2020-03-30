@@ -15,7 +15,7 @@
 'use strict';
 
 const TypedStack = require('./serializer/typedstack');
-const checkConcertoObject = require('./concerto').checkConcertoObject;
+const getTypeDeclaration = require('./concerto').getTypeDeclaration;
 const getIdentifier = require('./concerto').getIdentifier;
 const ObjectValidator = require('./serializer/objectvalidator');
 
@@ -27,7 +27,7 @@ const ObjectValidator = require('./serializer/objectvalidator');
  * @throws {Error} - if the instance if invalid with respect to the model
  */
 function validate(obj, modelManager, options) {
-    const classDeclaration = checkConcertoObject(obj, modelManager);
+    const classDeclaration = getTypeDeclaration(obj, modelManager);
     const parameters = {};
     parameters.stack = new TypedStack(obj);
     parameters.modelManager = modelManager;

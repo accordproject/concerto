@@ -22,13 +22,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
 const ModelManager = require('../lib/modelmanager');
-const getIdentifier = require('../lib/concerto').getIdentifier;
-const setIdentifier = require('../lib/concerto').setIdentifier;
-const getFullyQualifiedIdentifier = require('../lib/concerto').getFullyQualifiedIdentifier;
-const toURI = require('../lib/concerto').toURI;
-const getType = require('../lib/concerto').getType;
-const getNamespace = require('../lib/concerto').getNamespace;
-const instanceOf = require('../lib/concerto').instanceOf;
+const Concerto = require('../index').Concerto;
 
 describe('concerto', () => {
 
@@ -63,7 +57,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const ssn = getIdentifier(obj, modelManager);
+            const ssn = Concerto.getIdentifier(obj, modelManager);
             ssn.should.equal('123456789');
         });
     });
@@ -77,7 +71,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            setIdentifier(obj, modelManager, 'abcdefg');
+            Concerto.setIdentifier(obj, modelManager, 'abcdefg');
             obj.ssn.should.equal('abcdefg');
         });
     });
@@ -91,7 +85,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const fgid = getFullyQualifiedIdentifier(obj, modelManager);
+            const fgid = Concerto.getFullyQualifiedIdentifier(obj, modelManager);
             fgid.should.equal('org.accordproject.test.Person#123456789');
         });
     });
@@ -105,7 +99,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const uri = toURI(obj, modelManager);
+            const uri = Concerto.toURI(obj, modelManager);
             uri.should.equal('resource:org.accordproject.test.Person#123456789');
         });
     });
@@ -119,7 +113,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const type = getType(obj, modelManager);
+            const type = Concerto.getType(obj, modelManager);
             type.should.equal('Person');
         });
     });
@@ -133,7 +127,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const ns = getNamespace(obj, modelManager);
+            const ns = Concerto.getNamespace(obj, modelManager);
             ns.should.equal('org.accordproject.test');
         });
     });
@@ -148,7 +142,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const result = instanceOf(obj, modelManager, 'org.accordproject.test.Person');
+            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Person');
             result.should.be.true;
         });
 
@@ -160,7 +154,7 @@ participant Customer extends Person {
                 name: 'Dan Selman'
             };
 
-            const result = instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
             result.should.be.true;
         });
 
@@ -170,8 +164,33 @@ participant Customer extends Person {
                 ssn: '123456789'
             };
 
-            const result = instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
             expect(result).to.be.false;
+        });
+    });
+
+    describe('#validate', () => {
+
+        it('should validate a valid obj', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                customerId: '001',
+            };
+
+            Concerto.validate(obj, modelManager);
+        });
+
+        it('should fail an invalid obj', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                name: 'Dan',
+            };
+
+            (() => {
+                Concerto.validate(obj, modelManager);
+            }).should.throw(/Instance 123456789 has a property named name which is not declared in org.accordproject.test.Customer/);
         });
     });
 });
