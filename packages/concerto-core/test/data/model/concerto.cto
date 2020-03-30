@@ -1,0 +1,30 @@
+namespace org.accordproject.test
+
+enum Department {
+    o ENGINEERING
+    o ACCOUNTS
+    o HR
+    o SALES
+}
+
+concept Product {
+    o String sku
+    o String description
+}
+
+abstract participant Person identified by ssn {
+    o String ssn
+    o Department department
+    --> Manager manager optional
+}
+
+participant Employee extends Person {
+    o String[] pets optional
+}
+
+participant Manager extends Person {
+}
+
+participant Customer extends Person {
+    o String customerId
+}

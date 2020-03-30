@@ -28,6 +28,7 @@ const isIdentifiable = require('../concerto').isIdentifiable;
 const getIdentifier = require('../concerto').getIdentifier;
 const getFullyQualifiedIdentifier = require('../concerto').getFullyQualifiedIdentifier;
 const isRelationship = require('../concerto').isRelationship;
+const isObject = require('../concerto').isObject;
 /**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
@@ -119,7 +120,9 @@ class ObjectValidator {
 
         const obj = parameters.stack.pop();
 
-        parameters.rootResourceIdentifier = getFullyQualifiedIdentifier(obj, parameters.modelManager);
+        if(isIdentifiable(obj, parameters.modelManager)) {
+            parameters.rootResourceIdentifier = getFullyQualifiedIdentifier(obj, parameters.modelManager);
+        }
 
         const toBeAssignedClassDeclaration = parameters.modelManager.getType(obj.$class);
         const toBeAssignedClassDecName = toBeAssignedClassDeclaration.getFullyQualifiedName();
@@ -406,8 +409,9 @@ class ObjectValidator {
     static reportFieldTypeViolation(id, propName, value, field) {
         let isArray = field.isArray() ? '[]' : '';
         let typeOfValue = typeof value;
+        const modelManager = field.getParent().getModelFile().getModelManager();
 
-        if( isIdentifiable(value, field.getParent().getModelFile().getModelManager())) {
+        if( isObject(value, modelManager) && isIdentifiable(value, modelManager)) {
             typeOfValue = value.getFullyQualifiedType();
             value = value.getFullyQualifiedIdentifier();
         }

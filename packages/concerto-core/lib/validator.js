@@ -16,7 +16,6 @@
 
 const TypedStack = require('./serializer/typedstack');
 const getTypeDeclaration = require('./concerto').getTypeDeclaration;
-const getIdentifier = require('./concerto').getIdentifier;
 const ObjectValidator = require('./serializer/objectvalidator');
 
 /**
@@ -31,7 +30,6 @@ function validate(obj, modelManager, options) {
     const parameters = {};
     parameters.stack = new TypedStack(obj);
     parameters.modelManager = modelManager;
-    parameters.rootResourceIdentifier = getIdentifier(obj, modelManager);
     const objectValidator = new ObjectValidator(options);
     classDeclaration.accept(objectValidator, parameters);
 }
