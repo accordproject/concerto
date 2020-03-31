@@ -94,15 +94,19 @@ function isRelationship(obj, modelManager) {
 }
 
 /**
- * Set the identifier for an object
+ * Set the identifier for an object. This method does *not* mutate the
+ * input object, use the return object.
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
  * @param {string} id the new identifier
+ * @returns {*} the input object with the identifier set
  */
 function setIdentifier(obj, modelManager, id ) {
     const typeDeclaration = getTypeDeclaration(obj, modelManager);
     const idField = typeDeclaration.getIdentifierFieldName();
-    obj[idField] = id;
+    const clone = JSON.parse(JSON.stringify(obj));
+    clone[idField] = id;
+    return clone;
 }
 
 /**

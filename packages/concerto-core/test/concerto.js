@@ -16,7 +16,6 @@
 
 const fs = require('fs');
 const chai = require('chai');
-const moment = require('moment-mini');
 
 const expect = chai.expect;
 // eslint-disable-next-line no-unused-vars
@@ -100,8 +99,8 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            Concerto.setIdentifier(obj, modelManager, 'abcdefg');
-            obj.ssn.should.equal('abcdefg');
+            const clone = Concerto.setIdentifier(obj, modelManager, 'abcdefg');
+            clone.ssn.should.equal('abcdefg');
         });
     });
 
@@ -307,7 +306,7 @@ describe('concerto', () => {
                     departmentArrayValue : ['ENGINEERING', 'HR'],
                     relationshipValue: 'resource:org.accordproject.test.Person#ABC',
                     relationshipArrayValue: ['resource:org.accordproject.test.Person#ABC', 'resource:org.accordproject.test.Person#DEF'],
-                    dateTimeValue: moment(),
+                    dateTimeValue: '2020-03-31',
                     conceptValue : {
                         $class : 'org.accordproject.test.Product',
                         sku: 'abc',
