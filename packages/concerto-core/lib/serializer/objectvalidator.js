@@ -29,6 +29,8 @@ const getIdentifier = require('../concerto').getIdentifier;
 const getFullyQualifiedIdentifier = require('../concerto').getFullyQualifiedIdentifier;
 const isRelationship = require('../concerto').isRelationship;
 const isObject = require('../concerto').isObject;
+const fromURI = require('../concerto').fromURI;
+
 /**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
@@ -386,13 +388,13 @@ class ObjectValidator {
             ObjectValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
         }
 
-        const relationshipType = parameters.modelManager.getType(obj.$class);
+        const relationshipType = fromURI(obj, parameters.modelManager).typeDeclaration;
 
         if(relationshipType.isConcept()) {
             throw new Error('Cannot have a relationship to a concept. Relationships must be to resources.');
         }
 
-        if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj.$class, relationshipDeclaration)) {
+        if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), relationshipType.getFullyQualifiedName(), relationshipDeclaration)) {
             ObjectValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
         }
     }

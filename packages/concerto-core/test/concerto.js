@@ -16,6 +16,8 @@
 
 const fs = require('fs');
 const chai = require('chai');
+const moment = require('moment-mini');
+
 const expect = chai.expect;
 // eslint-disable-next-line no-unused-vars
 const should = chai.should();
@@ -284,6 +286,34 @@ describe('concerto', () => {
                 ssn: '123456789',
                 customerId: '001',
                 department: 'ENGINEERING'
+            };
+
+            Concerto.validate(obj, modelManager);
+        });
+
+        it('should validate data that conforms to model (types)', () => {
+            const obj = {
+                $class : 'org.accordproject.test.TestAsset',
+                id: '001',
+                types: {
+                    $class : 'org.accordproject.test.Types',
+                    stringValue: 'a',
+                    stringArrayValue : ['a', 'b', 'c'],
+                    longValue: 1,
+                    integerValue: 10,
+                    doubleValue: 5.0,
+                    booleanValue: true,
+                    departmentValue : 'ENGINEERING',
+                    departmentArrayValue : ['ENGINEERING', 'HR'],
+                    relationshipValue: 'resource:org.accordproject.test.Person#ABC',
+                    relationshipArrayValue: ['resource:org.accordproject.test.Person#ABC', 'resource:org.accordproject.test.Person#DEF'],
+                    dateTimeValue: moment(),
+                    conceptValue : {
+                        $class : 'org.accordproject.test.Product',
+                        sku: 'abc',
+                        description: 'widget'
+                    }
+                }
             };
 
             Concerto.validate(obj, modelManager);
