@@ -131,6 +131,74 @@ describe('concerto', () => {
         });
     });
 
+    describe('#fromURI', () => {
+
+        it('should be able to roundtrip toURI and fromURI', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789',
+                name: 'Dan Selman'
+            };
+
+            const uri = Concerto.toURI(obj, modelManager);
+            const result = Concerto.fromURI(uri, modelManager);
+            result.typeDeclaration.getName().should.equal('Person');
+            result.id.should.equal('123456789');
+        });
+    });
+
+    describe('#getTypeDeclaration', () => {
+
+        it('should get type declaration', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789',
+                name: 'Dan Selman'
+            };
+
+            const type = Concerto.getTypeDeclaration(obj, modelManager);
+            type.getName().should.equal('Person');
+        });
+
+        it('should fail to get type declaration is $class missing', () => {
+            const obj = {
+                ssn: '123456789',
+                name: 'Dan Selman'
+            };
+
+            (() => {
+                Concerto.getTypeDeclaration(obj, modelManager);
+            }).should.throw(/Input object does not have a \$class attribute./);
+        });
+
+        it('should fail to get type declaration is $class in invalid', () => {
+            const obj = {
+                $class: 'Foo',
+                ssn: '123456789',
+                name: 'Dan Selman'
+            };
+
+            (() => {
+                Concerto.getTypeDeclaration(obj, modelManager);
+            }).should.throw(/Namespace is not defined for type Foo/);
+        });
+    });
+
+    describe('#isRelationship', () => {
+
+        it('should identify a relationship', () => {
+            Concerto.isRelationship('resource:org.accordproject.test.Person#001', modelManager).should.be.true;
+        });
+
+        it('should not identify a relationship with wrong scheme', () => {
+            Concerto.isRelationship('foo:org.accordproject.test.Person#001', modelManager).should.be.false;
+        });
+
+        it('should not identify a relationship with wrong type', () => {
+            Concerto.isRelationship(false, modelManager).should.be.false;
+        });
+    });
+
     describe('#getType', () => {
 
         it('should get type', () => {
@@ -164,6 +232,18 @@ describe('concerto', () => {
         it('should get instanceOf for sub type', () => {
             const obj = {
                 $class : 'org.accordproject.test.Customer',
+                ssn: '123456789',
+                customerId: '001',
+                name: 'Dan Selman'
+            };
+
+            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Person');
+            result.should.be.true;
+        });
+
+        it('should get instanceOf for sub-sub type', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Manager',
                 ssn: '123456789',
                 customerId: '001',
                 name: 'Dan Selman'

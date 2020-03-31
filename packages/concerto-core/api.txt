@@ -15,6 +15,7 @@ class BaseFileException extends BaseException {
    + void setIdentifier() 
    + string getFullyQualifiedIdentifier() 
    + string toURI() 
+   + void fromURI() throws Error
    + string getType() 
    + string getNamespace() 
    + boolean instanceOf() 

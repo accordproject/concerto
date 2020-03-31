@@ -60,6 +60,7 @@ module.exports.Concerto = {
     setIdentifier : require('./lib/concerto').setIdentifier,
     getFullyQualifiedIdentifier : require('./lib/concerto').getFullyQualifiedIdentifier,
     toURI : require('./lib/concerto').toURI,
+    fromURI : require('./lib/concerto').fromURI,
     getType : require('./lib/concerto').getType,
     getNamespace : require('./lib/concerto').getNamespace,
     instanceOf : require('./lib/concerto').instanceOf,
