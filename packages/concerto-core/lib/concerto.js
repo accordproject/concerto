@@ -14,6 +14,7 @@
 
 'use strict';
 
+const URIJS = require('urijs');
 const RESOURCE_SCHEME = 'resource';
 
 
@@ -81,14 +82,15 @@ function isIdentifiable(obj, modelManager) {
 }
 
 /**
- * Returns true if the object is a relationship
+ * Returns true if the object is a relationship. Relationships are strings
+ * of the form: 'resource:org.accordproject.Order#001' (a relationship)
+ * to the 'Order' identifiable, with the id 001.
  * @param {*} obj the input object
  * @param {*} modelManager the model manager
  * @return {boolean} true if the object is a relationship
  */
 function isRelationship(obj, modelManager) {
-    getTypeDeclaration(obj, modelManager);
-    return obj.$relationship === true;
+    return typeof obj === 'string' && obj.startsWith(`${RESOURCE_SCHEME}:`);
 }
 
 /**
@@ -123,6 +125,37 @@ function getFullyQualifiedIdentifier(obj, modelManager) {
 function toURI(obj, modelManager) {
     getTypeDeclaration(obj, modelManager);
     return `${RESOURCE_SCHEME}:${obj.$class}#${encodeURI(getIdentifier(obj, modelManager))}`;
+}
+
+/**
+ * Parses a resource URI into typeDeclaration and id components.
+ *
+ * @param {string} uri the input URI
+ * @param {*} modelManager the model manager
+ * @returns {*} an object with typeDeclaration and id attributes
+ * @throws {Error} if the URI is invalid or the type does not exist
+ * in the model manager
+ */
+function fromURI(uri, modelManager) {
+    let uriComponents;
+    try {
+        uriComponents = URIJS.parse(uri);
+    } catch (err){
+        throw new Error('Invalid URI: ' + uri);
+    }
+
+    const scheme = uriComponents.protocol;
+    if (scheme && scheme !== RESOURCE_SCHEME) {
+        throw new Error('Invalid URI scheme: ' + uri);
+    }
+    if (uriComponents.username || uriComponents.password || uriComponents.port || uriComponents.query) {
+        throw new Error('Invalid resource URI format: ' + uri);
+    }
+
+    return {
+        typeDeclaration : getTypeDeclaration( { $class: uriComponents.path }, modelManager ),
+        id : decodeURIComponent(uriComponents.fragment)
+    };
 }
 
 /**
@@ -176,6 +209,7 @@ module.exports.getIdentifier = getIdentifier;
 module.exports.setIdentifier = setIdentifier;
 module.exports.getFullyQualifiedIdentifier = getFullyQualifiedIdentifier;
 module.exports.toURI = toURI;
+module.exports.fromURI = fromURI;
 module.exports.getType = getType;
 module.exports.getNamespace = getNamespace;
 module.exports.instanceOf = instanceOf;
