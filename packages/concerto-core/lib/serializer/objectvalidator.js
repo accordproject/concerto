@@ -22,7 +22,7 @@ const Util = require('../util');
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
-const Moment = require('moment-mini');
+const moment = require('moment-mini');
 
 const isIdentifiable = require('../concerto').isIdentifiable;
 const getIdentifier = require('../concerto').getIdentifier;
@@ -310,7 +310,7 @@ class ObjectValidator {
                 }
                 break;
             case 'DateTime':
-                if(!(Moment.isMoment(obj))) {
+                if(!moment(obj, moment.ISO_8601).isValid()) {
                     invalid = true;
                 }
                 break;
