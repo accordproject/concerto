@@ -24,16 +24,17 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
 const ModelManager = require('../lib/modelmanager');
-const Concerto = require('../index').Concerto;
+const Concerto = require('../lib/concerto');
 
 describe('concerto', () => {
 
     let concertoModel = fs.readFileSync('./test/data/model/concerto.cto', 'utf8');
-    let modelManager;
+    let concerto;
 
     beforeEach(() => {
-        modelManager = new ModelManager();
+        const modelManager = new ModelManager();
         modelManager.addModelFile( concertoModel, 'test.cto');
+        concerto = new Concerto(modelManager);
     });
 
     afterEach(() => {
@@ -48,7 +49,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            Concerto.isIdentifiable(obj, modelManager).should.be.true;
+            concerto.isIdentifiable(obj).should.be.true;
         });
 
         it('should not return the identifier', () => {
@@ -58,7 +59,7 @@ describe('concerto', () => {
                 description: 'Widgets'
             };
 
-            Concerto.isIdentifiable(obj, modelManager).should.be.false;
+            concerto.isIdentifiable(obj).should.be.false;
         });
 
     });
@@ -72,7 +73,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const ssn = Concerto.getIdentifier(obj, modelManager);
+            const ssn = concerto.getIdentifier(obj);
             ssn.should.equal('123456789');
         });
 
@@ -84,7 +85,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.getIdentifier(obj, modelManager);
+                concerto.getIdentifier(obj);
             }).should.throw(/Object does not have an identifier/);
         });
 
@@ -99,7 +100,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const clone = Concerto.setIdentifier(obj, modelManager, 'abcdefg');
+            const clone = concerto.setIdentifier(obj, 'abcdefg');
             clone.ssn.should.equal('abcdefg');
         });
     });
@@ -113,7 +114,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const fgid = Concerto.getFullyQualifiedIdentifier(obj, modelManager);
+            const fgid = concerto.getFullyQualifiedIdentifier(obj);
             fgid.should.equal('org.accordproject.test.Person#123456789');
         });
     });
@@ -127,7 +128,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const uri = Concerto.toURI(obj, modelManager);
+            const uri = concerto.toURI(obj);
             uri.should.equal('resource:org.accordproject.test.Person#123456789');
         });
     });
@@ -141,8 +142,8 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const uri = Concerto.toURI(obj, modelManager);
-            const result = Concerto.fromURI(uri, modelManager);
+            const uri = concerto.toURI(obj);
+            const result = concerto.fromURI(uri);
             result.typeDeclaration.getName().should.equal('Person');
             result.id.should.equal('123456789');
         });
@@ -157,7 +158,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const type = Concerto.getTypeDeclaration(obj, modelManager);
+            const type = concerto.getTypeDeclaration(obj);
             type.getName().should.equal('Person');
         });
 
@@ -168,7 +169,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.getTypeDeclaration(obj, modelManager);
+                concerto.getTypeDeclaration(obj);
             }).should.throw(/Input object does not have a \$class attribute./);
         });
 
@@ -180,7 +181,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.getTypeDeclaration(obj, modelManager);
+                concerto.getTypeDeclaration(obj);
             }).should.throw(/Namespace is not defined for type Foo/);
         });
     });
@@ -188,15 +189,15 @@ describe('concerto', () => {
     describe('#isRelationship', () => {
 
         it('should identify a relationship', () => {
-            Concerto.isRelationship('resource:org.accordproject.test.Person#001', modelManager).should.be.true;
+            concerto.isRelationship('resource:org.accordproject.test.Person#001').should.be.true;
         });
 
         it('should not identify a relationship with wrong scheme', () => {
-            Concerto.isRelationship('foo:org.accordproject.test.Person#001', modelManager).should.be.false;
+            concerto.isRelationship('foo:org.accordproject.test.Person#001').should.be.false;
         });
 
         it('should not identify a relationship with wrong type', () => {
-            Concerto.isRelationship(false, modelManager).should.be.false;
+            concerto.isRelationship(false).should.be.false;
         });
     });
 
@@ -209,7 +210,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const type = Concerto.getType(obj, modelManager);
+            const type = concerto.getType(obj);
             type.should.equal('Person');
         });
     });
@@ -223,7 +224,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const ns = Concerto.getNamespace(obj, modelManager);
+            const ns = concerto.getNamespace(obj);
             ns.should.equal('org.accordproject.test');
         });
     });
@@ -238,7 +239,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Person');
+            const result = concerto.instanceOf(obj, 'org.accordproject.test.Person');
             result.should.be.true;
         });
 
@@ -250,7 +251,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Person');
+            const result = concerto.instanceOf(obj, 'org.accordproject.test.Person');
             result.should.be.true;
         });
 
@@ -262,7 +263,7 @@ describe('concerto', () => {
                 name: 'Dan Selman'
             };
 
-            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            const result = concerto.instanceOf(obj, 'org.accordproject.test.Customer');
             result.should.be.true;
         });
 
@@ -272,7 +273,7 @@ describe('concerto', () => {
                 ssn: '123456789'
             };
 
-            const result = Concerto.instanceOf(obj, modelManager, 'org.accordproject.test.Customer');
+            const result = concerto.instanceOf(obj, 'org.accordproject.test.Customer');
             expect(result).to.be.false;
         });
     });
@@ -287,7 +288,7 @@ describe('concerto', () => {
                 department: 'ENGINEERING'
             };
 
-            Concerto.validate(obj, modelManager);
+            concerto.validate(obj);
         });
 
         it('should validate data that conforms to model (types)', () => {
@@ -315,7 +316,7 @@ describe('concerto', () => {
                 }
             };
 
-            Concerto.validate(obj, modelManager);
+            concerto.validate(obj);
         });
 
         it('should fail with extra property', () => {
@@ -327,7 +328,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Instance 123456789 has a property named name which is not declared in org.accordproject.test.Customer/);
         });
 
@@ -340,7 +341,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Instance undefined has a property named price which is not declared in org.accordproject.test.Product/);
         });
 
@@ -353,7 +354,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Instance org.accordproject.test.Customer#123456789 invalid enum value FOO for field Department/);
         });
 
@@ -366,7 +367,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Instance org.accordproject.test.Customer# has an empty identifier./);
         });
 
@@ -378,7 +379,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Instance org.accordproject.test.Customer#001 missing required field department/);
         });
 
@@ -391,7 +392,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/Model violation in instance org.accordproject.test.Employee#001 field pets has value/);
         });
 
@@ -403,7 +404,7 @@ describe('concerto', () => {
             };
 
             (() => {
-                Concerto.validate(obj, modelManager);
+                concerto.validate(obj);
             }).should.throw(/The class org.accordproject.test.Person is abstract. Should not have an instance!/);
         });
 
