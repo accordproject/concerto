@@ -35,18 +35,15 @@ class Factory {
 }
 class AssetDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string getSystemType() 
    + boolean hasInstance(object) 
 }
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,string) throws IllegalModelException
    + ClassDeclaration _resolveSuperType() 
-   + string getSystemType() 
    + boolean isAbstract() 
    + boolean isEnum() 
    + boolean isConcept() 
    + boolean isEvent() 
-   + boolean isSystemCoreType() 
    + string getName() 
    + String getNamespace() 
    + string getFullyQualifiedName() 
@@ -89,7 +86,6 @@ class EnumValueDeclaration extends Property {
 }
 class EventDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string getSystemType() 
    + boolean isEvent() 
    + boolean hasInstance(object) 
 }
@@ -99,7 +95,7 @@ class Introspector {
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
 class ModelFile {
-   + void constructor(ModelManager,string,string,boolean) throws IllegalModelException
+   + void constructor(ModelManager,string,string) throws IllegalModelException
    + boolean isExternal() 
    + ModelManager getModelManager() 
    + string[] getImports() 
@@ -117,15 +113,13 @@ class ModelFile {
    + ParticipantDeclaration[] getParticipantDeclarations(Boolean) 
    + ConceptDeclaration[] getConceptDeclarations(Boolean) 
    + EnumDeclaration[] getEnumDeclarations(Boolean) 
-   + ClassDeclaration[] getDeclarations(Function,Boolean) 
+   + ClassDeclaration[] getDeclarations(Function) 
    + ClassDeclaration[] getAllDeclarations() 
    + string getDefinitions() 
-   + boolean isSystemModelFile() 
    + boolean hasInstance(object) 
 }
 class ParticipantDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string getSystemType() 
    + boolean hasInstance(object) 
 }
 class Property extends Decorated {
@@ -149,7 +143,6 @@ class RelationshipDeclaration extends Property {
 }
 class TransactionDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string getSystemType() 
    + boolean hasInstance(object) 
 }
 class Concept extends Typed {
@@ -205,11 +198,10 @@ class ModelManager {
    + Object[] addModelFiles(object[],undefined,boolean) 
    + void validateModelFiles() 
    + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
-   + void writeModelsToFileSystem(String,Object,boolean,boolean) 
-   + Object[] getModels(Object,boolean,boolean) 
+   + void writeModelsToFileSystem(String,Object,boolean) 
+   + Object[] getModels(Object,boolean) 
    + void clearModelFiles() 
    + string[] getNamespaces() 
-   + ClassDeclaration[] getSystemTypes() 
    + AssetDeclaration[] getAssetDeclarations(Boolean) 
    + TransactionDeclaration[] getTransactionDeclarations(Boolean) 
    + EventDeclaration[] getEventDeclarations(Boolean) 

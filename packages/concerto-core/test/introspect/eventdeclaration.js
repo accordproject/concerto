@@ -14,7 +14,6 @@
 
 'use strict';
 
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
@@ -24,17 +23,10 @@ const sinon = require('sinon');
 
 describe('EventDeclaration', () => {
 
-    let mockModelManager;
-    let mockSystemEvent;
-
     let sandbox;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        mockModelManager = sinon.createStubInstance(ModelManager);
-        mockSystemEvent = sinon.createStubInstance(EventDeclaration);
-        mockSystemEvent.getFullyQualifiedName.returns('org.hyperledger.composer.system.Event');
-        mockModelManager.getSystemTypes.returns([mockSystemEvent]);
     });
 
     afterEach(() => {
@@ -55,8 +47,6 @@ describe('EventDeclaration', () => {
             const modelFile = modelManager.addModelFile(model, 'awesome.cto' );
 
             let ed = modelFile.getEventDeclaration('E');
-            let stub = sinon.stub(ed,'getSystemType');
-            stub.throws(new Error());
             ed.validate();
 
         });

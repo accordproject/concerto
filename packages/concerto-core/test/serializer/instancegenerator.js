@@ -415,7 +415,7 @@ describe('InstanceGenerator', () => {
 
         it('should generate concrete subclass for abstract reference', function () {
             let resource = test(`namespace org.acme.test
-            event MyEvent identified by eventId extends Event {
+            event MyEvent identified by eventId {
                 o String eventId
             }
             asset MyAsset identified by id {

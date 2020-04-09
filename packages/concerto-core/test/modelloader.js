@@ -75,7 +75,6 @@ describe('ModelLoader', () => {
         it('should load models', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
-                .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
             const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
@@ -86,7 +85,6 @@ describe('ModelLoader', () => {
         it('should throw an error for a namespace that does not exist', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
-                .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
             const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
@@ -97,7 +95,6 @@ describe('ModelLoader', () => {
         it('should throw an error for an empty namespace', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
-                .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
             const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
@@ -108,7 +105,6 @@ describe('ModelLoader', () => {
         it('should throw an error for a type that does not exist', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const files = modelManager.getModelFiles()
-                .filter(f => !f.isSystemModelFile())
                 .map(f => f.definitions);
             const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {

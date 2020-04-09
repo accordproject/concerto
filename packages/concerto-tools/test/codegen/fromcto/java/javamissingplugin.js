@@ -108,7 +108,6 @@ describe('JavaMissingPlugin', function () {
             }]);
             mockClassDeclaration.isConcept.returns(false);
             mockClassDeclaration.isAbstract.returns(false);
-            mockClassDeclaration.isSystemCoreType.returns(false);
             mockClassDeclaration.getSuperType.returns(false);
             mockClassDeclaration.getIdentifierFieldName.returns(false);
 

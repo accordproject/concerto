@@ -35,7 +35,6 @@ describe('AssetDeclaration', () => {
         mockModelManager =  sinon.createStubInstance(ModelManager);
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
         mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
-        mockModelManager.getSystemTypes.returns([mockSystemAsset]);
         mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);

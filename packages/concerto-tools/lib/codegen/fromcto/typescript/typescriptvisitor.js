@@ -89,14 +89,6 @@ class TypescriptVisitor {
     visitModelFile(modelFile, parameters) {
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.ts');
 
-        // if this is not the system model file we have to import the system types
-        // so that they can be extended
-        if (!modelFile.isSystemModelFile()) {
-            const systemTypes = modelFile.getModelManager().getSystemTypes();
-            systemTypes.forEach(systemType =>
-                parameters.fileWriter.writeLine(0, `import {${systemType.getName()}} from './org.hyperledger.composer.system';`));
-        }
-
         // Import property types that are imported from other cto files.
         const dot = '.';
         const properties = new Map();

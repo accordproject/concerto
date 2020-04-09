@@ -14,9 +14,7 @@
 
 'use strict';
 
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
-const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 
 require('chai').should();
@@ -30,20 +28,10 @@ describe('ParticipantDeclaration', () => {
         Util.addComposerModel(modelManager);
     });
 
-    let loadParticipantDeclaration = (modelFileName) => {
-        let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = new ModelFile(modelManager, modelDefinitions);
-        let assets = modelFile.getParticipantDeclarations();
-        assets.should.have.lengthOf(1);
-
-        return assets[0];
-    };
-
-    describe('#getSystemType', () => {
-        it('should return Participant', () => {
-            let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.valid.cto');
-            p.getSystemType().should.equal('Participant');
+    describe('#getParticipantDeclarations', () => {
+        it('should get participants', () => {
+            let assets = modelManager.getParticipantDeclarations();
+            assets.should.have.lengthOf(3);
         });
     });
-
 });

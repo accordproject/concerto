@@ -243,9 +243,7 @@ describe('Test Model', function(){
 
             // check the clear
             modelManager.clearModelFiles();
-            modelManager.getModelFiles().filter((modelFile) => {
-                return !modelFile.isSystemModelFile();
-            }).length.should.equal(0);
+            modelManager.getModelFiles().length.should.equal(0);
             // the system model will remain hence 1.
 
             // re-add
@@ -338,8 +336,7 @@ describe('Test Model', function(){
             modelFile.isImportedType('MyParticipant').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
                 const importNamespace = ModelUtil.getNamespace(element);
-                const modelFile = modelManager.getModelFile(importNamespace);
-                return !modelFile.isSystemModelFile();
+                return modelManager.getModelFile(importNamespace);
             });
             imprts.length.should.equal(1);
             modelFile.getImports().includes('composer.MyParticipant').should.equal(true);
@@ -378,8 +375,7 @@ describe('Test Model', function(){
             modelFile.isImportedType('Person').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
                 const importNamespace = ModelUtil.getNamespace(element);
-                const modelFile = modelManager.getModelFile(importNamespace);
-                return !modelFile.isSystemModelFile();
+                return modelManager.getModelFile(importNamespace);
             });
             imprts.length.should.equal(2);
         });

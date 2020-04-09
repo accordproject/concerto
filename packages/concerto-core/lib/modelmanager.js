@@ -27,9 +27,6 @@ const ModelFileDownloader = require('./introspect/loaders/modelfiledownloader');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
-const systemNamespace = require('./systemmodel').systemNamespace;
-const systemFileName = require('./systemmodel').systemFileName;
-const systemModel = require('./systemmodel').systemModel;
 
 const debug = require('debug')('concerto:ModelManager');
 
@@ -42,10 +39,9 @@ const debug = require('debug')('concerto:ModelManager');
  * a set of asset, transaction and participant type definitions.
  *
  * Concerto applications load their Concerto files and then call the {@link ModelManager#addModelFile addModelFile}
- * method to register the Concerto file(s) with the ModelManager. The ModelManager
- * parses the text of the Concerto file and will make all defined types available
- * to other Concerto services, such as the {@link Serializer} (to convert instances to/from JSON)
- * and {@link Factory} (to create instances).
+ * method to register the Concerto file(s) with the ModelManager.
+ *
+ * Use the {@link Concerto} class to validate instances.
  *
  * @class
  * @memberof module:concerto-core
@@ -60,8 +56,6 @@ class ModelManager {
         this.serializer = new Serializer(this.factory, this);
         this.decoratorFactories = [];
         this._isModelManager = true;
-        // Always add the systems model
-        this.addModelFile(new ModelFile(this, systemModel, systemFileName, true), systemFileName, true);
     }
 
     /**
@@ -164,9 +158,6 @@ class ModelManager {
             let m = new ModelFile(this, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
         } else {
-            if (modelFile.getNamespace() === systemNamespace) {
-                throw new Error(`System namespace ${systemNamespace} cannot be updated`);
-            }
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
                 throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
@@ -187,8 +178,6 @@ class ModelManager {
     deleteModelFile(namespace) {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
-        } else if (namespace === systemNamespace) {
-            throw new Error('Cannot delete system namespace');
         } else {
             delete this.modelFiles[namespace];
         }
@@ -219,9 +208,6 @@ class ModelManager {
                 }
 
                 const m = typeof modelFile === 'string' ? new ModelFile(this, modelFile, fileName) : modelFile;
-                if (m.getNamespace() === systemNamespace) {
-                    throw new Error('System namespace can not be updated');
-                }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
                     newModelFiles.push(m);
@@ -327,8 +313,6 @@ class ModelManager {
      * @param {Object} [options] - Options object
      * @param {boolean} options.includeExternalModels -
      *  If true, external models are written to the file system. Defaults to true
-     * @param {boolean} options.includeSystemModels -
-     *  If true, system models are written to the file system. Defaults to false
      */
     writeModelsToFileSystem(path, options = {}) {
         if(!path){
@@ -337,13 +321,9 @@ class ModelManager {
 
         const opts = Object.assign({
             includeExternalModels: true,
-            includeSystemModels: false,
         }, options);
 
         this.getModelFiles().forEach(function (file) {
-            if (file.isSystemModelFile() && !opts.includeSystemModels) {
-                return;
-            }
             if (file.isExternal() && !opts.includeExternalModels) {
                 return;
             }
@@ -375,26 +355,10 @@ class ModelManager {
     }
 
     /**
-     * Get the array of system model file instances
-     * Note - this is an internal method and therefore will return the system model
-     *
-     * @return {ModelFile[]} The system ModelFiles registered
-     * @private
-     */
-    getSystemModelFiles() {
-        return this.getModelFiles()
-            .filter((modelFile) => {
-                return modelFile.isSystemModelFile();
-            });
-    }
-
-    /**
-     * Gets all the CTO models
+     * Gets all the Concerto models
      * @param {Object} [options] - Options object
      * @param {boolean} options.includeExternalModels -
      *  If true, external models are written to the file system. Defaults to true
-     * @param {boolean} options.includeSystemModels -
-     *  If true, system models are written to the file system. Defaults to false
      * @return {Array<{name:string, content:string}>} the name and content of each CTO file
      */
     getModels(options) {
@@ -402,13 +366,9 @@ class ModelManager {
         let models = [];
         const opts = Object.assign({
             includeExternalModels: true,
-            includeSystemModels: false,
         }, options);
 
         modelFiles.forEach(function (file) {
-            if (file.isSystemModelFile() && !opts.includeSystemModels) {
-                return;
-            }
             if (file.isExternal() && !opts.includeExternalModels) {
                 return;
             }
@@ -464,23 +424,12 @@ class ModelManager {
      * Remove all registered Concerto files
      */
     clearModelFiles() {
-        const systemModelFiles = this.getSystemModelFiles();
         this.modelFiles = {};
-
-        systemModelFiles.forEach((m) => {
-            this.modelFiles[m.getNamespace()] = m;
-        });
-
-        // now validate all the models
-        this.validateModelFiles();
     }
 
     /**
      * Get the ModelFile associated with a namespace
-     * Note - this is an internal method and therefore will return the system model
-     * as well as any network defined models.
      *
-     * It is the callers responsibility to remove this before the data leaves an external API
      * @param {string} namespace - the namespace containing the ModelFile
      * @return {ModelFile} registered ModelFile for the namespace or null
      * @private
@@ -491,10 +440,7 @@ class ModelManager {
 
     /**
      * Get the ModelFile associated with a file name
-     * Note - this is an internal method and therefore will return the system model
-     * as well as any network defined models.
      *
-     * It is the callers responsibility to remove this before the data leaves an external API
      * @param {string} fileName - the fileName associated with the ModelFile
      * @return {ModelFile} registered ModelFile for the namespace or null
      * @private
@@ -540,24 +486,6 @@ class ModelManager {
         }
 
         return classDecl;
-    }
-
-
-    /**
-     * Get all class declarations from system namespaces
-     * @return {ClassDeclaration[]} the ClassDeclarations from system namespaces
-     */
-    getSystemTypes() {
-        return this.getModelFiles()
-            .filter((modelFile) => {
-                return modelFile.isSystemModelFile();
-            })
-            .reduce((classDeclarations, modelFile) => {
-                return classDeclarations.concat(modelFile.getAllDeclarations());
-            }, [])
-            .filter((classDeclaration) => {
-                return classDeclaration.isSystemCoreType();
-            });
     }
 
     /**

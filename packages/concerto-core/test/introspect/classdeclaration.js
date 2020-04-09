@@ -212,16 +212,16 @@ describe('ClassDeclaration', () => {
             superclassName.should.equal('com.testing.parent.Super');
         });
 
-        it('should return system type when none exists', function() {
+        it('should return null when no super type exists', function() {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'system.Participant');
+            should.equal(superclassName,null);
         });
 
         it('toString',()=>{
             const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Participant enum=false abstract=true}');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base enum=false abstract=true}');
         });
     });
 
@@ -285,12 +285,12 @@ describe('ClassDeclaration', () => {
             should.equal(classDecl._resolveSuperType(), null);
         });
 
-        it('should return the super class declaration for a system super class', () => {
+        it('should return null for a super class', () => {
             modelManager.addModelFile(`namespace org.acme
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
+            should.equal(superClassDecl, null);
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
@@ -321,28 +321,6 @@ describe('ClassDeclaration', () => {
             let classDecl = modelManager.getType('system.Asset');
             should.equal(classDecl.getSuperTypeDeclaration(), null);
         });
-
-        it('should resolve the super type if not already resolved', () => {
-            modelManager.addModelFile(`namespace org.acme
-            asset TestAsset identified by assetId { o String assetId }`);
-            let classDecl = modelManager.getType('org.acme.TestAsset');
-            classDecl.superTypeDeclaration = null;
-            let spy = sinon.spy(classDecl, '_resolveSuperType');
-            let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
-            sinon.assert.calledOnce(spy);
-        });
-
-        it('should not resolve the super type if not already resolved', () => {
-            modelManager.addModelFile(`namespace org.acme
-            asset TestAsset identified by assetId { o String assetId }`);
-            let classDecl = modelManager.getType('org.acme.TestAsset');
-            let spy = sinon.spy(classDecl, '_resolveSuperType');
-            let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
-            sinon.assert.notCalled(spy);
-        });
-
     });
 
     describe('#validation', function() {
@@ -384,12 +362,12 @@ describe('ClassDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
 
-        it('should return array with only system types if there are no superclasses', function() {
+        it('should return empty array if there are no superclasses', function() {
             const testClass = modelManager.getType('com.testing.parent.Base');
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.members(['Participant']);
+            superclassNames.should.have.length(0);
         });
 
         it('should return all superclass definitions', function() {
@@ -397,7 +375,7 @@ describe('ClassDeclaration', () => {
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.same.members(['Base', 'Super','Participant']);
+            superclassNames.should.have.same.members(['Base', 'Super']);
         });
     });
 

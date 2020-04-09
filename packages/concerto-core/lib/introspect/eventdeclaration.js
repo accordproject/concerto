@@ -46,15 +46,6 @@ class EventDeclaration extends ClassDeclaration {
     }
 
     /**
-     * Returns the base system type for Events from the system namespace
-     *
-     * @return {string} the short name of the base system type
-     */
-    getSystemType() {
-        return 'Event';
-    }
-
-    /**
      * Returns true if this class is the definition of an event
      *
      * @return {boolean} true if the class is an event
