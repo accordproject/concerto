@@ -89,7 +89,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['system.Participant', 'system.Event', 'system.Transaction', 'system.Asset', 'org.freddos', 'org.doge']);
+            mf.imports.should.deep.equal(['org.freddos', 'org.doge']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
@@ -101,7 +101,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['system.Participant', 'system.Event', 'system.Transaction', 'system.Asset', 'org.doge', 'org.freddos.*']);
+            mf.imports.should.deep.equal(['org.doge', 'org.freddos.*']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge') === null).should.be.true;
         });
@@ -371,13 +371,6 @@ describe('ModelFile', () => {
 
     describe('#resolveImport', () => {
 
-        it('should find the fully qualified name of a type in the system namespace', () => {
-            const model = `
-            namespace org.acme`;
-            let modelFile = new ModelFile(modelManager, model);
-            modelFile.resolveImport('Asset').should.equal('system.Asset');
-        });
-
         it('should find the fully qualified name of the import', () => {
             const model = `
             namespace org.acme
@@ -605,41 +598,18 @@ describe('ModelFile', () => {
 
         it('should return the expected number of Event declarations without system types', () => {
             let modelFile = new ModelFile(modelManager, carLeaseModel);
-            let events = modelFile.getEventDeclarations(false);
+            let events = modelFile.getEventDeclarations();
             events.length.should.equal(1);
-            let i;
-            for(i = 0; i < events.length; i++) {
-                events[i].modelFile.should.have.property('systemModelFile', false);
-            }
         });
     });
 
     describe('#getEnumDeclarations', () => {
 
-        it('should return the expected number of Enum declarations with system types', () => {
+        it('should return the expected number of Enum declarations', () => {
             let modelFile = new ModelFile(modelManager, carLeaseModel);
             let decls = modelFile.getEnumDeclarations();
             decls.should.all.be.an.instanceOf(EnumDeclaration);
             decls.length.should.equal(1);
-            // TO DO ADD IN CHECK FOR TRUE AND FALSE, CHECK THAT SYSTEM TYPE IS CORRECT USING FOR LOOP LIKE EARLIER
-        });
-
-        it('should return the expected number of Enum declarations with system types', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
-            let decls = modelFile.getEnumDeclarations(true);
-            decls.should.all.be.an.instanceOf(EnumDeclaration);
-            decls.length.should.equal(1);
-        });
-
-        it('should return the expected number of Enum declarations without system types', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
-            let decls = modelFile.getEnumDeclarations(false);
-            decls.should.all.be.an.instanceOf(EnumDeclaration);
-            decls.length.should.equal(1);
-            let i;
-            for(i = 0; i < decls.length; i++) {
-                decls[i].modelFile.should.have.property('systemModelFile', false);
-            }
         });
 
     });

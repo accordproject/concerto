@@ -293,7 +293,6 @@ describe('JavaVisitor', function () {
             }]);
             mockClassDeclaration.isConcept.returns(false);
             mockClassDeclaration.isAbstract.returns(false);
-            mockClassDeclaration.isSystemCoreType.returns(false);
             mockClassDeclaration.getSuperType.returns(false);
             mockClassDeclaration.getIdentifierFieldName.returns(false);
 
@@ -354,7 +353,6 @@ describe('JavaVisitor', function () {
         });
 
         it('should write a system core type class declaration and call accept on each property', () => {
-            mockClassDeclaration.isSystemCoreType.returns(true);
 
             javaVisit.visitClassDeclaration(mockClassDeclaration, param);
 

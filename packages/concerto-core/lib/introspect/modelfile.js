@@ -42,10 +42,9 @@ class ModelFile {
      * ModelFile
      * @param {string} definitions - The DSL model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
-     * @param {boolean} [isSystemModelFile] - If true, this is a system model file, defaults to false
      * @throws {IllegalModelException}
      */
-    constructor(modelManager, definitions, fileName, isSystemModelFile = false) {
+    constructor(modelManager, definitions, fileName) {
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -84,7 +83,6 @@ class ModelFile {
         }
 
         this.namespace = this.ast.namespace;
-        this.systemModelFile = isSystemModelFile;
 
         if(this.ast.imports) {
             this.ast.imports.forEach((imp) => {
@@ -98,16 +96,6 @@ class ModelFile {
                     this.importUriMap[imp.namespace] = imp.uri;
                 }
             });
-        }
-
-        // if we are not in the system namespace we add imports to all the system types
-        if(!this.isSystemModelFile()) {
-            const systemTypes = this.modelManager.getSystemTypes();
-            for(let index in systemTypes) {
-                let fqn = systemTypes[index].getFullyQualifiedName();
-                this.imports.unshift(fqn);
-                this.importShortNames.set(ModelUtil.getShortName(fqn), fqn);
-            }
         }
 
         for(let n=0; n < this.ast.body.length; n++ ) {
@@ -572,14 +560,13 @@ class ModelFile {
     /**
      * Get the instances of a given type in this ModelFile
      * @param {Function} type - the type of the declaration
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {ClassDeclaration[]} the ClassDeclaration defined in the model file
      */
-    getDeclarations(type, includeSystemType = true) {
+    getDeclarations(type) {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
-            if(classDeclaration instanceof type && (includeSystemType || !classDeclaration.isSystemCoreType())) {
+            if(classDeclaration instanceof type) {
                 result.push(classDeclaration);
             }
         }
@@ -600,14 +587,6 @@ class ModelFile {
      */
     getDefinitions() {
         return this.definitions;
-    }
-
-    /**
-     * Returns true if this ModelFile is a system model
-     * @return {boolean} true of this ModelFile is a system model
-     */
-    isSystemModelFile() {
-        return this.systemModelFile;
     }
 
     /**

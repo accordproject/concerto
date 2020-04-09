@@ -88,38 +88,24 @@ class XmlSchemaVisitor {
         parameters.fileWriter.writeLine(0, '<?xml version="1.0"?>');
         parameters.fileWriter.writeLine(0, `<xs:schema xmlns:${modelFile.getNamespace()}="${modelFile.getNamespace()}" targetNamespace="${modelFile.getNamespace()}" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" `);
 
-        if(!modelFile.isSystemModelFile()) {
-            const importedNamespaces = [];
-            modelFile.getModelManager().getSystemModelFiles().forEach((systemModelFile) => {
-                const systemNamespace = systemModelFile.getNamespace();
-                parameters.fileWriter.writeLine(1, `xmlns:${systemNamespace}="${systemNamespace}"`);
-                importedNamespaces.push(systemNamespace);
-            });
-            for(let importedType of modelFile.getImports()) {
-                const clazz = modelFile.getModelManager().getType(importedType);
-                if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
-                    importedNamespaces.push(clazz.getNamespace());
-                    parameters.fileWriter.writeLine(0, `xmlns:${clazz.getNamespace()}="${clazz.getNamespace()}"`);
-                }
+        const importedNamespaces = [];
+        for(let importedType of modelFile.getImports()) {
+            const clazz = modelFile.getModelManager().getType(importedType);
+            if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
+                importedNamespaces.push(clazz.getNamespace());
+                parameters.fileWriter.writeLine(0, `xmlns:${clazz.getNamespace()}="${clazz.getNamespace()}"`);
             }
         }
         parameters.fileWriter.writeLine(0, '>');
 
         // import the system namespace and then any explicitly required namespaces
-        if(!modelFile.isSystemModelFile()) {
-            const importedNamespaces = [];
-            modelFile.getModelManager().getSystemModelFiles().forEach((systemModelFile) => {
-                const systemNamespace = systemModelFile.getNamespace();
-                parameters.fileWriter.writeLine(0, `<xs:import namespace="${systemNamespace}" schemaLocation="${systemNamespace}.xsd"/>`);
-                importedNamespaces.push(systemNamespace);
-            });
-            // prevent namespaces being imported multiple times
-            for(let importedType of modelFile.getImports()) {
-                const clazz = modelFile.getModelManager().getType(importedType);
-                if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
-                    importedNamespaces.push(clazz.getNamespace());
-                    parameters.fileWriter.writeLine(0, `<xs:import namespace="${clazz.getNamespace()}" schemaLocation="${clazz.getNamespace()}.xsd"/>`);
-                }
+        const importedNamespaces = [];
+        // prevent namespaces being imported multiple times
+        for(let importedType of modelFile.getImports()) {
+            const clazz = modelFile.getModelManager().getType(importedType);
+            if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
+                importedNamespaces.push(clazz.getNamespace());
+                parameters.fileWriter.writeLine(0, `<xs:import namespace="${clazz.getNamespace()}" schemaLocation="${clazz.getNamespace()}.xsd"/>`);
             }
         }
 

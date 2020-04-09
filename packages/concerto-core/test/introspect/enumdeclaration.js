@@ -15,7 +15,6 @@
 'use strict';
 
 const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
 const EnumValueDeclaration = require('../../lib/introspect/enumvaluedeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
@@ -56,14 +55,10 @@ describe('EnumDeclaration', () => {
     };
 
     let sandbox;
-    let mockSystemEvent;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         mockModelManager = sinon.createStubInstance(ModelManager);
-        mockSystemEvent = sinon.createStubInstance(EventDeclaration);
-        mockSystemEvent.getFullyQualifiedName.returns('org.hyperledger.composer.system.Event');
-        mockModelManager.getSystemTypes.returns([mockSystemEvent]);
     });
 
     afterEach(() => {

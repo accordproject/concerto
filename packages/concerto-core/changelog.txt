@@ -24,7 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 0.82.7 {1589a150da7411d75b7c8a864af17206} 2020-02-02
+Version 0.82.7 {d5e9f460724d294bbbe3a15cea961ee2} 2020-04-08
+- Add new Concerto API
+- Removed System Models APIs
 - Remove notion of system table
 - Remove user ability to change system model
 - Update JsDoc for ModelManager.addModelFiles
