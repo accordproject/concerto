@@ -16,8 +16,8 @@
 
 const COMPOSER_MODEL =
     {
-        namespace: 'org.hyperledger.composer.system',
-        fileName: 'org.hyperledger.composer.system.cto',
+        namespace: 'system',
+        fileName: 'system.cto',
         contents: `/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,19 @@ const COMPOSER_MODEL =
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace org.hyperledger.composer.system
+namespace system
+
+event Event {
+}
+
+participant Participant {
+}
+
+asset Asset {
+}
+
+transaction Transaction {
+}
 
 /**
  * Abstract system participant that all participants extend.

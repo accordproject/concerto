@@ -14,7 +14,6 @@
 
 'use strict';
 
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
@@ -24,7 +23,6 @@ require('chai').should();
 const sinon = require('sinon');
 
 describe('TransactionDeclaration', () => {
-    let mockSystemTransaction;
     let mockClassDeclaration;
     let sandbox;
     let modelManager;
@@ -33,8 +31,6 @@ describe('TransactionDeclaration', () => {
         sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        mockSystemTransaction = sinon.createStubInstance(TransactionDeclaration);
-        mockSystemTransaction.getFullyQualifiedName.returns('org.hyperledger.composer.system.Transaction');
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);
     });
@@ -53,8 +49,6 @@ describe('TransactionDeclaration', () => {
 
             const modelFile = new ModelFile(modelManager, model);
             let td = modelFile.getTransactionDeclaration('T');
-
-            sinon.stub(td,'getSystemType').throws(new Error('fred'));
             td.validate();
 
         });

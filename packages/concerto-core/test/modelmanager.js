@@ -27,7 +27,6 @@ const ModelFileDownloader = require('../lib/introspect/loaders/modelfiledownload
 const ModelManager = require('../lib/modelmanager');
 const ParticipantDeclaration = require('../lib/introspect/participantdeclaration');
 const Serializer = require('../lib/serializer');
-const TransactionDeclaration = require('../lib/introspect/transactiondeclaration');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
@@ -47,17 +46,12 @@ describe('ModelManager', () => {
     let invalidModel = fs.readFileSync('./test/data/model/invalid.cto', 'utf8');
     let invalidModel2 = fs.readFileSync('./test/data/model/invalid2.cto', 'utf8');
     let modelManager;
-    let mockSystemModelFile;
     let sandbox;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        mockSystemModelFile = sinon.createStubInstance(ModelFile);
-        mockSystemModelFile.isLocalType.withArgs('Asset').returns(true);
-        mockSystemModelFile.getNamespace.returns('system');
-        mockSystemModelFile.isSystemModelFile.returns(true);
     });
 
     afterEach(() => {
@@ -253,9 +247,7 @@ describe('ModelManager', () => {
             }
 
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
-            modelManager.getModelFiles().filter((modelFile) => {
-                return !modelFile.isSystemModelFile();
-            }).length.should.equal(2);
+            modelManager.getModelFiles().length.should.equal(2);
         });
 
         it('should restore existing model files on validation error', () => {
@@ -274,18 +266,6 @@ describe('ModelManager', () => {
             sinon.assert.calledOnce(mf2.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             should.equal(modelManager.modelFiles['org.fry'], undefined);
-        });
-
-        it('should not be possible to add a system model file', ()=>{
-            (() => {
-                modelManager.addModelFiles([mockSystemModelFile]);
-            }).should.throw();
-        });
-
-        it('should not be possible to add a system model file (via string)', ()=>{
-            (() => {
-                modelManager.addModelFiles(['namespace system'],['fakesysnamespace.cto'], null);
-            }).should.throw(/System namespace can not be updated/);
         });
 
         it('should return an error for duplicate namespace from strings', () => {
@@ -481,19 +461,6 @@ describe('ModelManager', () => {
             modelManager.modelFiles['org.doge'].definitions.should.equal(model);
         });
 
-        it('should not be possible to update a system model file', ()=>{
-            (() => {
-                modelManager.updateModelFile(mockSystemModelFile);
-            }).should.throw();
-        });
-
-        it('should not be possible to update a system model file (via string)', ()=>{
-            (() => {
-                modelManager.updateModelFile('namespace system','fakesysnamespace.cto');
-            }).should.throw();
-        });
-
-
     });
 
     describe('#deleteModelFile', () => {
@@ -517,13 +484,6 @@ describe('ModelManager', () => {
             modelManager.deleteModelFile('org.doge');
             should.equal(modelManager.modelFiles['org.doge'], undefined);
         });
-
-        it('should not be possible to delete a system model file', ()=>{
-            (() => {
-                modelManager.deleteModelFile('system');
-            }).should.throw(/Cannot delete system namespace/);
-        });
-
     });
 
     describe('#updateExternalModels', () => {
@@ -671,7 +631,7 @@ concept Bar {
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
                 'internal.cto',
-                'org.hyperledger.composer.system.cto',
+                'system.cto',
             ]);
             dir.cleanup();
         });
@@ -683,21 +643,19 @@ concept Bar {
             });
             fs.readdirSync(dir.path).should.eql([
                 'internal.cto',
-                'org.hyperledger.composer.system.cto',
+                'system.cto',
             ]);
             dir.cleanup();
         });
 
-        it('should write models to the file system, with system models', async () => {
+        it('should write models to the file system', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
             modelManager.writeModelsToFileSystem(dir.path, {
-                includeSystemModels: true
             });
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
-                '@system.cto',
                 'internal.cto',
-                'org.hyperledger.composer.system.cto'
+                'system.cto'
             ]);
             dir.cleanup();
         });
@@ -707,31 +665,16 @@ concept Bar {
         });
     });
 
-    describe('#getSystemModelFiles', () => {
-        it('should only list all system model files', () => {
-            modelManager.addModelFile(modelBase);
-            modelManager.getModelFiles().length.should.equal(3);
-            modelManager.getSystemModelFiles().length.should.equal(1);
-        });
-    });
-
     describe('#getModels', () => {
         it('should return a list of name / content pairs', () => {
             modelManager.addModelFile(modelBase);
             const models = modelManager.getModels();
             models.length.should.equal(2);
             models[0].should.deep.equal({
-                name: 'org.hyperledger.composer.system.cto', content: COMPOSER_MODEL.contents
+                name: 'system.cto', content: COMPOSER_MODEL.contents
             }, {
                 name: 'org.acme.base.cto', content: modelBase
             });
-        });
-        it('should return a list of name / content pairs, with System Models', () => {
-            modelManager.addModelFile(modelBase);
-            const models = modelManager.getModels({
-                includeSystemModels: true
-            });
-            models.length.should.equal(3);
         });
         it('should return a list of name / content pairs, with External Models', async () => {
             const externalModelFile = new ModelFile(modelManager, `namespace org.external
@@ -796,177 +739,54 @@ concept Bar {
 
     });
 
-    describe('#getSystemTypes', () => {
-
-        it('should return all of the system core types', () => {
-            modelManager.getSystemTypes().map((classDeclaration) => {
-                return classDeclaration.getName();
-            }).should.deep.equal(['Asset', 'Transaction', 'Event', 'Participant']);
-        });
-
-    });
-
     describe('#getDeclarations', () => {
-
-        const numberSystemAssets = 1;
-        const numberSystemEnums = 0;
-        const numberSystemParticipants = 1;
-        const numberSystemEvents = 1;
-        const numberSystemTransactions = 1;
-        const numberSystemConcepts = 0;
-
-        const numberModelBaseAssets = 12;
+        const numberModelBaseAssets = 13;
         const numberModelBaseEnums = 2;
-        const numberModelBaseParticipants = 4;
-        const numberModelBaseEvents = 0;
-        const numberModelBaseTransactions = 20;
+        const numberModelBaseParticipants = 5;
+        const numberModelBaseEvents = 1;
+        const numberModelBaseTransactions = 21;
         const numberModelBaseConcepts = 2;
-
 
         describe('#getAssetDeclarations', () => {
 
-            it('should return all of the asset declarations with system types', () => {
+            it('should return all of the asset declarations', () => {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getAssetDeclarations();
                 decls.should.all.be.an.instanceOf(AssetDeclaration);
-                decls.length.should.equal(numberSystemAssets+numberModelBaseAssets);
-            });
-
-        });
-
-        describe('#getAssetDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the asset declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getAssetDeclarations(false);
-                decls.should.all.be.an.instanceOf(AssetDeclaration);
                 decls.length.should.equal(numberModelBaseAssets);
-                /* let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                } */
-            });
-
-        });
-
-        describe('#getAssetDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the asset declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getAssetDeclarations(true);
-                decls.should.all.be.an.instanceOf(AssetDeclaration);
-                decls.length.should.equal(numberSystemAssets+numberModelBaseAssets);
             });
 
         });
 
         describe('#getEnumDeclarations', () => {
 
-            it('should return all of the enum declarations with system types', () => {
+            it('should return all of the enum declarations', () => {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getEnumDeclarations();
                 decls.should.all.be.an.instanceOf(EnumDeclaration);
-                decls.length.should.equal(numberSystemEnums+numberModelBaseEnums);
-            });
-
-        });
-
-        describe('#getEnumDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the enum declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getEnumDeclarations(false);
-                decls.should.all.be.an.instanceOf(EnumDeclaration);
                 decls.length.should.equal(numberModelBaseEnums);
-                /* let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                } */
-            });
-
-        });
-
-        describe('#getEnumDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the enum declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getEnumDeclarations(true);
-                decls.should.all.be.an.instanceOf(EnumDeclaration);
-                decls.length.should.equal(numberSystemEnums+numberModelBaseEnums);
             });
 
         });
 
         describe('#getParticipantDeclarations', () => {
 
-            it('should return all of the participant declarations with system types', () => {
+            it('should return all of the participant declarations', () => {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getParticipantDeclarations();
                 decls.should.all.be.an.instanceOf(ParticipantDeclaration);
-                decls.length.should.equal(numberSystemParticipants+numberModelBaseParticipants);
-            });
-
-        });
-
-        describe('#getParticipantDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the participant declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getParticipantDeclarations(false);
-                decls.should.all.be.an.instanceOf(ParticipantDeclaration);
                 decls.length.should.equal(numberModelBaseParticipants);
-                /* let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                } */
-            });
-
-        });
-
-        describe('#getParticipantDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the participant declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getParticipantDeclarations(true);
-                decls.should.all.be.an.instanceOf(ParticipantDeclaration);
-                decls.length.should.equal(numberSystemParticipants+numberModelBaseParticipants);
             });
 
         });
 
         describe('#getEventDeclarations', () => {
 
-            it('should return all of the event declarations with system types', () => {
+            it('should return all of the event declarations', () => {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getEventDeclarations();
                 decls.should.all.be.an.instanceOf(EventDeclaration);
-                decls.length.should.equal(numberSystemEvents+numberModelBaseEvents);
-            });
-
-        });
-
-        describe('#getEventDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the event declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getEventDeclarations(false);
-                decls.should.all.be.an.instanceOf(EventDeclaration);
                 decls.length.should.equal(numberModelBaseEvents);
-                let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
-            });
-
-        });
-
-        describe('#getEventDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the event declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getEventDeclarations(true);
-                decls.should.all.be.an.instanceOf(EventDeclaration);
-                decls.length.should.equal(numberSystemEvents+numberModelBaseEvents);
             });
 
         });
@@ -976,33 +796,7 @@ concept Bar {
             it('should return all of the transaction declarations', () => {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getTransactionDeclarations();
-                decls.length.should.equal(numberSystemTransactions+numberModelBaseTransactions);
-            });
-
-        });
-
-        describe('#getTransactionDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the transaction declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getTransactionDeclarations(false);
-                decls.should.all.be.an.instanceOf(TransactionDeclaration);
                 decls.length.should.equal(numberModelBaseTransactions);
-                /* let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                } */
-            });
-
-        });
-
-        describe('#getTransactionDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the transaction declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getTransactionDeclarations(true);
-                decls.should.all.be.an.instanceOf(TransactionDeclaration);
-                decls.length.should.equal(numberSystemTransactions+numberModelBaseTransactions);
             });
 
         });
@@ -1013,34 +807,8 @@ concept Bar {
                 modelManager.addModelFile(modelBase);
                 let decls = modelManager.getConceptDeclarations();
                 decls.should.all.be.an.instanceOf(ConceptDeclaration);
-                decls.length.should.equal(numberSystemConcepts+numberModelBaseConcepts);
-            });
-        });
-
-        describe('#getConceptDeclarationsWithParameterFalse', () => {
-
-            it('should return all of the concept declarations without system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getConceptDeclarations(false);
-                decls.should.all.be.an.instanceOf(ConceptDeclaration);
                 decls.length.should.equal(numberModelBaseConcepts);
-                let i;
-                for(i = 0; i < decls.length; i++) {
-                    decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
             });
-
-        });
-
-        describe('#getConceptDeclarationsWithParameterTrue', () => {
-
-            it('should return all of the concept declarations with system types', () => {
-                modelManager.addModelFile(modelBase);
-                let decls = modelManager.getConceptDeclarations(true);
-                decls.should.all.be.an.instanceOf(ConceptDeclaration);
-                decls.length.should.equal(numberSystemConcepts+numberModelBaseConcepts);
-            });
-
         });
     });
 

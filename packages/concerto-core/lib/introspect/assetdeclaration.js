@@ -41,15 +41,6 @@ class AssetDeclaration extends ClassDeclaration {
     }
 
     /**
-     * Returns the base system type for Assets from the system namespace
-     *
-     * @return {string} the short name of the base system type
-     */
-    getSystemType() {
-        return 'Asset';
-    }
-
-    /**
      * Alternative instanceof that is reliable across different module instances
      * @see https://github.com/hyperledger/composer-concerto/issues/47
      *

@@ -36,15 +36,6 @@ class ParticipantDeclaration extends ClassDeclaration {
     }
 
     /**
-     * Returns the base system type for Participants from the system namespace
-     *
-     * @return {string} the short name of the base system type
-     */
-    getSystemType() {
-        return 'Participant';
-    }
-
-    /**
      * Alternative instanceof that is reliable across different module instances
      * @see https://github.com/hyperledger/composer-concerto/issues/47
      *

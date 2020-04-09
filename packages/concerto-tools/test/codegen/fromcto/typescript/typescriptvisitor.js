@@ -201,7 +201,6 @@ describe('TypescriptVisitor', function () {
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
-            mockModelFile.isSystemModelFile.returns(true);
             mockModelFile.getNamespace.returns('org.acme.Person');
             mockModelFile.getAllDeclarations.returns([
                 mockEnum,
@@ -266,20 +265,9 @@ describe('TypescriptVisitor', function () {
 
             let mockModelManager = sinon.createStubInstance(ModelManager);
             mockModelManager._isModelManager = true;
-            mockModelManager.getSystemTypes.returns([{
-                getName: () => {
-                    return 'Bob';
-                }
-            },
-            {
-                getName: () => {
-                    return 'Fred';
-                }
-            }]);
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
-            mockModelFile.isSystemModelFile.returns(false);
             mockModelFile.getNamespace.returns('org.acme.Person');
             mockModelFile.getAllDeclarations.returns([
                 mockEnum,

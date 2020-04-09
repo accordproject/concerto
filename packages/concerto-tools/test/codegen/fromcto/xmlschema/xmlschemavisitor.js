@@ -135,7 +135,6 @@ describe('XmlSchemaVisitor', function () {
                 return visitor.visit(this, parameters);
             };
             mockModelFile.getNamespace.returns('org.hyperledger.composer.system');
-            mockModelFile.isSystemModelFile.returns(true);
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
             mockModelManager.getModelFiles.returns([mockModelFile]);
 
@@ -178,7 +177,6 @@ describe('XmlSchemaVisitor', function () {
                 return visitor.visit(this, parameters);
             };
             mockModelFile.getNamespace.returns('org.hyperledger.composer.system');
-            mockModelFile.isSystemModelFile.returns(true);
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
             mockModelManager.getModelFiles.returns([mockModelFile]);
 
@@ -206,12 +204,6 @@ describe('XmlSchemaVisitor', function () {
                 return visitor.visit(this, parameters);
             };
 
-            let mockSystemModelFile = sinon.createStubInstance(ModelFile);
-            mockSystemModelFile._isModelFile = true;
-            mockSystemModelFile.getModelManager.returns(mockModelManager);
-            mockSystemModelFile.isSystemModelFile.returns(true);
-            mockSystemModelFile.getNamespace.returns('org.hyperledger.composer.system');
-
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration._isClassDeclaration = true;
             mockClassDeclaration.getNamespace.returns('org.imported');
@@ -234,7 +226,6 @@ describe('XmlSchemaVisitor', function () {
             mockModelFile._isModelFile = true;
             mockModelFile.getModelManager.returns(mockModelManager);
 
-            mockModelFile.isSystemModelFile.returns(false);
             mockModelFile.getImports.returns(['org.imported.ImportedType','org.imported.AnotherImportedType', 'org.different.Type']);
 
             mockModelFile.accept = function(visitor, parameters) {
@@ -243,7 +234,6 @@ describe('XmlSchemaVisitor', function () {
             mockModelFile.getNamespace.returns('org.foo');
             mockModelFile.getAllDeclarations.returns([mockClassDeclaration]);
             mockModelManager.getModelFiles.returns([mockModelFile]);
-            mockModelManager.getSystemModelFiles.returns([mockSystemModelFile]);
 
             xmlSchemaVisitor.visitModelManager(mockModelManager, param);
 

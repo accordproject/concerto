@@ -75,12 +75,6 @@ class ClassDeclaration extends Decorated {
 
         if (this.ast.classExtension) {
             this.superType = this.ast.classExtension.class.name;
-        } else {
-            // if we are not a system type, then we should set the
-            // super type to the system type for this class declaration
-            if (!this.isSystemCoreType()) {
-                this.superType = this.getSystemType();
-            }
         }
 
         if (this.ast.idField) {
@@ -146,9 +140,7 @@ class ClassDeclaration extends Decorated {
 
         // Prevent extending declaration with different type of declaration
         if (this.constructor.name !== classDecl.constructor.name) {
-            let typeName = this.getSystemType();
-            let superTypeName = classDecl.getSystemType();
-            throw new IllegalModelException(`${typeName} (${this.getName()}) cannot extend ${superTypeName} (${classDecl.getName()})`, this.modelFile, this.ast.location);
+            throw new IllegalModelException(`${this.constructor.name} (${this.getName()}) cannot extend ${classDecl.constructor.name} (${classDecl.getName()})`, this.modelFile, this.ast.location);
         }
         this.superTypeDeclaration = classDecl;
         return classDecl;
@@ -254,16 +246,6 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Returns the base system type for this type of class declaration. Override
-     * this method in derived classes to specify a base system type.
-     *
-     * @return {string} the short name of the base system type or null
-     */
-    getSystemType() {
-        return null;
-    }
-
-    /**
      * Returns true if this class is declared as abstract in the model file
      *
      * @return {boolean} true if the class is abstract
@@ -297,16 +279,6 @@ class ClassDeclaration extends Decorated {
      */
     isEvent() {
         return false;
-    }
-
-    /**
-     * Returns true if this class is a system core type - both in the system
-     * namespace, and also one of the system core types (Asset, Participant, etc).
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isSystemCoreType() {
-        return this.getSystemType() === this.getName();
     }
 
     /**

@@ -211,10 +211,6 @@ public abstract class Resource
 
         let superType = '';
 
-        if(classDeclaration.isSystemCoreType()) {
-            superType = ' extends org.hyperledger.composer.system.Resource';
-        }
-
         if(classDeclaration.getSuperType()) {
             superType = ' extends ' + ModelUtil.getShortName(classDeclaration.getSuperType());
         }
