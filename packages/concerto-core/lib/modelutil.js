@@ -190,29 +190,6 @@ class ModelUtil {
             return type;
         }
     }
-
-    /**
-     * Returns the default system model table for a system model file where the class names
-     * exactly match the defaults expected by the ClassDeclarations.
-     *
-     * The default names are:
-     * - 'Transaction'
-     * - 'Asset'
-     * - 'Event'
-     * - 'Participant'
-     *
-     * @returns {string} the fully qualified type name.
-     */
-    static getIdentitySystemModelTable() {
-        const systemModelTable = new Map();
-
-        systemModelTable.set('Transaction', 'Transaction');
-        systemModelTable.set('Asset', 'Asset');
-        systemModelTable.set('Event', 'Event');
-        systemModelTable.set('Participant', 'Participant');
-
-        return systemModelTable;
-    }
 }
 
 module.exports = ModelUtil;

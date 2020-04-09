@@ -18,7 +18,7 @@ const ModelManager = require('../../lib/modelmanager');
 const sinon = require('sinon');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');
 chai.should();
@@ -42,7 +42,7 @@ describe('RelationshipDeclaration', function () {
 
     beforeEach(function () {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockClassDeclaration.getModelFile.returns(mockClassDeclaration);
     });
@@ -105,12 +105,11 @@ describe('RelationshipDeclaration', function () {
             const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
-            mockClassDeclaration.isRelationshipTarget.returns(false);
             field.getParent().getModelFile().getType = () => {return mockClassDeclaration;};
 
             (function () {
                 field.validate(vehicleDeclaration);
-            }).should.throw(/Relationship owner must be to an asset or participant/);
+            }).should.throw(/Relationship owner must be to a class that has an identifier/);
         });
     });
 });

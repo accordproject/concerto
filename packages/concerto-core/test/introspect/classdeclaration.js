@@ -25,7 +25,7 @@ const IntrospectUtils = require('./introspectutils');
 
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -38,7 +38,7 @@ describe('ClassDeclaration', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = new ModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
     });
@@ -216,7 +216,7 @@ describe('ClassDeclaration', () => {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'org.hyperledger.composer.system.Participant');
+            should.equal(superclassName,'system.Participant');
         });
 
         it('toString',()=>{
@@ -281,7 +281,7 @@ describe('ClassDeclaration', () => {
     describe('#_resolveSuperType', () => {
 
         it('should return null if no super type', () => {
-            let classDecl = modelManager.getType('org.hyperledger.composer.system.Asset');
+            let classDecl = modelManager.getType('system.Asset');
             should.equal(classDecl._resolveSuperType(), null);
         });
 
@@ -290,7 +290,7 @@ describe('ClassDeclaration', () => {
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            superClassDecl.getFullyQualifiedName().should.equal('org.hyperledger.composer.system.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
@@ -318,7 +318,7 @@ describe('ClassDeclaration', () => {
     describe('#getSuperTypeDeclaration', () => {
 
         it('should return null if no super type', () => {
-            let classDecl = modelManager.getType('org.hyperledger.composer.system.Asset');
+            let classDecl = modelManager.getType('system.Asset');
             should.equal(classDecl.getSuperTypeDeclaration(), null);
         });
 
@@ -329,7 +329,7 @@ describe('ClassDeclaration', () => {
             classDecl.superTypeDeclaration = null;
             let spy = sinon.spy(classDecl, '_resolveSuperType');
             let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('org.hyperledger.composer.system.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
             sinon.assert.calledOnce(spy);
         });
 
@@ -339,7 +339,7 @@ describe('ClassDeclaration', () => {
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let spy = sinon.spy(classDecl, '_resolveSuperType');
             let superClassDecl = classDecl.getSuperTypeDeclaration();
-            superClassDecl.getFullyQualifiedName().should.equal('org.hyperledger.composer.system.Asset');
+            superClassDecl.getFullyQualifiedName().should.equal('system.Asset');
             sinon.assert.notCalled(spy);
         });
 
@@ -414,40 +414,6 @@ describe('ClassDeclaration', () => {
         it('should return false', () => {
             const testClass = modelManager.getType('com.testing.child.Sub');
             testClass.isEvent().should.be.false;
-
-        });
-    });
-
-    describe('#isRelationshipTarget', () => {
-        const modelFileNames = [
-            'test/data/parser/classdeclaration.isrelationshiptarget.cto',
-        ];
-
-        beforeEach(() => {
-            const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
-            modelManager.addModelFiles(modelFiles);
-        });
-
-        it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.Test');
-            testClass.isRelationshipTarget().should.be.false;
-
-        });
-    });
-
-    describe('#isSystemRelationshipTarget', () => {
-        const modelFileNames = [
-            'test/data/parser/classdeclaration.isrelationshiptarget.cto',
-        ];
-
-        beforeEach(() => {
-            const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
-            modelManager.addModelFiles(modelFiles);
-        });
-
-        it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.Test');
-            testClass.isSystemRelationshipTarget().should.be.false;
 
         });
     });

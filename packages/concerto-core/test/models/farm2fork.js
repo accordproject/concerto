@@ -17,7 +17,7 @@
 require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');
 
@@ -25,7 +25,7 @@ describe('Farm2Fork Model', function() {
     describe('#getModelManagerFarm2Fork', function() {
         it('check parsing and model manager', function() {
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
 
             // parse a model file from disk and add to the ModelManager
@@ -40,7 +40,7 @@ describe('Farm2Fork Model', function() {
             modelManager.addModelFile(file,fileName);
             modelManager.getModelFiles().filter((modelFile) => {
                 return !modelFile.isSystemModelFile();
-            }).length.should.equal(2);
+            }).length.should.equal(3);
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
 
@@ -76,7 +76,7 @@ describe('Farm2Fork Model', function() {
             let txDecl = modelFile.getTransactionDeclaration('MoveAnimalToHolding');
             txDecl.should.not.be.null;
             txDecl.getName().should.equal('MoveAnimalToHolding');
-            txDecl.getProperties().length.should.equal(4);
+            txDecl.getProperties().length.should.equal(3);
             let holdingField = txDecl.getProperty('holding');
             (holdingField !== null).should.be.true;
             holdingField.getName().should.equal('holding');

@@ -29,8 +29,8 @@ const ParticipantDeclaration = require('../lib/introspect/participantdeclaration
 const Serializer = require('../lib/serializer');
 const TransactionDeclaration = require('../lib/introspect/transactiondeclaration');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
-const ModelUtil = require('../lib/modelutil');
-const Util = require('./composer/systemmodelutility');
+const Util = require('./composer/composermodelutility');
+const COMPOSER_MODEL = require('./composer/composermodel');
 
 const chai = require('chai');
 const should = chai.should();
@@ -53,10 +53,10 @@ describe('ModelManager', () => {
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         mockSystemModelFile = sinon.createStubInstance(ModelFile);
         mockSystemModelFile.isLocalType.withArgs('Asset').returns(true);
-        mockSystemModelFile.getNamespace.returns('org.hyperledger.composer.system');
+        mockSystemModelFile.getNamespace.returns('system');
         mockSystemModelFile.isSystemModelFile.returns(true);
     });
 
@@ -134,15 +134,6 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             let res = modelManager.addModelFile(mf1);
-            sinon.assert.calledOnce(mf1.validate);
-            modelManager.modelFiles['org.doge'].should.equal(mf1);
-            res.should.equal(mf1);
-        });
-
-        it('should not be possible to add a system model file explicit system model table', ()=>{
-            let mf1 = sinon.createStubInstance(ModelFile);
-            mf1.getNamespace.returns('org.doge');
-            let res = modelManager.addModelFile(mf1, null, null, ModelUtil.getIdentitySystemModelTable());
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
@@ -264,7 +255,7 @@ describe('ModelManager', () => {
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
             modelManager.getModelFiles().filter((modelFile) => {
                 return !modelFile.isSystemModelFile();
-            }).length.should.equal(1);
+            }).length.should.equal(2);
         });
 
         it('should restore existing model files on validation error', () => {
@@ -293,13 +284,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to add a system model file (via string)', ()=>{
             (() => {
-                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, true);
-            }).should.throw(/System namespace can not be updated/);
-        });
-
-        it('should not be possible to add a system model file (via string) with explicit system model table', ()=>{
-            (() => {
-                modelManager.addModelFiles(['namespace org.hyperledger.composer.system'],['fakesysnamespace.cto'], null, ModelUtil.getIdentitySystemModelTable());
+                modelManager.addModelFiles(['namespace system'],['fakesysnamespace.cto'], null);
             }).should.throw(/System namespace can not be updated/);
         });
 
@@ -426,14 +411,14 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge');
             (() => {
                 modelManager.updateModelFile(mf1);
-            }).should.throw(/model file does not exist/);
+            }).should.throw(/Model file for namespace org.doge not found/);
         });
 
         it('throw if the namespace from a string does not exist', () => {
             let model = 'namespace org.doge\nasset TestAsset identified by assetId { o String assetId }';
             (() => {
                 modelManager.updateModelFile(model);
-            }).should.throw(/model file does not exist/);
+            }).should.throw(/Model file for namespace org.doge not found/);
         });
 
         it('should update from an object', () => {
@@ -504,7 +489,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to update a system model file (via string)', ()=>{
             (() => {
-                modelManager.updateModelFile('namespace org.hyperledger.composer.system','fakesysnamespace.cto');
+                modelManager.updateModelFile('namespace system','fakesysnamespace.cto');
             }).should.throw();
         });
 
@@ -518,7 +503,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge');
             (() => {
                 modelManager.deleteModelFile(mf1);
-            }).should.throw(/model file does not exist/);
+            }).should.throw(/Model file does not exist/);
         });
 
         it('delete the model file', () => {
@@ -535,7 +520,7 @@ describe('ModelManager', () => {
 
         it('should not be possible to delete a system model file', ()=>{
             (() => {
-                modelManager.deleteModelFile('org.hyperledger.composer.system');
+                modelManager.deleteModelFile('system');
             }).should.throw(/Cannot delete system namespace/);
         });
 
@@ -686,6 +671,7 @@ concept Bar {
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
                 'internal.cto',
+                'org.hyperledger.composer.system.cto',
             ]);
             dir.cleanup();
         });
@@ -697,6 +683,7 @@ concept Bar {
             });
             fs.readdirSync(dir.path).should.eql([
                 'internal.cto',
+                'org.hyperledger.composer.system.cto',
             ]);
             dir.cleanup();
         });
@@ -708,6 +695,7 @@ concept Bar {
             });
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
+                '@system.cto',
                 'internal.cto',
                 'org.hyperledger.composer.system.cto'
             ]);
@@ -722,7 +710,7 @@ concept Bar {
     describe('#getSystemModelFiles', () => {
         it('should only list all system model files', () => {
             modelManager.addModelFile(modelBase);
-            modelManager.getModelFiles().length.should.equal(2);
+            modelManager.getModelFiles().length.should.equal(3);
             modelManager.getSystemModelFiles().length.should.equal(1);
         });
     });
@@ -731,8 +719,10 @@ concept Bar {
         it('should return a list of name / content pairs', () => {
             modelManager.addModelFile(modelBase);
             const models = modelManager.getModels();
-            models.length.should.equal(1);
+            models.length.should.equal(2);
             models[0].should.deep.equal({
+                name: 'org.hyperledger.composer.system.cto', content: COMPOSER_MODEL.contents
+            }, {
                 name: 'org.acme.base.cto', content: modelBase
             });
         });
@@ -741,7 +731,7 @@ concept Bar {
             const models = modelManager.getModels({
                 includeSystemModels: true
             });
-            models.length.should.equal(2);
+            models.length.should.equal(3);
         });
         it('should return a list of name / content pairs, with External Models', async () => {
             const externalModelFile = new ModelFile(modelManager, `namespace org.external
@@ -762,7 +752,7 @@ concept Bar {
             const options = {};
             await modelManager.updateExternalModels(options, mfd);
             const models = modelManager.getModels();
-            models.length.should.equal(2);
+            models.length.should.equal(3);
         });
 
         it('should return a list of name / content pairs, without External Models', async () => {
@@ -786,7 +776,7 @@ concept Bar {
             const models = modelManager.getModels({
                 includeExternalModels: false
             });
-            models.length.should.equal(1);
+            models.length.should.equal(2);
         });
     });
 
@@ -811,25 +801,25 @@ concept Bar {
         it('should return all of the system core types', () => {
             modelManager.getSystemTypes().map((classDeclaration) => {
                 return classDeclaration.getName();
-            }).should.deep.equal(['Asset', 'Participant', 'Transaction', 'Event']);
+            }).should.deep.equal(['Asset', 'Transaction', 'Event', 'Participant']);
         });
 
     });
 
     describe('#getDeclarations', () => {
 
-        const numberSystemAssets = 8;
-        const numberSystemEnums = 1;
-        const numberSystemParticipants = 2;
+        const numberSystemAssets = 1;
+        const numberSystemEnums = 0;
+        const numberSystemParticipants = 1;
         const numberSystemEvents = 1;
-        const numberSystemTransactions = 17;
+        const numberSystemTransactions = 1;
         const numberSystemConcepts = 0;
 
-        const numberModelBaseAssets = 5;
-        const numberModelBaseEnums = 1;
-        const numberModelBaseParticipants = 2;
+        const numberModelBaseAssets = 12;
+        const numberModelBaseEnums = 2;
+        const numberModelBaseParticipants = 4;
         const numberModelBaseEvents = 0;
-        const numberModelBaseTransactions = 3;
+        const numberModelBaseTransactions = 20;
         const numberModelBaseConcepts = 2;
 
 
@@ -851,10 +841,10 @@ concept Bar {
                 let decls = modelManager.getAssetDeclarations(false);
                 decls.should.all.be.an.instanceOf(AssetDeclaration);
                 decls.length.should.equal(numberModelBaseAssets);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -888,10 +878,10 @@ concept Bar {
                 let decls = modelManager.getEnumDeclarations(false);
                 decls.should.all.be.an.instanceOf(EnumDeclaration);
                 decls.length.should.equal(numberModelBaseEnums);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -925,10 +915,10 @@ concept Bar {
                 let decls = modelManager.getParticipantDeclarations(false);
                 decls.should.all.be.an.instanceOf(ParticipantDeclaration);
                 decls.length.should.equal(numberModelBaseParticipants);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });
@@ -998,10 +988,10 @@ concept Bar {
                 let decls = modelManager.getTransactionDeclarations(false);
                 decls.should.all.be.an.instanceOf(TransactionDeclaration);
                 decls.length.should.equal(numberModelBaseTransactions);
-                let i;
+                /* let i;
                 for(i = 0; i < decls.length; i++) {
                     decls[i].modelFile.should.have.property('systemModelFile', false);
-                }
+                } */
             });
 
         });

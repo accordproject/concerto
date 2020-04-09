@@ -102,7 +102,7 @@ class ResourceValidator {
         }
 
         if(!found) {
-            ResourceValidator.reportInvalidEnumValue( parameters.rootResourceIdentifier, enumDeclaration, obj );
+            ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj);
         }
 
         return null;
@@ -145,7 +145,7 @@ class ResourceValidator {
             if(!this.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(obj instanceof Identifiable) {
+                    if(classDeclaration.getIdentifierFieldName()) {
                         ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
                     }
                     else {
@@ -155,7 +155,7 @@ class ResourceValidator {
             }
         }
 
-        if(obj instanceof Identifiable) {
+        if(classDeclaration.getIdentifierFieldName()) {
             const id = obj.getIdentifier();
 
             // prevent empty identifiers
@@ -299,12 +299,16 @@ class ResourceValidator {
                     invalid = true;
                 }
                 break;
-            case 'Double':
             case 'Long':
             case 'Integer':
+            case 'Double': {
                 if(dataType !== 'number') {
                     invalid = true;
                 }
+                if (!isFinite(obj)) {
+                    invalid = true;
+                }
+            }
                 break;
             case 'Boolean':
                 if(dataType !== 'boolean') {
@@ -421,7 +425,11 @@ class ResourceValidator {
         else {
             if(value) {
                 try {
-                    value = JSON.stringify(value);
+                    if (typeof value === 'number' && !isFinite(value)) {
+                        value = value.toString();
+                    } else {
+                        value = JSON.stringify(value);
+                    }
                 }
                 catch(err) {
                     value = value.toString();

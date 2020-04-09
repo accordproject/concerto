@@ -14,8 +14,7 @@
 
 'use strict';
 
-const SYSTEM_MODELS = [
-
+const COMPOSER_MODEL =
     {
         namespace: 'org.hyperledger.composer.system',
         fileName: 'org.hyperledger.composer.system.cto',
@@ -35,42 +34,15 @@ const SYSTEM_MODELS = [
 namespace org.hyperledger.composer.system
 
 /**
- * Abstract system asset that all assets extend.
- * Has no properties, and is soley used as a basis to model other assets.
- */
-@docs('asset.md')
-abstract asset Asset {  }
-
-/**
  * Abstract system participant that all participants extend.
  * Has no properties, and is soley used as a basis to model other assets.
  */
 @docs('participant.md')
-abstract participant Participant {   }
-
-/**
- * Abstract transaction that all transactions, including system ones, extend.
- *
- * Has two properties that are used set and are accessible in all transactions.
- *
- *
- * @param {String} transactionId Identifier for this transaction
- */
-@docs('transaction.md')
-abstract transaction Transaction identified by transactionId {
-  o String transactionId
+abstract participant ComposerParticipant identified by participantId {
+  o String participantId
 }
-
-/**
- * Abstract event that all events, including system ones, extend.
- *
- * Has two properties that are used set and are accessible in all transactions.
- *
- * @param {String} eventId Identifier for this event
- */
-@docs('event.md')
-abstract event Event identified by eventId {
-  o String eventId
+abstract transaction ComposerTransaction identified by transactionId {
+  o String transactionId
 }
 
 /**
@@ -144,7 +116,7 @@ participant NetworkAdmin identified by participantId {
  * Asset to represent each historian registry entry
  *
  * @param {String} transactionId Using the transaction id as the uuid
- * @param {Transaction} transactionInvoked Relationship to transaction
+ * @param {ComposerTransaction} transactionInvoked Relationship to transaction
  * @param {Participant} participantInvoking Participant who invoked this transaction
  * @param {Identity} identityUsed The identity that was used by the participant
  * @param {Event[]} eventsEmitted The events that were emitted by this transactionId
@@ -153,13 +125,13 @@ participant NetworkAdmin identified by participantId {
 @docs('historian.md')
 @docsuri('Composer Documentation','../business-network/historian')
 asset HistorianRecord identified by transactionId {
-  o String        transactionId
-  o String        transactionType
-  --> Transaction transactionInvoked
-  --> Participant participantInvoking  optional
-  --> Identity    identityUsed         optional
-  o Event[]       eventsEmitted        optional
-  o DateTime      transactionTimestamp
+  o String                transactionId
+  o String                transactionType
+  --> ComposerTransaction         transactionInvoked
+  --> ComposerParticipant participantInvoking  optional
+  --> Identity            identityUsed         optional
+  o Event[]               eventsEmitted        optional
+  o DateTime              transactionTimestamp
 }
 
 // -----------------------------------------------------------------------------
@@ -169,7 +141,8 @@ asset HistorianRecord identified by transactionId {
  * @param {Registry} targetRegistry Registry that will be manipulated
  */
 @docs('registryTransaction.md')
-abstract transaction RegistryTransaction {
+abstract transaction RegistryTransaction identified by transactionId {
+  o String transactionId
   --> Registry targetRegistry
 }
 
@@ -262,7 +235,7 @@ asset Identity identified by identityId {
     o String issuer
     o String certificate
     o IdentityState state
-    --> Participant participant
+    --> ComposerParticipant participant
 }
 
 /**
@@ -271,8 +244,9 @@ asset Identity identified by identityId {
  * @param {String} identityName  name to use for this identity
  */
 @docs('issueIdentity.md')
-transaction IssueIdentity {
-    --> Participant participant
+transaction IssueIdentity identified by transactionId {
+   o String transactionId
+    --> ComposerParticipant participant
     o String identityName
 }
 
@@ -282,8 +256,9 @@ transaction IssueIdentity {
  * @param {String} certificate to use
  */
 @docs('bindIdentity.md')
-transaction BindIdentity {
-    --> Participant participant
+transaction BindIdentity identified by transactionId {
+    o String transactionId
+    --> ComposerParticipant participant
     o String certificate
 }
 
@@ -291,7 +266,9 @@ transaction BindIdentity {
  * Transaction that will activate the current the identity
  */
 @docs('activateIdentity.md')
-transaction ActivateCurrentIdentity { }
+transaction ActivateCurrentIdentity identified by transactionId {
+  o String transactionId
+}
 
 /**
  * Transaction that will revoke the identity
@@ -332,7 +309,6 @@ transaction SetLogLevel {
 }
 `
     }
+;
 
-];
-
-module.exports = SYSTEM_MODELS;
+module.exports = COMPOSER_MODEL;

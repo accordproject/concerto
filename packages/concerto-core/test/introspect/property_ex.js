@@ -16,7 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const sinon = require('sinon');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');
 chai.should();
@@ -38,7 +38,7 @@ describe('Property', function () {
 
     before(function () {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
     });
 
     beforeEach(function () {

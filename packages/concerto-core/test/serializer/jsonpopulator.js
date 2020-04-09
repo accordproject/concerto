@@ -21,8 +21,9 @@ const ModelManager = require('../../lib/modelmanager');
 const Relationship = require('../../lib/model/relationship');
 const Resource = require('../../lib/model/resource');
 const TypedStack = require('../../lib/serializer/typedstack');
+const ValidationException = require('../../lib/serializer/validationexception');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 require('chai').should();
@@ -41,11 +42,12 @@ describe('JSONPopulator', () => {
 
     before(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.addModelFile(`
             namespace org.acme
             asset MyAsset1 identified by assetId {
                 o String assetId
+                o Integer assetValue optional
             }
             asset MyAsset2 identified by assetId {
                 o String assetId
@@ -114,13 +116,60 @@ describe('JSONPopulator', () => {
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
-        it('should convert to integers from strings', () => {
+        it('should not convert to dates from invalid moments', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, 'foo');
+            }).should.throw(ValidationException, /Expected value "foo" to be of type DateTime/);
+        });
+
+        it('should not convert to dates from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type DateTime/);
+        });
+
+        it('should not convert to dates from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type DateTime/);
+        });
+
+        it('should not convert to dates when not in ISO 8601 format', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, 'December 17, 1995 03:24:00');
+            }).should.throw(ValidationException, /Expected value "December 17, 1995 03:24:00" to be of type DateTime/);
+        });
+
+        it('should not convert to integers from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
-            let value = jsonPopulator.convertToObject(field, '32768');
-            value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
-            value.should.equal(32768);
+            (() => {
+                jsonPopulator.convertToObject(field, '32768');
+            }).should.throw(ValidationException, /Expected value "32768" to be of type Integer/);
+        });
+
+        it('should not convert to integer from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Integer/);
+        });
+
+        it('should not convert to integer from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Integer');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Integer/);
         });
 
         it('should convert to integers from numbers', () => {
@@ -128,17 +177,32 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             let value = jsonPopulator.convertToObject(field, 32768);
             value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
+            value = ergoJsonPopulator.convertToObject(field, {'$nat':32768});
             value.should.equal(32768);
         });
 
-        it('should convert to longs from strings', () => {
+        it('should not convert to longs from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
-            let value = jsonPopulator.convertToObject(field, '32768');
-            value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
-            value.should.equal(32768);
+            (() => {
+                jsonPopulator.convertToObject(field, '32768');
+            }).should.throw(ValidationException, /Expected value "32768" to be of type Long/);
+        });
+
+        it('should not convert to long from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Long/);
+        });
+
+        it('should not convert to long from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Long/);
         });
 
         it('should convert to longs from numbers', () => {
@@ -146,15 +210,40 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             let value = jsonPopulator.convertToObject(field, 32768);
             value.should.equal(32768);
-            value = ergoJsonPopulator.convertToObject(field, {'nat':'32768'});
+            value = ergoJsonPopulator.convertToObject(field, {'$nat':32768});
             value.should.equal(32768);
         });
 
-        it('should convert to doubles from strings', () => {
+        it('should not convert to longs from numbers that are not integers', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Long');
+            (() => {
+                jsonPopulator.convertToObject(field, 32.768);
+            }).should.throw(ValidationException, /Expected value 32.768 to be of type Long/);
+        });
+
+        it('should not convert to doubles from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Double');
-            let value = jsonPopulator.convertToObject(field, '32.768');
-            value.should.equal(32.768);
+            (() => {
+                jsonPopulator.convertToObject(field, '32.768');
+            }).should.throw(ValidationException, /Expected value "32.768" to be of type Double/);
+        });
+
+        it('should not convert to double from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Double');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Double/);
+        });
+
+        it('should not convert to double from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Double');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Double/);
         });
 
         it('should convert to doubles from numbers', () => {
@@ -164,18 +253,43 @@ describe('JSONPopulator', () => {
             value.should.equal(32.768);
         });
 
-        it('should convert to booleans from strings', () => {
+        it('should convert to booleans from true', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
-            let value = jsonPopulator.convertToObject(field, 'true');
+            let value = jsonPopulator.convertToObject(field, true);
             value.should.equal(true);
         });
 
-        it('should convert to booleans from numbers', () => {
+        it('should not convert to booleans from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
-            let value = jsonPopulator.convertToObject(field, false);
-            value.should.equal(false);
+            (() => {
+                jsonPopulator.convertToObject(field, 'true');
+            }).should.throw(ValidationException, /Expected value "true" to be of type Boolean/);
+        });
+
+        it('should not convert to booleans from numbers', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Boolean');
+            (() => {
+                jsonPopulator.convertToObject(field, 32.768);
+            }).should.throw(ValidationException, /Expected value 32.768 to be of type Boolean/);
+        });
+
+        it('should not convert to boolean from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Boolean');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type Boolean/);
+        });
+
+        it('should not convert to boolean from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('Boolean');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type Boolean/);
         });
 
         it('should convert to strings from strings', () => {
@@ -185,11 +299,28 @@ describe('JSONPopulator', () => {
             value.should.equal('hello world');
         });
 
-        it('should convert to strings from numbers', () => {
+        it('should not convert to strings from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
-            let value = jsonPopulator.convertToObject(field, 32768);
-            value.should.equal('32768');
+            (() => {
+                jsonPopulator.convertToObject(field, 32.768);
+            }).should.throw(ValidationException, /Expected value 32.768 to be of type String/);
+        });
+
+        it('should not convert to string from null', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('String');
+            (() => {
+                jsonPopulator.convertToObject(field, null);
+            }).should.throw(ValidationException, /Expected value null to be of type String/);
+        });
+
+        it('should not convert to string from undefined', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('String');
+            (() => {
+                jsonPopulator.convertToObject(field, undefined);
+            }).should.throw(ValidationException, /Expected value undefined to be of type String/);
         });
 
     });
@@ -225,6 +356,78 @@ describe('JSONPopulator', () => {
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
                 $class: 'org.acme.MyAsset1',
                 assetId: 'asset1'
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = jsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: 1
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional intege (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: { '$left' : { '$nat' : 1 } }
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer (null)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = jsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: null
+            }, options);
+            resource.should.be.an.instanceOf(Resource);
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+        });
+
+        it('should create a new resource from an object using a $class value that matches the model with optional integer (null) (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack({}),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockResource = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
+                $class: 'org.acme.MyAsset1',
+                assetId: 'asset1',
+                assetValue: { '$right' : null }
             }, options);
             resource.should.be.an.instanceOf(Resource);
             sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');

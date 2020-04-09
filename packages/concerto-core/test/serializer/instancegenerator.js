@@ -19,7 +19,7 @@ const InstanceGenerator = require('../../lib/serializer/instancegenerator');
 const ModelManager = require('../../lib/modelmanager');
 const TypedStack = require('../../lib/serializer/typedstack');
 const ValueGenerator = require('../../lib/serializer/valuegenerator');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 const chai = require('chai');
@@ -41,7 +41,7 @@ describe('InstanceGenerator', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
         parameters = {
             modelManager: modelManager,
@@ -76,6 +76,16 @@ describe('InstanceGenerator', () => {
             }`);
             resource.theValue.should.be.a('string');
         });
+
+        it('should generate a default value for a string property with a regex', () => {
+            let resource = test(`namespace org.acme.test
+            asset MyAsset identified by assetId {
+                o String assetId
+                o String theValue regex = /foo/
+            }`);
+            resource.theValue.should.be.a('string');
+        });
+
         it('should not throw a recursion error', () => {
             let resource = test(`namespace org.acme.test
             participant MyParticipant identified by participantId{
@@ -171,6 +181,15 @@ describe('InstanceGenerator', () => {
             resource.theValue.should.be.a('number');
         });
 
+        it('should generate a default value for an integer property with a range', () => {
+            let resource = test(`namespace org.acme.test
+            asset MyAsset identified by assetId {
+                o String assetId
+                o Integer theValue range = [-1,1]
+            }`);
+            resource.theValue.should.be.a('number');
+        });
+
         it('should generate a default value for an integer array property', () => {
             let resource = test(`namespace org.acme.test
             asset MyAsset identified by assetId {
@@ -190,6 +209,15 @@ describe('InstanceGenerator', () => {
             resource.theValue.should.be.a('number');
         });
 
+        it('should generate a default value for a long property with a range', () => {
+            let resource = test(`namespace org.acme.test
+            asset MyAsset identified by assetId {
+                o String assetId
+                o Long theValue range = [-1,1]
+            }`);
+            resource.theValue.should.be.a('number');
+        });
+
         it('should generate a default value for a long array property', () => {
             let resource = test(`namespace org.acme.test
             asset MyAsset identified by assetId {
@@ -205,6 +233,15 @@ describe('InstanceGenerator', () => {
             asset MyAsset identified by assetId {
                 o String assetId
                 o Double theValue
+            }`);
+            resource.theValue.should.be.a('number');
+        });
+
+        it('should generate a default value for a double property with a range', () => {
+            let resource = test(`namespace org.acme.test
+            asset MyAsset identified by assetId {
+                o String assetId
+                o Double theValue range = [-3.142, 3.143]
             }`);
             resource.theValue.should.be.a('number');
         });
@@ -378,11 +415,14 @@ describe('InstanceGenerator', () => {
 
         it('should generate concrete subclass for abstract reference', function () {
             let resource = test(`namespace org.acme.test
+            event MyEvent identified by eventId extends Event {
+                o String eventId
+            }
             asset MyAsset identified by id {
                 o String id
-                --> Asset theValue
+                --> MyEvent theValue
             }`);
-            resource.theValue.getType().should.equal('MyAsset');
+            resource.theValue.getType().should.equal('MyEvent');
         });
 
     });

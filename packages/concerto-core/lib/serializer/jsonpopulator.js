@@ -121,10 +121,19 @@ class JSONPopulator {
         validateProperties(properties, classDeclaration);
 
         properties.forEach((property) => {
-            const value = jsonObj[property];
-            parameters.jsonStack.push(value);
-            const classProperty = classDeclaration.getProperty(property);
-            resourceObj[property] = classProperty.accept(this,parameters);
+            let value = jsonObj[property];
+            if (this.ergo) { // XXX Unpack optionals
+                if (Object.prototype.hasOwnProperty.call(value,'$left')) {
+                    value = value.$left;
+                } else if (Object.prototype.hasOwnProperty.call(value,'$right')) {
+                    value = value.$right;
+                }
+            }
+            if (value !== null) {
+                parameters.jsonStack.push(value);
+                const classProperty = classDeclaration.getProperty(property);
+                resourceObj[property] = classProperty.accept(this,parameters);
+            }
         });
 
         return resourceObj;
@@ -156,12 +165,12 @@ class JSONPopulator {
     }
 
     /**
-    *
-    * @param {Field} field - the field of the item being converted
-    * @param {Object} jsonItem - the JSON object of the item being converted
-    * @param {Object} parameters - the parameters
-    * @return {Object} - the populated object.
-    */
+     *
+     * @param {Field} field - the field of the item being converted
+     * @param {Object} jsonItem - the JSON object of the item being converted
+     * @param {Object} parameters - the parameters
+     * @return {Object} - the populated object.
+     */
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
@@ -214,35 +223,64 @@ class JSONPopulator {
         let result = null;
 
         switch(field.getType()) {
-        case 'DateTime':
+        case 'DateTime': {
             if (Moment.isMoment(json)) {
                 result = json;
             } else {
-                result = new Moment.parseZone(json);
+                // Uses strict mode
+                result = new Moment.parseZone(json, Moment.ISO_8601, true);
             }
+            if (!result.isValid()) {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
         case 'Integer':
-        case 'Long':
-            result = this.ergo ? parseInt(json.nat) : parseInt(json);
+        case 'Long': {
+            const num = this.ergo ? json.$nat : json;
+            if (typeof num === 'number') {
+                if (Math.trunc(num) !== num) {
+                    throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                } else {
+                    result = num;
+                }
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
-        case 'Double':
-            result = parseFloat(json);
+        case 'Double': {
+            if (typeof json === 'number') {
+                result = parseFloat(json);
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
-        case 'Boolean':
-            result = (json === true || json === 'true');
+        case 'Boolean': {
+            if (typeof json === 'boolean') {
+                result = json;
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
+        }
             break;
         case 'String':
-            result = json.toString();
+            if (typeof json === 'string') {
+                result = json;
+            } else {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+            }
             break;
         default: {
             // everything else should be an enumerated value...
             if (this.ergo) {
                 // unpack the enum
-                let current = json.data;
-                while (!current.left) {
-                    current = current.right;
+                let current = json.$data;
+                while (!current.$left) {
+                    current = current.$right;
                 }
-                result = current.left;
+                result = current.$left;
             } else {
                 result = json;
             }

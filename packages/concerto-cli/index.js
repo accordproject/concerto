@@ -29,10 +29,6 @@ require('yargs')
             describe: 'sample JSON to validate',
             type: 'string'
         });
-        yargs.option('ctoSystem', {
-            describe: 'system model to be used',
-            type: 'string'
-        });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
@@ -45,7 +41,7 @@ require('yargs')
 
         try {
             argv = Commands.validateValidateArgs(argv);
-            return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
+            return Commands.validate(argv.sample, argv.ctoFiles)
                 .then((result) => {
                     Logger.info(result);
                 })
@@ -59,10 +55,6 @@ require('yargs')
     })
     .command('compile', 'generate code for a target platform', (yargs) => {
         yargs.demandOption(['ctoFiles'], 'Please provide at least the CTO files');
-        yargs.option('ctoSystem', {
-            describe: 'system model to be used',
-            type: 'string'
-        });
         yargs.option('ctoFiles', {
             describe: 'array of CTO files',
             type: 'string',
@@ -83,7 +75,7 @@ require('yargs')
             Logger.info(`generate code for target ${argv.target} from models ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.compile(argv.target, argv.ctoSystem, argv.ctoFiles, argv.output)
+        return Commands.compile(argv.target, argv.ctoFiles, argv.output)
             .then((result) => {
                 Logger.info(result);
             })
@@ -98,10 +90,6 @@ require('yargs')
             type: 'string',
             array: true
         });
-        yargs.option('ctoSystem', {
-            describe: 'system model to be used',
-            type: 'string'
-        });
         yargs.option('output', {
             describe: 'output directory path',
             type: 'string',
@@ -112,7 +100,7 @@ require('yargs')
             Logger.info(`saving external models from ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.get(argv.ctoSystem, argv.ctoFiles, argv.output)
+        return Commands.get(argv.ctoFiles, argv.output)
             .then((result) => {
                 Logger.info(result);
             })

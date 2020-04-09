@@ -17,7 +17,7 @@
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 require('chai').should();
 
@@ -27,7 +27,7 @@ describe('ParticipantDeclaration', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
     });
 
     let loadParticipantDeclaration = (modelFileName) => {
@@ -38,13 +38,6 @@ describe('ParticipantDeclaration', () => {
 
         return assets[0];
     };
-
-    describe('#isRelationshipTarget', () => {
-        it('should return true', () => {
-            let p = loadParticipantDeclaration('test/data/parser/participantdeclaration.valid.cto');
-            p.isRelationshipTarget().should.be.true;
-        });
-    });
 
     describe('#getSystemType', () => {
         it('should return Participant', () => {

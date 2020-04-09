@@ -26,7 +26,7 @@ const ParseException = require('../../lib/introspect/parseexception');
 const parser = require('../../lib/introspect/parser');
 const fs = require('fs');
 const path = require('path');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');
 const should = chai.should();
@@ -41,7 +41,7 @@ describe('ModelFile', () => {
 
     beforeEach(() => {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         sandbox = sinon.createSandbox();
     });
 
@@ -89,7 +89,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.hyperledger.composer.system.Event', 'org.hyperledger.composer.system.Transaction', 'org.hyperledger.composer.system.Participant', 'org.hyperledger.composer.system.Asset', 'org.freddos', 'org.doge']);
+            mf.imports.should.deep.equal(['system.Participant', 'system.Event', 'system.Transaction', 'system.Asset', 'org.freddos', 'org.doge']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
@@ -101,7 +101,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.hyperledger.composer.system.Event', 'org.hyperledger.composer.system.Transaction', 'org.hyperledger.composer.system.Participant', 'org.hyperledger.composer.system.Asset', 'org.doge', 'org.freddos.*']);
+            mf.imports.should.deep.equal(['system.Participant', 'system.Event', 'system.Transaction', 'system.Asset', 'org.doge', 'org.freddos.*']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge') === null).should.be.true;
         });
@@ -375,7 +375,7 @@ describe('ModelFile', () => {
             const model = `
             namespace org.acme`;
             let modelFile = new ModelFile(modelManager, model);
-            modelFile.resolveImport('Asset').should.equal('org.hyperledger.composer.system.Asset');
+            modelFile.resolveImport('Asset').should.equal('system.Asset');
         });
 
         it('should find the fully qualified name of the import', () => {
@@ -479,7 +479,7 @@ describe('ModelFile', () => {
 
         before(() => {
             modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelFile = modelManager.addModelFile(`namespace org.acme
             asset MyAsset identified by assetId {
                 o String assetId

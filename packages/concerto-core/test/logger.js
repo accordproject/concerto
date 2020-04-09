@@ -15,7 +15,6 @@
 'use strict';
 
 const Logger = require('../lib/logger');
-const Fs = require('fs');
 const Chai = require('chai');
 
 Chai.should();
@@ -91,34 +90,49 @@ describe('logger', () => {
             });
         });
     });
-    describe('#logger.info (in production)', function () {
-        it('should call logger.info', async function () {
-            process.env.NODE_ENV = 'production';
-            Logger.info('This is logging some useful information');
+    describe('#logger.verbose', function () {
+        it('should call logger.verbose', async function () {
+            Logger.verbose('This is logging some verbose message');
+        });
+        it('should call logger.verbose with an Error object', async function () {
+            Logger.verbose(new Error('This is some verbose message'));
         });
     });
-    describe('#setuplogger', () => {
-        const logDir = 'log';
-        const logDirTest = 'logtest';
-        it('should setup logger', async function () {
-            Logger.setup(process,'development',logDir);
+    describe('#logger.silly', function () {
+        it('should call logger.silly', async function () {
+            Logger.silly('This is logging some silly message');
         });
-        it('should setup logger (production)', async function () {
-            Logger.setup(process,'production',logDir);
+        it('should call logger.silly with an Error object', async function () {
+            Logger.silly(new Error('This is some silly message'));
         });
-        it('should setup logger with log directory', async function () {
-            Logger.setup(process,'development',logDirTest);
-            Fs.existsSync(logDir).should.be.true;
-            try { Fs.unlinkSync(`${logDirTest}/trace.log`); } catch (err) { Logger.info(err); }
-            try { Fs.rmdirSync(logDirTest, (err) => {}); } catch (err) { Logger.info(err); }
-            Logger.setup(process,'development',logDir);
+    });
+    describe('#logger.http', function () {
+        it('should call logger.http', async function () {
+            Logger.http('This is logging some http message');
         });
-        it('should setup logger with log directory (in production)', async function () {
-            Logger.setup(process,'production',logDirTest);
-            Fs.existsSync(logDir).should.be.true;
-            try { Fs.unlinkSync(`${logDirTest}/trace.log`); } catch (err) { Logger.info(err); }
-            try { Fs.rmdirSync(logDirTest, (err) => {}); } catch (err) { Logger.info(err); }
-            Logger.setup(process,'development',logDir);
+        it('should call logger.http with an Error object', async function () {
+            Logger.http(new Error('This is some http message'));
+        });
+    });
+    describe('#logger.dispatch', function () {
+        it('should fail to call logger.foo', async function () {
+            Logger.http('This is logging some http message');
+        });
+        it('should call logger.http with an Error object', async function () {
+            Logger.http(new Error('This is some http message'));
+        });
+    });
+    describe('#logger.add', function () {
+        it('should add a custom transport', async function () {
+            const messages = [];
+            Logger.add({
+                info: (...args) => {
+                    messages.push(args);
+                }
+            });
+            Logger.info('This is logging to the default logger and my custom tranport');
+            Logger.info(new Error('This is some silly message'));
+            messages.should.have.lengthOf(2);
         });
     });
 });

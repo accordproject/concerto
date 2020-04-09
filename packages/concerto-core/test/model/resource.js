@@ -16,7 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const Resource = require('../../lib/model/resource');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 const chai = require('chai');
@@ -33,7 +33,8 @@ describe('Resource', function () {
     o String vin
     -->Person owner
   }
-  transaction ScrapCar {
+  transaction ScrapCar identified by transactionId {
+    o String transactionId
     -->Car car
   }
   `;
@@ -42,7 +43,7 @@ describe('Resource', function () {
 
     beforeEach(function () {
         modelManager = new ModelManager();
-        Util.addComposerSystemModels(modelManager);
+        Util.addComposerModel(modelManager);
         modelManager.addModelFile(levelOneModel);
     });
 

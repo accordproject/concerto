@@ -36,22 +36,12 @@ class ParticipantDeclaration extends ClassDeclaration {
     }
 
     /**
-     * Returns true if this class can be pointed to by a relationship
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isRelationshipTarget() {
-        return true;
-    }
-
-    /**
      * Returns the base system type for Participants from the system namespace
      *
      * @return {string} the short name of the base system type
      */
     getSystemType() {
-        let systemType = this.modelFile.getModelManager().getSystemModelTable().get('Participant');
-        return systemType !== undefined ? systemType : null;
+        return 'Participant';
     }
 
     /**

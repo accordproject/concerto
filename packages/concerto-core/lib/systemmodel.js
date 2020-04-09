@@ -12,13 +12,14 @@
  * limitations under the License.
  */
 
-namespace org.acme.core
+'use strict';
 
-participant BaseMember identified by id {
-    o String id
-}
+const systemNamespace = 'system';
+const systemFileName = '@' + systemNamespace + '.cto';
+const systemModel = `namespace system
+abstract asset Asset {  }
+abstract transaction Transaction { }
+abstract event Event { }
+abstract participant Participant {  }`;
 
-transaction BaseTransaction identified by transactionId {
-	o String transactionId
-  --> BaseMember invoker
-}
+module.exports = { systemNamespace, systemFileName, systemModel };

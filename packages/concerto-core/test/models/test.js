@@ -21,7 +21,7 @@ const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclar
 const Serializer = require('../../lib/serializer');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const fs = require('fs');
-const Util = require('../composer/systemmodelutility');
+const Util = require('../composer/composermodelutility');
 const Moment = require('moment-mini');
 
 require('chai').should();
@@ -33,7 +33,7 @@ describe('Test Model', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 
@@ -72,7 +72,7 @@ describe('Test Model', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 
@@ -140,7 +140,7 @@ describe('Test Model', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
             modelManager.clearModelFiles();
 
@@ -225,7 +225,7 @@ describe('Test Model', function(){
     describe('#getModelManager', function() {
         it('check parsing and model manager', function() {
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
 
             let fileName1 = './test/data/model/composer.cto';
@@ -302,7 +302,7 @@ describe('Test Model', function(){
             let txDecl = modelFile.getTransactionDeclaration('VehicleTransferredToScrapMerchant');
             txDecl.should.not.be.null;
             txDecl.getName().should.equal('VehicleTransferredToScrapMerchant');
-            txDecl.getProperties().length.should.equal(4);
+            txDecl.getProperties().length.should.equal(3);
             let scrapMerchantField = txDecl.getProperty('scrapMerchant');
             (scrapMerchantField !== null).should.be.true;
             scrapMerchantField.getName().should.equal('scrapMerchant');
@@ -321,7 +321,7 @@ describe('Test Model', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
 
             let fileName = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
@@ -351,7 +351,7 @@ describe('Test Model', function(){
 
             // create and populate the ModelManager with a model file
             let modelManager = new ModelManager();
-            Util.addComposerSystemModels(modelManager);
+            Util.addComposerModel(modelManager);
 
             let fileName = './test/data/model/dependencies/base/base.cto';
             let baseModel = fs.readFileSync(fileName, 'utf8');

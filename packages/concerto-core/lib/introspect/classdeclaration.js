@@ -221,15 +221,6 @@ class ClassDeclaration extends Decorated {
                     //}
                 }
             }
-        } else {
-            if (this.isAbstract() === false && this.isEnum() === false && this.isConcept() === false) {
-                if (this.getIdentifierFieldName() === null) {
-                    let formatter = Globalize('en').messageFormatter('classdeclaration-validate-missingidentifier');
-                    throw new IllegalModelException(formatter({
-                        'class': this.name
-                    }), this.modelFile, this.ast.location);
-                }
-            }
         }
 
         // we also have to check fields defined in super classes
@@ -309,42 +300,13 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Returns true if this class can be pointed to by a relationship
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isRelationshipTarget() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class can be pointed to by a relationship in a
-     * system model
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isSystemRelationshipTarget() {
-        return this.isRelationshipTarget();
-    }
-
-    /**
-     * Returns true is this type is in the system namespace
-     *
-     * @return {boolean} true if the class may be pointed to by a relationship
-     */
-    isSystemType() {
-        return this.modelFile.isSystemModelFile();
-    }
-
-    /**
      * Returns true if this class is a system core type - both in the system
      * namespace, and also one of the system core types (Asset, Participant, etc).
      *
      * @return {boolean} true if the class may be pointed to by a relationship
      */
     isSystemCoreType() {
-        return this.isSystemType() &&
-            this.getSystemType() === this.getName();
+        return this.getSystemType() === this.getName();
     }
 
     /**
