@@ -53,19 +53,4 @@ module.exports.Typed = require('./lib/model/typed');
 module.exports.TypedStack = require('./lib/serializer/typedstack');
 module.exports.ModelUtil = require('./lib/modelutil');
 module.exports.version = require('./package.json');
-
-module.exports.Concerto = {
-    getTypeDeclaration : require('./lib/concerto').getTypeDeclaration,
-    getIdentifier : require('./lib/concerto').getIdentifier,
-    setIdentifier : require('./lib/concerto').setIdentifier,
-    getFullyQualifiedIdentifier : require('./lib/concerto').getFullyQualifiedIdentifier,
-    toURI : require('./lib/concerto').toURI,
-    fromURI : require('./lib/concerto').fromURI,
-    getType : require('./lib/concerto').getType,
-    getNamespace : require('./lib/concerto').getNamespace,
-    instanceOf : require('./lib/concerto').instanceOf,
-    isIdentifiable : require('./lib/concerto').isIdentifiable,
-    isRelationship : require('./lib/concerto').isRelationship,
-    isObject : require('./lib/concerto').isObject,
-    validate : require('./lib/validator').validate,
-};
+module.exports.Concerto = require('./lib/concerto');

@@ -24,13 +24,6 @@ const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
 const moment = require('moment-mini');
 
-const isIdentifiable = require('../concerto').isIdentifiable;
-const getIdentifier = require('../concerto').getIdentifier;
-const getFullyQualifiedIdentifier = require('../concerto').getFullyQualifiedIdentifier;
-const isRelationship = require('../concerto').isRelationship;
-const isObject = require('../concerto').isObject;
-const fromURI = require('../concerto').fromURI;
-
 /**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
@@ -53,15 +46,20 @@ class ObjectValidator {
 
     /**
      * ResourceValidator constructor
-     * @param {Object} options - the optional serialization options.
+     * @param {*} concerto - the Concerto instance used for validation
+     * @param {Object} options - the optional validation options.
      * @param {boolean} options.validate - validate the structure of the Resource
      * with its model prior to serialization (default to true)
      * @param {boolean} options.convertResourcesToRelationships - Convert resources that
      * are specified for relationship fields into relationships, false by default.
      * @param {boolean} options.permitResourcesForRelationships - Permit resources in the
      */
-    constructor(options) {
+    constructor(concerto, options) {
         this.options = options || {};
+        this.concerto = concerto;
+        if(!this.concerto) {
+            throw new Error('Missing concerto instance');
+        }
     }
     /**
      * Visitor design pattern.
@@ -122,11 +120,11 @@ class ObjectValidator {
 
         const obj = parameters.stack.pop();
 
-        if(isIdentifiable(obj, parameters.modelManager)) {
-            parameters.rootResourceIdentifier = getFullyQualifiedIdentifier(obj, parameters.modelManager);
+        if(this.concerto.isIdentifiable(obj)) {
+            parameters.rootResourceIdentifier = this.concerto.getFullyQualifiedIdentifier(obj);
         }
 
-        const toBeAssignedClassDeclaration = parameters.modelManager.getType(obj.$class);
+        const toBeAssignedClassDeclaration = this.concerto.getModelManager().getType(obj.$class);
         const toBeAssignedClassDecName = toBeAssignedClassDeclaration.getFullyQualifiedName();
 
         // is the type we are assigning to abstract?
@@ -143,8 +141,8 @@ class ObjectValidator {
             if(!this.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(isIdentifiable( obj, parameters.modelManager)) {
-                        ObjectValidator.reportUndeclaredField(getIdentifier(obj, parameters.modelManager), propName, toBeAssignedClassDecName);
+                    if(this.concerto.isIdentifiable( obj)) {
+                        ObjectValidator.reportUndeclaredField(this.concerto.getIdentifier(obj), propName, toBeAssignedClassDecName);
                     }
                     else {
                         ObjectValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName);
@@ -153,15 +151,15 @@ class ObjectValidator {
             }
         }
 
-        if (isIdentifiable( obj, parameters.modelManager)) {
-            const id = getIdentifier(obj, parameters.modelManager);
+        if (this.concerto.isIdentifiable( obj )) {
+            const id = this.concerto.getIdentifier(obj);
 
             // prevent empty identifiers
             if(!id || id.trim().length === 0) {
                 ObjectValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier);
             }
 
-            parameters.currentIdentifier = getFullyQualifiedIdentifier(obj, parameters.modelManager);
+            parameters.currentIdentifier = this.concerto.getFullyQualifiedIdentifier(obj);
         }
 
         // now validate each property
@@ -207,7 +205,7 @@ class ObjectValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
         }
 
         if(field.isTypeEnum()) {
@@ -235,7 +233,7 @@ class ObjectValidator {
     checkEnum(obj,field,parameters) {
 
         if(field.isArray() && !(obj instanceof Array)) {
-            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field, this.concerto);
         }
 
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
@@ -264,7 +262,7 @@ class ObjectValidator {
     checkArray(obj,field,parameters) {
 
         if(!(obj instanceof Array)) {
-            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field, this.concerto);
         }
 
         for(let n=0; n < obj.length; n++) {
@@ -285,7 +283,7 @@ class ObjectValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
         }
 
         if(field.isPrimitive()) {
@@ -316,7 +314,7 @@ class ObjectValidator {
                 break;
             }
             if (invalid) {
-                ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
             }
             else {
                 if(field.getValidator() !== null) {
@@ -326,12 +324,12 @@ class ObjectValidator {
         }
         else {
             // a field that points to a transaction, asset, participant...
-            let classDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-            if( isIdentifiable(obj, parameters.modelManager)) {
+            let classDeclaration = this.concerto.getModelManager().getType(field.getFullyQualifiedTypeName());
+            if( this.concerto.isIdentifiable(obj)) {
                 try {
-                    classDeclaration = parameters.modelManager.getType(obj.$class);
+                    classDeclaration = this.concerto.getModelManager().getType(obj.$class);
                 } catch (err) {
-                    ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                    ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
                 }
 
                 // is it compatible?
@@ -380,15 +378,15 @@ class ObjectValidator {
      * @private
      */
     checkRelationship(parameters, relationshipDeclaration, obj) {
-        if(isRelationship( obj, parameters.modelManager)) {
+        if(this.concerto.isRelationship( obj )) {
             // All good..
-        } else if (isIdentifiable(obj, parameters.modelManager) && (this.options.convertResourcesToRelationships || this.options.permitResourcesForRelationships)) {
+        } else if (this.concerto.isIdentifiable(obj) && (this.options.convertResourcesToRelationships || this.options.permitResourcesForRelationships)) {
             // All good.. Again
         } else {
             ObjectValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
         }
 
-        const relationshipType = fromURI(obj, parameters.modelManager).typeDeclaration;
+        const relationshipType = this.concerto.fromURI(obj).typeDeclaration;
 
         if(relationshipType.isConcept()) {
             throw new Error('Cannot have a relationship to a concept. Relationships must be to resources.');
@@ -405,15 +403,15 @@ class ObjectValidator {
      * @param {string} propName - the name of the field.
      * @param {*} value - the value of the field.
      * @param {Field} field - the field
+     * @param {*} concerto - the concerto instance
      * @throws {ValidationException} the exception
      * @private
      */
-    static reportFieldTypeViolation(id, propName, value, field) {
+    static reportFieldTypeViolation(id, propName, value, field, concerto) {
         let isArray = field.isArray() ? '[]' : '';
         let typeOfValue = typeof value;
-        const modelManager = field.getParent().getModelFile().getModelManager();
 
-        if( isObject(value, modelManager) && isIdentifiable(value, modelManager)) {
+        if( concerto.isObject(value) && concerto.isIdentifiable(value)) {
             typeOfValue = value.getFullyQualifiedType();
             value = value.getFullyQualifiedIdentifier();
         }

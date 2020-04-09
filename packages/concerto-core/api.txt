@@ -7,18 +7,23 @@ class BaseFileException extends BaseException {
    + string getShortMessage() 
    + string getFileName() 
 }
+class Concerto {
+   + void constructor() 
+   + void validate(undefined) throws Error
+   + void getModelManager() 
    + boolean isObject() 
    + void getTypeDeclaration() 
    + string getIdentifier() 
    + boolean isIdentifiable() 
    + boolean isRelationship() 
-   + void setIdentifier() 
+   + void setIdentifier(string) 
    + string getFullyQualifiedIdentifier() 
    + string toURI() 
-   + void fromURI() throws Error
+   + void fromURI(string) throws Error
    + string getType() 
    + string getNamespace() 
-   + boolean instanceOf() 
+   + boolean instanceOf(String) 
+}
 class Factory {
    + void constructor(ModelManager) 
    + Resource newResource(String,String,String,Object,boolean,String,boolean,boolean) throws TypeNotFoundException
@@ -232,4 +237,3 @@ class Serializer {
    + Resource fromJSON(Object,Object,boolean,boolean) 
    + boolean hasInstance(object) 
 }
-   + void validate() throws Error
