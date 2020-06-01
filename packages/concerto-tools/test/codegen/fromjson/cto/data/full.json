@@ -1,0 +1,21 @@
+{
+    "firstName":"Dan",
+    "lastName":"Selman",
+    "dob":"2011-10-05T14:48:00.000Z",
+    "age":11,
+    "height":1.8,
+    "children":[
+      {
+        "name":"Isaac",
+        "age":19,
+        "hairColor":"BROWN",
+        "coolDude":true,
+        "missing":null,
+        "pet":{"name":"Dusty","breed":"Lab"},
+        "favoriteColors":["red","green","blue"],
+        "favoriteNumbers":[3,4,5.3],
+        "mixed":["one",2,3]
+      }
+    ],
+    "company":{"name":"Clause Inc.","employees":[{"name":"Ann"}]}
+  }
