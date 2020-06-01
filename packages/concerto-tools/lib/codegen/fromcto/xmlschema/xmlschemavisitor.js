@@ -99,12 +99,12 @@ class XmlSchemaVisitor {
         parameters.fileWriter.writeLine(0, '>');
 
         // import the system namespace and then any explicitly required namespaces
-        const importedNamespaces = [];
+        const importedNamespaces2 = [];
         // prevent namespaces being imported multiple times
         for(let importedType of modelFile.getImports()) {
             const clazz = modelFile.getModelManager().getType(importedType);
-            if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
-                importedNamespaces.push(clazz.getNamespace());
+            if(importedNamespaces2.indexOf(clazz.getNamespace()) === -1){
+                importedNamespaces2.push(clazz.getNamespace());
                 parameters.fileWriter.writeLine(0, `<xs:import namespace="${clazz.getNamespace()}" schemaLocation="${clazz.getNamespace()}.xsd"/>`);
             }
         }
