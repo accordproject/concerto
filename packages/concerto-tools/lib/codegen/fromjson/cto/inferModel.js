@@ -23,6 +23,16 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function hashCode(value) {
+    let hash = 0, i, chr;
+    for (i = 0; i < value.length; i++) {
+        chr   = value.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 /**
  * Returns true if val is an object
  * @param {*} val the value to test
@@ -112,15 +122,21 @@ function isDouble(val) {
  * @param {*} input  the input object
  */
 function handleArray(typeName, context, input) {
+
+    // empty array are assumed to be strings
     let result = null;
+    let item = '';
+
     if(input.length > 0) {
-        const item = input[0];
-        const itemTypeName = isObject(item) ? typeName : getType(item);
-        result = handleType(itemTypeName, context, item);
-        if(result) {
-            result.array = '[]';
-            result.name = typeName;
-        }
+        item = input[0];
+    }
+    const itemTypeName = isObject(item) ? typeName : getType(item);
+
+    result = handleType(itemTypeName, context, item);
+    if(result) {
+        result.array = '[]';
+        result.optional = '',
+        result.name = typeName;
     }
 
     return result;
@@ -144,7 +160,7 @@ function getType(input) {
         return 'String';
     }
     else {
-        // e.g. null values
+        // nulls are assumed to be String
         return 'String';
     }
 }
@@ -166,7 +182,7 @@ function handleType(name, context, input) {
             fields : []
         };
         context.parents.push(typeDef);
-        context[name] = typeDef;
+        context[typeDef.type] = typeDef;
         const me = context.parents.peek();
 
         Object.keys(input).forEach(key => {
@@ -175,21 +191,52 @@ function handleType(name, context, input) {
                 me.fields.push(result);
             }
         });
+        me.hash = hashCode(JSON.stringify(me.fields));
         context.parents.pop();
         result = {
             name,
             type: typeDef.type,
-            array: ''
+            array: '',
+            optional : isNull(input) ? 'optional' : ''
         };
     } else {
         return {
             name: name,
             type: getType(input),
-            array: ''
+            array: '',
+            optional : isNull(input) ? 'optional' : ''
         };
     }
 
     return result;
+}
+
+/**
+ * Detect duplicate types and remove them
+ * @param {*} context the context
+ */
+function removeDuplicateTypes(context) {
+    const typeMap = {};
+    Object.values(context).forEach(typeDef => {
+        if(!typeMap[typeDef.hash]) {
+            typeMap[typeDef.hash] = typeDef;
+        }
+    });
+
+    Object.values(context).forEach(typeDef => {
+        Object.values(typeDef.fields).forEach(fieldDef => {
+            if(context[fieldDef.type]) {
+                const dupeTypeDef = typeMap[context[fieldDef.type].hash];
+                if(dupeTypeDef && fieldDef.type !== dupeTypeDef.type) {
+                    // console.log(`Removed ${fieldDef.type} and replaced with ${dupeTypeDef.type}`);
+                    delete context[fieldDef.type];
+                    fieldDef.type = dupeTypeDef.type;
+                }
+            }
+        });
+    });
+
+    // console.log(typeMap);
 }
 
 /**
@@ -207,13 +254,13 @@ function inferModel(namespace, rootTypeName, input) {
     };
     handleType(rootTypeName, context, input);
     delete context.parents;
-    // console.log(JSON.stringify(context, null, 2));
+    removeDuplicateTypes(context);
+    console.log(JSON.stringify(context, null, 2));
 
     writer.writeLine( 0, `namespace ${namespace}`);
-    Object.keys(context).forEach(key => {
-        const type = context[key];
+    Object.values(context).forEach(type => {
         writer.writeLine( 0, `concept ${type.type} {`);
-        type.fields.forEach( field => writer.writeLine( 1, `o ${field.type}${field.array} ${field.name}`));
+        type.fields.forEach( field => writer.writeLine( 1, `o ${field.type}${field.array} ${field.name} ${field.optional}`));
         writer.writeLine( 0, '}');
     });
 
