@@ -15,6 +15,7 @@
         "favoriteColors":["red","green","blue"],
         "favoriteNumbers":[3,4,5.3],
         "mixed":["one",2,3],
+        "arrayOfNull" : [null],
         "emptyArray" : [],
         "favoritePets" : [
           {"name":"Spot","breed":"Lab"},
