@@ -39,9 +39,6 @@ function hashCode(value) {
  * @returns {Boolean} true if val is an object
  */
 function isObject(val) {
-    if (isArray(val)) {
-        return false;
-    }
     if (val === null) {
         return false;
     }
@@ -133,11 +130,9 @@ function handleArray(typeName, context, input) {
     const itemTypeName = isObject(item) ? typeName : getType(item);
 
     result = handleType(itemTypeName, context, item);
-    if(result) {
-        result.array = '[]';
-        result.optional = '',
-        result.name = typeName;
-    }
+    result.array = '[]';
+    result.optional = '',
+    result.name = typeName;
 
     return result;
 }
@@ -187,9 +182,7 @@ function handleType(name, context, input) {
 
         Object.keys(input).forEach(key => {
             const result = handleType(key, context, input[key]);
-            if(result) {
-                me.fields.push(result);
-            }
+            me.fields.push(result);
         });
         me.hash = hashCode(JSON.stringify(me.fields));
         context.parents.pop();
@@ -197,7 +190,7 @@ function handleType(name, context, input) {
             name,
             type: typeDef.type,
             array: '',
-            optional : isNull(input) ? 'optional' : ''
+            optional : ''
         };
     } else {
         return {
