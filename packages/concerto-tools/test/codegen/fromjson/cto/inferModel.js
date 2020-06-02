@@ -29,6 +29,7 @@ describe('inferModel', function () {
     it('should generate Concerto', () => {
         const json = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/full.json'), 'utf8'));
         const cto = inferModel('org.acme', 'Root', json);
+        console.log(cto);
         cto.should.not.be.null;
     });
 });

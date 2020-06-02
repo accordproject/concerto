@@ -11,10 +11,15 @@
         "hairColor":"BROWN",
         "coolDude":true,
         "missing":null,
-        "pet":{"name":"Dusty","breed":"Lab"},
+        "pet":{"name":"Dusty","breed":"Tortoise"},
         "favoriteColors":["red","green","blue"],
         "favoriteNumbers":[3,4,5.3],
-        "mixed":["one",2,3]
+        "mixed":["one",2,3],
+        "emptyArray" : [],
+        "favoritePets" : [
+          {"name":"Spot","breed":"Lab"},
+          {"name":"Patch","breed":"Springer"}
+        ] 
       }
     ],
     "company":{"name":"Clause Inc.","employees":[{"name":"Ann"}]}
