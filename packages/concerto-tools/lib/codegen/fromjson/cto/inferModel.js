@@ -248,7 +248,7 @@ function inferModel(namespace, rootTypeName, input) {
     handleType(rootTypeName, context, input);
     delete context.parents;
     removeDuplicateTypes(context);
-    console.log(JSON.stringify(context, null, 2));
+    // console.log(JSON.stringify(context, null, 2));
 
     writer.writeLine( 0, `namespace ${namespace}`);
     Object.values(context).forEach(type => {
