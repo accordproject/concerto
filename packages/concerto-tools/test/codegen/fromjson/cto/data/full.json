@@ -24,8 +24,10 @@
         "stuff" : [
           5,
           null,
+          false,
           {"ssn":"123456789","firstName":"Dan"},
-          {"sku":"987654321","price": 10.0, "product": {"name": "Bella", "breed": "Lab"}}
+          {"sku":"987654321","price": 10.0, "product": {"name": "Bella", "breed": "Lab"}},
+          {"sku":"2","price": 11.5, "product": {"name": "Tiger", "breed": "Lab"}}
         ] 
       }
     ],
