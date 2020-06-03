@@ -119,13 +119,20 @@ function isDouble(val) {
  * @param {*} input  the input object
  */
 function handleArray(typeName, context, input) {
-
-    // empty array are assumed to be strings
     let result = null;
-    let item = '';
+    let item = null;
 
     if(input.length > 0) {
         item = input[0];
+        input.forEach( (i) => {
+            if(isObject(i)) {
+                item = {...item, ...i};
+            }
+        });
+    }
+    else {
+        // empty array are assumed to be strings
+        item = '';
     }
     const itemTypeName = isObject(item) ? typeName : getType(item);
 
