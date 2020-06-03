@@ -20,6 +20,12 @@
         "favoritePets" : [
           {"name":"Spot","breed":"Lab"},
           {"name":"Patch","breed":"Springer"}
+        ],
+        "stuff" : [
+          5,
+          null,
+          {"ssn":"123456789","firstName":"Dan"},
+          {"sku":"987654321","price": 10.0, "product": {"name": "Bella", "breed": "Lab"}}
         ] 
       }
     ],
