@@ -87,7 +87,7 @@ function isString(val) {
  * @returns {Boolean} true if val is a string
  */
 function isDateTime(val) {
-    return !isNull(val) && val.match(isoRegex);
+    return !isNull(val) && isString(val) && val.match(isoRegex);
 }
 
 /**
@@ -96,11 +96,10 @@ function isDateTime(val) {
  * @returns {Boolean} true if val is a string
  */
 function isInteger(val) {
-    if (isNull(val) || isNaN(val)) {
+    if (isNull(val) || isNaN(val) || typeof val !== 'number') {
         return false;
     }
-    let x = parseFloat(val);
-    return (x | 0) === x;
+    return val.toString().indexOf('.') === -1;
 }
 
 /**
@@ -109,7 +108,7 @@ function isInteger(val) {
  * @returns {Boolean} true if val is a string
  */
 function isDouble(val) {
-    return (!isNull(val) && !isNaN(val) && val.toString().indexOf('.') !== -1);
+    return (!isNull(val) && !isNaN(val) && typeof val === 'number' && val.toString().indexOf('.') !== -1);
 }
 
 /**

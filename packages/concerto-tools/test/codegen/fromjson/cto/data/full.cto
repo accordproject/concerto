@@ -28,10 +28,10 @@ concept Pet {
    o String breed 
 }
 concept Stuff {
-   o Integer ssn 
+   o String ssn 
    o String firstName 
-   o Integer sku 
-   o Integer price 
+   o String sku 
+   o Double price 
    o Pet product 
 }
 concept Company {
