@@ -388,8 +388,8 @@ class ObjectValidator {
 
         const relationshipType = this.concerto.fromURI(obj).typeDeclaration;
 
-        if(relationshipType.isConcept()) {
-            throw new Error('Cannot have a relationship to a concept. Relationships must be to resources.');
+        if(!relationshipType.getIdentifierFieldName()) {
+            throw new Error('Relationship can only be to identified types.');
         }
 
         if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), relationshipType.getFullyQualifiedName(), relationshipDeclaration)) {

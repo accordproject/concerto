@@ -18,7 +18,6 @@ const Factory = require('../lib/factory');
 const ModelManager = require('../lib/modelmanager');
 const Relationship = require('../lib/model/relationship');
 const Resource = require('../lib/model/resource');
-const Concept = require('../lib/model/concept');
 const Serializer = require('../lib/serializer');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
@@ -309,7 +308,7 @@ describe('Serializer', () => {
                 elevation: 3.14
             };
             let resource = serializer.fromJSON(json);
-            resource.should.be.an.instanceOf(Concept);
+            resource.should.be.an.instanceOf(Resource);
             resource.city.should.equal('Winchester');
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);

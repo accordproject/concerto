@@ -15,7 +15,7 @@
 'use strict';
 
 const ModelManager = require('../../lib/modelmanager');
-const Concept = require('../../lib/model/concept');
+const Resource = require('../../lib/model/resource');
 const Serializer = require('../../lib/serializer');
 const Factory = require('../../lib/factory');
 const Util = require('../composer/composermodelutility');
@@ -57,17 +57,16 @@ describe('Concept', function () {
 
     describe('#getClassDeclaration', function() {
         it('should return the class declaraction', function () {
-            const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person' );
+            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person' );
             resource.getClassDeclaration().should.equal(classDecl);
         });
     });
 
     describe('#toJSON', () => {
-        it('should throw if toJSON is called', function () {
-            const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person');
-            (function () {
-                resource.toJSON();
-            }).should.throw(/Use Serializer.toJSON to convert resource instances to JSON objects./);
+        it('should call default toJSON', function () {
+            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person', 'AAAA');
+            resource.name = 'Dan';
+            resource.toJSON().should.not.be.null;
         });
 
         it('should generate JSON for an asset that contains a concept', function () {
@@ -133,7 +132,7 @@ describe('Concept', function () {
 
     describe('#isConcept', () => {
         it('should be true', () => {
-            const resource = new Concept(modelManager, classDecl, 'org.acme.l1', 'Person');
+            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'Person');
             resource.isConcept().should.be.true;
         });
     });

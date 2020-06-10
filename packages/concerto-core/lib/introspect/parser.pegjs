@@ -767,6 +767,17 @@ IdentifiedByField
         return idField
     }
 
+Identified
+    = "identified" {
+        return {
+          name: "$identifier"
+        }
+    }
+
+IdentifierDeclaration 
+    = IdentifiedByField /
+      Identified
+
 DecoratorString =
   s:StringLiteral {
       return {
@@ -833,7 +844,7 @@ Decorators
   = decorators:(d:Decorator __ {return d;})*
 
 AssetDeclaration
-  = decorators:Decorators __ abstract:AbstractToken? __ AssetToken __ id:Identifier __ idField:IdentifiedByField? __ classExtension: ClassExtension? __
+  = decorators:Decorators __ abstract:AbstractToken? __ AssetToken __ id:Identifier __ idField:IdentifierDeclaration? __ classExtension: ClassExtension? __
     "{" __ body:ClassDeclarationBody __ "}"
     {
       return {
@@ -849,7 +860,7 @@ AssetDeclaration
     }
 
 ParticipantDeclaration
-      = decorators:Decorators __ abstract:AbstractToken? __ ParticipantToken __ id:Identifier __ idField:IdentifiedByField? __ classExtension: ClassExtension? __
+      = decorators:Decorators __ abstract:AbstractToken? __ ParticipantToken __ id:Identifier __ idField:IdentifierDeclaration? __ classExtension: ClassExtension? __
         "{" __ body:ClassDeclarationBody __ "}"
         {
           return {
@@ -874,7 +885,7 @@ ClassExtension
     }
 
 TransactionDeclaration
-  = decorators:Decorators __ abstract:AbstractToken? __ TransactionToken __ id:Identifier __ idField:IdentifiedByField? __ classExtension: ClassExtension? __
+  = decorators:Decorators __ abstract:AbstractToken? __ TransactionToken __ id:Identifier __ idField:IdentifierDeclaration? __ classExtension: ClassExtension? __
     "{" __ body:ClassDeclarationBody __ "}"
     {
       return {
@@ -890,7 +901,7 @@ TransactionDeclaration
     }
 
 EventDeclaration
-  = decorators:Decorators __ abstract:AbstractToken? __ EventToken __ id:Identifier __ idField:IdentifiedByField? __ classExtension: ClassExtension? __
+  = decorators:Decorators __ abstract:AbstractToken? __ EventToken __ id:Identifier __ idField:IdentifierDeclaration? __ classExtension: ClassExtension? __
     "{" __ body:ClassDeclarationBody __ "}"
     {
       return {
@@ -906,7 +917,7 @@ EventDeclaration
     }
 
 ConceptDeclaration
-      = decorators:Decorators __ abstract:AbstractToken? __ ConceptToken __ id:Identifier __ classExtension: ClassExtension? __
+      = decorators:Decorators __ abstract:AbstractToken? __ ConceptToken __ id:Identifier __ idField:IdentifierDeclaration? __ classExtension: ClassExtension? __
         "{" __ body:ClassDeclarationBody __ "}"
         {
           return {
@@ -914,6 +925,7 @@ ConceptDeclaration
             id:     id,
             classExtension: classExtension,
             body:   body,
+            idField: idField,
             abstract: abstract,
             decorators: decorators,
             location: location()

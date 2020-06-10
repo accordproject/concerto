@@ -180,7 +180,7 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 vehicleDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Cannot have a relationship to a concept. Relationships must be to resources./);
+            }).should.throw(/Cannot have a relationship to a field that is not identifiable./);
         });
 
         it('should detect a relationship to a non array', function () {
@@ -517,6 +517,7 @@ describe('ResourceValidator', function () {
             mockResource = sinon.createStubInstance(Resource);
             mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isConcept.returns(false);
+            mockClassDeclaration.getIdentifierFieldName.returns('$identifier');
             parameters = {rootResourceIdentifier: 'identifier', modelManager: {getType: () => {return mockClassDeclaration;}}};
             sandbox.stub(ModelUtil, 'isAssignableTo').returns(true);
         });

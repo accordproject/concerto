@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 1.0.0 {65baa824b4941856191bd4988d8e02c9} 2020-06-10
+- Concepts may now be identified
+
 Version 0.82.7 {d5e9f460724d294bbbe3a15cea961ee2} 2020-04-08
 - Add new Concerto API
 - Removed System Models APIs

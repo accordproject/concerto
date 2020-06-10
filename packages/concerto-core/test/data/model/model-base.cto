@@ -90,9 +90,8 @@ asset DerivedDerivedAsset extends DerivedAsset {
     o MyBasicTransaction includedTransaction
 }
 
-transaction MyTransaction  {
+transaction MyTransaction identified {
     o BaseAsset myAsset
-    
 }
 
 transaction MyTransactionEx extends MyTransaction {

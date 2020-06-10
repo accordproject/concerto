@@ -25,7 +25,6 @@ module.exports.AssetDeclaration = require('./lib/introspect/assetdeclaration');
 module.exports.BaseException = require('./lib/baseexception');
 module.exports.BaseFileException = require('./lib/basefileexception');
 module.exports.ClassDeclaration = require('./lib/introspect/classdeclaration');
-module.exports.Concept = require('./lib/model/concept');
 module.exports.ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
 module.exports.EnumDeclaration = require('./lib/introspect/enumdeclaration');
 module.exports.EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');

@@ -145,9 +145,6 @@ class TransactionDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
-class Concept extends Typed {
-   + boolean isConcept() 
-}
 class Identifiable extends Typed {
    + string getIdentifier() 
    + void setIdentifier(string) 
@@ -165,6 +162,8 @@ class Relationship extends Identifiable {
 class Resource extends Identifiable {
    + String toString() 
    + boolean isResource() 
+   + boolean isConcept() 
+   + boolean isIdentifiable() 
    + Object toJSON() 
 }
 class Typed {
@@ -174,11 +173,6 @@ class Typed {
    + void setPropertyValue(string,string) 
    + void addArrayValue(string,string) 
    + boolean instanceOf(String) 
-}
-class ValidatedConcept extends Concept {
-   + void setPropertyValue(string,string) throws Error
-   + void addArrayValue(string,string) throws Error
-   + void validate() throws Error
 }
 class ValidatedResource extends Resource {
    + void setPropertyValue(string,string) throws Error

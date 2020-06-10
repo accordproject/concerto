@@ -81,6 +81,10 @@ class ClassDeclaration extends Decorated {
             this.idField = this.ast.idField.name;
         }
 
+        if(this.idField === '$identifier') {
+            this.addIdentifierField();
+        }
+
         for (let n = 0; n < this.ast.body.declarations.length; n++) {
             let thing = this.ast.body.declarations[n];
 
@@ -114,6 +118,20 @@ class ClassDeclaration extends Decorated {
             definition.propertyType.name = 'DateTime';
             this.properties.push(new Field(this, definition));
         }
+    }
+
+    /**
+     * Adds a required field named '$identifier' of type 'String'
+     * This method should only be called by system code.
+     * @private
+     */
+    addIdentifierField() {
+        const definition = {};
+        definition.id = {};
+        definition.id.name = '$identifier';
+        definition.propertyType = {};
+        definition.propertyType.name = 'String';
+        this.properties.push(new Field(this, definition));
     }
 
     /**
