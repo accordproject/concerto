@@ -21,16 +21,24 @@ const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 
-describe('Concept Identified', function () {
+describe('Concept Identifiers', function () {
 
     let modelManager;
     let classDecl;
     before(function () {
         modelManager = new ModelManager();
         modelManager.addModelFile(`namespace org.accordproject
+        concept Address {
+            o String country
+        }
+        concept Product identified by sku {
+            o String sku
+        }
         concept Order identified {
             o Double ammount
-        }`);
+            o Address address
+            --> Product product
+        }`, 'test.cto');
         classDecl = modelManager.getType('org.accordproject.Order');
     });
 
@@ -40,18 +48,35 @@ describe('Concept Identified', function () {
     afterEach(function () {
     });
 
-    describe('#factory', function() {
-        it('should be able to create with an id', function () {
-            const factory = new Factory(modelManager);
-            const order = factory.newResource('org.accordproject', 'Order', '123');
-            order.getIdentifier().should.equal('123');
+    describe('#modelManager', function() {
+        it('should not parse a model with a relationship to a concept without an identifier', function () {
+            const temp = new ModelManager();
+            (function () {
+                temp.addModelFile(`namespace org.accordproject
+                concept Address {
+                    o String country
+                }
+                concept Order identified {
+                    --> Address address
+                }`, 'invalid.cto');
+            }).should.throw(/Relationship address must be to a class that has an identifier, but this is to org.accordproject.Address/);
         });
+    });
 
-        it('should be able to create a relationship to the type', function () {
+    describe('#factory', function() {
+        it('should be able to create a relationship to a concept with an id', function () {
             const factory = new Factory(modelManager);
             const order = factory.newRelationship('org.accordproject', 'Order', '123');
             order.getIdentifier().should.equal('123');
         });
+
+        it('should not be able to create a relationship to a concept without an id', function () {
+            const factory = new Factory(modelManager);
+            (function () {
+                factory.newRelationship('org.accordproject', 'Address', '123');
+            }).should.throw(/Cannot create a relationship to org.accordproject.Address, it is not identifiable./);
+        });
+
     });
 
 
@@ -64,9 +89,10 @@ describe('Concept Identified', function () {
 
     describe('#setIdentifier', () => {
         it('should be able to set identifier', function () {
-            let id = new Identifiable(modelManager, modelManager.getType('org.accordproject.Order'), 'org.accordproject', 'Order', '123' );
+            let id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
             id.setIdentifier('321');
             id.getIdentifier().should.equal('321');
+            id.$identifier.should.equal('321');
         });
     });
 });
