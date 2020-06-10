@@ -170,17 +170,11 @@ describe('ResourceValidator', function () {
             field.accept(resourceValidator,parameters );
         });
 
-        it('should detect a relationship to a concept', function () {
+        it('should reject a relationship to a concept', function () {
             const car = factory.newResource('org.acme.l3', 'Car', '123');
-            car.owner = factory.newRelationship('org.acme.l3', 'TestConcept');
-            car.model = 'FOO';
-
-            const typedStack = new TypedStack( car );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
-            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
-                vehicleDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Cannot have a relationship to a field that is not identifiable./);
+                car.owner = factory.newRelationship('org.acme.l3', 'TestConcept');
+            }).should.throw(/Cannot create a relationship to org.acme.l3.TestConcept, it is not identifiable./);
         });
 
         it('should detect a relationship to a non array', function () {

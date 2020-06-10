@@ -46,6 +46,12 @@ describe('Concept Identified', function () {
             const order = factory.newResource('org.accordproject', 'Order', '123');
             order.getIdentifier().should.equal('123');
         });
+
+        it('should be able to create a relationship to the type', function () {
+            const factory = new Factory(modelManager);
+            const order = factory.newRelationship('org.accordproject', 'Order', '123');
+            order.getIdentifier().should.equal('123');
+        });
     });
 
 

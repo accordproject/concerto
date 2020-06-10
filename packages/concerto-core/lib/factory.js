@@ -166,6 +166,9 @@ class Factory {
         // Load the type declaration to force an error if it doesn't exist
         const fqn = ModelUtil.getFullyQualifiedName(ns, type);
         const classDecl = this.modelManager.getType(fqn);
+        if(!classDecl.getIdentifierFieldName()) {
+            throw new Error(`Cannot create a relationship to ${fqn}, it is not identifiable.`);
+        }
         return new Relationship(this.modelManager, classDecl, ns, type, id);
     }
 
