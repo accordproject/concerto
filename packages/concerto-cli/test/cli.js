@@ -62,7 +62,7 @@ describe('cicero-cli', () => {
                 const result = await Commands.validate(sample2, models);
                 JSON.parse(result).should.deep.equal(JSON.parse(sampleText2));
             } catch (err) {
-                err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
+                err.message.should.equal('Instance org.accordproject.money.MonetaryAmount#null invalid enum value true for field CurrencyCode');
             }
         });
 

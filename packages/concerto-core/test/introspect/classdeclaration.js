@@ -92,7 +92,7 @@ describe('ClassDeclaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.identifierextendsfromsupertype.cto', AssetDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Identifier from super class cannot be redeclared./);
+            }).should.throw(/Super class has an explicit identifier a1 that cannot be redeclared/);
         });
 
         // TODO: This has been disabled pending major version bump and/or confirmation that this is illegal

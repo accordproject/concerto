@@ -21,11 +21,11 @@ import composer.base.Person
 import composer.business.Business
 import org.vda.PrivateVehicleTransfer
 
-participant PrivateOwner identified by email extends Person {
+participant PrivateOwner extends Person {
   o String email
 }
 
-participant Company identified by companyId extends Business {
+participant Company extends Business {
   o String companyId
 }
 

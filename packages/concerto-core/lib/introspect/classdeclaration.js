@@ -48,8 +48,6 @@ class ClassDeclaration extends Decorated {
     constructor(modelFile, ast) {
         super(modelFile, ast);
         this.process();
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
-        this._isClassDeclaration = true;
     }
 
     /**
@@ -88,6 +86,10 @@ class ClassDeclaration extends Decorated {
         for (let n = 0; n < this.ast.body.declarations.length; n++) {
             let thing = this.ast.body.declarations[n];
 
+            if(thing.id && thing.id.name && thing.id.name.startsWith('$')) {
+                throw new IllegalModelException(`Invalid field name ${thing.id.name}`, this.modelFile, this.ast.location);
+            }
+
             if (thing.type === 'FieldDeclaration') {
                 this.properties.push(new Field(this, thing));
             } else if (thing.type === 'RelationshipDeclaration') {
@@ -101,6 +103,9 @@ class ClassDeclaration extends Decorated {
                 }), this.modelFile, this.ast.location);
             }
         }
+
+        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
+        this._isClassDeclaration = true;
     }
 
     /**
@@ -189,9 +194,6 @@ class ClassDeclaration extends Decorated {
             }
         }
 
-        // TODO (LG) check that all imported classes exist, rather than just
-        // used imports
-
         // if we have a super type make sure it exists
         if (this.superType !== null) {
             this._resolveSuperType();
@@ -219,16 +221,19 @@ class ClassDeclaration extends Decorated {
                     throw new IllegalModelException('Identifying fields cannot be optional.', this.modelFile, this.ast.location);
                 }
                 if (this.getSuperType()) {
-                    // check this class doesn't declare the identifying field as a property.
-                    if (idField.getName() === this.getModelFile().getType(this.superType).getIdentifierFieldName()) {
-                        throw new IllegalModelException('Identifier from super class cannot be redeclared.', this.modelFile, this.ast.location);
-                    }
+                    const superType = this.getModelFile().getType(this.superType);
 
-                    // TODO: This has been disabled pending major version bump and/or confirmation that this is illegal
-                    // As this class has an idField declared, check the superclass doesn't
-                    //if (this.getModelFile().getType(this.superType).getIdentifierFieldName()) {
-                    //    throw new IllegalModelException('Identifier defined in super class, identifiers cannot be overridden', this.modelFile, this.ast.location);
-                    //}
+                    if(this.isSystemIdentified()) {
+                        // check that the super type is also system identified
+                        if(!superType.isSystemIdentified()) {
+                            throw new IllegalModelException(`Super class has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                        }
+                    }
+                    else {
+                        if(superType.isExplicitlyIdentified()) {
+                            throw new IllegalModelException(`Super class has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                        }
+                    }
                 }
             }
         }
@@ -325,6 +330,32 @@ class ClassDeclaration extends Decorated {
      */
     getFullyQualifiedName() {
         return this.fqn;
+    }
+
+    /**
+     * Returns true if this class declaration declares an identifying field
+     * (system or explicit)
+     * @returns {Boolean} true if the class declaration includes an identifier
+     */
+    isIdentified() {
+        return this.idField !== null;
+    }
+
+    /**
+     * Returns true if this class declaration declares a system identifier
+     * $identifier
+     * @returns {Boolean} true if the class declaration includes a system identifier
+     */
+    isSystemIdentified() {
+        return this.idField === '$identifier';
+    }
+
+    /**
+     * Returns true if this class declaration declares an explicit identifier
+     * @returns {Boolean} true if the class declaration includes an explicit identifier
+     */
+    isExplicitlyIdentified() {
+        return this.idField && this.idField !== '$identifier';
     }
 
     /**

@@ -24,8 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.0.0 {65baa824b4941856191bd4988d8e02c9} 2020-06-10
+Version 0.82.7 {8b661727f1eb31d106874df3d7f5cbc8} 2020-06-10
 - Concepts may now be identified
+- assets/participants/transaction/events have a system identified created $identifier automatically
+- Can no longer redefine the identifier declared by a super type
 
 Version 0.82.7 {d5e9f460724d294bbbe3a15cea961ee2} 2020-04-08
 - Add new Concerto API

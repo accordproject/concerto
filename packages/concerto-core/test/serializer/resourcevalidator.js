@@ -61,8 +61,7 @@ describe('ResourceValidator', function () {
     participant Person identified by ssn {
       o String ssn
     }
-    participant Employee identified by employeeId extends Person {
-      o String employeeId
+    participant Employee extends Person {
     }
     concept Data {
         o String name
@@ -76,7 +75,7 @@ describe('ResourceValidator', function () {
       o Integer numberOfWheels
       o Double milage
     }
-    participant PrivateOwner identified by employeeId extends Person {
+    participant PrivateOwner extends Person {
       o String employeeId
     }
     `;

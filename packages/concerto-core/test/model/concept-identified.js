@@ -88,11 +88,24 @@ describe('Concept Identifiers', function () {
     });
 
     describe('#setIdentifier', () => {
-        it('should be able to set identifier', function () {
-            let id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
-            id.setIdentifier('321');
-            id.getIdentifier().should.equal('321');
-            id.$identifier.should.equal('321');
+        it('should be able to set system identifier', function () {
+            const factory = new Factory(modelManager);
+            const order = factory.newResource('org.accordproject', 'Order', '123');
+            order.getIdentifier().should.equal('123');
+            order.$identifier.should.equal('123');
+            order.setIdentifier('321');
+            order.$identifier.should.equal('321');
+            order.$identifier = 'ABC';
+            order.getIdentifier().should.equal('ABC');
+        });
+
+        it('should be able to set explicit identifier', function () {
+            const factory = new Factory(modelManager);
+            const product = factory.newResource('org.accordproject', 'Product', '123');
+            product.getIdentifier().should.equal('123');
+            product.sku.should.equal('123');
+            product.setIdentifier('321');
+            product.sku.should.equal('321');
         });
     });
 });
