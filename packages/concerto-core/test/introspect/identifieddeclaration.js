@@ -15,6 +15,8 @@
 'use strict';
 
 const ModelManager = require('../../lib/modelmanager');
+const IdentifiedDeclaration = require('../../lib/introspect/identifieddeclaration');
+
 require('chai').should();
 
 describe('IdentifiedDeclaration', () => {
@@ -23,6 +25,24 @@ describe('IdentifiedDeclaration', () => {
     });
 
     afterEach(() => {
+    });
+
+    describe('#hasInstance', () => {
+
+        it('should identify instance', () => {
+            const mm = new ModelManager();
+            mm.addModelFile( `
+namespace test
+
+asset Order {
+    o Double price
+}
+            `, 'test.cto');
+
+            const order = mm.getType('test.Order');
+            order.should.not.be.null;
+            (order instanceof IdentifiedDeclaration).should.be.true;
+        });
     });
 
     describe('#identified', () => {
