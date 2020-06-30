@@ -47,12 +47,12 @@ class ObjectValidator {
     /**
      * ResourceValidator constructor
      * @param {*} concerto - the Concerto instance used for validation
-     * @param {Object} options - the optional validation options.
-     * @param {boolean} options.validate - validate the structure of the Resource
+     * @param {Object} [options] - the optional validation options.
+     * @param {boolean} [options.validate] - validate the structure of the Resource
      * with its model prior to serialization (default to true)
-     * @param {boolean} options.convertResourcesToRelationships - Convert resources that
+     * @param {boolean} [options.convertResourcesToRelationships] - Convert resources that
      * are specified for relationship fields into relationships, false by default.
-     * @param {boolean} options.permitResourcesForRelationships - Permit resources in the
+     * @param {boolean} [options.permitResourcesForRelationships] - Permit resources in the
      */
     constructor(concerto, options) {
         this.options = options || {};
@@ -204,7 +204,7 @@ class ObjectValidator {
         let dataType = typeof(obj);
         let propName = field.getName();
 
-        if (dataType === 'undefined' || dataType === 'symbol') {
+        if (dataType === 'symbol') {
             ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
         }
 
@@ -282,7 +282,7 @@ class ObjectValidator {
         let dataType = typeof obj;
         let propName = field.getName();
 
-        if (dataType === 'undefined' || dataType === 'symbol') {
+        if (dataType === 'symbol') {
             ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
         }
 
@@ -325,17 +325,15 @@ class ObjectValidator {
         else {
             // a field that points to a transaction, asset, participant...
             let classDeclaration = this.concerto.getModelManager().getType(field.getFullyQualifiedTypeName());
-            if( this.concerto.isIdentifiable(obj)) {
-                try {
-                    classDeclaration = this.concerto.getModelManager().getType(obj.$class);
-                } catch (err) {
-                    ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
-                }
+            try {
+                classDeclaration = this.concerto.getModelManager().getType(obj.$class);
+            } catch (err) {
+                ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
+            }
 
-                // is it compatible?
-                if(!ModelUtil.isAssignableTo(classDeclaration.getModelFile(), classDeclaration.getFullyQualifiedName(), field)) {
-                    ObjectValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field);
-                }
+            // is it compatible?
+            if(!ModelUtil.isAssignableTo(classDeclaration.getModelFile(), classDeclaration.getFullyQualifiedName(), field)) {
+                ObjectValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field);
             }
 
             // recurse
@@ -386,7 +384,8 @@ class ObjectValidator {
             ObjectValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
         }
 
-        const relationshipType = this.concerto.fromURI(obj).typeDeclaration;
+        const relationshipType = this.concerto.isRelationship(obj) ? this.concerto.fromURI(obj).typeDeclaration
+            : this.concerto.getTypeDeclaration(obj);
 
         if(!relationshipType.getIdentifierFieldName()) {
             throw new Error('Relationship can only be to identified types.');
