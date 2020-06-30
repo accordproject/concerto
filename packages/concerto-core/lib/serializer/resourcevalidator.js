@@ -20,7 +20,6 @@ const RelationshipDeclaration = require('../introspect/relationshipdeclaration')
 const EnumDeclaration = require('../introspect/enumdeclaration');
 const Relationship = require('../model/relationship');
 const Resource = require('../model/resource');
-const Concept = require('../model/concept');
 const Identifiable = require('../model/identifiable');
 const Util = require('../util');
 const ModelUtil = require('../modelutil');
@@ -120,7 +119,7 @@ class ResourceValidator {
         const obj = parameters.stack.pop();
 
         // are we dealing with a Resouce?
-        if(!((obj instanceof Resource) || (obj instanceof Concept))) {
+        if(!((obj instanceof Resource))) {
             ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
         }
 
@@ -396,8 +395,8 @@ class ResourceValidator {
 
         const relationshipType = parameters.modelManager.getType(obj.getFullyQualifiedType());
 
-        if(relationshipType.isConcept()) {
-            throw new Error('Cannot have a relationship to a concept. Relationships must be to resources.');
+        if(!relationshipType.getIdentifierFieldName()) {
+            throw new Error('Cannot have a relationship to a field that is not identifiable.');
         }
 
         if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj.getFullyQualifiedType(), relationshipDeclaration)) {

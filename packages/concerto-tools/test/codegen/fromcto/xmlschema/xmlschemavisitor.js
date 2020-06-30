@@ -129,6 +129,7 @@ describe('XmlSchemaVisitor', function () {
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
+            mockModelFile.getImports.returns([]);
             mockModelFile.getModelManager.returns(mockModelManager);
 
             mockModelFile.accept = function(visitor, parameters) {
@@ -170,6 +171,7 @@ describe('XmlSchemaVisitor', function () {
             mockModelManager.getType.returns(mockClassDeclaration);
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.getImports.returns([]);
             mockModelFile._isModelFile = true;
             mockModelFile.getModelManager.returns(mockModelManager);
 
@@ -238,17 +240,16 @@ describe('XmlSchemaVisitor', function () {
             xmlSchemaVisitor.visitModelManager(mockModelManager, param);
 
             param.fileWriter.openFile.withArgs('org.foo.xsd').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(10);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.foo="org.foo" targetNamespace="org.foo" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system"']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'xmlns:org.imported="org.imported"']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'xmlns:org.different="org.different"']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '>']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '<xs:import namespace="org.hyperledger.composer.system" schemaLocation="org.hyperledger.composer.system.xsd"/>']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '<xs:import namespace="org.imported" schemaLocation="org.imported.xsd"/>']);
-            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([0, '<xs:import namespace="org.different" schemaLocation="org.different.xsd"/>']);
-            param.fileWriter.writeLine.getCall(9).args.should.deep.equal([0, '</xs:schema>']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(8);
+            let index=0;
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '<?xml version="1.0"?>']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '<xs:schema xmlns:org.foo="org.foo" targetNamespace="org.foo" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, 'xmlns:org.imported="org.imported"']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, 'xmlns:org.different="org.different"']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '>']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '<xs:import namespace="org.imported" schemaLocation="org.imported.xsd"/>']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '<xs:import namespace="org.different" schemaLocation="org.different.xsd"/>']);
+            param.fileWriter.writeLine.getCall(index++).args.should.deep.equal([0, '</xs:schema>']);
 
             param.fileWriter.closeFile.calledOnce.should.be.ok;
         });

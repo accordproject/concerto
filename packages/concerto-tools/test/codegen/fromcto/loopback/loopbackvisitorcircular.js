@@ -53,7 +53,7 @@ describe('LoopbackVisitor with Circular Model', () => {
 
                     // Visit all of the loaded model files and check that they were all generated
                     const schemas = modelManager.accept(visitor, { fileWriter: mockFileWriter });
-                    schemas.length.should.equal(32);
+                    schemas.length.should.equal(29);
                 });
 
             });

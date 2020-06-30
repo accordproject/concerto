@@ -289,7 +289,7 @@ describe('JSONGenerator', () => {
             options.stack.push('string');
             (() => {
                 jsonGenerator.visitClassDeclaration(relationshipDeclaration4, options);
-            }).should.throw(/Expected a Resource or a Concept/);
+            }).should.throw(/Expected a Resource, but found string/);
         });
 
         it('should generate a relationship (Ergo)', () => {

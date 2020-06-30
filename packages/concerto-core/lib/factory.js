@@ -27,8 +27,6 @@ const TypedStack = require('./serializer/typedstack');
 const Relationship = require('./model/relationship');
 const Resource = require('./model/resource');
 const ValidatedResource = require('./model/validatedresource');
-const Concept = require('./model/concept');
-const ValidatedConcept = require('./model/validatedconcept');
 
 const TransactionDeclaration = require('./introspect/transactiondeclaration');
 const EventDeclaration = require('./introspect/eventdeclaration');
@@ -88,11 +86,9 @@ class Factory {
                 type: type
             }));
         }
-        if(classDecl.isConcept()) {
-            throw new Error('Use newConcept to create concepts ' + classDecl.getFullyQualifiedName());
-        }
 
         let idField = classDecl.getIdentifierFieldName();
+        // console.log(classDecl);
         if (idField) {
             id = id === null || id === undefined ? uuid.v4() : id;
             if(typeof(id) !== 'string') {
@@ -112,6 +108,8 @@ class Factory {
                     }));
                 }
             }
+        } else if(id) {
+            throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
         }
 
         let newObj = null;
@@ -148,35 +146,7 @@ class Factory {
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
     newConcept(ns, type, options) {
-        const method = 'newConcept';
-        const qualifiedName = ModelUtil.getFullyQualifiedName(ns, type);
-        const classDecl = this.modelManager.getType(qualifiedName);
-
-        if(classDecl.isAbstract()) {
-            let formatter = Globalize.messageFormatter('factory-newinstance-abstracttype');
-            throw new Error(formatter({
-                namespace: ns,
-                type: type
-            }));
-        }
-
-        if(!classDecl.isConcept()) {
-            throw new Error('Class is not a concept ' + classDecl.getFullyQualifiedName());
-        }
-
-        let newObj = null;
-        options = options || {};
-        if(options.disableValidation) {
-            newObj = new Concept(this.modelManager, classDecl, ns, type);
-        }
-        else {
-            newObj = new ValidatedConcept(this.modelManager, classDecl, ns, type, new ResourceValidator());
-        }
-        newObj.assignFieldDefaults();
-        this.initializeNewObject(newObj, classDecl, options);
-
-        debug(method, 'created concept', classDecl.getFullyQualifiedName() );
-        return newObj;
+        return this.newResource(ns, type, null, options);
     }
 
     /**
@@ -196,6 +166,9 @@ class Factory {
         // Load the type declaration to force an error if it doesn't exist
         const fqn = ModelUtil.getFullyQualifiedName(ns, type);
         const classDecl = this.modelManager.getType(fqn);
+        if(!classDecl.getIdentifierFieldName()) {
+            throw new Error(`Cannot create a relationship to ${fqn}, it is not identifiable.`);
+        }
         return new Relationship(this.modelManager, classDecl, ns, type, id);
     }
 

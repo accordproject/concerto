@@ -14,25 +14,28 @@
 
 'use strict';
 
-const IdentifiedDeclaration = require('./identifieddeclaration');
+const ClassDeclaration = require('./classdeclaration');
 
-/** Class representing the definition of an Transaction.
- * @extends ClassDeclaration
- * @see See  {@link ClassDeclaration}
+/**
+ * IdentifiedDeclaration
  *
+ * @extends ClassDeclaration
+ * @see See {@link ClassDeclaration}
  * @class
  * @memberof module:concerto-core
+ * @abstract
  */
-class TransactionDeclaration extends IdentifiedDeclaration {
+class IdentifiedDeclaration extends ClassDeclaration {
+
     /**
-     * Create an TransactionDeclaration.
+     * Create an AssetDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-        this._isTransactionDeclaration = true;
+        this._isIdentifiedDeclaration = true;
     }
 
     /**
@@ -43,7 +46,11 @@ class TransactionDeclaration extends IdentifiedDeclaration {
      */
     process() {
         super.process();
-        this.addTimestampField();
+
+        if(!this.superType && !this.idField) {
+            this.idField = '$identifier';
+            this.addIdentifierField();
+        }
     }
 
     /**
@@ -51,11 +58,11 @@ class TransactionDeclaration extends IdentifiedDeclaration {
      * @see https://github.com/hyperledger/composer-concerto/issues/47
      *
      * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a TransactionDeclaration
+     * @returns {boolean} - True, if the object is an instance of a AssetDeclaration
      */
     static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isTransactionDeclaration);
+        return typeof object !== 'undefined' && object !== null && Boolean(object._isIdentifiedDeclaration);
     }
 }
 
-module.exports = TransactionDeclaration;
+module.exports = IdentifiedDeclaration;

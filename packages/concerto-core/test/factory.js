@@ -115,12 +115,6 @@ describe('Factory', function() {
             }).should.throw(/AbstractAsset/);
         });
 
-        it('should throw creating a concept', function() {
-            (() => {
-                factory.newResource(namespace, 'MyConcept', 'MY_ID_1');
-            }).should.throw(/MyConcept/);
-        });
-
         it('should create a new instance with a specified ID', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1');
             resource.assetId.should.equal('MY_ID_1');
@@ -217,12 +211,6 @@ describe('Factory', function() {
             (() => {
                 factory.newConcept(namespace, 'AbstractConcept');
             }).should.throw(/Cannot instantiate Abstract Type AbstractConcept in namespace org.acme.test/);
-        });
-
-        it('should throw creating a non-concept', function() {
-            (() => {
-                factory.newConcept(namespace, assetName);
-            }).should.throw(new RegExp(assetName));
         });
 
         it('should create a new concept', () => {

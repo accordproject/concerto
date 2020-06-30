@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ClassDeclaration = require('./classdeclaration');
+const IdentifiedDeclaration = require('./identifieddeclaration');
 
 /** Class representing the definition of a Participant.
  * @extends ClassDeclaration
@@ -23,7 +23,7 @@ const ClassDeclaration = require('./classdeclaration');
  * @class
  * @memberof module:concerto-core
  */
-class ParticipantDeclaration extends ClassDeclaration {
+class ParticipantDeclaration extends IdentifiedDeclaration {
     /**
      * Create an ParticipantDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class

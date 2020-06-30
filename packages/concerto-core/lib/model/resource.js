@@ -72,6 +72,24 @@ class Resource extends Identifiable {
     }
 
     /**
+     * Determine if this identifiable is a concept.
+     * @return {boolean} True if this identifiable is a concept,
+     * false if not.
+     */
+    isConcept() {
+        return this.getClassDeclaration().isConcept();
+    }
+
+    /**
+     * Determine if this object is identifiable.
+     * @return {boolean} True if this object has an identifiying field
+     * false if not.
+     */
+    isIdentifiable() {
+        return this.getClassDeclaration().getIdentifierFieldName();
+    }
+
+    /**
      * Serialize this resource into a JavaScript object suitable for serialization to JSON,
      * using the default options for the serializer. If you need to set additional options
      * for the serializer, use the {@link Serializer#toJSON} method instead.

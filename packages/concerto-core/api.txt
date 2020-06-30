@@ -33,7 +33,7 @@ class Factory {
    + Resource newEvent(String,String,String,Object,String,boolean,boolean) 
    + boolean hasInstance(object) 
 }
-class AssetDeclaration extends ClassDeclaration {
+class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
@@ -47,6 +47,9 @@ class ClassDeclaration extends Decorated {
    + string getName() 
    + String getNamespace() 
    + string getFullyQualifiedName() 
+   + Boolean isIdentified() 
+   + Boolean isSystemIdentified() 
+   + Boolean isExplicitlyIdentified() 
    + string getIdentifierFieldName() 
    + Property getOwnProperty(string) 
    + Property[] getOwnProperties() 
@@ -84,9 +87,13 @@ class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
-class EventDeclaration extends ClassDeclaration {
+class EventDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean isEvent() 
+   + boolean hasInstance(object) 
+}
+class IdentifiedDeclaration extends ClassDeclaration {
+   + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
 class Introspector {
@@ -119,7 +126,7 @@ class ModelFile {
    + string getDefinitions() 
    + boolean hasInstance(object) 
 }
-class ParticipantDeclaration extends ClassDeclaration {
+class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
@@ -142,12 +149,9 @@ class RelationshipDeclaration extends Property {
    + String toString() 
    + boolean hasInstance(object) 
 }
-class TransactionDeclaration extends ClassDeclaration {
+class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
-}
-class Concept extends Typed {
-   + boolean isConcept() 
 }
 class Identifiable extends Typed {
    + string getIdentifier() 
@@ -166,6 +170,8 @@ class Relationship extends Identifiable {
 class Resource extends Identifiable {
    + String toString() 
    + boolean isResource() 
+   + boolean isConcept() 
+   + boolean isIdentifiable() 
    + Object toJSON() 
 }
 class Typed {
@@ -175,11 +181,6 @@ class Typed {
    + void setPropertyValue(string,string) 
    + void addArrayValue(string,string) 
    + boolean instanceOf(String) 
-}
-class ValidatedConcept extends Concept {
-   + void setPropertyValue(string,string) throws Error
-   + void addArrayValue(string,string) throws Error
-   + void validate() throws Error
 }
 class ValidatedResource extends Resource {
    + void setPropertyValue(string,string) throws Error
