@@ -40,6 +40,78 @@ describe('concerto', () => {
     afterEach(() => {
     });
 
+    describe('#techdocs', () => {
+
+        it('should validate', () => {
+
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( `namespace org.acme.address
+concept PostalAddress {
+  o String streetAddress optional
+  o String postalCode optional
+  o String postOfficeBoxNumber optional
+  o String addressRegion optional
+  o String addressLocality optional
+  o String addressCountry optional
+}`, 'model.cto');
+
+            const postalAddress = {
+                $class : 'org.acme.address.PostalAddress',
+                streetAddress : '1 Maine Street'
+            };
+            const concerto = new Concerto(modelManager);
+            concerto.validate(postalAddress);
+        });
+
+        it('should not validate', () => {
+
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( `namespace org.acme.address
+concept PostalAddress {
+  o String streetAddress optional
+  o String postalCode optional
+  o String postOfficeBoxNumber optional
+  o String addressRegion optional
+  o String addressLocality optional
+  o String addressCountry optional
+}`, 'model.cto');
+
+            const postalAddress = {
+                $class : 'org.acme.address.PostalAddress',
+                missing : '1 Maine Street'
+            };
+            const concerto = new Concerto(modelManager);
+
+            (() => {
+                concerto.validate(postalAddress);
+            }).should.throw(/property named missing which is not declared in org.acme.address.PostalAddress/);
+        });
+
+        it('should get type declaration', () => {
+
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( `namespace org.acme.address
+concept PostalAddress {
+  o String streetAddress optional
+  o String postalCode optional
+  o String postOfficeBoxNumber optional
+  o String addressRegion optional
+  o String addressLocality optional
+  o String addressCountry optional
+}`, 'model.cto');
+
+            const postalAddress = {
+                $class : 'org.acme.address.PostalAddress',
+                missing : '1 Maine Street'
+            };
+            const concerto = new Concerto(modelManager);
+            const typeDeclaration = concerto.getTypeDeclaration(postalAddress);
+            typeDeclaration.getFullyQualifiedName().should.equal('org.acme.address.PostalAddress');
+        });
+
+    });
+
+
     describe('#isIdentifiable', () => {
 
         it('should return the identifier', () => {
