@@ -18,9 +18,7 @@ const ClassDeclaration = require('../introspect/classdeclaration');
 const Field = require('../introspect/field');
 const RelationshipDeclaration = require('../introspect/relationshipdeclaration');
 const Resource = require('../model/resource');
-const Identifiable = require('../model/identifiable');
 const Typed = require('../model/typed');
-const Concept = require('../model/concept');
 const ModelUtil = require('../modelutil');
 const Util = require('../util');
 
@@ -86,14 +84,14 @@ class JSONGenerator {
     visitClassDeclaration(classDeclaration, parameters) {
 
         const obj = parameters.stack.pop();
-        if (!((obj instanceof Resource) || (obj instanceof Concept))) {
-            throw new Error('Expected a Resource or a Concept, but found ' + obj);
+        if (!((obj instanceof Resource))) {
+            throw new Error('Expected a Resource, but found ' + obj);
         }
 
         let result = {};
         let id = null;
 
-        if (obj instanceof Identifiable && this.deduplicateResources) {
+        if (obj.isIdentifiable() && this.deduplicateResources) {
             id = obj.toURI();
             if( parameters.dedupeResources.has(id)) {
                 return id;

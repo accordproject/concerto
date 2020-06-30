@@ -61,8 +61,7 @@ describe('ResourceValidator', function () {
     participant Person identified by ssn {
       o String ssn
     }
-    participant Employee identified by employeeId extends Person {
-      o String employeeId
+    participant Employee extends Person {
     }
     concept Data {
         o String name
@@ -76,7 +75,7 @@ describe('ResourceValidator', function () {
       o Integer numberOfWheels
       o Double milage
     }
-    participant PrivateOwner identified by employeeId extends Person {
+    participant PrivateOwner extends Person {
       o String employeeId
     }
     `;
@@ -170,17 +169,11 @@ describe('ResourceValidator', function () {
             field.accept(resourceValidator,parameters );
         });
 
-        it('should detect a relationship to a concept', function () {
+        it('should reject a relationship to a concept', function () {
             const car = factory.newResource('org.acme.l3', 'Car', '123');
-            car.owner = factory.newRelationship('org.acme.l3', 'TestConcept');
-            car.model = 'FOO';
-
-            const typedStack = new TypedStack( car );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
-            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
-                vehicleDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Cannot have a relationship to a concept. Relationships must be to resources./);
+                car.owner = factory.newRelationship('org.acme.l3', 'TestConcept');
+            }).should.throw(/Cannot create a relationship to org.acme.l3.TestConcept, it is not identifiable./);
         });
 
         it('should detect a relationship to a non array', function () {
@@ -517,6 +510,7 @@ describe('ResourceValidator', function () {
             mockResource = sinon.createStubInstance(Resource);
             mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isConcept.returns(false);
+            mockClassDeclaration.getIdentifierFieldName.returns('$identifier');
             parameters = {rootResourceIdentifier: 'identifier', modelManager: {getType: () => {return mockClassDeclaration;}}};
             sandbox.stub(ModelUtil, 'isAssignableTo').returns(true);
         });

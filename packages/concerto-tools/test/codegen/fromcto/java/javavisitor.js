@@ -360,7 +360,7 @@ describe('JavaVisitor', function () {
             param.fileWriter.writeLine.callCount.should.deep.equal(4);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob extends org.hyperledger.composer.system.Resource {']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob {']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;

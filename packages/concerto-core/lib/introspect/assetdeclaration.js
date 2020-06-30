@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ClassDeclaration = require('./classdeclaration');
+const IdentifiedDeclaration = require('./identifieddeclaration');
 
 /**
  * AssetDeclaration defines the schema (aka model or class) for
@@ -27,7 +27,7 @@ const ClassDeclaration = require('./classdeclaration');
  * @class
  * @memberof module:concerto-core
  */
-class AssetDeclaration extends ClassDeclaration {
+class AssetDeclaration extends IdentifiedDeclaration {
 
     /**
      * Create an AssetDeclaration.

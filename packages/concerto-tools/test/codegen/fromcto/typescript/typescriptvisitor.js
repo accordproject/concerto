@@ -283,12 +283,10 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
             param.fileWriter.openFile.withArgs('org.acme.Person.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(5);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import {Bob} from \'./org.hyperledger.composer.system\';']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import {Fred} from \'./org.hyperledger.composer.system\';']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import {Property1,Property3} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '// export namespace org.acme.Person{']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '// }']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import {Property1,Property3} from \'./org.org1\';']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// export namespace org.acme.Person{']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '// }']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;

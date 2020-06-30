@@ -319,7 +319,7 @@ describe('ModelManager', () => {
             }`;
             (() => {
                 modelManager.addModelFiles([mf1, mf2]);
-            }).should.throw(/Expected.* Line 2 column 27/);
+            }).should.throw(/Expected.* Line 2 column 47/);
         });
 
         it('should return the error message for an invalid model file with a file name', () => {
@@ -333,7 +333,7 @@ describe('ModelManager', () => {
             }`;
             (() => {
                 modelManager.addModelFiles([mf1, mf2], ['mf1.cto', 'mf2.cto']);
-            }).should.throw(/Expected.* File mf2.cto line 2 column 27/);
+            }).should.throw(/Expected.* File mf2.cto line 2 column 47/);
         });
 
         it('should handle model files with assets passed in the wrong logical order', () => {
