@@ -96,6 +96,7 @@ class Introspector {
 }
 class ModelFile {
    + void constructor(ModelManager,string,string) throws IllegalModelException
+   + Boolean isSystemModelFile() 
    + boolean isExternal() 
    + ModelManager getModelManager() 
    + string[] getImports() 

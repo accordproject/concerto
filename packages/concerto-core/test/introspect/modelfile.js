@@ -89,7 +89,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.freddos', 'org.doge']);
+            mf.imports.should.deep.equal(['org.freddos', 'org.doge', 'concerto.Concept']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
@@ -101,7 +101,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.doge', 'org.freddos.*']);
+            mf.imports.should.deep.equal(['org.doge', 'org.freddos.*', 'concerto.Concept']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge') === null).should.be.true;
         });

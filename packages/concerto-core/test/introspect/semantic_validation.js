@@ -16,38 +16,29 @@
 
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const fs = require('fs');
 const path = require('path');
 
 require('chai').should();
-const sinon = require('sinon');
 
 describe('ModelFile semantic validation', () => {
 
     const invalidModel = fs.readFileSync(path.resolve(__dirname, '../data/model/invalid.cto'), 'utf8');
 
-    let mockModelManager;
-    let mockClassDeclaration;
-    let sandbox;
+    let modelManager = null;
 
     beforeEach(() => {
-        mockModelManager = sinon.createStubInstance(ModelManager);
-        mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-        mockModelManager.getType.returns(mockClassDeclaration);
-        mockClassDeclaration.getProperties.returns([]);
-        sandbox = sinon.createSandbox();
+        modelManager = new ModelManager();
     });
 
     afterEach(() => {
-        sandbox.restore();
     });
 
     describe('#constructor', () => {
 
         it('should throw and include file location', () => {
             try {
-                const mf = new ModelFile(mockModelManager,invalidModel, 'invalid.cto');
+                const mf = new ModelFile(modelManager,invalidModel, 'invalid.cto');
                 mf.validate();
             }
             catch(error) {

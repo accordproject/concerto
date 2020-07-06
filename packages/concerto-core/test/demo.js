@@ -46,8 +46,7 @@ participant Employee identified by ssn {
 }
 `;
 
-let modelManager;
-modelManager = new ModelManager();
+const modelManager = new ModelManager();
 modelManager.addModelFile( concertoModel, 'test.cto');
 const obj = {
     $class : 'org.accordproject.test.Employee',
@@ -62,12 +61,9 @@ const obj = {
 };
 
 try {
-    // const concertoObject = serializer.fromJSON(obj);
-    // console.log(JSON.stringify(concertoObject));
-    // concertoObject.validate();
-
-    Concerto.validate(obj, modelManager);
-    console.log(`Valid instance: ${Concerto.getIdentifier(obj, modelManager)}`);
+    const concerto = new Concerto(modelManager);
+    concerto.validate(obj);
+    console.log(`Valid instance: ${concerto.getIdentifier(obj)}`);
 }
 catch(err) {
     console.log(err.message);

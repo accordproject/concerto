@@ -26,7 +26,7 @@ chai.use(require('chai-as-promised'));
 
 describe('ModelLoader', () => {
 
-    let modelBase = './test/data/model/model-base.cto';
+    let modelBase = __dirname + '/data/model/model-base.cto';
     let modelUrl = 'https://models.accordproject.org/patents/patent.cto';
 
     beforeEach(() => {

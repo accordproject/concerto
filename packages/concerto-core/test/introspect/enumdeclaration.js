@@ -21,11 +21,10 @@ const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
 
 require('chai').should();
-const sinon = require('sinon');
 
 describe('EnumDeclaration', () => {
 
-    let mockModelManager;
+    let modelManager;
 
     /**
      * Load an arbitrary number of model files.
@@ -45,7 +44,7 @@ describe('EnumDeclaration', () => {
     };
 
     const loadModelFile = (modelFileName) => {
-        return loadModelFiles([modelFileName], mockModelManager)[0];
+        return loadModelFiles([modelFileName], modelManager)[0];
     };
 
     const loadLastDeclaration = (modelFileName, type) => {
@@ -54,15 +53,11 @@ describe('EnumDeclaration', () => {
         return declarations[declarations.length - 1];
     };
 
-    let sandbox;
-
     beforeEach(() => {
-        sandbox = sinon.createSandbox();
-        mockModelManager = sinon.createStubInstance(ModelManager);
+        modelManager = new ModelManager();
     });
 
     afterEach(() => {
-        sandbox.restore();
     });
 
     describe('#toString', () => {
