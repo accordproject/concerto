@@ -56,6 +56,17 @@ class ModelManager {
         this.serializer = new Serializer(this.factory, this);
         this.decoratorFactories = [];
         this._isModelManager = true;
+        this.addRootModel();
+    }
+
+    /**
+     * Adds root types
+     * @private
+     */
+    addRootModel() {
+        this.addModelFile( `namespace concerto
+        concept Concept {
+        }`, 'concerto.cto');
     }
 
     /**
@@ -335,20 +346,20 @@ class ModelManager {
 
     /**
      * Get the array of model file instances
-     * Note - this is an internal method and therefore will return the system model
-     * as well as any network defined models.
-     *
-     * It is the callers responsibility to remove this before the data leaves an external API
-     *
+     * @param {Boolean} [includeConcertoNamespace] - whether to include the concerto namespace
+     * (default to false)
      * @return {ModelFile[]} The ModelFiles registered
      * @private
      */
-    getModelFiles() {
+    getModelFiles(includeConcertoNamespace) {
         let keys = Object.keys(this.modelFiles);
         let result = [];
 
         for (let n = 0; n < keys.length; n++) {
-            result.push(this.modelFiles[keys[n]]);
+            const ns = keys[n];
+            if(includeConcertoNamespace || ns !== 'concerto') {
+                result.push(this.modelFiles[ns]);
+            }
         }
 
         return result;
@@ -425,6 +436,7 @@ class ModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
+        this.addRootModel();
     }
 
     /**

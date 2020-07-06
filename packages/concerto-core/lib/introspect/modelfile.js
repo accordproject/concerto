@@ -84,6 +84,10 @@ class ModelFile {
 
         this.namespace = this.ast.namespace;
 
+        if(this.namespace !== 'concerto' && this.ast.imports) {
+            this.ast.imports.push( { namespace: 'concerto.Concept'} );
+        }
+
         if(this.ast.imports) {
             this.ast.imports.forEach((imp) => {
                 this.imports.push(imp.namespace);
@@ -134,6 +138,14 @@ class ModelFile {
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * Returns true if the ModelFile is a system namespace
+     * @returns {Boolean} true if this is a system model file
+     */
+    isSystemModelFile() {
+        return this.namespace === 'concerto';
     }
 
     /**
@@ -280,7 +292,6 @@ class ModelFile {
      */
     isLocalType(type) {
         let result = (type && this.getLocalType(type) !== null);
-        //console.log('isLocalType ' + this.getNamespace() + ' ' + type + '=' + result );
         return result;
     }
 

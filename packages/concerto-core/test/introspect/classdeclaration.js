@@ -165,7 +165,7 @@ describe('ClassDeclaration', () => {
                 }
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName enum=false abstract=false}');
+            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName super=Concept enum=false abstract=false}');
         });
 
     });
@@ -212,16 +212,16 @@ describe('ClassDeclaration', () => {
             superclassName.should.equal('com.testing.parent.Super');
         });
 
-        it('should return null when no super type exists', function() {
+        it('should return concerto.Concept when no super type exists', function() {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,null);
+            should.equal(superclassName,'concerto.Concept');
         });
 
         it('toString',()=>{
             const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base enum=false abstract=true}');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Concept enum=false abstract=true}');
         });
     });
 
@@ -280,17 +280,17 @@ describe('ClassDeclaration', () => {
 
     describe('#_resolveSuperType', () => {
 
-        it('should return null if no super type', () => {
+        it('should return Concept if no super type', () => {
             let classDecl = modelManager.getType('system.Asset');
-            should.equal(classDecl._resolveSuperType(), null);
+            classDecl._resolveSuperType().should.not.be.null;
         });
 
-        it('should return null for a super class', () => {
+        it('should return Concept for a super class', () => {
             modelManager.addModelFile(`namespace org.acme
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            should.equal(superClassDecl, null);
+            should.equal(superClassDecl.getName(), 'Concept');
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
@@ -317,9 +317,9 @@ describe('ClassDeclaration', () => {
 
     describe('#getSuperTypeDeclaration', () => {
 
-        it('should return null if no super type', () => {
+        it('should return Concept if no super type', () => {
             let classDecl = modelManager.getType('system.Asset');
-            should.equal(classDecl.getSuperTypeDeclaration(), null);
+            classDecl.getSuperTypeDeclaration().should.not.be.null;
         });
     });
 
@@ -362,12 +362,12 @@ describe('ClassDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
 
-        it('should return empty array if there are no superclasses', function() {
+        it('should return an array with Concept if there are no superclasses', function() {
             const testClass = modelManager.getType('com.testing.parent.Base');
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.length(0);
+            superclassNames.should.have.length(1);
         });
 
         it('should return all superclass definitions', function() {
@@ -375,7 +375,7 @@ describe('ClassDeclaration', () => {
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.same.members(['Base', 'Super']);
+            superclassNames.should.have.same.members(['Base', 'Super', 'Concept']);
         });
     });
 

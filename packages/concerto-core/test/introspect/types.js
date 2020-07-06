@@ -14,43 +14,30 @@
 
 'use strict';
 
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
 const path = require('path');
 
 require('chai').should();
-const sinon = require('sinon');
 
 describe('ModelFile type parsing', () => {
 
     const invalidModel = fs.readFileSync(path.resolve(__dirname, '../data/parser/types.cto'), 'utf8');
 
-    let mockModelManager;
-    let mockClassDeclaration;
-    let mockSystemAsset;
-    let sandbox;
+    let modelManager;
 
     beforeEach(() => {
-        mockModelManager = sinon.createStubInstance(ModelManager);
-        mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
-        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
-        mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-        mockModelManager.getType.returns(mockClassDeclaration);
-        mockClassDeclaration.getProperties.returns([]);
-        sandbox = sinon.createSandbox();
+        modelManager = new ModelManager();
     });
 
     afterEach(() => {
-        sandbox.restore();
     });
 
     describe('#constructor', () => {
 
         it('should be valid', () => {
-            const mf = new ModelFile(mockModelManager,invalidModel, 'types.cto');
+            const mf = new ModelFile(modelManager,invalidModel, 'types.cto');
             mf.validate();
         });
 
@@ -63,7 +50,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(mockModelManager, model, 'test.cto');
+                const mf = new ModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -77,7 +64,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(mockModelManager, model, 'test.cto');
+                const mf = new ModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -91,7 +78,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(mockModelManager, model, 'test.cto');
+                const mf = new ModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -105,7 +92,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(mockModelManager, model, 'test.cto');
+                const mf = new ModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -119,7 +106,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(mockModelManager, model, 'test.cto');
+                const mf = new ModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });

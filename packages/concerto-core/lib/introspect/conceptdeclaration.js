@@ -30,7 +30,7 @@ const ClassDeclaration = require('./classdeclaration');
 class ConceptDeclaration extends ClassDeclaration {
 
     /**
-     * Create an AssetDeclaration.
+     * Create a ConceptDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}

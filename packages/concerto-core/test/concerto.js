@@ -276,6 +276,16 @@ describe('concerto', () => {
             const result = concerto.instanceOf(obj, 'org.accordproject.test.Customer');
             expect(result).to.be.false;
         });
+
+        it('all types should be an instance of concerto.Concept', () => {
+            const obj = {
+                $class : 'org.accordproject.test.Person',
+                ssn: '123456789'
+            };
+
+            const result = concerto.instanceOf(obj, 'concerto.Concept');
+            expect(result).to.be.true;
+        });
     });
 
     describe('#validate', () => {

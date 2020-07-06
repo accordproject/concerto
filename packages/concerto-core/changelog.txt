@@ -24,7 +24,11 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 0.82.7 {d5e9f460724d294bbbe3a15cea961ee2} 2020-04-08
+Version 0.82.7 {38e3db98522d35f2ac6e64dabac9b2dd} 2020-07-06
+- Concepts may now be identified
+- assets/participants/transaction/events may have a system identified created $identifier automatically
+- Can no longer redefine the identifier declared by a super type
+- All types extend concerto.Concept
 - Add new Concerto API
 - Removed System Models APIs
 - Remove notion of system table
@@ -32,6 +36,7 @@ Version 0.82.7 {d5e9f460724d294bbbe3a15cea961ee2} 2020-04-08
 - Update JsDoc for ModelManager.addModelFiles
 - Add Logger API
 - Add instanceof alternatives to Factory and Serializer
+- 'concerto' namespace is now reserved and cannot be used by user code
 
 Version 0.82.1 {dee013e99a3c2d6acc4eddfb00aad2a2} 2019-10-22
 - Make several constructors public

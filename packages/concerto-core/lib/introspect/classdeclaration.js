@@ -76,6 +76,9 @@ class ClassDeclaration extends Decorated {
         if (this.ast.classExtension) {
             this.superType = this.ast.classExtension.class.name;
         }
+        else if(!(this.modelFile.getNamespace() === 'concerto' && this.name === 'Concept')) {
+            this.superType = 'Concept';
+        }
 
         if (this.ast.idField) {
             this.idField = this.ast.idField.name;
@@ -100,13 +103,14 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Adds a required field named 'timestamp' of type 'DateTime' if this class declaration does not have a super type.
+     * Adds a required field named 'timestamp' of type 'DateTime' if this class declaration has the 'concerto.Concept'
+     * super type.
      * This method should only be called by system code.
      * @private
      */
     addTimestampField() {
         // add a timestamp field
-        if(this.superType === null) {
+        if(this.superType === 'Concept') {
             const definition = {};
             definition.id = {};
             definition.id.name = 'timestamp';
@@ -138,8 +142,9 @@ class ClassDeclaration extends Decorated {
             throw new IllegalModelException('Could not find super type ' + this.superType, this.modelFile, this.ast.location);
         }
 
-        // Prevent extending declaration with different type of declaration
-        if (this.constructor.name !== classDecl.constructor.name) {
+        // if super type is not a concept, then check that this type and the super type
+        // are of the same type. E.g. an asset cannot extend a participant
+        if (classDecl.constructor.name !== 'ConceptDeclaration' && this.constructor.name !== classDecl.constructor.name) {
             throw new IllegalModelException(`${this.constructor.name} (${this.getName()}) cannot extend ${classDecl.constructor.name} (${classDecl.getName()})`, this.modelFile, this.ast.location);
         }
         this.superTypeDeclaration = classDecl;
@@ -488,7 +493,7 @@ class ClassDeclaration extends Decorated {
                 classDecl = this.getModelFile().getType(this.superType);
             }
 
-            if (classDecl === null) {
+            if (!classDecl) {
                 throw new IllegalModelException('Could not find super type ' + this.superType, this.modelFile, this.ast.location);
             }
 

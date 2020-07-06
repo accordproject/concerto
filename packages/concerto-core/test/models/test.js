@@ -338,7 +338,7 @@ describe('Test Model', function(){
                 const importNamespace = ModelUtil.getNamespace(element);
                 return modelManager.getModelFile(importNamespace);
             });
-            imprts.length.should.equal(1);
+            imprts.length.should.equal(2);
             modelFile.getImports().includes('composer.MyParticipant').should.equal(true);
         });
     });
@@ -377,7 +377,7 @@ describe('Test Model', function(){
                 const importNamespace = ModelUtil.getNamespace(element);
                 return modelManager.getModelFile(importNamespace);
             });
-            imprts.length.should.equal(2);
+            imprts.length.should.equal(3);
         });
     });
 });
