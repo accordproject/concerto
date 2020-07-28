@@ -114,15 +114,21 @@ let logger = winston.createLogger({
 const setupLogger = ((process, env, logDir) => {
     if (env === 'development' && !process.browser) {
         // Create the log directory if it does not exist
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir);
-        }
 
-        logger.add(new winston.transports.File({
-            name: 'logs-file',
-            filename: `${logDir}/trace.log`,
-            level: 'debug'
-        }));
+        try {
+            if (!fs.existsSync(logDir)) {
+                fs.mkdirSync(logDir);
+            }
+
+            logger.add(new winston.transports.File({
+                name: 'logs-file',
+                filename: `${logDir}/trace.log`,
+                level: 'debug'
+            }));
+        }
+        catch(error) {
+            console.log('Failed to create log directory. File logging disabled.');
+        }
     }
 });
 
