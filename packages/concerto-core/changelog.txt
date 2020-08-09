@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 0.82.7 {8b661727f1eb31d106874df3d7f5cbc8} 2020-06-10
+Version 0.82.7 {c81e803b2bd1acfed8b01cc505789c3a} 2020-07-06
 - Concepts may now be identified
 - assets/participants/transaction/events have a system identified created $identifier automatically
 - Can no longer redefine the identifier declared by a super type
