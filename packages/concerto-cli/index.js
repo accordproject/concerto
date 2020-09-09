@@ -38,6 +38,11 @@ require('yargs')
             type: 'string',
             array: true
         });
+        yargs.option('offline', {
+            describe: 'do not resolve external models',
+            type: 'boolean',
+            default: false
+        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`validate sample in ${argv.sample} against the models ${argv.ctoFiles}`);
@@ -45,7 +50,9 @@ require('yargs')
 
         try {
             argv = Commands.validateValidateArgs(argv);
-            return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles)
+            const options = {};
+            options.offline = argv.offline;
+            return Commands.validate(argv.sample, argv.ctoSystem, argv.ctoFiles, options)
                 .then((result) => {
                     Logger.info(result);
                 })
@@ -68,6 +75,11 @@ require('yargs')
             type: 'string',
             array: true
         });
+        yargs.option('offline', {
+            describe: 'do not resolve external models',
+            type: 'boolean',
+            default: false
+        });
         yargs.option('target', {
             describe: 'target of the code generation',
             type: 'string',
@@ -83,7 +95,9 @@ require('yargs')
             Logger.info(`generate code for target ${argv.target} from models ${argv.ctoFiles} into directory: ${argv.output}`);
         }
 
-        return Commands.compile(argv.target, argv.ctoSystem, argv.ctoFiles, argv.output)
+        const options = {};
+        options.offline = argv.offline;
+        return Commands.compile(argv.target, argv.ctoSystem, argv.ctoFiles, argv.output, options)
             .then((result) => {
                 Logger.info(result);
             })

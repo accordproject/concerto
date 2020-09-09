@@ -99,12 +99,14 @@ class Commands {
      * @param {string} sample - the sample to validate
      * @param {string} ctoSystemFile - the system model file
      * @param {string[]} ctoFiles - the CTO files to convert to code
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.offline] - do not resolve external models
      * @returns {string} serialized form of the validated JSON
      */
-    static async validate(sample, ctoSystemFile, ctoFiles) {
+    static async validate(sample, ctoSystemFile, ctoFiles, options) {
         const json = JSON.parse(fs.readFileSync(sample, 'utf8'));
 
-        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles);
+        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles, options);
         const factory = new Factory(modelManager);
         const serializer = new Serializer(factory, modelManager);
 
@@ -119,9 +121,11 @@ class Commands {
      * @param {string} ctoSystemFile - the system model file
      * @param {string[]} ctoFiles - the CTO files to convert to code
      * @param {string} output the output directory
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.offline] - do not resolve external models
      */
-    static async compile(target, ctoSystemFile, ctoFiles, output) {
-        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles);
+    static async compile(target, ctoSystemFile, ctoFiles, output, options) {
+        const modelManager = await ModelLoader.loadModelManager(ctoSystemFile, ctoFiles, options);
 
         let visitor = null;
 

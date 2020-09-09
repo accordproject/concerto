@@ -181,8 +181,8 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + object loadModelManager(string,string[]) 
-   + object loadModelManagerFromModelFiles(string,object[],undefined) 
+   + object loadModelManager(string,string[],object,boolean) 
+   + object loadModelManagerFromModelFiles(string,object[],undefined,object,boolean) 
 }
 class ModelManager {
    + void constructor() 

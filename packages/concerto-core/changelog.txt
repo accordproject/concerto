@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 0.82.6 {03fa6481ffdf0e58cb110c6f24009d18} 2020-02-26
+Version 0.82.6 {c96bafdd4a2bb7402f6b520a0cefe537} 2020-02-26
 - Update JsDoc for ModelManager.addModelFiles
 
 Version 0.82.5 {d4d49fabba1c6ce465c446e2dccad488} 2019-11-10
