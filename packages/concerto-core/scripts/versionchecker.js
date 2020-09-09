@@ -60,8 +60,8 @@ class VersionChecker {
                     // check the version in package.json is up to date
                     const packageObj = JSON.parse(packageJson);
 
-                    if (!semver.lte(version, packageObj.version)) {
-                        throw new Error(`The version in the changelog file "${version}" is not less than or equal to the version in package.json "${packageObj.version}".`);
+                    if (!semver.lte(version, semver.inc(packageObj.version,'patch'))) {
+                        throw new Error(`The version in the changelog file "${version}" is not less than or equal to the next available version in package.json "${packageObj.version}".`);
                     }
 
                     // get MD5

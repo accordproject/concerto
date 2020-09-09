@@ -57,12 +57,12 @@ describe('VersionChecker', () => {
             VersionChecker.check('Version 0.0.1 {' + digest + '}', publicApi, JSON.stringify(packageJson));
         });
 
-        it('should throw if version does not match and is greater than package version', () => {
+        it('should throw if version does not match and is greater than one patch version above package version', () => {
             (() => {
                 const packageJson = { version: '0.0.2'};
                 const publicApi = 'class Bogus{}';
                 const digest = VersionChecker.getDigest(publicApi);
-                VersionChecker.check('Version 0.0.3 {' + digest + '}', publicApi, JSON.stringify(packageJson));
+                VersionChecker.check('Version 0.0.4 {' + digest + '}', publicApi, JSON.stringify(packageJson));
             }).should.throw(/is not less than or equal/);
         });
 
