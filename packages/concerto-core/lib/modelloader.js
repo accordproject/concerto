@@ -75,9 +75,11 @@ class ModelLoader {
      *
      * @param {string} ctoSystemFile - the system model file
      * @param {string[]} ctoFiles - the CTO files (can be local file paths or URLs)
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.offline] - do not resolve external models
      * @return {object} the model manager
      */
-    static async loadModelManager(ctoSystemFile, ctoFiles) {
+    static async loadModelManager(ctoSystemFile, ctoFiles, options = { offline: false }) {
         let modelManager = new ModelManager();
         const modelFileLoader = new DefaultModelFileLoader(modelManager);
 
@@ -89,9 +91,14 @@ class ModelLoader {
             modelManager = await ModelLoader.addModel(modelFileLoader,modelManager,ctoFile,false);
         }
 
-        // Validate update models
-        await modelManager.updateExternalModels();
-        return modelManager;
+        // Validate the models, either offline or with external model resolution
+        if(options && options.offline) {
+            modelManager.validateModelFiles();
+            return modelManager;
+        } else {
+            await modelManager.updateExternalModels();
+            return modelManager;
+        }
     }
 
     /**
@@ -100,21 +107,28 @@ class ModelLoader {
      * @param {string} ctoSystemFile - the system model file
      * @param {object[]} modelFiles - An array of Concerto files as strings or ModelFile objects.
      * @param {string[]} [fileNames] - An optional array of file names to associate with the model files
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.offline] - do not resolve external models
      * @return {object} the model manager
      */
-    static async loadModelManagerFromModelFiles(ctoSystemFile, modelFiles, fileNames) {
+    static async loadModelManagerFromModelFiles(ctoSystemFile, modelFiles, fileNames, options = { offline: false }) {
         let modelManager = new ModelManager();
         const modelFileLoader = new DefaultModelFileLoader(modelManager);
 
         // Load system model
         modelManager = await ModelLoader.addModel(modelFileLoader,modelManager,ctoSystemFile,true);
-        modelManager.addModelFiles(modelFiles, fileNames);
 
         // Load user models
+        modelManager.addModelFiles(modelFiles, fileNames);
 
-        // Validate update models
-        await modelManager.updateExternalModels();
-        return modelManager;
+        // Validate the models, either offline or with external model resolution
+        if(options && options.offline) {
+            modelManager.validateModelFiles();
+            return modelManager;
+        } else {
+            await modelManager.updateExternalModels();
+            return modelManager;
+        }
     }
 
 }
