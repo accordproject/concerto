@@ -57,6 +57,14 @@ class StringValidator extends Validator{
             }
         }
     }
+
+    /**
+     * Returns the RegExp object associated with the string validator
+     * @returns {RegExp} the RegExp object
+     */
+    getRegex() {
+        return this.regex;
+    }
 }
 
 module.exports = StringValidator;

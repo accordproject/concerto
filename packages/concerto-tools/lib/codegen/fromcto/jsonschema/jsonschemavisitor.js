@@ -39,6 +39,21 @@ const util = require('util');
 class JSONSchemaVisitor {
 
     /**
+     * Gets an object with all the decorators for a model element. The object
+     * is keyed by decorator name, while the values are the decorator arguments.
+     * @param {object} decorated a ClassDeclaration or a Property
+     */
+    getDecorators(decorated) {
+        // add information about decorators
+        return decorated.getDecorators() && decorated.getDecorators().length > 0 ?
+            decorated.getDecorators().reduce( (acc, d) => {
+                acc[d.getName()] = d.getArguments();
+                return acc;
+            }, {})
+        : null;
+    }
+
+    /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited
      * @param {Object} parameters - the parameter
@@ -85,12 +100,20 @@ class JSONSchemaVisitor {
         parameters.modelManager = modelManager;
 
         // Visit all of the files in the model manager.
-        let jsonSchemas = [];
+        let result = {
+            $schema : 'http://json-schema.org/draft-07/schema#' // default for https://github.com/ajv-validator/ajv
+        };
         modelManager.getModelFiles().forEach((modelFile) => {
-            jsonSchemas = jsonSchemas.concat(modelFile.accept(this, parameters));
+            result = { ... result, ... modelFile.accept(this, parameters) };
         });
-        return jsonSchemas;
 
+        if(parameters.rootType) {
+            const classDecl = modelManager.getType(parameters.rootType);
+            const schema = classDecl.accept(this, parameters)
+            result = { ... result, ... schema.schema };
+        }
+
+        return result;
     }
 
     /**
@@ -107,19 +130,18 @@ class JSONSchemaVisitor {
         parameters.modelFile = modelFile;
 
         // Visit all of the asset and transaction declarations, but ignore the abstract ones.
-        let jsonSchemas = [];
-        modelFile.getAssetDeclarations()
-            .concat(modelFile.getTransactionDeclarations())
-            .concat(modelFile.getConceptDeclarations())
-            .filter((declaration) => {
-                return !declaration.isAbstract();
-            })
-            .forEach((declaration) => {
-                parameters.first = true;
-                jsonSchemas.push(declaration.accept(this, parameters));
+        let result = {
+            definitions : {}
+        };
+        modelFile.getAllDeclarations().filter((declaration) => {
+            return !declaration.isAbstract();
+        }).
+            forEach((declaration) => {
+                const type = declaration.accept(this, parameters);
+                result.definitions[type.$id] = type.schema;
             });
-        return jsonSchemas;
 
+        return result;
     }
 
     /**
@@ -131,19 +153,7 @@ class JSONSchemaVisitor {
      */
     visitAssetDeclaration(assetDeclaration, parameters) {
         debug('entering visitAssetDeclaration', assetDeclaration.getName());
-
-        // If this is the first declaration, then we are building a schema for this asset.
-        let jsonSchema = {};
-        if (parameters.first) {
-            jsonSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-            jsonSchema.title = assetDeclaration.getName();
-            jsonSchema.description = `An asset named ${assetDeclaration.getName()}`;
-            parameters.first = false;
-        }
-
-        // Apply all the common schema elements.
-        return this.visitClassDeclarationCommon(assetDeclaration, parameters, jsonSchema);
-
+        return this.visitClassDeclarationCommon(assetDeclaration, parameters);
     }
 
     /**
@@ -155,19 +165,7 @@ class JSONSchemaVisitor {
      */
     visitTransactionDeclaration(transactionDeclaration, parameters) {
         debug('entering visitTransactionDeclaration', transactionDeclaration.getName());
-
-        // If this is the top declaration, then we are building a schema for this transaction.
-        let jsonSchema = {};
-        if (parameters.first) {
-            jsonSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-            jsonSchema.title = transactionDeclaration.getName();
-            jsonSchema.description = `A transaction named ${transactionDeclaration.getName()}`;
-            parameters.first = false;
-        }
-
-        // Apply all the common schema elements.
-        return this.visitClassDeclarationCommon(transactionDeclaration, parameters, jsonSchema);
-
+        return this.visitClassDeclarationCommon(transactionDeclaration, parameters);
     }
 
     /**
@@ -179,18 +177,7 @@ class JSONSchemaVisitor {
      */
     visitConceptDeclaration(conceptDeclaration, parameters) {
         debug('entering visitConceptDeclaration', conceptDeclaration.getName());
-
-        // If this is the first declaration, then we are building a schema for this asset.
-        let jsonSchema = {};
-        if (parameters.first) {
-            jsonSchema.$schema = 'http://json-schema.org/draft-04/schema#';
-            jsonSchema.title = conceptDeclaration.getName();
-            jsonSchema.description = `A concept named ${conceptDeclaration.getName()}`;
-            parameters.first = false;
-        }
-
-        // Apply all the common schema elements.
-        return this.visitClassDeclarationCommon(conceptDeclaration, parameters, jsonSchema);
+        return this.visitClassDeclarationCommon(conceptDeclaration, parameters);
     }
 
     /**
@@ -202,10 +189,7 @@ class JSONSchemaVisitor {
      */
     visitClassDeclaration(classDeclaration, parameters) {
         debug('entering visitClassDeclaration', classDeclaration.getName());
-
-        // Apply all the common schema elements.
-        return this.visitClassDeclarationCommon(classDeclaration, parameters, {});
-
+        return this.visitClassDeclarationCommon(classDeclaration, parameters);
     }
 
     /**
@@ -216,60 +200,49 @@ class JSONSchemaVisitor {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitClassDeclarationCommon(classDeclaration, parameters, jsonSchema) {
+    visitClassDeclarationCommon(classDeclaration, parameters) {
         debug('entering visitClassDeclarationCommon', classDeclaration.getName());
 
-        // Set the required properties into the schema.
-        Object.assign(jsonSchema, {
-            type: 'object',
-            properties: {},
-            required: []
-        });
-
-        // If no description exists, add it now.
-        if (!jsonSchema.description) {
-            jsonSchema.description = `An instance of ${classDeclaration.getFullyQualifiedName()}`;
-        }
+        const result = {
+            $id: classDeclaration.getFullyQualifiedName(),
+            schema: {
+                title: classDeclaration.getName(),
+                description : `An instance of ${classDeclaration.getFullyQualifiedName()}`,
+                type: 'object',
+                properties: {},
+                required: []
+        }};
 
         // Every class declaration has a $class property.
-        jsonSchema.properties.$class = {
+        result.schema.properties.$class = {
             type: 'string',
             default: classDeclaration.getFullyQualifiedName(),
+            pattern: classDeclaration.getFullyQualifiedName().split('.').join('\\.'),
             description: 'The class identifier for this type'
         };
 
-        // But it's only required at the top level.
-        if (jsonSchema.$schema) {
-            jsonSchema.required.push('$class');
-        }
+        result.schema.required.push('$class');
 
         // Walk over all of the properties of this class and its super classes.
         classDeclaration.getProperties().forEach((property) => {
 
             // Get the schema for the property.
-            jsonSchema.properties[property.getName()] = property.accept(this, parameters);
+            result.schema.properties[property.getName()] = property.accept(this, parameters);
 
             // If the property is required, add it to the list.
             if (!property.isOptional()) {
-                jsonSchema.required.push(property.getName());
+                result.schema.required.push(property.getName());
             }
-
         });
 
-        // If this is a top level schema, now we need to write it to disk.
-        if (jsonSchema.$schema) {
-            let fileContents = JSON.stringify(jsonSchema, null, 4);
-            if (parameters.fileWriter) {
-                let fileName = `${classDeclaration.getFullyQualifiedName()}.json`;
-                parameters.fileWriter.openFile(fileName);
-                parameters.fileWriter.write(fileContents);
-                parameters.fileWriter.closeFile();
-            }
+        // add the decorators
+        const decorators = this.getDecorators(classDeclaration);
+        if(decorators) {
+            result.schema['$decorators'] = decorators;
         }
 
         // Return the created schema.
-        return jsonSchema;
-
+        return result;
     }
 
     /**
@@ -286,20 +259,44 @@ class JSONSchemaVisitor {
         let jsonSchema;
         if (field.isPrimitive()) {
 
+            const validator = field.getValidator();
+
             // Render the type as JSON Schema.
             jsonSchema = {};
+
+            if(field.getDefaultValue() !== null) {
+                jsonSchema.default = field.getDefaultValue();
+            }
+
             switch (field.getType()) {
             case 'String':
                 jsonSchema.type = 'string';
+                if(validator) {
+                    jsonSchema.pattern = `^${validator.getRegex().toString().slice(1,-1)}$`
+                }
                 break;
             case 'Double':
                 jsonSchema.type = 'number';
+                if(validator) {
+                    if(validator.getLowerBound() !== null) {
+                        jsonSchema.minimum = validator.getLowerBound();
+                    }
+                    if(validator.getUpperBound() !== null) {
+                        jsonSchema.maximum = validator.getUpperBound();
+                    }
+                }
                 break;
             case 'Integer':
-                jsonSchema.type = 'integer';
-                break;
             case 'Long':
                 jsonSchema.type = 'integer';
+                if(validator) {
+                    if(validator.getLowerBound() !== null) {
+                        jsonSchema.minimum = Math.trunc(validator.getLowerBound());
+                    }
+                    if(validator.getUpperBound() !== null) {
+                        jsonSchema.maximum = Math.trunc(validator.getUpperBound());
+                    }
+                }
                 break;
             case 'DateTime':
                 jsonSchema.format = 'date-time';
@@ -325,10 +322,7 @@ class JSONSchemaVisitor {
 
             // Look up the type of the property.
             let type = parameters.modelFile.getModelManager().getType(field.getFullyQualifiedTypeName());
-
-            // Render the type as JSON Schema.
-            jsonSchema = type.accept(this, parameters);
-
+            jsonSchema = { $ref: `#/definitions/${type.getFullyQualifiedName()}` };
         }
 
         // Is the type an array?
@@ -339,9 +333,14 @@ class JSONSchemaVisitor {
             };
         }
 
+        // add the decorators
+        const decorators = this.getDecorators(field);
+        if(decorators) {
+            jsonSchema['$decorators'] = decorators;
+        }
+
         // Return the schema.
         return jsonSchema;
-
     }
 
     /**
@@ -354,19 +353,27 @@ class JSONSchemaVisitor {
     visitEnumDeclaration(enumDeclaration, parameters) {
         debug('entering visitEnumDeclaration', enumDeclaration.getName());
 
-        // Create the schema.
-        let jsonSchema = {
-            enum: []
-        };
+        const result = {
+            $id: enumDeclaration.getFullyQualifiedName(),
+            schema: {
+                title: enumDeclaration.getName(),
+                description : `An instance of ${enumDeclaration.getFullyQualifiedName()}`,
+                enum: []
+        }};
 
         // Walk over all of the properties which should just be enum value declarations.
         enumDeclaration.getProperties().forEach((property) => {
-            jsonSchema.enum.push(property.accept(this, parameters));
+            result.schema.enum.push(property.accept(this, parameters));
         });
 
-        // Return the schema.
-        return jsonSchema;
+        // add the decorators
+        const decorators = this.getDecorators(enumDeclaration);
+        if(decorators) {
+            result.schema['$decorators'] = decorators;
+        }
 
+        // Return the schema.
+        return result;
     }
 
     /**
@@ -408,9 +415,14 @@ class JSONSchemaVisitor {
             };
         }
 
+        // add the decorators
+        const decorators = this.getDecorators(relationshipDeclaration);
+        if(decorators) {
+            jsonSchema['$decorators'] = decorators;
+        }
+
         // Return the schema.
         return jsonSchema;
-
     }
 
 }

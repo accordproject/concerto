@@ -58,6 +58,21 @@ class NumberValidator extends Validator{
     }
 
     /**
+     * Returns the lower bound for this validator, or null if not specified
+     * @returns {number} the lower bound or null
+     */
+    getLowerBound() {
+        return this.lowerBound;
+    }
+    /**
+     * Returns the upper bound for this validator, or null if not specified
+     * @returns {number} the upper bound or null
+     */
+    getUpperBound() {
+        return this.upperBound;
+    }
+
+    /**
      * Validate the property
      * @param {string} identifier the identifier of the instance being validated
      * @param {Object} value the value to validate

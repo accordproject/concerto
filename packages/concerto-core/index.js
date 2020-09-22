@@ -50,5 +50,6 @@ module.exports.SecurityException = require('./lib/securityexception');
 module.exports.Serializer = require('./lib/serializer');
 module.exports.TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
 module.exports.Typed = require('./lib/model/typed');
+module.exports.TypedStack = require('./lib/serializer/typedstack');
 module.exports.ModelUtil = require('./lib/modelutil');
 module.exports.version = require('./package.json');
