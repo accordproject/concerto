@@ -68,8 +68,17 @@ transaction MyRequest extends Base {
   o Money money
   o Color color
 }
-
 `;
+
+const MODEL_SIMPLE_2 = `
+namespace test2
+
+concept Vehicle {
+  o String model
+  o String make
+}
+`;
+
 const MODEL_RECURSIVE_COMPLEX = `
 namespace org.accordproject.ergo.monitor
 
@@ -187,6 +196,18 @@ describe('JSONSchema (samples)', function () {
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});
             expect(schema.properties.money.$ref).equal('#/definitions/test.Money');
+        });
+
+        it('should handle multiple model files', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+            modelManager.addModelFile( MODEL_SIMPLE_2 );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, {rootType: 'test.MyRequest' });
+            // console.log(JSON.stringify(schema, null, 2));
+            expect(schema.definitions['test.Money']).to.not.be.undefined;
+            expect(schema.definitions['test2.Vehicle']).to.not.be.undefined;
+            expect(schema.title).equal('MyRequest');
         });
 
         it('should generate regex and bounds', () => {

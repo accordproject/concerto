@@ -123,10 +123,12 @@ class JSONSchemaVisitor {
 
         // Visit all of the files in the model manager.
         let result = {
-            $schema : 'http://json-schema.org/draft-07/schema#' // default for https://github.com/ajv-validator/ajv
+            $schema : 'http://json-schema.org/draft-07/schema#', // default for https://github.com/ajv-validator/ajv
+            definitions: {}
         };
         modelManager.getModelFiles().forEach((modelFile) => {
-            result = { ... result, ... modelFile.accept(this, parameters) };
+            const schema = modelFile.accept(this, parameters);
+            result.definitions = { ... result.definitions, ... schema.definitions };
         });
 
         if(parameters.rootType) {
