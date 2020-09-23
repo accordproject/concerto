@@ -43,6 +43,7 @@ describe('StringValidator', () => {
 
         it('should ignore a null string', () => {
             let v = new StringValidator(mockField, '/^[A-z][A-z][0-9]{7}/' );
+            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/');
             v.validate('id', null);
         });
 

@@ -26,12 +26,22 @@ const RelationshipDeclaration = require('@accordproject/concerto-core').Relation
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const debug = require('debug')('concerto-core:jsonschemavisitor');
 const util = require('util');
+const RecursionDetectionVisitor = require('./recursionvisitor');
 
 /**
- * Convert the contents of a {@link ModelManager} instance to a set of JSON
- * Schema v4 files - one per concrete asset and transaction type.
- * Set a fileWriter property (instance of {@link FileWriter}) on the parameters
- * object to control where the generated code is written to disk.
+ * Convert the contents of a {@link ModelManager} to a JSON Schema, returning
+ * the schema for all types under the 'definitions' key. If the 'rootType'
+ * parameter option is set to a fully-qualified type name, then the properties
+ * of the type are also added to the root of the schema object.
+ * 
+ * If the fileWriter parameter is set then the JSONSchema will be written to disk.
+ * 
+ * Note that by default $ref is used to references types, unless 
+ * the `inlineTypes` parameter is set, in which case types are expanded inline,
+ * UNLESS they contain recursive references, in which case $ref is used.
+ * 
+ * The meta schema used is http://json-schema.org/draft-07/schema#
+ * 
  * @private
  * @class
  * @memberof module:concerto-tools
@@ -51,6 +61,21 @@ class JSONSchemaVisitor {
                 return acc;
             }, {})
         : null;
+    }
+
+    /**
+     * Returns true if the class declaration contains recursive references.
+     * 
+     * Basic example:
+     * concept Person {
+     *   o Person[] children
+     * }
+     * 
+     * @param {object} classDeclaration the class being visited
+     */
+    isModelRecursive(classDeclaration) {
+        const visitor = new RecursionDetectionVisitor();
+        return classDeclaration.accept( visitor, {stack : []} );
     }
 
     /**
@@ -96,9 +121,6 @@ class JSONSchemaVisitor {
     visitModelManager(modelManager, parameters) {
         debug('entering visitModelManager');
 
-        // Save the model manager so that we have access to it later.
-        parameters.modelManager = modelManager;
-
         // Visit all of the files in the model manager.
         let result = {
             $schema : 'http://json-schema.org/draft-07/schema#' // default for https://github.com/ajv-validator/ajv
@@ -113,6 +135,13 @@ class JSONSchemaVisitor {
             result = { ... result, ... schema.schema };
         }
 
+        if(parameters.fileWriter) {
+            const fileName = parameters.rootType ? `${parameters.rootType}.json` : 'schema.json';
+            parameters.fileWriter.openFile(fileName);
+            parameters.fileWriter.writeLine(0, JSON.stringify(result, null, 2));
+            parameters.fileWriter.closeFile();
+        }
+
         return result;
     }
 
@@ -125,9 +154,6 @@ class JSONSchemaVisitor {
      */
     visitModelFile(modelFile, parameters) {
         debug('entering visitModelFile', modelFile.getNamespace());
-
-        // Save the model file so that we have access to it later.
-        parameters.modelFile = modelFile;
 
         // Visit all of the asset and transaction declarations, but ignore the abstract ones.
         let result = {
@@ -203,6 +229,8 @@ class JSONSchemaVisitor {
     visitClassDeclarationCommon(classDeclaration, parameters) {
         debug('entering visitClassDeclarationCommon', classDeclaration.getName());
 
+        parameters.inlineTypes = parameters.inlineTypes ? !this.isModelRecursive(classDeclaration) : false;
+
         const result = {
             $id: classDeclaration.getFullyQualifiedName(),
             schema: {
@@ -217,7 +245,7 @@ class JSONSchemaVisitor {
         result.schema.properties.$class = {
             type: 'string',
             default: classDeclaration.getFullyQualifiedName(),
-            pattern: classDeclaration.getFullyQualifiedName().split('.').join('\\.'),
+            pattern: `^${classDeclaration.getFullyQualifiedName().split('.').join('\\.')}$`,
             description: 'The class identifier for this type'
         };
 
@@ -319,10 +347,14 @@ class JSONSchemaVisitor {
 
         // Not primitive, so must be a class or enumeration!
         } else {
-
             // Look up the type of the property.
-            let type = parameters.modelFile.getModelManager().getType(field.getFullyQualifiedTypeName());
-            jsonSchema = { $ref: `#/definitions/${type.getFullyQualifiedName()}` };
+            let type = field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName());
+            if(!parameters.inlineTypes) {
+                jsonSchema = { $ref: `#/definitions/${type.getFullyQualifiedName()}` };
+            } else {
+                // inline the schema
+                jsonSchema = this.visit( type, parameters ).schema;
+            }
         }
 
         // Is the type an array?

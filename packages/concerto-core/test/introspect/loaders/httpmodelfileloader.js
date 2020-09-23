@@ -29,22 +29,9 @@ describe('HTTPModeFilelLoader', () => {
     let modelManager;
     let sandbox;
 
-    let model = `namespace org.accordproject.usa.business
-
-    /**
-     * Types of businesses in the USA
-     * Taken from: https://en.wikipedia.org/wiki/List_of_business_entities#United_States
-     */
-    enum BusinessEntity {
-      o GENERAL_PARTNERSHIP
-      o LP
-      o LLP
-      o LLLP
-      o LLC
-      o PLLC
-      o CORP
-      o PC
-      o DBA
+    let model = `namespace test
+    enum Test {
+        o ONE
     }`;
 
     beforeEach(() => {
@@ -81,13 +68,15 @@ describe('HTTPModeFilelLoader', () => {
         it('should load https URIs', () => {
 
             // Match against an exact URL value
-            moxios.stubRequest('https://raw.githubusercontent.com/accordproject/models/master/usa/business.cto', {
+            const url = 'https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto';
+
+            moxios.stubRequest(url, {
                 status: 200,
                 responseText: model
             });
 
             const ml = new HTTPModelFileLoader(modelManager);
-            return ml.load('https://raw.githubusercontent.com/accordproject/models/master/usa/business.cto')
+            return ml.load(url)
                 .then((mf) => {
                     mf.getDefinitions().should.be.deep.equal(model);
                 });

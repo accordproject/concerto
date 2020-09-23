@@ -15,20 +15,62 @@
 'use strict';
 
 const Ajv = require('ajv');
+const fs = require('fs');
+const path = require('path');
 const { expect } = require('chai');
 const chai = require('chai');
 chai.should();
 
+const FileWriter = require('../../../../lib/filewriter');
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const JSONSchemaVisitor = require('../../../../lib/codegen/fromcto/jsonschema/jsonschemavisitor.js');
+const RecursionDetectionVisitor = require('../../../../lib/codegen/fromcto/jsonschema/recursionvisitor.js');
 
-describe('JSONSchema (samples)', function () {
+const MODEL_BOUNDS = `
+namespace test
 
-    describe('samples', () => {
+concept Test {
+  o String myString regex=/abc.*/
+  o Integer intLowerUpper range=[-1,1]
+  o Integer intLower range=[-1,]
+  o Integer intUpper range=[,1]
+  o Long longLowerUpper range=[-1,1]
+  o Long longLower range=[-1,]
+  o Long longUpper range=[,1]
+  o Double doubleLowerUpper range=[-1.2,1.2]
+  o Double doubleLower range=[-1.2,]
+  o Double doubleUpper range=[,1.2]
+}
+`;
 
-        it('should generate JSON schema for recursive schema with decorators and validators', () => {
-            const modelManager = new ModelManager();
-            modelManager.addModelFile( `
+const MODEL_SIMPLE = `
+namespace test
+
+enum Color {
+  o RED
+  o GREEN
+  o BLUE
+}
+
+abstract transaction Base identified by id {
+  o String id
+}
+
+concept Money {
+  o Double value
+  o String currencyCode
+}
+
+transaction MyRequest extends Base {
+  o String name
+  o DateTime date
+  o Integer age
+  o Money money
+  o Color color
+}
+
+`;
+const MODEL_RECURSIVE_COMPLEX = `
 namespace org.accordproject.ergo.monitor
 
 @Important
@@ -79,12 +121,126 @@ concept Phase {
 concept Monitor {
   @MonitorDecorator("test")
   o Phase[] phases
-}`);
+}`;
+
+const MODEL_RECURSIVE_SIMPLE = `
+namespace recursive
+
+enum Role {
+  o HR
+  o MARKETING
+  o ENGINEERING
+}
+
+asset Factory identified by id {
+  o String id
+  o Address address
+}
+
+concept Address {
+  o String street
+  o Person[] inhabitants
+}
+
+concept Person {
+  o String name
+  o Role role
+  --> Factory factory
+  o Address address
+}
+`;
+
+describe('JSONSchema (samples)', function () {
+
+    describe('samples', () => {
+
+        it('should detect simple recursive model', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_RECURSIVE_SIMPLE );
+            const visitor = new RecursionDetectionVisitor();
+            const type = modelManager.getType('recursive.Person');
+            const result = type.accept(visitor, {stack: []});
+            expect(result).equal(true);
+        });
+
+        it('should detect simple recursive model 2', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_RECURSIVE_SIMPLE );
+            const visitor = new RecursionDetectionVisitor();
+            const type = modelManager.getType('recursive.Factory');
+            const result = type.accept(visitor, {stack: []});
+            expect(result).equal(true);
+        });
+
+        it('should detect simple recursive model 3', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_RECURSIVE_SIMPLE );
+            const visitor = new RecursionDetectionVisitor();
+            const type = modelManager.getType('recursive.Address');
+            const result = type.accept(visitor, {stack: []});
+            expect(result).equal(true);
+        });
+
+        it('should reference types for simple model', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});
+            expect(schema.properties.money.$ref).equal('#/definitions/test.Money');
+        });
+
+        it('should generate regex and bounds', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_BOUNDS );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.Test'});
+            expect(schema.properties.myString.pattern).equal('^abc.*$');
+        });
+
+        it('should inline types for simple model', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest', inlineTypes: true});
+            expect(schema.properties.money.$ref).to.be.undefined;
+            expect(schema.properties.money.title).equal('Money');
+        });
+
+        it('should write to disk', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+            const visitor = new JSONSchemaVisitor();
+            const fileWriter = new FileWriter('./output');
+            modelManager.accept(visitor, { fileWriter, rootType: 'test.MyRequest', inlineTypes: true});
+            const contents = JSON.parse(fs.readFileSync( path.join('./output', 'test.MyRequest.json'), 'utf-8' ));
+            expect(contents.title).equal('MyRequest');
+        });
+
+        it('should only return definitions', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, {});
+            expect(schema.title).to.be.undefined;
+        });
+
+        it('should detect complex recursive model', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_RECURSIVE_COMPLEX );
+            const visitor = new RecursionDetectionVisitor();
+            const type = modelManager.getType('org.accordproject.ergo.monitor.Monitor');
+            const result = type.accept(visitor, {stack: []});
+            expect(result).equal(true);
+        });
+
+        it('should generate JSON schema for recursive schema with decorators and validators', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_RECURSIVE_COMPLEX );
 
             const visitor = new JSONSchemaVisitor();
             const monitorSchema = modelManager.accept(visitor, { rootType: 'org.accordproject.ergo.monitor.Monitor'});
             expect(monitorSchema.title).equal('Monitor');
-            console.log(JSON.stringify(monitorSchema, null, 2));
+            // console.log(JSON.stringify(monitorSchema, null, 2));
 
             const phaseSchema = modelManager.accept(visitor, { rootType: 'org.accordproject.ergo.monitor.Phase'});
             expect(phaseSchema.title).equal('Phase');
@@ -116,6 +272,36 @@ concept Monitor {
 
             const ajv = new Ajv();
             expect( ajv.validate(monitorSchema, instance)).equals(true);
+        });
+
+        it('should generate JSON schema for simple schema', () => {
+            const modelManager = new ModelManager();
+            modelManager.addModelFile( MODEL_SIMPLE );
+
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});
+            expect(schema.title).equal('MyRequest');
+            // console.log(JSON.stringify(schema, null, 2));
+
+            // check that the generated schema validates a valid instance
+            const instance =
+          {
+              $class : 'test.MyRequest',
+              id: '001',
+              age : 10,
+              name: 'Dan',
+              color: 'RED',
+              money : {
+                  $class : 'test.Money',
+                  value: 100.5,
+                  currencyCode: 'GBP'
+              },
+              date: new Date().toISOString(),
+              timestamp: new Date().toISOString(),
+          };
+
+            const ajv = new Ajv();
+            expect( ajv.validate(schema, instance)).equals(true);
         });
     });
 });

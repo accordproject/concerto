@@ -43,20 +43,20 @@ describe('NumberValidator', () => {
     describe('#constructor', () => {
         it('should accept valid constructor parms VALID_UPPER_AND_LOWER_BOUND_AST', () => {
             let validator = new NumberValidator(mockField, VALID_UPPER_AND_LOWER_BOUND_AST);
-            validator.lowerBound.should.equal(0);
-            validator.upperBound.should.equal(100);
+            validator.getLowerBound().should.equal(0);
+            validator.getUpperBound().should.equal(100);
         });
 
         it('should accept valid constructor parms NO_LOWER_BOUND_AST', () => {
             let validator = new NumberValidator(mockField, NO_LOWER_BOUND_AST);
-            should.equal(validator.lowerBound, null);
-            validator.upperBound.should.equal(100);
+            should.equal(validator.getLowerBound(), null);
+            validator.getUpperBound().should.equal(100);
         });
 
         it('should accept valid constructor parms NO_UPPER_BOUND_AST', () => {
             let validator = new NumberValidator(mockField, NO_UPPER_BOUND_AST);
-            validator.lowerBound.should.equal(0);
-            should.equal(validator.upperBound, null);
+            validator.getLowerBound().should.equal(0);
+            should.equal(validator.getUpperBound(), null);
         });
 
         it('should throw an error for constructor parms NO_PARMS_IN_AST', () => {

@@ -75,13 +75,13 @@ describe('GitHubModelFileLoader', () => {
 
         it('should load github URIs', () => {
             // Match against an exact URL value
-            moxios.stubRequest('https://raw.githubusercontent.com/accordproject/models/master/usa/business.cto', {
+            moxios.stubRequest('https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto', {
                 status: 200,
                 responseText: model
             });
 
             const ml = new GitHubModelFileLoader(modelManager);
-            return ml.load( 'github://accordproject/models/master/usa/business.cto', {foo: 'bar' })
+            return ml.load( 'github://accordproject/models/master/src/usa/business.cto', {foo: 'bar' })
                 .then((mf) => {
                     mf.getDefinitions().should.be.deep.equal(model);
                 });
