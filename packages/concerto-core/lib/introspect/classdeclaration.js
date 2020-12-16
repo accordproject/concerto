@@ -225,18 +225,20 @@ class ClassDeclaration extends Decorated {
                 if (idField.isOptional()) {
                     throw new IllegalModelException('Identifying fields cannot be optional.', this.modelFile, this.ast.location);
                 }
-                if (this.getSuperType()) {
-                    const superType = this.getModelFile().getType(this.superType);
 
-                    if(this.isSystemIdentified()) {
-                        // check that the super type is also system identified
-                        if(!superType.isSystemIdentified()) {
-                            throw new IllegalModelException(`Super class has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                if(this.superType) {
+                    const superType = this.getModelFile().getType(this.superType);
+                    if (superType && superType.getIdentifierFieldName() ) {
+                        if(this.isSystemIdentified()) {
+                            // check that the super type is also system identified
+                            if(!superType.isSystemIdentified()) {
+                                throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                            }
                         }
-                    }
-                    else {
-                        if(superType.isExplicitlyIdentified()) {
-                            throw new IllegalModelException(`Super class has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                        else {
+                            if(superType.isExplicitlyIdentified()) {
+                                throw new IllegalModelException(`Super class ${superType.getFullyQualifiedName()} has an explicit identifier ${superType.getIdentifierFieldName()} that cannot be redeclared.`, this.modelFile, this.ast.location);
+                            }
                         }
                     }
                 }
