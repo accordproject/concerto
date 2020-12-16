@@ -114,7 +114,7 @@ asset Order identified by sku {
                 }
                 
                             `, 'test.cto');
-            }).should.throw(/Super class has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow overriding system identifier', () => {
@@ -153,7 +153,7 @@ asset Order identified by sku {
                 }
                 
                             `, 'test.cto');
-            }).should.throw(/Super class has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow overriding explicit identifier with an explicit identifier', () => {
@@ -173,7 +173,7 @@ asset Order identified by sku {
                 }
                 
                             `, 'test.cto');
-            }).should.throw(/Super class has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow field called $identifier', () => {

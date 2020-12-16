@@ -36,6 +36,7 @@ class IdentifiedDeclaration extends ClassDeclaration {
     constructor(modelFile, ast) {
         super(modelFile, ast);
         this._isIdentifiedDeclaration = true;
+        this.process();
     }
 
     /**
@@ -47,7 +48,7 @@ class IdentifiedDeclaration extends ClassDeclaration {
     process() {
         super.process();
 
-        if(!this.superType && !this.idField) {
+        if(this.superType === 'Concept' && !this.idField) {
             this.idField = '$identifier';
             this.addIdentifierField();
         }
