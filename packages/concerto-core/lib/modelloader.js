@@ -94,9 +94,6 @@ class ModelLoader {
         // Load system model
         modelManager.addModelFiles(modelFiles, fileNames, true);
 
-        // Load user models
-        modelManager.addModelFiles(modelFiles, fileNames);
-
         // Validate the models, either offline or with external model resolution
         if(options && options.offline) {
             modelManager.validateModelFiles();
