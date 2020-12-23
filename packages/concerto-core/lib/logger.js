@@ -66,15 +66,20 @@ const isJson = (str) => {
     }
 };
 
-jsome.params.lintable = true;
-
-const jsonColor = winston.format(info => {
-    const padding = info.padding && info.padding[info.level] || '';
-
-    if (info[LEVEL] === 'error' && info.stack) {
-        info[MESSAGE] = `${tsFormat()} - ${info.level}:${padding} ${info.message}\n${info.stack}`;
-        return info;
+/**
+* Helper function to color and format JSON objects
+* @param {any} obj - the input obj to prettify
+* @returns {any} - the prettified object
+* @private
+*/
+const prettifyJson = (obj) => {
+    if(typeof obj === 'object') {
+        return `\n${jsome.getColoredString(obj, null, 2)}`;
+    } else if(isJson(obj)) {
+        return `\n${jsome.getColoredString(JSON.parse(obj), null, 2)}`;
     }
+    return obj;
+};
 
 /**
 * The default transport for logging at multiple levels to the console
@@ -240,3 +245,10 @@ class Logger {
     static silly(...args){ return this.dispatch('silly', ...args); }
 }
 
+// Set the default logging level
+Logger.level = 'info';
+
+// A list of user-provided logging tranports
+Logger.transports = [ defaultTransport ];
+
+module.exports = Logger;
