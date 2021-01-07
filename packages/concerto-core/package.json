@@ -70,7 +70,7 @@
     "moment-mini": "2.22.1",
     "randexp": "0.5.3",
     "slash": "3.0.0",
-    "urijs": "1.19.1",
+    "urijs": "1.19.4",
     "uuid": "3.3.2"
   },
   "license-check-and-add-config": {
