@@ -15,8 +15,10 @@
 'use strict';
 
 const loremIpsum = require('lorem-ipsum');
-const Moment = require('moment-mini');
 const RandExp = require('randexp');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 /**
  * Generate a random number within a given range with
@@ -93,12 +95,12 @@ class EmptyValueGenerator {
      * @private
      */
     constructor() {
-        this.currentDate = new Moment();
+        this.currentDate = dayjs.utc();
     }
 
     /**
      * Get a default DateTime value.
-     * @return {Moment} a date value.
+     * @return {object} a date value.
      */
     getDateTime() {
         return this.currentDate;

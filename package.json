@@ -10,7 +10,7 @@
     "jsdoc": "3.6.3",
     "lerna": "^3.22.1",
     "license-check-and-add": "2.3.6",
-    "moment-mini": "2.22.1",
+    "dayjs": "1.10.2",
     "nyc": "14.1.1",
     "semver": "6.3.0"
   },

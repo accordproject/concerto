@@ -163,7 +163,7 @@ describe('ObjectValidator', function () {
             }).should.throw(/expected type Boolean/);
         });
 
-        it('should fail if property not a DataTime', () => {
+        it('should fail if property not a DateTime', () => {
             const data = {
                 $class : 'test.Vehicle',
                 dateTimeProperty: true,

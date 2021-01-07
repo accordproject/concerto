@@ -19,7 +19,9 @@ const ModelManager = require('../../../lib/modelmanager');
 const Serializer = require('../../../lib/serializer');
 const fs = require('fs');
 const Util = require('../../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 let chai = require('chai');
 chai.should();
@@ -82,7 +84,7 @@ describe('Test generating deduplicated JSON for complex models', () => {
             logEntry.vehicle = wrapper.transaction.vehicle;
             logEntry.buyer = wrapper.transaction.buyer;
             logEntry.seller = wrapper.transaction.seller;
-            logEntry.timestamp = Moment();
+            logEntry.timestamp = dayjs.utc();
             wrapper.transaction.vehicle.logEntries= [logEntry];
 
             const obj = serializer.toJSON(wrapper, {deduplicateResources: true, permitResourcesForRelationships: true});

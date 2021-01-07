@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 const fs = require('fs');
-const moment = require('moment-mini');
 const path = require('path');
 const semver = require('semver');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
-const timestamp = moment().format('YYYYMMDDHHmmss');
+const timestamp = dayjs.utc().format('YYYYMMDDHHmmss');
 
 const lernaDirectory = path.resolve('.');
 const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
@@ -66,7 +68,7 @@ for (const i in packages) {
             if (dependency === otherPackage.name) {
                 currentPackage.peerDependencies[dependency] = targetVersion;
             }
-        }        
+        }
     }
     const packageFile = path.resolve(packagesDirectory, i, 'package.json');
     fs.writeFileSync(packageFile, JSON.stringify(currentPackage, null, 2), 'utf8');

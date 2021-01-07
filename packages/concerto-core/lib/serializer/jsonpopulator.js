@@ -21,7 +21,9 @@ const Relationship = require('../model/relationship');
 const Util = require('../util');
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 /**
  * Check if a given property name is a system property, e.g. '$class'.
@@ -224,11 +226,12 @@ class JSONPopulator {
 
         switch(field.getType()) {
         case 'DateTime': {
-            if (Moment.isMoment(json)) {
+            if (dayjs.isDayjs(json)) {
                 result = json;
+            } else if (typeof json !== 'string') {
+                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
             } else {
-                // Uses strict mode
-                result = new Moment.parseZone(json, Moment.ISO_8601, true);
+                result = dayjs.utc(json);
             }
             if (!result.isValid()) {
                 throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);

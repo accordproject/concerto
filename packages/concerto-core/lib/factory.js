@@ -33,7 +33,9 @@ const EventDeclaration = require('./introspect/eventdeclaration');
 
 const uuid = require('uuid');
 
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 /**
  * Use the Factory to create instances of Resource: transactions, participants
@@ -202,7 +204,7 @@ class Factory {
         }
 
         // set the timestamp
-        transaction.timestamp = Moment().utc();
+        transaction.timestamp = dayjs.utc();
 
         return transaction;
     }
@@ -238,7 +240,7 @@ class Factory {
         }
 
         // set the timestamp
-        event.timestamp = Moment().utc();
+        event.timestamp = dayjs.utc();
 
         return event;
     }
