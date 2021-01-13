@@ -22,7 +22,9 @@ const Util = require('../util');
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
-const moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 /**
  * <p>
@@ -308,7 +310,7 @@ class ObjectValidator {
                 }
                 break;
             case 'DateTime':
-                if(!moment(obj, moment.ISO_8601).isValid()) {
+                if(typeof obj !== 'string' || !dayjs.utc(obj).isValid()) {
                     invalid = true;
                 }
                 break;

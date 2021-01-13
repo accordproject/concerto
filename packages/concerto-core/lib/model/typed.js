@@ -15,7 +15,9 @@
 'use strict';
 
 const Field = require('../introspect/field');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 /**
  * Object is an instance with a namespace and a type.
@@ -148,7 +150,7 @@ class Typed {
                     } else if (field.getType() === 'Boolean') {
                         this.setPropertyValue(field.getName(), (defaultValue === 'true'));
                     } else if (field.getType() === 'DateTime') {
-                        const dateTime = Moment.parseZone(defaultValue);
+                        const dateTime = dayjs.utc(defaultValue);
                         this.setPropertyValue(field.getName(), dateTime);
                     } else {
                         // following precident set in jsonpopulator.js - if we get this far the field should be an enum

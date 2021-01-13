@@ -25,7 +25,9 @@ const Resource = require('../../lib/model/resource');
 const ModelUtil = require('../../lib/modelutil');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const Util = require('../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 const sinon = require('sinon');
 const chai = require('chai');
@@ -244,7 +246,7 @@ describe('ResourceValidator', function () {
         });
 
         it('should detect using a date type for a string field', function () {
-            const typedStack = new TypedStack( Moment.parseZone('2016-10-13T14:49:47.971Z') );
+            const typedStack = new TypedStack( dayjs.utc('2016-10-13T14:49:47.971Z') );
             const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
             const field = vehicleDeclaration.getProperty('model');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };

@@ -17,7 +17,7 @@
 const ModelManager = require('../../lib/modelmanager');
 const Typed = require('../../lib/model/typed');
 const Util = require('../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
 
 require('chai').should();
 
@@ -104,7 +104,7 @@ describe('Typed', () => {
                 const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
                 const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
                 typed.assignFieldDefaults();
-                if (Moment.isMoment(typed.value)) {
+                if (dayjs.isDayjs(typed.value)) {
                     typed.value.format().should.equal(defaultValue);
                 } else {
                     typed.value.should.equal(defaultValue);

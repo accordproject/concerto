@@ -24,7 +24,9 @@ const TypedStack = require('../../lib/serializer/typedstack');
 const ValidationException = require('../../lib/serializer/validationexception');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const Util = require('../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 require('chai').should();
 const sinon = require('sinon');
@@ -106,17 +108,17 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519Z');
-            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.519Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(dayjs.utc('2016-10-20T05:34:03.519Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
-        it('should convert to dates from moments', () => {
+        it('should convert to dates from dayjs objects', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulator.convertToObject(field, Moment.parseZone('2016-10-20T05:34:03Z'));
-            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(Moment.parseZone('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
+            let value = jsonPopulator.convertToObject(field, dayjs.utc('2016-10-20T05:34:03Z'));
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(dayjs.utc('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
-        it('should not convert to dates from invalid moments', () => {
+        it('should not convert to dates from invalid dayjs objects', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
@@ -144,8 +146,8 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, 'December 17, 1995 03:24:00');
-            }).should.throw(ValidationException, /Expected value "December 17, 1995 03:24:00" to be of type DateTime/);
+                jsonPopulator.convertToObject(field, 'abc');
+            }).should.throw(ValidationException, /Expected value "abc" to be of type DateTime/);
         });
 
         it('should not convert to integers from strings', () => {

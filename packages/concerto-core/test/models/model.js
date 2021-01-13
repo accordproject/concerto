@@ -18,7 +18,9 @@ const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Serializer = require('../../lib/serializer');
 const Util = require('../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 const assert = require('assert');
 require('chai').should();
@@ -99,7 +101,7 @@ describe('Model Tests', function(){
             assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /.+expected type Boolean/, 'did not throw with expected message');
 
             // o DateTime dateTimeProperty
-            const dateTime = Moment.parseZone('2016-10-11T02:30:26.262Z');
+            const dateTime = dayjs.utc('2016-10-11T02:30:26.262Z');
             resource.setPropertyValue('dateTimeProperty', dateTime );
             resource.dateTimeProperty.should.equal(dateTime);
             assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /.+expected type DateTime/, 'did not throw with expected message');

@@ -24,7 +24,9 @@ const Serializer = require('./../../lib/serializer');
 const ModelManager = require('./../../lib/modelmanager');
 const ModelUtil = require('./../../lib/modelutil');
 const Util = require('../composer/composermodelutility');
-const Moment = require('moment-mini');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 describe('Globalization', function() {
 
@@ -62,7 +64,7 @@ describe('Globalization', function() {
             // Use Globalize to format a message with plural inflection.
             let like = Globalize.messageFormatter('like');
             like(0).should.equal('Be the first to like this');
-            Globalize.dateFormatter()( Moment().format() ).should.not.be.null;
+            Globalize.dateFormatter()( dayjs.utc().format() ).should.not.be.null;
             Globalize('pt').formatMessage('hello').should.equal('Olá');
 
             let formatter = Globalize.messageFormatter('hello');

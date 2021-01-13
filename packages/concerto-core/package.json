@@ -63,11 +63,11 @@
   },
   "dependencies": {
     "axios": "0.21.1",
+    "dayjs": "1.10.2",
     "colors": "1.4.0",
     "debug": "4.1.1",
     "jsome": "2.5.0",
     "lorem-ipsum": "1.0.6",
-    "moment-mini": "2.22.1",
     "randexp": "0.5.3",
     "slash": "3.0.0",
     "urijs": "1.19.1",
