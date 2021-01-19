@@ -2,11 +2,6 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.82.11",
-  "hoist": true,
-  "command": {
-    "publish": {
-      "allowBranch": "master"
-    }
-  }
+  "version": "0.82.12-20210119205342",
+  "hoist": true
 }
