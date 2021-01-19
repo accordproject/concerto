@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+'use strict';
+
 const path = require('path');
 const semver = require('semver');
 const dayjs = require('dayjs');
