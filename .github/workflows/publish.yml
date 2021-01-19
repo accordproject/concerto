@@ -1,0 +1,52 @@
+name: publish
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  publish:
+    name: Publish to npm
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      job-status: ${{ job.status }}
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      - name: lerna install
+        run: |
+          npm install lerna@^3.22.0
+          ./node_modules/.bin/lerna bootstrap 2>&1
+
+      - name: build and publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ~/.npmrc
+          npm version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
+          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
+          ./node_modules/.bin/lerna exec -- npm publish --access public 2>&1
+          rm ~/.npmrc
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          base: master
+          commit-message: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: clausehq-publish-${{ github.event.release.tag_name }}
+          delete-branch: true
+          title: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
+          body: |
+            # NPM Publish
+
+            Publish build to NPM
+          assignees: ${{ github.actor }}
+          reviewers: ${{ github.actor }}
+          draft: false
