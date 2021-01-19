@@ -2,6 +2,6 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.82.12-20210119205342",
+  "version": "0.82.11",
   "hoist": true
 }
