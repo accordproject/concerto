@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "0.82.11",
+  "version": "0.82.12-20210119205342",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -63,8 +63,8 @@
   },
   "dependencies": {
     "axios": "0.21.1",
-    "dayjs": "1.10.2",
     "colors": "1.4.0",
+    "dayjs": "1.10.2",
     "debug": "4.1.1",
     "jsome": "2.5.0",
     "lorem-ipsum": "1.0.6",

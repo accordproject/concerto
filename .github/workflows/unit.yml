@@ -1,0 +1,94 @@
+name: unit
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  unit-tests:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+    name: Unit Tests
+
+    runs-on: ${{ matrix.os }}
+
+    outputs:
+      job-status: ${{ job.status }}
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      - name: lerna install
+        run: |
+          npm install lerna@^3.22.0
+          ./node_modules/.bin/lerna bootstrap 2>&1
+
+      - name: run unit tests
+        run: |
+          npm run test
+
+      - name: Calculate code coverage
+        run: |
+          npm run coverage
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{matrix.os}}
+          parallel: true
+
+  notify:
+    needs:
+      - unit-tests
+
+    name: Code Coverage
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+
+  publish:
+    needs:
+      - notify
+
+    name: Publish to npm
+    if: ${{ success() && github.event_name == 'push'}}
+    runs-on: ubuntu-latest
+
+    outputs:
+      job-status: ${{ job.status }}
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+
+      - name: lerna install
+        run: |
+          npm install lerna@^3.22.0
+          ./node_modules/.bin/lerna bootstrap 2>&1
+
+      - name: Create tag with timestamp
+        id: tag
+        run: |
+          node ./scripts/tag.js
+
+      - name: build and publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
+          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
+          ./node_modules/.bin/lerna exec -- npm publish --access public 2>&1
+          rm ~/.npmrc
