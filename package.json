@@ -15,22 +15,15 @@
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-  "version": "0.82.12-20210119205342",
+  "version": "0.82.11",
   "scripts": {
     "coverage": "istanbul-combine -d coverage -r lcov packages/concerto-cli/coverage/*.json packages/concerto-core/coverage/*.json  packages/concerto-tools/coverage/*.json && cat ./coverage/lcov.info",
-    "postinstall": "npm run pkgcheck && npm run bootstrap",
     "bootstrap": "lerna bootstrap",
     "pretest": "npm run licchk",
     "test": "lerna exec -- npm run test",
     "test:cli": "lerna exec --scope @accordproject/concerto-cli -- npm run test",
-    "publish": "./scripts/manualrelease.sh",
     "repoclean": "lerna clean",
-    "licchk": "license-check-and-add",
-    "pkgcheck": "node ./scripts/pkgcheck.js",
-    "pkgstamp": "node ./scripts/pkgstamp.js",
-    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
-    "pkgset": "node ./scripts/pkgset.js",
-    "depcheck": "node ./scripts/depcheck.js"
+    "licchk": "license-check-and-add"
   },
   "license-check-and-add-config": {
     "folder": ".",
