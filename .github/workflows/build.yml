@@ -1,4 +1,4 @@
-name: unit
+name: build
 
 on:
   push:
@@ -90,5 +90,5 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
           ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
-          ./node_modules/.bin/lerna exec -- npm publish --access public 2>&1
+          ./node_modules/.bin/lerna exec -- npm publish --access public --tag=unstable 2>&1
           rm ~/.npmrc
