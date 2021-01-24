@@ -23,16 +23,20 @@ jobs:
           npm install lerna@^3.22.0
           ./node_modules/.bin/lerna bootstrap 2>&1
 
+      - name: tag
+        id: tag
+        run: |
+          node ./scripts/tag.js ${{ github.event.release.tag_name }}
+
       - name: build and publish
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
           ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
-          ./node_modules/.bin/lerna exec -- npm publish --access public 2>&1
+          echo "./node_modules/.bin/lerna exec -- npm publish --access public ${{ steps.tag.outputs.tag }} 2>&1"
           rm ~/.npmrc
 
       - name: Create Pull Request
-        id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
           base: master
@@ -40,7 +44,7 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
-          branch: clausehq-publish-${{ github.event.release.tag_name }}
+          branch: ap-publish-${{ github.event.release.tag_name }}
           delete-branch: true
           title: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
           body: |
