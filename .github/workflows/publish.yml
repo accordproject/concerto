@@ -25,7 +25,7 @@ jobs:
 
       - name: build and publish
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
           ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
           ./node_modules/.bin/lerna exec -- npm publish --access public 2>&1
