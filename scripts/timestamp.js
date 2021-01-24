@@ -15,15 +15,17 @@
 
 'use strict';
 
+const path = require('path');
 const semver = require('semver');
-const targetVersion = process.argv[2];
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
-if (!semver.valid(targetVersion)) {
-    console.error(`Error: the version "${targetVersion}" is invalid!`);
-    process.exit(1);
-}
+const timestamp = dayjs.utc().format('YYYYMMDDHHmmss');
 
-const prerelease = semver.prerelease(targetVersion);
-const tag = prerelease ? 'unstable' : 'stable';
-
-console.log(`::set-output name=tag::--tag=${tag}`);
+const lernaDirectory = path.resolve('.');
+const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
+const lernaConfig = require(lernaConfigFile);
+lernaConfig.version.replace(/-.*/, '');
+const targetVersion = semver.inc(lernaConfig.version, 'patch') + '-' + timestamp;
+console.log(`::set-output name=stamp::${targetVersion}`);

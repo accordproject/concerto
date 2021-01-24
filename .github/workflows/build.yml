@@ -80,15 +80,15 @@ jobs:
           npm install lerna@^3.22.0
           ./node_modules/.bin/lerna bootstrap 2>&1
 
-      - name: Create tag with timestamp
-        id: tag
+      - name: timestamp
+        id: timestamp
         run: |
-          node ./scripts/tag.js
+          node ./scripts/timestamp.js
 
       - name: build and publish
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
-          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ steps.tag.outputs.stamp }}
+          npm version --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
+          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
           ./node_modules/.bin/lerna exec -- npm publish --access public --tag=unstable 2>&1
           rm ~/.npmrc
