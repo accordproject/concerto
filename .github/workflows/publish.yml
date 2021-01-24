@@ -33,7 +33,7 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
           ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
-          echo "./node_modules/.bin/lerna exec -- npm publish --access public ${{ steps.tag.outputs.tag }} 2>&1"
+          ./node_modules/.bin/lerna exec -- npm publish --access public ${{ steps.tag.outputs.tag }} 2>&1
           rm ~/.npmrc
 
       - name: Create Pull Request
