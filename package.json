@@ -2,20 +2,20 @@
   "private": true,
   "devDependencies": {
     "colors": "1.4.0",
-    "eslint": "6.0.1",
     "coveralls": "3.0.4",
+    "dayjs": "1.10.2",
+    "eslint": "6.0.1",
     "istanbul-combine": "0.3.0",
     "istanbul-merge": "1.1.1",
     "jsdoc": "3.6.3",
     "lerna": "^3.22.1",
     "license-check-and-add": "2.3.6",
-    "dayjs": "1.10.2",
     "nyc": "14.1.1",
     "semver": "6.3.0"
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-  "version": "0.82.11",
+  "version": "1.0.0-alpha.1",
   "scripts": {
     "coverage": "istanbul-combine -d coverage -r lcov packages/concerto-cli/coverage/*.json packages/concerto-core/coverage/*.json  packages/concerto-tools/coverage/*.json && cat ./coverage/lcov.info",
     "bootstrap": "lerna bootstrap",
