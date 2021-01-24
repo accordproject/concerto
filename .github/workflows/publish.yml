@@ -43,7 +43,7 @@ jobs:
           commit-message: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: false
+          signoff: true
           branch: ap-publish-${{ github.event.release.tag_name }}
           delete-branch: true
           title: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
