@@ -34,7 +34,6 @@
       ".github",
       ".gitattributes",
       ".tern-project",
-      ".travis",
       "node_modules",
       "packages",
       "softhsm",
