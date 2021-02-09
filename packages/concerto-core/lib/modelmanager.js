@@ -65,8 +65,11 @@ class ModelManager {
      */
     addRootModel() {
         this.addModelFile( `namespace concerto
-        concept Concept {
-        }`, 'concerto.cto');
+        abstract concept Concept {}
+        abstract asset Asset {}
+        abstract transaction Transaction {}
+        abstract participant Participant {}
+        abstract event Event {}`, 'concerto.cto');
     }
 
     /**

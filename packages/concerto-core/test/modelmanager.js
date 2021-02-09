@@ -104,8 +104,39 @@ describe('ModelManager', () => {
             let mockModelFile = sinon.createStubInstance(ModelFile);
             modelManager.validateModelFile(mockModelFile);
             sinon.assert.calledOnce(mockModelFile.validate);
+        });
+    });
 
+    describe('#concerto namespace', () => {
 
+        it('should contain Asset', () => {
+            const fqn = 'concerto.Asset';
+            const type = modelManager.getType(fqn);
+            type.getFullyQualifiedName().should.equal(fqn);
+        });
+
+        it('should contain Participant', () => {
+            const fqn = 'concerto.Participant';
+            const type = modelManager.getType(fqn);
+            type.getFullyQualifiedName().should.equal(fqn);
+        });
+
+        it('should contain Event', () => {
+            const fqn = 'concerto.Event';
+            const type = modelManager.getType(fqn);
+            type.getFullyQualifiedName().should.equal(fqn);
+        });
+
+        it('should contain Transaction', () => {
+            const fqn = 'concerto.Transaction';
+            const type = modelManager.getType(fqn);
+            type.getFullyQualifiedName().should.equal(fqn);
+        });
+
+        it('should contain Concept', () => {
+            const fqn = 'concerto.Concept';
+            const type = modelManager.getType(fqn);
+            type.getFullyQualifiedName().should.equal(fqn);
         });
     });
 
