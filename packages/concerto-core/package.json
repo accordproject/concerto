@@ -25,7 +25,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/accordproject/concerto.git"
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-core"
   },
   "keywords": [
     "blockchain",
