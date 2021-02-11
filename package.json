@@ -25,6 +25,10 @@
     "repoclean": "lerna clean",
     "licchk": "license-check-and-add"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto"
+  },
   "license-check-and-add-config": {
     "folder": ".",
     "license": "HEADER",
