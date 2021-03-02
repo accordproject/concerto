@@ -10,7 +10,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/accordproject/concerto.git"
+    "url": "git+https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-cli"
   },
   "scripts": {
     "lint": "eslint .",
