@@ -1,4 +1,4 @@
-name: build
+name: Build
 
 on:
   push:
@@ -7,47 +7,57 @@ on:
       - master
 
 jobs:
-  unit-tests:
+  build:
+    name: Unit Tests
+
     strategy:
       matrix:
+        node-version:
+          - 12.x
+          - 14.x
         os:
           - ubuntu-latest
           - windows-latest
-
-    name: Unit Tests
+          - macOS-latest
 
     runs-on: ${{ matrix.os }}
-
-    outputs:
-      job-status: ${{ job.status }}
 
     steps:
       - name: git checkout
         uses: actions/checkout@v2
 
-      - name: lerna install
-        run: |
-          npm install lerna@^3.22.0
-          ./node_modules/.bin/lerna bootstrap 2>&1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+    
+      - name: use cache 
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: run unit tests
-        run: |
-          npm run test
+      - name: Build
+        run: npx lerna bootstrap
+
+      - name: Run unit tests
+        run: npm test
 
       - name: Calculate code coverage
-        run: |
-          npm run coverage
+        run: npm run coverage
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: ${{matrix.os}}
+          flag-name: ${{ matrix.os }}
           parallel: true
 
   notify:
     needs:
-      - unit-tests
+      - build
 
     name: Code Coverage
     if: ${{ success() }}
@@ -62,6 +72,7 @@ jobs:
 
   publish:
     needs:
+      - build
       - notify
 
     name: Publish to npm
@@ -75,10 +86,13 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v2
 
-      - name: lerna install
-        run: |
-          npm install lerna@^3.22.0
-          ./node_modules/.bin/lerna bootstrap 2>&1
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+    
+      - name: Build
+        run: npx lerna bootstrap
 
       - name: timestamp
         id: timestamp
@@ -87,8 +101,7 @@ jobs:
 
       - name: build and publish
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm version --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
-          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
-          ./node_modules/.bin/lerna exec -- npm publish --access public --tag=unstable 2>&1
-          rm ~/.npmrc
+          npx lerna version --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
+          npx lerna exec -- npm publish --access public --ignore-scripts --tag=unstable 2>&1
