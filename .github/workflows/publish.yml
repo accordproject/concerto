@@ -1,4 +1,4 @@
-name: publish
+name: Publish
 
 on:
   release:
@@ -8,20 +8,18 @@ on:
 jobs:
   publish:
     name: Publish to npm
-
     runs-on: ubuntu-latest
-
-    outputs:
-      job-status: ${{ job.status }}
 
     steps:
       - name: git checkout
         uses: actions/checkout@v2
 
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
       - name: lerna install
-        run: |
-          npm install lerna@^3.22.0
-          ./node_modules/.bin/lerna bootstrap 2>&1
+        run: npx lerna bootstrap
 
       - name: tag
         id: tag
@@ -30,13 +28,12 @@ jobs:
 
       - name: build and publish
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
-          ./node_modules/.bin/lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
-          ./node_modules/.bin/lerna exec -- npm publish --access public ${{ steps.tag.outputs.tag }} 2>&1
-          rm ~/.npmrc
+          npx lerna version --no-git-tag-version --yes --exact ${{ github.event.release.tag_name }}
+          npx lerna exec -- npm publish --access public ${{ steps.tag.outputs.tag }} 2>&1
 
-      - name: Create Pull Request
+      - name: Create PR to increment version
         uses: peter-evans/create-pull-request@v3
         with:
           base: master
@@ -48,9 +45,9 @@ jobs:
           delete-branch: true
           title: 'chore(actions): publish ${{ github.event.release.tag_name }} to npm'
           body: |
-            # NPM Publish
+            # Increment Versions
 
-            Publish build to NPM
+            Update the package.json version numbers after publishing to NPM.
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
           draft: false
