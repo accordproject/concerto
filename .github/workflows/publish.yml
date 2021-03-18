@@ -8,15 +8,17 @@ on:
 jobs:
   publish:
     name: Publish to npm
+    if: ${{ github.repository_owner == 'accordproject' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: git checkout
         uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v1
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 14.x
 
       - name: lerna install
         run: npx lerna bootstrap

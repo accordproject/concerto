@@ -76,7 +76,7 @@ jobs:
       - notify
 
     name: Publish to npm
-    if: ${{ success() && github.event_name == 'push'}}
+    if: ${{ success() && github.event_name == 'push' && github.repository_owner == 'accordproject' }}
     runs-on: ubuntu-latest
 
     outputs:
