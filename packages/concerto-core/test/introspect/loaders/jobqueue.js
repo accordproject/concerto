@@ -154,9 +154,9 @@ describe('JobQueue', function () {
         it('should run all jobs in the queue in order.', function () {
 
             // We use a longer delay in the earlier jobs to make sure the later ones wait
-            const spy1 = sinon.spy(() => delay(20));
-            const spy2 = sinon.spy(() => delay(10));
-            const spy3 = sinon.spy(() => delay(5));
+            const spy1 = sinon.spy(() => delay(10));
+            const spy2 = sinon.spy(() => delay(5));
+            const spy3 = sinon.spy(() => delay(2));
 
             const testJobs = new TestJobQueue();
 
@@ -177,8 +177,8 @@ describe('JobQueue', function () {
             testJobs.addJob('test job');
 
             return Promise.all([
-                expect(delay(startDelay - 10).then(() => testJobs.jobRunning)).to.eventually.be.false,
-                expect(delay(startDelay + 10).then(() => testJobs.jobRunning)).to.eventually.be.true
+                expect(delay(startDelay - 100).then(() => testJobs.jobRunning)).to.eventually.be.false,
+                expect(delay(startDelay + 100).then(() => testJobs.jobRunning)).to.eventually.be.true
             ]);
         });
 
@@ -192,9 +192,8 @@ describe('JobQueue', function () {
             testJobs.addJob('test job 2');
 
             return Promise.all([
-                expect(delay(startDelay + testJobTime + 10).then(() => testJobs.getQueue())).to.eventually.have.lengthOf(1),
-
-                expect(delay(startDelay + testJobTime + 10).then(() => testJobs.getQueue()[0])).to.eventually.equal('test job 2')
+                expect(delay(startDelay + testJobTime + 100).then(() => testJobs.getQueue())).to.eventually.have.lengthOf(1),
+                expect(delay(startDelay + testJobTime + 100).then(() => testJobs.getQueue()[0])).to.eventually.equal('test job 2')
             ]);
         });
 
@@ -210,7 +209,7 @@ describe('JobQueue', function () {
             return Promise.all([
                 expect(delay(testJobTime + (jobDelay / 2)).then(() => testJobs.jobRunning)).to.eventually.be.false,
                 expect(delay(testJobTime + (jobDelay / 2)).then(() => testJobs.getQueue()[0])).to.eventually.equal('test job 2'),
-                expect(delay(testJobTime + jobDelay + 10).then(() => testJobs.jobRunning)).to.eventually.be.true,
+                expect(delay(testJobTime + jobDelay + 100).then(() => testJobs.jobRunning)).to.eventually.be.true,
             ]);
         });
     });
