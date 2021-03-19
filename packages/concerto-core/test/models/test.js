@@ -302,7 +302,7 @@ describe('Test Model', function(){
             let txDecl = modelFile.getTransactionDeclaration('VehicleTransferredToScrapMerchant');
             txDecl.should.not.be.null;
             txDecl.getName().should.equal('VehicleTransferredToScrapMerchant');
-            txDecl.getProperties().length.should.equal(4);
+            txDecl.getProperties().length.should.equal(3); // Should have 3: scarpMerchant, vehicle, timestamp
             let scrapMerchantField = txDecl.getProperty('scrapMerchant');
             (scrapMerchantField !== null).should.be.true;
             scrapMerchantField.getName().should.equal('scrapMerchant');
@@ -340,7 +340,7 @@ describe('Test Model', function(){
                 const importNamespace = ModelUtil.getNamespace(element);
                 return modelManager.getModelFile(importNamespace);
             });
-            imprts.length.should.equal(2);
+            imprts.length.should.equal(6); // XXX Now includes all concerto.* classes
             modelFile.getImports().includes('composer.MyParticipant').should.equal(true);
         });
     });
@@ -379,7 +379,7 @@ describe('Test Model', function(){
                 const importNamespace = ModelUtil.getNamespace(element);
                 return modelManager.getModelFile(importNamespace);
             });
-            imprts.length.should.equal(3);
+            imprts.length.should.equal(7); // XXX Now includes all concerto.* classes
         });
     });
 });
