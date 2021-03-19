@@ -52,7 +52,7 @@ asset Order {
             mm.addModelFile( `
 namespace test
 
-asset Order {
+asset Order identified {
     o Double price
 }
             `, 'test.cto');
@@ -205,10 +205,9 @@ asset Order identified by sku {
 
             const order = mm.getType('test.Order');
             order.should.not.be.null;
-            order.getProperties().length.should.equal(2);
-            order.isSystemIdentified().should.be.true;
+            order.getProperties().length.should.equal(1); // XXX Without an identified means it should have only a price property
+            order.isSystemIdentified().should.be.false;
             order.isExplicitlyIdentified().should.be.false;
-            order.getIdentifierFieldName().should.equal('$identifier');
         });
 
     });
