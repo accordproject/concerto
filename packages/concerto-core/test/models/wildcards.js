@@ -72,6 +72,7 @@ describe('Wildcards Model', function () {
         };
         const resource = serializer.fromJSON(json);
         resource.assetId.should.equal('1');
+        resource.$identifier.should.equal('1');
         resource.concept.gender.should.equal('FEMALE');
         resource.participant.personId.should.equal('1');
         resource.participant.firstName.should.equal('Alice');
@@ -102,6 +103,7 @@ describe('Wildcards Model', function () {
         };
         const resource = ergoSerializer.fromJSON(json);
         resource.assetId.should.equal('1');
+        resource.$identifier.should.equal('1');
         resource.concept.gender.should.equal('FEMALE');
         resource.participant.personId.should.equal('1');
         resource.participant.firstName.should.equal('Alice');
@@ -125,6 +127,7 @@ describe('Wildcards Model', function () {
         json.should.deep.equal({
             $class: 'org.acme.wildcards.MyAsset',
             assetId: '1',
+            $identifier: '1',
             concept: {
                 $class: 'org.acme.wildcards.MyConcept',
                 gender: 'FEMALE'

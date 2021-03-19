@@ -267,7 +267,7 @@ describe('Test Model', function(){
             let vehicle = modelFile.getAssetDeclaration('Vehicle');
             vehicle.getIdentifierFieldName().should.equal('vin');
             vehicle.getName().should.equal('Vehicle');
-            vehicle.getProperties().length.should.equal(16); // 15 from Vehicle, and 1 from Base
+            vehicle.getProperties().length.should.equal(17); // 15 from Vehicle, and 1 from Base, and one from $identifier
 
             // validator, default
             let vinField = vehicle.getProperty('vin');

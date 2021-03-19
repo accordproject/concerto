@@ -50,7 +50,7 @@ describe('Farm2Fork Model', function() {
             animal.should.not.be.null;
             animal.getIdentifierFieldName().should.equal('identifier');
             animal.getName().should.equal('Animal');
-            animal.getProperties().length.should.equal(9);
+            animal.getProperties().length.should.equal(10);
 
             // validator, default
             let identifierField = animal.getProperty('identifier');
