@@ -1,0 +1,6 @@
+{
+    "$class": "org.test.C",
+    "c": { "$class": "org.test.T2", "name": "foo" },
+    "t0": { "$class": "org.test.T2", "name": "foo" },
+    "t": { "$class": "org.test.T2", "name": "foo" }
+}

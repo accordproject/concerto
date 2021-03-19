@@ -1,0 +1,5 @@
+{
+    "$class": "org.test.C",
+    "c": { "$class": "org.test.T2", "name": "foo", "timestamp": "1231231" },
+    "t": { "$class": "org.test.T3", "name": "foo", "timestamp": "1231231" }
+}

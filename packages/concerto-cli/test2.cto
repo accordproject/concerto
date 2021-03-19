@@ -1,0 +1,25 @@
+namespace org.test
+
+// Should not be needed
+import concerto.Transaction
+import concerto.Participant
+import concerto.Event
+
+concept C {
+}
+
+transaction T {
+}
+
+participant P {
+}
+
+event E {
+}
+
+concept Foo {
+  o Concept c
+  o Transaction t // Validation error when containing a class T
+  o Participant p
+  o Event e
+}
