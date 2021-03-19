@@ -362,7 +362,7 @@ class ClassDeclaration extends Decorated {
      * @returns {Boolean} true if the class declaration includes an explicit identifier
      */
     isExplicitlyIdentified() {
-        return this.idField && this.idField !== '$identifier';
+        return (!!this.idField && this.idField !== '$identifier');
     }
 
     /**

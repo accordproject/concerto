@@ -86,6 +86,10 @@ class ModelFile {
 
         if(this.namespace !== 'concerto' && this.ast.imports) {
             this.ast.imports.push( { namespace: 'concerto.Concept'} );
+            this.ast.imports.push( { namespace: 'concerto.Asset'} );
+            this.ast.imports.push( { namespace: 'concerto.Transaction'} );
+            this.ast.imports.push( { namespace: 'concerto.Participant'} );
+            this.ast.imports.push( { namespace: 'concerto.Event'} );
         }
 
         if(this.ast.imports) {
@@ -106,15 +110,31 @@ class ModelFile {
             let thing = this.ast.body[n];
 
             if(thing.type === 'AssetDeclaration') {
+                // Default super type for asset
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Asset' } };
+                }
                 this.declarations.push( new AssetDeclaration(this, thing) );
             }
             else if(thing.type === 'TransactionDeclaration') {
+                // Default super type for transaction
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Transaction' } };
+                }
                 this.declarations.push( new TransactionDeclaration(this, thing) );
             }
             else if(thing.type === 'EventDeclaration') {
+                // Default super type for event
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Event' } };
+                }
                 this.declarations.push( new EventDeclaration(this, thing) );
             }
             else if(thing.type === 'ParticipantDeclaration') {
+                // Default super type for participant
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Participant' } };
+                }
                 this.declarations.push( new ParticipantDeclaration(this, thing) );
             }
             else if(thing.type === 'EnumDeclaration') {

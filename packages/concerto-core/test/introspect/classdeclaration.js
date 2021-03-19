@@ -212,16 +212,16 @@ describe('ClassDeclaration', () => {
             superclassName.should.equal('com.testing.parent.Super');
         });
 
-        it('should return concerto.Concept when no super type exists', function() {
+        it('should return concerto.Participant when no super type exists', function() {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'concerto.Concept');
+            should.equal(superclassName,'concerto.Participant');
         });
 
         it('toString',()=>{
             const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Concept enum=false abstract=true}');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Participant enum=false abstract=true}');
         });
     });
 
@@ -280,7 +280,7 @@ describe('ClassDeclaration', () => {
 
     describe('#_resolveSuperType', () => {
 
-        it('should return Concept if no super type', () => {
+        it('should return Asset if no super type', () => {
             let classDecl = modelManager.getType('system.Asset');
             classDecl._resolveSuperType().should.not.be.null;
         });
@@ -290,7 +290,7 @@ describe('ClassDeclaration', () => {
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            should.equal(superClassDecl.getName(), 'Concept');
+            should.equal(superClassDecl.getName(), 'Asset');
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
@@ -362,12 +362,12 @@ describe('ClassDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
 
-        it('should return an array with Concept if there are no superclasses', function() {
+        it('should return an array with Concept and Participant if there are no superclasses', function() {
             const testClass = modelManager.getType('com.testing.parent.Base');
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.length(1);
+            superclassNames.should.have.length(2);
         });
 
         it('should return all superclass definitions', function() {
@@ -375,7 +375,7 @@ describe('ClassDeclaration', () => {
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
-            superclassNames.should.have.same.members(['Base', 'Super', 'Concept']);
+            superclassNames.should.have.same.members(['Base', 'Super', 'Participant', 'Concept']);
         });
     });
 
