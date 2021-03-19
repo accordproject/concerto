@@ -47,11 +47,6 @@ class IdentifiedDeclaration extends ClassDeclaration {
      */
     process() {
         super.process();
-
-        if(this.superType === 'Concept' && !this.idField) {
-            this.idField = '$identifier';
-            this.addIdentifierField();
-        }
     }
 
     /**
