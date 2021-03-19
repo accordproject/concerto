@@ -52,7 +52,7 @@ asset Order {
             mm.addModelFile( `
 namespace test
 
-asset Order identified {
+asset Order {
     o Double price
 }
             `, 'test.cto');
@@ -68,7 +68,7 @@ asset Order identified {
             mm.addModelFile( `
 namespace test
 
-asset Order identified {
+asset Order {
     o Double price
 }
             `, 'test.cto');
@@ -92,7 +92,7 @@ asset Order identified by sku {
 
             const order = mm.getType('test.Order');
             order.should.not.be.null;
-            order.getProperties().length.should.equal(2);
+            order.getProperties().length.should.equal(3); // XXX Assets always have an identifier
             order.getIdentifierFieldName().should.equal('sku');
             order.isSystemIdentified().should.be.false;
             order.isExplicitlyIdentified().should.be.true;
@@ -124,11 +124,7 @@ asset Order identified by sku {
                 mm.addModelFile( `
                 namespace test
                 
-                asset Order identified {
-                    o Double price
-                }
-                
-                asset FancyOrder identified extends Order {
+                asset FancyOrder identified {
                     o String sku
                 }
                 
@@ -205,7 +201,7 @@ asset Order identified by sku {
 
             const order = mm.getType('test.Order');
             order.should.not.be.null;
-            order.getProperties().length.should.equal(1); // XXX Without an identified means it should have only a price property
+            order.getProperties().length.should.equal(2); // XXX Assets always have an identifier
             order.isSystemIdentified().should.be.false;
             order.isExplicitlyIdentified().should.be.false;
         });

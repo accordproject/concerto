@@ -122,6 +122,7 @@ describe('Serializer', () => {
             });
             json.should.deep.equal({
                 $class: 'org.acme.sample.SampleAsset',
+                $identifier: '1',
                 assetId: '1',
                 owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
                 stringValue: 'the value',
@@ -182,6 +183,7 @@ describe('Serializer', () => {
             });
             json.should.deep.equal({
                 $class: 'org.acme.sample.SampleAsset',
+                $identifier: '1',
                 assetId: '1'
             });
         });
@@ -192,6 +194,7 @@ describe('Serializer', () => {
             let json = serializer.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.sample.SampleAsset',
+                $identifier: '1',
                 assetId: '1'
             });
         });
@@ -230,6 +233,7 @@ describe('Serializer', () => {
             });
             json.should.deep.equal({
                 $class: 'org.acme.sample.SampleAsset',
+                $identifier: '1',
                 assetId: '1',
                 owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
                 stringValue: '',
@@ -267,6 +271,7 @@ describe('Serializer', () => {
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.assetId.should.equal('1');
+            resource.$identifier.should.equal('1');
             resource.owner.should.be.an.instanceOf(Relationship);
             resource.stringValue.should.equal('the value');
             resource.doubleValue.should.equal(3.14);
@@ -345,6 +350,7 @@ describe('Serializer', () => {
             let resource = serializer.fromJSON(json, { validate: false });
             resource.should.be.an.instanceOf(Resource);
             resource.assetId.should.equal('1');
+            resource.$identifier.should.equal('1');
             resource.owner.should.be.an.instanceOf(Relationship);
             should.equal(resource.stringValue, undefined);
         });
@@ -359,6 +365,7 @@ describe('Serializer', () => {
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.assetId.should.equal('1');
+            resource.$identifier.should.equal('1');
             resource.owner.should.be.an.instanceOf(Relationship);
             should.equal(resource.stringValue, undefined);
         });
