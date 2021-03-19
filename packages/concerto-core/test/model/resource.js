@@ -65,6 +65,7 @@ describe('Resource', function () {
             resource.owner = modelManager.getFactory().newRelationship('org.acme.l1', 'Person', '123');
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.Car',
+                $identifier: '456',
                 owner: 'resource:org.acme.l1.Person#123',
                 vin: '456'
             });

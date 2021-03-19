@@ -82,7 +82,7 @@ describe('Concept', function () {
             asset.invSets = [inventorySets];
             const serializer = new Serializer(factory, modelManager);
             const obj = serializer.toJSON(asset);
-            JSON.stringify(obj).should.equal('{"$class":"org.acme.biznet.MakerInventory","makerId":"123","invSets":[{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}]}');
+            JSON.stringify(obj).should.equal('{"$class":"org.acme.biznet.MakerInventory","makerId":"123","invSets":[{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}],"$identifier":"123"}');
         });
 
         it('should generate JSON for an asset that contains a concept', function () {

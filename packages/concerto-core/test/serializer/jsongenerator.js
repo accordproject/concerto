@@ -205,7 +205,7 @@ describe('JSONGenerator', () => {
             };
             options.stack.push(resource);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration1, options);
-            result.should.deep.equal({ '$class': 'org.acme.MyAsset1', assetId: 'DOGE_1' });
+            result.should.deep.equal({ '$class': 'org.acme.MyAsset1', $identifier: 'DOGE_1', assetId: 'DOGE_1' });
         });
 
         it('should generate a circular resource if option is specified', () => {
@@ -223,7 +223,7 @@ describe('JSONGenerator', () => {
             };
             options.stack.push(resource1);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration3, options);
-            result.should.deep.equal({'$class':'org.acme.SimpleAssetCircle','assetId':'DOGE_1','next':{'$class':'org.acme.SimpleAssetCircle','assetId':'DOGE_2','next':{'$class':'org.acme.SimpleAssetCircle','assetId':'DOGE_3','next':'resource:org.acme.SimpleAssetCircle#DOGE_1'}}});
+            result.should.deep.equal({'$class':'org.acme.SimpleAssetCircle', '$identifier': 'DOGE_1', 'assetId':'DOGE_1','next':{'$class':'org.acme.SimpleAssetCircle','$identifier': 'DOGE_2','assetId':'DOGE_2','next':{'$class':'org.acme.SimpleAssetCircle','$identifier': 'DOGE_3','assetId':'DOGE_3','next':'resource:org.acme.SimpleAssetCircle#DOGE_1'}}});
         });
 
         it('should generate an array of relationships', () => {
@@ -262,7 +262,7 @@ describe('JSONGenerator', () => {
             };
             options.stack.push([resource1, resource2]);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration2, options);
-            result.should.deep.equal([{ '$class': 'org.acme.MyAsset1', assetId: 'DOGE_1' }, { '$class': 'org.acme.MyAsset1', assetId: 'DOGE_2' }]);
+            result.should.deep.equal([{ '$class': 'org.acme.MyAsset1', '$identifier': 'DOGE_1', assetId: 'DOGE_1' }, { '$class': 'org.acme.MyAsset1', '$identifier': 'DOGE_2', assetId: 'DOGE_2' }]);
         });
 
         it('should serialize a circular array of resources if option is specified', () => {
@@ -280,7 +280,7 @@ describe('JSONGenerator', () => {
             };
             options.stack.push([resource1, resource2, resource3]);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration4, options);
-            result.should.deep.equal([{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']},'resource:org.acme.SimpleAssetCircleArray#DOGE_1']},{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1',{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']},'resource:org.acme.SimpleAssetCircleArray#DOGE_2']},{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2',{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']},'resource:org.acme.SimpleAssetCircleArray#DOGE_3']},{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3',{'$class':'org.acme.SimpleAssetCircleArray','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']}]}]}]);
+            result.should.deep.equal([{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']},'resource:org.acme.SimpleAssetCircleArray#DOGE_1']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']},'resource:org.acme.SimpleAssetCircleArray#DOGE_2']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']},'resource:org.acme.SimpleAssetCircleArray#DOGE_3']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']}]}]}]);
         });
 
         it('should throw if stack contains something other than a Resource or Concept', () => {
@@ -748,10 +748,10 @@ describe('JSONGenerator', () => {
 
             let result = jsonGenerator.visitField(field,parameters);
             result.should.deep.equal([
-                { '$class': 'org.acme.MyAsset1', assetId: 'child1' },
-                { '$class': 'org.acme.MyAsset1', assetId: 'child2' } ]);
+                { '$class': 'org.acme.MyAsset1', '$identifier': 'child1', assetId: 'child1' },
+                { '$class': 'org.acme.MyAsset1', '$identifier': 'child2', assetId: 'child2' } ]);
 
-            spy.callCount.should.equal(3); // we call it once at the start, the function recurses into it twice
+            spy.callCount.should.equal(5); // we call it once at the start, the function recurses into it twice
         });
 
     });
