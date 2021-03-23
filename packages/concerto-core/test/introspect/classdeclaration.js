@@ -65,8 +65,6 @@ describe('ClassDeclaration', () => {
     });
 
     describe('#validate', () => {
-
-
         it('should throw when asset name is duplicted in a modelfile', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeassetname.cto', AssetDeclaration);
             (() => {

@@ -1,0 +1,14 @@
+namespace org.test
+
+asset A {
+	o String name
+}
+
+asset A1 identified by id extends A {
+	o String id
+}
+
+asset A2 identified by id {
+	o String name
+	o String id
+}

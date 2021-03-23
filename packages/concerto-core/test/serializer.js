@@ -280,6 +280,7 @@ describe('Serializer', () => {
         it('should deserialize a valid transaction', () => {
             let json = {
                 $class: 'org.acme.sample.SampleTransaction',
+                transactionId: '111',
                 asset: 'resource:org.acme.sample.SampleAsset#1',
                 newValue: 'the value'
             };
@@ -294,6 +295,7 @@ describe('Serializer', () => {
         it('should deserialize a valid event', () => {
             let json = {
                 $class: 'org.acme.sample.SampleEvent',
+                eventId: '111',
                 asset: 'resource:org.acme.sample.SampleAsset#1',
                 newValue: 'the value'
             };

@@ -77,6 +77,7 @@ describe('Resource', function () {
             resource.ssn = '123';
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.Person',
+                $identifier: '123',
                 ssn: '123'
             });
         });

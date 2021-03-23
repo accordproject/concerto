@@ -163,7 +163,8 @@ class Serializer {
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
         } else if (classDeclaration instanceof ConceptDeclaration) {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
-                classDeclaration.getName() );
+                classDeclaration.getName(),
+                jsonObject[classDeclaration.getIdentifierFieldName()] );
         } else if (classDeclaration instanceof EnumDeclaration) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');
         } else {

@@ -158,16 +158,13 @@ class InstanceGenerator {
 
         classDeclaration = this.findConcreteSubclass(classDeclaration);
 
-        if (classDeclaration.isConcept()) {
-            let concept = parameters.factory.newConcept(classDeclaration.getNamespace(), classDeclaration.getName());
-            parameters.stack.push(concept);
-            return classDeclaration.accept(this, parameters);
-        } else {
-            const id = this.generateRandomId(classDeclaration);
-            let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);
-            parameters.stack.push(resource);
-            return classDeclaration.accept(this, parameters);
+        let id;
+        if (classDeclaration.getIdentifierFieldName()) {
+            id = this.generateRandomId(classDeclaration);
         }
+        let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);
+        parameters.stack.push(resource);
+        return classDeclaration.accept(this, parameters);
     }
 
     /**

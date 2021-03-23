@@ -1,0 +1,6 @@
+namespace org.test
+
+concept C identified by foo {
+	o String name
+	o String foo
+}
