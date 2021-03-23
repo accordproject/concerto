@@ -134,6 +134,7 @@ describe('Wildcards Model', function () {
             },
             participant: {
                 $class: 'org.acme.wildcards.MyParticipant',
+                $identifier: '1',
                 personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',

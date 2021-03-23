@@ -1,0 +1,5 @@
+{
+    "$class": "org.test.T1",
+    "name": "John",
+    "id": "123"
+}

@@ -143,7 +143,7 @@ class ObjectValidator {
             if(!this.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(this.concerto.isIdentifiable( obj)) {
+                    if(this.concerto.isIdentifiable(obj)) {
                         ObjectValidator.reportUndeclaredField(this.concerto.getIdentifier(obj), propName, toBeAssignedClassDecName);
                     }
                     else {
@@ -174,7 +174,8 @@ class ObjectValidator {
                 property.accept(this,parameters);
             }
             else {
-                if(!property.isOptional()) {
+                // Should allow systems properties like $identifier
+                if(!property.isOptional() && !this.isSystemProperty(property.getName())) {
                     ObjectValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
                 }
             }

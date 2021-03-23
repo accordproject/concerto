@@ -345,6 +345,7 @@ class ClassDeclaration extends Decorated {
      * @returns {Boolean} true if the class declaration includes an identifier
      */
     isIdentified() {
+        // XXX should this use getIdentifierFieldName() -- might be more useful?
         return this.idField !== null;
     }
 

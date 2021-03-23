@@ -67,8 +67,8 @@ class ModelManager {
         this.addModelFile( `namespace concerto
         abstract concept Concept {}
         abstract concept Asset identified {}
+        abstract concept Participant identified {}
         abstract concept Transaction { o DateTime timestamp }
-        abstract concept Participant {}
         abstract concept Event { o DateTime timestamp }`, 'concerto.cto');
     }
 

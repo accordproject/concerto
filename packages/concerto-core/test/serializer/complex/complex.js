@@ -63,7 +63,7 @@ describe('Test generating deduplicated JSON for complex models', () => {
         it('should generate deduplicated JSON for a complex model', () => {
 
             const wrapper = factory.newResource( 'org.acme.vehicle.lifecycle', 'TransactionWrapper', 'dummy');
-            wrapper.transaction = factory.newTransaction('org.vda', 'PrivateVehicleTransfer');
+            wrapper.transaction = factory.newTransaction('org.vda', 'PrivateVehicleTransfer', '111');
             wrapper.transaction.seller = factory.newResource('composer.base', 'Person', 'dan');
             wrapper.transaction.seller.firstName = 'Dan';
             wrapper.transaction.seller.lastName = 'Selman';

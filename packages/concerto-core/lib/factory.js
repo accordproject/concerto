@@ -90,9 +90,10 @@ class Factory {
         }
 
         let idField = classDecl.getIdentifierFieldName();
-        // console.log(classDecl);
-        if (idField) {
+        if (classDecl.isSystemIdentified()) {
             id = id === null || id === undefined ? uuid.v4() : id;
+        }
+        if (idField) {
             if(typeof(id) !== 'string') {
                 let formatter = Globalize.messageFormatter('factory-newinstance-invalididentifier');
                 throw new Error(formatter({
@@ -136,6 +137,7 @@ class Factory {
      * Create a new Concept with a given namespace and type name
      * @param {String} ns - the namespace of the Concept
      * @param {String} type - the type of the Concept
+     * @param {String} [id] - an optional identifier for the concept.
      * @param {Object} [options] - an optional set of options
      * @param {boolean} [options.disableValidation] - pass true if you want the factory to
      * return a {@link Concept} instead of a {@link ValidatedConcept}. Defaults to false.
@@ -147,8 +149,8 @@ class Factory {
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
-    newConcept(ns, type, options) {
-        return this.newResource(ns, type, null, options);
+    newConcept(ns, type, id, options) {
+        return this.newResource(ns, type, id, options);
     }
 
     /**

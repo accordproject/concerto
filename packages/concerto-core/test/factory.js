@@ -220,13 +220,13 @@ describe('Factory', function() {
         });
 
         it('should create a new non-validating concept', () => {
-            let resource = factory.newConcept(namespace, 'MyConcept', { disableValidation: true });
+            let resource = factory.newConcept(namespace, 'MyConcept', null, { disableValidation: true });
             should.equal(resource.newValue, undefined);
             should.equal(resource.validate, undefined);
         });
 
         it('should create a new concept with generated data', () => {
-            let resource = factory.newConcept(namespace, 'MyConcept', { generate: true });
+            let resource = factory.newConcept(namespace, 'MyConcept', null, { generate: true });
             resource.newValue.should.be.a('string');
             should.not.equal(resource.validate, undefined);
         });
@@ -266,13 +266,13 @@ describe('Factory', function() {
 
         it('should throw if a non transaction type was specified', () => {
             (() => {
-                factory.newTransaction(namespace, assetName);
+                factory.newTransaction(namespace, assetName, '111');
             }).should.throw(/not a transaction/);
         });
 
         it('should create a new instance with a generated ID', () => {
-            let resource = factory.newTransaction(namespace, 'MyTransaction');
-            resource.transactionId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
+            let resource = factory.newTransaction(namespace, 'MyTransaction', '111');
+            resource.transactionId.should.equal('111');
             should.equal(resource.newValue, undefined);
             resource.timestamp.should.be.an.instanceOf(dayjs);
         });
@@ -286,10 +286,10 @@ describe('Factory', function() {
 
         it('should pass options onto newResource', () => {
             let spy = sandbox.spy(factory, 'newResource');
-            let resource = factory.newTransaction(namespace, 'MyTransaction', null, { hello: 'world' });
+            let resource = factory.newTransaction(namespace, 'MyTransaction', '111', { hello: 'world' });
             sinon.assert.calledOnce(spy);
-            sinon.assert.calledWith(spy, namespace, 'MyTransaction', null, { hello: 'world' });
-            resource.transactionId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
+            sinon.assert.calledWith(spy, namespace, 'MyTransaction', '111', { hello: 'world' });
+            resource.transactionId.should.equal('111');
         });
 
     });
@@ -309,13 +309,13 @@ describe('Factory', function() {
 
         it('should throw if a non event type was specified', () => {
             (() => {
-                factory.newEvent(namespace, 'MyTransaction');
+                factory.newEvent(namespace, 'MyTransaction', '111');
             }).should.throw(/not an event/);
         });
 
         it('should create a new instance with a generated ID', () => {
-            let resource = factory.newEvent(namespace, 'MyEvent');
-            resource.eventId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
+            let resource = factory.newEvent(namespace, 'MyEvent', '111');
+            resource.eventId.should.equal('111');
             resource.timestamp.should.be.an.instanceOf(dayjs);
         });
 
@@ -327,10 +327,10 @@ describe('Factory', function() {
 
         it('should pass options onto newEvent', () => {
             let spy = sandbox.spy(factory, 'newResource');
-            let resource = factory.newEvent(namespace, 'MyEvent', null, { hello: 'world' });
+            let resource = factory.newEvent(namespace, 'MyEvent', '111', { hello: 'world' });
             sinon.assert.calledOnce(spy);
-            sinon.assert.calledWith(spy, namespace, 'MyEvent', null, { hello: 'world' });
-            resource.eventId.should.equal('5604bdfe-7b96-45d0-9883-9c05c18fe638');
+            sinon.assert.calledWith(spy, namespace, 'MyEvent', '111', { hello: 'world' });
+            resource.eventId.should.equal('111');
         });
     });
 
