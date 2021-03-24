@@ -86,12 +86,10 @@ describe('Resource', function () {
             const classDecl = modelManager.getType('org.acme.l1.ScrapCar');
             const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789' );
             resource.transactionId = '789';
-            resource.timestamp = dayjs.utc(0);
             resource.car = modelManager.getFactory().newRelationship('org.acme.l1', 'Car', '456');
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.ScrapCar',
                 car: 'resource:org.acme.l1.Car#456',
-                timestamp: '1970-01-01T00:00:00.000Z',
                 transactionId: '789'
             });
         });

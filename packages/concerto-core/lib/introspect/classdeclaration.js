@@ -118,15 +118,12 @@ class ClassDeclaration extends Decorated {
      * @private
      */
     addTimestampField() {
-        // add a timestamp field
-        if(this.superType === 'Concept') {
-            const definition = {};
-            definition.id = {};
-            definition.id.name = 'timestamp';
-            definition.propertyType = {};
-            definition.propertyType.name = 'DateTime';
-            this.properties.push(new Field(this, definition));
-        }
+        const definition = {};
+        definition.id = {};
+        definition.id.name = '$timestamp';
+        definition.propertyType = {};
+        definition.propertyType.name = 'DateTime';
+        this.properties.push(new Field(this, definition));
     }
 
     /**
