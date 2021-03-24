@@ -72,7 +72,7 @@ class Identifiable extends Typed {
      * @return {string} the fully qualified identifier of this instance
      */
     getFullyQualifiedIdentifier() {
-        return this.getFullyQualifiedType() + '#' + this.$identifier;
+        return this.getFullyQualifiedType() + '#' + (this.$identifier || 'null');
     }
 
     /**
