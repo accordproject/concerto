@@ -274,14 +274,14 @@ describe('Factory', function() {
             let resource = factory.newTransaction(namespace, 'MyTransaction', '111');
             resource.transactionId.should.equal('111');
             should.equal(resource.newValue, undefined);
-            resource.timestamp.should.be.an.instanceOf(dayjs);
+            resource.$timestamp.should.be.an.instanceOf(dayjs);
         });
 
         it('should create a new instance with a specified ID', () => {
             let resource = factory.newTransaction(namespace, 'MyTransaction', 'MY_ID_1');
             resource.transactionId.should.equal('MY_ID_1');
             should.equal(resource.newValue, undefined);
-            resource.timestamp.should.be.an.instanceOf(dayjs);
+            resource.$timestamp.should.be.an.instanceOf(dayjs);
         });
 
         it('should pass options onto newResource', () => {
@@ -316,13 +316,13 @@ describe('Factory', function() {
         it('should create a new instance with a generated ID', () => {
             let resource = factory.newEvent(namespace, 'MyEvent', '111');
             resource.eventId.should.equal('111');
-            resource.timestamp.should.be.an.instanceOf(dayjs);
+            resource.$timestamp.should.be.an.instanceOf(dayjs);
         });
 
         it('should create a new instance with a specified ID', () => {
             let resource = factory.newEvent(namespace, 'MyEvent', 'MY_ID_1');
             resource.eventId.should.equal('MY_ID_1');
-            resource.timestamp.should.be.an.instanceOf(dayjs);
+            resource.$timestamp.should.be.an.instanceOf(dayjs);
         });
 
         it('should pass options onto newEvent', () => {

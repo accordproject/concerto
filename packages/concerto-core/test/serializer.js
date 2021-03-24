@@ -287,7 +287,7 @@ describe('Serializer', () => {
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.transactionId.should.exist;
-            resource.timestamp.should.exist;
+            resource.$timestamp.should.exist;
             resource.asset.should.be.an.instanceOf(Relationship);
             resource.newValue.should.equal('the value');
         });
@@ -300,9 +300,9 @@ describe('Serializer', () => {
                 newValue: 'the value'
             };
             let resource = serializer.fromJSON(json);
+            resource.$timestamp.should.exist;
             resource.should.be.an.instanceOf(Resource);
             resource.eventId.should.exist;
-            resource.timestamp.should.exist;
             resource.asset.should.be.an.instanceOf(Relationship);
             resource.newValue.should.equal('the value');
         });

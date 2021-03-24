@@ -206,7 +206,7 @@ class Factory {
         }
 
         // set the timestamp
-        transaction.timestamp = dayjs.utc();
+        transaction.$timestamp = dayjs.utc();
 
         return transaction;
     }
@@ -242,7 +242,7 @@ class Factory {
         }
 
         // set the timestamp
-        event.timestamp = dayjs.utc();
+        event.$timestamp = dayjs.utc();
 
         return event;
     }

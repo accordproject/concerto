@@ -68,8 +68,8 @@ class ModelManager {
         abstract concept Concept {}
         abstract concept Asset identified {}
         abstract concept Participant identified {}
-        abstract concept Transaction { o DateTime timestamp }
-        abstract concept Event { o DateTime timestamp }`, 'concerto.cto');
+        abstract concept Transaction {}
+        abstract concept Event {}`, 'concerto.cto');
     }
 
     /**

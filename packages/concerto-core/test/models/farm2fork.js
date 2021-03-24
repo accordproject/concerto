@@ -74,7 +74,7 @@ describe('Farm2Fork Model', function() {
             let txDecl = modelFile.getTransactionDeclaration('MoveAnimalToHolding');
             txDecl.should.not.be.null;
             txDecl.getName().should.equal('MoveAnimalToHolding');
-            txDecl.getProperties().length.should.equal(3); // XXX Should not have an identifier, but farmer + holding + timestamp
+            txDecl.getProperties().length.should.equal(2); // XXX Should have farmer, holding
             let holdingField = txDecl.getProperty('holding');
             (holdingField !== null).should.be.true;
             holdingField.getName().should.equal('holding');
