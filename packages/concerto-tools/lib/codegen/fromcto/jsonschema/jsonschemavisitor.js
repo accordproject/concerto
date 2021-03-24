@@ -256,6 +256,9 @@ class JSONSchemaVisitor {
         // Walk over all of the properties of this class and its super classes.
         classDeclaration.getProperties().forEach((property) => {
 
+            if (property.getName().charAt(0) === '$') { // XXX Probably need a utility function (one is in resourcevalidator)
+                return;
+            }
             // Get the schema for the property.
             result.schema.properties[property.getName()] = property.accept(this, parameters);
 
