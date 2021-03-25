@@ -23,6 +23,10 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
+const uuid = require('uuid');
+const sinon = require('sinon');
+const mockId = '00000000-0000-0000-0000-000000000000';
+
 const ModelLoader = require('../..').ModelLoader;
 const Factory = require('../..').Factory;
 const Serializer = require('../..').Serializer;
@@ -41,12 +45,28 @@ const validate = async (sample, ctoFiles, options) => {
 
 const positive = [{
     name: 'root hierarchy',
+    sample: './data/test0.json',
+    ctoFiles: ['./models/test0.cto'],
+    expected: './data/test0.expect'
+}, {
+    name: 'root hierarchy',
     sample: './data/test1.json',
     ctoFiles: ['./models/test1.cto'],
     expected: './data/test1.json'
 }];
 
 describe('1.0.0', () => {
+    let sandbox;
+
+    beforeEach(function() {
+        sandbox = sinon.createSandbox();
+        sandbox.stub(uuid, 'v4').returns(mockId);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
     describe('#positive', () => {
         positive
             .forEach(({ name, sample, ctoFiles, expected }) => {

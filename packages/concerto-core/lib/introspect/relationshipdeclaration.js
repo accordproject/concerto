@@ -78,7 +78,7 @@ class RelationshipDeclaration extends Property {
                 throw new IllegalModelException('Relationship ' + this.getName() + ' points to a missing type ' + this.getFullyQualifiedTypeName(), classDecl.getModelFile(), this.ast.location);
             }
 
-            if (classDeclaration.getIdentifierFieldName()) {
+            if (classDeclaration.isIdentified()) {
                 // Relationship to a class with an identifier continue
             } else {
                 throw new IllegalModelException('Relationship ' + this.getName() + ' must be to a class that has an identifier, but this is to ' + this.getFullyQualifiedTypeName(), classDecl.getModelFile(), this.ast.location);

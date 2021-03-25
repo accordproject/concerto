@@ -159,7 +159,7 @@ class InstanceGenerator {
         classDeclaration = this.findConcreteSubclass(classDeclaration);
 
         let id = null;
-        if (classDeclaration.getIdentifierFieldName()) {
+        if (classDeclaration.isIdentified()) {
             id = this.generateRandomId(classDeclaration);
         }
         let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);

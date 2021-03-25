@@ -1,0 +1,7 @@
+{
+  "$class": "org.test.Foo",
+  "c": { "$class": "org.test.C" },
+  "t": { "$class": "org.test.T" },
+  "p": { "$class": "org.test.P", "$identifier": "00000000-0000-0000-0000-000000000000" },
+  "e": { "$class": "org.test.E" }
+}

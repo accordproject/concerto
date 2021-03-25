@@ -145,7 +145,7 @@ class ResourceValidator {
             if(!this.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(classDeclaration.getIdentifierFieldName()) {
+                    if(classDeclaration.isIdentified()) {
                         ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
                     }
                     else {
@@ -155,7 +155,7 @@ class ResourceValidator {
             }
         }
 
-        if(classDeclaration.getIdentifierFieldName()) {
+        if(classDeclaration.isIdentified()) {
             const id = obj.getIdentifier();
 
             // prevent empty identifiers
