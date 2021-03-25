@@ -225,7 +225,7 @@ class ClassDeclaration extends Decorated {
 
                 if(this.superType) {
                     const superType = this.getModelFile().getType(this.superType);
-                    if (superType && superType.getIdentifierFieldName() ) {
+                    if (superType && superType.isIdentified() ) {
                         if(this.isSystemIdentified()) {
                             // check that the super type is also system identified
                             if(!superType.isSystemIdentified()) {
@@ -342,8 +342,7 @@ class ClassDeclaration extends Decorated {
      * @returns {Boolean} true if the class declaration includes an identifier
      */
     isIdentified() {
-        // XXX should this use getIdentifierFieldName() -- might be more useful?
-        return this.idField !== null;
+        return !!(this.getIdentifierFieldName());
     }
 
     /**
@@ -352,7 +351,7 @@ class ClassDeclaration extends Decorated {
      * @returns {Boolean} true if the class declaration includes a system identifier
      */
     isSystemIdentified() {
-        return this.idField === '$identifier';
+        return this.getIdentifierFieldName() === '$identifier';
     }
 
     /**

@@ -202,7 +202,7 @@ asset Order identified by sku {
             const order = mm.getType('test.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(2); // XXX Assets always have an identifier
-            order.isSystemIdentified().should.be.false;
+            order.isSystemIdentified().should.be.true;
             order.isExplicitlyIdentified().should.be.false;
         });
 

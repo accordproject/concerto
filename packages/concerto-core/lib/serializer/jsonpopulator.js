@@ -192,7 +192,7 @@ class JSONPopulator {
             let subResource = null;
 
             // if this is identifiable, then we create a resource
-            if(classDeclaration.getIdentifierFieldName()) {
+            if(classDeclaration.isIdentified()) {
                 subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
                     classDeclaration.getName(), jsonItem[classDeclaration.getIdentifierFieldName()] );
             }

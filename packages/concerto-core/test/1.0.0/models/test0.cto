@@ -1,10 +1,5 @@
 namespace org.test
 
-// Should not be needed
-import concerto.Transaction
-import concerto.Participant
-import concerto.Event
-
 concept C {
 }
 
