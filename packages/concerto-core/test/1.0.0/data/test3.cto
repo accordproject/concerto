@@ -1,6 +1,0 @@
-namespace org.test
-
-concept C identified by id {
-	o String name
-	o String id
-}

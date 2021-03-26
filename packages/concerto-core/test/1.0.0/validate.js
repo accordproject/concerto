@@ -45,17 +45,39 @@ const validate = async (sample, ctoFiles, options) => {
 
 const positive = [{
     name: 'root hierarchy',
-    sample: './data/test0.json',
-    ctoFiles: ['./models/test0.cto'],
-    expected: './data/test0.expect'
+    sample: './data/hierarchy1.json',
+    ctoFiles: ['./models/hierarchy1.cto'],
+    expected: './data/hierarchy1.expect'
 }, {
     name: 'root hierarchy',
-    sample: './data/test1.json',
-    ctoFiles: ['./models/test1.cto'],
-    expected: './data/test1.json'
+    sample: './data/hierarchy2.json',
+    ctoFiles: ['./models/hierarchy2.cto'],
+    expected: './data/hierarchy2.expect'
+}, {
+    name: 'root hierarchy',
+    sample: './data/identifier1.json',
+    ctoFiles: ['./models/identifier1.cto'],
+    expected: './data/identifier1.expect'
+}, {
+    name: 'root hierarchy',
+    sample: './data/identifier1a.json',
+    ctoFiles: ['./models/identifier1.cto'],
+    expected: './data/identifier1a.expect'
+}, {
+    name: 'root hierarchy',
+    sample: './data/identifier1b.json',
+    ctoFiles: ['./models/identifier1.cto'],
+    expected: './data/identifier1b.expect'
 }];
 
-describe('1.0.0', () => {
+const negative = [{
+    name: 'root hierarchy',
+    sample: './data/hierarchy2err.json',
+    ctoFiles: ['./models/hierarchy2.cto'],
+    expected: 'Unexpected properties for type org.test.C: c, t'
+}];
+
+describe('Validation (1.0.0)', () => {
     let sandbox;
 
     beforeEach(function() {
@@ -74,6 +96,20 @@ describe('1.0.0', () => {
                     const resultActual = await validate(sample, ctoFiles);
                     const resultExpected = loadJson(expected);
                     resultActual.should.deep.equal(resultExpected);
+                });
+            });
+    });
+
+    describe('#negative', () => {
+        negative
+            .forEach(({ name, sample, ctoFiles, expected }) => {
+                it(`should be valid (${name})`, async function() {
+                    try {
+                        await validate(sample, ctoFiles);
+                    } catch (errorActual) {
+                        errorActual.name.should.equal('ValidationException');
+                        errorActual.message.should.deep.equal(expected);
+                    }
                 });
             });
     });

@@ -1,4 +1,6 @@
 {
     "$class": "org.test.A2",
+    "$identifier": "123",
+    "id": "123",
     "name": "John"
 }

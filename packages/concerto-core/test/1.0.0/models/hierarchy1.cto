@@ -12,9 +12,13 @@ participant P {
 event E {
 }
 
+asset A {
+}
+
 concept Foo {
   o Concept c
-  o Transaction t // Validation error when containing a class T
+  o Transaction t
   o Participant p
   o Event e
+  o Asset a
 }
