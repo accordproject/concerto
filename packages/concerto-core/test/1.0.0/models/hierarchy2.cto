@@ -1,0 +1,39 @@
+namespace org.test
+
+concept C {
+}
+concept C2 extends C {
+	o String name
+}
+
+transaction T {
+}
+transaction T2 extends T {
+	o String name
+}
+
+participant P {
+}
+participant P2 extends P {
+	o String name
+}
+
+event E {
+}
+event E2 extends E {
+	o String name
+}
+
+asset A {
+}
+asset A2 extends A {
+	o String name
+}
+
+concept Foo {
+  o Concept c
+  o Transaction t
+  o Participant p
+  o Event e
+  o Asset a
+}
