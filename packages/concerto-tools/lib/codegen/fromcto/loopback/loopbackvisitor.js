@@ -386,11 +386,6 @@ class LoopbackVisitor {
             jsonSchema.properties[identifierFieldName].required = false;
         }
 
-        if (classDeclaration instanceof TransactionDeclaration) {
-            // The timestamp can be supplied by the client, but does not have to be.
-            jsonSchema.properties.timestamp.required = false;
-        }
-
         // If this is a top level schema, now we need to write it to disk.
         if (jsonSchema.$first) {
             delete jsonSchema.$first;

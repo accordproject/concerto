@@ -91,10 +91,6 @@
         "id": {
           "type": "string",
           "description": "The instance identifier for this type"
-        },
-        "timestamp": {
-          "format": "date-time",
-          "type": "string"
         }
       },
       "required": [
@@ -104,8 +100,7 @@
         "age",
         "money",
         "color",
-        "id",
-        "timestamp"
+        "id"
       ]
     }
   },
@@ -165,10 +160,6 @@
     "id": {
       "type": "string",
       "description": "The instance identifier for this type"
-    },
-    "timestamp": {
-      "format": "date-time",
-      "type": "string"
     }
   },
   "required": [
@@ -178,7 +169,6 @@
     "age",
     "money",
     "color",
-    "id",
-    "timestamp"
+    "id"
   ]
 }
