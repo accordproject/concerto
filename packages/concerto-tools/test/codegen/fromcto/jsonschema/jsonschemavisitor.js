@@ -318,7 +318,6 @@ describe('JSONSchema (samples)', function () {
                   currencyCode: 'GBP'
               },
               date: new Date().toISOString(),
-              timestamp: new Date().toISOString(),
           };
 
             const ajv = new Ajv();

@@ -985,8 +985,7 @@ describe('LoopbackVisitor', () => {
                 title: 'A schema',
                 description: ' A particularly good schema',
                 properties: {
-                    noseLength: {},
-                    timestamp: {}
+                    noseLength: {}
                 }
             };
 
@@ -1022,19 +1021,6 @@ describe('LoopbackVisitor', () => {
                         };
                     }
                 },
-                {
-                    getName: () => {
-                        return 'timestamp';
-                    },
-                    isOptional: () => {
-                        return false;
-                    },
-                    accept: () => {
-                        return {
-                            prop: 'Hamster'
-                        };
-                    }
-                }
             ]);
             let expectedResult = {
                 $schema: true,
@@ -1055,10 +1041,6 @@ describe('LoopbackVisitor', () => {
                     Trevor: {
                         prop: 'Goldfish'
                     },
-                    timestamp: {
-                        prop: 'Hamster',
-                        required: false
-                    }
                 },
                 forceId: true,
 
