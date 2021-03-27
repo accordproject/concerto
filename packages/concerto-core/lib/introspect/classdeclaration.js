@@ -65,6 +65,7 @@ class ClassDeclaration extends Decorated {
         this.superType = null;
         this.superTypeDeclaration = null;
         this.idField = null;
+        this.timestamped = false;
         this.abstract = false;
 
         if (this.ast.abstract) {
@@ -109,6 +110,10 @@ class ClassDeclaration extends Decorated {
 
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
         this._isClassDeclaration = true;
+
+        if (this.fqn === 'concerto.Transaction' || this.fqn === 'concerto.Event') {
+            this.addTimestampField();
+        }
     }
 
     /**

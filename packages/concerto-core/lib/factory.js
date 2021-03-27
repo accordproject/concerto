@@ -60,7 +60,7 @@ class Factory {
      * Create a new Resource with a given namespace, type name and id
      * @param {String} ns - the namespace of the Resource
      * @param {String} type - the type of the Resource
-     * @param {String} id - the identifier
+     * @param {String} id - an string identifier (optional)
      * @param {Object} [options] - an optional set of options
      * @param {boolean} [options.disableValidation] - pass true if you want the factory to
      * return a {@link Resource} instead of a {@link ValidatedResource}. Defaults to false.
@@ -116,11 +116,15 @@ class Factory {
         }
 
         let newObj = null;
+        let timestamp = null;
+        if (classDecl instanceof TransactionDeclaration || classDecl instanceof EventDeclaration) {
+            timestamp = dayjs.utc();
+        }
         if(options.disableValidation) {
-            newObj = new Resource(this.modelManager, classDecl, ns, type, id);
+            newObj = new Resource(this.modelManager, classDecl, ns, type, id, timestamp);
         }
         else {
-            newObj = new ValidatedResource(this.modelManager, classDecl, ns, type, id, new ResourceValidator());
+            newObj = new ValidatedResource(this.modelManager, classDecl, ns, type, id, timestamp, new ResourceValidator());
         }
         newObj.assignFieldDefaults();
         this.initializeNewObject(newObj, classDecl, options);
@@ -129,6 +133,7 @@ class Factory {
             // if we have an identifier, we set it now
             newObj[idField] = id;
         }
+
         debug(method, 'Factory.newResource created ', id || 'valid');
         return newObj;
     }
@@ -205,9 +210,6 @@ class Factory {
             throw new Error(transaction.getClassDeclaration().getFullyQualifiedName() + ' is not a transaction');
         }
 
-        // set the timestamp
-        transaction.$timestamp = dayjs.utc();
-
         return transaction;
     }
 
@@ -240,9 +242,6 @@ class Factory {
         if (!(classDeclaration instanceof EventDeclaration)) {
             throw new Error(event.getClassDeclaration().getFullyQualifiedName() + ' is not an event');
         }
-
-        // set the timestamp
-        event.$timestamp = dayjs.utc();
 
         return event;
     }

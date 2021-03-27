@@ -123,7 +123,6 @@ class ResourceValidator {
             ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
         }
 
-        // XXX instanceof Identifiable will not work with concepts that have `identified by`
         if(obj instanceof Identifiable) {
             parameters.rootResourceIdentifier = obj.getFullyQualifiedIdentifier();
         }

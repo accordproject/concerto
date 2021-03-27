@@ -154,6 +154,7 @@ class TransactionDeclaration extends IdentifiedDeclaration {
    + boolean hasInstance(object) 
 }
 class Identifiable extends Typed {
+   + string getTimestamp() 
    + string getIdentifier() 
    + void setIdentifier(string) 
    + string getFullyQualifiedIdentifier() 

@@ -42,9 +42,6 @@ class EventDeclaration extends IdentifiedDeclaration {
      */
     process() {
         super.process();
-        if (this.getFullyQualifiedName() === 'Event') {
-            this.addTimestampField();
-        }
     }
 
     /**

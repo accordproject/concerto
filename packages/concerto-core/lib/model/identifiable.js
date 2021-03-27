@@ -39,11 +39,21 @@ class Identifiable extends Typed {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
+     * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id) {
+    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
         super(modelManager, classDeclaration, ns, type);
         this.$identifier = id;
+        this.$timestamp = timestamp;
+    }
+
+    /**
+     * Get the timestamp of this instance
+     * @return {string} The timestamp for this object
+     */
+    getTimestamp() {
+        return this.$timestamp;
     }
 
     /**
