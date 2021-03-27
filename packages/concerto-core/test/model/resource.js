@@ -84,11 +84,12 @@ describe('Resource', function () {
 
         it('should serialize a transaction to a JavaScript object', function () {
             const classDecl = modelManager.getType('org.acme.l1.ScrapCar');
-            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789' );
+            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789', dayjs(0) );
             resource.transactionId = '789';
             resource.car = modelManager.getFactory().newRelationship('org.acme.l1', 'Car', '456');
             resource.toJSON().should.deep.equal({
                 $class: 'org.acme.l1.ScrapCar',
+                $timestamp: '1969-12-31T19:00:00.000Z',
                 car: 'resource:org.acme.l1.Car#456',
                 transactionId: '789'
             });

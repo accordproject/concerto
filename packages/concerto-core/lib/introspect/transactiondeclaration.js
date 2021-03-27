@@ -43,9 +43,6 @@ class TransactionDeclaration extends IdentifiedDeclaration {
      */
     process() {
         super.process();
-        if (this.getFullyQualifiedName() === 'Transaction') {
-            this.addTimestampField();
-        }
     }
 
     /**

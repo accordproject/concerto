@@ -44,10 +44,11 @@ class Relationship extends Identifiable {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
+     * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id) {
-        super(modelManager, classDeclaration, ns, type, id);
+    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+        super(modelManager, classDeclaration, ns, type, id, timestamp);
         // we use this metatag to identify the instance as a relationship
         this.$class = 'Relationship';
     }

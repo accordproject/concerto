@@ -40,11 +40,12 @@ class ValidatedResource extends Resource {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
+     * @param {string} timestamp - The timestamp of this instance
      * @param {ResourceValidator} resourceValidator - The validator to use for this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id, resourceValidator) {
-        super(modelManager, classDeclaration, ns, type, id);
+    constructor(modelManager, classDeclaration, ns, type, id, timestamp, resourceValidator) {
+        super(modelManager, classDeclaration, ns, type, id, timestamp);
         this.$validator = resourceValidator;
     }
 

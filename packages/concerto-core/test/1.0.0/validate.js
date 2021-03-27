@@ -26,6 +26,8 @@ chai.use(require('chai-as-promised'));
 const uuid = require('uuid');
 const sinon = require('sinon');
 const mockId = '00000000-0000-0000-0000-000000000000';
+const dayjs = require('dayjs');
+const mockTimestamp = dayjs(0);
 
 const ModelLoader = require('../..').ModelLoader;
 const Factory = require('../..').Factory;
@@ -83,6 +85,7 @@ describe('Validation (1.0.0)', () => {
     beforeEach(function() {
         sandbox = sinon.createSandbox();
         sandbox.stub(uuid, 'v4').returns(mockId);
+        sandbox.stub(dayjs, 'utc').returns(mockTimestamp);
     });
 
     afterEach(() => {
