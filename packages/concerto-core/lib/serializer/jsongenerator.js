@@ -196,7 +196,7 @@ class JSONGenerator {
             if (this.ergo) {
                 return obj;
             } else {
-                return obj.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+                return obj.utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
             }
         }
         case 'Integer':
