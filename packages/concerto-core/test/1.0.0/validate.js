@@ -27,6 +27,8 @@ const uuid = require('uuid');
 const sinon = require('sinon');
 const mockId = '00000000-0000-0000-0000-000000000000';
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 const mockTimestamp = dayjs(0);
 
 const ModelLoader = require('../..').ModelLoader;
@@ -46,6 +48,11 @@ const validate = async (sample, ctoFiles, options) => {
 };
 
 const positive = [{
+    name: 'date',
+    sample: './data/date1.json',
+    ctoFiles: ['./models/date1.cto'],
+    expected: './data/date1.expect'
+}, {
     name: 'root hierarchy',
     sample: './data/hierarchy1.json',
     ctoFiles: ['./models/hierarchy1.cto'],
@@ -56,20 +63,25 @@ const positive = [{
     ctoFiles: ['./models/hierarchy2.cto'],
     expected: './data/hierarchy2.expect'
 }, {
-    name: 'root hierarchy',
+    name: 'generated identifier',
     sample: './data/identifier1.json',
     ctoFiles: ['./models/identifier1.cto'],
     expected: './data/identifier1.expect'
 }, {
-    name: 'root hierarchy',
+    name: 'user defined identifier through hierarchy',
     sample: './data/identifier1a.json',
     ctoFiles: ['./models/identifier1.cto'],
     expected: './data/identifier1a.expect'
 }, {
-    name: 'root hierarchy',
+    name: 'user defined identified',
     sample: './data/identifier1b.json',
     ctoFiles: ['./models/identifier1.cto'],
     expected: './data/identifier1b.expect'
+}, {
+    name: 'timestamp (transaction)',
+    sample: './data/timestamp1.json',
+    ctoFiles: ['./models/timestamp1.cto'],
+    expected: './data/timestamp1.expect'
 }];
 
 const negative = [{
