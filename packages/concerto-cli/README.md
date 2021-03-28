@@ -20,7 +20,7 @@ Options:
 
 ### Concerto validate
 
-The `validate` command lets you check whether a JSON sample is a valid instance of the given model.
+The `validate` command lets you check whether a JSON input is a valid instance of the given model.
 
 ```
 concerto validate
@@ -31,9 +31,10 @@ Options:
   --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
   --help         Show help                                             [boolean]
-  --sample       sample JSON to validate       [string] [default: "sample.json"]
-  --ctoSystem    system model to be used                                [string]
-  --ctoFiles     array of CTO files                       [array] [default: "."]
+  --input        JSON to validate                                       [string]
+  --model        array of concerto (cto) model files                     [array]
+  --offline      do not resolve external models       [boolean] [default: false]
+  --functional   new validation API                   [boolean] [default: false]
 ```
 
 ### Concerto compile
@@ -49,8 +50,8 @@ Options:
   --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
   --help         Show help                                             [boolean]
-  --ctoSystem    system model to be used                                [string]
-  --ctoFiles     array of CTO files                       [array] [default: "."]
+  --model        array of concerto (cto) model files          [array] [required]
+  --offline      do not resolve external models       [boolean] [default: false]
   --target       target of the code generation  [string] [default: "JSONSchema"]
   --output       output directory path           [string] [default: "./output/"]
 ```
@@ -58,37 +59,37 @@ Options:
 #### Go Lang
 
 ```
-concerto compile --ctoFiles modelfile.cto --target Go
+concerto compile --model modelfile.cto --target Go
 ```
 
 #### Plant UML
 
 ```
-concerto compile --ctoFiles modelfile.cto --target PlantUML
+concerto compile --model modelfile.cto --target PlantUML
 ```
 
 #### Typescript
 
 ```
-concerto compile --ctoFiles modelfile.cto --target Typescript
+concerto compile --model modelfile.cto --target Typescript
 ```
 
 #### Java
 
 ```
-concerto compile --ctoFiles modelfile.cto --target Java
+concerto compile --model modelfile.cto --target Java
 ```
 
 #### JSONSchema
 
 ```
-concerto compile --ctoFiles modelfile.cto --target JSONSchema
+concerto compile --model modelfile.cto --target JSONSchema
 ```
 
 #### XMLSchema
 
 ```
-concerto compile --ctoFiles modelfile.cto --target XMLSchema
+concerto compile --model modelfile.cto --target XMLSchema
 ```
 
 ### Concerto Get
@@ -104,8 +105,7 @@ Options:
   --version      Show version number                                   [boolean]
   --verbose, -v                                                 [default: false]
   --help         Show help                                             [boolean]
-  --ctoFiles     array of local CTO files                 [array] [default: "."]
-  --ctoSystem    system model to be used                                [string]
+  --model        array of concerto (cto) model files          [array] [required]
   --output       output directory path                  [string] [default: "./"]
 ```
 

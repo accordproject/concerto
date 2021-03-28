@@ -25,12 +25,12 @@ require('yargs')
     .strict()
     .usage('$0 <cmd> [args]')
     .command('validate', 'validate JSON against model files', (yargs) => {
-        yargs.option('sample', {
-            describe: 'sample JSON to validate',
+        yargs.option('input', {
+            describe: 'JSON to validate',
             type: 'string'
         });
-        yargs.option('ctoFiles', {
-            describe: 'array of CTO files',
+        yargs.option('model', {
+            describe: 'array of concerto (cto) model files',
             type: 'string',
             array: true
         });
@@ -39,20 +39,30 @@ require('yargs')
             type: 'boolean',
             default: false
         });
+        yargs.option('functional', {
+            describe: 'new validation API',
+            type: 'boolean',
+            default: false
+        });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`validate sample in ${argv.sample} against the models ${argv.ctoFiles}`);
+            Logger.info(`validate ${argv.input} against the models ${argv.model}`);
         }
 
         try {
             argv = Commands.validateValidateArgs(argv);
             const options = {};
             options.offline = argv.offline;
-            return Commands.validate(argv.sample, argv.ctoFiles, options)
+            options.functional = argv.functional;
+            return Commands.validate(argv.input, argv.model, options)
                 .then((result) => {
-                    Logger.info(result);
+                    Logger.info('Input is valid');
+                    if (!options.functional) {
+                        Logger.info(result);
+                    }
                 })
                 .catch((err) => {
+                    Logger.info('Input is invalid');
                     Logger.error(err.message);
                 });
         } catch (err){
@@ -61,9 +71,9 @@ require('yargs')
         }
     })
     .command('compile', 'generate code for a target platform', (yargs) => {
-        yargs.demandOption(['ctoFiles'], 'Please provide at least the CTO files');
-        yargs.option('ctoFiles', {
-            describe: 'array of CTO files',
+        yargs.demandOption(['model'], 'Please provide CTO models');
+        yargs.option('model', {
+            describe: 'array of concerto (cto) model files',
             type: 'string',
             array: true
         });
@@ -84,12 +94,12 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`generate code for target ${argv.target} from models ${argv.ctoFiles} into directory: ${argv.output}`);
+            Logger.info(`generate code for target ${argv.target} from models ${argv.model} into directory: ${argv.output}`);
         }
 
         const options = {};
         options.offline = argv.offline;
-        return Commands.compile(argv.target, argv.ctoFiles, argv.output, options)
+        return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);
             })
@@ -98,9 +108,9 @@ require('yargs')
             });
     })
     .command('get', 'save local copies of external model dependencies', (yargs) => {
-        yargs.demandOption(['ctoFiles'], 'Please provide at least the CTO files');
-        yargs.option('ctoFiles', {
-            describe: 'array of local CTO files',
+        yargs.demandOption(['model'], 'Please provide CTO models');
+        yargs.option('model', {
+            describe: 'array of concerto (cto) model files',
             type: 'string',
             array: true
         });
@@ -111,10 +121,10 @@ require('yargs')
         });
     }, (argv) => {
         if (argv.verbose) {
-            Logger.info(`saving external models from ${argv.ctoFiles} into directory: ${argv.output}`);
+            Logger.info(`saving external models from ${argv.model} into directory: ${argv.output}`);
         }
 
-        return Commands.get(argv.ctoFiles, argv.output)
+        return Commands.get(argv.model, argv.output)
             .then((result) => {
                 Logger.info(result);
             })

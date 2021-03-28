@@ -28,10 +28,10 @@ const Commands = require('../lib/commands');
 describe('cicero-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
     const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
-    const sample1 = path.resolve(__dirname, 'data/sample1.json');
-    const sample2 = path.resolve(__dirname, 'data/sample2.json');
-    const sampleText1 = fs.readFileSync(sample1, 'utf8');
-    const sampleText2 = fs.readFileSync(sample2, 'utf8');
+    const input1 = path.resolve(__dirname, 'data/input1.json');
+    const input2 = path.resolve(__dirname, 'data/input2.json');
+    const inputText1 = fs.readFileSync(input1, 'utf8');
+    const inputText2 = fs.readFileSync(input2, 'utf8');
 
     describe('#validateValidateArgs', () => {
         it('no args specified', () => {
@@ -39,44 +39,43 @@ describe('cicero-cli', () => {
             const args  = Commands.validateValidateArgs({
                 _: ['validate'],
             });
-            args.sample.should.match(/sample.json$/);
+            args.input.should.match(/input.json$/);
         });
 
         it('all args specified', () => {
             process.chdir(path.resolve(__dirname, 'data'));
             const args  = Commands.validateValidateArgs({
                 _: ['validate'],
-                sample: 'sample1.json'
+                input: 'input1.json'
             });
-            args.sample.should.match(/sample1.json$/);
+            args.input.should.match(/input1.json$/);
         });
     });
 
-    describe('#validate', () => {
+    describe('#validate (classic)', () => {
         it('should validate against a model', async () => {
-            const result = await Commands.validate(sample1, models, {offline:false});
-            JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
+            const result = await Commands.validate(input1, models, {offline:false});
+            JSON.parse(result).should.deep.equal(JSON.parse(inputText1));
         });
 
         it('should fail to validate against a model', async () => {
             try {
-                const result = await Commands.validate(sample2, models, {offline:false});
-                JSON.parse(result).should.deep.equal(JSON.parse(sampleText2));
+                const result = await Commands.validate(input2, models, {offline:false});
+                JSON.parse(result).should.deep.equal(JSON.parse(inputText2));
             } catch (err) {
-                // XXX This fails likely because of https://github.com/accordproject/concerto/issues/245
                 err.message.should.equal('Instance org.accordproject.money.MonetaryAmount#null invalid enum value true for field CurrencyCode');
             }
         });
 
         it('should validate against a model (offline)', async () => {
-            const result = await Commands.validate(sample1, offlineModels, {offline:true});
-            JSON.parse(result).should.deep.equal(JSON.parse(sampleText1));
+            const result = await Commands.validate(input1, offlineModels, {offline:true});
+            JSON.parse(result).should.deep.equal(JSON.parse(inputText1));
         });
 
         it('should fail to validate against a model (offline)', async () => {
             try {
-                const result = await Commands.validate(sample2, offlineModels, {offline:true});
-                JSON.parse(result).should.deep.equal(JSON.parse(sampleText2));
+                const result = await Commands.validate(input2, offlineModels, {offline:true});
+                JSON.parse(result).should.deep.equal(JSON.parse(inputText2));
             } catch (err) {
                 err.message.should.equal('Instance org.accordproject.money.MonetaryAmount#null invalid enum value true for field CurrencyCode');
             }
@@ -90,20 +89,35 @@ describe('cicero-cli', () => {
             });
         });
 
-        it('bad sample.json', () => {
+        it('bad input.json', () => {
             process.chdir(path.resolve(__dirname, 'data'));
             (() => Commands.validateValidateArgs({
                 _: ['validate'],
-                sample: 'sample_en.json'
-            })).should.throw('A sample.json file is required. Try the --sample flag or create a sample.json file.');
+                input: 'input_en.json'
+            })).should.throw('A input.json file is required. Try the --input flag or create a input.json file.');
         });
 
-        it('bad ctoFiles', () => {
+        it('bad model', () => {
             process.chdir(path.resolve(__dirname, 'data'));
             (() => Commands.validateValidateArgs({
                 _: ['validate'],
-                ctoFiles: ['missing.cto']
-            })).should.throw('A model.cto file is required. Try the --ctoFiles flag or create a model.cto file.');
+                model: ['missing.cto']
+            })).should.throw('A model.cto file is required. Try the --model flag or create a model.cto file.');
+        });
+    });
+
+    describe('#validate (functional)', () => {
+        it('should validate against a model', async () => {
+            const result = await Commands.validate(input1, models, {offline:false, functional: true});
+            (typeof result === 'undefined').should.equal(true);
+        });
+
+        it('should fail to validate against a model', async () => {
+            try {
+                await Commands.validate(input2, models, {offline:false, functional: true});
+            } catch (err) {
+                err.message.should.equal('Instance undefined invalid enum value true for field CurrencyCode');
+            }
         });
     });
 
