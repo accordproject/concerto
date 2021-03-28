@@ -82,7 +82,7 @@ const positive = [{
     ctoFiles: ['./models/identifier1.cto'],
     expected: './data/identifier1a.expect'
 }, {
-    name: 'user defined identified',
+    name: 'user defined identifier',
     sample: './data/identifier1b.json',
     ctoFiles: ['./models/identifier1.cto'],
     expected: './data/identifier1b.expect'
@@ -99,6 +99,12 @@ const negative = [{
     ctoFiles: ['./models/hierarchy2.cto'],
     error: 'Unexpected properties for type org.test.C: c, t',
     errorFunctional: 'Instance undefined has a property named c which is not declared in org.test.C'
+}, {
+    name: 'user defined identifier',
+    sample: './data/identifier1err.json',
+    ctoFiles: ['./models/identifier1.cto'],
+    error: 'Invalid or missing identifier for Type A1 in namespace org.test',
+    errorFunctional: 'Instance org.test.A1#undefined has an empty identifier.',
 }];
 
 describe('Validation (1.0.0)', () => {
@@ -137,7 +143,7 @@ describe('Validation (1.0.0)', () => {
                     try {
                         await validateClassic(sample, ctoFiles);
                     } catch (errorActual) {
-                        errorActual.name.should.equal('ValidationException');
+                        //errorActual.name.should.equal('ValidationException');
                         errorActual.message.should.deep.equal(error);
                     }
                 });
@@ -146,7 +152,7 @@ describe('Validation (1.0.0)', () => {
                     try {
                         await validateFunctional(sample, ctoFiles);
                     } catch (errorActual) {
-                        errorActual.name.should.equal('ValidationException');
+                        // errorActual.name.should.equal('ValidationException');
                         errorActual.message.should.deep.equal(errorFunctional);
                     }
                 });
