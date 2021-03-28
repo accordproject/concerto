@@ -22,6 +22,7 @@ const Logger = require('@accordproject/concerto-core').Logger;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
+const Concerto = require('@accordproject/concerto-core').Concerto;
 const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
@@ -83,11 +84,11 @@ class Commands {
      * @returns {object} a modfied argument object
      */
     static validateValidateArgs(argv) {
-        argv = Commands.setDefaultFileArg(argv, 'sample', 'sample.json', ((argv, argDefaultName) => { return path.resolve('.',argDefaultName); }));
-        argv = Commands.setDefaultFileArg(argv, 'ctoFiles', 'model.cto', ((argv, argDefaultName) => { return [path.resolve('.',argDefaultName)]; }));
+        argv = Commands.setDefaultFileArg(argv, 'input', 'input.json', ((argv, argDefaultName) => { return path.resolve('.',argDefaultName); }));
+        argv = Commands.setDefaultFileArg(argv, 'model', 'model.cto', ((argv, argDefaultName) => { return [path.resolve('.',argDefaultName)]; }));
 
         if(argv.verbose) {
-            Logger.info(`parse sample ${argv.sample} using a template ${argv.template}`);
+            Logger.info(`validate ${argv.input} using a model ${argv.model}`);
         }
 
         return argv;
@@ -106,11 +107,18 @@ class Commands {
         const json = JSON.parse(fs.readFileSync(sample, 'utf8'));
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
-        const factory = new Factory(modelManager);
-        const serializer = new Serializer(factory, modelManager);
 
-        const object = serializer.fromJSON(json);
-        return JSON.stringify(serializer.toJSON(object));
+        if (options.functional) {
+            const concerto = new Concerto(modelManager);
+
+            concerto.validate(json);
+        } else {
+            const factory = new Factory(modelManager);
+            const serializer = new Serializer(factory, modelManager);
+
+            const object = serializer.fromJSON(json);
+            return JSON.stringify(serializer.toJSON(object));
+        }
     }
 
     /**
