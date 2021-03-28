@@ -441,22 +441,6 @@ class ObjectValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {classDeclaration} classDeclaration - the declaration of the classs
-     * @param {Object} value - the value of the field.
-     * @private
-     */
-    static reportNotResouceViolation(id, classDeclaration, value) {
-        let formatter = Globalize.messageFormatter('resourcevalidator-notresourceorconcept');
-        throw new ValidationException(formatter({
-            resourceId: id,
-            classFQN: classDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
-        }));
-    }
-
-    /**
-     * Throw a new error for a model violation.
-     * @param {string} id - the identifier of this instance.
      * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the classs
      * @param {Object} value - the value of the field.
      * @private

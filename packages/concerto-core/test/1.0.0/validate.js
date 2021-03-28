@@ -34,9 +34,10 @@ const mockTimestamp = dayjs(0);
 const ModelLoader = require('../..').ModelLoader;
 const Factory = require('../..').Factory;
 const Serializer = require('../..').Serializer;
+const Concerto = require('../..').Concerto;
 
 const loadJson = (file) => JSON.parse(fs.readFileSync(path.join(__dirname,file), 'utf8'));
-const validate = async (sample, ctoFiles, options) => {
+const validateClassic = async (sample, ctoFiles, options) => {
     const json = loadJson(sample);
 
     const modelManager = await ModelLoader.loadModelManager(ctoFiles.map((file) => path.join(__dirname,file)), options);
@@ -46,12 +47,20 @@ const validate = async (sample, ctoFiles, options) => {
     const object = serializer.fromJSON(json);
     return serializer.toJSON(object);
 };
+const validateFunctional = async (sample, ctoFiles, options) => {
+    const json = loadJson(sample);
+
+    const modelManager = await ModelLoader.loadModelManager(ctoFiles.map((file) => path.join(__dirname,file)), options);
+    const concerto = new Concerto(modelManager);
+
+    return concerto.validate(json);
+};
 
 const positive = [{
     name: 'date',
     sample: './data/date1.json',
     ctoFiles: ['./models/date1.cto'],
-    expected: './data/date1.expect'
+    expected: './data/date1.expect',
 }, {
     name: 'root hierarchy',
     sample: './data/hierarchy1.json',
@@ -88,7 +97,8 @@ const negative = [{
     name: 'root hierarchy',
     sample: './data/hierarchy2err.json',
     ctoFiles: ['./models/hierarchy2.cto'],
-    expected: 'Unexpected properties for type org.test.C: c, t'
+    error: 'Unexpected properties for type org.test.C: c, t',
+    errorFunctional: 'Instance undefined has a property named c which is not declared in org.test.C'
 }];
 
 describe('Validation (1.0.0)', () => {
@@ -107,23 +117,37 @@ describe('Validation (1.0.0)', () => {
     describe('#positive', () => {
         positive
             .forEach(({ name, sample, ctoFiles, expected }) => {
-                it(`should be valid (${name})`, async function() {
-                    const resultActual = await validate(sample, ctoFiles);
+                it(`should validate - classic (${name})`, async function() {
+                    const resultActual = await validateClassic(sample, ctoFiles);
                     const resultExpected = loadJson(expected);
                     resultActual.should.deep.equal(resultExpected);
+                });
+
+                it(`should validate - functional (${name})`, async function() {
+                    const resultActual = await validateFunctional(sample, ctoFiles);
+                    (typeof resultActual === 'undefined').should.equal(true);
                 });
             });
     });
 
     describe('#negative', () => {
         negative
-            .forEach(({ name, sample, ctoFiles, expected }) => {
-                it(`should be valid (${name})`, async function() {
+            .forEach(({ name, sample, ctoFiles, error, errorFunctional }) => {
+                it(`should not validate - classic (${name})`, async function() {
                     try {
-                        await validate(sample, ctoFiles);
+                        await validateClassic(sample, ctoFiles);
                     } catch (errorActual) {
                         errorActual.name.should.equal('ValidationException');
-                        errorActual.message.should.deep.equal(expected);
+                        errorActual.message.should.deep.equal(error);
+                    }
+                });
+
+                it(`should not validate - functional (${name})`, async function() {
+                    try {
+                        await validateFunctional(sample, ctoFiles);
+                    } catch (errorActual) {
+                        errorActual.name.should.equal('ValidationException');
+                        errorActual.message.should.deep.equal(errorFunctional);
                     }
                 });
             });
