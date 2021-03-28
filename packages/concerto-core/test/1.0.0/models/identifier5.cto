@@ -1,9 +1,0 @@
-namespace org.test
-
-participant P identified by pId {
-	o String pId
-	o String name
-}
-
-participant P1 extends P {
-}

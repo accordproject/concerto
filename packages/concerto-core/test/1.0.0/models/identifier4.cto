@@ -1,5 +1,0 @@
-namespace org.test
-
-concept C identified {
-	o String name
-}

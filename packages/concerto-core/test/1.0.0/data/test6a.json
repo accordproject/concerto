@@ -1,5 +1,0 @@
-{
-    "$class": "org.test.C",
-    "name": "John",
-    "foo": "123"
-}
