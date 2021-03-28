@@ -107,7 +107,7 @@ class Concerto {
      */
     isIdentifiable(obj) {
         const typeDeclaration = this.getTypeDeclaration(obj);
-        return typeDeclaration.getIdentifierFieldName() !== null;
+        return !typeDeclaration.isSystemIdentified() && typeDeclaration.getIdentifierFieldName() !== null;
     }
 
     /**
