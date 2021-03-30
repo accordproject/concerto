@@ -60,7 +60,7 @@ class Factory {
      * Create a new Resource with a given namespace, type name and id
      * @param {String} ns - the namespace of the Resource
      * @param {String} type - the type of the Resource
-     * @param {String} id - an string identifier (optional)
+     * @param {String} [id] - an optional string identifier
      * @param {Object} [options] - an optional set of options
      * @param {boolean} [options.disableValidation] - pass true if you want the factory to
      * return a {@link Resource} instead of a {@link ValidatedResource}. Defaults to false.
@@ -142,7 +142,7 @@ class Factory {
      * Create a new Concept with a given namespace and type name
      * @param {String} ns - the namespace of the Concept
      * @param {String} type - the type of the Concept
-     * @param {String} [id] - an optional identifier for the concept.
+     * @param {String} [id] - an optional string identifier
      * @param {Object} [options] - an optional set of options
      * @param {boolean} [options.disableValidation] - pass true if you want the factory to
      * return a {@link Concept} instead of a {@link ValidatedConcept}. Defaults to false.
@@ -185,8 +185,7 @@ class Factory {
      * Create a new transaction object. The identifier of the transaction is set to a UUID.
      * @param {String} ns - the namespace of the transaction.
      * @param {String} type - the type of the transaction.
-     * @param {String} [id] - an optional identifier for the transaction; if you do not specify
-     * one then an identifier will be automatically generated.
+     * @param {String} [id] - an optional string identifier
      * @param {Object} [options] - an optional set of options
      * @param {String} [options.generate] - Pass one of: <dl>
      * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
@@ -218,8 +217,7 @@ class Factory {
      * set to a UUID.
      * @param {String} ns - the namespace of the event.
      * @param {String} type - the type of the event.
-     * @param {String} [id] - an optional identifier for the event; if you do not specify
-     * one then an identifier will be automatically generated.
+     * @param {String} [id] - an optional string identifier
      * @param {Object} [options] - an optional set of options
      * @param {String} [options.generate] - Pass one of: <dl>
      * <dt>sample</dt><dd>return a resource instance with generated sample data.</dd>
