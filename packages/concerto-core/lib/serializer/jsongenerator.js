@@ -46,13 +46,15 @@ class JSONGenerator {
      * @param {boolean} [convertResourcesToId] Convert resources that
      * are specified for relationship fields into their id, false by default.
      * @param {boolean} [ergo] target ergo.
+     * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
-    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo) {
+    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
         this.ergo = ergo;
+        this.utcOffset = utcOffset || 0; // Defaults to UTC
     }
 
     /**
@@ -193,10 +195,12 @@ class JSONGenerator {
         switch (field.getType()) {
         case 'DateTime':
         {
+            const objWithOffset = obj.utc().utcOffset(this.utcOffset);
             if (this.ergo) {
-                return obj;
+                return objWithOffset;
             } else {
-                return obj.utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+                const inZ = objWithOffset.utcOffset() === 0;
+                return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
             }
         }
         case 'Integer':

@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 1.0.0-alpha.4 {3b7ebc06a536a5e81624225c7b0079ee} 2021-04-08
+- Allow optional UTC offset for validating DateTime values
+
 Version 1.0.0-alpha.3 {7b8763c243f937d84579350aef348c3c} 2020-12-25
 - Concepts may now be identified
 - assets/participants have a system identifier created ($identifier) automatically
