@@ -27,7 +27,8 @@ const TypedStack = require('./serializer/typedstack');
 
 const baseDefaultOptions = {
     validate: true,
-    ergo: false
+    ergo: false,
+    utcOffset: 0,
 };
 
 /**
@@ -85,6 +86,7 @@ class Serializer {
      * serialized in full, subsequent instances are replaced with a reference to the $id
      * @param {boolean} [options.convertResourcesToId] - Convert resources that
      * are specified for relationship fields into their id, false by default.
+     * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @return {Object} - The Javascript Object that represents the resource
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
@@ -114,7 +116,8 @@ class Serializer {
             options.permitResourcesForRelationships === true,
             options.deduplicateResources === true,
             options.convertResourcesToId === true,
-            options.ergo === true
+            options.ergo === true,
+            options.utcOffset,
         );
 
         parameters.stack.clear();
@@ -138,6 +141,7 @@ class Serializer {
      * in the place of strings for relationships, defaults to false.
      * @param {boolean} options.validate - validate the structure of the Resource
      * with its model prior to serialization (default to true)
+     * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options) {
@@ -180,7 +184,7 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.ergo === true);
+        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.ergo === true, options.utcOffset);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model

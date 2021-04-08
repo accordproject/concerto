@@ -24,6 +24,12 @@ const ValidationException = require('./validationexception');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
+const quarterOfYear = require('dayjs/plugin/quarterOfYear');
+dayjs.extend(quarterOfYear);
+const minMax = require('dayjs/plugin/minMax');
+dayjs.extend(minMax);
+const duration = require('dayjs/plugin/duration');
+dayjs.extend(duration);
 
 /**
  * Check if a given property name is a system property, e.g. '$class'.
@@ -83,10 +89,12 @@ class JSONPopulator {
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
      * place of relationships, false by default.
      * @param {boolean} [ergo] target ergo.
+     * @param {number} [utcOffset] - UTC Offset for DateTime values.
      */
-    constructor(acceptResourcesForRelationships, ergo) {
+    constructor(acceptResourcesForRelationships, ergo, utcOffset) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.ergo = ergo;
+        this.utcOffset = utcOffset || 0; // Defaults to UTC
     }
 
     /**
@@ -226,12 +234,12 @@ class JSONPopulator {
 
         switch(field.getType()) {
         case 'DateTime': {
-            if (dayjs.isDayjs(json)) {
+            if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
             } else {
-                result = dayjs.utc(json);
+                result = dayjs.utc(json).utcOffset(this.utcOffset);
             }
             if (!result.isValid()) {
                 throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);

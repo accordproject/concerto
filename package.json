@@ -2,7 +2,7 @@
   "devDependencies": {
     "colors": "1.4.0",
     "coveralls": "3.0.4",
-    "dayjs": "1.10.2",
+    "dayjs": "1.10.4",
     "eslint": "6.0.1",
     "istanbul-combine": "0.3.0",
     "istanbul-merge": "1.1.1",

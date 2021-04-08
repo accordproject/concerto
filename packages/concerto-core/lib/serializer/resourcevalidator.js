@@ -25,7 +25,6 @@ const Util = require('../util');
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
-const dayjs = require('dayjs');
 
 /**
  * <p>
@@ -315,7 +314,7 @@ class ResourceValidator {
                 }
                 break;
             case 'DateTime':
-                if(!(dayjs.isDayjs(obj))) {
+                if(!(typeof obj === 'object' && typeof obj.isBefore === 'function')) {
                     invalid = true;
                 }
                 break;
