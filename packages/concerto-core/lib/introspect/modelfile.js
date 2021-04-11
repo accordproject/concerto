@@ -14,6 +14,8 @@
 
 'use strict';
 
+const packageJson = require('../../package.json');
+const semver = require('semver');
 const parser = require('./parser');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
@@ -55,6 +57,7 @@ class ModelFile {
         this.importUriMap = {};
         this.fileName = 'UNKNOWN';
         this._isModelFile = true;
+        this.concertoVersion = null;
 
         if(!definitions || typeof definitions !== 'string') {
             throw new Error('ModelFile expects a Concerto model as a string as input.');
@@ -72,6 +75,13 @@ class ModelFile {
 
         try {
             this.ast = parser.parse(definitions);
+            if (this.ast.version) {
+                if (semver.satisfies(packageJson.version, this.ast.version.value)) {
+                    this.concertoVersion = this.ast.version.value;
+                } else {
+                    throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
+                }
+            }
         }
         catch(err) {
             if(err.location && err.location.start) {
@@ -618,6 +628,14 @@ class ModelFile {
      */
     getDefinitions() {
         return this.definitions;
+    }
+
+    /**
+     * Get the expected concerto version
+     * @return {string} The semver range for compatible concerto versions
+     */
+    getConcertoVersion() {
+        return this.concertoVersion;
     }
 
     /**

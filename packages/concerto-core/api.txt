@@ -124,6 +124,7 @@ class ModelFile {
    + ClassDeclaration[] getDeclarations(Function) 
    + ClassDeclaration[] getAllDeclarations() 
    + string getDefinitions() 
+   + string getConcertoVersion() 
    + boolean hasInstance(object) 
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {

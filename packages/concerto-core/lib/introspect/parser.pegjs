@@ -702,6 +702,8 @@ absolute_URI
 
 
 /* Concerto Tokens */
+ConcertoToken     = "concerto"    !IdentifierPart
+VersionToken      = "version"     !IdentifierPart
 NamespaceToken    = "namespace"   !IdentifierPart
 AbstractToken     = "abstract"    !IdentifierPart
 ConceptToken      = "concept"     !IdentifierPart
@@ -1159,10 +1161,16 @@ Import
    = ImportFrom /
      ImportInternal
 
+Version
+   = ConcertoToken __ VersionToken __ version:StringLiteral __ {
+       return version;
+     }
+
 Program
-  = ns:Namespace imports:Imports? body:SourceElements? {
+  = version:Version? ns:Namespace imports:Imports? body:SourceElements? {
       return {
         type: "Program",
+        version: version,
         namespace: ns,
         imports: optionalList(imports),
         body: optionalList(body)
