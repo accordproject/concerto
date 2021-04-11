@@ -69,8 +69,6 @@ class Factory {
      * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
      * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
      * is specified, whether optional fields should be generated.
-     * @param {boolean} [options.allowEmptyId] - if <code>options.allowEmptyId</code>
-     * is specified as true, a zero length string for id is allowed (allows it to be filled in later).
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
@@ -102,14 +100,12 @@ class Factory {
                 }));
             }
 
-            if(!(options.allowEmptyId && id==='')) {
-                if(id.trim().length === 0) {
-                    let formatter = Globalize.messageFormatter('factory-newinstance-missingidentifier');
-                    throw new Error(formatter({
-                        namespace: ns,
-                        type: type
-                    }));
-                }
+            if(id.trim().length === 0) {
+                let formatter = Globalize.messageFormatter('factory-newinstance-missingidentifier');
+                throw new Error(formatter({
+                    namespace: ns,
+                    type: type
+                }));
             }
         } else if(id) {
             throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
@@ -192,8 +188,6 @@ class Factory {
      * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
      * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
      * is specified, whether optional fields should be generated.
-     * @param {boolean} [options.allowEmptyId] - if <code>options.allowEmptyId</code>
-     * is specified as true, a zero length string for id is allowed (allows it to be filled in later).
      * @return {Resource} A resource for the new transaction.
      */
     newTransaction(ns, type, id, options) {
@@ -224,8 +218,6 @@ class Factory {
      * <dt>empty</dt><dd>return a resource instance with empty property values.</dd></dl>
      * @param {boolean} [options.includeOptionalFields] - if <code>options.generate</code>
      * is specified, whether optional fields should be generated.
-     * @param {boolean} [options.allowEmptyId] - if <code>options.allowEmptyId</code>
-     * is specified as true, a zero length string for id is allowed (allows it to be filled in later).
      * @return {Resource} A resource for the new event.
      */
     newEvent(ns, type, id, options) {
