@@ -26,11 +26,11 @@ class Concerto {
 }
 class Factory {
    + void constructor(ModelManager) 
-   + Resource newResource(String,String,String,Object,boolean,String,boolean,boolean) throws TypeNotFoundException
+   + Resource newResource(String,String,String,Object,boolean,String,boolean) throws TypeNotFoundException
    + Resource newConcept(String,String,String,Object,boolean,String,boolean) throws TypeNotFoundException
    + Relationship newRelationship(String,String,String) throws TypeNotFoundException
-   + Resource newTransaction(String,String,String,Object,String,boolean,boolean) 
-   + Resource newEvent(String,String,String,Object,String,boolean,boolean) 
+   + Resource newTransaction(String,String,String,Object,String,boolean) 
+   + Resource newEvent(String,String,String,Object,String,boolean) 
    + boolean hasInstance(object) 
 }
 class AssetDeclaration extends IdentifiedDeclaration {
