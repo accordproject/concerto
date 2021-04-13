@@ -117,7 +117,7 @@ class Commands {
             const serializer = new Serializer(factory, modelManager);
 
             const object = serializer.fromJSON(json);
-            return JSON.stringify(serializer.toJSON(object));
+            return JSON.stringify(serializer.toJSON(object, {ergo: options.ergo}));
         }
     }
 
