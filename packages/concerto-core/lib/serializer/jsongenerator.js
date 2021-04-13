@@ -116,6 +116,8 @@ class JSONGenerator {
             if (!Util.isNull(value)) {
                 parameters.stack.push(value);
                 result[property.getName()] = property.accept(this, parameters);
+            } else if (this.ergo) {
+                result[property.getName()] = { '$right' : null };
             }
         }
 
