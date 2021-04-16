@@ -261,7 +261,6 @@ describe('JSONSchema (samples)', function () {
             const visitor = new JSONSchemaVisitor();
             const monitorSchema = modelManager.accept(visitor, { rootType: 'org.accordproject.ergo.monitor.Monitor'});
             expect(monitorSchema.title).equal('Monitor');
-            // console.log(JSON.stringify(monitorSchema, null, 2));
 
             const phaseSchema = modelManager.accept(visitor, { rootType: 'org.accordproject.ergo.monitor.Phase'});
             expect(phaseSchema.title).equal('Phase');
@@ -291,7 +290,7 @@ describe('JSONSchema (samples)', function () {
                 ]
             };
 
-            const ajv = new Ajv();
+            const ajv = new Ajv({ strict: false });
             expect( ajv.validate(monitorSchema, instance)).equals(true);
         });
 
@@ -302,7 +301,6 @@ describe('JSONSchema (samples)', function () {
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});
             expect(schema.title).equal('MyRequest');
-            // console.log(JSON.stringify(schema, null, 2));
 
             // check that the generated schema validates a valid instance
             const instance =
@@ -320,7 +318,7 @@ describe('JSONSchema (samples)', function () {
               date: new Date().toISOString(),
           };
 
-            const ajv = new Ajv();
+            const ajv = new Ajv({ strict: false });
             expect( ajv.validate(schema, instance)).equals(true);
         });
     });

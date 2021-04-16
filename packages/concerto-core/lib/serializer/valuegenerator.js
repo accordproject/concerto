@@ -14,7 +14,7 @@
 
 'use strict';
 
-const loremIpsum = require('lorem-ipsum');
+const { loremIpsum } = require('lorem-ipsum');
 const RandExp = require('randexp');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -236,7 +236,6 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @return {string} a String value.
      */
     getString() {
-
         return loremIpsum({
             count: 1                        // Number of words, sentences, or paragraphs to generate.
             , units: 'sentences'            // Generate words, sentences, or paragraphs.

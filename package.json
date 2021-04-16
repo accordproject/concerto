@@ -1,16 +1,16 @@
 {
   "devDependencies": {
     "colors": "1.4.0",
-    "coveralls": "3.0.4",
+    "coveralls": "3.1.0",
     "dayjs": "1.10.4",
-    "eslint": "6.0.1",
+    "eslint": "7.24.0",
     "istanbul-combine": "0.3.0",
     "istanbul-merge": "1.1.1",
-    "jsdoc": "3.6.3",
-    "lerna": "^3.22.1",
+    "jsdoc": "3.6.6",
+    "lerna": "^4.0.0",
     "license-check-and-add": "2.3.6",
-    "nyc": "14.1.1",
-    "semver": "6.3.0"
+    "nyc": "15.1.0",
+    "semver": "7.3.5"
   },
   "engines": {
     "node": ">=12",

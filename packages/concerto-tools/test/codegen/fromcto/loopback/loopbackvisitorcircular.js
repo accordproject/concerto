@@ -40,7 +40,7 @@ describe('LoopbackVisitor with Circular Model', () => {
                 modelManager = new ModelManager();
                 modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/circular.cto'), 'utf8'), 'circular.cto');
                 visitor = new LoopbackVisitor(namespaces);
-                sandbox = sinon.sandbox.create();
+                sandbox = sinon.createSandbox();
             });
 
             afterEach(() => {
