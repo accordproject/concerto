@@ -17,8 +17,10 @@
 const ModelManager = require('../../lib/modelmanager');
 const Factory = require('../../lib/factory');
 const Identifiable = require('../../lib/model/identifiable');
+
+const dayjs = require('dayjs');
 const chai = require('chai');
-chai.should();
+const should = chai.should();
 chai.use(require('chai-things'));
 
 describe('Concept Identifiers', function () {
@@ -38,7 +40,10 @@ describe('Concept Identifiers', function () {
             o Double ammount
             o Address address
             --> Product product
-        }`, 'test.cto');
+        }
+        transaction Request {}
+        event Event {}
+        `, 'test.cto');
         classDecl = modelManager.getType('org.accordproject.Order');
     });
 
@@ -84,6 +89,22 @@ describe('Concept Identifiers', function () {
         it('should be able to call toString', function () {
             const id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
             id.toString().should.equal('Identifiable {id=org.accordproject.Order#123}');
+        });
+    });
+
+    describe('#getTimestamp', function() {
+        it('should be able to call getTimestamp', function () {
+            const factory = new Factory(modelManager);
+            const txn = factory.newResource('org.accordproject', 'Request');
+            dayjs(txn.getTimestamp()).isValid().should.be.true;
+
+            const event = factory.newResource('org.accordproject', 'Event');
+            dayjs(event.getTimestamp()).isValid().should.be.true;
+        });
+
+        it('should be able to call getTimestamp for an identifiable without a $timestamp property', function () {
+            const id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
+            should.equal(id.getTimestamp(), undefined);
         });
     });
 

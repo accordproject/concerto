@@ -122,5 +122,26 @@ concept Foo {}`, 'fake.cto', true);
             return mfd.downloadExternalDependencies(modelManager.getModelFiles())
                 .should.be.rejectedWith(Error, 'Failed to load model file.');
         });
+
+        it('should handle loader error caused by DNS failure', function() {
+
+            // create a fake model file loader
+            const ml = sinon.createStubInstance(GitHubModelFileLoader);
+
+            // it accepts all URLs
+            ml.accepts.returns(true);
+
+            // bind the model files to namespaces in the fake loader
+            ml.load.withArgs('github://external.cto').returns(Promise.reject({ code: 'ENOTFOUND' }));
+
+            // add a model file that imports externalModelFile
+            modelManager.addModelFile(`namespace org.root
+import org.external from github://external.cto
+concept Foo {}`, 'fake.cto', true);
+
+            const mfd = new ModelFileDownloader(ml);
+            return mfd.downloadExternalDependencies(modelManager.getModelFiles())
+                .should.be.rejectedWith(Error, 'Unable to download external model dependency ');
+        });
     });
 });

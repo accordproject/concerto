@@ -542,6 +542,8 @@ concept Bar {
                 // model should be loaded and tagged as external
                     modelManager.getModelFile('org.external').isExternal().should.be.true;
 
+                    modelManager.getModelFile('org.external').isSystemModelFile().should.be.false;
+
                     // root model should still be there, and tagged as internal
                     modelManager.getModelFile('org.acme').isExternal().should.be.false;
 
