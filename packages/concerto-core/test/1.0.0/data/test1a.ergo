@@ -1,0 +1,7 @@
+{
+	"$class": { "$coll": ["org.test.C"], "$length": 1 },
+	"$data": {
+		"i": { "$left": { "$nat": 42 } },
+		"ds": { "$coll": [1,2,3], "$length": 3 }
+	}
+}

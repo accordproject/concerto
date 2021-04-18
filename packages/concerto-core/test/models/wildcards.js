@@ -83,23 +83,29 @@ describe('Wildcards Model', function () {
 
     it('should parse a resource using types from a wildcard import (Ergo)', () => {
         const json = {
-            $class: 'org.acme.wildcards.MyAsset',
-            assetId: '1',
-            concept: {
-                $class: 'org.acme.wildcards.MyConcept',
-                gender: { '$class': 'stdlib.base.Gender', '$data': { '$right' : { '$left': 'FEMALE' } } }
-            },
-            participant: {
-                $class: 'org.acme.wildcards.MyParticipant',
-                personId: '1',
-                firstName: 'Alice',
-                lastName: 'A',
-                contactDetails: {
-                    $class: 'stdlib.base.ContactDetails',
-                    email: 'alice@email.com'
-                }
-            },
-            person: 'resource:stdlib.base.Person#ALICE_1'
+            $class: { $coll: ['org.acme.wildcards.MyAsset'], $length: 1 },
+            $data: {
+                assetId: '1',
+                concept: {
+                    $class: { $coll: ['org.acme.wildcards.MyConcept'], $length: 1 },
+                    $data: {
+                        gender: { '$class': 'stdlib.base.Gender', '$data': { '$right' : { '$left': 'FEMALE' } } }
+                    }
+                },
+                participant: {
+                    $class: { $coll: ['org.acme.wildcards.MyParticipant'], $length: 1 },
+                    $data: {
+                        personId: '1',
+                        firstName: 'Alice',
+                        lastName: 'A',
+                        contactDetails: {
+                            $class: { $coll: ['stdlib.base.ContactDetails'], $length: 1 },
+                            $data: { email: 'alice@email.com' }
+                        }
+                    }
+                },
+                person: 'resource:stdlib.base.Person#ALICE_1'
+            }
         };
         const resource = ergoSerializer.fromJSON(json);
         resource.assetId.should.equal('1');

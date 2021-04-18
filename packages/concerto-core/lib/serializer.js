@@ -145,15 +145,19 @@ class Serializer {
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options) {
+        // set default options
+        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
+        if (options && options.ergo === true) {
+            const theClass = jsonObject.$class.$coll[0];
+            jsonObject = jsonObject.$data;
+            jsonObject.$class = theClass;
+        }
         if(!jsonObject.$class) {
             throw new Error('Invalid JSON data. Does not contain a $class type identifier.');
         }
 
         const classDeclaration = this.modelManager.getType(jsonObject.$class);
-
-        // default the options.
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
         // create a new instance, using the identifier field name as the ID.
         let resource;

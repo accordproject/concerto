@@ -381,7 +381,7 @@ describe('JSONPopulator', () => {
             sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
         });
 
-        it('should create a new resource from an object using a $class value that matches the model with optional intege (Ergo)', () => {
+        it('should create a new resource from an object using a $class value that matches the model with optional integer (Ergo)', () => {
             let options = {
                 jsonStack: new TypedStack({}),
                 resourceStack: new TypedStack({}),
@@ -391,9 +391,10 @@ describe('JSONPopulator', () => {
             let mockResource = sinon.createStubInstance(Resource);
             mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset1',
-                assetId: 'asset1',
-                assetValue: { '$left' : { '$nat' : 1 } }
+                $class: { $coll: ['org.acme.MyAsset1'], $length: 1 }, $data: {
+                    assetId: 'asset1',
+                    assetValue: { '$left' : { '$nat' : 1 } }
+                }
             }, options);
             resource.should.be.an.instanceOf(Resource);
             sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
@@ -427,9 +428,10 @@ describe('JSONPopulator', () => {
             let mockResource = sinon.createStubInstance(Resource);
             mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = ergoJsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset1',
-                assetId: 'asset1',
-                assetValue: { '$right' : null }
+                $class: { $coll: ['org.acme.MyAsset1'], $length: 1 }, $data: {
+                    assetId: 'asset1',
+                    assetValue: { '$right' : null }
+                }
             }, options);
             resource.should.be.an.instanceOf(Resource);
             sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
