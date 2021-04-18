@@ -70,6 +70,12 @@ describe('ModelLoader', () => {
             const declaration = modelManager.getType('org.acme.base.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
         });
+
+        it('should load models when offline', async function() {
+            const modelManager = await ModelLoader.loadModelManager([modelBase], { offline: true });
+            const declaration = modelManager.getType('org.acme.base.AbstractAsset');
+            declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+        });
     });
 
     describe('#loadModelManagerFromModelFiles', function() {
@@ -117,6 +123,18 @@ describe('ModelLoader', () => {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             const declaration = modelManager.getType('org.acme.base.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+        });
+
+        it('should load models when offline', async function() {
+            const modelManager = await ModelLoader.loadModelManager([modelBase]);
+            const files = modelManager.getModelFiles()
+                .map(f => f.definitions);
+            const fileNames = modelManager.getModelFiles()
+                .map(f => `${f.getFullyQualifiedName}.cto`);
+            const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files, fileNames, { offline: true });
+            (function() {
+                modelManager2.getType('String');
+            }).should.throw(TypeNotFoundException);
         });
     });
 
