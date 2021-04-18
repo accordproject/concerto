@@ -21,6 +21,7 @@ const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Serializer = require('../lib/serializer');
 
 const chai = require('chai');
+require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 

@@ -63,6 +63,7 @@
     "yargs": "16.2.0"
   },
   "dependencies": {
+    "@supercharge/promise-pool": "1.7.0",
     "axios": "0.21.1",
     "colors": "1.4.0",
     "dayjs": "1.10.4",
