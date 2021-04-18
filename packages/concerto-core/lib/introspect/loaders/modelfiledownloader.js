@@ -86,7 +86,7 @@ class ModelFileDownloader {
     /**
      * Execute a Job
      * @param {Object} job - the job to execute
-     * @param {Object} modelFileLoader - TODO
+     * @param {Object} modelFileLoader - the loader to use to download model files.
      * @return {Promise} a promise to the job results
      */
     runJob(job, modelFileLoader) {
