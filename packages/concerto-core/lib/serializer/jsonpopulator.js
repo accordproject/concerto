@@ -157,10 +157,15 @@ class JSONPopulator {
      * @private
      */
     visitField(field, parameters) {
-        const jsonObj = parameters.jsonStack.pop();
+        let jsonObj = parameters.jsonStack.pop();
         let result = null;
 
         if(field.isArray()) {
+            if (this.ergo) {
+                if (Object.prototype.hasOwnProperty.call(jsonObj,'$coll')) {
+                    jsonObj = jsonObj.$coll.slice(0,jsonObj.$length);
+                }
+            }
             result = [];
             for(let n=0; n < jsonObj.length; n++) {
                 const jsonItem = jsonObj[n];
@@ -185,6 +190,11 @@ class JSONPopulator {
         let result = null;
 
         if(!field.isPrimitive() && !field.isTypeEnum()) {
+            if (this.ergo) {
+                const theClass = jsonItem.$class.$coll[0];
+                jsonItem = jsonItem.$data;
+                jsonItem.$class = theClass ;
+            }
             let typeName = jsonItem.$class;
             if(!typeName) {
                 // If the type name is not specified in the data, then use the
@@ -308,7 +318,7 @@ class JSONPopulator {
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration, parameters) {
-        const jsonObj = parameters.jsonStack.pop();
+        let jsonObj = parameters.jsonStack.pop();
         let result = null;
 
         let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
@@ -320,6 +330,11 @@ class JSONPopulator {
 
         if(relationshipDeclaration.isArray()) {
             result = [];
+            if (this.ergo) {
+                if (Object.prototype.hasOwnProperty.call(jsonObj,'$coll')) {
+                    jsonObj = jsonObj.$coll.slice(0,jsonObj.$length);
+                }
+            }
             for(let n=0; n < jsonObj.length; n++) {
                 let jsonItem = jsonObj[n];
                 if (typeof jsonItem === 'string') {
@@ -334,6 +349,11 @@ class JSONPopulator {
                         throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonItem + ' for relationship ' + relationshipDeclaration );
                     }
 
+                    if (this.ergo) {
+                        const theClass = jsonObj.$class.$coll[0];
+                        jsonObj = jsonObj.$data;
+                        jsonObj.$class = theClass;
+                    }
                     const classDeclaration = parameters.modelManager.getType(jsonItem.$class);
 
                     // create a new instance, using the identifier field name as the ID.
@@ -359,6 +379,11 @@ class JSONPopulator {
                     throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
                 }
 
+                if (this.ergo) {
+                    const theClass = jsonObj.$class.$coll[0];
+                    jsonObj = jsonObj.$data;
+                    jsonObj.$class = theClass;
+                }
                 const classDeclaration = parameters.modelManager.getType(jsonObj.$class);
 
                 // create a new instance, using the identifier field name as the ID.

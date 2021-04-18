@@ -121,6 +121,17 @@ class JSONGenerator {
             }
         }
 
+        if (this.ergo) {
+            const theClass = result.$class;
+            delete result.$class;
+            result = {
+                $class: {
+                    $coll: [theClass],
+                    $length: 1
+                },
+                $data: result,
+            };
+        }
         return result;
     }
 
@@ -147,7 +158,14 @@ class JSONGenerator {
                     array.push(this.convertToJSON(field, item));
                 }
             }
-            result = array;
+            if (this.ergo) {
+                result = {
+                    $coll: array,
+                    $length: array.length
+                };
+            } else {
+                result = array;
+            }
         } else if (field.isPrimitive()) {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
@@ -255,7 +273,14 @@ class JSONGenerator {
                     array.push(relationshipText);
                 }
             }
-            result = array;
+            if (this.ergo) {
+                result = {
+                    $coll: array,
+                    $length: array.length
+                };
+            } else {
+                result = array;
+            }
         } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
             let fqi = obj.getFullyQualifiedIdentifier();
             if (parameters.seenResources.has(fqi)) {

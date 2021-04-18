@@ -673,10 +673,11 @@ describe('JSONGenerator', () => {
             let spy = sinon.spy(ergoJsonGenerator, 'visitField');
 
             let result = ergoJsonGenerator.visitField(field,parameters);
-            result.should.deep.equal({ '$class': 'org.acme.sample.Car',
+            result.should.deep.equal({ '$class': { '$coll': ['org.acme.sample.Car'], '$length': 1 }, '$data': {
                 color: 'GREEN',
                 numberOfSeats: { '$nat' : '2' },
-                numberPlate: 'PENGU1N' });
+                numberPlate: 'PENGU1N'
+            } });
             spy.callCount.should.equal(4); // We call it once at the start, then it recurses three times
         });
 
