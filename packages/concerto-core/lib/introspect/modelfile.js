@@ -546,56 +546,50 @@ class ModelFile {
 
     /**
      * Get the AssetDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {AssetDeclaration[]} the AssetDeclarations defined in the model file
      */
-    getAssetDeclarations(includeSystemType = true) {
-        return this.getDeclarations(AssetDeclaration, includeSystemType);
+    getAssetDeclarations() {
+        return this.getDeclarations(AssetDeclaration);
     }
 
     /**
      * Get the TransactionDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {TransactionDeclaration[]} the TransactionDeclarations defined in the model file
      */
-    getTransactionDeclarations(includeSystemType = true) {
-        return this.getDeclarations(TransactionDeclaration, includeSystemType);
+    getTransactionDeclarations() {
+        return this.getDeclarations(TransactionDeclaration);
     }
 
     /**
      * Get the EventDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {EventDeclaration[]} the EventDeclarations defined in the model file
      */
-    getEventDeclarations(includeSystemType = true) {
-        return this.getDeclarations(EventDeclaration, includeSystemType);
+    getEventDeclarations() {
+        return this.getDeclarations(EventDeclaration);
     }
 
     /**
      * Get the ParticipantDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {ParticipantDeclaration[]} the ParticipantDeclaration defined in the model file
      */
-    getParticipantDeclarations(includeSystemType = true) {
-        return this.getDeclarations(ParticipantDeclaration, includeSystemType);
+    getParticipantDeclarations() {
+        return this.getDeclarations(ParticipantDeclaration);
     }
 
     /**
      * Get the ConceptDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {ConceptDeclaration[]} the ParticipantDeclaration defined in the model file
      */
-    getConceptDeclarations(includeSystemType = true) {
-        return this.getDeclarations(ConceptDeclaration, includeSystemType);
+    getConceptDeclarations() {
+        return this.getDeclarations(ConceptDeclaration);
     }
 
     /**
      * Get the EnumDeclarations defined in this ModelFile
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {EnumDeclaration[]} the EnumDeclaration defined in the model file
      */
-    getEnumDeclarations(includeSystemType = true) {
-        return this.getDeclarations(EnumDeclaration, includeSystemType);
+    getEnumDeclarations() {
+        return this.getDeclarations(EnumDeclaration);
     }
 
     /**
