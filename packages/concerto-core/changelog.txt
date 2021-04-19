@@ -24,6 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 1.0.0-alpha.7 {e791f955bbe9bdac6bcd8944d6111e1a} 2021-04-17
+- Remove unused systemtime options in modelfile API
+- Fixes to the validation option targeting the ergo ES6 runtime
+
 Version 1.0.0-alpha.5 {446997953e3ac90783ff9d492a8e7fdc} 2021-04-08
 - Support Concerto version pragma at the beginning of model files
 - Remove allowEmptyId option in factory API
