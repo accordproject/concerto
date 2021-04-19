@@ -20,3 +20,4 @@ lib/acl/parser.js
 lib/query/parser.js
 test/data
 umd
+dist

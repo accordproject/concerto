@@ -65,8 +65,8 @@ jspm_packages
 package-lock.jsonyarn
 out
 
-# umd build folder
-umd
+# minimised build folder
+dist
 
 # windowsjunk
 
