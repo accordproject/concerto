@@ -5,7 +5,7 @@ env:
 extends: 'eslint:recommended'
 parserOptions:
     ecmaVersion: 12
-    sourceType: script
+    sourceType: module
 rules:
     indent:
         - error
