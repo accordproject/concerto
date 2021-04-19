@@ -76,3 +76,14 @@ out
 # lib/introspect/parser.js
 # lib/query/parser.js
 # index.d.ts
+
+api.txt
+changelog.txt
+jsdoc.json
+HEADER
+HEADER.md
+rollup.config.js
+lib/introspect/parser.pegjs
+
+# Locally built npm packages
+*.tgz
