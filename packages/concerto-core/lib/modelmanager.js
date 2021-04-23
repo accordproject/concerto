@@ -604,6 +604,25 @@ abstract concept Event {}
     }
 
     /**
+     * Checks if this fully qualified type name is derived from another.
+     * @param {String} fqt1 The fully qualified type name to check.
+     * @param {String} fqt2 The fully qualified type name it is may be derived from.
+     * @returns {boolean} True if this instance is an instance of the specified fully
+     * qualified type name, false otherwise.
+     */
+    derivesFrom(fqt1, fqt2) {
+        // Check to see if this is an exact instance of the specified type.
+        let typeDeclaration = this.getType(fqt1);
+        while (typeDeclaration) {
+            if (typeDeclaration.getFullyQualifiedName() === fqt2) {
+                return true;
+            }
+            typeDeclaration = typeDeclaration.getSuperTypeDeclaration();
+        }
+        return false;
+    }
+
+    /**
      * Alternative instanceof that is reliable across different module instances
      * @see https://github.com/hyperledger/composer-concerto/issues/47
      *

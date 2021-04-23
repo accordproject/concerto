@@ -45,6 +45,7 @@ describe('ModelManager', () => {
     let composerModel = fs.readFileSync('./test/data/model/composer.cto', 'utf8');
     let invalidModel = fs.readFileSync('./test/data/model/invalid.cto', 'utf8');
     let invalidModel2 = fs.readFileSync('./test/data/model/invalid2.cto', 'utf8');
+    let concertoModel = fs.readFileSync('./test/data/model/concerto.cto', 'utf8');
     let modelManager;
     let sandbox;
 
@@ -955,6 +956,45 @@ concept Bar {
     describe('#hasInstance', () => {
         it('should return true for a valid ModelManager', () => {
             (modelManager instanceof ModelManager).should.be.true;
+        });
+    });
+
+    describe('#derivesFrom', () => {
+
+        it('should get derivesFrom for sub type', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Customer', 'org.accordproject.test.Person');
+            result.should.be.true;
+        });
+
+        it('should get derivesFrom for sub-sub type', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Manager', 'org.accordproject.test.Person');
+            result.should.be.true;
+        });
+
+        it('should get derivesFrom for type', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Customer', 'org.accordproject.test.Customer');
+            result.should.be.true;
+        });
+
+        it('should not get derivesFrom for derived type', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'org.accordproject.test.Customer');
+            result.should.be.false;
+        });
+
+        it('should be an instance of concerto.Participant', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Participant');
+            result.should.be.true;
+        });
+
+        it('all types should be an instance of concerto.Concept', () => {
+            modelManager.addModelFile(concertoModel);
+            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Concept');
+            result.should.be.true;
         });
     });
 
