@@ -205,31 +205,6 @@ class Concerto {
     getNamespace(obj) {
         return this.getTypeDeclaration(obj).getNamespace();
     }
-
-    /**
-     * Check to see if this instance is an instance of the specified fully qualified
-     * type name.
-     * @param {*} obj the input object
-     * @param {String} fqt The fully qualified type name.
-     * @returns {boolean} True if this instance is an instance of the specified fully
-     * qualified type name, false otherwise.
-     */
-    instanceOf(obj, fqt) {
-        // Check to see if this is an exact instance of the specified type.
-        const classDeclaration = this.getTypeDeclaration(obj);
-        if (classDeclaration.getFullyQualifiedName() === fqt) {
-            return true;
-        }
-        // Now walk the class hierachy looking to see if it's an instance of the specified type.
-        let superTypeDeclaration = classDeclaration.getSuperTypeDeclaration();
-        while (superTypeDeclaration) {
-            if (superTypeDeclaration.getFullyQualifiedName() === fqt) {
-                return true;
-            }
-            superTypeDeclaration = superTypeDeclaration.getSuperTypeDeclaration();
-        }
-        return false;
-    }
 }
 
 module.exports = Concerto;

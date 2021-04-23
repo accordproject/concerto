@@ -17,7 +17,6 @@
 const fs = require('fs');
 const chai = require('chai');
 
-const expect = chai.expect;
 // eslint-disable-next-line no-unused-vars
 const should = chai.should();
 chai.use(require('chai-things'));
@@ -226,65 +225,6 @@ describe('concerto', () => {
 
             const ns = concerto.getNamespace(obj);
             ns.should.equal('org.accordproject.test');
-        });
-    });
-
-    describe('#instanceOf', () => {
-
-        it('should get instanceOf for sub type', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Customer',
-                ssn: '123456789',
-                customerId: '001',
-                name: 'Dan Selman'
-            };
-
-            const result = concerto.instanceOf(obj, 'org.accordproject.test.Person');
-            result.should.be.true;
-        });
-
-        it('should get instanceOf for sub-sub type', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Manager',
-                ssn: '123456789',
-                customerId: '001',
-                name: 'Dan Selman'
-            };
-
-            const result = concerto.instanceOf(obj, 'org.accordproject.test.Person');
-            result.should.be.true;
-        });
-
-        it('should get instanceOf for type', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Customer',
-                ssn: '123456789',
-                customerId: '001',
-                name: 'Dan Selman'
-            };
-
-            const result = concerto.instanceOf(obj, 'org.accordproject.test.Customer');
-            result.should.be.true;
-        });
-
-        it('should not get instanceOf for derived type', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Person',
-                ssn: '123456789'
-            };
-
-            const result = concerto.instanceOf(obj, 'org.accordproject.test.Customer');
-            expect(result).to.be.false;
-        });
-
-        it('all types should be an instance of concerto.Concept', () => {
-            const obj = {
-                $class : 'org.accordproject.test.Person',
-                ssn: '123456789'
-            };
-
-            const result = concerto.instanceOf(obj, 'concerto.Concept');
-            expect(result).to.be.true;
         });
     });
 

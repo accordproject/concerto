@@ -24,10 +24,11 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.0.0-alpha.8 {e282ac1f06ae25ddd4f644bba3d133b4} 2021-04-22
+Version 1.0.0-alpha.8 {08b0c809336354e7d1b17a2e44fca8b0} 2021-04-22
 - Add datetimeutil & Consolidate UTC offset support
+- Delete Concerto.instanceOf replace by ModelManager.derivesFrom
 
-Version 1.0.0-alpha.7 {e791f955bbe9bdac6bcd8944d6111e1a} 2021-04-17
+Version 1.0.0-alpha.7 {aec0f0d4e25be4dab03d6b94be60767b} 2021-04-17
 - Remove unused systemtime options in modelfile API
 - Fixes to the validation option targeting the ergo ES6 runtime
 

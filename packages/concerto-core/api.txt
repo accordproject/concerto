@@ -22,7 +22,6 @@ class Concerto {
    + void fromURI(string) throws Error
    + string getType() 
    + string getNamespace() 
-   + boolean instanceOf(String) 
 }
    + object setCurrentTime() 
 class Factory {
@@ -217,6 +216,7 @@ class ModelManager {
    + Serializer getSerializer() 
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
+   + boolean derivesFrom(String,String) 
    + boolean hasInstance(object) 
 }
 class SecurityException extends BaseException {
