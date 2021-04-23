@@ -26,6 +26,7 @@ module.exports.BaseException = require('./lib/baseexception');
 module.exports.BaseFileException = require('./lib/basefileexception');
 module.exports.ClassDeclaration = require('./lib/introspect/classdeclaration');
 module.exports.ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
+module.exports.DateTimeUtil = require('./lib/datetimeutil');
 module.exports.EnumDeclaration = require('./lib/introspect/enumdeclaration');
 module.exports.EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
 module.exports.EventDeclaration = require('./lib/introspect/eventdeclaration');

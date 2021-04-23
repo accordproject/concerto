@@ -61,7 +61,7 @@ class ModelLoader {
      * @return {object} the model manager
      */
     static async loadModelManager(ctoFiles, options = { offline: false }) {
-        let modelManager = new ModelManager();
+        let modelManager = new ModelManager(options);
         const modelFileLoader = new DefaultModelFileLoader(modelManager);
 
         // Load user models
@@ -89,7 +89,7 @@ class ModelLoader {
      * @return {object} the model manager
      */
     static async loadModelManagerFromModelFiles(modelFiles, fileNames, options = { offline: false }) {
-        let modelManager = new ModelManager();
+        let modelManager = new ModelManager(options);
 
         // Load system model
         modelManager.addModelFiles(modelFiles, fileNames, true);

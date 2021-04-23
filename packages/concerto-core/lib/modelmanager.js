@@ -49,11 +49,12 @@ const debug = require('debug')('concerto:ModelManager');
 class ModelManager {
     /**
      * Create the ModelManager.
+     * @param {object} options - Serializer options
      */
-    constructor() {
+    constructor(options) {
         this.modelFiles = {};
         this.factory = new Factory(this);
-        this.serializer = new Serializer(this.factory, this);
+        this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
         this._isModelManager = true;
         this.addRootModel();
@@ -65,11 +66,12 @@ class ModelManager {
      */
     addRootModel() {
         this.addModelFile( `namespace concerto
-        abstract concept Concept {}
-        abstract concept Asset identified {}
-        abstract concept Participant identified {}
-        abstract concept Transaction {}
-        abstract concept Event {}`, 'concerto.cto');
+abstract concept Concept {}
+abstract concept Asset identified {}
+abstract concept Participant identified {}
+abstract concept Transaction {}
+abstract concept Event {}
+`, 'concerto.cto');
     }
 
     /**

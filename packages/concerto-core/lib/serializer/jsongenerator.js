@@ -54,7 +54,7 @@ class JSONGenerator {
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
         this.ergo = ergo;
-        this.utcOffset = utcOffset || 0; // Defaults to UTC
+        this.utcOffset = utcOffset || 0;
     }
 
     /**

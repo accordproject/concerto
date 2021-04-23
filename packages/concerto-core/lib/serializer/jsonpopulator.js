@@ -83,7 +83,6 @@ function validateProperties(properties, classDeclaration) {
  * @memberof module:concerto-core
  */
 class JSONPopulator {
-
     /**
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the

@@ -34,6 +34,10 @@ require('yargs')
             type: 'string',
             array: true
         });
+        yargs.option('utcOffset', {
+            describe: 'set UTC offset',
+            type: 'number'
+        });
         yargs.option('offline', {
             describe: 'do not resolve external models',
             type: 'boolean',
@@ -58,6 +62,9 @@ require('yargs')
             argv = Commands.validateValidateArgs(argv);
             const options = {};
             options.offline = argv.offline;
+            if (argv.utcOffset !== undefined) {
+                options.utcOffset = argv.utcOffset;
+            }
             options.functional = !argv.ergo && argv.functional; // XXX Ergo option takes priority
             options.ergo = argv.ergo;
             return Commands.validate(argv.input, argv.model, options)

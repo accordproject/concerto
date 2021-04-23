@@ -24,6 +24,7 @@ class Concerto {
    + string getNamespace() 
    + boolean instanceOf(String) 
 }
+   + object setCurrentTime() 
 class Factory {
    + void constructor(ModelManager) 
    + Resource newResource(String,String,String,Object,boolean,String,boolean) throws TypeNotFoundException
@@ -194,7 +195,7 @@ class ModelLoader {
    + object loadModelManagerFromModelFiles(object[],undefined,object,boolean) 
 }
 class ModelManager {
-   + void constructor() 
+   + void constructor(object) 
    + void validateModelFile(string,string) throws IllegalModelException
    + Object addModelFile(string,string,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
@@ -222,7 +223,7 @@ class SecurityException extends BaseException {
    + void constructor(string) 
 }
 class Serializer {
-   + void constructor(Factory,ModelManager) 
+   + void constructor(Factory,ModelManager,object) 
    + void setDefaultOptions(Object) 
    + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean,boolean,number) throws Error
    + Resource fromJSON(Object,Object,boolean,boolean,number) 
