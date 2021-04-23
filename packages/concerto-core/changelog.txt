@@ -24,8 +24,8 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.0.0-alpha.8 {63957095b410cd581a8b1896659ad170} 2021-04-22
-- Add datetimeutil
+Version 1.0.0-alpha.8 {e282ac1f06ae25ddd4f644bba3d133b4} 2021-04-22
+- Add datetimeutil & Consolidate UTC offset support
 
 Version 1.0.0-alpha.7 {e791f955bbe9bdac6bcd8944d6111e1a} 2021-04-17
 - Remove unused systemtime options in modelfile API
