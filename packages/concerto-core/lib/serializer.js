@@ -17,6 +17,7 @@
 const EventDeclaration = require('./introspect/eventdeclaration');
 const ConceptDeclaration = require('./introspect/conceptdeclaration');
 const EnumDeclaration = require('./introspect/enumdeclaration');
+const DateTimeUtil = require('./datetimeutil');
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
 const JSONPopulator = require('./serializer/jsonpopulator');
@@ -25,10 +26,11 @@ const ResourceValidator = require('./serializer/resourcevalidator');
 const TransactionDeclaration = require('./introspect/transactiondeclaration');
 const TypedStack = require('./serializer/typedstack');
 
+const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
     validate: true,
     ergo: false,
-    utcOffset: 0,
+    utcOffset: defaultUtcOffset,
 };
 
 /**
@@ -44,8 +46,9 @@ class Serializer {
      * Create a Serializer.
      * @param {Factory} factory - The Factory to use to create instances
      * @param {ModelManager} modelManager - The ModelManager to use for validation etc.
+     * @param {object} options - Serializer options
      */
-    constructor(factory,modelManager) {
+    constructor(factory, modelManager, options) {
 
         if(!factory) {
             throw new Error(Globalize.formatMessage('serializer-constructor-factorynull'));
@@ -55,7 +58,7 @@ class Serializer {
 
         this.factory = factory;
         this.modelManager = modelManager;
-        this.defaultOptions = Object.assign({}, baseDefaultOptions);
+        this.defaultOptions = Object.assign({}, baseDefaultOptions, options || {});
         this._isSerializer = true;
     }
 

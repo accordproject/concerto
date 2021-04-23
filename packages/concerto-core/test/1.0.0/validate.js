@@ -44,8 +44,8 @@ const validateClassic = async (sample, ctoFiles, options) => {
     const factory = new Factory(modelManager);
     const serializer = new Serializer(factory, modelManager);
 
-    const object = serializer.fromJSON(json);
-    return serializer.toJSON(object);
+    const object = serializer.fromJSON(json, { utcOffset: 0 });
+    return serializer.toJSON(object, { utcOffset: 0 });
 };
 const validateFunctional = async (sample, ctoFiles, options) => {
     const json = loadJson(sample);
@@ -63,7 +63,7 @@ const validateToErgo = async (sample, ctoFiles, options) => {
     const serializer = new Serializer(factory, modelManager);
 
     const object = serializer.fromJSON(json);
-    return serializer.toJSON(object, { ergo: true });
+    return serializer.toJSON(object, { ergo: true, utcOffset: 0 });
 };
 const validateFromErgo = async (sample, ctoFiles, options) => {
     const json = loadJson(sample);
@@ -72,7 +72,7 @@ const validateFromErgo = async (sample, ctoFiles, options) => {
     const factory = new Factory(modelManager);
     const serializer = new Serializer(factory, modelManager);
 
-    const object = serializer.fromJSON(json, { ergo: true });
+    const object = serializer.fromJSON(json, { ergo: true, utcOffset: 0 });
     return serializer.toJSON(object);
 };
 

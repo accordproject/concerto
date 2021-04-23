@@ -114,10 +114,10 @@ class Commands {
             concerto.validate(json);
         } else {
             const factory = new Factory(modelManager);
-            const serializer = new Serializer(factory, modelManager);
+            const serializer = new Serializer(factory, modelManager, options);
 
-            const object = serializer.fromJSON(json);
-            return JSON.stringify(serializer.toJSON(object, {ergo: options.ergo}));
+            const object = serializer.fromJSON(json, options);
+            return JSON.stringify(serializer.toJSON(object, options));
         }
     }
 

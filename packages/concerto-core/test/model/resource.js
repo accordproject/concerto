@@ -44,7 +44,7 @@ describe('Resource', function () {
     let modelManager = null;
 
     beforeEach(function () {
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({ utcOffset: 0 });
         Util.addComposerModel(modelManager);
         modelManager.addModelFile(levelOneModel);
     });
@@ -84,7 +84,7 @@ describe('Resource', function () {
 
         it('should serialize a transaction to a JavaScript object', function () {
             const classDecl = modelManager.getType('org.acme.l1.ScrapCar');
-            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789', dayjs(0) );
+            const resource = new Resource(modelManager, classDecl, 'org.acme.l1', 'ScrapCar', '789', dayjs.utc(0) );
             resource.transactionId = '789';
             resource.car = modelManager.getFactory().newRelationship('org.acme.l1', 'Car', '456');
             resource.toJSON().should.deep.equal({
