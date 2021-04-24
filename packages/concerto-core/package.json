@@ -7,7 +7,7 @@
     "node": ">=12",
     "npm": ">=6"
   },
-  "main": "dist/concerto.min.js",
+  "main": "index.js",
   "module": "dist/concerto.esm.js",
   "browser": "dist/concerto.min.js",
   "typings": "types/index.d.ts",
