@@ -18,7 +18,7 @@
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "coverage": "istanbul-combine -d coverage -r lcov packages/concerto-cli/coverage/*.json packages/concerto-core/coverage/*.json  packages/concerto-tools/coverage/*.json && cat ./coverage/lcov.info",
