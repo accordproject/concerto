@@ -24,6 +24,6 @@ if (!semver.valid(targetVersion)) {
 }
 
 const prerelease = semver.prerelease(targetVersion);
-const tag = prerelease ? 'unstable' : 'stable';
+const tag = prerelease ? 'unstable' : 'latest';
 
 console.log(`::set-output name=tag::--tag=${tag}`);
