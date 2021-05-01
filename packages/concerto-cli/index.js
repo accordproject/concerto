@@ -76,10 +76,10 @@ require('yargs')
                 })
                 .catch((err) => {
                     Logger.info('Input is invalid');
-                    Logger.error(err.message);
+                    Logger.error(err);
                 });
         } catch (err){
-            Logger.error(err.message);
+            Logger.error(err);
             return;
         }
     })
