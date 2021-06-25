@@ -314,7 +314,7 @@ declare module '@accordproject/concerto-core' {
 
   export class ModelManager {
     constructor();
-    private accept(visitor: any, parameters: any): any;
+    accept(visitor: any, parameters: any): any;
     validateModelFile(modelFile: string, fileName?: string): void;
     private _throwAlreadyExists(modelFile: ModelFile): void;
     addModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
@@ -330,7 +330,7 @@ declare module '@accordproject/concerto-core' {
     getModels(options?: IncludeModelsOptions): { name: string; content: string }[];
     private resolveType(context: string, type: string): string;
     clearModelFiles(): void;
-    private getModelFile(namespace: string): ModelFile;
+    getModelFile(namespace: string): ModelFile;
     private getModelFileByFileName(fileName: string): ModelFile;
     getNamespaces(): string[];
     private getType(qualifiedName: string): ClassDeclaration;
