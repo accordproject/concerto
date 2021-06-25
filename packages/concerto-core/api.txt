@@ -195,6 +195,7 @@ class ModelLoader {
 }
 class ModelManager {
    + void constructor(object) 
+   + Object accept(Object,Object) 
    + void validateModelFile(string,string) throws IllegalModelException
    + Object addModelFile(string,string,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
@@ -205,6 +206,7 @@ class ModelManager {
    + void writeModelsToFileSystem(String,Object,boolean) 
    + Object[] getModels(Object,boolean) 
    + void clearModelFiles() 
+   + ModelFile getModelFile(string) 
    + string[] getNamespaces() 
    + AssetDeclaration[] getAssetDeclarations(Boolean) 
    + TransactionDeclaration[] getTransactionDeclarations(Boolean) 

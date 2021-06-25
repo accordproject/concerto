@@ -79,7 +79,6 @@ abstract concept Event {}
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
      */
     accept(visitor, parameters) {
         return visitor.visit(this, parameters);
@@ -449,7 +448,6 @@ abstract concept Event {}
      *
      * @param {string} namespace - the namespace containing the ModelFile
      * @return {ModelFile} registered ModelFile for the namespace or null
-     * @private
      */
     getModelFile(namespace) {
         return this.modelFiles[namespace];
