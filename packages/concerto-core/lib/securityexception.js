@@ -24,7 +24,6 @@ const BaseException = require('./baseexception');
 * @memberof module:concerto-core
 */
 class SecurityException extends BaseException {
-
     /**
      * Create the SecurityException.
      * @param {string} message - The exception message.

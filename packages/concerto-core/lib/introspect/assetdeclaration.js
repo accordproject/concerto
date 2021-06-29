@@ -28,7 +28,6 @@ const IdentifiedDeclaration = require('./identifieddeclaration');
  * @memberof module:concerto-core
  */
 class AssetDeclaration extends IdentifiedDeclaration {
-
     /**
      * Create an AssetDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class

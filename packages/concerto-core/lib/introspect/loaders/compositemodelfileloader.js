@@ -24,7 +24,6 @@
  * @memberof module:concerto-core
  */
 class CompositeModelFileLoader {
-
     /**
      * Create the CompositeModelFileLoader. Used to delegate to a set of ModelFileLoaders.
      */

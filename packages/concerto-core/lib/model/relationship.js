@@ -74,8 +74,8 @@ class Relationship extends Identifiable {
      * Contructs a Relationship instance from a URI representation (created using toURI).
      * @param {ModelManager} modelManager - the model manager to bind the relationship to
      * @param {String} uriAsString - the URI as a string, generated using Identifiable.toURI()
-     * @param {String} [defaultNamespace] - default namespace to use for backwards compatability (optional)
-     * @param {String} [defaultType] - default type to use for backwards compatability (optional)
+     * @param {String} [defaultNamespace] - default namespace to use for backwards compatability
+     * @param {String} [defaultType] - default type to use for backwards compatability
      * @return {Relationship} the relationship
      */
     static fromURI(modelManager, uriAsString, defaultNamespace, defaultType) {

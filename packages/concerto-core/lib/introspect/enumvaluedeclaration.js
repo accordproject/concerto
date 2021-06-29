@@ -25,7 +25,6 @@ const Property = require('./property');
  * @memberof module:concerto-core
  */
 class EnumValueDeclaration extends Property {
-
     /**
      * Create a EnumValueDeclaration.
      * @param {ClassDeclaration} parent - The owner of this property

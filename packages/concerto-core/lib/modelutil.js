@@ -24,7 +24,6 @@ const Globalize = require('./globalize');
  * @memberof module:concerto-core
  */
 class ModelUtil {
-
     /**
      * Returns everything after the last dot, if present, of the source string
      * @param {string} fqn - the source string

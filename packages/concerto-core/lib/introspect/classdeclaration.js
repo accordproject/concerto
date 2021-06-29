@@ -36,13 +36,12 @@ const RelationshipDeclaration = require('./relationshipdeclaration');
  * @memberof module:concerto-core
  */
 class ClassDeclaration extends Decorated {
-
     /**
      * Create a ClassDeclaration from an Abstract Syntax Tree. The AST is the
      * result of parsing.
      *
      * @param {ModelFile} modelFile - the ModelFile for this class
-     * @param {string} ast - the AST created by the parser
+     * @param {Object} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
@@ -57,7 +56,6 @@ class ClassDeclaration extends Decorated {
      * @private
      */
     process() {
-
         super.process();
 
         this.name = this.ast.id.name;
@@ -185,7 +183,6 @@ class ClassDeclaration extends Decorated {
      * @private
      */
     validate() {
-
         super.validate();
 
         const declarations = this.getModelFile().getAllDeclarations();
@@ -325,7 +322,7 @@ class ClassDeclaration extends Decorated {
 
     /**
      * Return the namespace of this class.
-     * @return {String} namespace - a namespace.
+     * @return {string} namespace - a namespace.
      */
     getNamespace() {
         return this.modelFile.getNamespace();
@@ -371,10 +368,9 @@ class ClassDeclaration extends Decorated {
      * Returns the name of the identifying field for this class. Note
      * that the identifying field may come from a super type.
      *
-     * @return {string} the name of the id field for this class
+     * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName() {
-
         if (this.idField) {
             return this.idField;
         } else {
@@ -400,7 +396,7 @@ class ClassDeclaration extends Decorated {
      * not introspected.
      *
      * @param {string} name the name of the field
-     * @return {Property} the field definition or null if it does not exist.
+     * @return {Property} the field definition or null if it does not exist
      */
     getOwnProperty(name) {
         for (let n = 0; n < this.properties.length; n++) {

@@ -25,9 +25,8 @@ const ClassDeclaration = require('./classdeclaration');
  * @memberof module:concerto-core
  */
 class EnumDeclaration extends ClassDeclaration {
-
     /**
-     * Create an AssetDeclaration.
+     * Create an EnumDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}

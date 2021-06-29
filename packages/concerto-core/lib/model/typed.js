@@ -55,7 +55,7 @@ class Typed {
      * @return {Object} the result of visiting or null
      * @private
      */
-    accept(visitor,parameters) {
+    accept(visitor, parameters) {
         return visitor.visit(this, parameters);
     }
 

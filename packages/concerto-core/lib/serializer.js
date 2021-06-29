@@ -41,15 +41,13 @@ const baseDefaultOptions = {
  * @memberof module:concerto-core
  */
 class Serializer {
-
     /**
      * Create a Serializer.
      * @param {Factory} factory - The Factory to use to create instances
      * @param {ModelManager} modelManager - The ModelManager to use for validation etc.
-     * @param {object} options - Serializer options
+     * @param {object} [options] - Serializer options
      */
     constructor(factory, modelManager, options) {
-
         if(!factory) {
             throw new Error(Globalize.formatMessage('serializer-constructor-factorynull'));
         } else if(!modelManager) {

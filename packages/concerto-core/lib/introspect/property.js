@@ -25,7 +25,6 @@ const ModelUtil = require('../modelutil');
  * @memberof module:concerto-core
  */
 class Property extends Decorated {
-
     /**
      * Create a Property.
      * @param {ClassDeclaration} parent - the owner of this property
@@ -186,8 +185,8 @@ class Property extends Decorated {
     }
 
     /**
-     *  Returns true if this property is a primitive type.
-     *@return {boolean} true if the property is a primitive type.
+     * Returns true if this property is a primitive type.
+     * @return {boolean} true if the property is a primitive type.
      */
     isPrimitive() {
         return ModelUtil.isPrimitiveType(this.getType());

@@ -49,7 +49,7 @@ const debug = require('debug')('concerto:ModelManager');
 class ModelManager {
     /**
      * Create the ModelManager.
-     * @param {object} options - Serializer options
+     * @param {object} [options] - Serializer options
      */
     constructor(options) {
         this.modelFiles = {};
@@ -92,7 +92,7 @@ abstract concept Event {}
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
      * @param {string} modelFile - The Concerto file as a string
-     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {string} [fileName] - a file name to associate with the model file
      * @throws {IllegalModelException}
      */
     validateModelFile(modelFile, fileName) {
@@ -161,7 +161,7 @@ abstract concept Event {}
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
      * @param {string} modelFile - The Concerto file as a string
-     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {string} [fileName] - a file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @returns {Object} The newly added model file (internal).
@@ -187,8 +187,7 @@ abstract concept Event {}
 
     /**
      * Remove the Concerto file for a given namespace
-     * @param {string} namespace - The namespace of the model file to
-     * delete.
+     * @param {string} namespace - The namespace of the model file to delete.
      */
     deleteModelFile(namespace) {
         if (!this.modelFiles[namespace]) {
@@ -201,7 +200,7 @@ abstract concept Event {}
     /**
      * Add a set of Concerto files to the model manager.
      * @param {object[]} modelFiles - An array of Concerto files as strings or ModelFile objects.
-     * @param {string[]} [fileNames] - An optional array of file names to associate with the model files
+     * @param {string[]} [fileNames] - A array of file names to associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
      */
@@ -324,7 +323,7 @@ abstract concept Event {}
     /**
      * Write all models in this model manager to the specified path in the file system
      *
-     * @param {String} path to a local directory
+     * @param {string} path to a local directory
      * @param {Object} [options] - Options object
      * @param {boolean} options.includeExternalModels -
      *  If true, external models are written to the file system. Defaults to true
@@ -471,6 +470,7 @@ abstract concept Event {}
     getNamespaces() {
         return Object.keys(this.modelFiles);
     }
+
     /**
      * Look up a type in all registered namespaces.
      *
@@ -505,67 +505,61 @@ abstract concept Event {}
 
     /**
      * Get the AssetDeclarations defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {AssetDeclaration[]} the AssetDeclarations defined in the model manager
      */
-    getAssetDeclarations(includeSystemType = true) {
+    getAssetDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getAssetDeclarations(includeSystemType));
+            return prev.concat(cur.getAssetDeclarations());
         }, []);
     }
 
     /**
      * Get the TransactionDeclarations defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {TransactionDeclaration[]} the TransactionDeclarations defined in the model manager
      */
-    getTransactionDeclarations(includeSystemType = true) {
+    getTransactionDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getTransactionDeclarations(includeSystemType));
+            return prev.concat(cur.getTransactionDeclarations());
         }, []);
     }
 
     /**
      * Get the EventDeclarations defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {EventDeclaration[]} the EventDeclaration defined in the model manager
      */
-    getEventDeclarations(includeSystemType = true) {
+    getEventDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getEventDeclarations(includeSystemType));
+            return prev.concat(cur.getEventDeclarations());
         }, []);
     }
 
     /**
      * Get the ParticipantDeclarations defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {ParticipantDeclaration[]} the ParticipantDeclaration defined in the model manager
      */
-    getParticipantDeclarations(includeSystemType = true) {
+    getParticipantDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getParticipantDeclarations(includeSystemType));
+            return prev.concat(cur.getParticipantDeclarations());
         }, []);
     }
 
     /**
      * Get the EnumDeclarations defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {EnumDeclaration[]} the EnumDeclaration defined in the model manager
      */
-    getEnumDeclarations(includeSystemType = true) {
+    getEnumDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getEnumDeclarations(includeSystemType));
+            return prev.concat(cur.getEnumDeclarations());
         }, []);
     }
 
     /**
      * Get the Concepts defined in this model manager
-     * @param {Boolean} includeSystemType - Include the decalarations of system type in returned data
      * @return {ConceptDeclaration[]} the ConceptDeclaration defined in the model manager
      */
-    getConceptDeclarations(includeSystemType = true) {
+    getConceptDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
-            return prev.concat(cur.getConceptDeclarations(includeSystemType));
+            return prev.concat(cur.getConceptDeclarations());
         }, []);
     }
 
@@ -603,8 +597,8 @@ abstract concept Event {}
 
     /**
      * Checks if this fully qualified type name is derived from another.
-     * @param {String} fqt1 The fully qualified type name to check.
-     * @param {String} fqt2 The fully qualified type name it is may be derived from.
+     * @param {string} fqt1 The fully qualified type name to check.
+     * @param {string} fqt2 The fully qualified type name it is may be derived from.
      * @returns {boolean} True if this instance is an instance of the specified fully
      * qualified type name, false otherwise.
      */

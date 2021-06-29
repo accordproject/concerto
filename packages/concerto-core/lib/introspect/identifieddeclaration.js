@@ -26,7 +26,6 @@ const ClassDeclaration = require('./classdeclaration');
  * @abstract
  */
 class IdentifiedDeclaration extends ClassDeclaration {
-
     /**
      * Create an AssetDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
@@ -37,16 +36,6 @@ class IdentifiedDeclaration extends ClassDeclaration {
         super(modelFile, ast);
         this._isIdentifiedDeclaration = true;
         this.process();
-    }
-
-    /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        super.process();
     }
 
     /**

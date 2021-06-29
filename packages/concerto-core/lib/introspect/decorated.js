@@ -26,7 +26,6 @@ const IllegalModelException = require('./illegalmodelexception');
  * @memberof module:concerto-core
  */
 class Decorated {
-
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.

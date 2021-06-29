@@ -20,7 +20,6 @@
  * @memberof module:concerto-core
  */
 class Decorator {
-
     /**
      * Create a Decorator.
      * @param {ClassDeclaration | Property} parent - the owner of this property
@@ -79,7 +78,6 @@ class Decorator {
      */
     validate() {}
 
-
     /**
      * Returns the name of a decorator
      * @return {string} the name of this decorator
@@ -90,7 +88,7 @@ class Decorator {
 
     /**
      * Returns the arguments for this decorator
-     * @return {object[]} the arguments for this decorator or null if it does not have any arguments
+     * @return {object[]} the arguments for this decorator
      */
     getArguments() {
         return this.arguments;

@@ -18,7 +18,6 @@
  * Tracks a stack of typed instances. The type information is used to detect
  * overflow / underflow bugs by the caller. It also performs basic sanity
  * checking on push/pop to make detecting bugs easier.
- * @private
  * @class
  * @memberof module:concerto-core
  */

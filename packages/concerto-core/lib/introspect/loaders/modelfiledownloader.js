@@ -34,18 +34,16 @@ const handleJobError = async (error, job) => {
 /**
  * Downloads the transitive closure of a set of model files.
  * @class
- * @private
  * @memberof module:concerto-core
  */
 class ModelFileDownloader {
-
     /**
      * Create a ModelFileDownloader and bind to a ModelFileLoader.
-     * @param {ModelFileLoader} mfl - the loader to use to download model files
+     * @param {ModelFileLoader} modelFileLoader - the loader to use to download model files
      * @param {Number} concurrency - the number of model files to download concurrently
      */
-    constructor(mfl, concurrency = 10) {
-        this.modelFileLoader = mfl;
+    constructor(modelFileLoader, concurrency = 10) {
+        this.modelFileLoader = modelFileLoader;
         this.concurrency = concurrency;
     }
 
@@ -56,7 +54,6 @@ class ModelFileDownloader {
      * @return {Promise} a promise that resolves to ModelFiles[] for the external model files
      */
     downloadExternalDependencies(modelFiles, options) {
-
         const method = 'downloadExternalDependencies';
         debug(method);
 
