@@ -22,10 +22,8 @@
  * @memberof module:concerto-core
  */
 class Writer {
-
     /**
      * Create a Writer.
-     *
      */
     constructor() {
         this.beforeBuffer = '';
@@ -38,7 +36,7 @@ class Writer {
      * @param {int} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
-    writeBeforeLine(tabs,text) {
+    writeBeforeLine(tabs, text) {
         for(let n=0; n < tabs; n++) {
             this.beforeBuffer += '   ';
         }
@@ -52,7 +50,7 @@ class Writer {
      * @param {int} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
-    writeLine(tabs,text) {
+    writeLine(tabs, text) {
         for(let n=0; n < tabs; n++) {
             this.write('   ');
         }

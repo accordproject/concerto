@@ -36,16 +36,6 @@ class TransactionDeclaration extends IdentifiedDeclaration {
     }
 
     /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        super.process();
-    }
-
-    /**
      * Alternative instanceof that is reliable across different module instances
      * @see https://github.com/hyperledger/composer-concerto/issues/47
      *

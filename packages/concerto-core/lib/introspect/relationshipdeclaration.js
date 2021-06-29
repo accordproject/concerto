@@ -27,7 +27,6 @@ const ModelUtil = require('../modelutil');
  * @memberof module:concerto-core
  */
 class RelationshipDeclaration extends Property {
-
     /**
      * Create a Relationship.
      * @param {ClassDeclaration} parent - The owner of this property

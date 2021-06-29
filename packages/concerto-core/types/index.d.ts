@@ -1,9 +1,15 @@
-
-import { EventEmitter } from 'events';
-
 declare module '@accordproject/concerto-core' {
-
   // Exceptions
+  interface FileLocation {
+    start: {
+      line: string;
+      column: string;
+    }
+    end: {
+      line: string;
+      column: string;
+    }
+  }
 
   export class BaseException extends Error {
     constructor(message: string, component?: string);
@@ -24,60 +30,60 @@ declare module '@accordproject/concerto-core' {
     constructor(message: string);
   }
 
-  class IllegalModelException extends BaseFileException {
-    constructor(message: string, modelFile?: ModelFile, fileLocation?: any, component?: string);
+  export class IllegalModelException extends BaseFileException {
+    constructor(message: string, modelFile?: ModelFile, fileLocation?: FileLocation, component?: string);
     getModelFile(): ModelFile | null;
   }
 
-  class TypeNotFoundException extends BaseException {
+  export class TypeNotFoundException extends BaseException {
     constructor(typeName: string, message?: string, component?: string);
     getTypeName(): string;
   }
 
   // Decorated
-
   class Decorated {
     constructor(modelFile: ModelFile, ast: string);
     getModelFile(): ModelFile;
     private accept(visitor: any, parameters: any): any;
-    process(): void;
-    validate(): void;
+    private process(): void;
+    private validate(): void;
     getDecorators(): Decorator[];
-    getDecorator(name: string): Decorator;
+    getDecorator(name: string): Decorator | null;
   }
 
-  class Decorator {
+  export class Decorator {
     constructor(parent: ClassDeclaration | Property, ast: any);
     private accept(visitor: any, parameters: any): any;
     getParent(): ClassDeclaration | Property;
     private process(): void;
     private validate(): void;
     getName(): string;
-    getArguments(): any[] | null;
+    getArguments(): any[];
   }
 
-  abstract class DecoratorFactory {
+  export abstract class DecoratorFactory {
     abstract newDecorator(parent: ClassDeclaration | Property, ast: any): Decorator;
   }
 
   // ClassDeclarations
-
   export abstract class ClassDeclaration extends Decorated {
-    constructor(modelFile: ModelFile, ast: string);
-    process(): void;
+    constructor(modelFile: ModelFile, ast: any);
+    private process(): void;
     private addTimestampField(): void;
+    private addIdentifierField(): void;
     _resolveSuperType(): ClassDeclaration | null;
-    validate(): void;
-    getSystemType(): string | null;
+    private validate(): void;
     isAbstract(): boolean;
     isEnum(): boolean;
     isConcept(): boolean;
     isEvent(): boolean;
-    isSystemCoreType(): boolean;
     getName(): string;
     getNamespace(): string;
     getFullyQualifiedName(): string;
-    getIdentifierFieldName(): string;
+    isIdentified(): boolean;
+    isSystemIdentified(): boolean;
+    isExplicitlyIdentified(): boolean;
+    getIdentifierFieldName(): string | null;
     getOwnProperty(name: string): Property | null;
     getOwnProperties(): Property[];
     getSuperType(): string | null;
@@ -91,25 +97,26 @@ declare module '@accordproject/concerto-core' {
     static [Symbol.hasInstance](object: any): boolean;
   }
 
-  export class AssetDeclaration extends ClassDeclaration { }
+  export class IdentifiedDeclaration extends ClassDeclaration { }
+
+  export class AssetDeclaration extends IdentifiedDeclaration { }
 
   export class ConceptDeclaration extends ClassDeclaration { }
 
   export class EnumDeclaration extends ClassDeclaration { }
 
-  export class EventDeclaration extends ClassDeclaration { }
+  export class EventDeclaration extends IdentifiedDeclaration { }
 
-  export class ParticipantDeclaration extends ClassDeclaration { }
+  export class ParticipantDeclaration extends IdentifiedDeclaration { }
 
-  export class TransactionDeclaration extends ClassDeclaration { }
+  export class TransactionDeclaration extends IdentifiedDeclaration { }
 
   // Properties
-
   export class Property extends Decorated {
     constructor(parent: ClassDeclaration, ast: any);
     getParent(): ClassDeclaration;
-    process(): void;
-    validate(classDecl?: ClassDeclaration): void;
+    private process(): void;
+    private validate(classDecl?: ClassDeclaration): void;
     getName(): string;
     getType(): string;
     isOptional(): boolean;
@@ -135,7 +142,6 @@ declare module '@accordproject/concerto-core' {
   }
 
   // Typed
-
   export abstract class Typed {
     constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string);
     private accept(visitor: any, parameters: any): any;
@@ -152,16 +158,10 @@ declare module '@accordproject/concerto-core' {
     [propertyName: string]: any;
   }
 
-  // Concept
-
-  export class Concept extends Typed {
-    isConcept(): boolean;
-  }
-
   // Identifiables
-
   abstract class Identifiable extends Typed {
-    constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string);
+    constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp: string);
+    getTimestamp(): string;
     getIdentifier(): string;
     setIdentifier(id: string): void;
     getFullyQualifiedIdentifier(): string;
@@ -175,10 +175,12 @@ declare module '@accordproject/concerto-core' {
     static fromURI(modelManager: ModelManager, uriAsstring: string, defaultNamespace?: string, defaultType?: string): Relationship;
   }
 
-  export class Resource extends Identifiable { }
+  export class Resource extends Identifiable {
+    isConcept(): boolean;
+    isIdentifiable(): boolean;
+  }
 
   // Writers
-
   export class Writer {
     constructor();
     writeBeforeLine(tabs: number, text: string): void;
@@ -190,22 +192,11 @@ declare module '@accordproject/concerto-core' {
     clearBuffer(): void;
   }
 
-  export class FileWriter extends Writer {
-    constructor(outputDirectory: string);
-    openFile(fileName: string): void;
-    openRelativeFile(relativeDir: string, fileName: string): void;
-    writeLine(tabs: number, text: string): void;
-    writeBeforeLine(tabs: number, text: string): void;
-    closeFile(): void;
-  }
-
   // Factory
-
   interface NewResourceOptions {
     disableValidation?: boolean;
     generate?: string;
     includeOptionalFields?: boolean;
-    allowEmptyId?: boolean;
   }
 
   interface NewConceptOptions {
@@ -217,28 +208,26 @@ declare module '@accordproject/concerto-core' {
   interface NewTransactionOptions {
     generate?: string;
     includeOptionalFields?: boolean;
-    allowEmptyId?: boolean;
   }
 
   interface NewEventOptions {
     generate?: string;
     includeOptionalFields?: boolean;
-    allowEmptyId?: boolean;
   }
 
   export class Factory {
     constructor(modelManager: ModelManager);
     newResource(ns: string, type: string, id: string, options?: NewResourceOptions): Resource;
-    newConcept(ns: string, type: string, options?: NewConceptOptions): Resource;
+    newConcept(ns: string, type: string, id: string, options?: NewConceptOptions): Resource;
     newRelationship(ns: string, type: string, id: string): Relationship;
     newTransaction(ns: string, type: string, id?: string, options?: NewTransactionOptions): Resource;
     newEvent(ns: string, type: string, id?: string, options?: NewEventOptions): Resource;
     private initializeNewObject(newObject: Typed, classDeclaration: ClassDeclaration, clientOptions: any): void;
     private parseGenerateOptions(clientOptions: any): any;
+    static [Symbol.hasInstance](object: any): boolean;
   }
 
   // Globalize
-
   export function Globalize(locale: string): any;
 
   export namespace Globalize {
@@ -247,7 +236,6 @@ declare module '@accordproject/concerto-core' {
   }
 
   // Introspector
-
   export class Introspector {
     constructor(modelManager: ModelManager);
     private accept(visitor: any, parameters: any): any;
@@ -257,22 +245,11 @@ declare module '@accordproject/concerto-core' {
   }
 
   // ModelFile
-
-  interface FileLocation {
-    start: {
-      line: string;
-      column: string;
-    }
-    end: {
-      line: string;
-      column: string;
-    }
-  }
-
   export class ModelFile {
-    constructor(modelManager: ModelManager, definitions: string, fileName?: string, isSystemModelFile?: boolean);
+    constructor(modelManager: ModelManager, definitions: string, fileName?: string);
+    isSystemModelFile(): boolean;
     isExternal(): boolean;
-    private getImportURI(namespace: string): string;
+    private getImportURI(namespace: string): string | null;
     private getExternalImports(): any;
     private accept(visitor: any, parameters: any): any;
     getModelManager(): ModelManager;
@@ -291,34 +268,33 @@ declare module '@accordproject/concerto-core' {
     getEventDeclaration(name: string): EventDeclaration | null;
     getParticipantDeclaration(name: string): ParticipantDeclaration | null;
     getNamespace(): string;
-    getName(): string | null;
-    getAssetDeclarations(includeSystemType?: boolean): AssetDeclaration[];
-    getTransactionDeclarations(includeSystemType?: boolean): TransactionDeclaration[];
-    getEventDeclarations(includeSystemType?: boolean): EventDeclaration[];
-    getParticipantDeclarations(includeSystemType?: boolean): ParticipantDeclaration[];
-    getConceptDeclarations(includeSystemType?: boolean): ConceptDeclaration[];
-    getEnumDeclarations(includeSystemType?: boolean): EnumDeclaration[];
-    getDeclarations(type: (...params: any[]) => any, includeSystemType?: boolean): ClassDeclaration[];
+    getName(): string;
+    getAssetDeclarations(): AssetDeclaration[];
+    getTransactionDeclarations(): TransactionDeclaration[];
+    getEventDeclarations(): EventDeclaration[];
+    getParticipantDeclarations(): ParticipantDeclaration[];
+    getConceptDeclarations(): ConceptDeclaration[];
+    getEnumDeclarations(): EnumDeclaration[];
+    getDeclarations(type: (...params: any[]) => any): ClassDeclaration[];
     getAllDeclarations(): ClassDeclaration[];
     getDefinitions(): string;
-    isSystemModelFile(): boolean;
+    getConcertoVersion(): string;
     static [Symbol.hasInstance](object: any): boolean;
   }
 
   // ModelManager
-
   interface IncludeModelsOptions {
     includeExternalModels: boolean;
     includeSystemModels: boolean;
   }
 
   export class ModelManager {
-    constructor();
+    constructor(options?: any);
+    private addRootModel(): void;
     accept(visitor: any, parameters: any): any;
     validateModelFile(modelFile: string, fileName?: string): void;
     private _throwAlreadyExists(modelFile: ModelFile): void;
     addModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
-    private getSystemModelTable(): any;
     updateModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
     deleteModelFile(namespace: string): void;
     addModelFiles(modelFiles: (string|ModelFile)[], fileNames?: string[], disableValidation?: boolean): any[];
@@ -330,47 +306,50 @@ declare module '@accordproject/concerto-core' {
     getModels(options?: IncludeModelsOptions): { name: string; content: string }[];
     private resolveType(context: string, type: string): string;
     clearModelFiles(): void;
-    getModelFile(namespace: string): ModelFile;
-    private getModelFileByFileName(fileName: string): ModelFile;
+    getModelFile(namespace: string): ModelFile | null;
+    private getModelFileByFileName(fileName: string): ModelFile | null;
     getNamespaces(): string[];
     private getType(qualifiedName: string): ClassDeclaration;
     getSystemTypes(): ClassDeclaration[];
-    getAssetDeclarations(includeSystemType?: boolean): AssetDeclaration[];
-    getTransactionDeclarations(includeSystemType?: boolean): TransactionDeclaration[];
-    getEventDeclarations(includeSystemType?: boolean): EventDeclaration[];
-    getParticipantDeclarations(includeSystemType?: boolean): ParticipantDeclaration[];
-    getEnumDeclarations(includeSystemType?: boolean): EnumDeclaration[];
-    getConceptDeclarations(includeSystemType?: boolean): ConceptDeclaration[];
+    getAssetDeclarations(): AssetDeclaration[];
+    getTransactionDeclarations(): TransactionDeclaration[];
+    getEventDeclarations(): EventDeclaration[];
+    getParticipantDeclarations(): ParticipantDeclaration[];
+    getEnumDeclarations(): EnumDeclaration[];
+    getConceptDeclarations(): ConceptDeclaration[];
     getFactory(): Factory;
     getSerializer(): Serializer;
     getDecoratorFactories(): DecoratorFactory[];
     addDecoratorFactory(factory: DecoratorFactory): void;
+    derivesFrom(fqt1: string, fqt2: string): boolean;
     static [Symbol.hasInstance](object: any): boolean;
   }
 
   // Serializer
-
   interface SerializerToJSONOptions {
     validate?: boolean;
     convertResourcesToRelationships?: boolean;
     permitResourcesForRelationships?: boolean;
     deduplicateResources?: boolean;
+    convertResourcesToId?: boolean;
+    utcOffset: number;
   }
 
   interface SerializerFromJSONOptions {
     acceptResourcesForRelationships: boolean;
     validate: boolean;
+    utcOffset: number;
   }
 
   export class Serializer {
-    constructor(factory: Factory, modelManager: ModelManager);
+    constructor(factory: Factory, modelManager: ModelManager, options?: any);
     setDefaultOptions(newDefaultOptions: any): void;
     toJSON(resource: Resource, options?: SerializerToJSONOptions): any;
-    fromJSON(jsonany: any, options?: SerializerFromJSONOptions): Resource;
+    fromJSON(jsonObject: any, options?: SerializerFromJSONOptions): Resource;
+    static [Symbol.hasInstance](object: any): boolean;
   }
 
   // ModelUtil
-
   export class ModelUtil {
     private static getShortName(fqn: string): string;
     private static isWildcardName(fqn: string): boolean;
@@ -382,11 +361,9 @@ declare module '@accordproject/concerto-core' {
     private static capitalizeFirstLetter(string: string): string;
     private static isEnum(field: Field): boolean;
     static getFullyQualifiedName(namespace: string, type: string): string;
-    static getIdentitySystemModelTable(): 'Transaction' | 'Asset' | 'Event' | 'Participant';
   }
 
   // ModelFileLoaders
-
   interface ModelFileLoader {
     accepts(url: string): boolean;
     load(url: string, options: any): Promise<ModelFile>;
@@ -405,18 +382,71 @@ declare module '@accordproject/concerto-core' {
     constructor(modelManager: ModelManager);
   }
 
-  class ModelFileDownloader extends JobQueue {
-    constructor(mfl: ModelFileLoader, startDelay: number, jobDelay: number);
+  export class ModelFileDownloader {
+    constructor(modelFileLoader: ModelFileLoader, concurrency: number);
     downloadExternalDependencies(modelFiles: ModelFile[], options?: any): Promise<ModelFile[]>;
-    runJob(job: any): Promise<ModelFile>;
+    runJob(job: any, modelFileLoader: ModelFileLoader): Promise<ModelFile>;
   }
 
-  class JobQueue extends EventEmitter {
-    constructor(startDelay: number, jobDelay: number);
-    addJob(job: any): void;
-    deleteJob(index: number): void;
-    processQueue(resetTimer: boolean): void;
-    getQueue(): any[];
-    runJob(job: any): void;
+  // ModelLoader
+  export class ModelLoader {
+    private addModel(modelFileLoader: ModelFileLoader, modelManager: ModelManager, ctoFile: string): ModelManager;
+    static loadModelManager(ctoFiles: string[], options?: any): Promise<ModelManager>;
+    static loadModelManagerFromModelFiles(modelFiles: ModelFile[], fileNames?: string[], options?: any): Promise<ModelManager>;
   }
+
+  // Logger
+  export class Logger {
+    private static dispatch(level, ...args: any[]): void;
+    private static add(transport: any): void;
+    private static error(...args: any[]): void;
+    private static info(...args: any[]): void;
+    private static log(...args: any[]): void;
+    private static http(...args: any[]): void;
+    private static verbose(...args:any[]): void;
+    private static debug(...args:any[]): void;
+    private static silly(...args:any[]): void;
+    level: string;
+    transports: any[];
+  }
+
+  // DateTimeUtil
+  interface CurrentTime {
+    currentTime: any,
+    utcOffset: number
+  }
+
+  export namespace DateTimeUtil {
+    function setCurrentTime(currentTime?: string, utcOffset?: number): CurrentTime;
+  }
+
+  // TypedStack
+  export class TypedStack {
+    constructor(resource: any);
+    push(obj: any, expectedType: any): void;
+    pop(expectedType: obj): any?;
+    peek(expectedType: obj): any?;
+    clear(): void;
+  }
+
+  // Concerto
+  class Concerto {
+    constructor(modelManager: ModelManager);
+    validate(obj: any, options?: any): void;
+    getModelManager(): ModelManager;
+    isObject(obj: any): boolean;
+    getTypeDeclaration(obj: any): ClassDeclaration;
+    getIdentifier(obj: any): string;
+    isIdentifiable(obj: any): boolean;
+    isRelationship(obj: aby): boolean;
+    setIdentifier(obj: any, id: string): any;
+    getFullyQualifiedIdentifier(obj: any): string;
+    toURI(obj: any): string;
+    fromURI(uri: string): any;
+    getType(obj: any): string;
+    getNamespace(obj: any): string;
+  }
+
+  // version
+  export version: any;
 }

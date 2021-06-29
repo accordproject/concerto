@@ -28,7 +28,6 @@ const ClassDeclaration = require('./classdeclaration');
  * @memberof module:concerto-core
  */
 class ConceptDeclaration extends ClassDeclaration {
-
     /**
      * Create a ConceptDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class

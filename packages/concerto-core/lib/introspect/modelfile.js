@@ -36,7 +36,6 @@ const Globalize = require('../globalize');
  * @memberof module:concerto-core
  */
 class ModelFile {
-
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -293,7 +292,7 @@ class ModelFile {
      * @throws {IllegalModelException} - if the type is not defined
      * @private
      */
-    resolveType(context,type,fileLocation) {
+    resolveType(context, type, fileLocation) {
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?

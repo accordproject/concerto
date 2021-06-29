@@ -24,14 +24,13 @@ const BaseException = require('./baseexception');
  * @memberof module:concerto-core
  */
 class BaseFileException extends BaseException {
-
     /**
      * Create an BaseFileException
      * @param {string} message - the message for the exception
      * @param {string} fileLocation - the optional file location associated with the exception
      * @param {string} fullMessage - the optional full message text
-     * @param {string} fileName - the optional file name
-      * @param {string} component - the optional component which throws this error
+     * @param {string} [fileName] - the file name
+     * @param {string} [component] - the component which throws this error
      */
     constructor(message, fileLocation, fullMessage, fileName, component) {
         super(fullMessage ? fullMessage : message, component);

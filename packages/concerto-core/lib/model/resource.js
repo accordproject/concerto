@@ -87,7 +87,7 @@ class Resource extends Identifiable {
      * false if not.
      */
     isIdentifiable() {
-        return this.getClassDeclaration().getIdentifierFieldName();
+        return this.getClassDeclaration().isIdentified();
     }
 
     /**

@@ -22,20 +22,18 @@ const BaseFileException = require('../basefileexception');
  * @see See  {@link BaseFileException}
  * @class
  * @memberof module:concerto-core
- * @private
  */
 class IllegalModelException extends BaseFileException {
-
     /**
      * Create an IllegalModelException.
-     * @param {String} message - the message for the exception
-     * @param {ModelFile} [modelFile] - the optional modelfile associated with the exception
+     * @param {string} message - the message for the exception
+     * @param {ModelFile} [modelFile] - the modelfile associated with the exception
      * @param {Object} [fileLocation] - location details of the error within the model file.
      * @param {number} fileLocation.start.line - start line of the error location.
      * @param {number} fileLocation.start.column - start column of the error location.
      * @param {number} fileLocation.end.line - end line of the error location.
      * @param {number} fileLocation.end.column - end column of the error location.
-     * @param {String} component - the optional component which throws this error
+     * @param {string} [component] - the component which throws this error
      */
     constructor(message, modelFile, fileLocation, component) {
 

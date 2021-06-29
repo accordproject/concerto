@@ -29,9 +29,8 @@ const StringValidator = require('./stringvalidator');
  * @memberof module:concerto-core
  */
 class Field extends Property {
-
     /**
-     * Create an Field.
+     * Create a Field.
      * @param {ClassDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}

@@ -21,7 +21,6 @@
  * @memberof module:concerto-core
  */
 class DecoratorFactory {
-
     /**
      * Process the decorator, and return a specific implementation class for that
      * decorator, or return null if this decorator is not handled by this processor.

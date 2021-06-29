@@ -24,9 +24,8 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.0.3 {f7a73e6f74c7c012aeb923b07010244a} 2021-06-25
-- Make ModelManager.getModelFile public
-- Make ModelManager.accept public
+Version 1.0.3 {1fe469fe1a79af5d5a4f5ec7dee6b7d4} 2021-06-25
+- Aligns JSDoc and the TypeScript interface
 
 Version 1.0.0-alpha.8 {08b0c809336354e7d1b17a2e44fca8b0} 2021-04-22
 - Add datetimeutil & Consolidate UTC offset support

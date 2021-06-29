@@ -25,14 +25,13 @@ const BaseFileException = require('../basefileexception');
  * @private
  */
 class ParseException extends BaseFileException {
-
     /**
      * Create an ParseException
      * @param {string} message - the message for the exception
-     * @param {string} fileLocation - the optional file location associated with the exception
-     * @param {string} fileName - the optional file name associated with the exception
-     * @param {string} fullMessageOverride - the optional pre-existing full message
-     * @param {string} component - the optional component which throws this error
+     * @param {string} [fileLocation] - the file location associated with the exception
+     * @param {string} [fileName] - the file name associated with the exception
+     * @param {string} [fullMessageOverride] - the pre-existing full message
+     * @param {string} [component] - the component which throws this error
      */
     constructor(message, fileLocation, fileName, fullMessageOverride, component) {
         let fullMessage = message;

@@ -23,7 +23,6 @@ const packageJson = require('../package.json');
 * @memberof module:concerto-core
 */
 class BaseException extends Error {
-
     /**
      * Create the BaseException.
      * @param {string} message - The exception message.

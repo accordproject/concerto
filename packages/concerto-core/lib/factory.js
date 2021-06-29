@@ -45,7 +45,6 @@ dayjs.extend(utc);
  * @memberof module:concerto-core
  */
 class Factory {
-
     /**
      * Create the factory.
      *

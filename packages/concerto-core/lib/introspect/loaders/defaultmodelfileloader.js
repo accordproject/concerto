@@ -29,7 +29,6 @@ const GitHubModelFileLoader = require('./githubmodelfileloader');
  * @memberof module:concerto-core
  */
 class DefaultModelFileLoader extends CompositeModelFileLoader {
-
     /**
      * Create the DefaultModelFileLoader.
      * @param {ModelManager} modelManager - the model manager to use

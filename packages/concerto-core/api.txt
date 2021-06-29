@@ -38,14 +38,14 @@ class AssetDeclaration extends IdentifiedDeclaration {
    + boolean hasInstance(object) 
 }
 class ClassDeclaration extends Decorated {
-   + void constructor(ModelFile,string) throws IllegalModelException
+   + void constructor(ModelFile,Object) throws IllegalModelException
    + ClassDeclaration _resolveSuperType() 
    + boolean isAbstract() 
    + boolean isEnum() 
    + boolean isConcept() 
    + boolean isEvent() 
    + string getName() 
-   + String getNamespace() 
+   + string getNamespace() 
    + string getFullyQualifiedName() 
    + Boolean isIdentified() 
    + Boolean isSystemIdentified() 
@@ -96,10 +96,18 @@ class IdentifiedDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + boolean hasInstance(object) 
 }
+class IllegalModelException extends BaseFileException {
+   + void constructor(string,ModelFile,Object,number,number,number,number,string) 
+}
 class Introspector {
    + void constructor(ModelManager) 
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
+}
+class ModelFileDownloader {
+   + void constructor(ModelFileLoader,Number) 
+   + Promise downloadExternalDependencies(ModelFile[],Object) 
+   + Promise runJob(Object,Object) 
 }
 class ModelFile {
    + void constructor(ModelManager,string,string) throws IllegalModelException
@@ -203,22 +211,22 @@ class ModelManager {
    + Object[] addModelFiles(object[],undefined,boolean) 
    + void validateModelFiles() 
    + Promise updateExternalModels(Object,ModelFileDownloader) throws IllegalModelException
-   + void writeModelsToFileSystem(String,Object,boolean) 
+   + void writeModelsToFileSystem(string,Object,boolean) 
    + Object[] getModels(Object,boolean) 
    + void clearModelFiles() 
    + ModelFile getModelFile(string) 
    + string[] getNamespaces() 
-   + AssetDeclaration[] getAssetDeclarations(Boolean) 
-   + TransactionDeclaration[] getTransactionDeclarations(Boolean) 
-   + EventDeclaration[] getEventDeclarations(Boolean) 
-   + ParticipantDeclaration[] getParticipantDeclarations(Boolean) 
-   + EnumDeclaration[] getEnumDeclarations(Boolean) 
-   + ConceptDeclaration[] getConceptDeclarations(Boolean) 
+   + AssetDeclaration[] getAssetDeclarations() 
+   + TransactionDeclaration[] getTransactionDeclarations() 
+   + EventDeclaration[] getEventDeclarations() 
+   + ParticipantDeclaration[] getParticipantDeclarations() 
+   + EnumDeclaration[] getEnumDeclarations() 
+   + ConceptDeclaration[] getConceptDeclarations() 
    + Factory getFactory() 
    + Serializer getSerializer() 
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
-   + boolean derivesFrom(String,String) 
+   + boolean derivesFrom(string,string) 
    + boolean hasInstance(object) 
 }
 class SecurityException extends BaseException {
@@ -230,4 +238,15 @@ class Serializer {
    + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean,boolean,number) throws Error
    + Resource fromJSON(Object,Object,boolean,boolean,number) 
    + boolean hasInstance(object) 
+}
+class TypedStack {
+   + void constructor(Object) 
+   + void push(Object,Object) 
+   + Object pop(Object) 
+   + Object peek(Object) 
+   + void clear() 
+}
+class TypeNotFoundException extends BaseException {
+   + void constructor(string,string,string) 
+   + string getTypeName() 
 }

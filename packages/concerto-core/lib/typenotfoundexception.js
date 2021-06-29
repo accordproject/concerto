@@ -23,15 +23,14 @@ const Globalize = require('./globalize');
  * @see see {@link BaseException}
  * @class
  * @memberof module:concerto-core
- * @private
  */
 class TypeNotFoundException extends BaseException {
     /**
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
-     * @param {String} typeName - fully qualified type name.
-     * @param {String} [message] - error message.
-     * @param {String} component - the optional component which throws this error
+     * @param {string} typeName - fully qualified type name.
+     * @param {string} [message] - error message.
+     * @param {string} component - the optional component which throws this error
      */
     constructor(typeName, message, component) {
         if (!message) {
