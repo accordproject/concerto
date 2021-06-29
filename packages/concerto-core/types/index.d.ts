@@ -448,5 +448,5 @@ declare module '@accordproject/concerto-core' {
   }
 
   // version
-  export version: any;
+  export const version: any;
 }
