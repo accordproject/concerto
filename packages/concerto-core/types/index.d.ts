@@ -309,7 +309,7 @@ declare module '@accordproject/concerto-core' {
     getModelFile(namespace: string): ModelFile | null;
     private getModelFileByFileName(fileName: string): ModelFile | null;
     getNamespaces(): string[];
-    private getType(qualifiedName: string): ClassDeclaration;
+    getType(qualifiedName: string): ClassDeclaration;
     getSystemTypes(): ClassDeclaration[];
     getAssetDeclarations(): AssetDeclaration[];
     getTransactionDeclarations(): TransactionDeclaration[];
