@@ -126,6 +126,12 @@ class GraphQLVisitor {
             property.accept(this, parameters);
         });
 
+        // Ensure we have at least one property
+        // See: https://github.com/graphql/graphql-spec/issues/568#issuecomment-468788779
+        if(classDeclaration.getProperties().length ===0) {
+            parameters.fileWriter.writeLine(1, '_: Boolean' );
+        }
+
         parameters.fileWriter.writeLine(0, '}' );
 
         return null;
