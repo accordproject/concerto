@@ -145,10 +145,10 @@ describe('XmlSchemaVisitor', function () {
             param.fileWriter.openFile.withArgs('org.hyperledger.composer.system.xsd').calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(6);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system=\"org.hyperledger.composer.system\" targetNamespace=\"org.hyperledger.composer.system\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" ']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'xmlns:org.imported=\"org.imported\"']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system" targetNamespace="org.hyperledger.composer.system" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'xmlns:org.imported="org.imported"']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '>']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:import namespace=\"org.imported\" schemaLocation=\"org.imported.xsd\"/>']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:import namespace="org.imported" schemaLocation="org.imported.xsd"/>']);
             param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '</xs:schema>']);
 
             param.fileWriter.closeFile.calledOnce.should.be.ok;
@@ -192,10 +192,10 @@ describe('XmlSchemaVisitor', function () {
             param.fileWriter.openFile.withArgs('org.hyperledger.composer.system.xsd').calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(6);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<?xml version="1.0"?>']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system=\"org.hyperledger.composer.system\" targetNamespace=\"org.hyperledger.composer.system\" elementFormDefault=\"qualified\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" ']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'xmlns:org.imported=\"org.imported\"']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '<xs:schema xmlns:org.hyperledger.composer.system="org.hyperledger.composer.system" targetNamespace="org.hyperledger.composer.system" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" ']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'xmlns:org.imported="org.imported"']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '>']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:import namespace=\"org.imported\" schemaLocation=\"org.imported.xsd\"/>']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:import namespace="org.imported" schemaLocation="org.imported.xsd"/>']);
             param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '</xs:schema>']);
 
             param.fileWriter.closeFile.calledOnce.should.be.ok;

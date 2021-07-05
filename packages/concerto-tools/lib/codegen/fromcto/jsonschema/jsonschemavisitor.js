@@ -33,15 +33,15 @@ const RecursionDetectionVisitor = require('./recursionvisitor');
  * the schema for all types under the 'definitions' key. If the 'rootType'
  * parameter option is set to a fully-qualified type name, then the properties
  * of the type are also added to the root of the schema object.
- * 
+ *
  * If the fileWriter parameter is set then the JSONSchema will be written to disk.
- * 
- * Note that by default $ref is used to references types, unless 
+ *
+ * Note that by default $ref is used to references types, unless
  * the `inlineTypes` parameter is set, in which case types are expanded inline,
  * UNLESS they contain recursive references, in which case $ref is used.
- * 
+ *
  * The meta schema used is http://json-schema.org/draft-07/schema#
- * 
+ *
  * @private
  * @class
  * @memberof module:concerto-tools
@@ -52,26 +52,28 @@ class JSONSchemaVisitor {
      * Gets an object with all the decorators for a model element. The object
      * is keyed by decorator name, while the values are the decorator arguments.
      * @param {object} decorated a ClassDeclaration or a Property
+     * @returns {object} the decorators
      */
     getDecorators(decorated) {
         // add information about decorators
-        return decorated.getDecorators() && decorated.getDecorators().length > 0 ?
-            decorated.getDecorators().reduce( (acc, d) => {
+        return decorated.getDecorators() && decorated.getDecorators().length > 0
+            ? decorated.getDecorators().reduce( (acc, d) => {
                 acc[d.getName()] = d.getArguments();
                 return acc;
             }, {})
-        : null;
+            : null;
     }
 
     /**
      * Returns true if the class declaration contains recursive references.
-     * 
+     *
      * Basic example:
      * concept Person {
      *   o Person[] children
      * }
-     * 
+     *
      * @param {object} classDeclaration the class being visited
+     * @returns {boolean} true if the model is recursive
      */
     isModelRecursive(classDeclaration) {
         const visitor = new RecursionDetectionVisitor();
@@ -133,7 +135,7 @@ class JSONSchemaVisitor {
 
         if(parameters.rootType) {
             const classDecl = modelManager.getType(parameters.rootType);
-            const schema = classDecl.accept(this, parameters)
+            const schema = classDecl.accept(this, parameters);
             result = { ... result, ... schema.schema };
         }
 
@@ -241,7 +243,7 @@ class JSONSchemaVisitor {
                 type: 'object',
                 properties: {},
                 required: []
-        }};
+            }};
 
         // Every class declaration has a $class property.
         result.schema.properties.$class = {
@@ -271,7 +273,7 @@ class JSONSchemaVisitor {
         // add the decorators
         const decorators = this.getDecorators(classDeclaration);
         if(decorators) {
-            result.schema['$decorators'] = decorators;
+            result.schema.$decorators = decorators;
         }
 
         // Return the created schema.
@@ -305,7 +307,7 @@ class JSONSchemaVisitor {
             case 'String':
                 jsonSchema.type = 'string';
                 if(validator) {
-                    jsonSchema.pattern = `^${validator.getRegex().toString().slice(1,-1)}$`
+                    jsonSchema.pattern = `^${validator.getRegex().toString().slice(1,-1)}$`;
                 }
                 break;
             case 'Double':
@@ -373,7 +375,7 @@ class JSONSchemaVisitor {
         // add the decorators
         const decorators = this.getDecorators(field);
         if(decorators) {
-            jsonSchema['$decorators'] = decorators;
+            jsonSchema.$decorators = decorators;
         }
 
         // Return the schema.
@@ -396,7 +398,7 @@ class JSONSchemaVisitor {
                 title: enumDeclaration.getName(),
                 description : `An instance of ${enumDeclaration.getFullyQualifiedName()}`,
                 enum: []
-        }};
+            }};
 
         // Walk over all of the properties which should just be enum value declarations.
         enumDeclaration.getProperties().forEach((property) => {
@@ -406,7 +408,7 @@ class JSONSchemaVisitor {
         // add the decorators
         const decorators = this.getDecorators(enumDeclaration);
         if(decorators) {
-            result.schema['$decorators'] = decorators;
+            result.schema.$decorators = decorators;
         }
 
         // Return the schema.
@@ -455,7 +457,7 @@ class JSONSchemaVisitor {
         // add the decorators
         const decorators = this.getDecorators(relationshipDeclaration);
         if(decorators) {
-            jsonSchema['$decorators'] = decorators;
+            jsonSchema.$decorators = decorators;
         }
 
         // Return the schema.

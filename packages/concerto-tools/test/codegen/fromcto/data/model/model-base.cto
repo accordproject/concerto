@@ -11,12 +11,16 @@ enum State {
   o BRONZE
 }
 
+@important
+@role("name", "manager")
 participant Person identified by stringProperty {
     o String stringProperty
     o UnitedStatesAddress address
 }
 
+@custom("string", "foo", "boolean", false, "intParam", 2, "floatParam", 3.14, "type", SimpleAsset[] )
 participant Bloke identified by stringProperty {
+    @stuff("two", 3, "bool", true)
     o String stringProperty
 }
 

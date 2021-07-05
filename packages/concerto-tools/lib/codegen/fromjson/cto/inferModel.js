@@ -19,10 +19,20 @@ const TypedStack = require('@accordproject/concerto-core').TypedStack;
 
 const isoRegex = /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]+)?(Z)?$/gm;
 
+/**
+ * Capitalize the first letter of a string
+ * @param {string} string the input string
+ * @returns {string} input with first letter capitalized
+ */
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+/**
+ * Computes an integer hashcode value for a string
+ * @param {string} value the input string
+ * @returns {number} the hashcode
+ */
 function hashCode(value) {
     let hash = 0, i, chr;
     for (i = 0; i < value.length; i++) {
@@ -112,10 +122,35 @@ function isDouble(val) {
 }
 
 /**
+ * Get the primitive Concerto type for an input
+ * @param {*} input the input object
+ * @returns {string} the Concerto type
+ */
+function getType(input) {
+    if (isDouble(input)) {
+        return 'Double';
+    }
+    else if (isInteger(input)) {
+        return 'Integer';
+    } else if (isBoolean(input)) {
+        return 'Boolean';
+    } else if (isDateTime(input)) {
+        return 'DateTime';
+    } else if (isString(input)) {
+        return 'String';
+    }
+    else {
+        // nulls are assumed to be String
+        return 'String';
+    }
+}
+
+/**
  * Handles an array
  * @param {*} typeName the name of the type being processed
  * @param {*} context the processing context
  * @param {*} input  the input object
+ * @returns {object} the type for the array
  */
 function handleArray(typeName, context, input) {
     let result = null;
@@ -144,33 +179,11 @@ function handleArray(typeName, context, input) {
 }
 
 /**
- * Get the primitive Concerto type for an input
- * @param {*} input the input object
- */
-function getType(input) {
-    if (isDouble(input)) {
-        return 'Double';
-    }
-    else if (isInteger(input)) {
-        return 'Integer';
-    } else if (isBoolean(input)) {
-        return 'Boolean';
-    } else if (isDateTime(input)) {
-        return 'DateTime';
-    } else if (isString(input)) {
-        return 'String';
-    }
-    else {
-        // nulls are assumed to be String
-        return 'String';
-    }
-}
-
-/**
  * Handles an input type
- * @param {*} typeName the name of the type being processed
+ * @param {*} name the name of the type being processed
  * @param {*} context the processing context
  * @param {*} input  the input object
+ * @returns {object} an object for the type
  */
 function handleType(name, context, input) {
     // console.log(name);

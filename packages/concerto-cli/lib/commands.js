@@ -32,6 +32,7 @@ const JSONSchemaVisitor = CodeGen.JSONSchemaVisitor;
 const PlantUMLVisitor = CodeGen.PlantUMLVisitor;
 const TypescriptVisitor = CodeGen.TypescriptVisitor;
 const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
+const GraphQLVisitor = CodeGen.GraphQLVisitor;
 
 /**
  * Utility class that implements the commands exposed by the CLI.
@@ -153,6 +154,9 @@ class Commands {
             break;
         case 'XMLSchema':
             visitor = new XmlSchemaVisitor();
+            break;
+        case 'GraphQL':
+            visitor = new GraphQLVisitor();
             break;
         }
 
