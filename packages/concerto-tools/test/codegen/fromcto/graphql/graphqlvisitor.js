@@ -34,6 +34,9 @@ namespace test
 concept Address {
 }
 
+participant Owner {
+}
+
 @single
 asset Vehicle {
   @single
@@ -43,6 +46,9 @@ asset Vehicle {
   o Integer age
   o Double price
   o Boolean secondHand
+  o String color optional
+  --> Owner owner
+  --> Owner previousOwner optional
 }
 `;
 
