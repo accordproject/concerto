@@ -159,6 +159,12 @@ describe('cicero-cli', () => {
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
+        it('should compile to a GraphQL model', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true});
+            await Commands.compile('GraphQL', models, dir.path, {offline:false});
+            fs.readdirSync(dir.path).length.should.be.above(0);
+            dir.cleanup();
+        });
         it('should not compile to an unknown model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true});
             await Commands.compile('BLAH', models, dir.path, {offline:false});
