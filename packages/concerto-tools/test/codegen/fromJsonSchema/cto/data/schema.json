@@ -1,0 +1,518 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "org.acme.Children": {
+            "title": "Children",
+            "description": "An instance of org.acme.Children",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Children",
+                    "pattern": "^org\\.acme\\.Children$",
+                    "description": "The class identifier for this type"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "hairColor": {
+                    "type": "string"
+                },
+                "coolDude": {
+                    "type": "boolean"
+                },
+                "missing": {
+                    "type": "string"
+                },
+                "pet": {
+                    "title": "Pet",
+                    "description": "An instance of org.acme.Pet",
+                    "type": "object",
+                    "properties": {
+                        "$class": {
+                            "type": "string",
+                            "default": "org.acme.Pet",
+                            "pattern": "^org\\.acme\\.Pet$",
+                            "description": "The class identifier for this type"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "breed": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["$class", "name", "breed"]
+                },
+                "favoriteColors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Color"
+                    }
+                },
+                "favoriteNumbers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "mixed": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "arrayOfNull": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "emptyArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "favoritePets": {
+                    "type": "array",
+                    "items": {
+                        "title": "Pet",
+                        "description": "An instance of org.acme.Pet",
+                        "type": "object",
+                        "properties": {
+                            "$class": {
+                                "type": "string",
+                                "default": "org.acme.Pet",
+                                "pattern": "^org\\.acme\\.Pet$",
+                                "description": "The class identifier for this type"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "breed": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["$class", "name", "breed"]
+                    }
+                },
+                "stuff": {
+                    "type": "array",
+                    "items": {
+                        "title": "Stuff",
+                        "description": "An instance of org.acme.Stuff",
+                        "type": "object",
+                        "properties": {
+                            "$class": {
+                                "type": "string",
+                                "default": "org.acme.Stuff",
+                                "pattern": "^org\\.acme\\.Stuff$",
+                                "description": "The class identifier for this type"
+                            },
+                            "sku": {
+                                "type": "string"
+                            },
+                            "price": {
+                                "type": "number"
+                            },
+                            "product": {
+                                "title": "Pet",
+                                "description": "An instance of org.acme.Pet",
+                                "type": "object",
+                                "properties": {
+                                    "$class": {
+                                        "type": "string",
+                                        "default": "org.acme.Pet",
+                                        "pattern": "^org\\.acme\\.Pet$",
+                                        "description": "The class identifier for this type"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "breed": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["$class", "name", "breed"]
+                            }
+                        },
+                        "required": ["$class", "sku", "price", "product"]
+                    }
+                }
+            },
+            "required": [
+                "$class",
+                "name",
+                "age",
+                "hairColor",
+                "coolDude",
+                "pet",
+                "favoriteColors",
+                "favoriteNumbers",
+                "mixed",
+                "arrayOfNull",
+                "emptyArray",
+                "favoritePets",
+                "stuff"
+            ]
+        },
+        "Color": {
+            "title": "Color",
+            "enum": ["blue", "green", "red", "yellow", "orange"]
+        },
+        "org.acme.Pet": {
+            "title": "Pet",
+            "description": "An instance of org.acme.Pet",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Pet",
+                    "pattern": "^org\\.acme\\.Pet$",
+                    "description": "The class identifier for this type"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "breed": {
+                    "type": "string"
+                }
+            },
+            "required": ["$class", "name", "breed"]
+        },
+        "org.acme.Stuff": {
+            "title": "Stuff",
+            "description": "An instance of org.acme.Stuff",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Stuff",
+                    "pattern": "^org\\.acme\\.Stuff$",
+                    "description": "The class identifier for this type"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product": {
+                    "title": "Pet",
+                    "description": "An instance of org.acme.Pet",
+                    "type": "object",
+                    "properties": {
+                        "$class": {
+                            "type": "string",
+                            "default": "org.acme.Pet",
+                            "pattern": "^org\\.acme\\.Pet$",
+                            "description": "The class identifier for this type"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "breed": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["$class", "name", "breed"]
+                }
+            },
+            "required": ["$class", "sku", "price", "product"]
+        },
+        "org.acme.Company": {
+            "title": "Company",
+            "description": "An instance of org.acme.Company",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Company",
+                    "pattern": "^org\\.acme\\.Company$",
+                    "description": "The class identifier for this type"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "employees": {
+                    "type": "array",
+                    "items": {
+                        "title": "Employees",
+                        "description": "An instance of org.acme.Employees",
+                        "type": "object",
+                        "properties": {
+                            "$class": {
+                                "type": "string",
+                                "default": "org.acme.Employees",
+                                "pattern": "^org\\.acme\\.Employees$",
+                                "description": "The class identifier for this type"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["$class", "name"]
+                    }
+                }
+            },
+            "required": ["$class", "name", "employees"]
+        },
+        "org.acme.Employees": {
+            "title": "Employees",
+            "description": "An instance of org.acme.Employees",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Employees",
+                    "pattern": "^org\\.acme\\.Employees$",
+                    "description": "The class identifier for this type"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": ["$class", "name"]
+        }
+    },
+    "title": "Root",
+    "description": "An instance of org.acme.Root",
+    "type": "object",
+    "properties": {
+        "$class": {
+            "type": "string",
+            "default": "org.acme.Root",
+            "pattern": "^org\\.acme\\.Root$",
+            "description": "The class identifier for this type"
+        },
+        "firstName": {
+            "type": "string"
+        },
+        "lastName": {
+            "type": "string"
+        },
+        "dob": {
+            "format": "date-time",
+            "type": "string"
+        },
+        "age": {
+            "type": "integer"
+        },
+        "height": {
+            "type": "number"
+        },
+        "children": {
+            "type": "array",
+            "items": {
+                "title": "Children",
+                "description": "An instance of org.acme.Children",
+                "type": "object",
+                "properties": {
+                    "$class": {
+                        "type": "string",
+                        "default": "org.acme.Children",
+                        "pattern": "^org\\.acme\\.Children$",
+                        "description": "The class identifier for this type"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "age": {
+                        "type": "integer"
+                    },
+                    "hairColor": {
+                        "type": "string"
+                    },
+                    "coolDude": {
+                        "type": "boolean"
+                    },
+                    "missing": {
+                        "type": "string"
+                    },
+                    "pet": {
+                        "title": "Pet",
+                        "description": "An instance of org.acme.Pet",
+                        "type": "object",
+                        "properties": {
+                            "$class": {
+                                "type": "string",
+                                "default": "org.acme.Pet",
+                                "pattern": "^org\\.acme\\.Pet$",
+                                "description": "The class identifier for this type"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "breed": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["$class", "name", "breed"]
+                    },
+                    "favoriteColors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "favoriteNumbers": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "mixed": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "arrayOfNull": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "emptyArray": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "favoritePets": {
+                        "type": "array",
+                        "items": {
+                            "title": "Pet",
+                            "description": "An instance of org.acme.Pet",
+                            "type": "object",
+                            "properties": {
+                                "$class": {
+                                    "type": "string",
+                                    "default": "org.acme.Pet",
+                                    "pattern": "^org\\.acme\\.Pet$",
+                                    "description": "The class identifier for this type"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "breed": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["$class", "name", "breed"]
+                        }
+                    },
+                    "stuff": {
+                        "type": "array",
+                        "items": {
+                            "title": "Stuff",
+                            "description": "An instance of org.acme.Stuff",
+                            "type": "object",
+                            "properties": {
+                                "$class": {
+                                    "type": "string",
+                                    "default": "org.acme.Stuff",
+                                    "pattern": "^org\\.acme\\.Stuff$",
+                                    "description": "The class identifier for this type"
+                                },
+                                "sku": {
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "type": "number"
+                                },
+                                "product": {
+                                    "title": "Pet",
+                                    "description": "An instance of org.acme.Pet",
+                                    "type": "object",
+                                    "properties": {
+                                        "$class": {
+                                            "type": "string",
+                                            "default": "org.acme.Pet",
+                                            "pattern": "^org\\.acme\\.Pet$",
+                                            "description": "The class identifier for this type"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "breed": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["$class", "name", "breed"]
+                                }
+                            },
+                            "required": ["$class", "sku", "price", "product"]
+                        }
+                    }
+                },
+                "required": [
+                    "$class",
+                    "name",
+                    "age",
+                    "hairColor",
+                    "coolDude",
+                    "pet",
+                    "favoriteColors",
+                    "favoriteNumbers",
+                    "mixed",
+                    "arrayOfNull",
+                    "emptyArray",
+                    "favoritePets",
+                    "stuff"
+                ]
+            }
+        },
+        "company": {
+            "title": "Company",
+            "description": "An instance of org.acme.Company",
+            "type": "object",
+            "properties": {
+                "$class": {
+                    "type": "string",
+                    "default": "org.acme.Company",
+                    "pattern": "^org\\.acme\\.Company$",
+                    "description": "The class identifier for this type"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "employees": {
+                    "type": "array",
+                    "items": {
+                        "title": "Employees",
+                        "description": "An instance of org.acme.Employees",
+                        "type": "object",
+                        "properties": {
+                            "$class": {
+                                "type": "string",
+                                "default": "org.acme.Employees",
+                                "pattern": "^org\\.acme\\.Employees$",
+                                "description": "The class identifier for this type"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["$class", "name"]
+                    }
+                }
+            },
+            "required": ["$class", "name", "employees"]
+        }
+    },
+    "required": [
+        "$class",
+        "firstName",
+        "lastName",
+        "dob",
+        "age",
+        "height",
+        "children",
+        "company"
+    ]
+}
