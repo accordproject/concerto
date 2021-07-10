@@ -30,13 +30,11 @@ describe('inferModel', function () {
     beforeEach(() => {
     });
 
-    it('should generate Concerto', async () => {
+    it('should generate Concerto for complex model', async () => {
         const example = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/example.json'), 'utf8'));
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/schema.json'), 'utf8'));
         const expectedCto = fs.readFileSync(path.resolve(__dirname, '../cto/data/full.cto'), 'utf8');
         const cto = inferModel('org.acme', 'Root', schema);
-        // console.log(cto);
-        // console.log(expectedCto);
         cto.should.equal(expectedCto);
 
         const ajv = new Ajv({ strict: true })
@@ -56,5 +54,148 @@ describe('inferModel', function () {
         const concerto = new Concerto(mm);
         concerto.validate(example);
 
+    });
+
+    it('should generate for a simple definition', async () => {
+        const cto = inferModel('org.acme', 'Root', {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            enum: ['one', 'two']
+        });
+        cto.should.equal(`namespace org.acme
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+enum Root {
+   o one
+   o two
+}
+
+`);
+    });
+
+    it('should generate for a simple array definition', async () => {
+        const cto = inferModel('org.acme', 'Root', {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+                xs: {
+                    type: 'array',
+                    items: {
+                        enum: ['one', 'two']
+                    }
+                }
+            }
+        });
+        // TODO This is not a valid CTO model, because we don't generate definitions for inline sub-schemas.
+        cto.should.equal(`namespace org.acme
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Root {
+   o Xs[] xs optional
+}
+
+`);
+    });
+
+    it('should not generate for a simple definition with an unsupported type', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                type: 'object',
+                properties: {
+                    foo: {
+                        const: 'value'
+                    }
+                }
+            });
+        }).should.throw('Unsupported definition: {"const":"value"}');
+    });
+
+    it('should not generate when additionalProperties are allowed', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                definitions: {
+                    Foo: {
+                        type: 'object',
+                        properties: {},
+                        additionalProperties: true,
+                    }
+                }
+            });
+        }).should.throw('\'additionalProperties\' are not supported in Concerto');
+    });
+
+    it('should not generate when unsupported formats are used', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                definitions: {
+                    Foo: {
+                        type: 'object',
+                        properties: {
+                            email: {
+                                type: 'string',
+                                format: 'email'
+                            }
+                        }
+                    }
+                }
+            });
+        }).should.throw('Format \'email\' in \'email\' is not supported');
+    });
+
+    it('should not generate when unsupported type keywords are used', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                definitions: {
+                    Foo: {
+                        type: 'null',
+                    }
+                }
+            });
+        }).should.throw('Type keyword \'null\' in definition \'Foo\' not supported.');
+    });
+
+    it('should not generate when unsupported type keywords are used in an object', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                definitions: {
+                    Foo: {
+                        type: 'object',
+                        properties: {
+                            email: {
+                                type: 'null',
+                            }
+                        }
+                    }
+                }
+            });
+        }).should.throw('Type keyword \'null\' in \'email\' is not supported');
+    });
+
+    it('should not generate when unsupported definitions', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                'allOf': [
+                    { 'type': 'string' }
+                ]
+            });
+        }).should.throw('Keyword(s) \'allOf\' in definition \'Root\' not supported.');
+    });
+
+    it('should not generate when unsupported references are used', async () => {
+        (function () {
+            inferModel('org.acme', 'Root', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                type: 'object',
+                'properties': {
+                    'cycle': { '$ref': '#' }
+                },
+            });
+        }).should.throw('The reference \'#\' in \'cycle\' is not supported. Only local definitions are currently supported, e.g. \'#/definitions/\'');
     });
 });

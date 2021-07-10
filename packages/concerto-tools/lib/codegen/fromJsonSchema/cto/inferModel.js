@@ -18,7 +18,7 @@ const { Writer, TypedStack } = require('@accordproject/concerto-core');
 const Ajv = require('ajv');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
 const addFormats = require('ajv-formats');
-const fs = require('fs');
+// const fs = require('fs');
 
 /**
  * Capitalize the first letter of a string
@@ -47,7 +47,7 @@ function normalizeType(type) {
  * @returns {string} the Concerto type
  * @private
  */
-function getType(definition, context) {
+function inferType(definition, context) {
     const name = context.parents.peek();
     if (definition.$ref) {
         if (!definition.$ref.startsWith('#/definitions/')) {
@@ -56,6 +56,7 @@ function getType(definition, context) {
         return definition.$ref.replace(/^#\/definitions\//, '');
     }
 
+    // TODO Also add local sub-schema definition
     if (definition.enum) {
         return normalizeType(definition.title || name);
     }
@@ -67,7 +68,7 @@ function getType(definition, context) {
                     if (definition.format === 'date-time' || definition.format === 'date') {
                         return 'DateTime';
                     } else {
-                        throw new Error(`format '${definition.format}' in '${name}' is not supported`);
+                        throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
                     }
                 }
                 return 'String';
@@ -78,12 +79,14 @@ function getType(definition, context) {
             case 'integer':
                 return 'Integer'; // Could also be Long?
             case 'array':
-                return getType(definition.items, context) + '[]';
+                return inferType(definition.items, context) + '[]';
             case 'object':
                 return normalizeType(definition.title || name);
+            default:
+                throw new Error(`Type keyword '${definition.type}' in '${name}' is not supported`);
         }
     }
-    throw new Error(`format '${definition.type}' in '${name}' is not supported`);
+    throw new Error(`Unsupported definition: ${JSON.stringify(definition)}`);
 }
 
 /**
@@ -95,12 +98,6 @@ function getType(definition, context) {
 function inferEnum(definition, context) {
     const { writer, parents } = context;
     const name = parents.peek();
-
-    // TODO improve detection of schemas that were generated from Concerto models,
-    // perhaps through metadata
-    if (name.startsWith('org.accordproject.time.')) {
-        return;
-    }
 
     writer.writeLine(0, `enum ${normalizeType(definition.title || name)} {`);
     definition.enum.forEach((value) => {
@@ -120,18 +117,11 @@ function inferEnum(definition, context) {
  * @private
  */
 function inferConcept(definition, context) {
-    const { writer, parents } = context;
-    const name = parents.peek();
-    const type = getType(definition, context);
+    const { writer } = context;
+    const type = inferType(definition, context);
 
     if (definition.additionalProperties) {
         throw new Error('\'additionalProperties\' are not supported in Concerto');
-    }
-
-    // TODO improve detection of schemas that were generated from Concerto models,
-    // perhaps through metadata
-    if (name.startsWith('org.accordproject.time.')) {
-        return;
     }
 
     const requiredFields = [];
@@ -140,7 +130,7 @@ function inferConcept(definition, context) {
     }
 
     writer.writeLine(0, `concept ${type} {`);
-    Object.keys(definition.properties).forEach((field) => {
+    Object.keys(definition.properties || []).forEach((field) => {
         // Ignore reserved properties
         if (['$identifier', '$class'].includes(field)) {
             return;
@@ -152,12 +142,40 @@ function inferConcept(definition, context) {
         context.parents.push(field);
         writer.writeLine(
             1,
-            `o ${getType(propertyDefinition, context)} ${field}${optional}`
+            `o ${inferType(propertyDefinition, context)} ${field}${optional}`
         );
         context.parents.pop();
     });
     writer.writeLine(0, '}');
     writer.writeLine(0, '');
+}
+
+/**
+ * Infers a Concerto model from a JSON Schema.
+ * @param {*} definition the input object
+ * @param {*} context the processing context
+ * @private
+ */
+function inferDeclaration(definition, context) {
+    const name = context.parents.peek();
+
+    if (definition.enum) {
+        inferEnum(definition, context);
+    } else if (definition.type) {
+        if (definition.type === 'object') {
+            inferConcept(definition, context);
+        } else {
+            throw new Error(
+                `Type keyword '${definition.type}' in definition '${name}' not supported.`
+            );
+        }
+    } else {
+        // Find all keys that are not supported
+        const badKeys = Object.keys(definition).filter(key => !['enum', 'type'].includes(key));
+        throw new Error(
+            `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' not supported.`
+        );
+    }
 }
 
 /**
@@ -191,24 +209,16 @@ function inferModelFile(namespace, rootTypeName, schema) {
     context.writer.writeLine(0, '');
 
     // Create definitions
-    Object.keys(schema.definitions).forEach((key) => {
+    Object.keys(schema.definitions || []).forEach((key) => {
         context.parents.push(key);
         const definition = schema.definitions[key];
-        if (definition.enum) {
-            inferEnum(definition, context);
-        } else if (definition.type === 'object') {
-            inferConcept(definition, context);
-        } else {
-            throw new Error(
-                `type '${definition.type}' in definition '${key}' not supported.`
-            );
-        }
+        inferDeclaration(definition, context);
         context.parents.pop();
     });
 
     // Create root type
     context.parents.push(rootTypeName);
-    inferConcept(schema, context);
+    inferDeclaration(schema, context);
     context.parents.pop();
 
     return context.writer.getBuffer();
@@ -216,9 +226,9 @@ function inferModelFile(namespace, rootTypeName, schema) {
 
 // Prototype CLI tool
 // usage: node lib/codegen/fromJsonSchema/inferModel.js MyJsonSchema.json namespace RootType
-if (!module.parent) {
-    const schema = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-    console.log(inferModelFile(process.argv[3], process.argv[4], schema));
-}
+// if (!module.parent) {
+//     const schema = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+//     console.log(inferModelFile(process.argv[3], process.argv[4], schema));
+// }
 
 module.exports = inferModelFile;
