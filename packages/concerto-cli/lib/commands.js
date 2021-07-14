@@ -23,6 +23,7 @@ const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
 const Concerto = require('@accordproject/concerto-core').Concerto;
+const MetaModel = require('@accordproject/concerto-core').MetaModel;
 const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
@@ -134,6 +135,16 @@ class Commands {
     static async compile(target, ctoFiles, output, options) {
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
 
+        // XXX temporary
+        if (target === 'metamodel') {
+            const modelFiles = modelManager.getModelFiles();
+            // XXX Pick first model, usually the main one
+            const lastModelFile = modelFiles[0];
+            const metamodel = lastModelFile.toMetaModel();
+            // XXX Log here for now
+            return JSON.stringify(metamodel);
+        }
+
         let visitor = null;
 
         switch(target) {
@@ -165,8 +176,7 @@ class Commands {
             parameters.fileWriter = new FileWriter(output);
             modelManager.accept(visitor, parameters);
             return `Compiled to ${target} in '${output}'.`;
-        }
-        else {
+        } else {
             return 'Unrecognized target: ' + target;
         }
     }
@@ -183,6 +193,18 @@ class Commands {
         mkdirp.sync(output);
         modelManager.writeModelsToFileSystem(output);
         return `Loaded external models in '${output}'.`;
+    }
+
+    /**
+     * Export meta model to CTO string
+     *
+     * @param {string} input the metamodel
+     * @param {string} the CTO string
+     */
+    static async export(input) {
+        const json = JSON.parse(fs.readFileSync(input, 'utf8'));
+        const result = MetaModel.modelFromMetaModel(json);
+        return result;
     }
 }
 

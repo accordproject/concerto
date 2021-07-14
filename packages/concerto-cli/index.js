@@ -145,6 +145,21 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
+    .command('export', 'get the cto string from a metamodel', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide input metamodel');
+        yargs.option('input', {
+            describe: 'JSON to validate',
+            type: 'string'
+        });
+    }, (argv) => {
+        return Commands.export(argv.input)
+            .then((result) => {
+                Logger.info(result);
+            })
+            .catch((err) => {
+                Logger.error(err.message);
+            });
+    })
     .option('verbose', {
         alias: 'v',
         default: false
