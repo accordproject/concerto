@@ -17,6 +17,7 @@
 const packageJson = require('../../package.json');
 const semver = require('semver');
 const parser = require('./parser');
+const MetaModel = require('./metamodel');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
@@ -74,13 +75,6 @@ class ModelFile {
 
         try {
             this.ast = parser.parse(definitions);
-            if (this.ast.version) {
-                if (semver.satisfies(packageJson.version, this.ast.version.value)) {
-                    this.concertoVersion = this.ast.version.value;
-                } else {
-                    throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
-                }
-            }
         }
         catch(err) {
             if(err.location && err.location.start) {
@@ -91,75 +85,10 @@ class ModelFile {
             }
         }
 
-        this.namespace = this.ast.namespace;
-
-        if(this.namespace !== 'concerto' && this.ast.imports) {
-            this.ast.imports.push( { namespace: 'concerto.Concept'} );
-            this.ast.imports.push( { namespace: 'concerto.Asset'} );
-            this.ast.imports.push( { namespace: 'concerto.Transaction'} );
-            this.ast.imports.push( { namespace: 'concerto.Participant'} );
-            this.ast.imports.push( { namespace: 'concerto.Event'} );
-        }
-
-        if(this.ast.imports) {
-            this.ast.imports.forEach((imp) => {
-                this.imports.push(imp.namespace);
-                this.importShortNames.set(ModelUtil.getShortName(imp.namespace), imp.namespace);
-                if (ModelUtil.isWildcardName(imp.namespace)) {
-                    const wildcardNamespace = ModelUtil.getNamespace(imp.namespace);
-                    this.importWildcardNamespaces.push(wildcardNamespace);
-                }
-                if(imp.uri) {
-                    this.importUriMap[imp.namespace] = imp.uri;
-                }
-            });
-        }
-
-        for(let n=0; n < this.ast.body.length; n++ ) {
-            let thing = this.ast.body[n];
-
-            if(thing.type === 'AssetDeclaration') {
-                // Default super type for asset
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Asset' } };
-                }
-                this.declarations.push( new AssetDeclaration(this, thing) );
-            }
-            else if(thing.type === 'TransactionDeclaration') {
-                // Default super type for transaction
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Transaction' } };
-                }
-                this.declarations.push( new TransactionDeclaration(this, thing) );
-            }
-            else if(thing.type === 'EventDeclaration') {
-                // Default super type for event
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Event' } };
-                }
-                this.declarations.push( new EventDeclaration(this, thing) );
-            }
-            else if(thing.type === 'ParticipantDeclaration') {
-                // Default super type for participant
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Participant' } };
-                }
-                this.declarations.push( new ParticipantDeclaration(this, thing) );
-            }
-            else if(thing.type === 'EnumDeclaration') {
-                this.declarations.push( new EnumDeclaration(this, thing) );
-            }
-            else if(thing.type === 'ConceptDeclaration') {
-                this.declarations.push( new ConceptDeclaration(this, thing) );
-            }
-            else {
-                let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
-
-                throw new IllegalModelException(formatter({
-                    'type': thing.type,
-                }),this);
-            }
-        }
+        // Populate from the AST
+        this.fromAst(this.ast);
+        // Check version compatibility
+        this.isCompatibleVersion();
 
         // Now build local types from Declarations
         for(let index in this.declarations) {
@@ -629,6 +558,104 @@ class ModelFile {
      */
     getConcertoVersion() {
         return this.concertoVersion;
+    }
+
+    /**
+     * Check whether this modelfile is compatible with the concerto version
+     */
+    isCompatibleVersion() {
+        if (this.ast.version) {
+            if (semver.satisfies(packageJson.version, this.ast.version.value)) {
+                this.concertoVersion = this.ast.version.value;
+            } else {
+                throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
+            }
+        }
+    }
+
+    /**
+     * Export metamodel
+     * @return {object} the metamodel for this model file
+     */
+    toMetaModel() {
+        return MetaModel.modelToMetaModel(this.ast);
+    }
+
+    /**
+     * Populate from an AST
+     * @param {object} ast - the AST obtained from the parser
+     * @private
+     */
+    fromAst(ast) {
+        this.namespace = this.ast.namespace;
+
+        if(this.namespace !== 'concerto' && this.ast.imports) {
+            this.ast.imports.push( { namespace: 'concerto.Concept'} );
+            this.ast.imports.push( { namespace: 'concerto.Asset'} );
+            this.ast.imports.push( { namespace: 'concerto.Transaction'} );
+            this.ast.imports.push( { namespace: 'concerto.Participant'} );
+            this.ast.imports.push( { namespace: 'concerto.Event'} );
+        }
+
+        if(this.ast.imports) {
+            this.ast.imports.forEach((imp) => {
+                this.imports.push(imp.namespace);
+                this.importShortNames.set(ModelUtil.getShortName(imp.namespace), imp.namespace);
+                if (ModelUtil.isWildcardName(imp.namespace)) {
+                    const wildcardNamespace = ModelUtil.getNamespace(imp.namespace);
+                    this.importWildcardNamespaces.push(wildcardNamespace);
+                }
+                if(imp.uri) {
+                    this.importUriMap[imp.namespace] = imp.uri;
+                }
+            });
+        }
+
+        for(let n=0; n < this.ast.body.length; n++ ) {
+            let thing = this.ast.body[n];
+
+            if(thing.type === 'AssetDeclaration') {
+                // Default super type for asset
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Asset' } };
+                }
+                this.declarations.push( new AssetDeclaration(this, thing) );
+            }
+            else if(thing.type === 'TransactionDeclaration') {
+                // Default super type for transaction
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Transaction' } };
+                }
+                this.declarations.push( new TransactionDeclaration(this, thing) );
+            }
+            else if(thing.type === 'EventDeclaration') {
+                // Default super type for event
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Event' } };
+                }
+                this.declarations.push( new EventDeclaration(this, thing) );
+            }
+            else if(thing.type === 'ParticipantDeclaration') {
+                // Default super type for participant
+                if (!thing.classExtension) {
+                    thing.classExtension = { class: { name: 'Participant' } };
+                }
+                this.declarations.push( new ParticipantDeclaration(this, thing) );
+            }
+            else if(thing.type === 'EnumDeclaration') {
+                this.declarations.push( new EnumDeclaration(this, thing) );
+            }
+            else if(thing.type === 'ConceptDeclaration') {
+                this.declarations.push( new ConceptDeclaration(this, thing) );
+            }
+            else {
+                let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
+
+                throw new IllegalModelException(formatter({
+                    'type': thing.type,
+                }),this);
+            }
+        }
     }
 
     /**

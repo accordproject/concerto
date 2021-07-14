@@ -247,6 +247,7 @@ declare module '@accordproject/concerto-core' {
   // ModelFile
   export class ModelFile {
     constructor(modelManager: ModelManager, definitions: string, fileName?: string);
+    private fromAst(ast: any): void;
     isSystemModelFile(): boolean;
     isExternal(): boolean;
     private getImportURI(namespace: string): string | null;
