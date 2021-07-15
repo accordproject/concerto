@@ -354,7 +354,7 @@ function declFromMetaModel(mm) {
 function modelFromMetaModel(mm) {
     let result = '';
     result += `namespace ${mm.namespace}`;
-    if (mm.imports) {
+    if (mm.imports && mm.imports.length > 0) {
         result += '\n';
         mm.imports.forEach((imp) => {
             let name = '*';
@@ -367,7 +367,7 @@ function modelFromMetaModel(mm) {
             }
         });
     }
-    if (mm.declarations) {
+    if (mm.declarations && mm.declarations.length > 0) {
         mm.declarations.forEach((decl) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
