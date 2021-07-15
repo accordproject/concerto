@@ -145,14 +145,14 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
-    .command('export', 'get the cto string from a metamodel', (yargs) => {
-        yargs.demandOption(['input'], 'Please provide input metamodel');
+    .command('transform', 'get the cto string from a metamodel', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide input (meta)model');
         yargs.option('input', {
-            describe: 'JSON to validate',
+            describe: '(meta)model file',
             type: 'string'
         });
     }, (argv) => {
-        return Commands.export(argv.input)
+        return Commands.transform(argv.input)
             .then((result) => {
                 Logger.info(result);
             })

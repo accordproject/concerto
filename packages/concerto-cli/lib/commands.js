@@ -135,16 +135,6 @@ class Commands {
     static async compile(target, ctoFiles, output, options) {
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
 
-        // XXX temporary
-        if (target === 'metamodel') {
-            const modelFiles = modelManager.getModelFiles();
-            // XXX Pick first model, usually the main one
-            const lastModelFile = modelFiles[0];
-            const metamodel = lastModelFile.toMetaModel();
-            // XXX Log here for now
-            return JSON.stringify(metamodel);
-        }
-
         let visitor = null;
 
         switch(target) {
@@ -196,15 +186,26 @@ class Commands {
     }
 
     /**
-     * Export meta model to CTO string
+     * Convert between CTO string and metamodel
      *
-     * @param {string} input the metamodel
-     * @param {string} the CTO string
+     * @param {string} input (meta)model
+     * @param {string} transformed (meta)model
      */
-    static async export(input) {
-        const json = JSON.parse(fs.readFileSync(input, 'utf8'));
-        const result = MetaModel.modelFromMetaModel(json);
-        return result;
+    static async transform(input) {
+        if (path.extname(input) === '.cto') {
+            const modelManager = await ModelLoader.loadModelManager([input], {});
+            const modelFiles = modelManager.getModelFiles();
+            // XXX Pick first model, usually the main one
+            const lastModelFile = modelFiles[0];
+            const metamodel = lastModelFile.toMetaModel();
+            // XXX Log here for now
+            return JSON.stringify(metamodel);
+        } else {
+            const inputString = fs.readFileSync(input, 'utf8');
+            const json = JSON.parse(inputString);
+            const result = MetaModel.modelFromMetaModel(json);
+            return result;
+        }
     }
 }
 
