@@ -442,9 +442,10 @@ function declToMetaModel(ast) {
 /**
  * Export metamodel from an AST
  * @param {object} ast - the AST for the model
+ * @param {boolean} [validate] - whether to perform validation
  * @return {object} the metamodel for this model
  */
-function modelToMetaModel(ast) {
+function modelToMetaModel(ast, validate = true) {
     const metamodel = {
         $class: 'concerto.metamodel.ModelFile'
     };
@@ -486,7 +487,7 @@ function modelToMetaModel(ast) {
     }
 
     // Last, validate the JSON metaModel
-    const mm = validateMetaModel(metamodel);
+    const mm = validate ? validateMetaModel(metamodel) : metamodel;
 
     return mm;
 }
@@ -494,10 +495,11 @@ function modelToMetaModel(ast) {
 /**
  * Export metamodel from a model file
  * @param {object} modelFile - the AST for the model
+ * @param {boolean} [validate] - whether to perform validation
  * @return {object} the metamodel for this model
  */
-function modelFileToMetaModel(modelFile) {
-    return modelToMetaModel(modelFile.ast);
+function modelFileToMetaModel(modelFile, validate) {
+    return modelToMetaModel(modelFile.ast, validate);
 }
 
 /**
@@ -602,11 +604,12 @@ function declFromMetaModel(mm) {
 /**
  * Create a model string from a metamodel
  * @param {object} metaModel - the metamodel
+ * @param {boolean} [validate] - whether to perform validation
  * @return {string} the string for that model
  */
-function ctoFromMetaModel(metaModel) {
+function ctoFromMetaModel(metaModel, validate = true) {
     // First, validate the JSON metaModel
-    const mm = validateMetaModel(metaModel);
+    const mm = validate ? validateMetaModel(metaModel) : metaModel;
 
     let result = '';
     result += `namespace ${mm.namespace}`;
@@ -634,9 +637,10 @@ function ctoFromMetaModel(metaModel) {
 /**
  * Export metamodel from a model string
  * @param {object} model - the string for the model
+ * @param {boolean} [validate] - whether to perform validation
  * @return {object} the metamodel for this model
  */
-function ctoToMetaModel(model) {
+function ctoToMetaModel(model, validate) {
     const ast = parser.parse(model);
     return modelToMetaModel(ast);
 }
