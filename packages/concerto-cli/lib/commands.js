@@ -193,17 +193,13 @@ class Commands {
      */
     static async transform(input) {
         if (path.extname(input) === '.cto') {
-            const modelManager = await ModelLoader.loadModelManager([input], {});
-            const modelFiles = modelManager.getModelFiles();
-            // XXX Pick first model, usually the main one
-            const lastModelFile = modelFiles[0];
-            const metamodel = lastModelFile.toMetaModel();
-            // XXX Log here for now
-            return JSON.stringify(metamodel);
+            const inputString = fs.readFileSync(input, 'utf8');
+            const result = MetaModel.ctoToMetaModel(inputString);
+            return JSON.stringify(result);
         } else {
             const inputString = fs.readFileSync(input, 'utf8');
             const json = JSON.parse(inputString);
-            const result = MetaModel.modelFromMetaModel(json);
+            const result = MetaModel.ctoFromMetaModel(json);
             return result;
         }
     }

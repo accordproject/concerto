@@ -17,7 +17,6 @@
 const packageJson = require('../../package.json');
 const semver = require('semver');
 const parser = require('./parser');
-const MetaModel = require('./metamodel');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
@@ -571,14 +570,6 @@ class ModelFile {
                 throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
             }
         }
-    }
-
-    /**
-     * Export metamodel
-     * @return {object} the metamodel for this model file
-     */
-    toMetaModel() {
-        return MetaModel.modelToMetaModel(this.ast);
     }
 
     /**
