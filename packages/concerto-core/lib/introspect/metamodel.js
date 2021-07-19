@@ -14,6 +14,246 @@
 
 'use strict';
 
+const parser = require('./parser');
+const ModelManager = require('../modelmanager');
+const Factory = require('../factory');
+const Serializer = require('../serializer');
+
+const metaModelCto = `/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace concerto.metamodel
+
+/**
+ * The metadmodel for Concerto files
+ */
+abstract concept DecoratorLiteral {
+}
+
+concept DecoratorString extends DecoratorLiteral {
+  o String value  
+}
+
+concept DecoratorNumber extends DecoratorLiteral {
+  o Double value
+}
+
+concept DecoratorBoolean extends DecoratorLiteral {
+  o Boolean value
+}
+
+concept TypeIdentifier {
+  @FormEditor("selectOptions", "types")
+  o String name default="Concept"
+}
+
+concept DecoratorIdentifier extends DecoratorLiteral {
+  o TypeIdentifier identifier
+  o Boolean isArray default=false
+}
+
+concept Decorator {
+  o String name
+  o DecoratorLiteral[] arguments optional
+}
+
+concept Identified {
+}
+
+concept IdentifiedBy extends Identified {
+  o String name
+}
+
+@FormEditor("defaultSubclass","concerto.metamodel.ConceptDeclaration")
+abstract concept ClassDeclaration {
+  @FormEditor("hide", true)
+  o Decorator[] decorators optional
+  o Boolean isAbstract default=false
+  // TODO use regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
+  @FormEditor("title", "Name")
+  o String name default="ClassName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
+  o Identified identified optional
+  @FormEditor("title", "Super Type")
+  o TypeIdentifier superType optional
+  o FieldDeclaration[] fields
+}
+
+concept AssetDeclaration extends ClassDeclaration {
+}
+
+concept ParticipantDeclaration extends ClassDeclaration {
+}
+
+concept TransactionDeclaration extends ClassDeclaration {
+}
+
+concept EventDeclaration extends ClassDeclaration {
+}
+
+concept ConceptDeclaration extends ClassDeclaration {
+}
+
+concept EnumDeclaration extends ClassDeclaration {
+}
+
+concept StringDefault {
+  o String value
+}
+
+concept BooleanDefault {
+  o Boolean value
+}
+
+concept IntegerDefault {
+  o Integer value
+}
+
+concept LongDefault {
+  o Long value
+}
+
+concept DoubleDefault {
+  o Double value
+}
+
+@FormEditor("defaultSubclass","concerto.metamodel.StringFieldDeclaration")
+abstract concept FieldDeclaration {
+  // TODO Allow regex modifiers e.g. //ui
+  // regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\pLm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
+  // This regex is an approximation of what the parser accepts without using unicode character classes
+  o String name default="fieldName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
+  @FormEditor("title", "Is Array?")
+  o Boolean isArray default=false
+  @FormEditor("title", "Is Optional?")
+  o Boolean isOptional default=false
+  @FormEditor("hide", true)
+  o Decorator[] decorators optional
+}
+
+concept ObjectFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o StringDefault defaultValue optional
+  @FormEditor("title", "Type Name", "selectOptions", "types")
+  o TypeIdentifier type
+}
+
+concept EnumFieldDeclaration extends FieldDeclaration {
+}
+
+concept BooleanFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o BooleanDefault defaultValue optional
+}
+
+concept DateTimeFieldDeclaration extends FieldDeclaration {
+}
+
+concept StringFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o StringDefault defaultValue optional
+  @FormEditor("hide", true)
+  o StringRegexValidator validator optional
+}
+
+concept StringRegexValidator {
+  o String regex
+}
+
+concept DoubleDomainValidator {
+  o Double lower optional
+  o Double upper optional
+}
+
+concept IntegerDomainValidator {
+  o Integer lower optional
+  o Integer upper optional
+}
+
+concept LongDomainValidator {
+  o Long lower optional
+  o Long upper optional
+}
+
+concept DoubleFieldDeclaration extends FieldDeclaration {
+  o DoubleDefault defaultValue optional
+  o DoubleDomainValidator validator optional
+}
+
+concept IntegerFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o IntegerDefault defaultValue optional
+  @FormEditor("hide", true)
+  o IntegerDomainValidator validator optional
+}
+
+concept LongFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o LongDefault defaultValue optional
+  @FormEditor("hide", true)
+  o LongDomainValidator validator optional
+}
+
+concept RelationshipDeclaration extends FieldDeclaration {
+  @FormEditor("title", "Type Name", "selectOptions", "types")
+  o TypeIdentifier type
+}
+
+abstract concept Import {
+  o String namespace
+  o String uri optional
+}
+
+concept ImportAll extends Import {
+}
+
+concept ImportType extends Import {
+  o TypeIdentifier identifier
+}
+
+concept ModelFile {
+  o String namespace default="my.namespace"
+  @FormEditor("hide", true)
+  o Import[] imports optional
+  @FormEditor("title", "Classes")
+  o ClassDeclaration[] declarations optional
+}
+`;
+
+/**
+ * Create a metamodel manager (for validation against the metamodel)
+ * @return {*} the metamodel manager
+ */
+function createMetaModelManager() {
+    const metaModelManager = new ModelManager();
+    metaModelManager.addModelFile(metaModelCto, 'concerto.metamodel');
+    return metaModelManager;
+}
+
+/**
+ * Validate against the metamodel
+ * @param {object} input - the metamodel in JSON
+ * @return {object} the validated metamodel in JSON
+ */
+function validateMetaModel(input) {
+    const metaModelManager = createMetaModelManager();
+    const factory = new Factory(metaModelManager);
+    const serializer = new Serializer(factory, metaModelManager);
+    // First validate the metaModel
+    const object = serializer.fromJSON(input);
+    return serializer.toJSON(object);
+}
+
 /**
  * Create metamodel for a field
  * @param {object} ast - the AST for the field
@@ -200,7 +440,7 @@ function declToMetaModel(ast) {
 }
 
 /**
- * Export metamodel
+ * Export metamodel from an AST
  * @param {object} ast - the AST for the model
  * @return {object} the metamodel for this model
  */
@@ -244,7 +484,20 @@ function modelToMetaModel(ast) {
         const decl = declToMetaModel(thing);
         metamodel.declarations.push(decl);
     }
-    return metamodel;
+
+    // Last, validate the JSON metaModel
+    const mm = validateMetaModel(metamodel);
+
+    return mm;
+}
+
+/**
+ * Export metamodel from a model file
+ * @param {object} modelFile - the AST for the model
+ * @return {object} the metamodel for this model
+ */
+function modelFileToMetaModel(modelFile) {
+    return modelToMetaModel(modelFile.ast);
 }
 
 /**
@@ -348,10 +601,13 @@ function declFromMetaModel(mm) {
 
 /**
  * Create a model string from a metamodel
- * @param {object} mm - the metamodel
+ * @param {object} metaModel - the metamodel
  * @return {string} the string for that model
  */
-function modelFromMetaModel(mm) {
+function ctoFromMetaModel(metaModel) {
+    // First, validate the JSON metaModel
+    const mm = validateMetaModel(metaModel);
+
     let result = '';
     result += `namespace ${mm.namespace}`;
     if (mm.imports && mm.imports.length > 0) {
@@ -375,7 +631,19 @@ function modelFromMetaModel(mm) {
     return result;
 }
 
+/**
+ * Export metamodel from a model string
+ * @param {object} model - the string for the model
+ * @return {object} the metamodel for this model
+ */
+function ctoToMetaModel(model) {
+    const ast = parser.parse(model);
+    return modelToMetaModel(ast);
+}
+
 module.exports = {
-    modelToMetaModel,
-    modelFromMetaModel,
+    metaModelCto,
+    modelFileToMetaModel,
+    ctoToMetaModel,
+    ctoFromMetaModel,
 };

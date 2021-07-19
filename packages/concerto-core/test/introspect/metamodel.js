@@ -29,16 +29,20 @@ describe('MetaModel', () => {
     const personMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/person.json'), 'utf8'));
 
     describe('#toMetaModel', () => {
+        it('should convert a CTO model to its metamodel', () => {
+            const mm1 = MetaModel.ctoToMetaModel(personModel);
+            mm1.should.deep.equal(personMetaModel);
+        });
 
-        it('should convert CTO file to its metamodel', () => {
+        it('should convert a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
             const mf1 = new ModelFile(modelManager1, personModel);
-            const mm1 = mf1.toMetaModel();
+            const mm1 = MetaModel.modelFileToMetaModel(mf1);
             mm1.should.deep.equal(personMetaModel);
-            const model2 = MetaModel.modelFromMetaModel(mm1);
+            const model2 = MetaModel.ctoFromMetaModel(mm1);
             const modelManager2 = new ModelManager();
             const mf2 = new ModelFile(modelManager2, model2);
-            const mm2 = mf2.toMetaModel();
+            const mm2 = MetaModel.modelFileToMetaModel(mf2);
             mm2.should.deep.equal(personMetaModel);
         });
     });

@@ -109,14 +109,18 @@ class ModelFileDownloader {
    + Promise downloadExternalDependencies(ModelFile[],Object) 
    + Promise runJob(Object,Object) 
 }
+   + void createMetaModelManager() 
+   + object validateMetaModel() 
    + object fieldToMetaModel() 
    + object relationshipToMetaModel() 
    + object enumPropertyToMetaModel() 
    + object declToMetaModel() 
    + object modelToMetaModel() 
+   + object modelFileToMetaModel() 
    + string fieldFromMetaModel() 
    + string declFromMetaModel() 
-   + string modelFromMetaModel() 
+   + string ctoFromMetaModel() 
+   + object ctoToMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,string,string) throws IllegalModelException
    + Boolean isSystemModelFile() 
@@ -142,7 +146,6 @@ class ModelFile {
    + string getDefinitions() 
    + string getConcertoVersion() 
    + void isCompatibleVersion() 
-   + object toMetaModel() 
    + boolean hasInstance(object) 
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
