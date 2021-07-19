@@ -30,11 +30,28 @@ describe('MetaModel', () => {
 
     describe('#toMetaModel', () => {
         it('should convert a CTO model to its metamodel', () => {
+            const mm1 = MetaModel.ctoToMetaModel(personModel, false);
+            mm1.should.deep.equal(personMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel', () => {
             const mm1 = MetaModel.ctoToMetaModel(personModel);
             mm1.should.deep.equal(personMetaModel);
         });
 
         it('should convert a ModelFile to its metamodel', () => {
+            const modelManager1 = new ModelManager();
+            const mf1 = new ModelFile(modelManager1, personModel);
+            const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
+            mm1.should.deep.equal(personMetaModel);
+            const model2 = MetaModel.ctoFromMetaModel(mm1, false);
+            const modelManager2 = new ModelManager();
+            const mf2 = new ModelFile(modelManager2, model2);
+            const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
+            mm2.should.deep.equal(personMetaModel);
+        });
+
+        it('should convert and validate a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
             const mf1 = new ModelFile(modelManager1, personModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1);
