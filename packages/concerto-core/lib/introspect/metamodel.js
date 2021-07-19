@@ -107,26 +107,6 @@ concept ConceptDeclaration extends ClassDeclaration {
 concept EnumDeclaration extends ClassDeclaration {
 }
 
-concept StringDefault {
-  o String value
-}
-
-concept BooleanDefault {
-  o Boolean value
-}
-
-concept IntegerDefault {
-  o Integer value
-}
-
-concept LongDefault {
-  o Long value
-}
-
-concept DoubleDefault {
-  o Double value
-}
-
 @FormEditor("defaultSubclass","concerto.metamodel.StringFieldDeclaration")
 abstract concept FieldDeclaration {
   // TODO Allow regex modifiers e.g. //ui
@@ -141,19 +121,24 @@ abstract concept FieldDeclaration {
   o Decorator[] decorators optional
 }
 
-concept ObjectFieldDeclaration extends FieldDeclaration {
-  @FormEditor("hide", true)
-  o StringDefault defaultValue optional
+concept EnumFieldDeclaration extends FieldDeclaration {
+}
+
+concept RelationshipDeclaration extends FieldDeclaration {
   @FormEditor("title", "Type Name", "selectOptions", "types")
   o TypeIdentifier type
 }
 
-concept EnumFieldDeclaration extends FieldDeclaration {
+concept ObjectFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o String defaultValue optional
+  @FormEditor("title", "Type Name", "selectOptions", "types")
+  o TypeIdentifier type
 }
 
 concept BooleanFieldDeclaration extends FieldDeclaration {
   @FormEditor("hide", true)
-  o BooleanDefault defaultValue optional
+  o Boolean defaultValue optional
 }
 
 concept DateTimeFieldDeclaration extends FieldDeclaration {
@@ -161,7 +146,7 @@ concept DateTimeFieldDeclaration extends FieldDeclaration {
 
 concept StringFieldDeclaration extends FieldDeclaration {
   @FormEditor("hide", true)
-  o StringDefault defaultValue optional
+  o String defaultValue optional
   @FormEditor("hide", true)
   o StringRegexValidator validator optional
 }
@@ -170,9 +155,21 @@ concept StringRegexValidator {
   o String regex
 }
 
+concept DoubleFieldDeclaration extends FieldDeclaration {
+  o Double defaultValue optional
+  o DoubleDomainValidator validator optional
+}
+
 concept DoubleDomainValidator {
   o Double lower optional
   o Double upper optional
+}
+
+concept IntegerFieldDeclaration extends FieldDeclaration {
+  @FormEditor("hide", true)
+  o Integer defaultValue optional
+  @FormEditor("hide", true)
+  o IntegerDomainValidator validator optional
 }
 
 concept IntegerDomainValidator {
@@ -180,33 +177,16 @@ concept IntegerDomainValidator {
   o Integer upper optional
 }
 
-concept LongDomainValidator {
-  o Long lower optional
-  o Long upper optional
-}
-
-concept DoubleFieldDeclaration extends FieldDeclaration {
-  o DoubleDefault defaultValue optional
-  o DoubleDomainValidator validator optional
-}
-
-concept IntegerFieldDeclaration extends FieldDeclaration {
-  @FormEditor("hide", true)
-  o IntegerDefault defaultValue optional
-  @FormEditor("hide", true)
-  o IntegerDomainValidator validator optional
-}
-
 concept LongFieldDeclaration extends FieldDeclaration {
   @FormEditor("hide", true)
-  o LongDefault defaultValue optional
+  o Long defaultValue optional
   @FormEditor("hide", true)
   o LongDomainValidator validator optional
 }
 
-concept RelationshipDeclaration extends FieldDeclaration {
-  @FormEditor("title", "Type Name", "selectOptions", "types")
-  o TypeIdentifier type
+concept LongDomainValidator {
+  o Long lower optional
+  o Long upper optional
 }
 
 abstract concept Import {
@@ -260,6 +240,7 @@ function validateMetaModel(input) {
  * @return {object} the metamodel for this field
  */
 function fieldToMetaModel(ast) {
+    // console.log(`FIELD ${JSON.stringify(ast)}`);
     const field = {};
 
     // Field name
@@ -281,24 +262,46 @@ function fieldToMetaModel(ast) {
     switch (type) {
     case 'Integer':
         field.$class = 'concerto.metamodel.IntegerFieldDeclaration';
+        if (ast.default) {
+            field.defaultValue = parseInt(ast.default);
+        }
         break;
     case 'Long':
         field.$class = 'concerto.metamodel.LongFieldDeclaration';
+        if (ast.default) {
+            field.defaultValue = parseInt(ast.default);
+        }
         break;
     case 'Double':
         field.$class = 'concerto.metamodel.DoubleFieldDeclaration';
+        if (ast.default) {
+            field.defaultValue = parseFloat(ast.default);
+        }
         break;
     case 'Boolean':
         field.$class = 'concerto.metamodel.BooleanFieldDeclaration';
+        if (ast.default) {
+            if (ast.default === 'true') {
+                field.defaultValue = true;
+            } else {
+                field.defaultValue = false;
+            }
+        }
         break;
     case 'DateTime':
         field.$class = 'concerto.metamodel.DateTimeFieldDeclaration';
         break;
     case 'String':
         field.$class = 'concerto.metamodel.StringFieldDeclaration';
+        if (ast.default) {
+            field.defaultValue = ast.default;
+        }
         break;
     default:
         field.$class = 'concerto.metamodel.ObjectFieldDeclaration';
+        if (ast.default) {
+            field.defaultValue = ast.default;
+        }
         field.type = {
             $class: 'concerto.metamodel.TypeIdentifier',
             name: type
@@ -509,6 +512,7 @@ function modelFileToMetaModel(modelFile, validate) {
  */
 function fieldFromMetaModel(mm) {
     let result = '';
+    let defaultString = '';
     if (mm.$class === 'concerto.metamodel.RelationshipDeclaration') {
         result += '-->';
     } else {
@@ -519,24 +523,48 @@ function fieldFromMetaModel(mm) {
         break;
     case 'concerto.metamodel.BooleanFieldDeclaration':
         result += ' Boolean';
+        if (mm.defaultValue === true || mm.defaultValue === false) {
+            if (mm.defaultValue) {
+                defaultString += ' default=true';
+            } else {
+                defaultString += ' default=false';
+            }
+        }
         break;
     case 'concerto.metamodel.DateTimeFieldDeclaration':
         result += ' DateTime';
         break;
     case 'concerto.metamodel.DoubleFieldDeclaration':
         result += ' Double';
+        if (mm.defaultValue) {
+            const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
+
+            defaultString += ` default=${doubleString}`;
+        }
         break;
     case 'concerto.metamodel.IntegerFieldDeclaration':
         result += ' Integer';
+        if (mm.defaultValue) {
+            defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
         break;
     case 'concerto.metamodel.LongFieldDeclaration':
         result += ' Long';
+        if (mm.defaultValue) {
+            defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
         break;
     case 'concerto.metamodel.StringFieldDeclaration':
         result += ' String';
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
         break;
     case 'concerto.metamodel.ObjectFieldDeclaration':
         result += ` ${mm.type.name}`;
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
         break;
     case 'concerto.metamodel.RelationshipDeclaration':
         result += ` ${mm.type.name}`;
@@ -549,6 +577,7 @@ function fieldFromMetaModel(mm) {
     if (mm.isOptional) {
         result += ' optional';
     }
+    result += defaultString;
     return result;
 }
 

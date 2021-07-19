@@ -32,8 +32,10 @@ participant Person extends Individual {
   o String firstName
   o String lastName
   o Address address
-  --> Address address2
-  --> Address[] address3
+  o Address address2 default="USAddress"
+  --> Address address3
+  --> Address[] address4
+  --> Address address5 optional
   o Gender gender
   o DateTime dob optional
 }
@@ -44,12 +46,20 @@ participant Employee extends Person {
 }
 
 concept Address identified {
-  o Integer zip
-  o Long zip2
-  o Double zip3
-  o String city
-  o String country
+  o Integer zip default=10001
+  o Long zip2 default=10001
+  o Double zip3 default=10001.0
+  o String city default="NYC"
+  o String country default="USA"
   o String[] street
+	o Boolean isResidential default=true
+	o Boolean isPrivate default=false
+}
+
+concept USAddress extends Address {
+  o Integer zip4
+  o Long zip5
+  o Double zip6
 }
 
 asset A {
