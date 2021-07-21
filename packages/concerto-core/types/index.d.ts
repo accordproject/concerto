@@ -448,6 +448,14 @@ declare module '@accordproject/concerto-core' {
     getNamespace(obj: any): string;
   }
 
+  // MetaModel
+  export namespace MetaModel {
+    const metaModelCto: string;
+    function modelFileToMetaModel(modelFile: ModelFile, validate: boolean): any;
+    function ctoToMetaModel(model: string, validate: boolean): any;
+    function ctoFromMetaModel(metaModel: any, validate: boolean): string;
+  }
+  
   // version
   export const version: any;
 }
