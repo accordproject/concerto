@@ -100,8 +100,8 @@ module.exports.TypedStack = require('./lib/serializer/typedstack');
 // Concerto
 module.exports.Concerto = require('./lib/concerto');
 
-// Version
-module.exports.version = require('./package.json');
-
 // MetaModel
 module.exports.MetaModel = require('./lib/introspect/metamodel');
+
+// Version
+module.exports.version = require('./package.json');
