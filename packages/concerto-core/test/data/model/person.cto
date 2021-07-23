@@ -70,4 +70,6 @@ event E {
 
 transaction T identified by id {
 	o String id
+	o TemporalUnit tu
+	o Month month // This is imported from the org.accordproject.time namespace
 }

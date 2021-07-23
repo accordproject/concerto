@@ -15,6 +15,7 @@
 'use strict';
 
 const ModelManager = require('../../lib/modelmanager');
+const ModelLoader = require('../../lib/modelloader');
 const ModelFile = require('../../lib/introspect/modelfile');
 const MetaModel = require('../../lib/introspect/metamodel');
 const fs = require('fs');
@@ -25,8 +26,10 @@ chai.should();
 chai.use(require('chai-things'));
 
 describe('MetaModel', () => {
-    const personModel = fs.readFileSync(path.resolve(__dirname, '../data/model/person.cto'), 'utf8');
+    const personModelPath = path.resolve(__dirname, '../data/model/person.cto');
+    const personModel = fs.readFileSync(personModelPath, 'utf8');
     const personMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/person.json'), 'utf8'));
+    const personMetaModelResolved = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/personResolved.json'), 'utf8'));
 
     describe('#toMetaModel', () => {
         it('should convert a CTO model to its metamodel', () => {
@@ -37,6 +40,12 @@ describe('MetaModel', () => {
         it('should convert and validate a CTO model to its metamodel', () => {
             const mm1 = MetaModel.ctoToMetaModel(personModel);
             mm1.should.deep.equal(personMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
+            const modelManager = await ModelLoader.loadModelManager([personModelPath]);
+            const mm1 = MetaModel.ctoToMetaModelAndResolve(modelManager, personModel);
+            mm1.should.deep.equal(personMetaModelResolved);
         });
 
         it('should convert a ModelFile to its metamodel', () => {

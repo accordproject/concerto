@@ -186,22 +186,37 @@ class Commands {
     }
 
     /**
-     * Convert between CTO string and metamodel
+     * Import a CTO string to its metamodel
      *
-     * @param {string} input (meta)model
+     * @param {string} input - CTO
+     * @param {string[]} ctoFiles - the CTO files used for import resolution
+     * @param {boolean} resolve - whether to resolve the names
+     * @param {string} the metamodel
+     */
+    static async import(input, ctoFiles, resolve) {
+        const inputString = fs.readFileSync(input, 'utf8');
+        let result;
+        if (resolve) {
+            const modelManager = await ModelLoader.loadModelManager(ctoFiles);
+            result = MetaModel.ctoToMetaModelAndResolve(modelManager, inputString);
+        } else {
+            result = MetaModel.ctoToMetaModel(inputString);
+        }
+        return JSON.stringify(result);
+    }
+
+    /**
+     * Export a metamodel to a CTO string
+     *
+     * @param {string} input metamodel
+     * @param {string[]} ctoFiles - the CTO files used for import resolution
      * @param {string} transformed (meta)model
      */
-    static async transform(input) {
-        if (path.extname(input) === '.cto') {
-            const inputString = fs.readFileSync(input, 'utf8');
-            const result = MetaModel.ctoToMetaModel(inputString);
-            return JSON.stringify(result);
-        } else {
-            const inputString = fs.readFileSync(input, 'utf8');
-            const json = JSON.parse(inputString);
-            const result = MetaModel.ctoFromMetaModel(json);
-            return result;
-        }
+    static async export(input, ctoFiles) {
+        const inputString = fs.readFileSync(input, 'utf8');
+        const json = JSON.parse(inputString);
+        const result = MetaModel.ctoFromMetaModel(json);
+        return result;
     }
 }
 

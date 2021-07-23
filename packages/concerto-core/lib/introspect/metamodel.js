@@ -56,6 +56,7 @@ concept DecoratorBoolean extends DecoratorLiteral {
 concept TypeIdentifier {
   @FormEditor("selectOptions", "types")
   o String name default="Concept"
+  o String fullyQualifiedName optional
 }
 
 concept DecoratorIdentifier extends DecoratorLiteral {
@@ -198,7 +199,7 @@ concept ImportAll extends Import {
 }
 
 concept ImportType extends Import {
-  o TypeIdentifier identifier
+  o String name
 }
 
 concept ModelFile {
@@ -232,6 +233,93 @@ function validateMetaModel(input) {
     // First validate the metaModel
     const object = serializer.fromJSON(input);
     return serializer.toJSON(object);
+}
+
+/**
+ * Create a name resolution table
+ * @param {*} modelManager - the model manager
+ * @param {object} metaModel - the metamodel (JSON)
+ * @return {object} mapping from local to fully qualified names
+ */
+function createNameTable(modelManager, metaModel) {
+    const table = {};
+
+    // First list the imported names in order (overriding as we go along)
+    const imports = metaModel.imports;
+    imports.forEach((imp) => {
+        const namespace = imp.namespace;
+        const modelFile = modelManager.getModelFile(namespace);
+        if (imp.$class === 'concerto.metamodel.ImportType') {
+            if (!modelFile.getLocalType(imp.name)) {
+                throw new Error(`Declaration ${imp.identifier.name} in namespace ${namespace} not found`);
+            }
+            table[imp.name] = namespace;
+        } else {
+            const decls = modelFile.getAllDeclarations();
+            decls.forEach((decl) => {
+                table[decl.getName()] = namespace;
+            });
+        }
+    });
+
+    // Then add the names local to this metaModel (overriding as we go along)
+    metaModel.declarations.forEach((decl) => {
+        table[decl.name] = metaModel.namespace;
+    });
+
+    return table;
+}
+
+/**
+ * Resolve a name using the name table
+ * @param {string} name - the name of the type to resolve
+ * @param {object} table - the name table
+ * @return {string} the fully qualified name
+ */
+function resolveName(name, table) {
+    if (!table[name]) {
+        throw new Error(`Name ${name} not found`);
+    }
+    const namespace = table[name];
+    return `${namespace}.${name}`;
+}
+
+/**
+ * Name resolution for metamodel
+ * @param {object} metaModel - the metamodel (JSON)
+ * @param {object} table - the name table
+ * @return {object} the metamodel with fully qualified names
+ */
+function resolveTypeNames(metaModel, table) {
+    switch (metaModel.$class) {
+    case 'concerto.metamodel.ModelFile': {
+        metaModel.declarations.forEach((decl) => {
+            resolveTypeNames(decl, table);
+        });
+    }
+        break;
+    case 'concerto.metamodel.AssetDeclaration':
+    case 'concerto.metamodel.ConceptDeclaration':
+    case 'concerto.metamodel.EventDeclaration':
+    case 'concerto.metamodel.TransactionDeclaration':
+    case 'concerto.metamodel.ParticipantDeclaration': {
+        if (metaModel.superType) {
+            const name = metaModel.superType.name;
+            metaModel.superType.fullyQualifiedName = resolveName(name, table);
+        }
+        metaModel.fields.forEach((field) => {
+            resolveTypeNames(field, table);
+        });
+    }
+        break;
+    case 'concerto.metamodel.ObjectFieldDeclaration':
+    case 'concerto.metamodel.RelationshipDeclaration': {
+        const name = metaModel.type.name;
+        metaModel.type.fullyQualifiedName = resolveName(name, table);
+    }
+        break;
+    }
+    return metaModel;
 }
 
 /**
@@ -468,10 +556,7 @@ function modelToMetaModel(ast, validate = true) {
                 ns.$class = 'concerto.metamodel.ImportAll';
             } else {
                 ns.$class = 'concerto.metamodel.ImportType';
-                ns.identifier = {
-                    $class: 'concerto.metamodel.TypeIdentifier',
-                    name
-                };
+                ns.name = name;
             }
             if(imp.uri) {
                 ns.uri = imp.uri;
@@ -647,7 +732,7 @@ function ctoFromMetaModel(metaModel, validate = true) {
         mm.imports.forEach((imp) => {
             let name = '*';
             if (imp.$class === 'concerto.metamodel.ImportType') {
-                name = imp.identifier.name;
+                name = imp.name;
             }
             result += `\nimport ${imp.namespace}.${name}`;
             if (imp.uri) {
@@ -665,7 +750,7 @@ function ctoFromMetaModel(metaModel, validate = true) {
 
 /**
  * Export metamodel from a model string
- * @param {object} model - the string for the model
+ * @param {string} model - the string for the model
  * @param {boolean} [validate] - whether to perform validation
  * @return {object} the metamodel for this model
  */
@@ -674,9 +759,26 @@ function ctoToMetaModel(model, validate) {
     return modelToMetaModel(ast);
 }
 
+/**
+ * Export metamodel from a model string and resolve names
+ * @param {*} modelManager - the model manager
+ * @param {string} model - the string for the model
+ * @param {boolean} [validate] - whether to perform validation
+ * @return {object} the metamodel for this model
+ */
+function ctoToMetaModelAndResolve(modelManager, model, validate) {
+    const ast = parser.parse(model);
+    const metaModel = modelToMetaModel(ast);
+    const nameTable = createNameTable(modelManager, metaModel);
+    // This adds the fully qualified names to the same object
+    resolveTypeNames(metaModel, nameTable);
+    return metaModel;
+}
+
 module.exports = {
     metaModelCto,
     modelFileToMetaModel,
     ctoToMetaModel,
+    ctoToMetaModelAndResolve,
     ctoFromMetaModel,
 };
