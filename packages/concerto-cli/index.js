@@ -145,14 +145,44 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
-    .command('transform', 'get the cto string from a metamodel', (yargs) => {
-        yargs.demandOption(['input'], 'Please provide input (meta)model');
+    .command('import', 'import a cto string into its metamodel', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide an input cto');
+        yargs.option('model', {
+            describe: 'array of concerto (cto) model files',
+            type: 'string',
+            array: true
+        });
         yargs.option('input', {
-            describe: '(meta)model file',
+            describe: 'the cto model to import',
+            type: 'string'
+        });
+        yargs.option('resolve', {
+            describe: 'resolve names to fully qualified names',
+            type: 'boolean',
+            default: false
+        });
+    }, (argv) => {
+        return Commands.import(argv.input, argv.model, argv.resolve)
+            .then((result) => {
+                Logger.info(result);
+            })
+            .catch((err) => {
+                Logger.error(err.message);
+            });
+    })
+    .command('export', 'export a metamodel to cto syntax', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide an input metamodel');
+        yargs.option('model', {
+            describe: 'array of concerto (cto) model files',
+            type: 'string',
+            array: true
+        });
+        yargs.option('input', {
+            describe: 'the metamodel to export',
             type: 'string'
         });
     }, (argv) => {
-        return Commands.transform(argv.input)
+        return Commands.export(argv.input, argv.model)
             .then((result) => {
                 Logger.info(result);
             })

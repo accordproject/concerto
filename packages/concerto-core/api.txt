@@ -111,6 +111,9 @@ class ModelFileDownloader {
 }
    + void createMetaModelManager() 
    + object validateMetaModel() 
+   + object createNameTable() 
+   + string resolveName() 
+   + object resolveTypeNames() 
    + object fieldToMetaModel() 
    + object relationshipToMetaModel() 
    + object enumPropertyToMetaModel() 
@@ -121,6 +124,7 @@ class ModelFileDownloader {
    + string declFromMetaModel() 
    + string ctoFromMetaModel() 
    + object ctoToMetaModel() 
+   + object ctoToMetaModelAndResolve() 
 class ModelFile {
    + void constructor(ModelManager,string,string) throws IllegalModelException
    + Boolean isSystemModelFile() 

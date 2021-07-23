@@ -52,7 +52,8 @@
       "name": "Person",
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
-        "name": "Individual"
+        "name": "Individual",
+        "fullyQualifiedName": "test.person.Individual"
       },
       "fields": [
         {
@@ -71,7 +72,8 @@
           "$class": "concerto.metamodel.ObjectFieldDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Address"
+            "name": "Address",
+            "fullyQualifiedName": "test.person.Address"
           },
           "name": "address",
           "isArray": false,
@@ -82,7 +84,8 @@
           "defaultValue": "USAddress",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Address"
+            "name": "Address",
+            "fullyQualifiedName": "test.person.Address"
           },
           "name": "address2",
           "isArray": false,
@@ -92,7 +95,8 @@
           "$class": "concerto.metamodel.RelationshipDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Address"
+            "name": "Address",
+            "fullyQualifiedName": "test.person.Address"
           },
           "name": "address3",
           "isArray": false,
@@ -102,7 +106,8 @@
           "$class": "concerto.metamodel.RelationshipDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Address"
+            "name": "Address",
+            "fullyQualifiedName": "test.person.Address"
           },
           "name": "address4",
           "isArray": true,
@@ -112,7 +117,8 @@
           "$class": "concerto.metamodel.RelationshipDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Address"
+            "name": "Address",
+            "fullyQualifiedName": "test.person.Address"
           },
           "name": "address5",
           "isArray": false,
@@ -122,7 +128,8 @@
           "$class": "concerto.metamodel.ObjectFieldDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Gender"
+            "name": "Gender",
+            "fullyQualifiedName": "test.person.Gender"
           },
           "name": "gender",
           "isArray": false,
@@ -142,7 +149,8 @@
       "name": "Employee",
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
-        "name": "Person"
+        "name": "Person",
+        "fullyQualifiedName": "test.person.Person"
       },
       "fields": [
         {
@@ -230,7 +238,8 @@
       "name": "USAddress",
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
-        "name": "Address"
+        "name": "Address",
+        "fullyQualifiedName": "test.person.Address"
       },
       "fields": [
         {
@@ -284,7 +293,8 @@
           "$class": "concerto.metamodel.ObjectFieldDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "TemporalUnit"
+            "name": "TemporalUnit",
+            "fullyQualifiedName": "org.accordproject.time.TemporalUnit"
           },
           "name": "tu",
           "isArray": false,
@@ -294,7 +304,8 @@
           "$class": "concerto.metamodel.ObjectFieldDeclaration",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
-            "name": "Month"
+            "name": "Month",
+            "fullyQualifiedName": "org.accordproject.time.Month"
           },
           "name": "month",
           "isArray": false,

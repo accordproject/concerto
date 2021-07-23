@@ -203,17 +203,26 @@ describe('cicero-cli', () => {
         });
     });
 
-    describe('#metamodel', async () => {
+    describe('#import', async () => {
         it('should transform cto to metamodel', async () => {
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contract.json')));
-            const result = JSON.parse(await Commands.transform(path.resolve(__dirname, 'models/contract.cto')));
+            const result = JSON.parse(await Commands.import(path.resolve(__dirname, 'models/contract.cto')));
             result.should.deep.equal(expected);
         });
 
+        it('should transform cto to metamodel and resolve names', async () => {
+            const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contractResolved.json')));
+            const contractFile = path.resolve(__dirname, 'models/contract.cto');
+            const result = JSON.parse(await Commands.import(contractFile, [contractFile], true));
+            result.should.deep.equal(expected);
+        });
+    });
+
+    describe('#export', async () => {
         it('should transform a metamodel to cto', async () => {
             const expected = fs.readFileSync(path.resolve(__dirname, 'models/contract2.cto'), 'utf-8');
             const metamodel = path.resolve(__dirname, 'models/contract.json');
-            const result = await Commands.transform(metamodel);
+            const result = await Commands.export(metamodel);
             result.should.equal(expected);
         });
     });

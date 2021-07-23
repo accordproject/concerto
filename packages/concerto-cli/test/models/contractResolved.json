@@ -1,0 +1,86 @@
+{
+  "$class": "concerto.metamodel.ModelFile",
+  "namespace": "org.accordproject.cicero.contract",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel.AssetDeclaration",
+      "isAbstract": false,
+      "name": "AccordContractState",
+      "identified": {
+        "$class": "concerto.metamodel.IdentifiedBy",
+        "name": "stateId"
+      },
+      "fields": [
+        {
+          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "name": "stateId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    }, 
+    {
+      "$class": "concerto.metamodel.ParticipantDeclaration",
+      "isAbstract": false,
+      "name": "AccordParty",
+      "identified": {
+        "$class": "concerto.metamodel.IdentifiedBy",
+        "name": "partyId"
+      },
+      "fields": [
+        {
+          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "name": "partyId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    }, 
+    {
+      "$class": "concerto.metamodel.AssetDeclaration",
+      "isAbstract": true,
+      "name": "AccordContract",
+      "identified": {
+        "$class": "concerto.metamodel.IdentifiedBy",
+        "name": "contractId"
+      },
+      "fields": [
+        {
+          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "name": "contractId",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
+          "$class": "concerto.metamodel.RelationshipDeclaration",
+          "type": {
+            "$class": "concerto.metamodel.TypeIdentifier",
+            "name": "AccordParty",
+            "fullyQualifiedName": "org.accordproject.cicero.contract.AccordParty"
+          },
+          "name": "parties",
+          "isArray": true,
+          "isOptional": true
+        }
+      ]
+    }, 
+    {
+      "$class": "concerto.metamodel.AssetDeclaration",
+      "isAbstract": true,
+      "name": "AccordClause",
+      "identified": {
+        "$class": "concerto.metamodel.IdentifiedBy",
+        "name": "clauseId"
+      },
+      "fields": [
+        {
+          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "name": "clauseId",
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    }
+  ]
+}
