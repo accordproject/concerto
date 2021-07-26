@@ -451,9 +451,10 @@ declare module '@accordproject/concerto-core' {
   // MetaModel
   export namespace MetaModel {
     const metaModelCto: string;
-    function modelFileToMetaModel(modelFile: ModelFile, validate: boolean): any;
-    function ctoToMetaModel(model: string, validate: boolean): any;
-    function ctoFromMetaModel(metaModel: any, validate: boolean): string;
+    function modelFileToMetaModel(modelFile: ModelFile, validate?: boolean): any;
+    function ctoToMetaModel(model: string, validate?: boolean): any;
+    function ctoToMetaModelAndResolve(modelManager: ModelManager, model: string, validate?: boolean);
+    function ctoFromMetaModel(metaModel: any, validate?: boolean): string;
   }
   
   // version
