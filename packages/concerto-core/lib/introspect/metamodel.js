@@ -56,6 +56,7 @@ concept DecoratorBoolean extends DecoratorLiteral {
 concept TypeIdentifier {
   @FormEditor("selectOptions", "types")
   o String name default="Concept"
+  @FormEditor( "hide", true)
   o String fullyQualifiedName optional
 }
 
