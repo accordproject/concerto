@@ -77,14 +77,30 @@ concept IdentifiedBy extends Identified {
   o String name
 }
 
-@FormEditor("defaultSubclass","concerto.metamodel.ConceptDeclaration")
-abstract concept ClassDeclaration {
-  @FormEditor("hide", true)
-  o Decorator[] decorators optional
-  o Boolean isAbstract default=false
+abstract concept Declaration {
   // TODO use regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
   @FormEditor("title", "Name")
   o String name default="ClassName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
+}
+
+concept EnumDeclaration extends Declaration {
+  o EnumFieldDeclaration[] fields
+}
+
+concept EnumFieldDeclaration {
+  // TODO Allow regex modifiers e.g. //ui
+  // regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\pLm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
+  // This regex is an approximation of what the parser accepts without using unicode character classes
+  o String name default="fieldName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
+  @FormEditor("hide", true)
+  o Decorator[] decorators optional
+}
+
+@FormEditor("defaultSubclass","concerto.metamodel.ConceptDeclaration")
+abstract concept ClassDeclaration extends Declaration {
+  @FormEditor("hide", true)
+  o Decorator[] decorators optional
+  o Boolean isAbstract default=false
   o Identified identified optional
   @FormEditor("title", "Super Type")
   o TypeIdentifier superType optional
@@ -106,9 +122,6 @@ concept EventDeclaration extends ClassDeclaration {
 concept ConceptDeclaration extends ClassDeclaration {
 }
 
-concept EnumDeclaration extends ClassDeclaration {
-}
-
 @FormEditor("defaultSubclass","concerto.metamodel.StringFieldDeclaration")
 abstract concept FieldDeclaration {
   // TODO Allow regex modifiers e.g. //ui
@@ -121,9 +134,6 @@ abstract concept FieldDeclaration {
   o Boolean isOptional default=false
   @FormEditor("hide", true)
   o Decorator[] decorators optional
-}
-
-concept EnumFieldDeclaration extends FieldDeclaration {
 }
 
 concept RelationshipDeclaration extends FieldDeclaration {
@@ -208,7 +218,7 @@ concept ModelFile {
   @FormEditor("hide", true)
   o Import[] imports optional
   @FormEditor("title", "Classes")
-  o ClassDeclaration[] declarations optional
+  o Declaration[] declarations optional
 }
 `;
 
@@ -324,7 +334,24 @@ function resolveTypeNames(metaModel, table) {
 }
 
 /**
- * Create metamodel for a field
+ * Create metamodel for an enum field
+ * @param {object} ast - the AST for the field
+ * @return {object} the metamodel for this field
+ */
+function enumFieldToMetaModel(ast) {
+    // console.log(`FIELD ${JSON.stringify(ast)}`);
+    const field = {};
+
+    field.$class = 'concerto.metamodel.EnumFieldDeclaration';
+
+    // Field name
+    field.name = ast.id.name;
+
+    return field;
+}
+
+/**
+ * Create metamodel for a class field
  * @param {object} ast - the AST for the field
  * @return {object} the metamodel for this field
  */
@@ -434,31 +461,35 @@ function relationshipToMetaModel(ast) {
 }
 
 /**
- * Create metamodel for an enum field
- * @param {object} ast - the AST for the enum field
- * @return {object} the metamodel for this enum field
+ * Create metamodel for an enum declaration
+ * @param {object} ast - the AST for the enum declaration
+ * @return {object} the metamodel for this enum declaration
  */
-function enumPropertyToMetaModel(ast) {
-    let property = {
-        $class: 'concerto.metamodel.EnumFieldDeclaration',
-    };
+function enumDeclToMetaModel(ast) {
+    let decl = {};
 
-    // Field name
-    property.name = ast.id.name;
-    // Is it an array?
-    property.isArray = false;
-    // Is it an optional?
-    property.isOptional = false;
+    decl.$class = 'concerto.metamodel.EnumDeclaration';
 
-    return property;
+    // The enum name
+    decl.name = ast.id.name;
+
+    // Enum fields
+    decl.fields = [];
+    for (let n = 0; n < ast.body.declarations.length; n++) {
+        let thing = ast.body.declarations[n];
+
+        decl.fields.push(enumFieldToMetaModel(thing));
+    }
+
+    return decl;
 }
 
 /**
  * Create metamodel for a class declaration
- * @param {object} ast - the AST for the declaration
- * @return {object} the metamodel for this declaration
+ * @param {object} ast - the AST for the class declaration
+ * @return {object} the metamodel for this class declaration
  */
-function declToMetaModel(ast) {
+function classDeclToMetaModel(ast) {
     let decl = {};
 
     if(ast.type === 'AssetDeclaration') {
@@ -471,8 +502,6 @@ function declToMetaModel(ast) {
         decl.$class = 'concerto.metamodel.ParticipantDeclaration';
     } else if (ast.type === 'TransactionDeclaration') {
         decl.$class = 'concerto.metamodel.TransactionDeclaration';
-    } else if (ast.type === 'EnumDeclaration') {
-        decl.$class = 'concerto.metamodel.EnumDeclaration';
     }
 
     // The class name
@@ -523,12 +552,22 @@ function declToMetaModel(ast) {
             decl.fields.push(fieldToMetaModel(thing));
         } else if (thing.type === 'RelationshipDeclaration') {
             decl.fields.push(relationshipToMetaModel(thing));
-        } else if (thing.type === 'EnumPropertyDeclaration') {
-            decl.fields.push(enumPropertyToMetaModel(thing));
         }
     }
 
     return decl;
+}
+
+/**
+ * Create metamodel for a declaration
+ * @param {object} ast - the AST for the declaration
+ * @return {object} the metamodel for this declaration
+ */
+function declToMetaModel(ast) {
+    if(ast.type === 'EnumDeclaration') {
+        return enumDeclToMetaModel(ast);
+    }
+    return classDeclToMetaModel(ast);
 }
 
 /**
