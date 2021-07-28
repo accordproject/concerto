@@ -77,14 +77,10 @@ concept IdentifiedBy extends Identified {
   o String name
 }
 
-@FormEditor("defaultSubclass","concerto.metamodel.ClassDeclaration")
-abstract concept Declaration {
+concept EnumDeclaration {
   // TODO use regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
-  @FormEditor("title", "Name")
+  @FormEditor("title", "Enum Name")
   o String name default="ClassName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
-}
-
-concept EnumDeclaration extends Declaration {
   o EnumFieldDeclaration[] fields
 }
 
@@ -98,7 +94,10 @@ concept EnumFieldDeclaration {
 }
 
 @FormEditor("defaultSubclass","concerto.metamodel.ConceptDeclaration")
-abstract concept ClassDeclaration extends Declaration {
+abstract concept ClassDeclaration {
+  // TODO use regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
+  @FormEditor("title", "Class Name")
+  o String name default="ClassName" // regex=/^(?!null|true|false)(\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\w|\\d|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\S|\\u200C|\\u200D)*$/
   @FormEditor("hide", true)
   o Decorator[] decorators optional
   o Boolean isAbstract default=false
