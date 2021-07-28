@@ -189,11 +189,15 @@ class Commands {
      * Import a CTO string to its metamodel
      *
      * @param {string} input - CTO
-     * @param {string[]} ctoFiles - the CTO files used for import resolution
+     * @param {string[]} [ctoFiles] - the CTO files used for import resolution
      * @param {boolean} resolve - whether to resolve the names
      * @param {string} the metamodel
      */
-    static async import(input, ctoFiles, resolve) {
+    static async import(input, ctoFiles = [], resolve) {
+        // Add input to ctoFiles for convenience
+        if (!ctoFiles.includes(input)) {
+            ctoFiles.push(input);
+        }
         const inputString = fs.readFileSync(input, 'utf8');
         let result;
         if (resolve) {
