@@ -77,6 +77,7 @@ concept IdentifiedBy extends Identified {
   o String name
 }
 
+@FormEditor("defaultSubclass","concerto.metamodel.ClassDeclaration")
 abstract concept Declaration {
   // TODO use regex /^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*/u
   @FormEditor("title", "Name")
@@ -217,8 +218,10 @@ concept ModelFile {
   o String namespace default="my.namespace"
   @FormEditor("hide", true)
   o Import[] imports optional
+  @FormEditor("title", "Enums")
+  o EnumDeclaration[] enumDeclarations optional
   @FormEditor("title", "Classes")
-  o Declaration[] declarations optional
+  o ClassDeclaration[] classDeclarations optional
 }
 `;
 
@@ -274,7 +277,10 @@ function createNameTable(modelManager, metaModel) {
     });
 
     // Then add the names local to this metaModel (overriding as we go along)
-    metaModel.declarations.forEach((decl) => {
+    metaModel.enumDeclarations.forEach((decl) => {
+        table[decl.name] = metaModel.namespace;
+    });
+    metaModel.classDeclarations.forEach((decl) => {
         table[decl.name] = metaModel.namespace;
     });
 
@@ -304,7 +310,10 @@ function resolveName(name, table) {
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
     case 'concerto.metamodel.ModelFile': {
-        metaModel.declarations.forEach((decl) => {
+        metaModel.enumDeclarations.forEach((decl) => {
+            resolveTypeNames(decl, table);
+        });
+        metaModel.classDeclarations.forEach((decl) => {
             resolveTypeNames(decl, table);
         });
     }
@@ -606,12 +615,17 @@ function modelToMetaModel(ast, validate = true) {
     }
 
     if (ast.body.length > 0) {
-        metamodel.declarations = [];
+        metamodel.enumDeclarations = [];
+        metamodel.classDeclarations = [];
     }
     for(let n=0; n < ast.body.length; n++ ) {
         const thing = ast.body[n];
         const decl = declToMetaModel(thing);
-        metamodel.declarations.push(decl);
+        if (decl.$class === 'concerto.metamodel.EnumDeclaration') {
+            metamodel.enumDeclarations.push(decl);
+        } else {
+            metamodel.classDeclarations.push(decl);
+        }
     }
 
     // Last, validate the JSON metaModel
@@ -780,8 +794,13 @@ function ctoFromMetaModel(metaModel, validate = true) {
             }
         });
     }
-    if (mm.declarations && mm.declarations.length > 0) {
-        mm.declarations.forEach((decl) => {
+    if (mm.enumDeclarations && mm.enumDeclarations.length > 0) {
+        mm.enumDeclarations.forEach((decl) => {
+            result += `\n\n${declFromMetaModel(decl)}`;
+        });
+    }
+    if (mm.classDeclarations && mm.classDeclarations.length > 0) {
+        mm.classDeclarations.forEach((decl) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
