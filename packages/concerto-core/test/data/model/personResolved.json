@@ -14,7 +14,7 @@
       "uri": "https://models.accordproject.org/time@0.2.0.cto"
     }
   ],
-  "declarations": [
+  "enumDeclarations": [
     {
       "$class": "concerto.metamodel.EnumDeclaration",
       "fields": [
@@ -32,7 +32,9 @@
         }
       ],
       "name": "Gender"
-    }, 
+    }
+  ],
+  "classDeclarations": [
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
       "isAbstract": true,
