@@ -60,6 +60,18 @@ describe('StringValidator', () => {
             }).should.throw(/Validator error for field id org.acme.myField/);
         });
 
+        it('should validate a string with escaped chacters', () => {
+            let v = new StringValidator(mockField, { pattern: '^[\\\\]*\\n$' });
+            v.validate('id', '\\\\\n');
+        });
+
+        it('should not validate a string with escaped chacters', () => {
+            let v = new StringValidator(mockField, { pattern: '^[\\\\]*\\n$' });
+            (() => {
+                v.validate('id', '\\hi!\n');
+            }).should.throw(/Validator error for field id org.acme.myField/);
+        });
+
         it('should validate a unicode string', () => {
             let v = new StringValidator(mockField, { pattern: '^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
             v.validate('id', 'AB1234567');
