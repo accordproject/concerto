@@ -17,6 +17,7 @@
   "enumDeclarations": [
     {
       "$class": "concerto.metamodel.EnumDeclaration",
+      "name": "Gender",
       "fields": [
         {
           "$class": "concerto.metamodel.EnumFieldDeclaration",
@@ -30,19 +31,19 @@
           "$class": "concerto.metamodel.EnumFieldDeclaration",
           "name": "OTHER"
         }
-      ],
-      "name": "Gender"
+      ]
     }
   ],
   "classDeclarations": [
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
+      "name": "Individual",
       "isAbstract": true,
-      "fields": [],
-      "name": "Individual"
+      "fields": []
     }, 
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
+      "name": "Person",
       "isAbstract": false,
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
@@ -51,6 +52,10 @@
       "fields": [
         {
           "$class": "concerto.metamodel.StringFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.StringRegexValidator",
+            "regex": "/[a-zA-Z]*/u"
+          },
           "name": "firstName",
           "isArray": false,
           "isOptional": false
@@ -128,11 +133,11 @@
           "isArray": false,
           "isOptional": true
         }
-      ],
-      "name": "Person"
+      ]
     }, 
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
+      "name": "Employee",
       "isAbstract": false,
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
@@ -151,11 +156,11 @@
           "isArray": false,
           "isOptional": false
         }
-      ],
-      "name": "Employee"
+      ]
     }, 
     {
       "$class": "concerto.metamodel.ConceptDeclaration",
+      "name": "Address",
       "isAbstract": false,
       "identified": {
         "$class": "concerto.metamodel.Identified"
@@ -216,11 +221,11 @@
           "isArray": false,
           "isOptional": false
         }
-      ],
-      "name": "Address"
+      ]
     }, 
     {
       "$class": "concerto.metamodel.ConceptDeclaration",
+      "name": "USAddress",
       "isAbstract": false,
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
@@ -229,39 +234,114 @@
       "fields": [
         {
           "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.IntegerDomainValidator",
+            "lower": -365,
+            "upper": 365
+          },
           "name": "zip4",
           "isArray": false,
           "isOptional": false
         }, 
         {
+          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.IntegerDomainValidator",
+            "upper": 365
+          },
+          "name": "zip41",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
+          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.IntegerDomainValidator",
+            "lower": -365
+          },
+          "name": "zip42",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
           "$class": "concerto.metamodel.LongFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.LongDomainValidator",
+            "lower": -365,
+            "upper": 365
+          },
           "name": "zip5",
           "isArray": false,
           "isOptional": false
         }, 
         {
+          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.LongDomainValidator",
+            "upper": 365
+          },
+          "name": "zip51",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
+          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.LongDomainValidator",
+            "lower": -365
+          },
+          "name": "zip52",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
           "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.DoubleDomainValidator",
+            "lower": -3.14,
+            "upper": 3.14
+          },
           "name": "zip6",
           "isArray": false,
           "isOptional": false
+        }, 
+        {
+          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.DoubleDomainValidator",
+            "lower": -3.14
+          },
+          "name": "zip61",
+          "isArray": false,
+          "isOptional": false
+        }, 
+        {
+          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "validator": {
+            "$class": "concerto.metamodel.DoubleDomainValidator",
+            "upper": 3.14
+          },
+          "name": "zip62",
+          "isArray": false,
+          "isOptional": false
         }
-      ],
-      "name": "USAddress"
+      ]
     }, 
     {
       "$class": "concerto.metamodel.AssetDeclaration",
+      "name": "A",
       "isAbstract": false,
-      "fields": [],
-      "name": "A"
+      "fields": []
     }, 
     {
       "$class": "concerto.metamodel.EventDeclaration",
+      "name": "E",
       "isAbstract": false,
-      "fields": [],
-      "name": "E"
+      "fields": []
     }, 
     {
       "$class": "concerto.metamodel.TransactionDeclaration",
+      "name": "T",
       "isAbstract": false,
       "identified": {
         "$class": "concerto.metamodel.IdentifiedBy",
@@ -294,8 +374,7 @@
           "isArray": false,
           "isOptional": false
         }
-      ],
-      "name": "T"
+      ]
     }
   ]
 }

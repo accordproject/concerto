@@ -381,17 +381,53 @@ function fieldToMetaModel(ast) {
         if (ast.default) {
             field.defaultValue = parseInt(ast.default);
         }
+        if (ast.range) {
+            const validator = {
+                $class: 'concerto.metamodel.IntegerDomainValidator',
+            };
+            if (ast.range.lower) {
+                validator.lower = parseInt(ast.range.lower);
+            }
+            if (ast.range.upper) {
+                validator.upper = parseInt(ast.range.upper);
+            }
+            field.validator = validator;
+        }
         break;
     case 'Long':
         field.$class = 'concerto.metamodel.LongFieldDeclaration';
         if (ast.default) {
             field.defaultValue = parseInt(ast.default);
         }
+        if (ast.range) {
+            const validator = {
+                $class: 'concerto.metamodel.LongDomainValidator',
+            };
+            if (ast.range.lower) {
+                validator.lower = parseInt(ast.range.lower);
+            }
+            if (ast.range.upper) {
+                validator.upper = parseInt(ast.range.upper);
+            }
+            field.validator = validator;
+        }
         break;
     case 'Double':
         field.$class = 'concerto.metamodel.DoubleFieldDeclaration';
         if (ast.default) {
             field.defaultValue = parseFloat(ast.default);
+        }
+        if (ast.range) {
+            const validator = {
+                $class: 'concerto.metamodel.DoubleDomainValidator',
+            };
+            if (ast.range.lower) {
+                validator.lower = parseFloat(ast.range.lower);
+            }
+            if (ast.range.upper) {
+                validator.upper = parseFloat(ast.range.upper);
+            }
+            field.validator = validator;
         }
         break;
     case 'Boolean':
@@ -411,6 +447,13 @@ function fieldToMetaModel(ast) {
         field.$class = 'concerto.metamodel.StringFieldDeclaration';
         if (ast.default) {
             field.defaultValue = ast.default;
+        }
+        if (ast.regex) {
+            const regex = ast.regex.flags ? `/${ast.regex.pattern}/${ast.regex.flags}` :  `/${ast.regex.pattern}/}`;
+            field.validator = {
+                $class: 'concerto.metamodel.StringRegexValidator',
+                regex,
+            };
         }
         break;
     default:
@@ -643,11 +686,14 @@ function modelFileToMetaModel(modelFile, validate) {
 function fieldFromMetaModel(mm) {
     let result = '';
     let defaultString = '';
+    let validatorString = '';
+
     if (mm.$class === 'concerto.metamodel.RelationshipDeclaration') {
         result += '-->';
     } else {
         result += 'o';
     }
+
     switch (mm.$class) {
     case 'concerto.metamodel.EnumFieldDeclaration':
         break;
@@ -671,11 +717,21 @@ function fieldFromMetaModel(mm) {
 
             defaultString += ` default=${doubleString}`;
         }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
         break;
     case 'concerto.metamodel.IntegerFieldDeclaration':
         result += ' Integer';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
     case 'concerto.metamodel.LongFieldDeclaration':
@@ -683,11 +739,19 @@ function fieldFromMetaModel(mm) {
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
         break;
     case 'concerto.metamodel.StringFieldDeclaration':
         result += ' String';
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
+        }
+        if (mm.validator) {
+            validatorString += ` regex=${mm.validator.regex}`;
         }
         break;
     case 'concerto.metamodel.ObjectFieldDeclaration':
@@ -708,6 +772,7 @@ function fieldFromMetaModel(mm) {
         result += ' optional';
     }
     result += defaultString;
+    result += validatorString;
     return result;
 }
 

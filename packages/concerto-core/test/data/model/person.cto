@@ -29,7 +29,7 @@ abstract participant Individual {
 }
 
 participant Person extends Individual {
-  o String firstName
+  o String firstName regex=/[a-zA-Z]*/u
   o String lastName
   o Address address
   o Address address2 default="USAddress"
@@ -57,9 +57,15 @@ concept Address identified {
 }
 
 concept USAddress extends Address {
-  o Integer zip4
-  o Long zip5
-  o Double zip6
+  o Integer zip4 range=[-365,365]
+  o Integer zip41 range=[,365]
+  o Integer zip42 range=[-365,]
+  o Long zip5 range=[-365,365]
+  o Long zip51 range=[,365]
+  o Long zip52 range=[-365,]
+  o Double zip6 range=[-3.14,3.14]
+  o Double zip61 range=[-3.14,]
+  o Double zip62 range=[,3.14]
 }
 
 asset A {
