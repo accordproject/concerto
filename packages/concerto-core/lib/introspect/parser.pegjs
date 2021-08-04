@@ -283,15 +283,10 @@ UnicodeEscapeSequence
 
 RegularExpressionLiteral "regular expression"
   = "/" pattern:$RegularExpressionBody "/" flags:$RegularExpressionFlags {
-      var value;
-
-      try {
-        value = new RegExp(pattern, flags);
-      } catch (e) {
-        error(e.message);
-      }
-
-      return { type: "Literal", value: value };
+      return {
+        pattern,
+        flags
+      };
     }
 
 RegularExpressionBody
@@ -1037,7 +1032,7 @@ StringFieldDeclaration
     }
 
 StringRegexValidator
-   = "regex" __ "=" __ regex:$RegularExpressionLiteral {
+   = "regex" __ "=" __ regex:RegularExpressionLiteral {
    	return regex
   }
 
