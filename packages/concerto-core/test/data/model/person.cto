@@ -56,7 +56,13 @@ concept Address identified {
 	o Boolean isPrivate default=false
 }
 
+@Address("x",1,"y","foo","z",true)
+@Address2()
+@Address3
 concept USAddress extends Address {
+	@Zip("x",1,"y","foo","z",true)
+	@Zip2()
+	@Zip3
   o Integer zip4 range=[-365,365]
   o Integer zip41 range=[,365]
   o Integer zip42 range=[-365,]
