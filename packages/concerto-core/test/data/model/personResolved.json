@@ -234,6 +234,47 @@
     {
       "$class": "concerto.metamodel.ConceptDeclaration",
       "name": "USAddress",
+      "decorators": [
+        {
+          "$class": "concerto.metamodel.Decorator",
+          "name": "Address",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel.DecoratorString",
+              "value": "x"
+            }, 
+            {
+              "$class": "concerto.metamodel.DecoratorNumber",
+              "value": 1
+            }, 
+            {
+              "$class": "concerto.metamodel.DecoratorString",
+              "value": "y"
+            }, 
+            {
+              "$class": "concerto.metamodel.DecoratorString",
+              "value": "foo"
+            }, 
+            {
+              "$class": "concerto.metamodel.DecoratorString",
+              "value": "z"
+            }, 
+            {
+              "$class": "concerto.metamodel.DecoratorBoolean",
+              "value": true
+            }
+          ]
+        }, 
+        {
+          "$class": "concerto.metamodel.Decorator",
+          "name": "Address2",
+          "arguments": []
+        }, 
+        {
+          "$class": "concerto.metamodel.Decorator",
+          "name": "Address3"
+        }
+      ],
       "isAbstract": false,
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
@@ -250,7 +291,48 @@
           },
           "name": "zip4",
           "isArray": false,
-          "isOptional": false
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel.Decorator",
+              "name": "Zip",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel.DecoratorString",
+                  "value": "x"
+                }, 
+                {
+                  "$class": "concerto.metamodel.DecoratorNumber",
+                  "value": 1
+                }, 
+                {
+                  "$class": "concerto.metamodel.DecoratorString",
+                  "value": "y"
+                }, 
+                {
+                  "$class": "concerto.metamodel.DecoratorString",
+                  "value": "foo"
+                }, 
+                {
+                  "$class": "concerto.metamodel.DecoratorString",
+                  "value": "z"
+                }, 
+                {
+                  "$class": "concerto.metamodel.DecoratorBoolean",
+                  "value": true
+                }
+              ]
+            }, 
+            {
+              "$class": "concerto.metamodel.Decorator",
+              "name": "Zip2",
+              "arguments": []
+            }, 
+            {
+              "$class": "concerto.metamodel.Decorator",
+              "name": "Zip3"
+            }
+          ]
         }, 
         {
           "$class": "concerto.metamodel.IntegerFieldDeclaration",

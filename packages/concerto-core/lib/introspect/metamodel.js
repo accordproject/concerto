@@ -339,7 +339,6 @@ function resolveTypeNames(metaModel, table) {
  * @return {object} the metamodel for this field
  */
 function enumFieldToMetaModel(ast) {
-    // console.log(`FIELD ${JSON.stringify(ast)}`);
     const field = {};
 
     field.$class = 'concerto.metamodel.EnumFieldDeclaration';
@@ -351,12 +350,67 @@ function enumFieldToMetaModel(ast) {
 }
 
 /**
+ * Create metamodel for a decorator argument
+ * @param {object} ast - the AST for the decorator argument
+ * @return {object} the metamodel for this decorator argument
+ */
+function decoratorArgToMetaModel(ast) {
+    const decoratorArg = {};
+    switch (ast.type) {
+    case 'String':
+        decoratorArg.$class = 'concerto.metamodel.DecoratorString';
+        decoratorArg.value = ast.value;
+        break;
+    case 'Number':
+        decoratorArg.$class = 'concerto.metamodel.DecoratorNumber';
+        decoratorArg.value = ast.value;
+        break;
+    case 'Boolean':
+        decoratorArg.$class = 'concerto.metamodel.DecoratorBoolean';
+        decoratorArg.value = ast.value;
+        break;
+    default:
+        break;
+    }
+
+    return decoratorArg;
+}
+
+/**
+ * Create metamodel for a decorator
+ * @param {object} ast - the AST for the decorator
+ * @return {object} the metamodel for this decorator
+ */
+function decoratorToMetaModel(ast) {
+    const decorator = {
+        $class: 'concerto.metamodel.Decorator',
+        name: ast.name,
+    };
+    if (ast.arguments && ast.arguments.list) {
+        if (!ast.arguments.list[0]) {
+            decorator.arguments = [];
+        } else {
+            decorator.arguments = ast.arguments.list.map(decoratorArgToMetaModel);
+        }
+    }
+    return decorator;
+}
+
+/**
+ * Create metamodel for a list of decorators
+ * @param {object} ast - the AST for the decorators
+ * @return {object} the metamodel for the decorators
+ */
+function decoratorsToMetaModel(ast) {
+    return ast.map(decoratorToMetaModel);
+}
+
+/**
  * Create metamodel for a class field
  * @param {object} ast - the AST for the field
  * @return {object} the metamodel for this field
  */
 function fieldToMetaModel(ast) {
-    // console.log(`FIELD ${JSON.stringify(ast)}`);
     const field = {};
 
     // Field name
@@ -375,6 +429,12 @@ function fieldToMetaModel(ast) {
     }
     // XXX Can it be missing?
     const type = ast.propertyType.name;
+
+    // Handle decorators
+    if (ast.decorators && ast.decorators.length > 0) {
+        field.decorators = decoratorsToMetaModel(ast.decorators);
+    }
+
     switch (type) {
     case 'Integer':
         field.$class = 'concerto.metamodel.IntegerFieldDeclaration';
@@ -586,6 +646,11 @@ function classDeclToMetaModel(ast) {
         }
     }
 
+    // Handle decorators
+    if (ast.decorators && ast.decorators.length > 0) {
+        decl.decorators = decoratorsToMetaModel(ast.decorators);
+    }
+
     // Class fields
     decl.fields = [];
     for (let n = 0; n < ast.body.declarations.length; n++) {
@@ -679,6 +744,53 @@ function modelFileToMetaModel(modelFile, validate) {
 }
 
 /**
+ * Create decorator argument string from a metamodel
+ * @param {object} mm - the metamodel
+ * @return {string} the string for the decorator argument
+ */
+function decoratorArgFromMetaModel(mm) {
+    let result = '';
+    switch (mm.$class) {
+    case 'concerto.metamodel.DecoratorString':
+        result += `"${mm.value}"`;
+        break;
+    default:
+        result += `${mm.value}`;
+        break;
+    }
+    return result;
+}
+
+/**
+ * Create decorator string from a metamodel
+ * @param {object} mm - the metamodel
+ * @return {string} the string for the decorator
+ */
+function decoratorFromMetaModel(mm) {
+    let result = '';
+    result += `@${mm.name}`;
+    if (mm.arguments) {
+        result += '(';
+        result += mm.arguments.map(decoratorArgFromMetaModel).join(',');
+        result += ')';
+    }
+    return result;
+}
+
+/**
+ * Create decorators string from a metamodel
+ * @param {object} mm - the metamodel
+ * @param {string} prefix - indentation
+ * @return {string} the string for the decorators
+ */
+function decoratorsFromMetaModel(mm, prefix) {
+    let result = '';
+    result += mm.map(decoratorFromMetaModel).join(`\n${prefix}`);
+    result += `\n${prefix}`;
+    return result;
+}
+
+/**
  * Create a field string from a metamodel
  * @param {object} mm - the metamodel
  * @return {string} the string for that field
@@ -688,6 +800,9 @@ function fieldFromMetaModel(mm) {
     let defaultString = '';
     let validatorString = '';
 
+    if (mm.decorators) {
+        result += decoratorsFromMetaModel(mm.decorators, '  ');
+    }
     if (mm.$class === 'concerto.metamodel.RelationshipDeclaration') {
         result += '-->';
     } else {
@@ -783,6 +898,10 @@ function fieldFromMetaModel(mm) {
  */
 function declFromMetaModel(mm) {
     let result = '';
+    if (mm.decorators) {
+        result += decoratorsFromMetaModel(mm.decorators, '');
+    }
+
     if (mm.isAbstract) {
         result += 'abstract ';
     }
