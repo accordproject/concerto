@@ -60,11 +60,6 @@ concept TypeIdentifier {
   o String fullyQualifiedName optional
 }
 
-concept DecoratorIdentifier extends DecoratorLiteral {
-  o TypeIdentifier identifier
-  o Boolean isArray default=false
-}
-
 concept Decorator {
   o String name
   o DecoratorLiteral[] arguments optional
