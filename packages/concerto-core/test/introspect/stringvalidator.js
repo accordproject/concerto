@@ -33,7 +33,7 @@ describe('StringValidator', () => {
 
         it('should throw for invalid regexes', () => {
             (() => {
-                new StringValidator(mockField, '/^[A-z/' );
+                new StringValidator(mockField, { pattern: '^[A-z' });
             }).should.throw(/Validator error for field/);
         });
 
@@ -42,22 +42,35 @@ describe('StringValidator', () => {
     describe('#validate', () => {
 
         it('should ignore a null string', () => {
-            let v = new StringValidator(mockField, '/^[A-z][A-z][0-9]{7}/' );
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
             v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/');
             v.validate('id', null);
         });
 
         it('should validate a string', () => {
-            let v = new StringValidator(mockField, '/^[A-z][A-z][0-9]{7}/' );
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
             v.validate('id', 'AB1234567');
         });
 
         it('should detect mismatch string', () => {
-            let v = new StringValidator(mockField, '/^[A-z][A-z][0-9]{7}/');
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
 
             (() => {
                 v.validate('id', 'xyz');
             }).should.throw(/Validator error for field id org.acme.myField/);
         });
+
+        it('should validate a unicode string', () => {
+            let v = new StringValidator(mockField, { pattern: '^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
+            v.validate('id', 'AB1234567');
+        });
+
+        it('should not validate a unicode string', () => {
+            let v = new StringValidator(mockField, { pattern: '^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
+            (() => {
+                v.validate('id', '1FOO');
+            }).should.throw(/Validator error for field id org.acme.myField/);
+        });
+
     });
 });

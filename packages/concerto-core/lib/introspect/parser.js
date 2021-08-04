@@ -264,15 +264,10 @@ function peg$parse(input, options) {
       peg$c105 = "/",
       peg$c106 = peg$literalExpectation("/", false),
       peg$c107 = function(pattern, flags) {
-            var value;
-
-            try {
-              value = new RegExp(pattern, flags);
-            } catch (e) {
-              error(e.message);
-            }
-
-            return { type: "Literal", value: value };
+            return {
+              pattern,
+              flags
+            };
           },
       peg$c108 = /^[*\\\/[]/,
       peg$c109 = peg$classExpectation(["*", "\\", "/", "["], false, false),
@@ -9195,7 +9190,7 @@ function peg$parse(input, options) {
   }
 
   function peg$parseStringRegexValidator() {
-    var s0, s1, s2, s3, s4, s5, s6;
+    var s0, s1, s2, s3, s4, s5;
 
     s0 = peg$currPos;
     if (input.substr(peg$currPos, 5) === peg$c302) {
@@ -9218,13 +9213,7 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse__();
           if (s4 !== peg$FAILED) {
-            s5 = peg$currPos;
-            s6 = peg$parseRegularExpressionLiteral();
-            if (s6 !== peg$FAILED) {
-              s5 = input.substring(s5, peg$currPos);
-            } else {
-              s5 = s6;
-            }
+            s5 = peg$parseRegularExpressionLiteral();
             if (s5 !== peg$FAILED) {
               peg$savedPos = s0;
               s1 = peg$c304(s5);

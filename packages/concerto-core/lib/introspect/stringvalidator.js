@@ -33,10 +33,13 @@ class StringValidator extends Validator{
      * @throws {IllegalModelException}
      */
     constructor(field, validator) {
-        super(field,validator);
+        super(field, validator);
         try {
-            // discard the leading / and closing /
-            this.regex = new RegExp(validator.substring(1,validator.length-1));
+            if (validator.flags) {
+                this.regex = new RegExp(validator.pattern, validator.flags);
+            } else {
+                this.regex = new RegExp(validator.pattern);
+            }
         }
         catch(exception) {
             this.reportError(exception.message);
@@ -53,7 +56,7 @@ class StringValidator extends Validator{
     validate(identifier, value) {
         if(value !== null) {
             if(!this.regex.test(value)) {
-                this.reportError(identifier, 'Value + \'' + value + '\' failed to match validation regex: ' + this.regex);
+                this.reportError(identifier, 'Value \'' + value + '\' failed to match validation regex: ' + this.regex);
             }
         }
     }

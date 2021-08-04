@@ -43,7 +43,7 @@ describe('Field', () => {
             should.equal(f.validator, null);
         });
 
-        it('should save the incoming validator', () => {
+        it('should save the incoming string validator', () => {
 
             let f = new Field(mockClassDeclaration, {
                 id: {
@@ -52,7 +52,21 @@ describe('Field', () => {
                 propertyType: {
                     name: 'String'
                 },
-                regex: 'suchValidator'
+                regex: '/^suchValidator$/'
+            });
+            f.getValidator().validate('id', 'suchValidator');
+        });
+
+        it('should save the incoming string validator (with flag)', () => {
+
+            let f = new Field(mockClassDeclaration, {
+                id: {
+                    name: 'field',
+                },
+                propertyType: {
+                    name: 'String'
+                },
+                regex: '/^suchValidator$/u'
             });
             f.getValidator().validate('id', 'suchValidator');
         });
