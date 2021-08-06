@@ -13,13 +13,21 @@
         },
         "latitude": {
             "type": "number",
-            "minimum": -90,
+            "exclusiveMinimum": -90,
             "maximum": 90
         },
         "longitude": {
             "type": "number",
             "minimum": -180,
-            "maximum": 180
+            "exclusiveMaximum": 180
+        },
+        "elevation": {
+            "type": "number",
+            "minimum": -11034
+        },
+        "yearDiscovered": {
+            "type": "integer",
+            "exclusiveMaximum": 2022
         }
     }
 }
