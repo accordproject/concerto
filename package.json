@@ -6,7 +6,7 @@
     "eslint": "7.24.0",
     "istanbul-combine": "0.3.0",
     "istanbul-merge": "1.1.1",
-    "jsdoc": "3.6.6",
+    "jsdoc": "^3.6.7",
     "lerna": "^4.0.0",
     "license-check-and-add": "2.3.6",
     "nyc": "15.1.0",
