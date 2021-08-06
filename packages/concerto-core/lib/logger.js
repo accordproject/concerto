@@ -18,9 +18,7 @@
 /* eslint-disable no-use-before-define */
 
 const colors = require('colors/safe');
-const jsome = require('jsome');
-
-jsome.params.lintable = true;
+const jsonColorize = require('json-colorizer');
 
 /**
  * Default levels for the npm configuration.
@@ -73,10 +71,8 @@ const isJson = (str) => {
 * @private
 */
 const prettifyJson = (obj) => {
-    if(typeof obj === 'object') {
-        return `\n${jsome.getColoredString(obj, null, 2)}`;
-    } else if(isJson(obj)) {
-        return `\n${jsome.getColoredString(JSON.parse(obj), null, 2)}`;
+    if(typeof obj === 'object' || isJson(obj)) {
+        return jsonColorize(obj, { pretty: true, colors });
     }
     return obj;
 };
