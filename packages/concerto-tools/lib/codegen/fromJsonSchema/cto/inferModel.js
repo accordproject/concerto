@@ -191,7 +191,9 @@ function inferConcept(definition, context) {
         // https://json-schema.org/understanding-json-schema/reference/numeric.html#range
         if (['Double', 'Long', 'Integer'].includes(type)) {
             if (propertyDefinition.minimum || propertyDefinition.exclusiveMaximum) {
-                validator = ` range=[${propertyDefinition.minimum || ''},${propertyDefinition.exclusiveMaximum || ''}]`;
+                const min = propertyDefinition.minimum || '';
+                const exclusiveMax = propertyDefinition.exclusiveMaximum || '';
+                validator = ` range=[${min},${exclusiveMax}]`;
             }
         } else if (type === 'String' && propertyDefinition.pattern) {
             validator = ` regex=/${propertyDefinition.pattern}/`;

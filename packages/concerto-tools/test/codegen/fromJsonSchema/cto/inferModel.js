@@ -151,8 +151,10 @@ import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0
 
 concept Geographical_location {
    o String name default="home" regex=/[\\w\\s]+/ optional
-   o Double latitude range=[-90,]
-   o Double longitude range=[-180,]
+   o Double latitude
+   o Double longitude range=[-180,180]
+   o Double elevation range=[-11034,] optional
+   o Integer yearDiscovered range=[,2022] optional
 }
 
 `);
