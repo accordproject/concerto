@@ -98,6 +98,67 @@ concept Root {
 `);
     });
 
+    it('should generate for a recursive definition', async () => {
+        const cto = inferModel('org.acme', 'Root', {
+            'type': 'object',
+            'properties': {
+                'name': { 'type': 'string' },
+                'children': {
+                    'type': 'array',
+                    'items': { '$ref': '#' }
+                }
+            }
+        }
+        );
+        cto.should.equal(`namespace org.acme
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Root {
+   o String name optional
+   o Root[] children optional
+}
+
+`);
+    });
+
+    it('should generate Concerto for for a schema that uses the 2020 draft', async () => {
+        const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/2020-schema.json'), 'utf8'));
+        const cto = inferModel('org.acme', 'Root', schema);
+        cto.should.equal(`namespace com.example
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Veggie {
+   o String veggieName
+   o Boolean veggieLike
+}
+
+concept Arrays {
+   o String[] fruits optional
+   o Veggie[] vegetables optional
+}
+
+`);
+    });
+
+    it('should generate Concerto for for a schema that property modifiers', async () => {
+        const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/modifiers-schema.json'), 'utf8'));
+        const cto = inferModel('org.acme', 'Root', schema);
+        cto.should.equal(`namespace com.example
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Geographical_location {
+   o String name default="home" regex=/[\\w\\s]+/ optional
+   o Double latitude range=[-90,]
+   o Double longitude range=[-180,]
+}
+
+`);
+    });
+
+
     it('should not generate for a simple definition with an unsupported type', async () => {
         (function () {
             inferModel('org.acme', 'Root', {
@@ -185,17 +246,5 @@ concept Root {
                 ]
             });
         }).should.throw('Keyword(s) \'allOf\' in definition \'Root\' not supported.');
-    });
-
-    it('should not generate when unsupported references are used', async () => {
-        (function () {
-            inferModel('org.acme', 'Root', {
-                $schema: 'http://json-schema.org/draft-07/schema#',
-                type: 'object',
-                'properties': {
-                    'cycle': { '$ref': '#' }
-                },
-            });
-        }).should.throw('The reference \'#\' in \'cycle\' is not supported. Only local definitions are currently supported, e.g. \'#/definitions/\'');
     });
 });

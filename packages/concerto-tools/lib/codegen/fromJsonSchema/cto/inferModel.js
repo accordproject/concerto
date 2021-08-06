@@ -15,8 +15,10 @@
 'use strict';
 
 const { Writer, TypedStack } = require('@accordproject/concerto-core');
-const Ajv = require('ajv');
+const Ajv2019 = require('ajv/dist/2019');
+const Ajv2020 = require('ajv/dist/2020');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
+const draft7MetaSchema = require('ajv/dist/refs/json-schema-draft-07.json');
 const addFormats = require('ajv-formats');
 // const fs = require('fs');
 
@@ -37,7 +39,44 @@ function capitalizeFirstLetter(string) {
  * @private
  */
 function normalizeType(type) {
-    return capitalizeFirstLetter(type.replace(/[\s\\.]/g, '_'));
+    return capitalizeFirstLetter(type.replace(/[\s\\.-]/g, '_'));
+}
+
+/**
+ * Parse a $id URL to use it as a namespace and root type
+ * @param {string} id - the $id value from a JSON schema
+ * @returns {object} A namespace and type pair
+ * @private
+ */
+function parseIdUri(id) {
+    if (!id) { return; }
+
+    // TODO (MCR) - support non-URL URI $id values
+    // https://datatracker.ietf.org/doc/html/draft-wright-json-schema-01#section-9.2
+    const url = new URL(id);
+    let namespace = url.hostname.split('.').reverse().join('.');
+    const path = url.pathname.split('/');
+    const type = normalizeType(path.pop()
+        .replace(/\.json$/, '') // Convention is to add .schema.json to $id
+        .replace(/\.schema$/, ''));
+
+    namespace += path.length > 0 ? path.join('.') : '';
+
+    return { namespace, type };
+}
+
+/**
+ * Infer a type name for a definition. Examines $id, title and parent declaration
+ * @param {*} definition the input object
+ * @param {*} context the processing context
+ * @returns {string} A name for the definition
+ * @private
+ */
+function inferTypeName(definition, context) {
+    const name = context.parents.peek();
+    const { type } = parseIdUri(definition.$id) ||
+        { type: definition.title || name };
+    return normalizeType(type);
 }
 
 /**
@@ -50,15 +89,20 @@ function normalizeType(type) {
 function inferType(definition, context) {
     const name = context.parents.peek();
     if (definition.$ref) {
-        if (!definition.$ref.startsWith('#/definitions/')) {
-            throw new Error(`The reference '${definition.$ref}' in '${name}' is not supported. Only local definitions are currently supported, e.g. '#/definitions/'`);
+        // Recursive defintion
+        if (definition.$ref === '#') {
+            const top = context.parents.pop();
+            const parent = context.parents.peek();
+            context.parents.push(top);
+            return parent;
         }
-        return definition.$ref.replace(/^#\/definitions\//, '');
+
+        return normalizeType(definition.$ref.replace(/^#\/(definitions|\$defs)\//, ''));
     }
 
     // TODO Also add local sub-schema definition
     if (definition.enum) {
-        return normalizeType(definition.title || name);
+        return inferTypeName(definition, context);
     }
 
     if (definition.type) {
@@ -81,7 +125,7 @@ function inferType(definition, context) {
             case 'array':
                 return inferType(definition.items, context) + '[]';
             case 'object':
-                return normalizeType(definition.title || name);
+                return inferTypeName(definition, context);
             default:
                 throw new Error(`Type keyword '${definition.type}' in '${name}' is not supported`);
         }
@@ -96,10 +140,9 @@ function inferType(definition, context) {
  * @private
  */
 function inferEnum(definition, context) {
-    const { writer, parents } = context;
-    const name = parents.peek();
+    const { writer } = context;
 
-    writer.writeLine(0, `enum ${normalizeType(definition.title || name)} {`);
+    writer.writeLine(0, `enum ${inferTypeName(definition, context)} {`);
     definition.enum.forEach((value) => {
         writer.writeLine(
             1,
@@ -140,9 +183,31 @@ function inferConcept(definition, context) {
 
         const propertyDefinition = definition.properties[field];
         context.parents.push(field);
+
+        const type = inferType(propertyDefinition, context);
+
+        let validator = '';
+        // Note: Concerto does not provide syntax for exclusive minimum or inclusive maximum
+        // https://json-schema.org/understanding-json-schema/reference/numeric.html#range
+        if (['Double', 'Long', 'Integer'].includes(type)) {
+            if (propertyDefinition.minimum || propertyDefinition.exclusiveMaximum) {
+                validator = ` range=[${propertyDefinition.minimum || ''},${propertyDefinition.exclusiveMaximum || ''}]`;
+            }
+        } else if (type === 'String' && propertyDefinition.pattern) {
+            validator = ` regex=/${propertyDefinition.pattern}/`;
+        }
+
+        // Warning: The semantics of this default property differs between JSON Schema and Concerto
+        // JSON Schema does not fill in missing values during validation, whereas Concerto does
+        // https://json-schema.org/understanding-json-schema/reference/generic.html#id2
+        let defaultValue = '';
+        if (propertyDefinition.default) {
+            defaultValue = ` default=${JSON.stringify(propertyDefinition.default)}`;
+        }
+
         writer.writeLine(
             1,
-            `o ${inferType(propertyDefinition, context)} ${field}${optional}`
+            `o ${type} ${field}${defaultValue}${validator}${optional}`
         );
         context.parents.pop();
     });
@@ -180,20 +245,30 @@ function inferDeclaration(definition, context) {
 
 /**
  * Infers a Concerto model from a JSON Schema.
- * @param {string} namespace the namespace to use for the model
- * @param {*} rootTypeName the name for the root concept
- * @param {*} schema the input json object
+ * @param {string} defaultNamespace a fallback namespace to use for the model if it can't be infered
+ * @param {string} defaultType a fallback name for the root concept if it can't be infered
+ * @param {object} schema the input json object
  * @returns {string} the Concerto model
  */
-function inferModelFile(namespace, rootTypeName, schema) {
-    // Validate the Schema before we start. We won't generate code for bad schema.
-    const ajv = new Ajv({ strict: true })
+function inferModelFile(defaultNamespace, defaultType, schema) {
+    const schemaVersion = schema.$schema;
+
+    let ajv = new Ajv2019({ strict: true })
         .addMetaSchema(draft6MetaSchema)
-        .addSchema(schema, rootTypeName);
+        .addMetaSchema(draft7MetaSchema);
+
+    if (schemaVersion && schemaVersion.startsWith('https://json-schema.org/draft/2020-12/schema')) {
+        ajv = new Ajv2020({ strict: true });
+    }
+
+    const { namespace, type } = parseIdUri(schema.$id) ||
+        { namespace: defaultNamespace, type: defaultType };
+
+    ajv.addSchema(schema, type);
     addFormats(ajv);
 
     // Will throw an error for bad schemas
-    ajv.validate(rootTypeName);
+    ajv.validate(type);
 
     const context = {
         parents: new TypedStack(),
@@ -209,15 +284,16 @@ function inferModelFile(namespace, rootTypeName, schema) {
     context.writer.writeLine(0, '');
 
     // Create definitions
-    Object.keys(schema.definitions || []).forEach((key) => {
+    const defs = schema.definitions || schema.$defs || [];
+    Object.keys(defs).forEach((key) => {
         context.parents.push(key);
-        const definition = schema.definitions[key];
+        const definition = defs[key];
         inferDeclaration(definition, context);
         context.parents.pop();
     });
 
     // Create root type
-    context.parents.push(rootTypeName);
+    context.parents.push(type);
     inferDeclaration(schema, context);
     context.parents.pop();
 
@@ -225,7 +301,7 @@ function inferModelFile(namespace, rootTypeName, schema) {
 }
 
 // Prototype CLI tool
-// usage: node lib/codegen/fromJsonSchema/inferModel.js MyJsonSchema.json namespace RootType
+// usage: node lib/codegen/fromJsonSchema/cto/inferModel.js MyJsonSchema.json namespace RootType
 // if (!module.parent) {
 //     const schema = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 //     console.log(inferModelFile(process.argv[3], process.argv[4], schema));
