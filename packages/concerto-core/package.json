@@ -63,7 +63,7 @@
     "colors": "1.4.0",
     "dayjs": "1.10.4",
     "debug": "4.3.1",
-    "jsome": "2.5.0",
+    "json-colorizer": "2.2.2",
     "lorem-ipsum": "2.0.3",
     "randexp": "0.5.3",
     "slash": "3.0.0",
