@@ -43,7 +43,7 @@
     "doctrine": "3.0.0",
     "eslint": "7.24.0",
     "fs-extra": "9.1.0",
-    "jsdoc": "3.6.6",
+    "jsdoc": "^3.6.7",
     "klaw": "3.0.0",
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
@@ -55,7 +55,7 @@
     "sinon": "10.0.0",
     "sinon-chai": "3.6.0",
     "tmp-promise": "3.0.2",
-    "yargs": "16.2.0"
+    "yargs": "17.1.0"
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",

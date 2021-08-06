@@ -32,7 +32,7 @@
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "eslint": "7.24.0",
-    "jsdoc": "3.6.6",
+    "jsdoc": "^3.6.7",
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
     "mockery": "2.1.0",
@@ -48,7 +48,7 @@
     "@accordproject/concerto-core": "1.0.4",
     "@accordproject/concerto-tools": "1.0.4",
     "mkdirp": "1.0.4",
-    "yargs": "16.2.0"
+    "yargs": "17.1.0"
   },
   "license-check-and-add-config": {
     "folder": "./lib",
