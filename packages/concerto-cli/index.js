@@ -161,10 +161,16 @@ require('yargs')
             type: 'boolean',
             default: false
         });
+        yargs.option('output', {
+            describe: 'path to the output file',
+            type: 'string'
+        });
     }, (argv) => {
-        return Commands.import(argv.input, argv.model, argv.resolve)
+        return Commands.import(argv.input, argv.model, argv.resolve, argv.output)
             .then((result) => {
-                Logger.info(result);
+                if (result) {
+                    Logger.info(result);
+                }
             })
             .catch((err) => {
                 Logger.error(err.message);
@@ -172,19 +178,20 @@ require('yargs')
     })
     .command('export', 'export a metamodel to cto syntax', (yargs) => {
         yargs.demandOption(['input'], 'Please provide an input metamodel');
-        yargs.option('model', {
-            describe: 'array of concerto (cto) model files',
-            type: 'string',
-            array: true
-        });
         yargs.option('input', {
             describe: 'the metamodel to export',
             type: 'string'
         });
+        yargs.option('output', {
+            describe: 'path to the output file',
+            type: 'string'
+        });
     }, (argv) => {
-        return Commands.export(argv.input, argv.model)
+        return Commands.export(argv.input, argv.output)
             .then((result) => {
-                Logger.info(result);
+                if (result) {
+                    Logger.info(result);
+                }
             })
             .catch((err) => {
                 Logger.error(err.message);

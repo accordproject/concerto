@@ -124,19 +124,19 @@ describe('cicero-cli', () => {
     describe('#compile', () => {
 
         it('should compile to a Go model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('Go', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a PlantUML model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('PlantUML', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a Typescript model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('Typescript', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
@@ -148,25 +148,25 @@ describe('cicero-cli', () => {
             dir.cleanup();
         });
         it('should compile to a JSONSchema model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('JSONSchema', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a XMLSchema model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('XMLSchema', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should compile to a GraphQL model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('GraphQL', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
         it('should not compile to an unknown model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('BLAH', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.equal(0);
             dir.cleanup();
@@ -175,7 +175,7 @@ describe('cicero-cli', () => {
 
     describe('#get', () => {
         it('should save external dependencies', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.get(models, dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@models.accordproject.org.cicero.contract.cto',
@@ -186,7 +186,7 @@ describe('cicero-cli', () => {
         });
 
         it('should save external dependencies for an external model', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.get(['https://models.accordproject.org/patents/patent.cto'], dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@models.accordproject.org.address.cto',
@@ -210,6 +210,15 @@ describe('cicero-cli', () => {
             result.should.deep.equal(expected);
         });
 
+        it('should transform cto to metamodel and save it', async () => {
+            const output = await tmp.file({ unsafeCleanup: true });
+            const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contract.json')));
+            await Commands.import(path.resolve(__dirname, 'models/contract.cto'), undefined, undefined, output.path);
+            const result = JSON.parse(fs.readFileSync(output.path));
+            result.should.deep.equal(expected);
+            output.cleanup();
+        });
+
         it('should transform cto to metamodel and resolve names', async () => {
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contractResolved.json')));
             const contractFile = path.resolve(__dirname, 'models/contract.cto');
@@ -224,6 +233,16 @@ describe('cicero-cli', () => {
             const metamodel = path.resolve(__dirname, 'models/contract.json');
             const result = await Commands.export(metamodel);
             result.should.equal(expected);
+        });
+
+        it('should transform a metamodel to cto and save it', async () => {
+            const output = await tmp.file({ unsafeCleanup: true });
+            const expected = fs.readFileSync(path.resolve(__dirname, 'models/contract2.cto'), 'utf-8');
+            const metamodel = path.resolve(__dirname, 'models/contract.json');
+            await Commands.export(metamodel, output.path);
+            const result = fs.readFileSync(output.path, 'utf-8');
+            result.should.equal(expected);
+            output.cleanup();
         });
     });
 });
