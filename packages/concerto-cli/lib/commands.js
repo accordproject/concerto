@@ -191,9 +191,10 @@ class Commands {
      * @param {string} input - CTO
      * @param {string[]} [ctoFiles] - the CTO files used for import resolution
      * @param {boolean} resolve - whether to resolve the names
+     * @param {string} outputPath to an output file
      * @param {string} the metamodel
      */
-    static async import(input, ctoFiles = [], resolve) {
+    static async import(input, ctoFiles = [], resolve = false, outputPath) {
         // Add input to ctoFiles for convenience
         if (!ctoFiles.includes(input)) {
             ctoFiles.push(input);
@@ -206,6 +207,11 @@ class Commands {
         } else {
             result = MetaModel.ctoToMetaModel(inputString);
         }
+        if (outputPath) {
+            Logger.info('Creating file: ' + outputPath);
+            fs.writeFileSync(outputPath, JSON.stringify(result));
+            return;
+        }
         return JSON.stringify(result);
     }
 
@@ -213,13 +219,18 @@ class Commands {
      * Export a metamodel to a CTO string
      *
      * @param {string} input metamodel
-     * @param {string[]} ctoFiles - the CTO files used for import resolution
+     * @param {string} outputPath to an output file
      * @param {string} transformed (meta)model
      */
-    static async export(input, ctoFiles) {
+    static async export(input, outputPath) {
         const inputString = fs.readFileSync(input, 'utf8');
         const json = JSON.parse(inputString);
         const result = MetaModel.ctoFromMetaModel(json);
+        if (outputPath) {
+            Logger.info('Creating file: ' + outputPath);
+            fs.writeFileSync(outputPath, result);
+            return;
+        }
         return result;
     }
 }
