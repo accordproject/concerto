@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
