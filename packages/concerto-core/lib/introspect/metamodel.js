@@ -247,7 +247,13 @@ function validateMetaModel(input) {
  * @return {object} mapping from local to fully qualified names
  */
 function createNameTable(modelManager, metaModel) {
-    const table = {};
+    const table = {
+        'Concept': 'concerto',
+        'Asset': 'concerto',
+        'Participant': 'concerto',
+        'Transaction ': 'concerto',
+        'Event': 'concerto',
+    };
 
     // First list the imported names in order (overriding as we go along)
     const imports = metaModel.imports;
