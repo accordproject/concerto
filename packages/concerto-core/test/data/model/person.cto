@@ -52,17 +52,17 @@ concept Address identified {
   o String city default="NYC"
   o String country default="USA"
   o String[] street
-	o Boolean isResidential default=true
-	o Boolean isPrivate default=false
+  o Boolean isResidential default=true
+  o Boolean isPrivate default=false
 }
 
 @Address("x",1,"y","foo","z",true,Gender,TemporalUnit[])
 @Address2()
 @Address3
 concept USAddress extends Address {
-	@Zip("x",1,"y","foo","z",true)
-	@Zip2()
-	@Zip3
+  @Zip("x",1,"y","foo","z",true)
+  @Zip2()
+  @Zip3
   o Integer zip4 range=[-365,365]
   o Integer zip41 range=[,365]
   o Integer zip42 range=[-365,]
@@ -81,7 +81,8 @@ event E {
 }
 
 transaction T identified by id {
-	o String id
-	o TemporalUnit tu
-	o Month month // This is imported from the org.accordproject.time namespace
+  o String id
+  o TemporalUnit tu
+  o Month month // This is imported from the org.accordproject.time namespace
+  o Participant p
 }
