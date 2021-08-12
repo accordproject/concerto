@@ -38,6 +38,13 @@ namespace concerto.metamodel
 /**
  * The metadmodel for Concerto files
  */
+concept TypeIdentifier {
+  @FormEditor("selectOptions", "types")
+  o String name default="Concept"
+  @FormEditor( "hide", true)
+  o String fullyQualifiedName optional
+}
+
 abstract concept DecoratorLiteral {
 }
 
@@ -53,11 +60,9 @@ concept DecoratorBoolean extends DecoratorLiteral {
   o Boolean value
 }
 
-concept TypeIdentifier {
-  @FormEditor("selectOptions", "types")
-  o String name default="Concept"
-  @FormEditor( "hide", true)
-  o String fullyQualifiedName optional
+concept DecoratorTypeReference extends DecoratorLiteral {
+  o TypeIdentifier type
+  o Boolean isArray default=false
 }
 
 concept Decorator {
@@ -251,7 +256,7 @@ function createNameTable(modelManager, metaModel) {
         const modelFile = modelManager.getModelFile(namespace);
         if (imp.$class === 'concerto.metamodel.ImportType') {
             if (!modelFile.getLocalType(imp.name)) {
-                throw new Error(`Declaration ${imp.identifier.name} in namespace ${namespace} not found`);
+                throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
             }
             table[imp.name] = namespace;
         } else {
@@ -316,10 +321,42 @@ function resolveTypeNames(metaModel, table) {
         metaModel.fields.forEach((field) => {
             resolveTypeNames(field, table);
         });
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
     }
         break;
+    case 'concerto.metamodel.EnumDeclaration': {
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
+    }
+        break;
+    case 'concerto.metamodel.EnumFieldDeclaration':
     case 'concerto.metamodel.ObjectFieldDeclaration':
     case 'concerto.metamodel.RelationshipDeclaration': {
+        const name = metaModel.type.name;
+        metaModel.type.fullyQualifiedName = resolveName(name, table);
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
+    }
+        break;
+    case 'concerto.metamodel.Decorator': {
+        if (metaModel.arguments) {
+            metaModel.arguments.forEach((argument) => {
+                resolveTypeNames(argument, table);
+            });
+        }
+    }
+        break;
+    case 'concerto.metamodel.DecoratorTypeReference': {
         const name = metaModel.type.name;
         metaModel.type.fullyQualifiedName = resolveName(name, table);
     }
@@ -365,6 +402,12 @@ function decoratorArgToMetaModel(ast) {
         decoratorArg.value = ast.value;
         break;
     default:
+        decoratorArg.$class = 'concerto.metamodel.DecoratorTypeReference';
+        decoratorArg.type = {
+            $class: 'concerto.metamodel.TypeIdentifier',
+            name: ast.value.name,
+        };
+        decoratorArg.isArray = ast.value.array;
         break;
     }
 
@@ -746,6 +789,9 @@ function modelFileToMetaModel(modelFile, validate) {
 function decoratorArgFromMetaModel(mm) {
     let result = '';
     switch (mm.$class) {
+    case 'concerto.metamodel.DecoratorTypeReference':
+        result += `${mm.type.name}${mm.isArray ? '[]' : ''}`;
+        break;
     case 'concerto.metamodel.DecoratorString':
         result += `"${mm.value}"`;
         break;

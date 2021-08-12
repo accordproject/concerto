@@ -56,7 +56,7 @@ concept Address identified {
 	o Boolean isPrivate default=false
 }
 
-@Address("x",1,"y","foo","z",true)
+@Address("x",1,"y","foo","z",true,Gender,TemporalUnit[])
 @Address2()
 @Address3
 concept USAddress extends Address {
