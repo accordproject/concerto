@@ -216,6 +216,7 @@ declare module '@accordproject/concerto-core' {
   }
 
   export class Factory {
+    static newId(): string;
     constructor(modelManager: ModelManager);
     newResource(ns: string, type: string, id: string, options?: NewResourceOptions): Resource;
     newConcept(ns: string, type: string, id: string, options?: NewConceptOptions): Resource;
@@ -456,7 +457,7 @@ declare module '@accordproject/concerto-core' {
     function ctoToMetaModelAndResolve(modelManager: ModelManager, model: string, validate?: boolean);
     function ctoFromMetaModel(metaModel: any, validate?: boolean): string;
   }
-  
+
   // version
   export const version: any;
 }

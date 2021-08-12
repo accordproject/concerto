@@ -25,6 +25,7 @@ class Concerto {
 }
    + object setCurrentTime() 
 class Factory {
+   + string newId() 
    + void constructor(ModelManager) 
    + Resource newResource(String,String,String,Object,boolean,String,boolean) throws TypeNotFoundException
    + Resource newConcept(String,String,String,Object,boolean,String,boolean) throws TypeNotFoundException
