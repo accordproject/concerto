@@ -24,10 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.1.1 {2c9512d9d90bde289b47942937d252ca} 2021-08-12
+Version 1.1.2 {2c9512d9d90bde289b47942937d252ca} 2021-08-12
 - Add Factory.newId for creating new unique IDs
 
-Version 1.0.5 {16fb2d5684ec917532a19428c74f1ebf} 2021-07-13
+Version 1.1.0 {16fb2d5684ec917532a19428c74f1ebf} 2021-07-13
 - Add support for Concerto metamodel with import/export to CTO
 
 Version 1.0.3 {1fe469fe1a79af5d5a4f5ec7dee6b7d4} 2021-06-25
