@@ -68,7 +68,7 @@
     "semver": "7.3.5",
     "slash": "3.0.0",
     "urijs": "1.19.7",
-    "uuid": "3.4.0"
+    "uuid": "8.3.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

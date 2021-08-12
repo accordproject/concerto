@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 1.1.1 {2c9512d9d90bde289b47942937d252ca} 2021-08-12
+- Add Factory.newId for creating new unique IDs
+
 Version 1.0.5 {16fb2d5684ec917532a19428c74f1ebf} 2021-07-13
 - Add support for Concerto metamodel with import/export to CTO
 
@@ -84,7 +87,7 @@ Version 0.70.5 {db48b7eb8404d9206e9bc8efb3de0009} 2019-06-23
 - Update exception triggered when creating EventDeclaration class
 
 Version 0.31.0 {82c0c10648bd10fb79b84db3fcda1776} 2018-10-03
-- Remove built-in system model file 
+- Remove built-in system model file
 
 Version 0.30.1 {fd4b813bc0bda4042db3c4657893593f} 2018-10-03
 - Remove Wallet

@@ -46,6 +46,14 @@ dayjs.extend(utc);
  */
 class Factory {
     /**
+     * Create a new ID for an object.
+     * @returns {string} a new ID
+     */
+    static newId() {
+        return uuid.v4();
+    }
+
+    /**
      * Create the factory.
      *
      * @param {ModelManager} modelManager - The ModelManager to use for this registry
@@ -88,7 +96,7 @@ class Factory {
 
         let idField = classDecl.getIdentifierFieldName();
         if (classDecl.isSystemIdentified()) {
-            id = id === null || id === undefined ? uuid.v4() : id;
+            id = id === null || id === undefined ? Factory.newId() : id;
         }
         if (idField) {
             if(typeof(id) !== 'string') {
