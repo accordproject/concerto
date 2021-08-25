@@ -160,10 +160,10 @@ describe('TypescriptVisitor', function () {
                 fileWriter: mockFileWriter
             };
         });
-        it('should write lines for the imports that are not in own namespace ignoring primitives', () => {
+        it('should write lines for the imports that are not in own namespace (including super types) ignoring primitives', () => {
             let acceptSpy = sinon.spy();
             let mockEnum = sinon.createStubInstance(EnumDeclaration);
-            mockEnum._isEnumDeclaration = true;
+            mockEnum.isEnum.returns(true);
             mockEnum.isEnum.returns(true);
             mockEnum.accept = acceptSpy;
 
@@ -190,38 +190,48 @@ describe('TypescriptVisitor', function () {
                     return true;
                 },
                 getFullyQualifiedTypeName: () => {
-                    return 'org.org2.Property3';
+                    return 'super.Property3';
                 }
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isEnum.returns(false);
+            mockClassDeclaration.getSuperType.returns('super.Parent');
             mockClassDeclaration.getProperties.returns([property1, property2, property3]);
             mockClassDeclaration.accept = acceptSpy;
 
+            let mockClassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockClassDeclaration2.getSuperType.returns('super.Parent');
+            mockClassDeclaration2.getProperties.returns([]);
+            mockClassDeclaration2.accept = acceptSpy;
+
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
-            mockModelFile.getNamespace.returns('org.acme.Person');
+            mockModelFile.getNamespace.returns('org.acme');
             mockModelFile.getAllDeclarations.returns([
                 mockEnum,
-                mockClassDeclaration
+                mockClassDeclaration,
+                mockClassDeclaration2
             ]);
             mockModelFile.getImports.returns([
                 'org.org1.Import1',
                 'org.org1.Import2',
                 'org.org2.Import1',
+                'super.Property3',
+                'super.Parent'
             ]);
 
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
-            param.fileWriter.openFile.withArgs('org.acme.Person.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import {Property1} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// export namespace org.acme.Person{']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '// }']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import {Parent} from \'./super\';']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '// export namespace org.acme{']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '// }']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
-            acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
+            acceptSpy.withArgs(typescriptVisitor, param).calledThrice.should.be.ok;
         });
 
         it('should write lines for the imports that are not in own namespace ignoring primitives and write lines for importing system type', () => {
