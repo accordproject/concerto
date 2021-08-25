@@ -73,7 +73,7 @@ class TypescriptVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-        modelManager.getModelFiles().forEach((modelFile) => {
+        modelManager.getModelFiles(true).forEach((modelFile) => {
             modelFile.accept(this, parameters);
         });
         return null;
@@ -89,29 +89,34 @@ class TypescriptVisitor {
     visitModelFile(modelFile, parameters) {
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.ts');
 
-        // Import property types that are imported from other cto files.
-        const dot = '.';
+        // Compute the types we need to import (based on all the types of the properites
+        // as well as all the super types) for all the classes in this model file
         const properties = new Map();
         modelFile.getAllDeclarations()
             .filter(v => !v.isEnum())
-            .forEach(classDeclaration => classDeclaration.getProperties().forEach(property => {
-                if (!property.isPrimitive()) {
-                    const fullyQualifiedTypeName = property.getFullyQualifiedTypeName();
-                    const lastIndexOfDot = fullyQualifiedTypeName.lastIndexOf(dot);
-                    const propertyNamespace = fullyQualifiedTypeName.substring(0, lastIndexOfDot);
-                    const propertyTypeName = fullyQualifiedTypeName.substring(lastIndexOfDot + 1);
-                    if (!properties.has(propertyNamespace)) {
-                        properties.set(propertyNamespace, new Set());
+            .forEach(classDeclaration => {
+                if (classDeclaration.getSuperType()) {
+                    const typeNamespace = ModelUtil.getNamespace(classDeclaration.getSuperType());
+                    const typeName = ModelUtil.getShortName(classDeclaration.getSuperType());
+                    if (!properties.has(typeNamespace)) {
+                        properties.set(typeNamespace, new Set());
                     }
-                    properties.get(propertyNamespace).add(propertyTypeName);
+                    properties.get(typeNamespace).add(typeName);
                 }
-            }));
 
-        modelFile.getImports().map(importString => {
-            const lastIndexOfDot = importString.lastIndexOf(dot);
-            const namespace = importString.substring(0, lastIndexOfDot);
-            return namespace;
-        }).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
+                classDeclaration.getProperties().forEach(property => {
+                    if (!property.isPrimitive()) {
+                        const typeNamespace = ModelUtil.getNamespace(property.getFullyQualifiedTypeName());
+                        const typeName = ModelUtil.getShortName(property.getFullyQualifiedTypeName());
+                        if (!properties.has(typeNamespace)) {
+                            properties.set(typeNamespace, new Set());
+                        }
+                        properties.get(typeNamespace).add(typeName);
+                    }
+                });
+            });
+
+        modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
             .forEach(namespace => {
                 const propertyTypeNames = properties.get(namespace);
@@ -242,20 +247,20 @@ class TypescriptVisitor {
      */
     toTsType(type) {
         switch (type) {
-        case 'DateTime':
-            return 'Date';
-        case 'Boolean':
-            return 'boolean';
-        case 'String':
-            return 'string';
-        case 'Double':
-            return 'number';
-        case 'Long':
-            return 'number';
-        case 'Integer':
-            return 'number';
-        default:
-            return type;
+            case 'DateTime':
+                return 'Date';
+            case 'Boolean':
+                return 'boolean';
+            case 'String':
+                return 'string';
+            case 'Double':
+                return 'number';
+            case 'Long':
+                return 'number';
+            case 'Integer':
+                return 'number';
+            default:
+                return type;
         }
     }
 }
