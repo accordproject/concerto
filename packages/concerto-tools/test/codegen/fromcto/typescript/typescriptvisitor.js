@@ -164,7 +164,6 @@ describe('TypescriptVisitor', function () {
             let acceptSpy = sinon.spy();
             let mockEnum = sinon.createStubInstance(EnumDeclaration);
             mockEnum.isEnum.returns(true);
-            mockEnum.isEnum.returns(true);
             mockEnum.accept = acceptSpy;
 
             let property1 = {
