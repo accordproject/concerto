@@ -89,8 +89,11 @@ class TypescriptVisitor {
     visitModelFile(modelFile, parameters) {
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.ts');
 
+        parameters.fileWriter.writeLine(0, `// Generated code for namespace: ${modelFile.getNamespace()}`);
+
         // Compute the types we need to import (based on all the types of the properites
         // as well as all the super types) for all the classes in this model file
+        parameters.fileWriter.writeLine(0, '\n// imports');
         const properties = new Map();
         modelFile.getAllDeclarations()
             .filter(v => !v.isEnum())
@@ -101,6 +104,7 @@ class TypescriptVisitor {
                     if (!properties.has(typeNamespace)) {
                         properties.set(typeNamespace, new Set());
                     }
+                    properties.get(typeNamespace).add(`I${typeName}`);
                     properties.get(typeNamespace).add(typeName);
                 }
 
@@ -111,6 +115,7 @@ class TypescriptVisitor {
                         if (!properties.has(typeNamespace)) {
                             properties.set(typeNamespace, new Set());
                         }
+                        properties.get(typeNamespace).add(`I${typeName}`);
                         properties.get(typeNamespace).add(typeName);
                     }
                 });
@@ -126,13 +131,11 @@ class TypescriptVisitor {
                 }
             });
 
-        parameters.fileWriter.writeLine(0, '// export namespace ' + modelFile.getNamespace() + '{');
-
+        parameters.fileWriter.writeLine(0, '\n// types');
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
 
-        parameters.fileWriter.writeLine(0, '// }');
         parameters.fileWriter.closeFile();
 
         return null;
@@ -147,13 +150,13 @@ class TypescriptVisitor {
      */
     visitEnumDeclaration(enumDeclaration, parameters) {
 
-        parameters.fileWriter.writeLine(1, 'export enum ' + enumDeclaration.getName() + ' {');
+        parameters.fileWriter.writeLine(0, 'export enum ' + enumDeclaration.getName() + ' {');
 
         enumDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
 
-        parameters.fileWriter.writeLine(1, '}');
+        parameters.fileWriter.writeLine(0, '}\n');
         return null;
     }
 
@@ -166,26 +169,42 @@ class TypescriptVisitor {
      */
     visitClassDeclaration(classDeclaration, parameters) {
 
-
-        let isAbstract = '';
-        if (classDeclaration.isAbstract()) {
-            isAbstract = 'export abstract ';
-        } else {
-            isAbstract = 'export ';
-        }
-
-        let superType = '';
+        let superType = ' ';
         if (classDeclaration.getSuperType()) {
-            superType = ' extends ' + ModelUtil.getShortName(classDeclaration.getSuperType());
+            superType = ` extends I${ModelUtil.getShortName(classDeclaration.getSuperType())} `;
         }
 
-        parameters.fileWriter.writeLine(1, isAbstract + 'class ' + classDeclaration.getName() + superType + ' {');
+        parameters.fileWriter.writeLine(0, 'export interface I' + classDeclaration.getName() + superType + '{');
 
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
 
+        parameters.fileWriter.writeLine(0, '}\n');
+
+        const exportDecl = classDeclaration.isAbstract() ? 'export abstract' : 'export';
+
+        if (classDeclaration.getSuperType()) {
+            superType = ` extends ${ModelUtil.getShortName(classDeclaration.getSuperType())} `;
+        }
+
+        parameters.fileWriter.writeLine(0, `${exportDecl} class ${classDeclaration.getName()}${superType}implements I${classDeclaration.getName()} {`);
+        parameters.fileWriter.writeLine(1, 'public static $class: string');
+        parameters.useDefiniteAssignment = true;
+        classDeclaration.getOwnProperties().forEach((property) => {
+            property.accept(this, parameters);
+        });
+        parameters.useDefiniteAssignment = false;
+
+        parameters.fileWriter.writeLine(1,`public constructor(data: I${classDeclaration.getName()}) {`);
+        if(classDeclaration.getSuperType()) {
+            parameters.fileWriter.writeLine(2, 'super(data);');
+        }
+        parameters.fileWriter.writeLine(2, 'Object.assign(this, data);');
+        parameters.fileWriter.writeLine(2, `${classDeclaration.getName()}.$class = '${classDeclaration.getFullyQualifiedName()}'`);
         parameters.fileWriter.writeLine(1, '}');
+        parameters.fileWriter.writeLine(0, '}\n');
+
         return null;
     }
 
@@ -203,7 +222,12 @@ class TypescriptVisitor {
             array = '[]';
         }
 
-        parameters.fileWriter.writeLine(2, field.getName() + ': ' + this.toTsType(field.getType()) + array + ';');
+        const isEnumRef = field.isPrimitive() ? false
+            : field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName()).isEnum();
+
+        const assignment = parameters.useDefiniteAssignment ? '!' : '';
+
+        parameters.fileWriter.writeLine(1, field.getName() + assignment + ': ' + this.toTsType(field.getType(), !isEnumRef) + array + ';');
         return null;
     }
 
@@ -215,7 +239,7 @@ class TypescriptVisitor {
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        parameters.fileWriter.writeLine(2, enumValueDeclaration.getName() + ',');
+        parameters.fileWriter.writeLine(1, enumValueDeclaration.getName() + ',');
         return null;
     }
 
@@ -233,8 +257,10 @@ class TypescriptVisitor {
             array = '[]';
         }
 
-        // we export all relationships by capitalizing them
-        parameters.fileWriter.writeLine(2, relationship.getName() + ': ' + this.toTsType(relationship.getType()) + array + ';');
+        const assignment = parameters.useDefiniteAssignment ? '!' : '';
+
+        // we export all relationships
+        parameters.fileWriter.writeLine(1, relationship.getName() + assignment + ': ' + this.toTsType(relationship.getType(), true) + array + ';');
         return null;
     }
 
@@ -242,10 +268,11 @@ class TypescriptVisitor {
      * Converts a Concerto type to a Typescript  type. Primitive types are converted
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
+     * @param {boolean} useInterface  - whether to use an interface type
      * @return {string} the corresponding type in Typescript
      * @private
      */
-    toTsType(type) {
+    toTsType(type, useInterface) {
         switch (type) {
             case 'DateTime':
                 return 'Date';
@@ -260,7 +287,7 @@ class TypescriptVisitor {
             case 'Integer':
                 return 'number';
             default:
-                return type;
+                return useInterface ? `I${type}` : type;
         }
     }
 }
