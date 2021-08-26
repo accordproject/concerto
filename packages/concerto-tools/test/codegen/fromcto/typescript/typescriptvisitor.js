@@ -223,11 +223,12 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
             param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import {Property1} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import {Parent} from \'./super\';']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '// export namespace org.acme{']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '// }']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '\n// imports']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import {IProperty1,Property1} from \'./org.org1\';']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import {IParent,Parent} from \'./super\';']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '\n// types']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledThrice.should.be.ok;
@@ -277,7 +278,7 @@ describe('TypescriptVisitor', function () {
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile._isModelFile = true;
-            mockModelFile.getNamespace.returns('org.acme.Person');
+            mockModelFile.getNamespace.returns('org.acme');
             mockModelFile.getAllDeclarations.returns([
                 mockEnum,
                 mockClassDeclaration
@@ -291,11 +292,12 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
-            param.fileWriter.openFile.withArgs('org.acme.Person.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(3);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import {Property1,Property3} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// export namespace org.acme.Person{']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '// }']);
+            param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '\n// imports']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import {IProperty1,Property1,IProperty3,Property3} from \'./org.org1\';']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '\n// types']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
@@ -311,7 +313,7 @@ describe('TypescriptVisitor', function () {
             };
 
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getName.returns('Bob');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -323,8 +325,8 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(2);
-            param.fileWriter.writeLine.withArgs(1, 'export enum Bob {').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.withArgs(1, '}').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(0, 'export enum Bob {').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(0, '}\n').calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
         });
@@ -352,10 +354,16 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(2);
-            param.fileWriter.writeLine.withArgs(1, 'export class Bob {').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.withArgs(1, '}').calledOnce.should.be.ok;
-            acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(9);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IBob {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '}\n']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'export class Bob implements IBob {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'public static $class: string']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'public constructor(data: IBob) {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([2, 'Object.assign(this, data);']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([2, 'Bob.$class = \'undefined\'']);
+            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([0, '}\n']);
         });
         it('should write the class opening and close with abstract and super type', () => {
             let acceptSpy = sinon.spy();
@@ -374,10 +382,17 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(2);
-            param.fileWriter.writeLine.withArgs(1, 'export abstract class Bob extends Person {').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.withArgs(1, '}').calledOnce.should.be.ok;
-            acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(10);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IBob extends IPerson {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '}\n']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'export abstract class Bob extends Person implements IBob {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'public static $class: string']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'public constructor(data: IBob) {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([2, 'super(data);']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([2, 'Object.assign(this, data);']);
+            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([2, 'Bob.$class = \'undefined\'']);
+            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(9).args.should.deep.equal([0, '}\n']);
         });
     });
 
@@ -388,33 +403,66 @@ describe('TypescriptVisitor', function () {
                 fileWriter: mockFileWriter
             };
         });
-        it('should write a line for field name and type', () => {
-            let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+        it('should write a line for primitive field name and type', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('name');
+            mockField.getType.returns('String');
+            mockField.isPrimitive.returns(true);
+            typescriptVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.withArgs(1, 'name: string;').calledOnce.should.be.ok;
+        });
+        it('should write a line for primitive field name and type using definite assignment', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('name');
+            mockField.getType.returns('String');
+            mockField.isPrimitive.returns(true);
+            param.useDefiniteAssignment = true;
+            typescriptVisitor.visitField(mockField, param);
+            param.useDefiniteAssignment = false;
+            param.fileWriter.writeLine.withArgs(1, 'name!: string;').calledOnce.should.be.ok;
+        });
+
+        it('should convert classes to interfaces', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
             mockField.getName.returns('Bob');
             mockField.getType.returns('Person');
 
-            let mockToType = sinon.stub(typescriptVisitor, 'toTsType');
-            mockToType.withArgs('Person').returns('Human');
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
 
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
             typescriptVisitor.visitField(mockField, param);
 
-            param.fileWriter.writeLine.withArgs(2, 'Bob: Human;').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson;').calledOnce.should.be.ok;
         });
 
         it('should write a line for field name and type thats an array', () => {
-            let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
             mockField.getName.returns('Bob');
             mockField.getType.returns('Person');
             mockField.isArray.returns(true);
 
-            let mockToType = sinon.stub(typescriptVisitor, 'toTsType');
-            mockToType.withArgs('Person').returns('Human');
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
 
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
             typescriptVisitor.visitField(mockField, param);
 
-            param.fileWriter.writeLine.withArgs(2, 'Bob: Human[];').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson[];').calledOnce.should.be.ok;
         });
     });
 
@@ -430,7 +478,7 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitEnumValueDeclaration(mockEnumValueDeclaration, param);
 
-            param.fileWriter.writeLine.withArgs(2, 'Bob,').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob,').calledOnce.should.be.ok;
         });
     });
 
@@ -446,13 +494,19 @@ describe('TypescriptVisitor', function () {
             mockRelationship._isRelationshipDeclaration = true;
             mockRelationship.getName.returns('Bob');
             mockRelationship.getType.returns('Person');
-
-            let mockToType = sinon.stub(typescriptVisitor, 'toTsType');
-            mockToType.withArgs('Person').returns('Human');
-
             typescriptVisitor.visitRelationship(mockRelationship, param);
 
-            param.fileWriter.writeLine.withArgs(2, 'Bob: Human;').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson;').calledOnce.should.be.ok;
+        });
+        it('should write a line for field name and type using definite assignment', () => {
+            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
+            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.getName.returns('Bob');
+            mockRelationship.getType.returns('Person');
+            param.useDefiniteAssignment = true;
+            typescriptVisitor.visitRelationship(mockRelationship, param);
+            param.useDefiniteAssignment = false;
+            param.fileWriter.writeLine.withArgs(1, 'Bob!: IPerson;').calledOnce.should.be.ok;
         });
 
         it('should write a line for field name and type thats an array', () => {
@@ -461,13 +515,9 @@ describe('TypescriptVisitor', function () {
             mockField.getName.returns('Bob');
             mockField.getType.returns('Person');
             mockField.isArray.returns(true);
-
-            let mockToType = sinon.stub(typescriptVisitor, 'toTsType');
-            mockToType.withArgs('Person').returns('Human');
-
             typescriptVisitor.visitRelationship(mockField, param);
 
-            param.fileWriter.writeLine.withArgs(2, 'Bob: Human[];').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson[];').calledOnce.should.be.ok;
         });
     });
 
