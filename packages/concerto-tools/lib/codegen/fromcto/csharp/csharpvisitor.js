@@ -140,7 +140,7 @@ class CSharpVisitor {
             superType = ` : ${ModelUtil.getShortName(classDeclaration.getSuperType())} `;
         }
 
-        parameters.fileWriter.writeLine(1, `class ${classDeclaration.getName()}${superType} {`);
+        parameters.fileWriter.writeLine(1, `class ${classDeclaration.getName()}${superType}{`);
         parameters.fileWriter.writeLine(2, this.toCSharpProperty('public new', '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
