@@ -379,7 +379,7 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(3);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'abstract class Bob : Person {']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n      public new string _class { get;} = "undefined";']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
         });
