@@ -23,3 +23,4 @@ module.exports.PlantUMLVisitor = require('./fromcto/plantuml/plantumlvisitor');
 module.exports.TypescriptVisitor = require('./fromcto/typescript/typescriptvisitor');
 module.exports.JavaVisitor = require('./fromcto/java/javavisitor');
 module.exports.GraphQLVisitor = require('./fromcto/graphql/graphqlvisitor');
+module.exports.CSharpVisitor = require('./fromcto/csharp/csharpvisitor');
