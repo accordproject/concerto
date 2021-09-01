@@ -18,6 +18,8 @@ const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
 const path = require('path');
+const sinon = require('sinon');
+const pkgJSON = require('../../package.json');
 
 const chai = require('chai');
 chai.should();
@@ -36,6 +38,7 @@ describe('ModelFile', () => {
     });
 
     afterEach(() => {
+        sinon.restore();
     });
 
     describe('#concertoVersion', () => {
@@ -48,7 +51,15 @@ describe('ModelFile', () => {
 
         it('should return when concerto version is compatible with model', () => {
             let mf = new ModelFile(modelManager, versionValid);
-            mf.getConcertoVersion().should.equal('^1.0.0-alpha.0');
+            mf.getConcertoVersion().should.equal('^1.0.0');
+        });
+
+        it('should return when concerto version is compatible with model with a pre-release version', () => {
+            const version = pkgJSON.version;
+            const newVersion = `${version}-unittest.${new Date().getTime()}`;
+            sinon.replace(pkgJSON, 'version', newVersion);
+            let mf = new ModelFile(modelManager, versionValid);
+            mf.getConcertoVersion().should.equal('^1.0.0');
         });
 
         it('should return when model has no concerto version range', () => {

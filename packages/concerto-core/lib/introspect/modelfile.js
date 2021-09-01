@@ -564,7 +564,7 @@ class ModelFile {
      */
     isCompatibleVersion() {
         if (this.ast.version) {
-            if (semver.satisfies(packageJson.version, this.ast.version.value)) {
+            if (semver.satisfies(packageJson.version, this.ast.version.value, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.version.value;
             } else {
                 throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
