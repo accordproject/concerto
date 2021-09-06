@@ -274,12 +274,16 @@ function createNameTable(modelManager, metaModel) {
     });
 
     // Then add the names local to this metaModel (overriding as we go along)
-    metaModel.enumDeclarations.forEach((decl) => {
-        table[decl.name] = metaModel.namespace;
-    });
-    metaModel.classDeclarations.forEach((decl) => {
-        table[decl.name] = metaModel.namespace;
-    });
+    if (metaModel.enumDeclarations) {
+        metaModel.enumDeclarations.forEach((decl) => {
+            table[decl.name] = metaModel.namespace;
+        });
+    }
+    if (metaModel.classDeclarations) {
+        metaModel.classDeclarations.forEach((decl) => {
+            table[decl.name] = metaModel.namespace;
+        });
+    }
 
     return table;
 }
@@ -307,12 +311,16 @@ function resolveName(name, table) {
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
     case 'concerto.metamodel.ModelFile': {
-        metaModel.enumDeclarations.forEach((decl) => {
-            resolveTypeNames(decl, table);
-        });
-        metaModel.classDeclarations.forEach((decl) => {
-            resolveTypeNames(decl, table);
-        });
+        if (metaModel.enumDeclarations) {
+            metaModel.enumDeclarations.forEach((decl) => {
+                resolveTypeNames(decl, table);
+            });
+        }
+        if (metaModel.classDeclarations) {
+            metaModel.classDeclarations.forEach((decl) => {
+                resolveTypeNames(decl, table);
+            });
+        }
     }
         break;
     case 'concerto.metamodel.AssetDeclaration':

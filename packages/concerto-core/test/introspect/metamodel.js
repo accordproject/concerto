@@ -25,7 +25,7 @@ const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 
-describe('MetaModel', () => {
+describe('MetaModel (Person)', () => {
     const personModelPath = path.resolve(__dirname, '../data/model/person.cto');
     const personModel = fs.readFileSync(personModelPath, 'utf8');
     const personMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/person.json'), 'utf8'));
@@ -70,6 +70,66 @@ describe('MetaModel', () => {
             const mf2 = new ModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
             mm2.should.deep.equal(personMetaModel);
+        });
+    });
+
+    describe('#meta-metamodel', () => {
+        it('should roundtrip the metamodel', () => {
+            const metaModel = MetaModel.metaModelCto;
+            const mm1 = MetaModel.ctoToMetaModel(metaModel, false);
+            const metaModel2 = MetaModel.ctoFromMetaModel(mm1);
+            const mm2 = MetaModel.ctoToMetaModel(metaModel2, false);
+            mm2.should.deep.equal(mm1);
+        });
+
+    });
+});
+
+describe('MetaModel (Empty)', () => {
+    const emptyModelPath = path.resolve(__dirname, '../data/model/empty.cto');
+    const emptyModel = fs.readFileSync(emptyModelPath, 'utf8');
+    const emptyMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/empty.json'), 'utf8'));
+    const emptyMetaModelResolved = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/emptyResolved.json'), 'utf8'));
+
+    describe('#toMetaModel', () => {
+        it('should convert a CTO model to its metamodel', () => {
+            const mm1 = MetaModel.ctoToMetaModel(emptyModel, false);
+            mm1.should.deep.equal(emptyMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel', () => {
+            const mm1 = MetaModel.ctoToMetaModel(emptyModel);
+            mm1.should.deep.equal(emptyMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
+            const modelManager = await ModelLoader.loadModelManager([emptyModelPath]);
+            const mm1 = MetaModel.ctoToMetaModelAndResolve(modelManager, emptyModel);
+            mm1.should.deep.equal(emptyMetaModelResolved);
+        });
+
+        it('should convert a ModelFile to its metamodel', () => {
+            const modelManager1 = new ModelManager();
+            const mf1 = new ModelFile(modelManager1, emptyModel);
+            const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
+            mm1.should.deep.equal(emptyMetaModel);
+            const model2 = MetaModel.ctoFromMetaModel(mm1, false);
+            const modelManager2 = new ModelManager();
+            const mf2 = new ModelFile(modelManager2, model2);
+            const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
+            mm2.should.deep.equal(emptyMetaModel);
+        });
+
+        it('should convert and validate a ModelFile to its metamodel', () => {
+            const modelManager1 = new ModelManager();
+            const mf1 = new ModelFile(modelManager1, emptyModel);
+            const mm1 = MetaModel.modelFileToMetaModel(mf1);
+            mm1.should.deep.equal(emptyMetaModel);
+            const model2 = MetaModel.ctoFromMetaModel(mm1);
+            const modelManager2 = new ModelManager();
+            const mf2 = new ModelFile(modelManager2, model2);
+            const mm2 = MetaModel.modelFileToMetaModel(mf2);
+            mm2.should.deep.equal(emptyMetaModel);
         });
     });
 
