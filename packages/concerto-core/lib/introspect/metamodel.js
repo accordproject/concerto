@@ -79,76 +79,71 @@ concept IdentifiedBy extends Identified {
 
 concept EnumDeclaration {
   @FormEditor("title", "Enum Name")
-  o String name default="ClassName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  o EnumFieldDeclaration[] fields
+  o String name default="EnumName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
+  o EnumProperty[] properties
 }
 
-concept EnumFieldDeclaration {
-  o String name default="fieldName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
+concept EnumProperty {
+  o String name default="propertyName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   @FormEditor("hide", true)
   o Decorator[] decorators optional
 }
 
-@FormEditor("defaultSubclass","concerto.metamodel.ConceptDeclaration")
-abstract concept ClassDeclaration {
-  @FormEditor("title", "Class Name")
-  o String name default="ClassName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
+concept ConceptDeclaration {
+  @FormEditor("title", "Concept Name")
+  o String name default="ConceptName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   @FormEditor("hide", true)
   o Decorator[] decorators optional
   o Boolean isAbstract default=false
   o Identified identified optional
-  @FormEditor("title", "Super Type")
   o TypeIdentifier superType optional
-  o FieldDeclaration[] fields
+  o Property[] properties
 }
 
-concept AssetDeclaration extends ClassDeclaration {
+concept AssetDeclaration extends ConceptDeclaration {
 }
 
-concept ParticipantDeclaration extends ClassDeclaration {
+concept ParticipantDeclaration extends ConceptDeclaration {
 }
 
-concept TransactionDeclaration extends ClassDeclaration {
+concept TransactionDeclaration extends ConceptDeclaration {
 }
 
-concept EventDeclaration extends ClassDeclaration {
+concept EventDeclaration extends ConceptDeclaration {
 }
 
-concept ConceptDeclaration extends ClassDeclaration {
-}
-
-@FormEditor("defaultSubclass","concerto.metamodel.StringFieldDeclaration")
-abstract concept FieldDeclaration {
-  o String name default="fieldName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  @FormEditor("title", "Is Array?")
+@FormEditor("defaultSubconcept","concerto.metamodel.StringProperty")
+abstract concept Property {
+  o String name default="propertyName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
+  @FormEditor("title", "List")
   o Boolean isArray default=false
-  @FormEditor("title", "Is Optional?")
+  @FormEditor("title", "Optional")
   o Boolean isOptional default=false
   @FormEditor("hide", true)
   o Decorator[] decorators optional
 }
 
-concept RelationshipDeclaration extends FieldDeclaration {
+concept RelationshipProperty extends Property {
   @FormEditor("title", "Type Name", "selectOptions", "types")
   o TypeIdentifier type
 }
 
-concept ObjectFieldDeclaration extends FieldDeclaration {
+concept ObjectProperty extends Property {
   @FormEditor("hide", true)
   o String defaultValue optional
   @FormEditor("title", "Type Name", "selectOptions", "types")
   o TypeIdentifier type
 }
 
-concept BooleanFieldDeclaration extends FieldDeclaration {
+concept BooleanProperty extends Property {
   @FormEditor("hide", true)
   o Boolean defaultValue optional
 }
 
-concept DateTimeFieldDeclaration extends FieldDeclaration {
+concept DateTimeProperty extends Property {
 }
 
-concept StringFieldDeclaration extends FieldDeclaration {
+concept StringProperty extends Property {
   @FormEditor("hide", true)
   o String defaultValue optional
   @FormEditor("hide", true)
@@ -159,7 +154,7 @@ concept StringRegexValidator {
   o String regex
 }
 
-concept DoubleFieldDeclaration extends FieldDeclaration {
+concept DoubleProperty extends Property {
   o Double defaultValue optional
   o DoubleDomainValidator validator optional
 }
@@ -169,7 +164,7 @@ concept DoubleDomainValidator {
   o Double upper optional
 }
 
-concept IntegerFieldDeclaration extends FieldDeclaration {
+concept IntegerProperty extends Property {
   @FormEditor("hide", true)
   o Integer defaultValue optional
   @FormEditor("hide", true)
@@ -181,7 +176,7 @@ concept IntegerDomainValidator {
   o Integer upper optional
 }
 
-concept LongFieldDeclaration extends FieldDeclaration {
+concept LongProperty extends Property {
   @FormEditor("hide", true)
   o Long defaultValue optional
   @FormEditor("hide", true)
@@ -210,9 +205,9 @@ concept ModelFile {
   @FormEditor("hide", true)
   o Import[] imports optional
   @FormEditor("title", "Enums")
-  o EnumDeclaration[] enumDeclarations optional
-  @FormEditor("title", "Classes")
-  o ClassDeclaration[] classDeclarations optional
+  o EnumDeclaration[] enums optional
+  @FormEditor("title", "Concepts")
+  o ConceptDeclaration[] concepts optional
 }
 `;
 
@@ -274,13 +269,13 @@ function createNameTable(modelManager, metaModel) {
     });
 
     // Then add the names local to this metaModel (overriding as we go along)
-    if (metaModel.enumDeclarations) {
-        metaModel.enumDeclarations.forEach((decl) => {
+    if (metaModel.enums) {
+        metaModel.enums.forEach((decl) => {
             table[decl.name] = metaModel.namespace;
         });
     }
-    if (metaModel.classDeclarations) {
-        metaModel.classDeclarations.forEach((decl) => {
+    if (metaModel.concepts) {
+        metaModel.concepts.forEach((decl) => {
             table[decl.name] = metaModel.namespace;
         });
     }
@@ -311,13 +306,13 @@ function resolveName(name, table) {
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
     case 'concerto.metamodel.ModelFile': {
-        if (metaModel.enumDeclarations) {
-            metaModel.enumDeclarations.forEach((decl) => {
+        if (metaModel.enums) {
+            metaModel.enums.forEach((decl) => {
                 resolveTypeNames(decl, table);
             });
         }
-        if (metaModel.classDeclarations) {
-            metaModel.classDeclarations.forEach((decl) => {
+        if (metaModel.concepts) {
+            metaModel.concepts.forEach((decl) => {
                 resolveTypeNames(decl, table);
             });
         }
@@ -332,8 +327,8 @@ function resolveTypeNames(metaModel, table) {
             const name = metaModel.superType.name;
             metaModel.superType.fullyQualifiedName = resolveName(name, table);
         }
-        metaModel.fields.forEach((field) => {
-            resolveTypeNames(field, table);
+        metaModel.properties.forEach((property) => {
+            resolveTypeNames(property, table);
         });
         if (metaModel.decorators) {
             metaModel.decorators.forEach((decorator) => {
@@ -350,9 +345,9 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.EnumFieldDeclaration':
-    case 'concerto.metamodel.ObjectFieldDeclaration':
-    case 'concerto.metamodel.RelationshipDeclaration': {
+    case 'concerto.metamodel.EnumProperty':
+    case 'concerto.metamodel.ObjectProperty':
+    case 'concerto.metamodel.RelationshipProperty': {
         const name = metaModel.type.name;
         metaModel.type.fullyQualifiedName = resolveName(name, table);
         if (metaModel.decorators) {
@@ -380,19 +375,19 @@ function resolveTypeNames(metaModel, table) {
 }
 
 /**
- * Create metamodel for an enum field
- * @param {object} ast - the AST for the field
- * @return {object} the metamodel for this field
+ * Create metamodel for an enum property
+ * @param {object} ast - the AST for the property
+ * @return {object} the metamodel for this property
  */
-function enumFieldToMetaModel(ast) {
-    const field = {};
+function enumPropertyToMetaModel(ast) {
+    const property = {};
 
-    field.$class = 'concerto.metamodel.EnumFieldDeclaration';
+    property.$class = 'concerto.metamodel.EnumProperty';
 
-    // Field name
-    field.name = ast.id.name;
+    // Property name
+    property.name = ast.id.name;
 
-    return field;
+    return property;
 }
 
 /**
@@ -458,40 +453,40 @@ function decoratorsToMetaModel(ast) {
 }
 
 /**
- * Create metamodel for a class field
- * @param {object} ast - the AST for the field
- * @return {object} the metamodel for this field
+ * Create metamodel for a property
+ * @param {object} ast - the AST for the property
+ * @return {object} the metamodel for this property
  */
-function fieldToMetaModel(ast) {
-    const field = {};
+function propertyToMetaModel(ast) {
+    const property = {};
 
-    // Field name
-    field.name = ast.id.name;
+    // Property name
+    property.name = ast.id.name;
     // Is it an array?
     if (ast.array) {
-        field.isArray = true;
+        property.isArray = true;
     } else {
-        field.isArray = false;
+        property.isArray = false;
     }
     // Is it an optional?
     if (ast.optional) {
-        field.isOptional = true;
+        property.isOptional = true;
     } else {
-        field.isOptional = false;
+        property.isOptional = false;
     }
     // XXX Can it be missing?
     const type = ast.propertyType.name;
 
     // Handle decorators
     if (ast.decorators && ast.decorators.length > 0) {
-        field.decorators = decoratorsToMetaModel(ast.decorators);
+        property.decorators = decoratorsToMetaModel(ast.decorators);
     }
 
     switch (type) {
     case 'Integer':
-        field.$class = 'concerto.metamodel.IntegerFieldDeclaration';
+        property.$class = 'concerto.metamodel.IntegerProperty';
         if (ast.default) {
-            field.defaultValue = parseInt(ast.default);
+            property.defaultValue = parseInt(ast.default);
         }
         if (ast.range) {
             const validator = {
@@ -503,13 +498,13 @@ function fieldToMetaModel(ast) {
             if (ast.range.upper) {
                 validator.upper = parseInt(ast.range.upper);
             }
-            field.validator = validator;
+            property.validator = validator;
         }
         break;
     case 'Long':
-        field.$class = 'concerto.metamodel.LongFieldDeclaration';
+        property.$class = 'concerto.metamodel.LongProperty';
         if (ast.default) {
-            field.defaultValue = parseInt(ast.default);
+            property.defaultValue = parseInt(ast.default);
         }
         if (ast.range) {
             const validator = {
@@ -521,13 +516,13 @@ function fieldToMetaModel(ast) {
             if (ast.range.upper) {
                 validator.upper = parseInt(ast.range.upper);
             }
-            field.validator = validator;
+            property.validator = validator;
         }
         break;
     case 'Double':
-        field.$class = 'concerto.metamodel.DoubleFieldDeclaration';
+        property.$class = 'concerto.metamodel.DoubleProperty';
         if (ast.default) {
-            field.defaultValue = parseFloat(ast.default);
+            property.defaultValue = parseFloat(ast.default);
         }
         if (ast.range) {
             const validator = {
@@ -539,48 +534,48 @@ function fieldToMetaModel(ast) {
             if (ast.range.upper) {
                 validator.upper = parseFloat(ast.range.upper);
             }
-            field.validator = validator;
+            property.validator = validator;
         }
         break;
     case 'Boolean':
-        field.$class = 'concerto.metamodel.BooleanFieldDeclaration';
+        property.$class = 'concerto.metamodel.BooleanProperty';
         if (ast.default) {
             if (ast.default === 'true') {
-                field.defaultValue = true;
+                property.defaultValue = true;
             } else {
-                field.defaultValue = false;
+                property.defaultValue = false;
             }
         }
         break;
     case 'DateTime':
-        field.$class = 'concerto.metamodel.DateTimeFieldDeclaration';
+        property.$class = 'concerto.metamodel.DateTimeProperty';
         break;
     case 'String':
-        field.$class = 'concerto.metamodel.StringFieldDeclaration';
+        property.$class = 'concerto.metamodel.StringProperty';
         if (ast.default) {
-            field.defaultValue = ast.default;
+            property.defaultValue = ast.default;
         }
         if (ast.regex) {
             const regex = ast.regex.flags ? `/${ast.regex.pattern}/${ast.regex.flags}` :  `/${ast.regex.pattern}/}`;
-            field.validator = {
+            property.validator = {
                 $class: 'concerto.metamodel.StringRegexValidator',
                 regex,
             };
         }
         break;
     default:
-        field.$class = 'concerto.metamodel.ObjectFieldDeclaration';
+        property.$class = 'concerto.metamodel.ObjectProperty';
         if (ast.default) {
-            field.defaultValue = ast.default;
+            property.defaultValue = ast.default;
         }
-        field.type = {
+        property.type = {
             $class: 'concerto.metamodel.TypeIdentifier',
             name: type
         };
         break;
     }
 
-    return field;
+    return property;
 }
 
 /**
@@ -590,14 +585,14 @@ function fieldToMetaModel(ast) {
  */
 function relationshipToMetaModel(ast) {
     let relationship = {
-        $class: 'concerto.metamodel.RelationshipDeclaration',
+        $class: 'concerto.metamodel.RelationshipProperty',
         type: {
             $class: 'concerto.metamodel.TypeIdentifier',
             name: ast.propertyType.name
         },
     };
 
-    // Field name
+    // Property name
     relationship.name = ast.id.name;
     // Is it an array?
     if (ast.array) {
@@ -628,23 +623,23 @@ function enumDeclToMetaModel(ast) {
     // The enum name
     decl.name = ast.id.name;
 
-    // Enum fields
-    decl.fields = [];
+    // Enum properties
+    decl.properties = [];
     for (let n = 0; n < ast.body.declarations.length; n++) {
         let thing = ast.body.declarations[n];
 
-        decl.fields.push(enumFieldToMetaModel(thing));
+        decl.properties.push(enumPropertyToMetaModel(thing));
     }
 
     return decl;
 }
 
 /**
- * Create metamodel for a class declaration
- * @param {object} ast - the AST for the class declaration
- * @return {object} the metamodel for this class declaration
+ * Create metamodel for a concept declaration
+ * @param {object} ast - the AST for the concept declaration
+ * @return {object} the metamodel for this concept declaration
  */
-function classDeclToMetaModel(ast) {
+function conceptDeclToMetaModel(ast) {
     let decl = {};
 
     if(ast.type === 'AssetDeclaration') {
@@ -659,10 +654,10 @@ function classDeclToMetaModel(ast) {
         decl.$class = 'concerto.metamodel.TransactionDeclaration';
     }
 
-    // The class name
+    // The concept name
     decl.name = ast.id.name;
 
-    // Is the class abstract?
+    // Is the concept abstract?
     if (ast.abstract) {
         decl.isAbstract = true;
     } else {
@@ -684,7 +679,7 @@ function classDeclToMetaModel(ast) {
         }
     }
 
-    // Is the class idenfitied by a field
+    // Is the concept idenfitied by a property
     if (ast.idField) {
         if (ast.idField.name === '$identifier') {
             decl.identified = {
@@ -703,15 +698,15 @@ function classDeclToMetaModel(ast) {
         decl.decorators = decoratorsToMetaModel(ast.decorators);
     }
 
-    // Class fields
-    decl.fields = [];
+    // Concept properties
+    decl.properties = [];
     for (let n = 0; n < ast.body.declarations.length; n++) {
         let thing = ast.body.declarations[n];
-
+        // console.log(`THING ${JSON.stringify(thing)}`);
         if (thing.type === 'FieldDeclaration') {
-            decl.fields.push(fieldToMetaModel(thing));
+            decl.properties.push(propertyToMetaModel(thing));
         } else if (thing.type === 'RelationshipDeclaration') {
-            decl.fields.push(relationshipToMetaModel(thing));
+            decl.properties.push(relationshipToMetaModel(thing));
         }
     }
 
@@ -727,7 +722,7 @@ function declToMetaModel(ast) {
     if(ast.type === 'EnumDeclaration') {
         return enumDeclToMetaModel(ast);
     }
-    return classDeclToMetaModel(ast);
+    return conceptDeclToMetaModel(ast);
 }
 
 /**
@@ -766,16 +761,16 @@ function modelToMetaModel(ast, validate = true) {
     }
 
     if (ast.body.length > 0) {
-        metamodel.enumDeclarations = [];
-        metamodel.classDeclarations = [];
+        metamodel.enums = [];
+        metamodel.concepts = [];
     }
     for(let n=0; n < ast.body.length; n++ ) {
         const thing = ast.body[n];
         const decl = declToMetaModel(thing);
         if (decl.$class === 'concerto.metamodel.EnumDeclaration') {
-            metamodel.enumDeclarations.push(decl);
+            metamodel.enums.push(decl);
         } else {
-            metamodel.classDeclarations.push(decl);
+            metamodel.concepts.push(decl);
         }
     }
 
@@ -846,11 +841,11 @@ function decoratorsFromMetaModel(mm, prefix) {
 }
 
 /**
- * Create a field string from a metamodel
+ * Create a property string from a metamodel
  * @param {object} mm - the metamodel
- * @return {string} the string for that field
+ * @return {string} the string for that property
  */
-function fieldFromMetaModel(mm) {
+function propertyFromMetaModel(mm) {
     let result = '';
     let defaultString = '';
     let validatorString = '';
@@ -858,16 +853,16 @@ function fieldFromMetaModel(mm) {
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '  ');
     }
-    if (mm.$class === 'concerto.metamodel.RelationshipDeclaration') {
+    if (mm.$class === 'concerto.metamodel.RelationshipProperty') {
         result += '-->';
     } else {
         result += 'o';
     }
 
     switch (mm.$class) {
-    case 'concerto.metamodel.EnumFieldDeclaration':
+    case 'concerto.metamodel.EnumProperty':
         break;
-    case 'concerto.metamodel.BooleanFieldDeclaration':
+    case 'concerto.metamodel.BooleanProperty':
         result += ' Boolean';
         if (mm.defaultValue === true || mm.defaultValue === false) {
             if (mm.defaultValue) {
@@ -877,10 +872,10 @@ function fieldFromMetaModel(mm) {
             }
         }
         break;
-    case 'concerto.metamodel.DateTimeFieldDeclaration':
+    case 'concerto.metamodel.DateTimeProperty':
         result += ' DateTime';
         break;
-    case 'concerto.metamodel.DoubleFieldDeclaration':
+    case 'concerto.metamodel.DoubleProperty':
         result += ' Double';
         if (mm.defaultValue) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
@@ -893,7 +888,7 @@ function fieldFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.IntegerFieldDeclaration':
+    case 'concerto.metamodel.IntegerProperty':
         result += ' Integer';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -904,7 +899,7 @@ function fieldFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.LongFieldDeclaration':
+    case 'concerto.metamodel.LongProperty':
         result += ' Long';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -915,7 +910,7 @@ function fieldFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.StringFieldDeclaration':
+    case 'concerto.metamodel.StringProperty':
         result += ' String';
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
@@ -924,13 +919,13 @@ function fieldFromMetaModel(mm) {
             validatorString += ` regex=${mm.validator.regex}`;
         }
         break;
-    case 'concerto.metamodel.ObjectFieldDeclaration':
+    case 'concerto.metamodel.ObjectProperty':
         result += ` ${mm.type.name}`;
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }
         break;
-    case 'concerto.metamodel.RelationshipDeclaration':
+    case 'concerto.metamodel.RelationshipProperty':
         result += ` ${mm.type.name}`;
         break;
     }
@@ -992,8 +987,8 @@ function declFromMetaModel(mm) {
         }
     }
     result += '{';
-    mm.fields.forEach((field) => {
-        result += `\n  ${fieldFromMetaModel(field)}`;
+    mm.properties.forEach((property) => {
+        result += `\n  ${propertyFromMetaModel(property)}`;
     });
     result += '\n}';
     return result;
@@ -1024,13 +1019,13 @@ function ctoFromMetaModel(metaModel, validate = true) {
             }
         });
     }
-    if (mm.enumDeclarations && mm.enumDeclarations.length > 0) {
-        mm.enumDeclarations.forEach((decl) => {
+    if (mm.enums && mm.enums.length > 0) {
+        mm.enums.forEach((decl) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
-    if (mm.classDeclarations && mm.classDeclarations.length > 0) {
-        mm.classDeclarations.forEach((decl) => {
+    if (mm.concepts && mm.concepts.length > 0) {
+        mm.concepts.forEach((decl) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
