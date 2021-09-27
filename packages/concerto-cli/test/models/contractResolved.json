@@ -2,8 +2,8 @@
   "$class": "concerto.metamodel.ModelFile",
   "namespace": "org.accordproject.cicero.contract",
   "imports": [],
-  "enumDeclarations": [],
-  "classDeclarations": [
+  "enums": [],
+  "concepts": [
     {
       "$class": "concerto.metamodel.AssetDeclaration",
       "isAbstract": false,
@@ -12,9 +12,9 @@
         "$class": "concerto.metamodel.IdentifiedBy",
         "name": "stateId"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "stateId",
           "isArray": false,
           "isOptional": false
@@ -29,9 +29,9 @@
         "$class": "concerto.metamodel.IdentifiedBy",
         "name": "partyId"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "partyId",
           "isArray": false,
           "isOptional": false
@@ -46,15 +46,15 @@
         "$class": "concerto.metamodel.IdentifiedBy",
         "name": "contractId"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "contractId",
           "isArray": false,
           "isOptional": false
         }, 
         {
-          "$class": "concerto.metamodel.RelationshipDeclaration",
+          "$class": "concerto.metamodel.RelationshipProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "AccordParty",
@@ -74,9 +74,9 @@
         "$class": "concerto.metamodel.IdentifiedBy",
         "name": "clauseId"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "clauseId",
           "isArray": false,
           "isOptional": false

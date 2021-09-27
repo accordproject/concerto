@@ -14,32 +14,32 @@
       "uri": "https://models.accordproject.org/time@0.2.0.cto"
     }
   ],
-  "enumDeclarations": [
+  "enums": [
     {
       "$class": "concerto.metamodel.EnumDeclaration",
       "name": "Gender",
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.EnumFieldDeclaration",
+          "$class": "concerto.metamodel.EnumProperty",
           "name": "MALE"
         },
         {
-          "$class": "concerto.metamodel.EnumFieldDeclaration",
+          "$class": "concerto.metamodel.EnumProperty",
           "name": "FEMALE"
         },
         {
-          "$class": "concerto.metamodel.EnumFieldDeclaration",
+          "$class": "concerto.metamodel.EnumProperty",
           "name": "OTHER"
         }
       ]
     }
   ],
-  "classDeclarations": [
+  "concepts": [
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
       "name": "Individual",
       "isAbstract": true,
-      "fields": []
+      "properties": []
     },
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
@@ -50,9 +50,9 @@
         "name": "Individual",
         "fullyQualifiedName": "test.person.Individual"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "validator": {
             "$class": "concerto.metamodel.StringRegexValidator",
             "regex": "/[a-zA-Z]*/u"
@@ -62,13 +62,13 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "lastName",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
@@ -79,7 +79,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "defaultValue": "USAddress",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
@@ -91,7 +91,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.RelationshipDeclaration",
+          "$class": "concerto.metamodel.RelationshipProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
@@ -102,7 +102,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.RelationshipDeclaration",
+          "$class": "concerto.metamodel.RelationshipProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
@@ -113,7 +113,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.RelationshipDeclaration",
+          "$class": "concerto.metamodel.RelationshipProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
@@ -124,7 +124,7 @@
           "isOptional": true
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Gender",
@@ -135,7 +135,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.DateTimeFieldDeclaration",
+          "$class": "concerto.metamodel.DateTimeProperty",
           "name": "dob",
           "isArray": false,
           "isOptional": true
@@ -151,15 +151,15 @@
         "name": "Person",
         "fullyQualifiedName": "test.person.Person"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "company",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.BooleanFieldDeclaration",
+          "$class": "concerto.metamodel.BooleanProperty",
           "name": "onLeave",
           "isArray": false,
           "isOptional": false
@@ -173,57 +173,57 @@
       "identified": {
         "$class": "concerto.metamodel.Identified"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "$class": "concerto.metamodel.IntegerProperty",
           "defaultValue": 10001,
           "name": "zip",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "$class": "concerto.metamodel.LongProperty",
           "defaultValue": 10001,
           "name": "zip2",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "$class": "concerto.metamodel.DoubleProperty",
           "defaultValue": 10001,
           "name": "zip3",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "defaultValue": "NYC",
           "name": "city",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "defaultValue": "USA",
           "name": "country",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "street",
           "isArray": true,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.BooleanFieldDeclaration",
+          "$class": "concerto.metamodel.BooleanProperty",
           "defaultValue": true,
           "name": "isResidential",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.BooleanFieldDeclaration",
+          "$class": "concerto.metamodel.BooleanProperty",
           "defaultValue": false,
           "name": "isPrivate",
           "isArray": false,
@@ -299,9 +299,9 @@
         "name": "Address",
         "fullyQualifiedName": "test.person.Address"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "$class": "concerto.metamodel.IntegerProperty",
           "validator": {
             "$class": "concerto.metamodel.IntegerDomainValidator",
             "lower": -365,
@@ -353,7 +353,7 @@
           ]
         },
         {
-          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "$class": "concerto.metamodel.IntegerProperty",
           "validator": {
             "$class": "concerto.metamodel.IntegerDomainValidator",
             "upper": 365
@@ -363,7 +363,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.IntegerFieldDeclaration",
+          "$class": "concerto.metamodel.IntegerProperty",
           "validator": {
             "$class": "concerto.metamodel.IntegerDomainValidator",
             "lower": -365
@@ -373,7 +373,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "$class": "concerto.metamodel.LongProperty",
           "validator": {
             "$class": "concerto.metamodel.LongDomainValidator",
             "lower": -365,
@@ -384,7 +384,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "$class": "concerto.metamodel.LongProperty",
           "validator": {
             "$class": "concerto.metamodel.LongDomainValidator",
             "upper": 365
@@ -394,7 +394,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.LongFieldDeclaration",
+          "$class": "concerto.metamodel.LongProperty",
           "validator": {
             "$class": "concerto.metamodel.LongDomainValidator",
             "lower": -365
@@ -404,7 +404,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "$class": "concerto.metamodel.DoubleProperty",
           "validator": {
             "$class": "concerto.metamodel.DoubleDomainValidator",
             "lower": -3.14,
@@ -415,7 +415,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "$class": "concerto.metamodel.DoubleProperty",
           "validator": {
             "$class": "concerto.metamodel.DoubleDomainValidator",
             "lower": -3.14
@@ -425,7 +425,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.DoubleFieldDeclaration",
+          "$class": "concerto.metamodel.DoubleProperty",
           "validator": {
             "$class": "concerto.metamodel.DoubleDomainValidator",
             "upper": 3.14
@@ -440,13 +440,13 @@
       "$class": "concerto.metamodel.AssetDeclaration",
       "name": "A",
       "isAbstract": false,
-      "fields": []
+      "properties": []
     },
     {
       "$class": "concerto.metamodel.EventDeclaration",
       "name": "E",
       "isAbstract": false,
-      "fields": []
+      "properties": []
     },
     {
       "$class": "concerto.metamodel.TransactionDeclaration",
@@ -456,15 +456,15 @@
         "$class": "concerto.metamodel.IdentifiedBy",
         "name": "id"
       },
-      "fields": [
+      "properties": [
         {
-          "$class": "concerto.metamodel.StringFieldDeclaration",
+          "$class": "concerto.metamodel.StringProperty",
           "name": "id",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "TemporalUnit",
@@ -475,7 +475,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Month",
@@ -486,7 +486,7 @@
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel.ObjectFieldDeclaration",
+          "$class": "concerto.metamodel.ObjectProperty",
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Participant",
