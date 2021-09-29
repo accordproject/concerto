@@ -1,9 +1,8 @@
 {
-  "$class": "concerto.metamodel.ModelFile",
+  "$class": "concerto.metamodel.Model",
   "namespace": "org.accordproject.cicero.contract",
   "imports": [],
-  "enums": [],
-  "concepts": [
+  "declarations": [
     {
       "$class": "concerto.metamodel.AssetDeclaration",
       "isAbstract": false,
@@ -58,7 +57,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "AccordParty",
-            "fullyQualifiedName": "org.accordproject.cicero.contract.AccordParty"
+            "namespace": "org.accordproject.cicero.contract"
           },
           "name": "parties",
           "isArray": true,

@@ -1,9 +1,8 @@
 {
-  "$class": "concerto.metamodel.ModelFile",
+  "$class": "concerto.metamodel.Model",
   "namespace": "org.accordproject.cicero.contract",
   "imports": [],
-  "enums": [],
-  "concepts": [
+  "declarations": [
     {
       "$class": "concerto.metamodel.AssetDeclaration",
       "name": "AccordContractState",

@@ -1,5 +1,5 @@
 {
-  "$class": "concerto.metamodel.ModelFile",
+  "$class": "concerto.metamodel.Model",
   "namespace": "test.person",
   "imports": [
     {
@@ -14,7 +14,7 @@
       "uri": "https://models.accordproject.org/time@0.2.0.cto"
     }
   ],
-  "enums": [
+  "declarations": [
     {
       "$class": "concerto.metamodel.EnumDeclaration",
       "name": "Gender",
@@ -32,9 +32,7 @@
           "name": "OTHER"
         }
       ]
-    }
-  ],
-  "concepts": [
+    },
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
       "name": "Individual",
