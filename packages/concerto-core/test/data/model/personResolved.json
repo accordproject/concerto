@@ -1,5 +1,5 @@
 {
-  "$class": "concerto.metamodel.ModelFile",
+  "$class": "concerto.metamodel.Model",
   "namespace": "test.person",
   "imports": [
     {
@@ -14,7 +14,7 @@
       "uri": "https://models.accordproject.org/time@0.2.0.cto"
     }
   ],
-  "enums": [
+  "declarations": [
     {
       "$class": "concerto.metamodel.EnumDeclaration",
       "name": "Gender",
@@ -32,9 +32,7 @@
           "name": "OTHER"
         }
       ]
-    }
-  ],
-  "concepts": [
+    },
     {
       "$class": "concerto.metamodel.ParticipantDeclaration",
       "name": "Individual",
@@ -48,7 +46,7 @@
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
         "name": "Individual",
-        "fullyQualifiedName": "test.person.Individual"
+        "namespace": "test.person"
       },
       "properties": [
         {
@@ -72,7 +70,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
-            "fullyQualifiedName": "test.person.Address"
+            "namespace": "test.person"
           },
           "name": "address",
           "isArray": false,
@@ -84,7 +82,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
-            "fullyQualifiedName": "test.person.Address"
+            "namespace": "test.person"
           },
           "name": "address2",
           "isArray": false,
@@ -95,7 +93,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
-            "fullyQualifiedName": "test.person.Address"
+            "namespace": "test.person"
           },
           "name": "address3",
           "isArray": false,
@@ -106,7 +104,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
-            "fullyQualifiedName": "test.person.Address"
+            "namespace": "test.person"
           },
           "name": "address4",
           "isArray": true,
@@ -117,7 +115,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Address",
-            "fullyQualifiedName": "test.person.Address"
+            "namespace": "test.person"
           },
           "name": "address5",
           "isArray": false,
@@ -128,7 +126,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Gender",
-            "fullyQualifiedName": "test.person.Gender"
+            "namespace": "test.person"
           },
           "name": "gender",
           "isArray": false,
@@ -149,7 +147,7 @@
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
         "name": "Person",
-        "fullyQualifiedName": "test.person.Person"
+        "namespace": "test.person"
       },
       "properties": [
         {
@@ -268,7 +266,7 @@
               "type": {
                 "$class": "concerto.metamodel.TypeIdentifier",
                 "name": "Gender",
-                "fullyQualifiedName": "test.person.Gender"
+                "namespace": "test.person"
               },
               "isArray": false
             },
@@ -277,7 +275,7 @@
               "type": {
                 "$class": "concerto.metamodel.TypeIdentifier",
                 "name": "TemporalUnit",
-                "fullyQualifiedName": "org.accordproject.time.TemporalUnit"
+                "namespace": "org.accordproject.time"
               },
               "isArray": true
             }
@@ -297,7 +295,7 @@
       "superType": {
         "$class": "concerto.metamodel.TypeIdentifier",
         "name": "Address",
-        "fullyQualifiedName": "test.person.Address"
+        "namespace": "test.person"
       },
       "properties": [
         {
@@ -468,7 +466,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "TemporalUnit",
-            "fullyQualifiedName": "org.accordproject.time.TemporalUnit"
+            "namespace": "org.accordproject.time"
           },
           "name": "tu",
           "isArray": false,
@@ -479,7 +477,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Month",
-            "fullyQualifiedName": "org.accordproject.time.Month"
+            "namespace": "org.accordproject.time"
           },
           "name": "month",
           "isArray": false,
@@ -490,7 +488,7 @@
           "type": {
             "$class": "concerto.metamodel.TypeIdentifier",
             "name": "Participant",
-            "fullyQualifiedName": "concerto.Participant"
+            "namespace": "concerto"
           },
           "name": "p",
           "isArray": false,

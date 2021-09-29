@@ -39,10 +39,8 @@ namespace concerto.metamodel
  * The metadmodel for Concerto files
  */
 concept TypeIdentifier {
-  @FormEditor("selectOptions", "types")
-  o String name default="Concept"
-  @FormEditor( "hide", true)
-  o String fullyQualifiedName optional
+  o String name
+  o String namespace optional
 }
 
 abstract concept DecoratorLiteral {
@@ -77,22 +75,20 @@ concept IdentifiedBy extends Identified {
   o String name
 }
 
-concept EnumDeclaration {
-  @FormEditor("title", "Enum Name")
-  o String name default="EnumName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
+abstract concept Declaration {}
+
+concept EnumDeclaration extends Declaration {
+  o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o EnumProperty[] properties
 }
 
 concept EnumProperty {
-  o String name default="propertyName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  @FormEditor("hide", true)
+  o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o Decorator[] decorators optional
 }
 
-concept ConceptDeclaration {
-  @FormEditor("title", "Concept Name")
-  o String name default="ConceptName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  @FormEditor("hide", true)
+concept ConceptDeclaration extends Declaration {
+  o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o Decorator[] decorators optional
   o Boolean isAbstract default=false
   o Identified identified optional
@@ -112,31 +108,23 @@ concept TransactionDeclaration extends ConceptDeclaration {
 concept EventDeclaration extends ConceptDeclaration {
 }
 
-@FormEditor("defaultSubconcept","concerto.metamodel.StringProperty")
 abstract concept Property {
-  o String name default="propertyName" regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  @FormEditor("title", "List")
+  o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o Boolean isArray default=false
-  @FormEditor("title", "Optional")
   o Boolean isOptional default=false
-  @FormEditor("hide", true)
   o Decorator[] decorators optional
 }
 
 concept RelationshipProperty extends Property {
-  @FormEditor("title", "Type Name", "selectOptions", "types")
   o TypeIdentifier type
 }
 
 concept ObjectProperty extends Property {
-  @FormEditor("hide", true)
   o String defaultValue optional
-  @FormEditor("title", "Type Name", "selectOptions", "types")
   o TypeIdentifier type
 }
 
 concept BooleanProperty extends Property {
-  @FormEditor("hide", true)
   o Boolean defaultValue optional
 }
 
@@ -144,9 +132,7 @@ concept DateTimeProperty extends Property {
 }
 
 concept StringProperty extends Property {
-  @FormEditor("hide", true)
   o String defaultValue optional
-  @FormEditor("hide", true)
   o StringRegexValidator validator optional
 }
 
@@ -165,9 +151,7 @@ concept DoubleDomainValidator {
 }
 
 concept IntegerProperty extends Property {
-  @FormEditor("hide", true)
   o Integer defaultValue optional
-  @FormEditor("hide", true)
   o IntegerDomainValidator validator optional
 }
 
@@ -177,9 +161,7 @@ concept IntegerDomainValidator {
 }
 
 concept LongProperty extends Property {
-  @FormEditor("hide", true)
   o Long defaultValue optional
-  @FormEditor("hide", true)
   o LongDomainValidator validator optional
 }
 
@@ -200,14 +182,10 @@ concept ImportType extends Import {
   o String name
 }
 
-concept ModelFile {
-  o String namespace default="my.namespace"
-  @FormEditor("hide", true)
+concept Model {
+  o String namespace
   o Import[] imports optional
-  @FormEditor("title", "Enums")
-  o EnumDeclaration[] enums optional
-  @FormEditor("title", "Concepts")
-  o ConceptDeclaration[] concepts optional
+  o Declaration[] declarations optional
 }
 `;
 
@@ -239,7 +217,7 @@ function validateMetaModel(input) {
  * Create a name resolution table
  * @param {*} modelManager - the model manager
  * @param {object} metaModel - the metamodel (JSON)
- * @return {object} mapping from local to fully qualified names
+ * @return {object} mapping from a name to its namespace
  */
 function createNameTable(modelManager, metaModel) {
     const table = {
@@ -269,13 +247,8 @@ function createNameTable(modelManager, metaModel) {
     });
 
     // Then add the names local to this metaModel (overriding as we go along)
-    if (metaModel.enums) {
-        metaModel.enums.forEach((decl) => {
-            table[decl.name] = metaModel.namespace;
-        });
-    }
-    if (metaModel.concepts) {
-        metaModel.concepts.forEach((decl) => {
+    if (metaModel.declarations) {
+        metaModel.declarations.forEach((decl) => {
             table[decl.name] = metaModel.namespace;
         });
     }
@@ -287,14 +260,13 @@ function createNameTable(modelManager, metaModel) {
  * Resolve a name using the name table
  * @param {string} name - the name of the type to resolve
  * @param {object} table - the name table
- * @return {string} the fully qualified name
+ * @return {string} the namespace for that name
  */
 function resolveName(name, table) {
     if (!table[name]) {
         throw new Error(`Name ${name} not found`);
     }
-    const namespace = table[name];
-    return `${namespace}.${name}`;
+    return table[name];
 }
 
 /**
@@ -305,14 +277,9 @@ function resolveName(name, table) {
  */
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
-    case 'concerto.metamodel.ModelFile': {
-        if (metaModel.enums) {
-            metaModel.enums.forEach((decl) => {
-                resolveTypeNames(decl, table);
-            });
-        }
-        if (metaModel.concepts) {
-            metaModel.concepts.forEach((decl) => {
+    case 'concerto.metamodel.Model': {
+        if (metaModel.declarations) {
+            metaModel.declarations.forEach((decl) => {
                 resolveTypeNames(decl, table);
             });
         }
@@ -325,7 +292,7 @@ function resolveTypeNames(metaModel, table) {
     case 'concerto.metamodel.ParticipantDeclaration': {
         if (metaModel.superType) {
             const name = metaModel.superType.name;
-            metaModel.superType.fullyQualifiedName = resolveName(name, table);
+            metaModel.superType.namespace = resolveName(name, table);
         }
         metaModel.properties.forEach((property) => {
             resolveTypeNames(property, table);
@@ -349,7 +316,7 @@ function resolveTypeNames(metaModel, table) {
     case 'concerto.metamodel.ObjectProperty':
     case 'concerto.metamodel.RelationshipProperty': {
         const name = metaModel.type.name;
-        metaModel.type.fullyQualifiedName = resolveName(name, table);
+        metaModel.type.namespace = resolveName(name, table);
         if (metaModel.decorators) {
             metaModel.decorators.forEach((decorator) => {
                 resolveTypeNames(decorator, table);
@@ -367,7 +334,7 @@ function resolveTypeNames(metaModel, table) {
         break;
     case 'concerto.metamodel.DecoratorTypeReference': {
         const name = metaModel.type.name;
-        metaModel.type.fullyQualifiedName = resolveName(name, table);
+        metaModel.type.namespace = resolveName(name, table);
     }
         break;
     }
@@ -733,7 +700,7 @@ function declToMetaModel(ast) {
  */
 function modelToMetaModel(ast, validate = true) {
     const metamodel = {
-        $class: 'concerto.metamodel.ModelFile'
+        $class: 'concerto.metamodel.Model'
     };
     metamodel.namespace = ast.namespace;
 
@@ -761,17 +728,12 @@ function modelToMetaModel(ast, validate = true) {
     }
 
     if (ast.body.length > 0) {
-        metamodel.enums = [];
-        metamodel.concepts = [];
+        metamodel.declarations = [];
     }
     for(let n=0; n < ast.body.length; n++ ) {
         const thing = ast.body[n];
         const decl = declToMetaModel(thing);
-        if (decl.$class === 'concerto.metamodel.EnumDeclaration') {
-            metamodel.enums.push(decl);
-        } else {
-            metamodel.concepts.push(decl);
-        }
+        metamodel.declarations.push(decl);
     }
 
     // Last, validate the JSON metaModel
@@ -1019,13 +981,8 @@ function ctoFromMetaModel(metaModel, validate = true) {
             }
         });
     }
-    if (mm.enums && mm.enums.length > 0) {
-        mm.enums.forEach((decl) => {
-            result += `\n\n${declFromMetaModel(decl)}`;
-        });
-    }
-    if (mm.concepts && mm.concepts.length > 0) {
-        mm.concepts.forEach((decl) => {
+    if (mm.declarations && mm.declarations.length > 0) {
+        mm.declarations.forEach((decl) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
