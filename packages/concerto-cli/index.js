@@ -30,7 +30,7 @@ require('yargs')
             type: 'string'
         });
         yargs.option('model', {
-            describe: 'array of concerto (cto) model files',
+            describe: 'array of concerto model files',
             type: 'string',
             array: true
         });
@@ -84,9 +84,9 @@ require('yargs')
         }
     })
     .command('compile', 'generate code for a target platform', (yargs) => {
-        yargs.demandOption(['model'], 'Please provide CTO models');
+        yargs.demandOption(['model'], 'Please provide models');
         yargs.option('model', {
-            describe: 'array of concerto (cto) model files',
+            describe: 'array of concerto model files',
             type: 'string',
             array: true
         });
@@ -121,9 +121,9 @@ require('yargs')
             });
     })
     .command('get', 'save local copies of external model dependencies', (yargs) => {
-        yargs.demandOption(['model'], 'Please provide CTO models');
+        yargs.demandOption(['model'], 'Please provide models');
         yargs.option('model', {
-            describe: 'array of concerto (cto) model files',
+            describe: 'array of concerto model files',
             type: 'string',
             array: true
         });
@@ -148,7 +148,7 @@ require('yargs')
     .command('import', 'import a cto string into its metamodel', (yargs) => {
         yargs.demandOption(['input'], 'Please provide an input cto');
         yargs.option('model', {
-            describe: 'array of concerto (cto) model files',
+            describe: 'array of concerto model files',
             type: 'string',
             array: true
         });
@@ -161,12 +161,17 @@ require('yargs')
             type: 'boolean',
             default: false
         });
+        yargs.option('all', {
+            describe: 'import all models',
+            type: 'boolean',
+            default: false
+        });
         yargs.option('output', {
             describe: 'path to the output file',
             type: 'string'
         });
     }, (argv) => {
-        return Commands.import(argv.input, argv.model, argv.resolve, argv.output)
+        return Commands.import(argv.input, argv.model, argv.resolve, argv.all, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);
@@ -187,7 +192,7 @@ require('yargs')
             type: 'string'
         });
     }, (argv) => {
-        return Commands.export(argv.input, argv.output)
+        return Commands.export(argv.input, argv.model, argv.all, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);

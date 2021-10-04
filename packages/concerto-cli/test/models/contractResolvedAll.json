@@ -1,0 +1,89 @@
+{
+  "$class": "concerto.metamodel.Models",
+  "models": [{
+    "$class": "concerto.metamodel.Model",
+    "namespace": "org.accordproject.cicero.contract",
+    "imports": [],
+    "declarations": [
+      {
+        "$class": "concerto.metamodel.AssetDeclaration",
+        "isAbstract": false,
+        "name": "AccordContractState",
+        "identified": {
+          "$class": "concerto.metamodel.IdentifiedBy",
+          "name": "stateId"
+        },
+        "properties": [
+          {
+            "$class": "concerto.metamodel.StringProperty",
+            "name": "stateId",
+            "isArray": false,
+            "isOptional": false
+          }
+        ]
+      }, 
+      {
+        "$class": "concerto.metamodel.ParticipantDeclaration",
+        "isAbstract": false,
+        "name": "AccordParty",
+        "identified": {
+          "$class": "concerto.metamodel.IdentifiedBy",
+          "name": "partyId"
+        },
+        "properties": [
+          {
+            "$class": "concerto.metamodel.StringProperty",
+            "name": "partyId",
+            "isArray": false,
+            "isOptional": false
+          }
+        ]
+      }, 
+      {
+        "$class": "concerto.metamodel.AssetDeclaration",
+        "isAbstract": true,
+        "name": "AccordContract",
+        "identified": {
+          "$class": "concerto.metamodel.IdentifiedBy",
+          "name": "contractId"
+        },
+        "properties": [
+          {
+            "$class": "concerto.metamodel.StringProperty",
+            "name": "contractId",
+            "isArray": false,
+            "isOptional": false
+          }, 
+          {
+            "$class": "concerto.metamodel.RelationshipProperty",
+            "type": {
+              "$class": "concerto.metamodel.TypeIdentifier",
+              "name": "AccordParty",
+              "namespace": "org.accordproject.cicero.contract"
+            },
+            "name": "parties",
+            "isArray": true,
+            "isOptional": true
+          }
+        ]
+      }, 
+      {
+        "$class": "concerto.metamodel.AssetDeclaration",
+        "isAbstract": true,
+        "name": "AccordClause",
+        "identified": {
+          "$class": "concerto.metamodel.IdentifiedBy",
+          "name": "clauseId"
+        },
+        "properties": [
+          {
+            "$class": "concerto.metamodel.StringProperty",
+            "name": "clauseId",
+            "isArray": false,
+            "isOptional": false
+          }
+        ]
+      }
+    ]
+  }]
+}

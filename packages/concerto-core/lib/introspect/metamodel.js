@@ -187,6 +187,10 @@ concept Model {
   o Import[] imports optional
   o Declaration[] declarations optional
 }
+
+concept Models {
+  o Model[] models
+}
 `;
 
 /**
@@ -744,12 +748,36 @@ function modelToMetaModel(ast, validate = true) {
 
 /**
  * Export metamodel from a model file
- * @param {object} modelFile - the AST for the model
+ * @param {object} modelFile - the ModelFile
  * @param {boolean} [validate] - whether to perform validation
  * @return {object} the metamodel for this model
  */
 function modelFileToMetaModel(modelFile, validate) {
     return modelToMetaModel(modelFile.ast, validate);
+}
+
+/**
+ * Export metamodel from a model manager
+ * @param {object} modelManager - the ModelManager
+ * @param {boolean} [resolve] - whether to resolve names
+ * @param {boolean} [validate] - whether to perform validation
+ * @return {object} the metamodel for this model manager
+ */
+function modelManagerToMetaModel(modelManager, resolve, validate) {
+    const result = {
+        $class: 'concerto.metamodel.Models',
+        models: [],
+    };
+    modelManager.getModelFiles().forEach((modelFile) => {
+        const metaModel = modelToMetaModel(modelFile.ast, validate);
+        if (resolve) {
+            const nameTable = createNameTable(modelManager, metaModel);
+            // This adds the fully qualified names to the same object
+            resolveTypeNames(metaModel, nameTable);
+        }
+        result.models.push(metaModel);
+    });
+    return result;
 }
 
 /**
@@ -990,6 +1018,27 @@ function ctoFromMetaModel(metaModel, validate = true) {
 }
 
 /**
+ * Import metamodel to a model manager
+ * @param {object} metaModel - the metamodel
+ * @param {boolean} [validate] - whether to perform validation
+ * @return {object} the metamodel for this model manager
+ */
+function modelManagerFromMetaModel(metaModel, validate) {
+    // First, validate the JSON metaModel
+    const mm = validate ? validateMetaModel(metaModel) : metaModel;
+
+    const modelManager = new ModelManager();
+
+    mm.models.forEach((mm) => {
+        const cto = ctoFromMetaModel(mm, false); // No need to re-validate
+        modelManager.addModelFile(cto, null, false);
+    });
+
+    modelManager.validateModelFiles();
+    return modelManager;
+}
+
+/**
  * Export metamodel from a model string
  * @param {string} model - the string for the model
  * @param {boolean} [validate] - whether to perform validation
@@ -1019,6 +1068,8 @@ function ctoToMetaModelAndResolve(modelManager, model, validate) {
 module.exports = {
     metaModelCto,
     modelFileToMetaModel,
+    modelManagerToMetaModel,
+    modelManagerFromMetaModel,
     ctoToMetaModel,
     ctoToMetaModelAndResolve,
     ctoFromMetaModel,
