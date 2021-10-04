@@ -195,21 +195,28 @@ class Commands {
      * @param {string} input - CTO
      * @param {string[]} [ctoFiles] - the CTO files used for import resolution
      * @param {boolean} resolve - whether to resolve the names
+     * @param {boolean} all - whether to import all models
      * @param {string} outputPath to an output file
      * @param {string} the metamodel
      */
-    static async import(input, ctoFiles = [], resolve = false, outputPath) {
+    static async import(input, ctoFiles = [], resolve = false, all = false, outputPath) {
         // Add input to ctoFiles for convenience
         if (!ctoFiles.includes(input)) {
             ctoFiles.push(input);
         }
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles);
+
         const inputString = fs.readFileSync(input, 'utf8');
         let result;
-        if (resolve) {
-            const modelManager = await ModelLoader.loadModelManager(ctoFiles);
-            result = MetaModel.ctoToMetaModelAndResolve(modelManager, inputString);
+
+        if (all) {
+            result = MetaModel.modelManagerToMetaModel(modelManager, resolve);
         } else {
-            result = MetaModel.ctoToMetaModel(inputString);
+            if (resolve) {
+                result = MetaModel.ctoToMetaModelAndResolve(modelManager, inputString);
+            } else {
+                result = MetaModel.ctoToMetaModel(inputString);
+            }
         }
         if (outputPath) {
             Logger.info('Creating file: ' + outputPath);

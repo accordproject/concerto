@@ -132,7 +132,46 @@ describe('MetaModel (Empty)', () => {
             mm2.should.deep.equal(emptyMetaModel);
         });
     });
+});
 
+describe('MetaModel (Car)', () => {
+    const vehicleModelPath = path.resolve(__dirname, '../data/model/vehicle.cto');
+    const carModelPath = path.resolve(__dirname, '../data/model/car.cto');
+    const carMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/car.json'), 'utf8'));
+    const carMetaModelResolved = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/carResolved.json'), 'utf8'));
+
+    describe('#toMetaModel', () => {
+        it('should convert a model manager to its metamodel', async () => {
+            const modelManager = await ModelLoader.loadModelManager([vehicleModelPath, carModelPath]);
+            const mm1 = MetaModel.modelManagerToMetaModel(modelManager, false, false);
+            mm1.should.deep.equal(carMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel', async () => {
+            const modelManager = await ModelLoader.loadModelManager([vehicleModelPath, carModelPath]);
+            const mm1 = MetaModel.modelManagerToMetaModel(modelManager, false, true);
+            mm1.should.deep.equal(carMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
+            const modelManager = await ModelLoader.loadModelManager([vehicleModelPath, carModelPath]);
+            const mm1 = MetaModel.modelManagerToMetaModel(modelManager, true, true);
+            mm1.should.deep.equal(carMetaModelResolved);
+        });
+
+        it('should roundtrip a model manager with its metamodel', async () => {
+            const modelManager = await ModelLoader.loadModelManager([vehicleModelPath, carModelPath]);
+            const mm1 = MetaModel.modelManagerToMetaModel(modelManager);
+            mm1.should.deep.equal(carMetaModel);
+            const modelManager2 = MetaModel.modelManagerFromMetaModel(mm1);
+            const mm2 = MetaModel.modelManagerToMetaModel(modelManager2);
+            mm2.should.deep.equal(carMetaModel);
+        });
+
+    });
+});
+
+describe('MetaMetaModel', () => {
     describe('#meta-metamodel', () => {
         it('should roundtrip the metamodel', () => {
             const metaModel = MetaModel.metaModelCto;
@@ -141,6 +180,5 @@ describe('MetaModel (Empty)', () => {
             const mm2 = MetaModel.ctoToMetaModel(metaModel2, false);
             mm2.should.deep.equal(mm1);
         });
-
     });
 });

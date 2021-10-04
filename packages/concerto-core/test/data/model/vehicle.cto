@@ -1,0 +1,9 @@
+namespace org.vehicle
+
+abstract concept Manufactured {
+}
+
+abstract concept Vehicle extends Manufactured {
+	o String name
+	o Double range
+}
