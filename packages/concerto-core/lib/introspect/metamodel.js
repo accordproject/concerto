@@ -346,6 +346,20 @@ function resolveTypeNames(metaModel, table) {
 }
 
 /**
+ * Resolve the namespace for names in the metamodel
+ * @param {object} modelManager - the ModelManager
+ * @param {object} metaModel - the MetaModel
+ * @return {object} the resolved metamodel
+ */
+function resolveMetaModel(modelManager, metaModel) {
+    const result = JSON.parse(JSON.stringify(metaModel));
+    const nameTable = createNameTable(modelManager, metaModel);
+    // This adds the fully qualified names to the same object
+    resolveTypeNames(result, nameTable);
+    return result;
+}
+
+/**
  * Create metamodel for an enum property
  * @param {object} ast - the AST for the property
  * @return {object} the metamodel for this property
@@ -769,11 +783,9 @@ function modelManagerToMetaModel(modelManager, resolve, validate) {
         models: [],
     };
     modelManager.getModelFiles().forEach((modelFile) => {
-        const metaModel = modelToMetaModel(modelFile.ast, validate);
+        let metaModel = modelToMetaModel(modelFile.ast, validate);
         if (resolve) {
-            const nameTable = createNameTable(modelManager, metaModel);
-            // This adds the fully qualified names to the same object
-            resolveTypeNames(metaModel, nameTable);
+            metaModel = resolveMetaModel(modelManager, metaModel);
         }
         result.models.push(metaModel);
     });
@@ -1059,10 +1071,8 @@ function ctoToMetaModel(model, validate) {
 function ctoToMetaModelAndResolve(modelManager, model, validate) {
     const ast = parser.parse(model);
     const metaModel = modelToMetaModel(ast);
-    const nameTable = createNameTable(modelManager, metaModel);
-    // This adds the fully qualified names to the same object
-    resolveTypeNames(metaModel, nameTable);
-    return metaModel;
+    const result = resolveMetaModel(modelManager, metaModel);
+    return result;
 }
 
 module.exports = {
@@ -1070,6 +1080,7 @@ module.exports = {
     modelFileToMetaModel,
     modelManagerToMetaModel,
     modelManagerFromMetaModel,
+    resolveMetaModel,
     ctoToMetaModel,
     ctoToMetaModelAndResolve,
     ctoFromMetaModel,

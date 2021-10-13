@@ -115,6 +115,7 @@ class ModelFileDownloader {
    + object createNameTable() 
    + string resolveName() 
    + object resolveTypeNames() 
+   + object resolveMetaModel() 
    + object enumPropertyToMetaModel() 
    + object decoratorArgToMetaModel() 
    + object decoratorToMetaModel() 
