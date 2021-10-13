@@ -24,9 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.2.2 {a07bdd68f8dc79691f86852ebeae6786} 2021-08-12
+Version 1.2.2 {b19318bb094e5da7bdff192cf9a3b4f2} 2021-08-12
 - Fixes to metamodel, including terminology changes
 - Ability to roundtrip model manager to metamodel
+- Expose name resolution to MetaModel API
 
 Version 1.1.2 {2c9512d9d90bde289b47942937d252ca} 2021-08-12
 - Add Factory.newId for creating new unique IDs
