@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
-    "axios": "0.21.2",
+    "axios": "0.23.0",
     "colors": "1.4.0",
     "dayjs": "1.10.4",
     "debug": "4.3.1",
