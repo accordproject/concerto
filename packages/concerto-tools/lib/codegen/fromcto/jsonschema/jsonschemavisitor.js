@@ -159,14 +159,12 @@ class JSONSchemaVisitor {
     visitModelFile(modelFile, parameters) {
         debug('entering visitModelFile', modelFile.getNamespace());
 
-        // Visit all of the asset and transaction declarations, but ignore the abstract ones.
+        // Visit all of the asset and transaction declarations
         let result = {
             definitions : {}
         };
-        modelFile.getAllDeclarations().filter((declaration) => {
-            return !declaration.isAbstract();
-        }).
-            forEach((declaration) => {
+        modelFile.getAllDeclarations()
+            .forEach((declaration) => {
                 const type = declaration.accept(this, parameters);
                 result.definitions[type.$id] = type.schema;
             });

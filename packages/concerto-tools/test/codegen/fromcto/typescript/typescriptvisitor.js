@@ -223,12 +223,13 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
             param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(5);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '\n// imports']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import {IProperty1,Property1} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import {IParent,Parent} from \'./super\';']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '\n// types']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '/* eslint-disable @typescript-eslint/no-empty-interface */']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '\n// imports']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import {IProperty1} from \'./org.org1\';']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'import {IParent} from \'./super\';']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '\n// interfaces']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledThrice.should.be.ok;
@@ -293,11 +294,12 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
             param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '\n// imports']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import {IProperty1,Property1,IProperty3,Property3} from \'./org.org1\';']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '\n// types']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '/* eslint-disable @typescript-eslint/no-empty-interface */']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '\n// imports']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import {IProperty1,IProperty3} from \'./org.org1\';']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '\n// interfaces']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
@@ -354,16 +356,10 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(9);
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IBob {']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '}\n']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'export class Bob implements IBob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'public static $class: string']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'public constructor(data: IBob) {']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([2, 'Object.assign(this, data);']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([2, 'Bob.$class = \'undefined\'']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([1, '}']);
-            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([0, '}\n']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '$class: string;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '}\n']);
         });
         it('should write the class opening and close with abstract and super type', () => {
             let acceptSpy = sinon.spy();
@@ -382,17 +378,9 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(10);
+            param.fileWriter.writeLine.callCount.should.deep.equal(2);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IBob extends IPerson {']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '}\n']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'export abstract class Bob extends Person implements IBob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'public static $class: string']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'public constructor(data: IBob) {']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([2, 'super(data);']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([2, 'Object.assign(this, data);']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([2, 'Bob.$class = \'undefined\'']);
-            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([1, '}']);
-            param.fileWriter.writeLine.getCall(9).args.should.deep.equal([0, '}\n']);
         });
     });
 

@@ -89,6 +89,7 @@ class TypescriptVisitor {
     visitModelFile(modelFile, parameters) {
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.ts');
 
+        parameters.fileWriter.writeLine(0, '/* eslint-disable @typescript-eslint/no-empty-interface */');
         parameters.fileWriter.writeLine(0, `// Generated code for namespace: ${modelFile.getNamespace()}`);
 
         // Compute the types we need to import (based on all the types of the properites
@@ -105,7 +106,6 @@ class TypescriptVisitor {
                         properties.set(typeNamespace, new Set());
                     }
                     properties.get(typeNamespace).add(`I${typeName}`);
-                    properties.get(typeNamespace).add(typeName);
                 }
 
                 classDeclaration.getProperties().forEach(property => {
@@ -116,7 +116,6 @@ class TypescriptVisitor {
                             properties.set(typeNamespace, new Set());
                         }
                         properties.get(typeNamespace).add(`I${typeName}`);
-                        properties.get(typeNamespace).add(typeName);
                     }
                 });
             });
@@ -131,7 +130,7 @@ class TypescriptVisitor {
                 }
             });
 
-        parameters.fileWriter.writeLine(0, '\n// types');
+        parameters.fileWriter.writeLine(0, '\n// interfaces');
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
@@ -176,35 +175,15 @@ class TypescriptVisitor {
 
         parameters.fileWriter.writeLine(0, 'export interface I' + classDeclaration.getName() + superType + '{');
 
+        if(!classDeclaration.getSuperType()) {
+            parameters.fileWriter.writeLine(1, '$class: string;');
+        }
+
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
 
         parameters.fileWriter.writeLine(0, '}\n');
-
-        const exportDecl = classDeclaration.isAbstract() ? 'export abstract' : 'export';
-
-        if (classDeclaration.getSuperType()) {
-            superType = ` extends ${ModelUtil.getShortName(classDeclaration.getSuperType())} `;
-        }
-
-        parameters.fileWriter.writeLine(0, `${exportDecl} class ${classDeclaration.getName()}${superType}implements I${classDeclaration.getName()} {`);
-        parameters.fileWriter.writeLine(1, 'public static $class: string');
-        parameters.useDefiniteAssignment = true;
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
-        parameters.useDefiniteAssignment = false;
-
-        parameters.fileWriter.writeLine(1,`public constructor(data: I${classDeclaration.getName()}) {`);
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(2, 'super(data);');
-        }
-        parameters.fileWriter.writeLine(2, 'Object.assign(this, data);');
-        parameters.fileWriter.writeLine(2, `${classDeclaration.getName()}.$class = '${classDeclaration.getFullyQualifiedName()}'`);
-        parameters.fileWriter.writeLine(1, '}');
-        parameters.fileWriter.writeLine(0, '}\n');
-
         return null;
     }
 
