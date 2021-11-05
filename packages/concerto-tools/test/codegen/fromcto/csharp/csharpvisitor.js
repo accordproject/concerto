@@ -467,7 +467,7 @@ describe('CSharpVisitor', function () {
         });
     });
 
-    describe('toTsType', () => {
+    describe('toCSharpType', () => {
         it('should return Date for DateTime', () => {
             csharpVisitor.toCSharpType('DateTime').should.deep.equal('DateTime');
         });

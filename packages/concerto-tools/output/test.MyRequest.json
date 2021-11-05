@@ -10,6 +10,27 @@
         "BLUE"
       ]
     },
+    "test.Base": {
+      "title": "Base",
+      "description": "An instance of test.Base",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "test.Base",
+          "pattern": "^test\\.Base$",
+          "description": "The class identifier for this type"
+        },
+        "id": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        }
+      },
+      "required": [
+        "$class",
+        "id"
+      ]
+    },
     "test.Money": {
       "title": "Money",
       "description": "An instance of test.Money",
