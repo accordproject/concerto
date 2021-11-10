@@ -400,17 +400,6 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitField(mockField, param);
             param.fileWriter.writeLine.withArgs(1, 'name: string;').calledOnce.should.be.ok;
         });
-        it('should write a line for primitive field name and type using definite assignment', () => {
-            const mockField = sinon.createStubInstance(Field);
-            mockField.isPrimitive.returns(false);
-            mockField.getName.returns('name');
-            mockField.getType.returns('String');
-            mockField.isPrimitive.returns(true);
-            param.useDefiniteAssignment = true;
-            typescriptVisitor.visitField(mockField, param);
-            param.useDefiniteAssignment = false;
-            param.fileWriter.writeLine.withArgs(1, 'name!: string;').calledOnce.should.be.ok;
-        });
 
         it('should convert classes to interfaces', () => {
             const mockField = sinon.createStubInstance(Field);
@@ -485,16 +474,6 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitRelationship(mockRelationship, param);
 
             param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson;').calledOnce.should.be.ok;
-        });
-        it('should write a line for field name and type using definite assignment', () => {
-            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
-            mockRelationship.getName.returns('Bob');
-            mockRelationship.getType.returns('Person');
-            param.useDefiniteAssignment = true;
-            typescriptVisitor.visitRelationship(mockRelationship, param);
-            param.useDefiniteAssignment = false;
-            param.fileWriter.writeLine.withArgs(1, 'Bob!: IPerson;').calledOnce.should.be.ok;
         });
 
         it('should write a line for field name and type thats an array', () => {

@@ -196,17 +196,20 @@ class TypescriptVisitor {
      */
     visitField(field, parameters) {
         let array = '';
+        let optional = '';
 
         if (field.isArray()) {
             array = '[]';
         }
 
+        if (field.isOptional()) {
+            optional = '?';
+        }
+
         const isEnumRef = field.isPrimitive() ? false
             : field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName()).isEnum();
 
-        const assignment = parameters.useDefiniteAssignment ? '!' : '';
-
-        parameters.fileWriter.writeLine(1, field.getName() + assignment + ': ' + this.toTsType(field.getType(), !isEnumRef) + array + ';');
+        parameters.fileWriter.writeLine(1, field.getName() + optional + ': ' + this.toTsType(field.getType(), !isEnumRef) + array + ';');
         return null;
     }
 
@@ -231,15 +234,18 @@ class TypescriptVisitor {
      */
     visitRelationship(relationship, parameters) {
         let array = '';
+        let optional='';
 
         if (relationship.isArray()) {
             array = '[]';
         }
 
-        const assignment = parameters.useDefiniteAssignment ? '!' : '';
+        if (relationship.isOptional()) {
+            optional = '?';
+        }
 
         // we export all relationships
-        parameters.fileWriter.writeLine(1, relationship.getName() + assignment + ': ' + this.toTsType(relationship.getType(), true) + array + ';');
+        parameters.fileWriter.writeLine(1, relationship.getName() + optional + ': ' + this.toTsType(relationship.getType(), true) + array + ';');
         return null;
     }
 
