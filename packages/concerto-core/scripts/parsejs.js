@@ -34,8 +34,8 @@ function processFile(file, fileProcessor) {
     let filePath = path.parse(file);
     if (filePath.ext === '.js' && filePath.base !== 'parser.js') { //ignore the generated parsers
         let fileContents = fs.readFileSync(file, 'utf8');
-        // Specify ES2017 (ES8) as that has async/await, which we use in our APIs.
-        const parser = new JavaScriptParser(fileContents, program.private, 8, false);
+        // Specify ES2022 (ES13) as that has static class members, which we use in our APIs.
+        const parser = new JavaScriptParser(fileContents, program.private, 2022);
         fileProcessor.generate(program, file, parser.getIncludes(), parser.getClasses(), parser.getFunctions());
     }
 }
@@ -73,7 +73,7 @@ function processDirectory(path, fileProcessor) {
  * --inputDir <location to recursively read .js files>
  */
 program
-    .version('0.0.1')
+    .version('1.0.0')
     .description('Parses Javascript source and generates output from class and method definitions')
     .usage('[options]')
     .option('-o, --outputDir <outputDir>', 'Output directory')

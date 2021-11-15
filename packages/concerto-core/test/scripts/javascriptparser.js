@@ -18,7 +18,6 @@ const JavascriptParser = require('../../scripts/javascriptparser');
 const fs = require('fs');
 const path = require('path');
 const doctrine = require('doctrine');
-const acorn = require('acorn');
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-as-promised'));
@@ -52,7 +51,7 @@ describe('JavascriptParser', () => {
         afterEach(() => {
             sandbox.restore();
         });
-        it('should use a default ECMAScript version of 7', () => {
+        it('should use a default ECMAScript version of 2022', () => {
             const contents = `
                 let num = 3 ** 2;
                 num **= 2;
@@ -76,12 +75,11 @@ describe('JavascriptParser', () => {
 
         it('should accept a non-default ECMAScript version of 5', () => {
             const contents = `
+            function inc(arg) {
+                return arg++;
+            }
             `;
-
-            sandbox.stub(acorn.Parser.prototype,'startNode').returns({body:[]});
-            sandbox.stub(acorn.Parser.prototype,'finishNode').returns({body:[]});
             new JavascriptParser(contents, false, 5);
-
         });
 
         it('should accept a non-default ECMAScript version of 5', () => {
@@ -263,28 +261,6 @@ describe('JavascriptParser', () => {
         });
     });
 
-    describe('#getTokens', () => {
-        afterEach(() => {
-            delete global.composerJavaScriptParserNoTokens;
-        });
-
-        it('should return all of the tokens', () => {
-            const contents = 'eval(true)';
-            const parser = new JavascriptParser(contents);
-            const tokens = parser.getTokens();
-            tokens.should.have.lengthOf(5);
-            tokens.should.all.have.property('loc');
-        });
-
-        it('should return no tokens if token collection is disabled', () => {
-            global.composerJavaScriptParserNoTokens = true;
-            const contents = 'eval(true)';
-            const parser = new JavascriptParser(contents);
-            const tokens = parser.getTokens();
-            tokens.should.have.lengthOf(0);
-        });
-    });
-
     describe('#getText', () => {
         it('should use the substring method correctly', () => {
             JavascriptParser.getText(0, 6, 'strings are cool').should.equal('string');
@@ -298,91 +274,6 @@ describe('JavascriptParser', () => {
             parser.getIncludes();
         });
     });
-
-    describe('#searchForComment', () => {
-        let commentSpy;
-        beforeEach(() => {
-            commentSpy = sandbox.spy(JavascriptParser, 'searchForComment');
-        });
-
-        it('should handle comments not directly before function', () => {
-            const code = readTestExample('CommentNotDirectlyBeforeFunction.js.txt');
-            sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code);
-            parser.getFunctions().length.should.equal(1);
-            const func = parser.getFunctions()[0];
-            func.decorators.should.deep.equal(['param', 'transaction']);
-            func.parameterTypes.length.should.equal(1);
-            func.parameterTypes[0].should.equal('org.acme.mynetwork.Trade');
-            func.name.should.equal('tradeCommodity');
-            sinon.assert.called(commentSpy);
-        });
-
-        it('should handle the basic of examples', () => {
-            const code = readTestExample('BasicExample.js.txt');
-            sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code);
-            parser.getFunctions().length.should.equal(1);
-            const func = parser.getFunctions()[0];
-            func.decorators.should.deep.equal(['param', 'transaction']);
-            func.parameterTypes.length.should.equal(1);
-            func.parameterTypes[0].should.equal('org.acme.mynetwork.Trade');
-            func.name.should.equal('tradeCommodity');
-            sinon.assert.called(commentSpy);
-        });
-
-        it('should handle the uncommented function following commented function', () => {
-            const code = readTestExample('UncommentedFollowingCommented.js.txt');
-            sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code);
-            parser.getFunctions().length.should.equal(2);
-            const func = parser.getFunctions()[0];
-            func.decorators.should.deep.equal(['param', 'transaction']);
-            func.name.should.equal('tradeCommodity');
-            func.parameterTypes.length.should.equal(1);
-            func.parameterTypes[0].should.equal('org.acme.mynetwork.Trade');
-            const func2 = parser.getFunctions()[1];
-            func2.decorators.length.should.equal(0);
-            func2.parameterTypes.length.should.equal(0);
-            sinon.assert.called(commentSpy);
-        });
-
-        it('should handle the class methods', () => {
-            const code = readTestExample('ClassExample.js.txt');
-            sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code, false, 7, true);
-            const clazz = parser.getClasses();
-            clazz.length.should.equal(1);
-            const methods = clazz[0].methods;
-            methods.length.should.equal(3);
-            methods[0].decorators.length.should.equal(0);
-            methods[1].decorators.should.deep.equal(['param', 'transaction']);
-            methods[2].decorators.length.should.equal(0);
-            sinon.assert.called(commentSpy);
-        });
-
-        it('should handle the a complex example', () => {
-            const code = readTestExample('ComplexExample.js.txt');
-            sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code);
-            const funcs = parser.getFunctions();
-            funcs.length.should.equal(12);
-            const noDecorators = [0, 1, 2, 3, 5, 6, 9, 10];
-            const allDecorators = [7, 8, 11];
-            noDecorators.forEach((value) => {
-                funcs[value].decorators.length.should.equal(0);
-            });
-            allDecorators.forEach((value) => {
-                funcs[value].decorators.length.should.equal(2);
-                funcs[value].decorators.should.deep.equal(['param', 'transaction']);
-            });
-            funcs[4].decorators.length.should.equal(1);
-            funcs[4].decorators[0].should.equal('transaction');
-            sinon.assert.called(commentSpy);
-        });
-
-    });
-
 
     describe('#findCommentBefore', () => {
         let commentSpy;
