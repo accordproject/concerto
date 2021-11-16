@@ -230,11 +230,8 @@ declare module '@accordproject/concerto-core' {
 
   // Globalize
   export function Globalize(locale: string): any;
-
-  export namespace Globalize {
-    function messageFormatter(message: string): any;
-    function formatMessage(message: string): any;
-  }
+  function messageFormatter(message: string): any;
+  function formatMessage(message: string): any;
 
   // Introspector
   export class Introspector {
@@ -418,9 +415,7 @@ declare module '@accordproject/concerto-core' {
     utcOffset: number
   }
 
-  export namespace DateTimeUtil {
-    function setCurrentTime(currentTime?: string, utcOffset?: number): CurrentTime;
-  }
+  function setCurrentTime(currentTime?: string, utcOffset?: number): CurrentTime;
 
   // TypedStack
   export class TypedStack {
@@ -440,7 +435,7 @@ declare module '@accordproject/concerto-core' {
     getTypeDeclaration(obj: any): ClassDeclaration;
     getIdentifier(obj: any): string;
     isIdentifiable(obj: any): boolean;
-    isRelationship(obj: aby): boolean;
+    isRelationship(obj: any): boolean;
     setIdentifier(obj: any, id: string): any;
     getFullyQualifiedIdentifier(obj: any): string;
     toURI(obj: any): string;
@@ -450,12 +445,12 @@ declare module '@accordproject/concerto-core' {
   }
 
   // MetaModel
-  export namespace MetaModel {
-    const metaModelCto: string;
-    function modelFileToMetaModel(modelFile: ModelFile, validate?: boolean): any;
-    function ctoToMetaModel(model: string, validate?: boolean): any;
-    function ctoToMetaModelAndResolve(modelManager: ModelManager, model: string, validate?: boolean);
-    function ctoFromMetaModel(metaModel: any, validate?: boolean): string;
+  export class MetaModel {
+    static metaModelCto: string;
+    static modelFileToMetaModel(modelFile: ModelFile, validate?: boolean): any;
+    static ctoToMetaModel(model: string, validate?: boolean): any;
+    static ctoToMetaModelAndResolve(modelManager: ModelManager, model: string, validate?: boolean) : any;
+    static ctoFromMetaModel(metaModel: any, validate?: boolean): string;
   }
 
   // version
