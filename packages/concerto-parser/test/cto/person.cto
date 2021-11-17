@@ -1,0 +1,72 @@
+namespace test.person
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+import org.accordproject.time.TemporalUnit from https://models.accordproject.org/time@0.2.0.cto
+
+enum Gender {
+  o MALE
+  o FEMALE
+  o OTHER
+}
+
+abstract participant Individual {
+}
+
+participant Person extends Individual {
+  o String firstName regex=/[a-zA-Z]*/u
+  o String lastName
+  o Address address
+  o Address address2 default="USAddress"
+  --> Address address3
+  --> Address[] address4
+  --> Address address5 optional
+  o Gender gender
+  o DateTime dob optional
+}
+
+participant Employee extends Person {
+  o String company
+  o Boolean onLeave
+}
+
+concept Address identified {
+  o Integer zip default=10001
+  o Long zip2 default=10001
+  o Double zip3 default=10001.0
+  o String city default="NYC"
+  o String country default="USA"
+  o String[] street
+  o Boolean isResidential default=true
+  o Boolean isPrivate default=false
+}
+
+@Address("x",1,"y","foo","z",true,Gender,TemporalUnit[])
+@Address2()
+@Address3
+concept USAddress extends Address {
+  @Zip("x",1,"y","foo","z",true)
+  @Zip2()
+  @Zip3
+  o Integer zip4 range=[-365,365]
+  o Integer zip41 range=[,365]
+  o Integer zip42 range=[-365,]
+  o Long zip5 range=[-365,365]
+  o Long zip51 range=[,365]
+  o Long zip52 range=[-365,]
+  o Double zip6 range=[-3.14,3.14]
+  o Double zip61 range=[-3.14,]
+  o Double zip62 range=[,3.14]
+}
+
+asset A {
+}
+
+event E {
+}
+
+transaction T identified by id {
+  o String id
+  o TemporalUnit tu
+  o Month month
+  o Participant p
+}

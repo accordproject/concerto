@@ -1,33 +1,39 @@
 {
-  "name": "@accordproject/concerto-cli",
+  "name": "@accordproject/concerto-parser",
   "version": "1.2.1",
-  "description": "Command-line utility for working with Concerto model files",
+  "description": "Parser the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
-  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=12",
+    "npm": ">=6"
+  },
   "main": "index.js",
-  "bin": {
-    "concerto": "./index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-cli"
-  },
   "scripts": {
-    "lint": "eslint .",
+    "prepare": "peggy ./lib/parser.pegjs",
     "pretest": "npm run lint",
+    "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "nyc mocha --recursive -t 10000"
+    "test": "nyc mocha --recursive -t 10000",
+    "test:watch": "nyc mocha --watch --recursive -t 10000",
+    "mocha": "mocha --recursive -t 10000",
+    "nyc": "nyc mocha --recursive -t 10000"
   },
-  "bugs": {
-    "url": "https://github.com/accordproject/concerto/issues"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-core"
   },
+  "keywords": [
+    "blockchain",
+    "hyperledger",
+    "solutions"
+  ],
+  "author": "accordproject.org",
+  "license": "Apache-2.0",
   "devDependencies": {
-    "ajv": "8.1.0",
-    "babel-preset-latest": "6.24.1",
     "chai": "4.3.4",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -35,22 +41,12 @@
     "jsdoc": "^3.6.7",
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
-    "mockery": "2.1.0",
-    "moxios": "0.4.0",
-    "nunjucks": "3.2.3",
     "nyc": "15.1.0",
-    "peggy": "1.2.0",
-    "sinon": "10.0.0",
-    "sinon-chai": "3.6.0",
-    "tmp-promise": "3.0.2"
+    "peggy": "1.2.0"
   },
   "dependencies": {
-    "@accordproject/concerto-core": "1.2.1",
-    "@accordproject/concerto-parser": "1.2.1",
-    "@accordproject/concerto-tools": "1.2.1",
-    "mkdirp": "1.0.4",
-    "yargs": "17.1.0"
   },
+  "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
     "folder": "./lib",
     "license": "HEADER",
@@ -59,9 +55,7 @@
       "api.txt",
       "composer-logs",
       "coverage",
-      "index.d.ts",
-      "./system",
-      "./introspect/parser.js",
+      "./parser.js",
       "LICENSE",
       "node_modules",
       ".nyc-output",
@@ -90,7 +84,7 @@
         }
       },
       "md": {
-        "file": "./HEADER.md"
+        "file": "HEADER.md"
       }
     }
   },
@@ -106,12 +100,14 @@
     "include": [
       "lib/**/*.js"
     ],
-    "exclude": [],
+    "exclude": [
+      "lib/parser.js"
+    ],
     "all": true,
     "check-coverage": true,
-    "statements": 100,
-    "branches": 100,
-    "functions": 100,
-    "lines": 100
+    "statements": 54,
+    "branches": 41,
+    "functions": 70,
+    "lines": 55
   }
 }

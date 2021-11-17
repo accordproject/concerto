@@ -14,7 +14,7 @@
 
 'use strict';
 
-const parser = require('./parser');
+const { Parser, Printer } = require('@accordproject/concerto-parser');
 const ModelManager = require('../modelmanager');
 const Factory = require('../factory');
 const Serializer = require('../serializer');
@@ -383,7 +383,7 @@ class MetaModel {
      * @param {boolean} [validate] - whether to perform validation
      * @return {object} the metamodel for this model
      */
-    static modelFileToMetaModel(modelFile, validate) {
+    static modelFileToMetaModel(modelFile, validate = true) {
         // Last, validate the JSON metaModel
         return validate ? MetaModel.validateMetaModel(modelFile.ast) : modelFile.ast;
     }
@@ -395,7 +395,7 @@ class MetaModel {
      * @param {boolean} [validate] - whether to perform validation
      * @return {object} the metamodel for this model manager
      */
-    static modelManagerToMetaModel(modelManager, resolve, validate) {
+    static modelManagerToMetaModel(modelManager, resolve, validate = true) {
         const result = {
             $class: 'concerto.metamodel.Models',
             models: [],
@@ -411,256 +411,19 @@ class MetaModel {
     }
 
     /**
-     * Create decorator argument string from a metamodel
-     * @param {object} mm - the metamodel
-     * @return {string} the string for the decorator argument
-     */
-    static decoratorArgFromMetaModel(mm) {
-        let result = '';
-        switch (mm.$class) {
-        case 'concerto.metamodel.DecoratorTypeReference':
-            result += `${mm.type.name}${mm.isArray ? '[]' : ''}`;
-            break;
-        case 'concerto.metamodel.DecoratorString':
-            result += `"${mm.value}"`;
-            break;
-        default:
-            result += `${mm.value}`;
-            break;
-        }
-        return result;
-    }
-
-    /**
-     * Create decorator string from a metamodel
-     * @param {object} mm - the metamodel
-     * @return {string} the string for the decorator
-     */
-    static decoratorFromMetaModel(mm) {
-        let result = '';
-        result += `@${mm.name}`;
-        if (mm.arguments) {
-            result += '(';
-            result += mm.arguments.map(MetaModel.decoratorArgFromMetaModel).join(',');
-            result += ')';
-        }
-        return result;
-    }
-
-    /**
-     * Create decorators string from a metamodel
-     * @param {object} mm - the metamodel
-     * @param {string} prefix - indentation
-     * @return {string} the string for the decorators
-     */
-    static decoratorsFromMetaModel(mm, prefix) {
-        let result = '';
-        result += mm.map(MetaModel.decoratorFromMetaModel).join(`\n${prefix}`);
-        result += `\n${prefix}`;
-        return result;
-    }
-
-    /**
-     * Create a property string from a metamodel
-     * @param {object} mm - the metamodel
-     * @return {string} the string for that property
-     */
-    static propertyFromMetaModel(mm) {
-        let result = '';
-        let defaultString = '';
-        let validatorString = '';
-
-        if (mm.decorators) {
-            result += MetaModel.decoratorsFromMetaModel(mm.decorators, '  ');
-        }
-        if (mm.$class === 'concerto.metamodel.RelationshipProperty') {
-            result += '-->';
-        } else {
-            result += 'o';
-        }
-
-        switch (mm.$class) {
-        case 'concerto.metamodel.EnumProperty':
-            break;
-        case 'concerto.metamodel.BooleanProperty':
-            result += ' Boolean';
-            if (mm.defaultValue === true || mm.defaultValue === false) {
-                if (mm.defaultValue) {
-                    defaultString += ' default=true';
-                } else {
-                    defaultString += ' default=false';
-                }
-            }
-            break;
-        case 'concerto.metamodel.DateTimeProperty':
-            result += ' DateTime';
-            break;
-        case 'concerto.metamodel.DoubleProperty':
-            result += ' Double';
-            if (mm.defaultValue) {
-                const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
-
-                defaultString += ` default=${doubleString}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                validatorString += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case 'concerto.metamodel.IntegerProperty':
-            result += ' Integer';
-            if (mm.defaultValue) {
-                defaultString += ` default=${mm.defaultValue.toString()}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                validatorString += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case 'concerto.metamodel.LongProperty':
-            result += ' Long';
-            if (mm.defaultValue) {
-                defaultString += ` default=${mm.defaultValue.toString()}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                validatorString += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case 'concerto.metamodel.StringProperty':
-            result += ' String';
-            if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
-            }
-            if (mm.validator) {
-                validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
-            }
-            break;
-        case 'concerto.metamodel.ObjectProperty':
-            result += ` ${mm.type.name}`;
-            if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
-            }
-            break;
-        case 'concerto.metamodel.RelationshipProperty':
-            result += ` ${mm.type.name}`;
-            break;
-        }
-        if (mm.isArray) {
-            result += '[]';
-        }
-        result += ` ${mm.name}`;
-        if (mm.isOptional) {
-            result += ' optional';
-        }
-        result += defaultString;
-        result += validatorString;
-        return result;
-    }
-
-    /**
-     * Create a declaration string from a metamodel
-     * @param {object} mm - the metamodel
-     * @return {string} the string for that declaration
-     */
-    static declFromMetaModel(mm) {
-        let result = '';
-        if (mm.decorators) {
-            result += MetaModel.decoratorsFromMetaModel(mm.decorators, '');
-        }
-
-        if (mm.isAbstract) {
-            result += 'abstract ';
-        }
-        switch (mm.$class) {
-        case 'concerto.metamodel.AssetDeclaration':
-            result += `asset ${mm.name} `;
-            break;
-        case 'concerto.metamodel.ConceptDeclaration':
-            result += `concept ${mm.name} `;
-            break;
-        case 'concerto.metamodel.EventDeclaration':
-            result += `event ${mm.name} `;
-            break;
-        case 'concerto.metamodel.ParticipantDeclaration':
-            result += `participant ${mm.name} `;
-            break;
-        case 'concerto.metamodel.TransactionDeclaration':
-            result += `transaction ${mm.name} `;
-            break;
-        case 'concerto.metamodel.EnumDeclaration':
-            result += `enum ${mm.name} `;
-            break;
-        }
-        if (mm.superType) {
-            result += `extends ${mm.superType.name} `;
-        }
-        // XXX Needs to be fixed to support `identified`
-        if (mm.identified) {
-            if (mm.identified.$class === 'concerto.metamodel.IdentifiedBy') {
-                result += `identified by ${mm.identified.name} `;
-            } else {
-                result += 'identified ';
-            }
-        }
-        result += '{';
-        mm.properties.forEach((property) => {
-            result += `\n  ${MetaModel.propertyFromMetaModel(property)}`;
-        });
-        result += '\n}';
-        return result;
-    }
-
-    /**
-     * Create a model string from a metamodel
-     * @param {object} metaModel - the metamodel
-     * @param {boolean} [validate] - whether to perform validation
-     * @return {string} the string for that model
-     */
-    static ctoFromMetaModel(metaModel, validate = true) {
-        // First, validate the JSON metaModel
-        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
-
-        let result = '';
-        result += `namespace ${mm.namespace}`;
-        if (mm.imports && mm.imports.length > 0) {
-            result += '\n';
-            mm.imports.forEach((imp) => {
-                let name = '*';
-                if (imp.$class === 'concerto.metamodel.ImportType') {
-                    name = imp.name;
-                }
-                result += `\nimport ${imp.namespace}.${name}`;
-                if (imp.uri) {
-                    result += ` from ${imp.uri}`;
-                }
-            });
-        }
-        if (mm.declarations && mm.declarations.length > 0) {
-            mm.declarations.forEach((decl) => {
-                result += `\n\n${MetaModel.declFromMetaModel(decl)}`;
-            });
-        }
-        return result;
-    }
-
-    /**
      * Import metamodel to a model manager
      * @param {object} metaModel - the metamodel
      * @param {boolean} [validate] - whether to perform validation
      * @return {object} the metamodel for this model manager
      */
-    static modelManagerFromMetaModel(metaModel, validate) {
+    static modelManagerFromMetaModel(metaModel, validate = true) {
         // First, validate the JSON metaModel
         const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
 
         const modelManager = new ModelManager();
 
         mm.models.forEach((mm) => {
-            const cto = MetaModel.ctoFromMetaModel(mm, false); // No need to re-validate
+            const cto = Printer.toCTO(mm); // No need to re-validate
             modelManager.addModelFile(cto, null, false);
         });
 
@@ -674,8 +437,8 @@ class MetaModel {
      * @param {boolean} [validate] - whether to perform validation
      * @return {object} the metamodel for this model
      */
-    static ctoToMetaModel(model, validate) {
-        return parser.parse(model);
+    static ctoToMetaModel(model, validate = true) {
+        return Parser.parse(model);
     }
 
     /**
@@ -685,9 +448,13 @@ class MetaModel {
      * @param {boolean} [validate] - whether to perform validation
      * @return {object} the metamodel for this model
      */
-    static ctoToMetaModelAndResolve(modelManager, model, validate) {
-        const metaModel = parser.parse(model);
-        const result = MetaModel.resolveMetaModel(modelManager, metaModel);
+    static ctoToMetaModelAndResolve(modelManager, model, validate = true) {
+        const metaModel = Parser.parse(model);
+
+        // First, validate the JSON metaModel
+        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
+
+        const result = MetaModel.resolveMetaModel(modelManager, mm);
         return result;
     }
 }

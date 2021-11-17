@@ -1,11 +1,11 @@
-# Concerto Core
+# Concerto Parser
 
-Main library for Concerto models, model manager, JSON instance validation and serialization.
+Library for Concerto model parsing and printing using CTO syntax.
 
 # Installation
 
 ```
-npm install @accordproject/concerto-core --save
+npm install @accordproject/concerto-parser --save
 ```
 
 ## License <a name="license"></a>

@@ -23,10 +23,11 @@ const IllegalModelException = require('../../lib/introspect/illegalmodelexceptio
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const ParseException = require('../../lib/introspect/parseexception');
-const parser = require('../../lib/introspect/parser');
 const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
+
+const { Parser } = require('@accordproject/concerto-parser');
 
 const chai = require('chai');
 const should = chai.should();
@@ -74,7 +75,7 @@ describe('ModelFile', () => {
                 namespace: 'org.acme',
                 body: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
             mf.ast.should.equal(ast);
             mf.namespace.should.equal('org.acme');
@@ -96,7 +97,7 @@ describe('ModelFile', () => {
                 imports: imports,
                 declarations: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
             mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
         });
@@ -117,7 +118,7 @@ describe('ModelFile', () => {
                 imports: imports,
                 declarations: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
             mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
@@ -125,7 +126,7 @@ describe('ModelFile', () => {
         });
 
         it('should handle a normal parsing exception', () => {
-            sandbox.stub(parser, 'parse').throws({
+            sandbox.stub(Parser, 'parse').throws({
                 location: {
                     start: {
                         line: 99,
@@ -139,7 +140,7 @@ describe('ModelFile', () => {
         });
 
         it('should handle a normal parsing exception with a file name', () => {
-            sandbox.stub(parser, 'parse').throws({
+            sandbox.stub(Parser, 'parse').throws({
                 location: {
                     start: {
                         line: 99,
@@ -153,13 +154,13 @@ describe('ModelFile', () => {
         });
 
         it('should handle any other parsing exception', () => {
-            sandbox.stub(parser, 'parse').throws(new Error('fake error'));
+            sandbox.stub(Parser, 'parse').throws(new Error('fake error'));
             (() => {
                 new ModelFile(modelManager, 'fake definitions');
             }).should.throw(/fake error/);
             let error = new Error('fake error 2');
             error.location = {};
-            parser.parse.throws(error);
+            Parser.parse.throws(error);
             (() => {
                 new ModelFile(modelManager, 'fake definitions');
             }).should.throw(/fake error 2/);
@@ -173,7 +174,7 @@ describe('ModelFile', () => {
                     $class: 'BlahType'
                 } ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             (() => {
                 new ModelFile(modelManager, 'fake definitions');
             }).should.throw(/BlahType/);
@@ -519,7 +520,7 @@ describe('ModelFile', () => {
                 namespace: 'org.acme',
                 body: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
             mf.getType('String').should.equal('String');
         });
@@ -529,7 +530,7 @@ describe('ModelFile', () => {
                 namespace: 'org.acme',
                 body: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake');
             mf.isImportedType = () => { return true; };
             mf.resolveImport = () => { return 'org.acme'; };
@@ -639,7 +640,7 @@ describe('ModelFile', () => {
                 namespace: 'org.acme',
                 body: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake');
             mf.isImportedType = () => { return false; };
             mf.isLocalType = () => { return false; };
@@ -651,7 +652,7 @@ describe('ModelFile', () => {
                 namespace: 'org.acme',
                 body: [ ]
             };
-            sandbox.stub(parser, 'parse').returns(ast);
+            sandbox.stub(Parser, 'parse').returns(ast);
             let modelFile = new ModelFile(modelManager, 'something');
 
             modelFile.getFullyQualifiedTypeName('String').should.equal('String');

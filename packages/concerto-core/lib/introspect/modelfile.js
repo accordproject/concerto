@@ -16,7 +16,6 @@
 
 const packageJson = require('../../package.json');
 const semver = require('semver');
-const parser = require('./parser');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
@@ -27,6 +26,7 @@ const IllegalModelException = require('./illegalmodelexception');
 const ParseException = require('./parseexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
+const { Parser } = require('@accordproject/concerto-parser');
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
@@ -72,8 +72,7 @@ class ModelFile {
         }
 
         try {
-            this.ast = parser.parse(definitions);
-            // console.log(`AST ${JSON.stringify(this.ast, null, 2)}`);
+            this.ast = Parser.parse(definitions);
         }
         catch(err) {
             if(err.location && err.location.start) {
