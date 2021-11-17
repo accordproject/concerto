@@ -10,7 +10,6 @@
   "main": "index.js",
   "typings": "types/index.d.ts",
   "scripts": {
-    "prepare": "peggy ./lib/introspect/parser.pegjs",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
@@ -59,6 +58,7 @@
     "yargs": "17.1.0"
   },
   "dependencies": {
+    "@accordproject/concerto-parser": "1.2.1",
     "@supercharge/promise-pool": "1.7.0",
     "axios": "0.23.0",
     "colors": "1.4.0",
@@ -83,7 +83,6 @@
       "coverage",
       "index.d.ts",
       "./system",
-      "./introspect/parser.js",
       "LICENSE",
       "node_modules",
       ".nyc-output",
@@ -129,9 +128,6 @@
       "lib/**/*.js"
     ],
     "exclude": [
-      "lib/codegen/parsejs.js",
-      "lib/codegen/javascriptparser.js",
-      "lib/introspect/parser.js"
     ],
     "all": true,
     "check-coverage": true,

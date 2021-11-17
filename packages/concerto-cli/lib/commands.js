@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
+const Printer = require('@accordproject/concerto-parser').Printer;
 const Logger = require('@accordproject/concerto-core').Logger;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
@@ -236,7 +237,7 @@ class Commands {
     static async export(input, outputPath) {
         const inputString = fs.readFileSync(input, 'utf8');
         const json = JSON.parse(inputString);
-        const result = MetaModel.ctoFromMetaModel(json);
+        const result = Printer.toCTO(json);
         if (outputPath) {
             Logger.info('Creating file: ' + outputPath);
             fs.writeFileSync(outputPath, result);

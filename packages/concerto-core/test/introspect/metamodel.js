@@ -18,6 +18,9 @@ const ModelManager = require('../../lib/modelmanager');
 const ModelLoader = require('../../lib/modelloader');
 const ModelFile = require('../../lib/introspect/modelfile');
 const MetaModel = require('../../lib/introspect/metamodel');
+
+const { Printer } = require('@accordproject/concerto-parser');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -53,7 +56,7 @@ describe('MetaModel (Person)', () => {
             const mf1 = new ModelFile(modelManager1, personModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
             mm1.should.deep.equal(personMetaModel);
-            const model2 = MetaModel.ctoFromMetaModel(mm1, false);
+            const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
             const mf2 = new ModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
@@ -65,7 +68,7 @@ describe('MetaModel (Person)', () => {
             const mf1 = new ModelFile(modelManager1, personModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1);
             mm1.should.deep.equal(personMetaModel);
-            const model2 = MetaModel.ctoFromMetaModel(mm1);
+            const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
             const mf2 = new ModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
@@ -102,7 +105,7 @@ describe('MetaModel (Empty)', () => {
             const mf1 = new ModelFile(modelManager1, emptyModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
             mm1.should.deep.equal(emptyMetaModel);
-            const model2 = MetaModel.ctoFromMetaModel(mm1, false);
+            const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
             const mf2 = new ModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
@@ -114,7 +117,7 @@ describe('MetaModel (Empty)', () => {
             const mf1 = new ModelFile(modelManager1, emptyModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1);
             mm1.should.deep.equal(emptyMetaModel);
-            const model2 = MetaModel.ctoFromMetaModel(mm1);
+            const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
             const mf2 = new ModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
@@ -165,8 +168,8 @@ describe('MetaMetaModel', () => {
         it('should roundtrip the metamodel', () => {
             const metaModel = MetaModel.getMetaModelCto();
             const mm1 = MetaModel.ctoToMetaModel(metaModel, false);
-            const metaModel2 = MetaModel.ctoFromMetaModel(mm1);
-            const mm2 = MetaModel.ctoToMetaModel(metaModel2, false);
+            const model2 = Printer.toCTO(mm1);
+            const mm2 = MetaModel.ctoToMetaModel(model2, false);
             mm2.should.deep.equal(mm1);
         });
     });
