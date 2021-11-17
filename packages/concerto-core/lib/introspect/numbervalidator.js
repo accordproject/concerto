@@ -37,12 +37,12 @@ class NumberValidator extends Validator{
         this.lowerBound = null;
         this.upperBound = null;
 
-        if(ast.lower) {
-            this.lowerBound = parseFloat(ast.lower);
+        if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
+            this.lowerBound = ast.lower;
         }
 
-        if(ast.upper) {
-            this.upperBound = parseFloat(ast.upper);
+        if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
+            this.upperBound = ast.upper;
         }
 
         if(this.lowerBound === null && this.upperBound === null) {

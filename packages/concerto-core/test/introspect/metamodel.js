@@ -72,17 +72,6 @@ describe('MetaModel (Person)', () => {
             mm2.should.deep.equal(personMetaModel);
         });
     });
-
-    describe('#meta-metamodel', () => {
-        it('should roundtrip the metamodel', () => {
-            const metaModel = MetaModel.metaModelCto;
-            const mm1 = MetaModel.ctoToMetaModel(metaModel, false);
-            const metaModel2 = MetaModel.ctoFromMetaModel(mm1);
-            const mm2 = MetaModel.ctoToMetaModel(metaModel2, false);
-            mm2.should.deep.equal(mm1);
-        });
-
-    });
 });
 
 describe('MetaModel (Empty)', () => {

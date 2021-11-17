@@ -53,26 +53,39 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        this.name = this.ast.id.name;
+        this.name = this.ast.name;
         this.decorator = null;
 
         if(!this.name) {
-            throw new Error('No name for type ' + this.ast );
+            throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        if(this.ast.propertyType) {
-            this.type = this.ast.propertyType.name;
-        }
-        else {
+        if (this.ast.$class === 'concerto.metamodel.BooleanProperty') {
+            this.type = 'Boolean';
+        } else if (this.ast.$class === 'concerto.metamodel.StringProperty') {
+            this.type = 'String';
+        } else if (this.ast.$class === 'concerto.metamodel.IntegerProperty') {
+            this.type = 'Integer';
+        } else if (this.ast.$class === 'concerto.metamodel.LongProperty') {
+            this.type = 'Long';
+        } else if (this.ast.$class === 'concerto.metamodel.DoubleProperty') {
+            this.type = 'Double';
+        } else if (this.ast.$class === 'concerto.metamodel.DateTimeProperty') {
+            this.type = 'DateTime';
+        } else if (this.ast.$class === 'concerto.metamodel.ObjectProperty') {
+            this.type = this.ast.type ? this.ast.type.name : null;
+        } else if (this.ast.$class === 'concerto.metamodel.RelationshipProperty') {
+            this.type = this.ast.type.name;
+        } else {
             this.type = null;
         }
         this.array = false;
 
-        if(this.ast.array) {
+        if(this.ast.isArray) {
             this.array = true;
         }
 
-        if(this.ast.optional) {
+        if(this.ast.isOptional) {
             this.optional = true;
         }
         else {

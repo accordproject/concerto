@@ -62,10 +62,19 @@ class Decorator {
         this.arguments = [];
 
         if (this.ast.arguments) {
-            for (let n = 0; n < this.ast.arguments.list.length; n++) {
-                let thing = this.ast.arguments.list[n];
+            for (let n = 0; n < this.ast.arguments.length; n++) {
+                let thing = this.ast.arguments[n];
                 if (thing) {
-                    this.arguments.push(thing.value);
+                    if (thing.$class === 'concerto.metamodel.DecoratorTypeReference') {
+                        // XXX Is this really what we want?
+                        this.arguments.push({
+                            type: 'Identifier',
+                            name: thing.type.name,
+                            array: thing.isArray
+                        });
+                    } else {
+                        this.arguments.push(thing.value);
+                    }
                 }
             }
         }

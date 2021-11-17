@@ -48,16 +48,10 @@ describe('ClassDeclaration', () => {
         it('should throw if ast contains invalid type', () => {
             (() => {
                 new ClassDeclaration(modelFile, {
-                    id: {
-                        name: 'suchName'
-                    },
-                    body: {
-                        declarations: [
-                            {
-                                type: 'noSuchType'
-                            }
-                        ]
-                    }
+                    name: 'suchName',
+                    properties: [{
+                        $class: 'noSuchType'
+                    }]
                 });
             }).should.throw(/Unrecognised model element/);
         });
@@ -132,13 +126,9 @@ describe('ClassDeclaration', () => {
 
         it('should call the visitor', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                properties: [
+                ]
             });
             let visitor = {
                 visit: sinon.stub()
@@ -154,13 +144,9 @@ describe('ClassDeclaration', () => {
 
         it('should return the class name', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                properties: [
+                ]
             });
             clz.getName().should.equal('suchName');
             clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName super=Concept enum=false abstract=false}');
@@ -172,84 +158,60 @@ describe('ClassDeclaration', () => {
 
         it('should return true for concepts', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'ConceptDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.ConceptDeclaration',
+                properties: [
+                ]
             });
             clz.isConcept().should.equal(true);
         });
 
         it('should return true for assets', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'AssetDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.AssetDeclaration',
+                properties: [
+                ]
             });
             clz.isAsset().should.equal(true);
         });
 
         it('should return true for events', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'EventDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.EventDeclaration',
+                properties: [
+                ]
             });
             clz.isEvent().should.equal(true);
         });
 
         it('should return true for participants', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'ParticipantDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.ParticipantDeclaration',
+                properties: [
+                ]
             });
             clz.isParticipant().should.equal(true);
         });
 
         it('should return true for enums', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'EnumDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.EnumDeclaration',
+                properties: [
+                ]
             });
             clz.isEnum().should.equal(true);
         });
 
         it('should return true for transactions', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                type: 'TransactionDeclaration',
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                $class: 'concerto.metamodel.TransactionDeclaration',
+                properties: [
+                ]
             });
             clz.isTransaction().should.equal(true);
             clz.isAsset().should.equal(false);
@@ -261,13 +223,9 @@ describe('ClassDeclaration', () => {
 
         it('should return the fully qualified name if function is in a namespace', () => {
             let clz = new ClassDeclaration(modelFile, {
-                id: {
-                    name: 'suchName'
-                },
-                body: {
-                    declarations: [
-                    ]
-                }
+                name: 'suchName',
+                properties: [
+                ]
             });
             clz.getFullyQualifiedName().should.equal('com.hyperledger.testing.suchName');
         });

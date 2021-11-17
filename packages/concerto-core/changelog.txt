@@ -24,11 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.2.2 {a060e0f8db275f6616bfb649cca3fb23} 2021-11-22
+Version 1.2.2 {cf9d5dad911076e149b7013afe24e3dc} 2021-11-22
 - Remove custom instanceof and add methods to check runtime type
 - Remove support for Node 12
-
-Version 1.2.2 {8149560555027394c95a893c1e442d67} 2021-11-15
+- Parser directly constructs metamodel instance
 - Convert MetaModel to a class for Typescript + Webpack compatability
 - Update Acorn to latest and refactor the JavaScript parser so we can use static class members
 

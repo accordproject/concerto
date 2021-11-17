@@ -25,12 +25,22 @@ describe('Decorator', () => {
     let mockAssetDeclaration;
 
     const ast = {
+        $class: 'concerto.metamodel.Decorator',
         name: 'Test',
-        arguments: {
-            list: [
-                {value:'one'}, {value:'two'}, {value:'three'}
-            ]
-        }
+        arguments: [
+            {
+                $class: 'concerto.metamodel.DecoratorString',
+                value:'one'
+            },
+            {
+                $class: 'concerto.metamodel.DecoratorString',
+                value:'two'
+            },
+            {
+                $class: 'concerto.metamodel.DecoratorString',
+                value:'three'
+            }
+        ]
     };
 
     beforeEach(() => {

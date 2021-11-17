@@ -81,29 +81,47 @@ describe('ModelFile', () => {
         });
 
         it('should call the parser with the definitions and save any imports', () => {
-            const imports = [ {namespace: 'org.freddos'}, {namespace: 'org.doge'} ];
+            const imports = [ {
+                $class: 'concerto.metamodel.ImportType',
+                namespace: 'org.freddos',
+                name: 'Bar',
+            }, {
+                $class: 'concerto.metamodel.ImportType',
+                namespace: 'org.doge',
+                name: 'Foo',
+            } ];
             const ast = {
+                $class: 'concerto.metamodel.Model',
                 namespace: 'org.acme',
                 imports: imports,
-                body: [ ]
+                declarations: [ ]
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.freddos', 'org.doge', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.imports.should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
-            const imports = [ {namespace: 'org.doge'}, {namespace: 'org.freddos.*', uri: 'https://freddos.org/model.cto'} ];
+            const imports = [ {
+                $class: 'concerto.metamodel.ImportType',
+                namespace: 'org.doge',
+                name:'Foo',
+            }, {
+                $class: 'concerto.metamodel.ImportAll',
+                namespace: 'org.freddos',
+                uri: 'https://freddos.org/model.cto'
+            } ];
             const ast = {
+                $class: 'concerto.metamodel.Model',
                 namespace: 'org.acme',
                 imports: imports,
-                body: [ ]
+                declarations: [ ]
             };
             sandbox.stub(parser, 'parse').returns(ast);
             let mf = new ModelFile(modelManager, 'fake definitions');
-            mf.imports.should.deep.equal(['org.doge', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.imports.should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
-            (mf.getImportURI('org.doge') === null).should.be.true;
+            (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
         it('should handle a normal parsing exception', () => {
@@ -149,9 +167,10 @@ describe('ModelFile', () => {
 
         it('should throw for an unrecognized body element', () => {
             const ast = {
+                $class: 'concerto.metamodel.Model',
                 namespace: 'org.acme',
-                body: [ {
-                    type: 'BlahType'
+                declarations: [ {
+                    $class: 'BlahType'
                 } ]
             };
             sandbox.stub(parser, 'parse').returns(ast);
