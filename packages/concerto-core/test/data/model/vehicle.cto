@@ -4,6 +4,6 @@ abstract concept Manufactured {
 }
 
 abstract concept Vehicle extends Manufactured {
-	o String name
-	o Double range
+  o String name
+  o Double range
 }

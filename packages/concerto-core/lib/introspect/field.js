@@ -53,19 +53,19 @@ class Field extends Property {
         case 'Integer':
         case 'Double':
         case 'Long':
-            if(this.ast.range) {
-                this.validator = new NumberValidator(this, this.ast.range);
+            if(this.ast.validator) {
+                this.validator = new NumberValidator(this, this.ast.validator);
             }
             break;
         case 'String':
-            if(this.ast.regex) {
-                this.validator = new StringValidator(this, this.ast.regex);
+            if(this.ast.validator) {
+                this.validator = new StringValidator(this, this.ast.validator);
             }
             break;
         }
 
-        if(this.ast.default) {
-            this.defaultValue = this.ast.default;
+        if(this.ast.defaultValue) {
+            this.defaultValue = this.ast.defaultValue;
         } else {
             this.defaultValue = null;
         }

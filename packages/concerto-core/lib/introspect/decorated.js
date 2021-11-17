@@ -103,7 +103,6 @@ class Decorated {
      * @private
      */
     validate() {
-
         for(let n=0; n < this.decorators.length; n++) {
             let decorator = this.decorators[n];
             decorator.validate();

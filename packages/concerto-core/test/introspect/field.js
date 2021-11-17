@@ -36,9 +36,8 @@ describe('Field', () => {
 
         it('should not have a validator by default', () => {
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
             });
             should.equal(f.validator, null);
         });
@@ -46,13 +45,12 @@ describe('Field', () => {
         it('should save the incoming string validator', () => {
 
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                },
-                propertyType: {
-                    name: 'String'
-                },
-                regex: '/^suchValidator$/'
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
+                validator: {
+                    pattern: '^suchValidator$',
+                    flags: ''
+                }
             });
             f.getValidator().validate('id', 'suchValidator');
         });
@@ -60,50 +58,46 @@ describe('Field', () => {
         it('should save the incoming string validator (with flag)', () => {
 
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                },
-                propertyType: {
-                    name: 'String'
-                },
-                regex: '/^suchValidator$/u'
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
+                validator: {
+                    pattern: '^suchValidator$',
+                    flags: 'u'
+                }
             });
             f.getValidator().validate('id', 'suchValidator');
         });
 
         it('should not have a default value by default', () => {
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
             });
             should.equal(f.defaultValue, null);
         });
 
         it('should save the incoming default value', () => {
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                }, default: 'wowSuchDefault'
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
+                defaultValue: 'wowSuchDefault'
             });
             f.defaultValue.should.equal('wowSuchDefault');
         });
 
         it('should not be optional by default', () => {
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
             });
             f.optional.should.equal(false);
         });
 
         it('should detect if field is optional', () => {
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                },
-                optional: true
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
+                isOptional: true
             });
             f.optional.should.equal(true);
         });
@@ -113,9 +107,8 @@ describe('Field', () => {
     describe('#toString',()=>{
         it('regular toString',()=>{
             let f = new Field(mockClassDeclaration, {
-                id: {
-                    name: 'field',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'field',
             });
             let stub = sinon.stub(f,'getFullyQualifiedTypeName');
             stub.returns('fqn');
