@@ -49,7 +49,7 @@ describe('GoLangVisitor', function () {
         });
         it('should call visitModelManager for a ModelManager', () => {
             let thing = sinon.createStubInstance(ModelManager);
-            thing._isModelManager = true;
+            thing.isModelManager.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitModelManager');
             mockSpecialVisit.returns('Duck');
 
@@ -60,7 +60,7 @@ describe('GoLangVisitor', function () {
 
         it('should call visitModelFile for a ModelFile', () => {
             let thing = sinon.createStubInstance(ModelFile);
-            thing._isModelFile = true;
+            thing.isModelFile.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitModelFile');
             mockSpecialVisit.returns('Duck');
 
@@ -71,7 +71,7 @@ describe('GoLangVisitor', function () {
 
         it('should call visitClassDeclaration for a AssetDeclaration', () => {
             let thing = sinon.createStubInstance(AssetDeclaration);
-            thing._isAssetDeclaration = true;
+            thing.isAsset.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -82,14 +82,14 @@ describe('GoLangVisitor', function () {
 
         it('should call nothing for a TransactionDeclaration', () => {
             let thing = sinon.createStubInstance(TransactionDeclaration);
-            thing._isTransactionDeclaration = true;
+            thing.isTransaction.returns(true);
 
             should.equal(goVisit.visit(thing, param), undefined);
         });
 
         it('should call visitEnumDeclaration for a EnumDeclaration', () => {
             let thing = sinon.createStubInstance(EnumDeclaration);
-            thing._isEnumDeclaration = true;
+            thing.isEnum.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitEnumDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -100,14 +100,14 @@ describe('GoLangVisitor', function () {
 
         it('should call nothing for a ConceptDeclaration', () => {
             let thing = sinon.createStubInstance(ConceptDeclaration);
-            thing._isConceptDeclaration = true;
+            thing.isConcept.returns(true);
 
             should.equal(goVisit.visit(thing, param), undefined);
         });
 
         it('should call visitClassDeclaration for a ClassDeclaration', () => {
             let thing = sinon.createStubInstance(ClassDeclaration);
-            thing._isClassDeclaration = true;
+            thing.isClassDeclaration.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -118,7 +118,7 @@ describe('GoLangVisitor', function () {
 
         it('should call visitField for a Field', () => {
             let thing = sinon.createStubInstance(Field);
-            thing._isField = true;
+            thing.isField.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitField');
             mockSpecialVisit.returns('Duck');
 
@@ -129,14 +129,14 @@ describe('GoLangVisitor', function () {
 
         it('should call nothing for a RelationshipDeclaration', () => {
             let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing._isRelationshipDeclaration = true;
+            thing.isRelationship.returns(true);
 
             should.equal(goVisit.visit(thing, param), undefined);
         });
 
         it('should call visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
-            thing._isEnumValueDeclaration = true;
+            thing.isEnumValue.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitEnumValueDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -163,7 +163,7 @@ describe('GoLangVisitor', function () {
 
             let acceptSpy = sinon.spy();
             let mockModelManagerDefinition = sinon.createStubInstance(ModelManager);
-            mockModelManagerDefinition._isModelManager = true;
+            mockModelManagerDefinition.isModelManager.returns(true);
             mockModelManagerDefinition.getModelFiles.returns([{
                 accept: acceptSpy
             },
@@ -197,7 +197,7 @@ describe('GoLangVisitor', function () {
             mockContainsDateTimeField.returns(false);
 
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns;
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
@@ -222,7 +222,7 @@ describe('GoLangVisitor', function () {
             mockContainsDateTimeField.returns(true);
 
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns;
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
@@ -252,7 +252,7 @@ describe('GoLangVisitor', function () {
         it('should write lines defining type and const and call accept for each property', () => {
             let acceptSpy = sinon.spy();
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getName.returns('Bob');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -282,7 +282,7 @@ describe('GoLangVisitor', function () {
         it('should write lines defining type call accept for each property', () => {
             let acceptSpy = sinon.spy();
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -302,7 +302,7 @@ describe('GoLangVisitor', function () {
         it('should write lines defining type and call accept for each property embedding the super type as necessary', () => {
             let acceptSpy = sinon.spy();
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -332,7 +332,7 @@ describe('GoLangVisitor', function () {
 
         it('should write a line defining a field', () => {
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.isArray.returns(false);
             mockField.getName.returns('bob');
             let mockGoType = sinon.stub(goVisit, 'toGoType');
@@ -345,7 +345,7 @@ describe('GoLangVisitor', function () {
 
         it('should write a line defining a field and add [] if an array', () => {
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.isArray.returns(true);
             mockField.getName.returns('bob');
             let mockGoType = sinon.stub(goVisit, 'toGoType');
@@ -366,9 +366,9 @@ describe('GoLangVisitor', function () {
             };
         });
 
-        it('should write a line using the enum value decleration', () => {
+        it('should write a line using the enum value declaration', () => {
             let mockEnumValueDeclaration = sinon.createStubInstance(EnumValueDeclaration);
-            mockEnumValueDeclaration._isEnumDeclaration = true;
+            mockEnumValueDeclaration.isEnumValue.returns(true);
             mockEnumValueDeclaration.getParent.returns({
                 getOwnProperties: () => {
                     return [{
@@ -390,7 +390,7 @@ describe('GoLangVisitor', function () {
 
         it('should write a line using the enum value decleration adding iota when the first', () => {
             let mockEnumValueDeclaration = sinon.createStubInstance(EnumValueDeclaration);
-            mockEnumValueDeclaration._isEnumValueDeclaration = true;
+            mockEnumValueDeclaration.isEnumValue.returns(true);
             mockEnumValueDeclaration.getParent.returns({
                 getOwnProperties: () => {
                     return [{
@@ -422,7 +422,7 @@ describe('GoLangVisitor', function () {
 
         it('should write a line defining a relationship', () => {
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.isArray.returns(false);
             mockRelationship.getName.returns('bob');
 
@@ -433,7 +433,7 @@ describe('GoLangVisitor', function () {
 
         it('should write a line defining a relationship and add [] if an array', () => {
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.isArray.returns(true);
             mockRelationship.getName.returns('bob');
 
@@ -446,7 +446,7 @@ describe('GoLangVisitor', function () {
     describe('containsDateTimeField', () => {
         it('should return true if the model file contains a data and time field', () => {
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getAllDeclarations.returns([
                 {
                     getProperties: () => {
@@ -464,7 +464,7 @@ describe('GoLangVisitor', function () {
 
         it('should return true if the model file contains a data and time field', () => {
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getAllDeclarations.returns([
                 {
                     getProperties: () => {

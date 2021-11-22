@@ -14,16 +14,12 @@
 
 'use strict';
 
-const EventDeclaration = require('./introspect/eventdeclaration');
-const ConceptDeclaration = require('./introspect/conceptdeclaration');
-const EnumDeclaration = require('./introspect/enumdeclaration');
 const DateTimeUtil = require('./datetimeutil');
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
 const JSONPopulator = require('./serializer/jsonpopulator');
 const Typed = require('./model/typed');
 const ResourceValidator = require('./serializer/resourcevalidator');
-const TransactionDeclaration = require('./introspect/transactiondeclaration');
 const TypedStack = require('./serializer/typedstack');
 
 const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
@@ -57,7 +53,6 @@ class Serializer {
         this.factory = factory;
         this.modelManager = modelManager;
         this.defaultOptions = Object.assign({}, baseDefaultOptions, options || {});
-        this._isSerializer = true;
     }
 
     /**
@@ -162,19 +157,19 @@ class Serializer {
 
         // create a new instance, using the identifier field name as the ID.
         let resource;
-        if (classDeclaration instanceof TransactionDeclaration) {
+        if (classDeclaration.isTransaction()) {
             resource = this.factory.newTransaction(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration instanceof EventDeclaration) {
+        } else if (classDeclaration.isEvent()) {
             resource = this.factory.newEvent(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration instanceof ConceptDeclaration) {
+        } else if (classDeclaration.isConcept()) {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration instanceof EnumDeclaration) {
+        } else if (classDeclaration.isEnum()) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');
         } else {
             resource = this.factory.newResource( classDeclaration.getNamespace(),
@@ -198,17 +193,6 @@ class Serializer {
         }
 
         return resource;
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Serializer
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isSerializer);
     }
 }
 

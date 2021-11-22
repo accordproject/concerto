@@ -47,7 +47,7 @@ describe('XmlSchemaVisitor', function () {
 
         it('should return visitEnumDeclaration for a EnumDeclaration', () => {
             let thing = sinon.createStubInstance(EnumDeclaration);
-            thing._isEnumDeclaration = true;
+            thing.isEnum.returns(true);
             let mockSpecialVisit = sinon.stub(xmlSchemaVisitor, 'visitEnumDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -58,7 +58,7 @@ describe('XmlSchemaVisitor', function () {
 
         it('should return visitClassDeclaration for a ClassDeclaration', () => {
             let thing = sinon.createStubInstance(ClassDeclaration);
-            thing._isClassDeclaration = true;
+            thing.isClassDeclaration.returns(true);
             let mockSpecialVisit = sinon.stub(xmlSchemaVisitor, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -69,7 +69,7 @@ describe('XmlSchemaVisitor', function () {
 
         it('should return visitField for a Field', () => {
             let thing = sinon.createStubInstance(Field);
-            thing._isField = true;
+            thing.isField.returns(true);
             let mockSpecialVisit = sinon.stub(xmlSchemaVisitor, 'visitField');
             mockSpecialVisit.returns('Duck');
 
@@ -80,7 +80,7 @@ describe('XmlSchemaVisitor', function () {
 
         it('should return visitRelationship for a RelationshipDeclaration', () => {
             let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing._isRelationshipDeclaration = true;
+            thing.isRelationship.returns(true);
             let mockSpecialVisit = sinon.stub(xmlSchemaVisitor, 'visitRelationship');
             mockSpecialVisit.returns('Duck');
 
@@ -91,7 +91,7 @@ describe('XmlSchemaVisitor', function () {
 
         it('should return visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
-            thing._isEnumValueDeclaration = true;
+            thing.isEnumValue.returns(true);
             let mockSpecialVisit = sinon.stub(xmlSchemaVisitor, 'visitEnumValueDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -116,19 +116,19 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
 
             mockModelManager.accept = function(visitor, parameters) {
                 return visitor.visit(this, parameters);
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getNamespace.returns('org.imported');
             mockModelManager.getType.returns(mockClassDeclaration);
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getImports.returns([]);
             mockModelFile.getModelManager.returns(mockModelManager);
 
@@ -162,20 +162,20 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
 
             mockModelManager.accept = function(visitor, parameters) {
                 return visitor.visit(this, parameters);
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getNamespace.returns('org.imported');
             mockModelManager.getType.returns(mockClassDeclaration);
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
             mockModelFile.getImports.returns([]);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getModelManager.returns(mockModelManager);
 
             mockModelFile.accept = function(visitor, parameters) {
@@ -207,32 +207,32 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
 
             mockModelManager.accept = function(visitor, parameters) {
                 return visitor.visit(this, parameters);
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getNamespace.returns('org.imported');
             mockClassDeclaration.getName.returns('ImportedType');
             mockModelManager.getType.withArgs('org.imported.ImportedType').returns(mockClassDeclaration);
 
             let mockClassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration2._isClassDeclaration = true;
+            mockClassDeclaration2.isClassDeclaration.returns(true);
             mockClassDeclaration2.getNamespace.returns('org.imported');
             mockClassDeclaration.getName.returns('AnotherImportedType');
             mockModelManager.getType.withArgs('org.imported.AnotherImportedType').returns(mockClassDeclaration2);
 
             let mockClassDeclaration3 = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration3._isClassDeclaration = true;
+            mockClassDeclaration3.isClassDeclaration.returns(true);
             mockClassDeclaration3.getNamespace.returns('org.different');
             mockClassDeclaration3.getName.returns('Type');
             mockModelManager.getType.withArgs('org.different.Type').returns(mockClassDeclaration3);
 
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getModelManager.returns(mockModelManager);
 
             mockModelFile.getImports.returns(['org.imported.ImportedType','org.imported.AnotherImportedType', 'org.different.Type']);
@@ -271,7 +271,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getName.returns('Person');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -281,9 +281,9 @@ describe('XmlSchemaVisitor', function () {
             }]);
 
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getModelManager.returns(mockModelManager);
             mockEnumDeclaration.getModelFile.returns(mockModelFile);
 
@@ -306,16 +306,16 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockSuperType = sinon.createStubInstance(EnumDeclaration);
-            mockSuperType._isEnumDeclaration = true;
+            mockSuperType.isEnum.returns(true);
             mockSuperType.getName.returns('Human');
             mockSuperType.getNamespace.returns('org.acme');
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
             mockModelManager.getType.returns(mockSuperType);
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getModelManager.returns(mockModelManager);
             mockEnumDeclaration.getModelFile.returns(mockModelFile);
 
@@ -355,7 +355,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -383,18 +383,18 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockSuperType = sinon.createStubInstance(ClassDeclaration);
-            mockSuperType._isClassDeclaration = true;
+            mockSuperType.isClassDeclaration.returns(true);
             mockSuperType.getNamespace.returns('org.acme');
             mockSuperType.getName.returns('Human');
             let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager._isModelManager = true;
+            mockModelManager.isModelManager.returns(true);
             mockModelManager.getType.returns(mockSuperType);
             let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile._isModelFile = true;
+            mockModelFile.isModelFile.returns(true);
             mockModelFile.getModelManager.returns(mockModelManager);
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getModelFile.returns(mockModelFile);
             mockClassDeclaration.getName.returns('Person');
             mockClassDeclaration.getNamespace.returns('org.acme');
@@ -429,7 +429,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('String');
             mockField.getName.returns('Bob');
 
@@ -443,7 +443,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('Long');
             mockField.getName.returns('Bob');
 
@@ -457,7 +457,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('Double');
             mockField.getName.returns('Bob');
 
@@ -471,7 +471,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('DateTime');
             mockField.getName.returns('Bob');
 
@@ -485,7 +485,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('Boolean');
             mockField.getName.returns('Bob');
 
@@ -499,7 +499,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('Integer');
             mockField.getName.returns('Bob');
 
@@ -513,7 +513,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('org.acme.Foo');
             mockField.getName.returns('Bob');
 
@@ -527,7 +527,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getFullyQualifiedTypeName.returns('String');
             mockField.getName.returns('Bob');
             mockField.isArray.returns(true);
@@ -544,7 +544,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockEnumValueDecl = sinon.createStubInstance(EnumValueDeclaration);
-            mockEnumValueDecl._isEnumValueDeclaration = true;
+            mockEnumValueDecl.isEnumValue.returns(true);
             mockEnumValueDecl.getName.returns('Bob');
 
             xmlSchemaVisitor.visitEnumValueDeclaration(mockEnumValueDecl, param);
@@ -560,7 +560,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getFullyQualifiedTypeName.returns('String');
 
             xmlSchemaVisitor.visitRelationship(mockRelationship, param);
@@ -574,7 +574,7 @@ describe('XmlSchemaVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getFullyQualifiedTypeName.returns('String');
             mockRelationship.getName.returns('Bob');
             mockRelationship.isArray.returns(true);

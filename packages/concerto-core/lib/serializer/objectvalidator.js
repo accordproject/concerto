@@ -14,10 +14,6 @@
 
 'use strict';
 
-const ClassDeclaration = require('../introspect/classdeclaration');
-const Field = require('../introspect/field');
-const RelationshipDeclaration = require('../introspect/relationshipdeclaration');
-const EnumDeclaration = require('../introspect/enumdeclaration');
 const Util = require('../util');
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
@@ -72,13 +68,13 @@ class ObjectValidator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing instanceof EnumDeclaration) {
+        if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing instanceof ClassDeclaration) {
+        } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         }
     }

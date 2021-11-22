@@ -27,26 +27,14 @@ const ClassDeclaration = require('./classdeclaration');
  */
 class IdentifiedDeclaration extends ClassDeclaration {
     /**
-     * Create an AssetDeclaration.
+     * Create an IdentifiedDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-        this._isIdentifiedDeclaration = true;
         this.process();
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a AssetDeclaration
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isIdentifiedDeclaration);
     }
 }
 

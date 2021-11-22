@@ -14,7 +14,6 @@
 
 'use strict';
 
-const Field = require('../introspect/field');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -135,7 +134,7 @@ class Typed {
 
         for (let n = 0; n < fields.length; n++) {
             let field = fields[n];
-            if (field instanceof Field) {
+            if (field.isField?.()) {
                 let defaultValue = field.getDefaultValue();
 
                 if (defaultValue) {

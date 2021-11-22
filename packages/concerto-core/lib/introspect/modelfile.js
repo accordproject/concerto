@@ -55,7 +55,6 @@ class ModelFile {
         this.importWildcardNamespaces = [];
         this.importUriMap = {};
         this.fileName = 'UNKNOWN';
-        this._isModelFile = true;
         this.concertoVersion = null;
 
         if(!definitions || typeof definitions !== 'string') {
@@ -95,6 +94,14 @@ class ModelFile {
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * Returns true
+     * @returns {boolean} true
+     */
+    isModelFile() {
+        return true;
     }
 
     /**
@@ -405,7 +412,7 @@ class ModelFile {
      */
     getAssetDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration instanceof AssetDeclaration) {
+        if(classDeclaration && classDeclaration.isAsset()) {
             return classDeclaration;
         }
 
@@ -419,7 +426,7 @@ class ModelFile {
      */
     getTransactionDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration instanceof TransactionDeclaration) {
+        if(classDeclaration && classDeclaration.isTransaction()) {
             return classDeclaration;
         }
 
@@ -433,7 +440,7 @@ class ModelFile {
      */
     getEventDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration instanceof EventDeclaration) {
+        if(classDeclaration && classDeclaration.isEvent()) {
             return classDeclaration;
         }
 
@@ -447,7 +454,7 @@ class ModelFile {
      */
     getParticipantDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration instanceof ParticipantDeclaration) {
+        if(classDeclaration && classDeclaration.isParticipant()) {
             return classDeclaration;
         }
 
@@ -647,17 +654,6 @@ class ModelFile {
                 }),this);
             }
         }
-    }
-
-    /**
-     * Alternative to instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a ModelFile
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isModelFile);
     }
 }
 

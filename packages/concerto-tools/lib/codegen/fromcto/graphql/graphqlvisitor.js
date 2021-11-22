@@ -51,17 +51,17 @@ class GraphQLVisitor {
     * @private
     */
     visit(thing, parameters) {
-        if (thing instanceof ModelManager) {
+        if (thing.isModelManager?.()) {
             return this.visitModelManager(thing, parameters);
-        } else if (thing instanceof ModelFile) {
+        } else if (thing.isModelFile?.()) {
             return this.visitModelFile(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationship(thing, parameters);
-        } else if (thing instanceof EnumValueDeclaration) {
+        } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
-        } else if (thing instanceof ClassDeclaration) {
+        } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         }
         else {

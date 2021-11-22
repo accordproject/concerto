@@ -50,7 +50,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should call visitModelManager for a ModelManager', () => {
             let thing = sinon.createStubInstance(ModelManager);
-            thing._isModelManager = true;
+            thing.isModelManager.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitModelManager');
             mockSpecialVisit.returns('Duck');
 
@@ -60,7 +60,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should call visitModelFile for a ModelFile', () => {
             let thing = sinon.createStubInstance(ModelFile);
-            thing._isModelFile = true;
+            thing.isModelFile.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitModelFile');
             mockSpecialVisit.returns('Duck');
 
@@ -70,7 +70,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitParticipantDeclaration for a ParticipantDeclaration', () => {
             let thing = sinon.createStubInstance(ParticipantDeclaration);
-            thing._isParticipantDeclaration = true;
+            thing.isParticipant.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitParticipantDeclaration');
             mockSpecialVisit.returns('Duck');
             plantUMLvisitor.visit(thing, param).should.deep.equal('Duck');
@@ -79,7 +79,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitTransactionDeclaration for a TransactionDeclaration', () => {
             let thing = sinon.createStubInstance(TransactionDeclaration);
-            thing._isTransactionDeclaration = true;
+            thing.isTransaction.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitTransactionDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -90,7 +90,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitAssetDeclaration for a AssetDeclaration', () => {
             let thing = sinon.createStubInstance(AssetDeclaration);
-            thing._isAssetDeclaration = true;
+            thing.isAsset.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitAssetDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -101,7 +101,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitEnumDeclaration for a EnumDeclaration', () => {
             let thing = sinon.createStubInstance(EnumDeclaration);
-            thing._isEnumDeclaration = true;
+            thing.isEnum.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitEnumDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -112,7 +112,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitClassDeclaration for a ClassDeclaration', () => {
             let thing = sinon.createStubInstance(ClassDeclaration);
-            thing._isClassDeclaration = true;
+            thing.isClassDeclaration.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -123,7 +123,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitField for a Field', () => {
             let thing = sinon.createStubInstance(Field);
-            thing._isField = true;
+            thing.isField.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitField');
             mockSpecialVisit.returns('Duck');
 
@@ -134,7 +134,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitRelationship for a RelationshipDeclaration', () => {
             let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing._isRelationshipDeclaration = true;
+            thing.isRelationship.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitRelationship');
             mockSpecialVisit.returns('Duck');
 
@@ -145,7 +145,7 @@ describe('PlantUMLVisitor', function () {
 
         it('should return visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
-            thing._isEnumValueDeclaration = true;
+            thing.isEnumValue.returns(true);
             let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitEnumValueDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -172,7 +172,7 @@ describe('PlantUMLVisitor', function () {
 
             let acceptSpy = sinon.spy();
             let mockModelManagerDefinition = sinon.createStubInstance(ModelManager);
-            mockModelManagerDefinition._isModelManager = true;
+            mockModelManagerDefinition.isModelManager.returns(true);
             mockModelManagerDefinition.getModelFiles.returns([{
                 accept: acceptSpy
             },
@@ -200,7 +200,7 @@ describe('PlantUMLVisitor', function () {
         it('should visit all declaration in a model file', () => {
             let acceptSpy = sinon.spy();
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns;
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
@@ -223,7 +223,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockAssetDeclaration = sinon.createStubInstance(AssetDeclaration);
-            mockAssetDeclaration._isAssetDeclaration = true;
+            mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockAssetDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -249,7 +249,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockAssetDeclaration = sinon.createStubInstance(AssetDeclaration);
-            mockAssetDeclaration._isAssetDeclaration = true;
+            mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockAssetDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -279,7 +279,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -305,7 +305,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -335,7 +335,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockParticipantDeclaration = sinon.createStubInstance(ParticipantDeclaration);
-            mockParticipantDeclaration._isParticipantDeclaration = true;
+            mockParticipantDeclaration.isParticipant.returns(true);
             mockParticipantDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockParticipantDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -361,7 +361,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockParticipantDeclaration = sinon.createStubInstance(ParticipantDeclaration);
-            mockParticipantDeclaration._isParticipantDeclaration = true;
+            mockParticipantDeclaration.isParticipant.returns(true);
             mockParticipantDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockParticipantDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -391,7 +391,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockTransDeclaration = sinon.createStubInstance(TransactionDeclaration);
-            mockTransDeclaration._isTransactionDeclaration = true;
+            mockTransDeclaration.isTransaction.returns(true);
             mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockTransDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -417,7 +417,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockTransDeclaration = sinon.createStubInstance(TransactionDeclaration);
-            mockTransDeclaration._isTransactionDeclaration = true;
+            mockTransDeclaration.isTransaction.returns(true);
             mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockTransDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -447,7 +447,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -473,7 +473,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -501,7 +501,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
 
@@ -516,7 +516,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
             mockField.isArray.returns(true);
@@ -534,7 +534,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockEnumValueDecl = sinon.createStubInstance(EnumValueDeclaration);
-            mockEnumValueDecl._isEnumValueDeclaration = true;
+            mockEnumValueDecl.isEnumValue.returns(true);
             mockEnumValueDecl.getName.returns('Bob');
 
             plantUMLvisitor.visitEnumValueDeclaration(mockEnumValueDecl, param);
@@ -550,7 +550,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getType.returns('string');
             mockRelationship.getName.returns('Bob');
 
@@ -565,7 +565,7 @@ describe('PlantUMLVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getType.returns('string');
             mockRelationship.getName.returns('Bob');
             mockRelationship.isArray.returns(true);

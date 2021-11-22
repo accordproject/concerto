@@ -44,14 +44,14 @@ class RecursionDetectionVisitor {
      */
     visit(thing, parameters) {
         // the order of these matters!
-        if (thing instanceof EnumDeclaration) {
+        if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
         }
-        else if (thing instanceof ClassDeclaration) {
+        else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));

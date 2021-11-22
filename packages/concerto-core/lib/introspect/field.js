@@ -37,7 +37,6 @@ class Field extends Property {
      */
     constructor(parent, ast) {
         super(parent, ast);
-        this._isField = true;
     }
 
     /**
@@ -102,14 +101,12 @@ class Field extends Property {
     }
 
     /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     * Returns true if this class is the definition of a field.
      *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Class Declaration
+     * @return {boolean} true if the class is a field
      */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isField);
+    isField() {
+        return true;
     }
 }
 

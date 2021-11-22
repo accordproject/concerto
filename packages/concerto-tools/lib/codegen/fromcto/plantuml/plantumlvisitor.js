@@ -45,25 +45,25 @@ class PlantUMLVisitor {
      * @private
      */
     visit(thing, parameters) {
-        if (thing instanceof ModelManager) {
+        if (thing.isModelManager?.()) {
             return this.visitModelManager(thing, parameters);
-        } else if (thing instanceof ModelFile) {
+        } else if (thing.isModelFile?.()) {
             return this.visitModelFile(thing, parameters);
-        } else if (thing instanceof ParticipantDeclaration) {
+        } else if (thing.isParticipant?.()) {
             return this.visitParticipantDeclaration(thing, parameters);
-        } else if (thing instanceof TransactionDeclaration) {
+        } else if (thing.isTransaction?.()) {
             return this.visitTransactionDeclaration(thing, parameters);
-        } else if (thing instanceof AssetDeclaration) {
+        } else if (thing.isAsset?.()) {
             return this.visitAssetDeclaration(thing, parameters);
-        } else if (thing instanceof EnumDeclaration) {
+        } else if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing instanceof ClassDeclaration) {
+        } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationship(thing, parameters);
-        } else if (thing instanceof EnumValueDeclaration) {
+        } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing) );

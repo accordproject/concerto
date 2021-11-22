@@ -66,27 +66,27 @@ class LoopbackVisitor {
      * @private
      */
     visit(thing, parameters) {
-        if (thing instanceof ModelManager) {
+        if (thing.isModelManager?.()) {
             return this.visitModelManager(thing, parameters);
-        } else if (thing instanceof ModelFile) {
+        } else if (thing.isModelFile?.()) {
             return this.visitModelFile(thing, parameters);
-        } else if (thing instanceof AssetDeclaration) {
+        } else if (thing.isAsset?.()) {
             return this.visitAssetDeclaration(thing, parameters);
-        } else if (thing instanceof ParticipantDeclaration) {
+        } else if (thing.isParticipant?.()) {
             return this.visitParticipantDeclaration(thing, parameters);
-        } else if (thing instanceof ConceptDeclaration) {
+        } else if (thing.isConcept?.()) {
             return this.visitConceptDeclaration(thing, parameters);
-        } else if (thing instanceof TransactionDeclaration) {
+        } else if (thing.isTransaction?.()) {
             return this.visitTransactionDeclaration(thing, parameters);
-        } else if (thing instanceof EventDeclaration) {
+        } else if (thing.isEvent?.()) {
             return this.visitEventDeclaration(thing, parameters);
-        } else if (thing instanceof EnumDeclaration) {
+        } else if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing instanceof EnumValueDeclaration) {
+        } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: 1 }));

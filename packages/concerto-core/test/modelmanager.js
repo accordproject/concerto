@@ -59,6 +59,12 @@ describe('ModelManager', () => {
         sandbox.restore();
     });
 
+    describe('#isModelManager', () => {
+        it('should return true', () => {
+            modelManager.isModelManager().should.be.true;
+        });
+    });
+
     describe('#accept', () => {
 
         it('should call the visitor', () => {
