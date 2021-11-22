@@ -67,7 +67,9 @@ module.exports = {
             "tls": false,
             "net": false,
             "path" : false,
-            "os" : false
+            "os" : false,
+            "util" : false,
+            "url" : false,
         }    
     }
 };
