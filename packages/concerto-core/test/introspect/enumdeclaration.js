@@ -15,7 +15,6 @@
 'use strict';
 
 const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const EnumValueDeclaration = require('../../lib/introspect/enumvaluedeclaration');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
@@ -67,13 +66,13 @@ describe('EnumDeclaration', () => {
         });
     });
 
-    describe('#hasInstance', () => {
+    describe('#isEnum and isEnumValue', () => {
         it('should return true for a valid Enum Declaration', () => {
             let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
-            (declaration instanceof EnumDeclaration).should.be.true;
+            (declaration.isEnum()).should.be.true;
 
             let value = declaration.getProperties();
-            (value[0] instanceof EnumValueDeclaration).should.be.true;
+            (value[0].isEnumValue()).should.be.true;
         });
     });
 });

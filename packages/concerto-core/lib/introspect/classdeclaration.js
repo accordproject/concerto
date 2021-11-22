@@ -65,6 +65,7 @@ class ClassDeclaration extends Decorated {
         this.idField = null;
         this.timestamped = false;
         this.abstract = false;
+        this.type = this.ast.type;
 
         if (this.ast.abstract) {
             this.abstract = true;
@@ -107,7 +108,6 @@ class ClassDeclaration extends Decorated {
         }
 
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
-        this._isClassDeclaration = true;
 
         if (this.fqn === 'concerto.Transaction' || this.fqn === 'concerto.Event') {
             this.addTimestampField();
@@ -281,33 +281,6 @@ class ClassDeclaration extends Decorated {
      */
     isAbstract() {
         return this.abstract;
-    }
-
-    /**
-     * Returns true if this class is an enumeration.
-     *
-     * @return {boolean} true if the class is an enumerated type
-     */
-    isEnum() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is a concept
-     */
-    isConcept() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of an event.
-     *
-     * @return {boolean} true if the class is an event
-     */
-    isEvent() {
-        return false;
     }
 
     /**
@@ -602,16 +575,67 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     * Returns true if this class is the definition of an asset.
      *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Class Declaration
+     * @return {boolean} true if the class is an asset
      */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isClassDeclaration);
+    isAsset() {
+        return this.type === 'AssetDeclaration';
     }
 
+    /**
+     * Returns true if this class is the definition of a participant.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isParticipant() {
+        return this.type === 'ParticipantDeclaration';
+    }
+
+    /**
+     * Returns true if this class is the definition of a transaction.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isTransaction() {
+        return this.type === 'TransactionDeclaration';
+    }
+
+    /**
+     * Returns true if this class is the definition of an event.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isEvent() {
+        return this.type === 'EventDeclaration';
+    }
+
+    /**
+     * Returns true if this class is the definition of a concept.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isConcept() {
+        return this.type === 'ConceptDeclaration';
+    }
+
+    /**
+     * Returns true if this class is the definition of a enum.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isEnum() {
+        return this.type === 'EnumDeclaration';
+    }
+
+    /**
+     * Returns true if this class is the definition of a enum.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isClassDeclaration() {
+        return true;
+    }
 }
 
 module.exports = ClassDeclaration;

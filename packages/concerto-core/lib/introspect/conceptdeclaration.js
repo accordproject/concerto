@@ -36,27 +36,6 @@ class ConceptDeclaration extends ClassDeclaration {
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-        this._isConceptDeclaration = true;
-    }
-
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is a concept
-     */
-    isConcept() {
-        return true;
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a ConceptDeclaration
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isConceptDeclaration);
     }
 }
 

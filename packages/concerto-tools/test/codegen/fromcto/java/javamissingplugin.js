@@ -41,7 +41,7 @@ describe('JavaMissingPlugin', function () {
             };
 
             let mockClass = sinon.createStubInstance(ClassDeclaration);
-            mockClass._isClassDeclaration = true;
+            mockClass.isClassDeclaration.returns(true);
             mockClass.getModelFile.returns({
                 getNamespace: () => {
                     return 'org.acme.people';
@@ -65,7 +65,7 @@ describe('JavaMissingPlugin', function () {
             };
 
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration._isEnumDeclaration = true;
+            mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getName.returns('Bob');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
@@ -93,7 +93,7 @@ describe('JavaMissingPlugin', function () {
             };
 
             mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
             mockClassDeclaration.getModelFile.returns({
                 getImports: () => {

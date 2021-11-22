@@ -56,8 +56,15 @@ class ModelManager {
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
-        this._isModelManager = true;
         this.addRootModel();
+    }
+
+    /**
+     * Returns true
+     * @returns {boolean} true
+     */
+    isModelManager() {
+        return true;
     }
 
     /**
@@ -612,17 +619,6 @@ abstract concept Event {}
             typeDeclaration = typeDeclaration.getSuperTypeDeclaration();
         }
         return false;
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a ModelManager
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isModelManager);
     }
 }
 

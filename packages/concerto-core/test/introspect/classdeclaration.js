@@ -168,6 +168,95 @@ describe('ClassDeclaration', () => {
 
     });
 
+    describe('#isXYZ', () => {
+
+        it('should return true for concepts', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'ConceptDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isConcept().should.equal(true);
+        });
+
+        it('should return true for assets', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'AssetDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isAsset().should.equal(true);
+        });
+
+        it('should return true for events', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'EventDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isEvent().should.equal(true);
+        });
+
+        it('should return true for participants', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'ParticipantDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isParticipant().should.equal(true);
+        });
+
+        it('should return true for enums', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'EnumDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isEnum().should.equal(true);
+        });
+
+        it('should return true for transactions', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                id: {
+                    name: 'suchName'
+                },
+                type: 'TransactionDeclaration',
+                body: {
+                    declarations: [
+                    ]
+                }
+            });
+            clz.isTransaction().should.equal(true);
+            clz.isAsset().should.equal(false);
+        });
+    });
+
+
     describe('#getFullyQualifiedName', () => {
 
         it('should return the fully qualified name if function is in a namespace', () => {

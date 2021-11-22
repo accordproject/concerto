@@ -70,7 +70,7 @@ describe('GraphQLVisitor', function () {
 
         it('should call visitModelManager for a ModelManager', () => {
             let thing = sinon.createStubInstance(ModelManager);
-            thing._isModelManager = true;
+            thing.isModelManager.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitModelManager');
             mockSpecialVisit.returns('Duck');
 
@@ -80,7 +80,7 @@ describe('GraphQLVisitor', function () {
 
         it('should call visitModelFile for a ModelFile', () => {
             let thing = sinon.createStubInstance(ModelFile);
-            thing._isModelFile = true;
+            thing.isModelFile.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitModelFile');
             mockSpecialVisit.returns('Duck');
 
@@ -90,7 +90,7 @@ describe('GraphQLVisitor', function () {
 
         it('should return visitClassDeclaration for a ClassDeclaration', () => {
             let thing = sinon.createStubInstance(ClassDeclaration);
-            thing._isClassDeclaration = true;
+            thing.isClassDeclaration.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -101,7 +101,7 @@ describe('GraphQLVisitor', function () {
 
         it('should return visitField for a Field', () => {
             let thing = sinon.createStubInstance(Field);
-            thing._isField = true;
+            thing.isField.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitField');
             mockSpecialVisit.returns('Duck');
 
@@ -112,7 +112,7 @@ describe('GraphQLVisitor', function () {
 
         it('should return visitRelationship for a RelationshipDeclaration', () => {
             let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing._isRelationshipDeclaration = true;
+            thing.isRelationship.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitRelationship');
             mockSpecialVisit.returns('Duck');
 
@@ -123,7 +123,7 @@ describe('GraphQLVisitor', function () {
 
         it('should return visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
-            thing._isEnumValueDeclaration = true;
+            thing.isEnumValue.returns(true);
             let mockSpecialVisit = sinon.stub(graphQLVisitor, 'visitEnumValueDeclaration');
             mockSpecialVisit.returns('Duck');
 
@@ -150,7 +150,7 @@ describe('GraphQLVisitor', function () {
 
             let acceptSpy = sinon.spy();
             let mockModelManagerDefinition = sinon.createStubInstance(ModelManager);
-            mockModelManagerDefinition._isModelManager = true;
+            mockModelManagerDefinition.isModelManager.returns(true);
             mockModelManagerDefinition.getModelFiles.returns([{
                 accept: acceptSpy
             },
@@ -178,7 +178,7 @@ describe('GraphQLVisitor', function () {
         it('should visit all declaration in a model file', () => {
             let acceptSpy = sinon.spy();
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
-            mockModelFileDefinition._isModelFile = true;
+            mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns;
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
@@ -201,7 +201,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getProperties.returns([{
@@ -228,7 +228,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Size');
             mockClassDeclaration.isEnum.returns(true);
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Size');
@@ -256,7 +256,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
-            mockClassDeclaration._isClassDeclaration = true;
+            mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getProperties.returns([{
@@ -284,7 +284,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
 
@@ -298,7 +298,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getType.returns('org.acme.Person');
             mockField.getName.returns('Bob');
             mockField.getFullyQualifiedTypeName.returns('org.acme.Person');
@@ -314,7 +314,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockField = sinon.createStubInstance(Field);
-            mockField._isField = true;
+            mockField.isField.returns(true);
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
             mockField.isArray.returns(true);
@@ -331,7 +331,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockEnumValueDecl = sinon.createStubInstance(EnumValueDeclaration);
-            mockEnumValueDecl._isEnumValueDeclaration = true;
+            mockEnumValueDecl.isEnumValue.returns(true);
             mockEnumValueDecl.getName.returns('Bob');
 
             graphQLVisitor.visitEnumValueDeclaration(mockEnumValueDecl, param);
@@ -346,7 +346,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getType.returns('string');
             mockRelationship.getName.returns('Bob');
 
@@ -361,7 +361,7 @@ describe('GraphQLVisitor', function () {
             };
 
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship._isRelationshipDeclaration = true;
+            mockRelationship.isRelationship.returns(true);
             mockRelationship.getType.returns('string');
             mockRelationship.getName.returns('Bob');
             mockRelationship.isArray.returns(true);

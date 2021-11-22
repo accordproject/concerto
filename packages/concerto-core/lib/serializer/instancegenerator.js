@@ -14,11 +14,7 @@
 
 'use strict';
 
-const ClassDeclaration = require('../introspect/classdeclaration');
-const EnumDeclaration = require('../introspect/enumdeclaration');
-const Field = require('../introspect/field');
 const ModelUtil = require('../modelutil');
-const RelationshipDeclaration = require('../introspect/relationshipdeclaration');
 const Util = require('../util');
 const Globalize = require('../globalize');
 
@@ -40,11 +36,11 @@ class InstanceGenerator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing instanceof ClassDeclaration) {
+        if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing) );
@@ -151,7 +147,7 @@ class InstanceGenerator {
 
         let classDeclaration = parameters.modelManager.getType(type);
 
-        if (classDeclaration instanceof EnumDeclaration) {
+        if (classDeclaration.isEnum()) {
             let enumValues = classDeclaration.getOwnProperties();
             return parameters.valueGenerator.getEnum(enumValues).getName();
         }

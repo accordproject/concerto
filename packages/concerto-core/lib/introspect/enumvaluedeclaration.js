@@ -33,7 +33,6 @@ class EnumValueDeclaration extends Property {
      */
     constructor(parent, ast) {
         super(parent, ast);
-        this._isEnumValueDeclaration = true;
     }
 
     /**
@@ -47,14 +46,12 @@ class EnumValueDeclaration extends Property {
     }
 
     /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     * Returns true if this class is the definition of a enum value.
      *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a EnumValueDeclaration
+     * @return {boolean} true if the class is an enum value
      */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isEnumValueDeclaration);
+    isEnumValue() {
+        return true;
     }
 }
 

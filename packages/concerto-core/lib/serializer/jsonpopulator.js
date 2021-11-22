@@ -14,9 +14,6 @@
 
 'use strict';
 
-const ClassDeclaration = require('../introspect/classdeclaration');
-const Field = require('../introspect/field');
-const RelationshipDeclaration = require('../introspect/relationshipdeclaration');
 const Relationship = require('../model/relationship');
 const Util = require('../util');
 const ModelUtil = require('../modelutil');
@@ -104,11 +101,11 @@ class JSONPopulator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing instanceof ClassDeclaration) {
+        if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing instanceof RelationshipDeclaration) {
+        } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing instanceof Field) {
+        } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing) );

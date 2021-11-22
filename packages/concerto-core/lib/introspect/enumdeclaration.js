@@ -33,16 +33,6 @@ class EnumDeclaration extends ClassDeclaration {
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-        this._isEnumDeclaration = true;
-    }
-
-    /**
-     * Returns true if this class is an enumeration.
-     *
-     * @return {boolean} true if the class is an enumerated type
-     */
-    isEnum() {
-        return true;
     }
 
     /**
@@ -51,17 +41,6 @@ class EnumDeclaration extends ClassDeclaration {
      */
     toString() {
         return 'EnumDeclaration {id=' + this.getFullyQualifiedName() + '}';
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Class Declaration
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isEnumDeclaration);
     }
 }
 

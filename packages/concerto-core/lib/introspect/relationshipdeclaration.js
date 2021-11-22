@@ -35,7 +35,6 @@ class RelationshipDeclaration extends Property {
      */
     constructor(parent, ast) {
         super(parent, ast);
-        this._isRelationshipDeclaration = true;
     }
 
     /**
@@ -94,14 +93,12 @@ class RelationshipDeclaration extends Property {
     }
 
     /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
+     * Returns true if this class is the definition of a relationship.
      *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a RelationshipDeclaration
+     * @return {boolean} true if the class is a relationship
      */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isRelationshipDeclaration);
+    isRelationship() {
+        return true;
     }
 }
 

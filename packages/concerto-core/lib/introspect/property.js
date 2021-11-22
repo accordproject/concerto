@@ -35,7 +35,6 @@ class Property extends Decorated {
         super(parent.getModelFile(), ast);
         this.parent = parent;
         this.process();
-        this._isProperty = true;
     }
 
     /**
@@ -190,17 +189,6 @@ class Property extends Decorated {
      */
     isPrimitive() {
         return ModelUtil.isPrimitiveType(this.getType());
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Property
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isProperty);
     }
 }
 

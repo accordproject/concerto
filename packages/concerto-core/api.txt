@@ -32,19 +32,14 @@ class Factory {
    + Relationship newRelationship(String,String,String) throws TypeNotFoundException
    + Resource newTransaction(String,String,String,Object,String,boolean) 
    + Resource newEvent(String,String,String,Object,String,boolean) 
-   + boolean hasInstance(object) 
 }
 class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean hasInstance(object) 
 }
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + ClassDeclaration _resolveSuperType() 
    + boolean isAbstract() 
-   + boolean isEnum() 
-   + boolean isConcept() 
-   + boolean isEvent() 
    + string getName() 
    + string getNamespace() 
    + string getFullyQualifiedName() 
@@ -62,12 +57,16 @@ class ClassDeclaration extends Decorated {
    + Property[] getProperties() 
    + Property getNestedProperty(string) throws IllegalModelException
    + String toString() 
-   + boolean hasInstance(object) 
+   + boolean isAsset() 
+   + boolean isParticipant() 
+   + boolean isTransaction() 
+   + boolean isEvent() 
+   + boolean isConcept() 
+   + boolean isEnum() 
+   + boolean isClassDeclaration() 
 }
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean isConcept() 
-   + boolean hasInstance(object) 
 }
 class Decorator {
    + void constructor(Object) throws IllegalModelException
@@ -80,22 +79,17 @@ class DecoratorFactory {
 }
 class EnumDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean isEnum() 
    + String toString() 
-   + boolean hasInstance(object) 
 }
 class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + boolean hasInstance(object) 
+   + boolean isEnumValue() 
 }
 class EventDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean isEvent() 
-   + boolean hasInstance(object) 
 }
 class IdentifiedDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean hasInstance(object) 
 }
 class IllegalModelException extends BaseFileException {
    + void constructor(string,ModelFile,Object,number,number,number,number,string) 
@@ -110,37 +104,36 @@ class ModelFileDownloader {
    + Promise downloadExternalDependencies(ModelFile[],Object) 
    + Promise runJob(Object,Object) 
 }
-class MetaModel {
    + void createMetaModelManager() 
-   + object validateMetaModel(object) 
-   + object createNameTable(object) 
-   + string resolveName(string,object) 
-   + object resolveTypeNames(object,object) 
-   + object resolveMetaModel(object,object) 
-   + object enumPropertyToMetaModel(object) 
-   + object decoratorArgToMetaModel(object) 
-   + object decoratorToMetaModel(object) 
-   + object decoratorsToMetaModel(object) 
-   + object propertyToMetaModel(object) 
-   + object relationshipToMetaModel(object) 
-   + object enumDeclToMetaModel(object) 
-   + object conceptDeclToMetaModel(object) 
-   + object declToMetaModel(object) 
-   + object modelToMetaModel(object,boolean) 
-   + object modelFileToMetaModel(object,boolean) 
-   + object modelManagerToMetaModel(object,boolean,boolean) 
-   + string decoratorArgFromMetaModel(object) 
-   + string decoratorFromMetaModel(object) 
-   + string decoratorsFromMetaModel(object,string) 
-   + string propertyFromMetaModel(object) 
-   + string declFromMetaModel(object) 
-   + string ctoFromMetaModel(object,boolean) 
-   + object modelManagerFromMetaModel(object,boolean) 
-   + object ctoToMetaModel(string,boolean) 
-   + object ctoToMetaModelAndResolve(string,boolean) 
-}
+   + object validateMetaModel() 
+   + object createNameTable() 
+   + string resolveName() 
+   + object resolveTypeNames() 
+   + object resolveMetaModel() 
+   + object enumPropertyToMetaModel() 
+   + object decoratorArgToMetaModel() 
+   + object decoratorToMetaModel() 
+   + object decoratorsToMetaModel() 
+   + object propertyToMetaModel() 
+   + object relationshipToMetaModel() 
+   + object enumDeclToMetaModel() 
+   + object conceptDeclToMetaModel() 
+   + object declToMetaModel() 
+   + object modelToMetaModel() 
+   + object modelFileToMetaModel() 
+   + object modelManagerToMetaModel() 
+   + string decoratorArgFromMetaModel() 
+   + string decoratorFromMetaModel() 
+   + string decoratorsFromMetaModel() 
+   + string propertyFromMetaModel() 
+   + string declFromMetaModel() 
+   + string ctoFromMetaModel() 
+   + object modelManagerFromMetaModel() 
+   + object ctoToMetaModel() 
+   + object ctoToMetaModelAndResolve() 
 class ModelFile {
    + void constructor(ModelManager,string,string) throws IllegalModelException
+   + boolean isModelFile() 
    + Boolean isSystemModelFile() 
    + boolean isExternal() 
    + ModelManager getModelManager() 
@@ -164,11 +157,9 @@ class ModelFile {
    + string getDefinitions() 
    + string getConcertoVersion() 
    + void isCompatibleVersion() 
-   + boolean hasInstance(object) 
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean hasInstance(object) 
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
@@ -182,16 +173,14 @@ class Property extends Decorated {
    + boolean isArray() 
    + boolean isTypeEnum() 
    + boolean isPrimitive() 
-   + boolean hasInstance(object) 
 }
 class RelationshipDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    + String toString() 
-   + boolean hasInstance(object) 
+   + boolean isRelationship() 
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + boolean hasInstance(object) 
 }
 class Identifiable extends Typed {
    + string getTimestamp() 
@@ -234,6 +223,7 @@ class ModelLoader {
 }
 class ModelManager {
    + void constructor(object) 
+   + boolean isModelManager() 
    + Object accept(Object,Object) 
    + void validateModelFile(string,string) throws IllegalModelException
    + Object addModelFile(string,string,boolean) throws IllegalModelException
@@ -258,7 +248,6 @@ class ModelManager {
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean derivesFrom(string,string) 
-   + boolean hasInstance(object) 
 }
 class SecurityException extends BaseException {
    + void constructor(string) 
@@ -268,7 +257,6 @@ class Serializer {
    + void setDefaultOptions(Object) 
    + Object toJSON(Resource,Object,boolean,boolean,boolean,boolean,boolean,number) throws Error
    + Resource fromJSON(Object,Object,boolean,boolean,number) 
-   + boolean hasInstance(object) 
 }
 class TypedStack {
    + void constructor(Object) 

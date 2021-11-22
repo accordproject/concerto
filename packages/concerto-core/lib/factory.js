@@ -28,9 +28,6 @@ const Relationship = require('./model/relationship');
 const Resource = require('./model/resource');
 const ValidatedResource = require('./model/validatedresource');
 
-const TransactionDeclaration = require('./introspect/transactiondeclaration');
-const EventDeclaration = require('./introspect/eventdeclaration');
-
 const uuid = require('uuid');
 
 const dayjs = require('dayjs');
@@ -60,7 +57,6 @@ class Factory {
      */
     constructor(modelManager) {
         this.modelManager = modelManager;
-        this._isFactory = true;
     }
 
     /**
@@ -120,7 +116,7 @@ class Factory {
 
         let newObj = null;
         let timestamp = null;
-        if (classDecl instanceof TransactionDeclaration || classDecl instanceof EventDeclaration) {
+        if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
         }
         if(options.disableValidation) {
@@ -206,7 +202,7 @@ class Factory {
         let transaction = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
 
-        if (!(classDeclaration instanceof TransactionDeclaration)) {
+        if (!classDeclaration.isTransaction()) {
             throw new Error(transaction.getClassDeclaration().getFullyQualifiedName() + ' is not a transaction');
         }
 
@@ -236,7 +232,7 @@ class Factory {
         let event = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
 
-        if (!(classDeclaration instanceof EventDeclaration)) {
+        if (!classDeclaration.isEvent()) {
             throw new Error(event.getClassDeclaration().getFullyQualifiedName() + ' is not an event');
         }
 
@@ -290,18 +286,6 @@ class Factory {
         generateParams.includeOptionalFields = clientOptions.includeOptionalFields ? true : false;
 
         return generateParams;
-    }
-
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a Factory
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isFactory);
     }
 }
 

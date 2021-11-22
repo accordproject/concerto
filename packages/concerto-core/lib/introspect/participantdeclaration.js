@@ -32,18 +32,6 @@ class ParticipantDeclaration extends IdentifiedDeclaration {
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-        this._isParticipantDeclaration = true;
-    }
-
-    /**
-     * Alternative instanceof that is reliable across different module instances
-     * @see https://github.com/hyperledger/composer-concerto/issues/47
-     *
-     * @param {object} object - The object to test against
-     * @returns {boolean} - True, if the object is an instance of a ParticipantDeclaration
-     */
-    static [Symbol.hasInstance](object){
-        return typeof object !== 'undefined' && object !== null && Boolean(object._isParticipantDeclaration);
     }
 }
 
