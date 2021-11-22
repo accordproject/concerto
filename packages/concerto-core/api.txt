@@ -228,7 +228,7 @@ class ModelManager {
    + boolean isModelManager() 
    + Object accept(Object,Object) 
    + void validateModelFile(string,string) throws IllegalModelException
-   + Object addModelFile(string,string,boolean) throws IllegalModelException
+   + Object addModelFile(string,boolean) throws IllegalModelException
    + Object updateModelFile(string,string,boolean) throws IllegalModelException
    + void deleteModelFile(string) 
    + Object[] addModelFiles(object[],undefined,boolean) 
