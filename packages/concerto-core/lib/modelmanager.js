@@ -132,7 +132,7 @@ abstract concept Event {}
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string} modelFile - The Concerto file as a string
+     * @param {string|ModelFile} modelFile - The Concerto file as a string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}

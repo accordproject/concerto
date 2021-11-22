@@ -68,13 +68,13 @@ declare class ModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string} modelFile - The Concerto file as a string
+     * @param {string|ModelFile} modelFile - The Concerto file as a string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addModelFile(modelFile: string, fileName: string, disableValidation?: boolean): any;
+    addModelFile(modelFile: string | ModelFile, fileName: string, disableValidation?: boolean): any;
     /**
      * Updates a Concerto file (as a string) on the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the
@@ -248,5 +248,5 @@ declare class ModelManager {
 }
 import Factory = require("./factory");
 import Serializer = require("./serializer");
-import ModelFileDownloader = require("./introspect/loaders/modelfiledownloader");
 import ModelFile = require("./introspect/modelfile");
+import ModelFileDownloader = require("./introspect/loaders/modelfiledownloader");
