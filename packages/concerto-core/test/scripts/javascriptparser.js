@@ -792,42 +792,6 @@ describe('JavascriptParser', () => {
             (()=>{JavascriptParser.getMethodArguments(comment);})
                 .should.throws(/Malformed JSDoc comment/);
         });
-
-        it('Cope with different types of tag type', () => {
-            const comment = `
-                /**
-                 * @returns {Animal[]} Something valid
-                */
-            `;
-            sandbox.stub(doctrine,'parse').returns(
-                {
-                    tags:[
-                        {
-                            type:
-                            {
-                                applications:['somename']
-                            }
-
-                        },
-                        {
-                            type:
-                            {
-                                expression: {name:'somename'}
-                            }
-
-                        },
-                        {
-                            type:
-                            {
-                                wibble: {name:'somename'}
-                            }
-
-                        }
-                    ]
-                });
-            JavascriptParser.getMethodArguments(comment);
-
-        });
     });
 
     describe('#getExample', () => {
