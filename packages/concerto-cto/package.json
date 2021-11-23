@@ -1,5 +1,5 @@
 {
-  "name": "@accordproject/concerto-parser",
+  "name": "@accordproject/concerto-cto",
   "version": "1.2.1",
   "description": "Parser the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",

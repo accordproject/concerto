@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { Parser, Printer } = require('@accordproject/concerto-parser');
+const { Printer } = require('@accordproject/concerto-cto');
 const ModelManager = require('../modelmanager');
 const Factory = require('../factory');
 const Serializer = require('../serializer');
@@ -188,6 +188,7 @@ concept ImportType extends Import {
 
 concept Model {
   o String namespace
+  o String sourceUri optional
   o String concertoVersion optional
   o Import[] imports optional
   o Declaration[] declarations optional
@@ -367,11 +368,15 @@ class MetaModel {
      * Resolve the namespace for names in the metamodel
      * @param {object} modelManager - the ModelManager
      * @param {object} metaModel - the MetaModel
+     * @param {boolean} [validate] - whether to perform validation
      * @return {object} the resolved metamodel
      */
-    static resolveMetaModel(modelManager, metaModel) {
-        const result = JSON.parse(JSON.stringify(metaModel));
-        const nameTable = MetaModel.createNameTable(modelManager, metaModel);
+    static resolveMetaModel(modelManager, metaModel, validate = true) {
+        // First, validate the JSON metaModel
+        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
+
+        const result = JSON.parse(JSON.stringify(mm));
+        const nameTable = MetaModel.createNameTable(modelManager, mm);
         // This adds the fully qualified names to the same object
         MetaModel.resolveTypeNames(result, nameTable);
         return result;
@@ -403,7 +408,8 @@ class MetaModel {
         modelManager.getModelFiles().forEach((modelFile) => {
             let metaModel = modelFile.ast;
             if (resolve) {
-                metaModel = MetaModel.resolveMetaModel(modelManager, metaModel);
+                // No need to re-validate when models are obtained from model manager
+                metaModel = MetaModel.resolveMetaModel(modelManager, metaModel, false);
             }
             result.models.push(metaModel);
         });
@@ -429,33 +435,6 @@ class MetaModel {
 
         modelManager.validateModelFiles();
         return modelManager;
-    }
-
-    /**
-     * Export metamodel from a model string
-     * @param {string} model - the string for the model
-     * @param {boolean} [validate] - whether to perform validation
-     * @return {object} the metamodel for this model
-     */
-    static ctoToMetaModel(model, validate = true) {
-        return Parser.parse(model);
-    }
-
-    /**
-     * Export metamodel from a model string and resolve names
-     * @param {*} modelManager - the model manager
-     * @param {string} model - the string for the model
-     * @param {boolean} [validate] - whether to perform validation
-     * @return {object} the metamodel for this model
-     */
-    static ctoToMetaModelAndResolve(modelManager, model, validate = true) {
-        const metaModel = Parser.parse(model);
-
-        // First, validate the JSON metaModel
-        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
-
-        const result = MetaModel.resolveMetaModel(modelManager, mm);
-        return result;
     }
 }
 

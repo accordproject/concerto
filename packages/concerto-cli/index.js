@@ -145,8 +145,8 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
-    .command('import', 'import a cto string into its metamodel', (yargs) => {
-        yargs.demandOption(['input'], 'Please provide an input cto');
+    .command('parse', 'parse a cto string to a JSON syntax tree', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide an input cto string');
         yargs.option('model', {
             describe: 'array of concerto model files',
             type: 'string',
@@ -171,7 +171,7 @@ require('yargs')
             type: 'string'
         });
     }, (argv) => {
-        return Commands.import(argv.input, argv.model, argv.resolve, argv.all, argv.output)
+        return Commands.parse(argv.input, argv.model, argv.resolve, argv.all, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);
@@ -181,8 +181,8 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
-    .command('export', 'export a metamodel to cto syntax', (yargs) => {
-        yargs.demandOption(['input'], 'Please provide an input metamodel');
+    .command('print', 'print a JSON syntax tree to a cto string', (yargs) => {
+        yargs.demandOption(['input'], 'Please provide an input Concerto syntax tree');
         yargs.option('input', {
             describe: 'the metamodel to export',
             type: 'string'
@@ -192,7 +192,7 @@ require('yargs')
             type: 'string'
         });
     }, (argv) => {
-        return Commands.export(argv.input, argv.model, argv.all, argv.output)
+        return Commands.print(argv.input, argv.model, argv.all, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);

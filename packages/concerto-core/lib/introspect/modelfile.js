@@ -26,7 +26,7 @@ const IllegalModelException = require('./illegalmodelexception');
 const ParseException = require('./parseexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
-const { Parser } = require('@accordproject/concerto-parser');
+const { Parser } = require('@accordproject/concerto-cto');
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
