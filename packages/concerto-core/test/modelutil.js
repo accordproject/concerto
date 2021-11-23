@@ -16,10 +16,8 @@
 
 const ModelFile = require('../lib/introspect/modelfile');
 const Property = require('../lib/introspect/property');
-const Typed = require('../lib/model/identifiable');
 const ModelManager = require('../lib/modelmanager');
 const ModelUtil = require('../lib/modelutil');
-const Util = require('./composer/composermodelutility');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -57,104 +55,6 @@ describe('ModelUtil', function () {
             ModelUtil.getShortName('Foo').should.equal('Foo');
         });
 
-    });
-
-    describe('#isWildcardName', () => {
-
-        it('should return false for a name without a wildcard', () => {
-            ModelUtil.isWildcardName('Foo').should.be.false;
-        });
-
-        it('should return true for a name with a wildcard', () => {
-            ModelUtil.isWildcardName('*').should.be.true;
-        });
-
-        it('should return false for a fully qualified name without a wildcard', () => {
-            ModelUtil.isWildcardName('org.acme.baz.Foo').should.be.false;
-        });
-
-        it('should return true for a fully qualified name with a wildcard', () => {
-            ModelUtil.isWildcardName('org.acme.baz.*').should.be.true;
-        });
-
-        it('should return false for a fully qualified name with a recursive wildcard', () => {
-            ModelUtil.isWildcardName('org.acme.baz.**').should.be.false;
-        });
-
-    });
-
-    describe('#isRecursiveWildcardName', () => {
-
-        it('should return false for a name without a recursive wildcard', () => {
-            ModelUtil.isRecursiveWildcardName('Foo').should.be.false;
-        });
-
-        it('should return true for a name with a recursive wildcard', () => {
-            ModelUtil.isRecursiveWildcardName('**').should.be.true;
-        });
-
-        it('should return false for a fully qualified name without a recursive wildcard', () => {
-            ModelUtil.isRecursiveWildcardName('org.acme.baz.Foo').should.be.false;
-        });
-
-        it('should return true for a fully qualified name with a recursive wildcard', () => {
-            ModelUtil.isRecursiveWildcardName('org.acme.baz.**').should.be.true;
-        });
-
-        it('should return false for a fully qualified name with a wildcard', () => {
-            ModelUtil.isRecursiveWildcardName('org.acme.baz.*').should.be.false;
-        });
-
-    });
-
-    describe('#isMatchingType', () => {
-
-        let modelManager;
-        let classDecl;
-        let type;
-
-        beforeEach(() => {
-            modelManager = new ModelManager();
-            Util.addComposerModel(modelManager);
-            modelManager.addModelFile(`namespace org.acme.baz
-            asset Foo identified by fooId {
-                o String fooId
-            }`);
-            classDecl = modelManager.getType('org.acme.baz.Foo');
-            type = new Typed(modelManager, classDecl, 'org.acme.baz', 'Foo' );
-        });
-
-        it('should return true for an exact match', () => {
-            ModelUtil.isMatchingType(type, 'org.acme.baz.Foo').should.be.true;
-        });
-
-        it('should return false for a non-match', () => {
-            ModelUtil.isMatchingType(type, 'org.acme.baz.Bar').should.be.false;
-        });
-
-        it('should return true for a wildcard namespace match', () => {
-            ModelUtil.isMatchingType(type, 'org.acme.baz.*').should.be.true;
-        });
-
-        it('should return false for a non-matching wildcard namespace', () => {
-            ModelUtil.isMatchingType(type, 'org.doge.baz.*').should.be.false;
-        });
-
-        it('should return false for an ancestor namespace wildcard match', () => {
-            ModelUtil.isMatchingType(type, 'org.acme.*').should.be.false;
-        });
-
-        it('should return true for a recursive wildcard match', () => {
-            ModelUtil.isMatchingType(type, 'org.acme.**').should.be.true;
-        });
-
-        it('should return false for a non-matching recursive wildcard', () => {
-            ModelUtil.isMatchingType(type, 'org.ac.**').should.be.false;
-        });
-
-        it('should return true for a root recursive wildcard match', () => {
-            ModelUtil.isMatchingType(type, '**').should.be.true;
-        });
     });
 
     describe('#getNamespace', function() {

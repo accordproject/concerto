@@ -172,7 +172,7 @@ class ModelFile {
      * @return {string[]} The array of imports for this ModelFile
      */
     getImports() {
-        return this.imports;
+        return this.imports.map(ModelUtil.importFullyQualifiedName);
     }
 
     /**
@@ -184,8 +184,9 @@ class ModelFile {
     validate() {
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
-        this.imports.forEach((importName) => {
-            const importNamespace = ModelUtil.getNamespace(importName);
+        this.imports.forEach((imp) => {
+            const importName = ModelUtil.importFullyQualifiedName(imp);
+            const importNamespace = imp.namespace;
             const modelFile = this.getModelManager().getModelFile(importNamespace);
             if (!modelFile) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
@@ -193,12 +194,12 @@ class ModelFile {
                     type: importName
                 }), this);
             }
-            if (ModelUtil.isWildcardName(importName)) {
+            if (imp.$class === 'concerto.metamodel.ImportAll') {
                 // This is a wildcard import, org.acme.*
                 // Doesn't matter if 0 or 100 types in the namespace.
                 return;
             }
-            const importShortName = ModelUtil.getShortName(importName);
+            const importShortName = imp.name;
             if (!modelFile.isLocalType(importShortName)) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
                 throw new IllegalModelException(formatter({
@@ -213,7 +214,6 @@ class ModelFile {
             let classDeclaration = this.declarations[n];
             classDeclaration.validate();
         }
-
     }
 
     /**
@@ -628,22 +628,16 @@ class ModelFile {
             );
         }
 
-        // XXX To be fixed
-        imports.forEach((imp) => {
-            let namespace;
+        this.imports = imports;
+        this.imports.forEach((imp) => {
+            const fqn = ModelUtil.importFullyQualifiedName(imp);
             if (imp.$class === 'concerto.metamodel.ImportAll') {
-                namespace = `${imp.namespace}.*`;
+                this.importWildcardNamespaces.push(imp.namespace);
             } else {
-                namespace = `${imp.namespace}.${imp.name}`;
-            }
-            this.imports.push(namespace);
-            this.importShortNames.set(ModelUtil.getShortName(namespace), namespace);
-            if (ModelUtil.isWildcardName(namespace)) {
-                const wildcardNamespace = ModelUtil.getNamespace(namespace);
-                this.importWildcardNamespaces.push(wildcardNamespace);
+                this.importShortNames.set(imp.name, fqn);
             }
             if(imp.uri) {
-                this.importUriMap[namespace] = imp.uri;
+                this.importUriMap[fqn] = imp.uri;
             }
         });
 

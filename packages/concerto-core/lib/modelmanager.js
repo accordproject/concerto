@@ -287,7 +287,7 @@ abstract concept Event {}
                     try {
                         this.validateModelFiles();
                         return [];
-                    } catch (validationError){
+                    } catch (validationError) {
                         // The validation error tells us the first model that is missing from the model manager, but the dependency download
                         // will fail at the first external model, regardless of whether there is already a local copy.
                         // As a hint to the user we display the URL of the external model that can't be found.
