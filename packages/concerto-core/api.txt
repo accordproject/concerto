@@ -111,12 +111,10 @@ class MetaModel {
    + object createNameTable(modelManager,object) 
    + string resolveName(string,object) 
    + object resolveTypeNames(object,object) 
-   + object resolveMetaModel(object,object) 
+   + object resolveMetaModel(object,object,boolean?) 
    + object modelFileToMetaModel(object,boolean?) 
    + object modelManagerToMetaModel(object,boolean?,boolean?) 
    + object modelManagerFromMetaModel(object,boolean?) 
-   + object ctoToMetaModel(string,boolean?) 
-   + object ctoToMetaModelAndResolve(modelManager,string,boolean?) 
 }
 class ModelFile {
    + void constructor(ModelManager,string,string?) throws IllegalModelException

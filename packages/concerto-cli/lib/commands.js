@@ -18,7 +18,8 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
-const Printer = require('@accordproject/concerto-parser').Printer;
+const Printer = require('@accordproject/concerto-cto').Printer;
+const Parser = require('@accordproject/concerto-cto').Parser;
 const Logger = require('@accordproject/concerto-core').Logger;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
@@ -191,7 +192,7 @@ class Commands {
     }
 
     /**
-     * Import a CTO string to its metamodel
+     * Parse a cto string to a JSON syntax tree
      *
      * @param {string} input - CTO
      * @param {string[]} [ctoFiles] - the CTO files used for import resolution
@@ -200,7 +201,7 @@ class Commands {
      * @param {string} outputPath to an output file
      * @param {string} the metamodel
      */
-    static async import(input, ctoFiles = [], resolve = false, all = false, outputPath) {
+    static async parse(input, ctoFiles = [], resolve = false, all = false, outputPath) {
         // Add input to ctoFiles for convenience
         if (!ctoFiles.includes(input)) {
             ctoFiles.push(input);
@@ -213,10 +214,9 @@ class Commands {
         if (all) {
             result = MetaModel.modelManagerToMetaModel(modelManager, resolve);
         } else {
+            result = Parser.parse(inputString);
             if (resolve) {
-                result = MetaModel.ctoToMetaModelAndResolve(modelManager, inputString);
-            } else {
-                result = MetaModel.ctoToMetaModel(inputString);
+                result = MetaModel.resolveMetaModel(modelManager, result);
             }
         }
         if (outputPath) {
@@ -228,13 +228,13 @@ class Commands {
     }
 
     /**
-     * Export a metamodel to a CTO string
+     * Print a JSON syntax tree to a cto string
      *
      * @param {string} input metamodel
      * @param {string} outputPath to an output file
      * @param {string} transformed (meta)model
      */
-    static async export(input, outputPath) {
+    static async print(input, outputPath) {
         const inputString = fs.readFileSync(input, 'utf8');
         const json = JSON.parse(inputString);
         const result = Printer.toCTO(json);

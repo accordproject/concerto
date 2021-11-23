@@ -27,7 +27,7 @@ const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
 
-const { Parser } = require('@accordproject/concerto-parser');
+const { Parser } = require('@accordproject/concerto-cto');
 
 const chai = require('chai');
 const should = chai.should();

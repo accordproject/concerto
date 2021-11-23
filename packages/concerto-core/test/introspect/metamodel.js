@@ -19,7 +19,7 @@ const ModelLoader = require('../../lib/modelloader');
 const ModelFile = require('../../lib/introspect/modelfile');
 const MetaModel = require('../../lib/introspect/metamodel');
 
-const { Printer } = require('@accordproject/concerto-parser');
+const { Parser, Printer } = require('@accordproject/concerto-cto');
 
 const fs = require('fs');
 const path = require('path');
@@ -36,19 +36,20 @@ describe('MetaModel (Person)', () => {
 
     describe('#toMetaModel', () => {
         it('should convert a CTO model to its metamodel', () => {
-            const mm1 = MetaModel.ctoToMetaModel(personModel, false);
+            const mm1 = Parser.parse(personModel);
             mm1.should.deep.equal(personMetaModel);
         });
 
         it('should convert and validate a CTO model to its metamodel', () => {
-            const mm1 = MetaModel.ctoToMetaModel(personModel);
+            const mm1 = Parser.parse(personModel);
             mm1.should.deep.equal(personMetaModel);
         });
 
         it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
             const modelManager = await ModelLoader.loadModelManager([personModelPath]);
-            const mm1 = MetaModel.ctoToMetaModelAndResolve(modelManager, personModel);
-            mm1.should.deep.equal(personMetaModelResolved);
+            const mm1 = Parser.parse(personModel);
+            const mm1r = MetaModel.resolveMetaModel(modelManager, mm1);
+            mm1r.should.deep.equal(personMetaModelResolved);
         });
 
         it('should convert a ModelFile to its metamodel', () => {
@@ -85,19 +86,20 @@ describe('MetaModel (Empty)', () => {
 
     describe('#toMetaModel', () => {
         it('should convert a CTO model to its metamodel', () => {
-            const mm1 = MetaModel.ctoToMetaModel(emptyModel, false);
+            const mm1 = Parser.parse(emptyModel);
             mm1.should.deep.equal(emptyMetaModel);
         });
 
         it('should convert and validate a CTO model to its metamodel', () => {
-            const mm1 = MetaModel.ctoToMetaModel(emptyModel);
+            const mm1 = Parser.parse(emptyModel);
             mm1.should.deep.equal(emptyMetaModel);
         });
 
         it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
             const modelManager = await ModelLoader.loadModelManager([emptyModelPath]);
-            const mm1 = MetaModel.ctoToMetaModelAndResolve(modelManager, emptyModel);
-            mm1.should.deep.equal(emptyMetaModelResolved);
+            const mm1 = Parser.parse(emptyModel);
+            const mm1r = MetaModel.resolveMetaModel(modelManager, mm1);
+            mm1r.should.deep.equal(emptyMetaModelResolved);
         });
 
         it('should convert a ModelFile to its metamodel', () => {
@@ -167,9 +169,9 @@ describe('MetaMetaModel', () => {
     describe('#meta-metamodel', () => {
         it('should roundtrip the metamodel', () => {
             const metaModel = MetaModel.getMetaModelCto();
-            const mm1 = MetaModel.ctoToMetaModel(metaModel, false);
+            const mm1 = Parser.parse(metaModel);
             const model2 = Printer.toCTO(mm1);
-            const mm2 = MetaModel.ctoToMetaModel(model2, false);
+            const mm2 = Parser.parse(model2);
             mm2.should.deep.equal(mm1);
         });
     });
