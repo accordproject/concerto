@@ -461,13 +461,55 @@ class JavaScriptParser {
                 }
             }
 
-            if (tag.type.name) {
-                paramTypes.push(tag.type.name);
-            } else if (tag.type.applications) {
-                paramTypes.push(tag.type.applications[0].name + '[]');
-            } else if (tag.type.expression) {
-                paramTypes.push(tag.type.expression.name);
-
+            switch(tag.type.type) {
+            case 'UnionType':
+                if(tag?.type?.elements) {
+                    paramTypes.push(tag.type.elements.map( e => e.name).join('|'));
+                }
+                else {
+                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                }
+                break;
+            case 'OptionalType':
+                if(tag?.type?.expression?.type === 'TypeApplication') {
+                    paramTypes.push(`${tag.type.expression.applications[0].name}[]`);
+                }
+                else if(tag?.type.expression?.name) {
+                    paramTypes.push(`${tag?.type.expression?.name}?`);
+                }
+                else if(tag?.name) {
+                    paramTypes.push(`${tag?.name}?`);
+                }
+                else {
+                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                }
+                break;
+            case 'AllLiteral':
+                if(tag?.name) {
+                    paramTypes.push(tag.name);
+                }
+                else {
+                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                }
+                break;
+            case 'NameExpression':
+                if(tag?.type?.name) {
+                    paramTypes.push(tag.type.name);
+                }
+                else {
+                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                }
+                break;
+            case 'TypeApplication':
+                if(tag?.type?.applications) {
+                    paramTypes.push(tag.type.applications.map(e => e.name).join(',') + '[]');
+                }
+                else {
+                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                }
+                break;
+            default:
+                throw new Error('Unrecognized JSDoc comment: ' + JSON.stringify(tag));
             }
         });
         return paramTypes;
