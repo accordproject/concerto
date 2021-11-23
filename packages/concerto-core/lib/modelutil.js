@@ -43,59 +43,6 @@ class ModelUtil {
     }
 
     /**
-     * Returns true if the specified name is a wildcard
-     * @param {string} fqn - the source string
-     * @return {boolean} true if the specified name is a wildcard
-     * @private
-     */
-    static isWildcardName(fqn) {
-        return ModelUtil.getShortName(fqn) === '*';
-    }
-
-    /**
-     * Returns true if the specified name is a recusive wildcard
-     * @param {string} fqn - the source string
-     * @return {boolean} true if the specified name is a recusive wildcard
-     * @private
-     */
-    static isRecursiveWildcardName(fqn) {
-        return ModelUtil.getShortName(fqn) === '**';
-    }
-
-    /**
-     * Returns true if a type matches the required fully qualified name. The required
-     * name may be a wildcard or recursive wildcard
-     * @param {Typed} type - the type to test
-     * @param {string} fqn - required fully qualified name
-     * @return {boolean} true if the specified type and namespace match
-     * @private
-     */
-    static isMatchingType(type, fqn) {
-
-        // Instance of type before any complex string operations.
-        if (type.instanceOf(fqn)) {
-            // matching type or subtype
-            return true;
-        }
-
-        let ns = ModelUtil.getNamespace(fqn);
-        let typeNS = type.getNamespace();
-
-        if (ModelUtil.isWildcardName(fqn) && typeNS === ns) {
-            // matching namespace
-        } else if (ModelUtil.isRecursiveWildcardName(fqn) && (typeNS + '.').startsWith(ns + '.')) {
-            // matching recursive namespace
-        } else if (ModelUtil.isRecursiveWildcardName(fqn) && !ns) {
-            // matching root recursive namespace
-        } else {
-            // does not match
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Returns the namespace for a the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
      * @return {string} - namespace of the type (everything before the last dot)
@@ -114,6 +61,16 @@ class ModelUtil {
         }
 
         return result;
+    }
+
+    /**
+     * Return the fully qualified name for an import
+     * @param {object} imp - the import
+     * @return {string} - the fully qualified name for that import
+     * @private
+     */
+    static importFullyQualifiedName(imp) {
+        return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
     }
 
     /**

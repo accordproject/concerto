@@ -16,7 +16,6 @@
 
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
-const ModelUtil = require('../../lib/modelutil');
 const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
 const Serializer = require('../../lib/serializer');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
@@ -336,8 +335,10 @@ describe('Test Model', function(){
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.isLocalType('MyParticipant').should.equal(false);
             modelFile.isImportedType('MyParticipant').should.equal(true);
-            let imprts = modelFile.getImports().filter( (element) => {
-                const importNamespace = ModelUtil.getNamespace(element);
+            let imprts = modelFile.getImports().filter((element) => {
+                const split = element.split('.');
+                split.pop();
+                const importNamespace = split.join('.');
                 return modelManager.getModelFile(importNamespace);
             });
             imprts.length.should.equal(6); // XXX Now includes all concerto.* classes
@@ -376,7 +377,9 @@ describe('Test Model', function(){
             modelFile.isLocalType('Business').should.equal(true);
             modelFile.isImportedType('Person').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
-                const importNamespace = ModelUtil.getNamespace(element);
+                const split = element.split('.');
+                split.pop();
+                const importNamespace = split.join('.');
                 return modelManager.getModelFile(importNamespace);
             });
             imprts.length.should.equal(7); // XXX Now includes all concerto.* classes
