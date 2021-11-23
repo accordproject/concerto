@@ -68,7 +68,7 @@ declare class ModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string|ModelFile} modelFile - The Concerto file as a string
+     * @param {string|ModelFile} modelFile - Model as a string or object
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
@@ -80,13 +80,13 @@ declare class ModelManager {
      * Concerto files have a single namespace. If a Concerto file with the
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
-     * @param {string} modelFile - The Concerto file as a string
+     * @param {string|ModelFile} modelFile - Model as a string or object
      * @param {string} [fileName] - a file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @returns {Object} The newly added model file (internal).
      */
-    updateModelFile(modelFile: string, fileName?: string, disableValidation?: boolean): any;
+    updateModelFile(modelFile: string | ModelFile, fileName?: string, disableValidation?: boolean): any;
     /**
      * Remove the Concerto file for a given namespace
      * @param {string} namespace - The namespace of the model file to delete.
@@ -94,12 +94,12 @@ declare class ModelManager {
     deleteModelFile(namespace: string): void;
     /**
      * Add a set of Concerto files to the model manager.
-     * @param {object[]} modelFiles - An array of Concerto files as strings or ModelFile objects.
+     * @param {string[]|ModelFile[]} modelFiles - An array of models as strings or ModelFile objects.
      * @param {string[]} [fileNames] - A array of file names to associate with the model files
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles: object[], fileNames?: string[], disableValidation?: boolean): any[];
+    addModelFiles(modelFiles: string[] | ModelFile[], fileNames?: string[], disableValidation?: boolean): any[];
     /**
      * Validates all models files in this model manager
      */
