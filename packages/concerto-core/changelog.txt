@@ -28,8 +28,7 @@ Version 1.2.2 {bc4515790689a025335b5873a662b3a6} 2021-11-22
 - Remove custom instanceof and add methods to check runtime type
 - Remove support for Node 12
 - Generate Typescript definitions from JSDoc
-
-Version 1.2.2 {8149560555027394c95a893c1e442d67} 2021-11-15
+- Parser directly constructs metamodel instance
 - Convert MetaModel to a class for Typescript + Webpack compatability
 - Update Acorn to latest and refactor the JavaScript parser so we can use static class members
 

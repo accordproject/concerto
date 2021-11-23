@@ -27,13 +27,13 @@ describe('NumberValidator', () => {
     let mockField;
 
     // valid test parms
-    let VALID_UPPER_AND_LOWER_BOUND_AST = {'lower' : '0', 'upper' : '100' };
-    let NO_LOWER_BOUND_AST = {'lower' : null, 'upper' : '100' };
-    let NO_UPPER_BOUND_AST = {'lower' : '0' , 'upper' : null };
+    let VALID_UPPER_AND_LOWER_BOUND_AST = { lower : 0, upper : 100 };
+    let NO_LOWER_BOUND_AST = { lower : null, upper : 100 };
+    let NO_UPPER_BOUND_AST = { lower : 0 , upper : null };
 
     // error parms
     let NO_PARMS_IN_AST = {'lower' : null, 'upper' : null };
-    let LOWER_IS_HIGHER_THAN_UPPER = {'lower' : '200', 'upper' : '100' };
+    let LOWER_IS_HIGHER_THAN_UPPER = {'lower' : 200, 'upper' : 100 };
 
     beforeEach(() => {
         mockField = sinon.createStubInstance(Field);

@@ -73,6 +73,7 @@ class ModelFile {
 
         try {
             this.ast = parser.parse(definitions);
+            // console.log(`AST ${JSON.stringify(this.ast, null, 2)}`);
         }
         catch(err) {
             if(err.location && err.location.start) {
@@ -570,11 +571,11 @@ class ModelFile {
      * Check whether this modelfile is compatible with the concerto version
      */
     isCompatibleVersion() {
-        if (this.ast.version) {
-            if (semver.satisfies(packageJson.version, this.ast.version.value, { includePrerelease: true })) {
-                this.concertoVersion = this.ast.version.value;
+        if (this.ast.concertoVersion) {
+            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
+                this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.version.value} but this is ${packageJson.version}`);
+                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
             }
         }
     }
@@ -585,72 +586,127 @@ class ModelFile {
      * @private
      */
     fromAst(ast) {
-        this.namespace = this.ast.namespace;
+        this.namespace = ast.namespace;
+        // Make sure to clone imports since we will add built-in imports
+        const imports = ast.imports ? ast.imports.concat([]) : [];
 
-        if(this.namespace !== 'concerto' && this.ast.imports) {
-            this.ast.imports.push( { namespace: 'concerto.Concept'} );
-            this.ast.imports.push( { namespace: 'concerto.Asset'} );
-            this.ast.imports.push( { namespace: 'concerto.Transaction'} );
-            this.ast.imports.push( { namespace: 'concerto.Participant'} );
-            this.ast.imports.push( { namespace: 'concerto.Event'} );
+        if(this.namespace !== 'concerto') {
+            imports.push(
+                {
+                    $class: 'concerto.metamodel.ImportType',
+                    namespace: 'concerto',
+                    name: 'Concept',
+                }
+            );
+            imports.push(
+                {
+                    $class: 'concerto.metamodel.ImportType',
+                    namespace: 'concerto',
+                    name: 'Asset',
+                }
+            );
+            imports.push(
+                {
+                    $class: 'concerto.metamodel.ImportType',
+                    namespace: 'concerto',
+                    name: 'Transaction',
+                }
+            );
+            imports.push(
+                {
+                    $class: 'concerto.metamodel.ImportType',
+                    namespace: 'concerto',
+                    name: 'Participant',
+                }
+            );
+            imports.push(
+                {
+                    $class: 'concerto.metamodel.ImportType',
+                    namespace: 'concerto',
+                    name: 'Event',
+                }
+            );
         }
 
-        if(this.ast.imports) {
-            this.ast.imports.forEach((imp) => {
-                this.imports.push(imp.namespace);
-                this.importShortNames.set(ModelUtil.getShortName(imp.namespace), imp.namespace);
-                if (ModelUtil.isWildcardName(imp.namespace)) {
-                    const wildcardNamespace = ModelUtil.getNamespace(imp.namespace);
-                    this.importWildcardNamespaces.push(wildcardNamespace);
-                }
-                if(imp.uri) {
-                    this.importUriMap[imp.namespace] = imp.uri;
-                }
-            });
+        // XXX To be fixed
+        imports.forEach((imp) => {
+            let namespace;
+            if (imp.$class === 'concerto.metamodel.ImportAll') {
+                namespace = `${imp.namespace}.*`;
+            } else {
+                namespace = `${imp.namespace}.${imp.name}`;
+            }
+            this.imports.push(namespace);
+            this.importShortNames.set(ModelUtil.getShortName(namespace), namespace);
+            if (ModelUtil.isWildcardName(namespace)) {
+                const wildcardNamespace = ModelUtil.getNamespace(namespace);
+                this.importWildcardNamespaces.push(wildcardNamespace);
+            }
+            if(imp.uri) {
+                this.importUriMap[namespace] = imp.uri;
+            }
+        });
+
+        // declarations is an optional field
+        if (!ast.declarations) {
+            return;
         }
 
-        for(let n=0; n < this.ast.body.length; n++ ) {
-            let thing = this.ast.body[n];
+        for(let n=0; n < ast.declarations.length; n++) {
+            // Make sure to clone since we may add super type
+            let thing = Object.assign({}, ast.declarations[n]);
 
-            if(thing.type === 'AssetDeclaration') {
+            if(thing.$class === 'concerto.metamodel.AssetDeclaration') {
                 // Default super type for asset
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Asset' } };
+                if (!thing.superType) {
+                    thing.superType = {
+                        $class: 'concerto.metamodel.TypeIdentified',
+                        name: 'Asset',
+                    };
                 }
                 this.declarations.push( new AssetDeclaration(this, thing) );
             }
-            else if(thing.type === 'TransactionDeclaration') {
+            else if(thing.$class === 'concerto.metamodel.TransactionDeclaration') {
                 // Default super type for transaction
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Transaction' } };
+                if (!thing.superType) {
+                    thing.superType = {
+                        $class: 'concerto.metamodel.TypeIdentified',
+                        name: 'Transaction',
+                    };
                 }
                 this.declarations.push( new TransactionDeclaration(this, thing) );
             }
-            else if(thing.type === 'EventDeclaration') {
+            else if(thing.$class === 'concerto.metamodel.EventDeclaration') {
                 // Default super type for event
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Event' } };
+                if (!thing.superType) {
+                    thing.superType = {
+                        $class: 'concerto.metamodel.TypeIdentified',
+                        name: 'Event',
+                    };
                 }
                 this.declarations.push( new EventDeclaration(this, thing) );
             }
-            else if(thing.type === 'ParticipantDeclaration') {
+            else if(thing.$class === 'concerto.metamodel.ParticipantDeclaration') {
                 // Default super type for participant
-                if (!thing.classExtension) {
-                    thing.classExtension = { class: { name: 'Participant' } };
+                if (!thing.superType) {
+                    thing.superType = {
+                        $class: 'concerto.metamodel.TypeIdentified',
+                        name: 'Participant',
+                    };
                 }
                 this.declarations.push( new ParticipantDeclaration(this, thing) );
             }
-            else if(thing.type === 'EnumDeclaration') {
+            else if(thing.$class === 'concerto.metamodel.EnumDeclaration') {
                 this.declarations.push( new EnumDeclaration(this, thing) );
             }
-            else if(thing.type === 'ConceptDeclaration') {
+            else if(thing.$class === 'concerto.metamodel.ConceptDeclaration') {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
             }
             else {
                 let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
 
                 throw new IllegalModelException(formatter({
-                    'type': thing.type,
+                    'type': thing.$class,
                 }),this);
             }
         }

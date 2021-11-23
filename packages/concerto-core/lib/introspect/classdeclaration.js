@@ -30,7 +30,6 @@ const RelationshipDeclaration = require('./relationshipdeclaration');
  * A ClassDeclaration is conceptually owned by a ModelFile which
  * defines all the classes that are part of a namespace.
  *
- *
  * @abstract
  * @class
  * @memberof module:concerto-core
@@ -58,51 +57,60 @@ class ClassDeclaration extends Decorated {
     process() {
         super.process();
 
-        this.name = this.ast.id.name;
+        this.name = this.ast.name;
         this.properties = [];
         this.superType = null;
         this.superTypeDeclaration = null;
         this.idField = null;
         this.timestamped = false;
         this.abstract = false;
-        this.type = this.ast.type;
+        this.type = this.ast.$class;
 
-        if (this.ast.abstract) {
+        if (this.ast.isAbstract) {
             this.abstract = true;
         }
 
-        if (this.ast.classExtension) {
-            this.superType = this.ast.classExtension.class.name;
+        if (this.ast.superType) {
+            this.superType = this.ast.superType.name;
         }
         else if(!(this.modelFile.getNamespace() === 'concerto' && this.name === 'Concept')) {
             this.superType = 'Concept';
         }
 
-        if (this.ast.idField) {
-            this.idField = this.ast.idField.name;
+        if (this.ast.identified) {
+            if (this.ast.identified.$class === 'concerto.metamodel.IdentifiedBy') {
+                this.idField = this.ast.identified.name;
+            } else {
+                this.idField = '$identifier';
+                this.addIdentifierField();
+            }
         }
 
-        if(this.idField === '$identifier') {
-            this.addIdentifierField();
-        }
+        for (let n = 0; n < this.ast.properties.length; n++) {
+            let thing = this.ast.properties[n];
 
-        for (let n = 0; n < this.ast.body.declarations.length; n++) {
-            let thing = this.ast.body.declarations[n];
-
-            if(thing.id && thing.id.name && thing.id.name.startsWith('$')) {
-                throw new IllegalModelException(`Invalid field name ${thing.id.name}`, this.modelFile, this.ast.location);
+            if(thing.name && thing.name.startsWith('$')) {
+                throw new IllegalModelException(`Invalid field name ${thing.name}`, this.modelFile, this.ast.location);
             }
 
-            if (thing.type === 'FieldDeclaration') {
-                this.properties.push(new Field(this, thing));
-            } else if (thing.type === 'RelationshipDeclaration') {
+            if (thing.$class === 'concerto.metamodel.RelationshipProperty') {
                 this.properties.push(new RelationshipDeclaration(this, thing));
-            } else if (thing.type === 'EnumPropertyDeclaration') {
+            } else if (thing.$class === 'concerto.metamodel.EnumProperty') {
                 this.properties.push(new EnumValueDeclaration(this, thing));
+            } else if (
+                thing.$class === 'concerto.metamodel.BooleanProperty' ||
+                    thing.$class === 'concerto.metamodel.StringProperty' ||
+                    thing.$class === 'concerto.metamodel.IntegerProperty' ||
+                    thing.$class === 'concerto.metamodel.LongProperty' ||
+                    thing.$class === 'concerto.metamodel.DoubleProperty' ||
+                    thing.$class === 'concerto.metamodel.DateTimeProperty' ||
+                    thing.$class === 'concerto.metamodel.ObjectProperty'
+            ) {
+                this.properties.push(new Field(this, thing));
             } else {
                 let formatter = Globalize.messageFormatter('classdeclaration-process-unrecmodelelem');
                 throw new IllegalModelException(formatter({
-                    'type': thing.type
+                    'type': thing.$class
                 }), this.modelFile, this.ast.location);
             }
         }
@@ -122,10 +130,8 @@ class ClassDeclaration extends Decorated {
      */
     addTimestampField() {
         const definition = {};
-        definition.id = {};
-        definition.id.name = '$timestamp';
-        definition.propertyType = {};
-        definition.propertyType.name = 'DateTime';
+        definition.$class = 'concerto.metamodel.DateTimeProperty';
+        definition.name = '$timestamp';
         this.properties.push(new Field(this, definition));
     }
 
@@ -136,10 +142,8 @@ class ClassDeclaration extends Decorated {
      */
     addIdentifierField() {
         const definition = {};
-        definition.id = {};
-        definition.id.name = '$identifier';
-        definition.propertyType = {};
-        definition.propertyType.name = 'String';
+        definition.$class = 'concerto.metamodel.StringProperty';
+        definition.name = '$identifier';
         this.properties.push(new Field(this, definition));
     }
 
@@ -580,7 +584,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isAsset() {
-        return this.type === 'AssetDeclaration';
+        return this.type === 'concerto.metamodel.AssetDeclaration';
     }
 
     /**
@@ -589,7 +593,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isParticipant() {
-        return this.type === 'ParticipantDeclaration';
+        return this.type === 'concerto.metamodel.ParticipantDeclaration';
     }
 
     /**
@@ -598,7 +602,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isTransaction() {
-        return this.type === 'TransactionDeclaration';
+        return this.type === 'concerto.metamodel.TransactionDeclaration';
     }
 
     /**
@@ -607,7 +611,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isEvent() {
-        return this.type === 'EventDeclaration';
+        return this.type === 'concerto.metamodel.EventDeclaration';
     }
 
     /**
@@ -616,7 +620,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isConcept() {
-        return this.type === 'ConceptDeclaration';
+        return this.type === 'concerto.metamodel.ConceptDeclaration';
     }
 
     /**
@@ -625,7 +629,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isEnum() {
-        return this.type === 'EnumDeclaration';
+        return this.type === 'concerto.metamodel.EnumDeclaration';
     }
 
     /**

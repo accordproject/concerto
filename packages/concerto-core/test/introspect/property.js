@@ -37,19 +37,19 @@ describe('Property', () => {
         it('throw an error for no name', () => {
             (() => {
                 new Property(mockClassDeclaration, {
-                    id: {
-                        name: null
-                    }
+                    $class: 'concerto.metamodel.StringProperty',
+                    name: null
                 });
             }).should.throw(/No name for type/);
         });
 
         it('should save the incoming property type', () => {
             let p = new Property(mockClassDeclaration, {
-                id: {
-                    name: 'property',
-                }, propertyType: {
-                    name: 'suchType'
+                $class: 'concerto.metamodel.ObjectProperty',
+                name: 'property',
+                type: {
+                    $class: 'concerto.metamodel.TypeIdentifier',
+                    name: 'suchType',
                 }
             });
             p.type.should.equal('suchType');
@@ -57,28 +57,25 @@ describe('Property', () => {
 
         it('should handle a missing incoming property type', () => {
             let p = new Property(mockClassDeclaration, {
-                id: {
-                    name: 'property',
-                }
+                $class: 'concerto.metamodel.ObjectProperty',
+                name: 'property',
             });
             should.equal(p.type, null);
         });
 
         it('should not be an array by default', () => {
             let p = new Property(mockClassDeclaration, {
-                id: {
-                    name: 'property',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'property',
             });
             p.array.should.equal(false);
         });
 
         it('should mark as an array if required', () => {
             let p = new Property(mockClassDeclaration, {
-                id: {
-                    name: 'property',
-                },
-                array: true
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'property',
+                isArray: true
             });
             p.array.should.equal(true);
         });
@@ -88,9 +85,8 @@ describe('Property', () => {
     describe('#hasInstance', () => {
         it('should return true for a valid Property', () => {
             let p = new Property(mockClassDeclaration, {
-                id: {
-                    name: 'property',
-                }
+                $class: 'concerto.metamodel.StringProperty',
+                name: 'property',
             });
             (p instanceof Property).should.be.true;
         });

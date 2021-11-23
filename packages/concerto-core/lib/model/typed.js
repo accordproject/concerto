@@ -147,7 +147,7 @@ class Typed {
                     } else if (field.getType() === 'Double') {
                         this.setPropertyValue(field.getName(), parseFloat(defaultValue));
                     } else if (field.getType() === 'Boolean') {
-                        this.setPropertyValue(field.getName(), (defaultValue === 'true'));
+                        this.setPropertyValue(field.getName(), (defaultValue === true));
                     } else if (field.getType() === 'DateTime') {
                         const dateTime = dayjs.utc(defaultValue);
                         this.setPropertyValue(field.getName(), dateTime);
