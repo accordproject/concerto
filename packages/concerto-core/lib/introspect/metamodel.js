@@ -29,15 +29,15 @@ class MetaModel {
      */
     static metaModelCto = `namespace concerto.metamodel
 
-concept LocationPoint {
+concept Position {
   o Integer line
   o Integer column
   o Integer offset
 }
 
-concept Location {
-  o LocationPoint start
-  o LocationPoint end
+concept Range {
+  o Position start
+  o Position end
   o String source optional
 }
 
@@ -47,7 +47,7 @@ concept TypeIdentifier {
 }
 
 abstract concept DecoratorLiteral {
-  o Location location optional
+  o Range location optional
 }
 
 concept DecoratorString extends DecoratorLiteral {
@@ -70,7 +70,7 @@ concept DecoratorTypeReference extends DecoratorLiteral {
 concept Decorator {
   o String name
   o DecoratorLiteral[] arguments optional
-  o Location location optional
+  o Range location optional
 }
 
 concept Identified {
@@ -83,7 +83,7 @@ concept IdentifiedBy extends Identified {
 abstract concept Declaration {
   o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o Decorator[] decorators optional
-  o Location location optional
+  o Range location optional
 }
 
 concept EnumDeclaration extends Declaration {
@@ -93,7 +93,7 @@ concept EnumDeclaration extends Declaration {
 concept EnumProperty {
   o String name regex=/^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
   o Decorator[] decorators optional
-  o Location location optional
+  o Range location optional
 }
 
 concept ConceptDeclaration extends Declaration {
@@ -120,7 +120,7 @@ abstract concept Property {
   o Boolean isArray default=false
   o Boolean isOptional default=false
   o Decorator[] decorators optional
-  o Location location optional
+  o Range location optional
 }
 
 concept RelationshipProperty extends Property {

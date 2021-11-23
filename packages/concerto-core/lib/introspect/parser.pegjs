@@ -68,13 +68,13 @@
     return value ? true : false;
   }
 
-  function buildLocation(value) {
+  function buildRange(value) {
     const start = value.start;
     const end = value.end;
-    start.$class = 'concerto.metamodel.LocationPoint';
-    end.$class = 'concerto.metamodel.LocationPoint';
+    start.$class = 'concerto.metamodel.Position';
+    end.$class = 'concerto.metamodel.Position';
     const result = {
-      $class: 'concerto.metamodel.Location',
+      $class: 'concerto.metamodel.Range',
       start: start,
       end: end,
     };
@@ -814,7 +814,7 @@ DecoratorString =
       return {
       	$class: "concerto.metamodel.DecoratorString",
         value: s.value,
-        location: buildLocation(location())
+        location: buildRange(location())
       }
   }
 
@@ -823,7 +823,7 @@ DecoratorNumber =
       return {
       	$class: "concerto.metamodel.DecoratorNumber",
         value: +n,
-        location: buildLocation(location())
+        location: buildRange(location())
       }
   }
 
@@ -832,7 +832,7 @@ DecoratorBoolean =
       return {
       	$class: "concerto.metamodel.DecoratorBoolean",
         value: (b == "true"),
-        location: buildLocation(location())
+        location: buildRange(location())
       }
   }
 
@@ -842,7 +842,7 @@ DecoratorIdentifier =
           $class: "concerto.metamodel.DecoratorTypeReference",
           type: value,
           isArray: !!array,
-          location: buildLocation(location())
+          location: buildRange(location())
       }
   }
 
@@ -867,7 +867,7 @@ Decorator
     const result = {
       $class: "concerto.metamodel.Decorator",
       name: name,
-      location: buildLocation(location())
+      location: buildRange(location())
     };
     if (decoratorArgs) {
       result.arguments = decoratorArgs;
@@ -896,7 +896,7 @@ AssetDeclaration
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -919,7 +919,7 @@ ParticipantDeclaration
         name:  id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -942,7 +942,7 @@ TransactionDeclaration
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -965,7 +965,7 @@ EventDeclaration
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -988,7 +988,7 @@ ConceptDeclaration
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -1044,7 +1044,7 @@ ClassDeclarationBody
       return {
         type: "ClassDeclarationBody",
         declarations: optionalList(decls),
-        location: buildLocation(location())
+        location: buildRange(location())
       };
     }
 
@@ -1056,7 +1056,7 @@ ObjectFieldDeclaration
     		type: propertyType,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -1074,7 +1074,7 @@ BooleanFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = (d === 'true' ? true : false);
@@ -1092,7 +1092,7 @@ DateTimeFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -1110,7 +1110,7 @@ StringFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -1178,7 +1178,7 @@ RealFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = parseFloat(d);
@@ -1199,7 +1199,7 @@ IntegerFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (d) {
         result.defaultValue = parseInt(d);
@@ -1220,7 +1220,7 @@ LongFieldDeclaration
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	}
       if (d) {
         result.defaultValue = parseInt(d);
@@ -1242,7 +1242,7 @@ EnumDeclaration
         $class: "concerto.metamodel.EnumDeclaration",
         name:   id.name,
         properties:  body.declarations,
-        location: buildLocation(location())
+        location: buildRange(location())
       };
       if (decorators.length > 0) {
         result.decorators = decorators;
@@ -1263,7 +1263,7 @@ EnumPropertyDeclaration
     	const result = {
     		$class: "concerto.metamodel.EnumProperty",
     		name: id.name,
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (decorators.length > 0) {
         result.decorators = decorators;
@@ -1279,7 +1279,7 @@ RelationshipDeclaration
     		type: propertyType,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildLocation(location())
+        location: buildRange(location())
     	};
       if (decorators.length > 0) {
         result.decorators = decorators;
