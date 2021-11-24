@@ -105,6 +105,7 @@ class ModelFileDownloader {
    + Promise runJob(Object,Object) 
 }
 class MetaModel {
+   + string getMetaModelCto() 
    + void createMetaModelManager() 
    + object validateMetaModel(object) 
    + object createNameTable(modelManager,object) 

@@ -15,29 +15,6 @@ declare class ModelUtil {
      */
     private static getShortName;
     /**
-     * Returns true if the specified name is a wildcard
-     * @param {string} fqn - the source string
-     * @return {boolean} true if the specified name is a wildcard
-     * @private
-     */
-    private static isWildcardName;
-    /**
-     * Returns true if the specified name is a recusive wildcard
-     * @param {string} fqn - the source string
-     * @return {boolean} true if the specified name is a recusive wildcard
-     * @private
-     */
-    private static isRecursiveWildcardName;
-    /**
-     * Returns true if a type matches the required fully qualified name. The required
-     * name may be a wildcard or recursive wildcard
-     * @param {Typed} type - the type to test
-     * @param {string} fqn - required fully qualified name
-     * @return {boolean} true if the specified type and namespace match
-     * @private
-     */
-    private static isMatchingType;
-    /**
      * Returns the namespace for a the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
      * @return {string} - namespace of the type (everything before the last dot)
@@ -45,6 +22,13 @@ declare class ModelUtil {
      * @private
      */
     private static getNamespace;
+    /**
+     * Return the fully qualified name for an import
+     * @param {object} imp - the import
+     * @return {string} - the fully qualified name for that import
+     * @private
+     */
+    private static importFullyQualifiedName;
     /**
      * Returns true if the type is a primitive type
      * @param {string} typeName - the name of the type

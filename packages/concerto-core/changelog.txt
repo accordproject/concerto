@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 1.2.2 {0ed9b2150eb03a620e66b1fd6a2833b5} 2021-11-22
+Version 1.2.2 {82c68f1a011449a7783092b0aff0b928} 2021-11-24
 - Remove custom instanceof and add methods to check runtime type
 - Remove support for Node 12
 - Generate Typescript definitions from JSDoc
