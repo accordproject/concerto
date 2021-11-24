@@ -284,7 +284,7 @@ describe('JavascriptParser', () => {
         it('should handle the basic of examples', () => {
             const code = readTestExample('BasicExample.js.txt');
             sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code,null,null,false);
+            const parser = new JavascriptParser(code);
             parser.getFunctions().length.should.equal(1);
             const func = parser.getFunctions()[0];
             func.decorators.should.deep.equal(['param', 'transaction']);
@@ -297,7 +297,7 @@ describe('JavascriptParser', () => {
         it('should handle the uncommented function following commented function', () => {
             const code = readTestExample('UncommentedFollowingCommented.js.txt');
             sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code,null,null,false);
+            const parser = new JavascriptParser(code);
             parser.getFunctions().length.should.equal(2);
             const func = parser.getFunctions()[0];
             func.decorators.should.deep.equal(['param', 'transaction']);
@@ -313,7 +313,7 @@ describe('JavascriptParser', () => {
         it('should handle the class methods', () => {
             const code = readTestExample('ClassExample.js.txt');
             sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code, false, 7, false);
+            const parser = new JavascriptParser(code, false, 7);
             const clazz = parser.getClasses();
             clazz.length.should.equal(1);
             const methods = clazz[0].methods;
@@ -327,7 +327,7 @@ describe('JavascriptParser', () => {
         it('should handle the a complex example', () => {
             const code = readTestExample('ComplexExample.js.txt');
             sinon.assert.notCalled(commentSpy);
-            const parser = new JavascriptParser(code,null,null,false);
+            const parser = new JavascriptParser(code);
             const funcs = parser.getFunctions();
             funcs.length.should.equal(12);
             const noDecorators = [0, 1, 2, 3, 5, 6, 9, 10];

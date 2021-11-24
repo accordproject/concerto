@@ -20,14 +20,9 @@ const Factory = require('../factory');
 const Serializer = require('../serializer');
 
 /**
- * Class to work with the Concerto metamodel
+ * The metamodel itself, as a CTO string
  */
-class MetaModel {
-
-    /**
-     * The metamodel itself, as a CTO string
-     */
-    static metaModelCto = `namespace concerto.metamodel
+const metaModelCto = `namespace concerto.metamodel
 
 concept Position {
   o Integer line
@@ -203,13 +198,26 @@ concept Models {
 }
 `;
 
+/**
+ * Class to work with the Concerto metamodel
+ */
+class MetaModel {
+
+    /**
+     * Returns the metamodel CTO
+     * @returns {string} the metamodel as a CTO string
+     */
+    static getMetaModelCto() {
+        return metaModelCto;
+    }
+
     /**
      * Create a metamodel manager (for validation against the metamodel)
      * @return {*} the metamodel manager
      */
     static createMetaModelManager() {
         const metaModelManager = new ModelManager();
-        metaModelManager.addModelFile(MetaModel.metaModelCto, 'concerto.metamodel');
+        metaModelManager.addModelFile(metaModelCto, 'concerto.metamodel');
         return metaModelManager;
     }
 

@@ -4,9 +4,10 @@ export = MetaModel;
  */
 declare class MetaModel {
     /**
-     * The metamodel itself, as a CTO string
+     * Returns the metamodel CTO
+     * @returns {string} the metamodel as a CTO string
      */
-    static metaModelCto: string;
+    static getMetaModelCto(): string;
     /**
      * Create a metamodel manager (for validation against the metamodel)
      * @return {*} the metamodel manager

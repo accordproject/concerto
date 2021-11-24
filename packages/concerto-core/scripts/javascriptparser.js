@@ -37,7 +37,7 @@ class JavaScriptParser {
      * @param {number} [ecmaVersion] - the ECMAScript version to use
      * @param {boolean} [engineMode] - true if being used by engine for TP/ACL function Parsing
      */
-    constructor(fileContents, includePrivates, ecmaVersion) {
+    constructor(fileContents, includePrivates=false, ecmaVersion=2022) {
         let comments = [];
         this.tokens = [];
         let nodesToProcess = [];
