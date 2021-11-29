@@ -13,8 +13,8 @@
  */
 
 'use strict';
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
 /**
@@ -46,7 +46,7 @@ class IntrospectUtils {
         const modelFiles = [];
         for (let modelFileName of modelFileNames) {
             const modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-            const modelFile = new ModelFile(this.modelManager, modelDefinitions);
+            const modelFile = ParserUtil.newModelFile(this.modelManager, modelDefinitions);
             modelFiles.push(modelFile);
         }
         return modelFiles;

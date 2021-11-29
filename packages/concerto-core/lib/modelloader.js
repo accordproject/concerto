@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 
+const Parser = require('@accordproject/concerto-cto').Parser;
 const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
 const ModelFile = require('./introspect/modelfile');
 const ModelManager = require('./modelmanager');
@@ -44,7 +45,8 @@ class ModelLoader {
             modelFile = await modelFileLoader.load(ctoFile);
         } else {
             const content = fs.readFileSync(ctoFile, 'utf8');
-            modelFile = new ModelFile(modelManager, content, ctoFile);
+            const ast = Parser.parse(content, ctoFile);
+            modelFile = new ModelFile(modelManager, ast, content, ctoFile);
         }
 
         modelManager.addModelFile(modelFile, modelFile.getName(), true);

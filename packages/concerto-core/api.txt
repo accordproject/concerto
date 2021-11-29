@@ -108,7 +108,7 @@ class MetaModel {
    + object modelManagerFromMetaModel(object,boolean?) 
 }
 class ModelFile {
-   + void constructor(ModelManager,string,string?) throws IllegalModelException
+   + void constructor(ModelManager,object,string,string?) throws IllegalModelException
    + boolean isModelFile() 
    + Boolean isSystemModelFile() 
    + boolean isExternal() 
@@ -131,6 +131,7 @@ class ModelFile {
    + ClassDeclaration[] getDeclarations(Function) 
    + ClassDeclaration[] getAllDeclarations() 
    + string getDefinitions() 
+   + object getAst() 
    + string getConcertoVersion() 
    + void isCompatibleVersion() 
 }

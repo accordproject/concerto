@@ -15,8 +15,8 @@
 'use strict';
 
 const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
 require('chai').should();
@@ -35,7 +35,7 @@ describe('EnumDeclaration', () => {
         const modelFiles = [];
         for (let modelFileName of modelFileNames) {
             const modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-            const modelFile = new ModelFile(modelManager, modelDefinitions);
+            const modelFile = ParserUtil.newModelFile(modelManager, modelDefinitions);
             modelFiles.push(modelFile);
         }
         modelManager.addModelFiles(modelFiles, modelFileNames);

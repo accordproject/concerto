@@ -26,6 +26,7 @@ const ModelManager = require('../../lib/modelmanager');
 const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
+const ParserUtil = require('./parserutility');
 
 const { Parser } = require('@accordproject/concerto-cto');
 
@@ -52,21 +53,21 @@ describe('ModelFile', () => {
 
     describe('#constructor', () => {
 
-        it('should throw when null definitions provided', () => {
+        it('should throw when non object ast provided', () => {
             (() => {
                 new ModelFile(modelManager, null);
-            }).should.throw(/as a string as input/);
+            }).should.throw(/model AST as input/);
         });
 
         it('should throw when invalid definitions provided', () => {
             (() => {
-                new ModelFile(modelManager, [{}]);
-            }).should.throw(/as a string as input/);
+                new ModelFile(modelManager, {}, {});
+            }).should.throw(/definition as a string/);
         });
 
         it('should throw when invalid filename provided', () => {
             (() => {
-                new ModelFile(modelManager, 'fake', {});
+                new ModelFile(modelManager, {}, 'fake', {});
             }).should.throw(/filename as a string/);
         });
 
@@ -76,7 +77,7 @@ describe('ModelFile', () => {
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake definitions');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.ast.should.equal(ast);
             mf.namespace.should.equal('org.acme');
         });
@@ -98,7 +99,7 @@ describe('ModelFile', () => {
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake definitions');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
         });
 
@@ -119,7 +120,7 @@ describe('ModelFile', () => {
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake definitions');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
@@ -135,7 +136,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             (() => {
-                new ModelFile(modelManager, 'fake definitions');
+                ParserUtil.newModelFile(modelManager, 'fake definitions');
             }).should.throw(/BlahType/);
         });
 
@@ -144,7 +145,7 @@ describe('ModelFile', () => {
     describe('#accept', () => {
 
         it('should call the visitor', () => {
-            let mf = new ModelFile(modelManager, carLeaseModel);
+            let mf = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let visitor = {
                 visit: sinon.stub()
             };
@@ -164,7 +165,7 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             (() => {
                 modelFile.validate();
             }).should.throw(IllegalModelException, /org.acme.ext/);
@@ -177,7 +178,7 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             (() => {
                 modelFile.validate();
             }).should.throw(IllegalModelException, /org.acme.ext/);
@@ -195,9 +196,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.validate();
             }).should.throw(IllegalModelException, /MyAsset3/);
@@ -215,9 +216,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
         });
 
@@ -233,9 +234,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
         });
 
@@ -244,7 +245,7 @@ describe('ModelFile', () => {
     describe('#getDefinitions', () => {
 
         it('should return the definitions for the model', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             modelFile.getDefinitions().should.equal(carLeaseModel);
         });
 
@@ -253,7 +254,7 @@ describe('ModelFile', () => {
     describe('#getName', () => {
 
         it('should return the name of the model', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel, 'car lease');
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel, 'car lease');
             modelFile.getName().should.equal('car lease');
         });
 
@@ -267,7 +268,7 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             modelFile.isImportedType('Fred').should.be.false;
         });
 
@@ -277,7 +278,7 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             modelFile.isImportedType('MyAsset').should.be.false;
         });
 
@@ -288,7 +289,7 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             modelFile.isImportedType('MyAsset2').should.be.true;
         });
 
@@ -304,9 +305,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset2').should.be.true;
         });
 
@@ -322,9 +323,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset3').should.be.false;
         });
 
@@ -340,9 +341,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset3').should.be.false;
         });
 
@@ -354,7 +355,7 @@ describe('ModelFile', () => {
             const model = `
             namespace org.acme
             import org.doge.Coin`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             modelFile.resolveImport('Coin').should.equal('org.doge.Coin');
         });
 
@@ -370,9 +371,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.resolveImport('MyAsset2').should.equal('org.acme.ext.MyAsset2');
         });
 
@@ -380,7 +381,7 @@ describe('ModelFile', () => {
             const model = `
             namespace org.acme
             import org.doge.Wow`;
-            let modelFile = new ModelFile(modelManager, model);
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
             (() => {
                 modelFile.resolveImport('Coin');
             }).should.throw(/Coin/);
@@ -398,9 +399,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.resolveImport('Coin');
             }).should.throw(/Coin/);
@@ -418,9 +419,9 @@ describe('ModelFile', () => {
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
-            let modelFile1 = new ModelFile(modelManager, model1);
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.resolveImport('Coin');
             }).should.throw(/Coin/);
@@ -435,7 +436,7 @@ describe('ModelFile', () => {
                 --> DontExist relationship
             }`;
 
-            let modelFile2 = new ModelFile(modelManager, model2);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.validate();
             }).should.throw(/DontExist/);
@@ -480,7 +481,7 @@ describe('ModelFile', () => {
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake definitions');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.getType('String').should.equal('String');
         });
 
@@ -490,7 +491,7 @@ describe('ModelFile', () => {
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake');
             mf.isImportedType = () => { return true; };
             mf.resolveImport = () => { return 'org.acme'; };
             should.not.exist(mf.getType('TNTAsset'));
@@ -500,13 +501,13 @@ describe('ModelFile', () => {
     describe('#getAssetDeclaration', () => {
 
         it('should return the specified asset declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let asset = modelFile.getAssetDeclaration('Vehicle');
             asset.should.be.an.instanceOf(AssetDeclaration);
         });
 
         it('should return null if it cannot find the specified asset declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let asset = modelFile.getAssetDeclaration('Blobby');
             should.equal(asset, null);
         });
@@ -516,13 +517,13 @@ describe('ModelFile', () => {
     describe('#getParticipantDeclaration', () => {
 
         it('should return the specified Participant declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let participant = modelFile.getParticipantDeclaration('Regulator');
             participant.should.be.an.instanceOf(ParticipantDeclaration);
         });
 
         it('should return null if it cannot find the specified Participant declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let participant = modelFile.getParticipantDeclaration('Blobby');
             should.equal(participant, null);
         });
@@ -532,13 +533,13 @@ describe('ModelFile', () => {
     describe('#getTransactionDeclaration', () => {
 
         it('should return the specified Transaction declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let transaction = modelFile.getTransactionDeclaration('VehicleCreated');
             transaction.should.be.an.instanceOf(TransactionDeclaration);
         });
 
         it('should return null if it cannot find the specified Transaction declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let transaction = modelFile.getTransactionDeclaration('Blobby');
             should.equal(transaction, null);
         });
@@ -548,13 +549,13 @@ describe('ModelFile', () => {
     describe('#getEventDeclaration', () => {
 
         it('should return the specified Event declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let event = modelFile.getEventDeclaration('TestEvent');
             event.should.be.an.instanceOf(EventDeclaration);
         });
 
         it('should return null if it cannot find the specified Event declaration', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let transaction = modelFile.getEventDeclaration('Blobby');
             should.equal(transaction, null);
         });
@@ -564,19 +565,19 @@ describe('ModelFile', () => {
     describe('#getEventDeclarations', () => {
 
         it('should return the expected number of Event declarations with system types', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let events = modelFile.getEventDeclarations();
             events.length.should.equal(1);
         });
 
         it('should return the expected number of Event declarations with system types', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let events = modelFile.getEventDeclarations(true);
             events.length.should.equal(1);
         });
 
         it('should return the expected number of Event declarations without system types', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let events = modelFile.getEventDeclarations();
             events.length.should.equal(1);
         });
@@ -585,7 +586,7 @@ describe('ModelFile', () => {
     describe('#getEnumDeclarations', () => {
 
         it('should return the expected number of Enum declarations', () => {
-            let modelFile = new ModelFile(modelManager, carLeaseModel);
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
             let decls = modelFile.getEnumDeclarations();
             decls.should.all.be.an.instanceOf(EnumDeclaration);
             decls.length.should.equal(1);
@@ -600,7 +601,7 @@ describe('ModelFile', () => {
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let mf = new ModelFile(modelManager, 'fake');
+            let mf = ParserUtil.newModelFile(modelManager, 'fake');
             mf.isImportedType = () => { return false; };
             mf.isLocalType = () => { return false; };
             should.not.exist(mf.getFullyQualifiedTypeName('TNTAsset'));
@@ -612,7 +613,7 @@ describe('ModelFile', () => {
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
-            let modelFile = new ModelFile(modelManager, 'something');
+            let modelFile = ParserUtil.newModelFile(modelManager, 'something');
 
             modelFile.getFullyQualifiedTypeName('String').should.equal('String');
         });

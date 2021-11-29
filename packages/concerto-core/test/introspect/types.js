@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');
 
@@ -37,7 +37,7 @@ describe('ModelFile type parsing', () => {
     describe('#constructor', () => {
 
         it('should be valid', () => {
-            const mf = new ModelFile(modelManager,invalidModel, 'types.cto');
+            const mf = ParserUtil.newModelFile(modelManager,invalidModel, 'types.cto');
             mf.validate();
         });
 
@@ -50,7 +50,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(modelManager, model, 'test.cto');
+                const mf = ParserUtil.newModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -64,7 +64,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(modelManager, model, 'test.cto');
+                const mf = ParserUtil.newModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -78,7 +78,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(modelManager, model, 'test.cto');
+                const mf = ParserUtil.newModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -92,7 +92,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(modelManager, model, 'test.cto');
+                const mf = ParserUtil.newModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });
@@ -106,7 +106,7 @@ describe('ModelFile type parsing', () => {
             }
             `;
             (() => {
-                const mf = new ModelFile(modelManager, model, 'test.cto');
+                const mf = ParserUtil.newModelFile(modelManager, model, 'test.cto');
                 mf.validate();
             }).should.throw();
         });

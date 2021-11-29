@@ -15,9 +15,9 @@
 'use strict';
 
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
+const ParserUtil = require('./parserutility');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -47,7 +47,7 @@ describe('TransactionDeclaration', () => {
             transaction T {}
             `;
 
-            const modelFile = new ModelFile(modelManager, model);
+            const modelFile = ParserUtil.newModelFile(modelManager, model);
             let td = modelFile.getTransactionDeclaration('T');
             td.validate();
 

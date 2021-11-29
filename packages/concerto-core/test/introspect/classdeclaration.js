@@ -22,8 +22,8 @@ const ConceptDeclaration = require('../../lib/introspect/conceptdeclaration');
 const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
 const IntrospectUtils = require('./introspectutils');
+const ParserUtil = require('./parserutility');
 
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
 
@@ -40,7 +40,7 @@ describe('ClassDeclaration', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
-        modelFile = new ModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
+        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
     });
 
     describe('#constructor', () => {

@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');
 const sinon = require('sinon');
@@ -45,12 +45,12 @@ describe('ModelFile', () => {
 
         it('should throw when concerto version is not compatible with model', () => {
             (() => {
-                new ModelFile(modelManager, versionInvalid);
+                ParserUtil.newModelFile(modelManager, versionInvalid);
             }).should.throw(/ModelFile expects Concerto version/);
         });
 
         it('should return when concerto version is compatible with model', () => {
-            let mf = new ModelFile(modelManager, versionValid);
+            let mf = ParserUtil.newModelFile(modelManager, versionValid);
             mf.getConcertoVersion().should.equal('^1.0.0');
         });
 
@@ -58,12 +58,12 @@ describe('ModelFile', () => {
             const version = pkgJSON.version;
             const newVersion = `${version}-unittest.${new Date().getTime()}`;
             sinon.replace(pkgJSON, 'version', newVersion);
-            let mf = new ModelFile(modelManager, versionValid);
+            let mf = ParserUtil.newModelFile(modelManager, versionValid);
             mf.getConcertoVersion().should.equal('^1.0.0');
         });
 
         it('should return when model has no concerto version range', () => {
-            let mf = new ModelFile(modelManager, versionMissing);
+            let mf = ParserUtil.newModelFile(modelManager, versionMissing);
             (mf.getConcertoVersion() === null).should.equal(true);
         });
     });

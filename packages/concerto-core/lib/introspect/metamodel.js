@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { Printer } = require('@accordproject/concerto-cto');
+const Printer = require('@accordproject/concerto-cto').Printer;
 const ModelManager = require('../modelmanager');
 const Factory = require('../factory');
 const Serializer = require('../serializer');
