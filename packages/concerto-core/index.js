@@ -22,9 +22,6 @@
  */
 
 // Exceptions
-module.exports.BaseException = require('./lib/baseexception');
-module.exports.BaseFileException = require('./lib/basefileexception');
-module.exports.ParseException = require('./lib/introspect/parseexception');
 module.exports.SecurityException = require('./lib/securityexception');
 module.exports.IllegalModelException = require('./lib/introspect/illegalmodelexception');
 module.exports.TypeNotFoundException = require('./lib/typenotfoundexception');

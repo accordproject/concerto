@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseFileException = require('../basefileexception');
+const BaseFileException = require('@accordproject/concerto-cto').BaseFileException;
 
 /**
  * Exception throws when a composer file is semantically invalid

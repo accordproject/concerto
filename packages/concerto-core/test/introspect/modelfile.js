@@ -22,7 +22,7 @@ const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
-const ParseException = require('../../lib/introspect/parseexception');
+
 const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
@@ -123,47 +123,6 @@ describe('ModelFile', () => {
             mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
-        });
-
-        it('should handle a normal parsing exception', () => {
-            sandbox.stub(Parser, 'parse').throws({
-                location: {
-                    start: {
-                        line: 99,
-                        column: 99
-                    }
-                }
-            });
-            (() => {
-                new ModelFile(modelManager, 'fake definitions');
-            }).should.throw(ParseException, /Line 99 column 99/);
-        });
-
-        it('should handle a normal parsing exception with a file name', () => {
-            sandbox.stub(Parser, 'parse').throws({
-                location: {
-                    start: {
-                        line: 99,
-                        column: 99
-                    }
-                }
-            });
-            (() => {
-                new ModelFile(modelManager, 'fake definitions', 'mf1.cto');
-            }).should.throw(ParseException, /File mf1.cto line 99 column 99/);
-        });
-
-        it('should handle any other parsing exception', () => {
-            sandbox.stub(Parser, 'parse').throws(new Error('fake error'));
-            (() => {
-                new ModelFile(modelManager, 'fake definitions');
-            }).should.throw(/fake error/);
-            let error = new Error('fake error 2');
-            error.location = {};
-            Parser.parse.throws(error);
-            (() => {
-                new ModelFile(modelManager, 'fake definitions');
-            }).should.throw(/fake error 2/);
         });
 
         it('should throw for an unrecognized body element', () => {

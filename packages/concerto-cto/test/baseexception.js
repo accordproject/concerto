@@ -25,7 +25,7 @@ describe('BaseException', function () {
         it('should return an instance of Error', function () {
             let exc = new BaseException('hello world');
             exc.should.be.an.instanceOf(Error);
-            exc.component.should.equal('@accordproject/concerto-core');
+            exc.component.should.equal('@accordproject/concerto-cto');
         });
 
         it('should return an instance of Error for another component', function () {

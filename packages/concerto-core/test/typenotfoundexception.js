@@ -25,14 +25,14 @@ describe('TypeNotFoundException', function() {
             const typeName = 'namespace.TypeName';
             const obj = new TypeNotFoundException(typeName);
             obj.toString().should.include(typeName);
-            obj.component.should.equal('@accordproject/concerto-core');
+            obj.component.should.equal('@accordproject/concerto-cto');
         });
 
         it('with two arguments', function() {
             const message = 'MESSAGE_TEXT';
             const obj = new TypeNotFoundException('namespace.TypeName', message);
             obj.toString().should.include(message);
-            obj.component.should.equal('@accordproject/concerto-core');
+            obj.component.should.equal('@accordproject/concerto-cto');
         });
 
         it('with three arguments', function() {
