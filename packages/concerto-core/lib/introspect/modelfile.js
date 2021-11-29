@@ -25,7 +25,6 @@ const EventDeclaration = require('./eventdeclaration');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
-const { Parser } = require('@accordproject/concerto-cto');
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
@@ -40,11 +39,12 @@ class ModelFile {
      * Use the ModelManager to manage ModelFiles.
      * @param {ModelManager} modelManager - the ModelManager that manages this
      * ModelFile
+     * @param {object} ast - The DSL model as a string.
      * @param {string} definitions - The DSL model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */
-    constructor(modelManager, definitions, fileName) {
+    constructor(modelManager, ast, definitions, fileName) {
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -56,8 +56,13 @@ class ModelFile {
         this.fileName = 'UNKNOWN';
         this.concertoVersion = null;
 
-        if(!definitions || typeof definitions !== 'string') {
-            throw new Error('ModelFile expects a Concerto model as a string as input.');
+        if(!ast || typeof ast !== 'object') {
+            throw new Error('ModelFile expects a Concerto model AST as input.');
+        }
+        this.ast = ast;
+
+        if(definitions && typeof definitions !== 'string') {
+            throw new Error('ModelFile expects an (optional) Concerto model definition as a string.');
         }
         this.definitions = definitions;
 
@@ -69,8 +74,6 @@ class ModelFile {
         if(fileName) {
             this.external = fileName.startsWith('@');
         }
-
-        this.ast = Parser.parse(definitions, fileName);
 
         // Populate from the AST
         this.fromAst(this.ast);
@@ -545,6 +548,14 @@ class ModelFile {
      */
     getDefinitions() {
         return this.definitions;
+    }
+
+    /**
+     * Get the ast for this model.
+     * @return {object} The definitions for this model.
+     */
+    getAst() {
+        return this.ast;
     }
 
     /**

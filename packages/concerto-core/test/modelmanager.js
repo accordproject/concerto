@@ -30,6 +30,7 @@ const Serializer = require('../lib/serializer');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
+const ParserUtil = require('./introspect/parserutility');
 
 const chai = require('chai');
 const should = chai.should();
@@ -255,7 +256,7 @@ describe('ModelManager', () => {
         });
 
         it('should be able to add model files without validation', () => {
-            modelManager.addModelFiles([composerModel, new ModelFile(modelManager, 'namespace foo concept Foo{o Missing m}', 'invalid.cto')], ['1.cto', '2.cto'], true);
+            modelManager.addModelFiles([composerModel, ParserUtil.newModelFile(modelManager, 'namespace foo concept Foo{o Missing m}', 'invalid.cto')], ['1.cto', '2.cto'], true);
         });
 
         it('should add to existing model files from objects', () => {
@@ -528,7 +529,7 @@ describe('ModelManager', () => {
 
         it('should update external models', () => {
 
-            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -568,7 +569,7 @@ concept Bar {
 
         it('should rollback changes on error', () => {
 
-            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -646,7 +647,7 @@ concept Foo {
 
     describe('#writeModelsToFileSystem', () => {
         beforeEach(async () => {
-            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -717,7 +718,7 @@ concept Bar {
             });
         });
         it('should return a list of name / content pairs, with External Models', async () => {
-            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -739,7 +740,7 @@ concept Bar {
         });
 
         it('should return a list of name / content pairs, without External Models', async () => {
-            const externalModelFile = new ModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(ModelFileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));

@@ -16,8 +16,8 @@
 
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
 const should = require('chai').should();
@@ -46,7 +46,7 @@ describe('AssetDeclaration', () => {
 
     let loadAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = new ModelFile(mockModelManager, modelDefinitions);
+        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions);
         let assets = modelFile.getAssetDeclarations();
         assets.should.have.lengthOf(1);
 
@@ -55,7 +55,7 @@ describe('AssetDeclaration', () => {
 
     let loadLastAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = new ModelFile(mockModelManager, modelDefinitions);
+        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions);
         let assets = modelFile.getAssetDeclarations();
         return assets[assets.length - 1];
     };

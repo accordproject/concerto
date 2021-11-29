@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelFile = require('../../lib/introspect/modelfile');
 const ModelManager = require('../../lib/modelmanager');
+const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');
 
@@ -38,7 +38,7 @@ describe('ModelFile semantic validation', () => {
 
         it('should throw and include file location', () => {
             try {
-                const mf = new ModelFile(modelManager,invalidModel, 'invalid.cto');
+                const mf = ParserUtil.newModelFile(modelManager,invalidModel, 'invalid.cto');
                 mf.validate();
             }
             catch(error) {

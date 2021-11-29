@@ -16,8 +16,8 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const ModelLoader = require('../../lib/modelloader');
-const ModelFile = require('../../lib/introspect/modelfile');
 const MetaModel = require('../../lib/introspect/metamodel');
+const ParserUtil = require('./parserutility');
 
 const { Parser, Printer } = require('@accordproject/concerto-cto');
 
@@ -54,24 +54,24 @@ describe('MetaModel (Person)', () => {
 
         it('should convert a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
-            const mf1 = new ModelFile(modelManager1, personModel);
+            const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
             mm1.should.deep.equal(personMetaModel);
             const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
-            const mf2 = new ModelFile(modelManager2, model2);
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
             mm2.should.deep.equal(personMetaModel);
         });
 
         it('should convert and validate a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
-            const mf1 = new ModelFile(modelManager1, personModel);
+            const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1);
             mm1.should.deep.equal(personMetaModel);
             const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
-            const mf2 = new ModelFile(modelManager2, model2);
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
             mm2.should.deep.equal(personMetaModel);
         });
@@ -104,24 +104,24 @@ describe('MetaModel (Empty)', () => {
 
         it('should convert a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
-            const mf1 = new ModelFile(modelManager1, emptyModel);
+            const mf1 = ParserUtil.newModelFile(modelManager1, emptyModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1, false);
             mm1.should.deep.equal(emptyMetaModel);
             const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
-            const mf2 = new ModelFile(modelManager2, model2);
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2, false);
             mm2.should.deep.equal(emptyMetaModel);
         });
 
         it('should convert and validate a ModelFile to its metamodel', () => {
             const modelManager1 = new ModelManager();
-            const mf1 = new ModelFile(modelManager1, emptyModel);
+            const mf1 = ParserUtil.newModelFile(modelManager1, emptyModel);
             const mm1 = MetaModel.modelFileToMetaModel(mf1);
             mm1.should.deep.equal(emptyMetaModel);
             const model2 = Printer.toCTO(mm1);
             const modelManager2 = new ModelManager();
-            const mf2 = new ModelFile(modelManager2, model2);
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
             mm2.should.deep.equal(emptyMetaModel);
         });

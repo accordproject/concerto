@@ -17,6 +17,7 @@
 const axios = require('axios');
 const ModelFile = require('../modelfile');
 const url = require('url');
+const Parser = require('@accordproject/concerto-cto').Parser;
 
 /**
  * Loads ModelFiles from an HTTP(S) URL using the axios library.
@@ -67,7 +68,8 @@ class HTTPModelFileLoader {
                 // external ModelFiles have a name that starts with '@'
                 // (so that they are identified as external when an archive is read back in)
                 const name = (parsedUrl.host + parsedUrl.pathname).replace(/\//g, '.');
-                return new ModelFile(this.modelManager, response.data, '@' + name);
+                const ast = Parser.parse(response.data, '@' + name);
+                return new ModelFile(this.modelManager, ast, response.data, '@' + name);
             });
     }
 }

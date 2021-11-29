@@ -18,6 +18,7 @@ const fs = require('fs');
 const fsPath = require('path');
 const slash = require('slash');
 
+const Parser = require('@accordproject/concerto-cto').Parser;
 const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -104,7 +105,8 @@ abstract concept Event {}
      */
     validateModelFile(modelFile, fileName) {
         if (typeof modelFile === 'string') {
-            let m = new ModelFile(this, modelFile, fileName);
+            const ast = Parser.parse(modelFile, fileName);
+            let m = new ModelFile(this, ast, modelFile, fileName);
             m.validate();
         } else {
             modelFile.validate();
@@ -145,7 +147,8 @@ abstract concept Event {}
         let m = null;
 
         if (typeof modelFile === 'string') {
-            m = new ModelFile(this, modelFile, fileName);
+            const ast = Parser.parse(modelFile, fileName);
+            m = new ModelFile(this, ast, modelFile, fileName);
         } else {
             m = modelFile;
         }
@@ -177,7 +180,8 @@ abstract concept Event {}
         const NAME = 'updateModelFile';
         debug(NAME, 'updateModelFile', modelFile, fileName);
         if (typeof modelFile === 'string') {
-            let m = new ModelFile(this, modelFile, fileName);
+            const ast = Parser.parse(modelFile, fileName);
+            let m = new ModelFile(this, ast, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
@@ -228,7 +232,13 @@ abstract concept Event {}
                     fileName = fileNames[n];
                 }
 
-                const m = typeof modelFile === 'string' ? new ModelFile(this, modelFile, fileName) : modelFile;
+                let m;
+                if (typeof modelFile === 'string') {
+                    const ast = Parser.parse(modelFile, fileName);
+                    m = new ModelFile(this, ast, modelFile, fileName);
+                } else {
+                    m = modelFile;
+                }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;
                     newModelFiles.push(m);
