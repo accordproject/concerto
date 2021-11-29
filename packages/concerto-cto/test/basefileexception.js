@@ -26,7 +26,7 @@ describe('BaseFileException', function () {
         it('should return an instance of BaseFileException', function () {
             let exc = new BaseFileException('message', {start: 1, end: 2}, 'full message');
             exc.should.be.an.instanceOf(BaseException);
-            exc.component.should.equal('@accordproject/concerto-core');
+            exc.component.should.equal('@accordproject/concerto-cto');
         });
 
         it('should return an instance of BaseFileException for another component', function () {

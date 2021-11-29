@@ -18,11 +18,16 @@
  * Concerto module. Concerto is a framework for defining domain
  * specific models.
  *
- * @module concerto-parser
+ * @module concerto-cto
  */
 
+// Exceptions
+module.exports.BaseException = require('./lib/baseexception');
+module.exports.BaseFileException = require('./lib/basefileexception');
+module.exports.ParseException = require('./lib/parseexception');
+
 // Parser
-module.exports.Parser = require('./lib/parser');
+module.exports.Parser = require('./lib/parserMain');
 
 // Printer
 module.exports.Printer = require('./lib/printer');

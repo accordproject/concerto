@@ -23,7 +23,6 @@ const ParticipantDeclaration = require('./participantdeclaration');
 const TransactionDeclaration = require('./transactiondeclaration');
 const EventDeclaration = require('./eventdeclaration');
 const IllegalModelException = require('./illegalmodelexception');
-const ParseException = require('./parseexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const { Parser } = require('@accordproject/concerto-cto');
@@ -71,17 +70,7 @@ class ModelFile {
             this.external = fileName.startsWith('@');
         }
 
-        try {
-            this.ast = Parser.parse(definitions);
-        }
-        catch(err) {
-            if(err.location && err.location.start) {
-                throw new ParseException(err.message, err.location, fileName);
-            }
-            else {
-                throw err;
-            }
-        }
+        this.ast = Parser.parse(definitions, fileName);
 
         // Populate from the AST
         this.fromAst(this.ast);

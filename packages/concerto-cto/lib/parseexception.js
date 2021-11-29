@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseFileException = require('../basefileexception');
+const BaseFileException = require('./basefileexception');
 
 /**
  * Exception throws when a Concerto file is syntactically invalid

@@ -1,12 +1,3 @@
-class BaseException extends Error {
-   + void constructor(string,string) 
-}
-class BaseFileException extends BaseException {
-   + void constructor(string,string,string,string?,string?) 
-   + string getFileLocation() 
-   + string getShortMessage() 
-   + string getFileName() 
-}
 class Concerto {
    + void constructor(modelManager) 
    + void validate(obj,options?) throws Error

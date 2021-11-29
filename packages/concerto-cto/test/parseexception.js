@@ -14,11 +14,10 @@
 
 'use strict';
 
-const BaseFileException = require('../../lib/basefileexception');
-const ParseException = require('../../lib/introspect/parseexception');
+const BaseFileException = require('../lib/basefileexception');
+const ParseException = require('../lib/parseexception');
 
 require('chai').should();
-
 
 describe('ParseException', function () {
 
