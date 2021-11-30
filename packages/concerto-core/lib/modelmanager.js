@@ -18,13 +18,14 @@ const fs = require('fs');
 const fsPath = require('path');
 const slash = require('slash');
 
+const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
+const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const Parser = require('@accordproject/concerto-cto').Parser;
-const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
+
 const Factory = require('./factory');
 const Globalize = require('./globalize');
 const IllegalModelException = require('./introspect/illegalmodelexception');
 const ModelFile = require('./introspect/modelfile');
-const ModelFileDownloader = require('./introspect/loaders/modelfiledownloader');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
@@ -277,20 +278,29 @@ abstract concept Event {}
      * Downloads all ModelFiles that are external dependencies and adds or
      * updates them in this ModelManager.
      * @param {Object} [options] - Options object passed to ModelFileLoaders
-     * @param {ModelFileDownloader} [modelFileDownloader] - an optional ModelFileDownloader
+     * @param {FileDownloader} [fileDownloader] - an optional FileDownloader
      * @throws {IllegalModelException} if the models fail validation
      * @return {Promise} a promise when the download and update operation is completed.
      */
-    async updateExternalModels(options, modelFileDownloader) {
+    async updateExternalModels(options, fileDownloader) {
 
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
-        if(!modelFileDownloader) {
-            modelFileDownloader = new ModelFileDownloader(new DefaultModelFileLoader(this));
+        if(!fileDownloader) {
+            // How to create a modelfile from the external content
+            const processFile = (name, data) => {
+                const ast = Parser.parse(data);
+                return new ModelFile(this, ast, data, name);
+            };
+            // How to get external imports
+            const getExternalImports = (file) => {
+                return file.getExternalImports();
+            };
+            fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), getExternalImports);
         }
 
-        const externalModelFiles = await modelFileDownloader.downloadExternalDependencies(this.getModelFiles(), options)
+        const externalModelFiles = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options)
             .catch(error => {
                 // If we're not able to download the latest dependencies, see whether the models all validate based on the available cached models.
                 if(error.code === 'MISSING_DEPENDENCY'){

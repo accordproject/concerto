@@ -25,7 +25,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-core"
+    "directory": "packages/concerto-cto"
   },
   "keywords": [
     "blockchain",
@@ -58,13 +58,12 @@
     "yargs": "17.1.0"
   },
   "dependencies": {
+    "@accordproject/concerto-util": "1.2.1",
     "@accordproject/concerto-cto": "1.2.1",
     "@supercharge/promise-pool": "1.7.0",
     "axios": "0.23.0",
-    "colors": "1.4.0",
     "dayjs": "1.10.4",
     "debug": "4.3.1",
-    "json-colorizer": "2.2.2",
     "lorem-ipsum": "2.0.3",
     "randexp": "0.5.3",
     "semver": "7.3.5",

@@ -14,6 +14,8 @@
 
 'use strict';
 
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
+
 const debug = require('debug')('concerto:Factory');
 const Globalize = require('./globalize');
 
@@ -22,7 +24,6 @@ const ModelUtil = require('./modelutil');
 const InstanceGenerator = require('./serializer/instancegenerator');
 const ValueGeneratorFactory = require('./serializer/valuegenerator');
 const ResourceValidator = require('./serializer/resourcevalidator');
-const TypedStack = require('./serializer/typedstack');
 
 const Relationship = require('./model/relationship');
 const Resource = require('./model/resource');

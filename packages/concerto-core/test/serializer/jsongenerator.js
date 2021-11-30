@@ -14,10 +14,10 @@
 
 'use strict';
 
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Factory = require('../../lib/factory');
 const JSONGenerator = require('../../lib/serializer/jsongenerator');
 const ModelManager = require('../../lib/modelmanager');
-const TypedStack = require('../../lib/serializer/typedstack');
 const ModelUtil = require('../../lib/modelutil');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');

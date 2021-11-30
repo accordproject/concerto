@@ -18,9 +18,9 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
+const Logger = require('@accordproject/concerto-util').Logger;
 const Printer = require('@accordproject/concerto-cto').Printer;
 const Parser = require('@accordproject/concerto-cto').Parser;
-const Logger = require('@accordproject/concerto-core').Logger;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;

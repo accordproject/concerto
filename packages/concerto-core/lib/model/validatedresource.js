@@ -14,7 +14,7 @@
 
 'use strict';
 
-const TypedStack = require('../serializer/typedstack');
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Resource = require('./resource');
 
 /**

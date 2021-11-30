@@ -14,13 +14,13 @@
 
 'use strict';
 
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const DateTimeUtil = require('./datetimeutil');
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
 const JSONPopulator = require('./serializer/jsonpopulator');
 const Typed = require('./model/typed');
 const ResourceValidator = require('./serializer/resourcevalidator');
-const TypedStack = require('./serializer/typedstack');
 
 const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {

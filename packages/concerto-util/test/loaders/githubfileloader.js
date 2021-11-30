@@ -14,8 +14,7 @@
 
 'use strict';
 
-const GitHubModelFileLoader = require('../../../lib/introspect/loaders/githubmodelfileloader');
-const ModelManager = require('../../../lib/modelmanager');
+const GitHubFileLoader = require('../../lib/loaders/githubfileloader');
 
 const moxios = require('moxios');
 const chai = require('chai');
@@ -24,9 +23,12 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
-describe('GitHubModelFileLoader', () => {
+const defaultProcessFile = (name, data) => {
+    return { name, data };
+};
 
-    let modelManager;
+describe('GitHubFileLoader', () => {
+
     let sandbox;
 
     let model = `namespace org.accordproject.usa.business
@@ -48,7 +50,6 @@ describe('GitHubModelFileLoader', () => {
     }`;
 
     beforeEach(() => {
-        modelManager = new ModelManager();
         sandbox = sinon.createSandbox();
         moxios.install();
     });
@@ -61,12 +62,12 @@ describe('GitHubModelFileLoader', () => {
     describe('#accept', () => {
 
         it('should accept github URIs', () => {
-            const ml = new GitHubModelFileLoader(modelManager);
+            const ml = new GitHubFileLoader(defaultProcessFile);
             ml.accepts('github://goo').should.be.true;
         });
 
         it('should reject unknown URIs', () => {
-            const ml = new GitHubModelFileLoader(modelManager);
+            const ml = new GitHubFileLoader(defaultProcessFile);
             ml.accepts('foo://goo').should.be.false;
         });
     });
@@ -80,10 +81,13 @@ describe('GitHubModelFileLoader', () => {
                 responseText: model
             });
 
-            const ml = new GitHubModelFileLoader(modelManager);
+            const ml = new GitHubFileLoader(defaultProcessFile);
             return ml.load( 'github://accordproject/models/master/src/usa/business.cto', {foo: 'bar' })
                 .then((mf) => {
-                    mf.getDefinitions().should.be.deep.equal(model);
+                    mf.should.be.deep.equal({
+                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        data: model
+                    });
                 });
         });
     });

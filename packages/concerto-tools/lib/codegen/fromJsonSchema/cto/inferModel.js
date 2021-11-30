@@ -14,7 +14,8 @@
 
 'use strict';
 
-const { Writer, TypedStack } = require('@accordproject/concerto-core');
+const Writer = require('@accordproject/concerto-util').Writer;
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Ajv2019 = require('ajv/dist/2019');
 const Ajv2020 = require('ajv/dist/2020');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');

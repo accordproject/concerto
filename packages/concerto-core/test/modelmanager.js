@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 
+const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
 const DecoratorFactory = require('../lib/introspect/decoratorfactory');
@@ -23,7 +24,6 @@ const EnumDeclaration = require('../lib/introspect/enumdeclaration');
 const EventDeclaration = require('../lib/introspect/eventdeclaration');
 const Factory = require('../lib/factory');
 const ModelFile = require('../lib/introspect/modelfile');
-const ModelFileDownloader = require('../lib/introspect/loaders/modelfiledownloader');
 const ModelManager = require('../lib/modelmanager');
 const ParticipantDeclaration = require('../lib/introspect/participantdeclaration');
 const Serializer = require('../lib/serializer');
@@ -531,7 +531,7 @@ describe('ModelManager', () => {
 
             const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
-            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
@@ -571,7 +571,7 @@ concept Bar {
 
             const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
-            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
@@ -649,7 +649,7 @@ concept Foo {
         beforeEach(async () => {
             const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
-            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
@@ -720,7 +720,7 @@ concept Bar {
         it('should return a list of name / content pairs, with External Models', async () => {
             const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
-            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
@@ -742,7 +742,7 @@ concept Bar {
         it('should return a list of name / content pairs, without External Models', async () => {
             const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
-            const mfd = sinon.createStubInstance(ModelFileDownloader);
+            const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model

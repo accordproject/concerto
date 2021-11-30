@@ -21,38 +21,38 @@
  * </p>
  * @private
  * @class
- * @memberof module:concerto-core
+ * @memberof module:concerto-util
  */
-class CompositeModelFileLoader {
+class CompositeFileLoader {
     /**
-     * Create the CompositeModelFileLoader. Used to delegate to a set of ModelFileLoaders.
+     * Create the CompositeFileLoader. Used to delegate to a set of FileLoaders.
      */
     constructor() {
-        this.modelFileLoaders = [];
+        this.fileLoaders = [];
     }
 
     /**
-     * Adds a ModelFileLoader implemenetation to the ModelFileLoader
-     * @param {ModelFileLoader} modelFileLoader - The script to add to the ScriptManager
+     * Adds a FileLoader implemenetation to the FileLoader
+     * @param {FileLoader} fileLoader - The script to add to the ScriptManager
      */
-    addModelFileLoader(modelFileLoader) {
-        this.modelFileLoaders.push(modelFileLoader);
+    addFileLoader(fileLoader) {
+        this.fileLoaders.push(fileLoader);
     }
 
     /**
-     * Get the array of ModelFileLoader instances
-     * @return {ModelFileLoaders[]} The ModelFileLoader registered
+     * Get the array of FileLoader instances
+     * @return {FileLoaders[]} The FileLoader registered
      * @private
      */
-    getModelFileLoaders() {
-        return this.modelFileLoaders;
+    getFileLoaders() {
+        return this.fileLoaders;
     }
 
     /**
-     * Remove all registered ModelFileLoaders
+     * Remove all registered FileLoaders
      */
-    clearModelFileLoaders() {
-        this.modelFileLoaders = [];
+    clearFileLoaders() {
+        this.fileLoaders = [];
     }
 
     /**
@@ -62,8 +62,8 @@ class CompositeModelFileLoader {
      * @abstract
      */
     accepts(url) {
-        for (let n = 0; n < this.modelFileLoaders.length; n++) {
-            const ml = this.modelFileLoaders[n];
+        for (let n = 0; n < this.fileLoaders.length; n++) {
+            const ml = this.fileLoaders[n];
 
             if (ml.accepts(url)) {
                 return true;
@@ -74,14 +74,14 @@ class CompositeModelFileLoader {
     }
 
     /**
-     * Load a ModelFile from a URL and return it
+     * Load a File from a URL and return it
      * @param {string} url - the url to get
      * @param {object} options - additional options
-     * @return {Promise} a promise to the ModelFile
+     * @return {Promise} a promise to the File
      */
     load(url, options) {
-        for (let n = 0; n < this.modelFileLoaders.length; n++) {
-            const ml = this.modelFileLoaders[n];
+        for (let n = 0; n < this.fileLoaders.length; n++) {
+            const ml = this.fileLoaders[n];
 
             if (ml.accepts(url)) {
                 return ml.load(url, options);
@@ -92,4 +92,4 @@ class CompositeModelFileLoader {
     }
 }
 
-module.exports = CompositeModelFileLoader;
+module.exports = CompositeFileLoader;

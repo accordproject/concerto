@@ -16,7 +16,7 @@
 
 const crypto = require('crypto');
 const semver = require('semver');
-const Logger = require('../lib/logger');
+const Logger = require('@accordproject/concerto-util').Logger;
 
 /**
  * Checks that a change log file takes into account

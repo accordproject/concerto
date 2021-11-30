@@ -14,23 +14,22 @@
 
 'use strict';
 
-const HTTPModelFileLoader = require('./httpmodelfileloader');
+const HTTPFileLoader = require('./httpfileloader');
 
 /**
- * Loads ModelFiles from an external source, such as a URL.
+ * Loads Files from an external source, such as a URL.
  *
  * @class
  * @private
- * @memberof module:concerto-core
+ * @memberof module:concerto-util
  */
-class GitHubModelFileLoader extends HTTPModelFileLoader {
+class GitHubFileLoader extends HTTPFileLoader {
     /**
-     * Create the ModelLoader.
-     * @param {ModelManager} modelManager - the modelManager for the modelFile
-     * @private
+     * Create the GitHubFileLoader.
+     * @param {*} processFile - a function to apply to the content of the file
      */
-    constructor(modelManager) {
-        super(modelManager);
+    constructor(processFile) {
+        super(processFile);
     }
 
     /**
@@ -44,10 +43,10 @@ class GitHubModelFileLoader extends HTTPModelFileLoader {
     }
 
     /**
-     * Load a ModelFile from a URL and return it
+     * Load a File from a URL and return it
      * @param {string} url - the url to get
      * @param {object} options - additional options
-     * @return {Promise} a promise to the ModelFile
+     * @return {Promise} a promise to the File
      */
     load(url, options) {
         const rewrittenUrl = 'https://raw.githubusercontent.com/' + url.substring(9);
@@ -56,4 +55,4 @@ class GitHubModelFileLoader extends HTTPModelFileLoader {
     }
 }
 
-module.exports = GitHubModelFileLoader;
+module.exports = GitHubFileLoader;

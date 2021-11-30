@@ -24,7 +24,7 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const path = require('path');
 
-const Writer = require('@accordproject/concerto-core').Writer;
+const Writer = require('@accordproject/concerto-util').Writer;
 const FileWriter = require('../lib/filewriter');
 
 describe('FileWriter', function () {

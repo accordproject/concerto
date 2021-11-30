@@ -17,7 +17,7 @@
 const fs = require('fs');
 
 const Parser = require('@accordproject/concerto-cto').Parser;
-const DefaultModelFileLoader = require('./introspect/loaders/defaultmodelfileloader');
+const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
 const ModelFile = require('./introspect/modelfile');
 const ModelManager = require('./modelmanager');
 
@@ -65,7 +65,12 @@ class ModelLoader {
      */
     static async loadModelManager(ctoFiles, options = { offline: false }) {
         let modelManager = new ModelManager(options);
-        const modelFileLoader = new DefaultModelFileLoader(modelManager);
+        // How to create a modelfile from the external content
+        const processFile = (name, data) => {
+            const ast = Parser.parse(data);
+            return new ModelFile(modelManager, ast, data, name);
+        };
+        const modelFileLoader = new DefaultFileLoader(processFile);
 
         // Load user models
         for(let ctoFile of ctoFiles) {
