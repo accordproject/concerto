@@ -19,9 +19,9 @@ const ParseException = require('./parseexception');
 
 /**
  * Create decorator argument string from a metamodel
- * @param {object} cto - the Concerto string
+ * @param {string} cto - the Concerto string
  * @param {string} [fileName] - an optional file name
- * @return {string} the string for the decorator argument
+ * @return {object} the string for the decorator argument
  */
 function parse(cto, fileName) {
     try {

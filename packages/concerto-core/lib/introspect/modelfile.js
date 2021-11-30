@@ -40,7 +40,7 @@ class ModelFile {
      * @param {ModelManager} modelManager - the ModelManager that manages this
      * ModelFile
      * @param {object} ast - The DSL model as a string.
-     * @param {string} definitions - The DSL model as a string.
+     * @param {string} [definitions] - The (optional) CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */

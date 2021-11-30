@@ -8,6 +8,7 @@
     "npm": ">=6"
   },
   "main": "index.js",
+  "typings": "types/index.d.ts",
   "scripts": {
     "pretest": "npm run lint",
     "lint": "eslint .",
@@ -18,7 +19,8 @@
     "test": "nyc mocha --recursive -t 10000",
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000"
+    "nyc": "nyc mocha --recursive -t 10000",
+    "build:types" : "npx -p typescript tsc ./lib/**/*.js index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {
     "type": "git",

@@ -60,8 +60,6 @@
   "dependencies": {
     "@accordproject/concerto-util": "1.2.1",
     "@accordproject/concerto-cto": "1.2.1",
-    "@supercharge/promise-pool": "1.7.0",
-    "axios": "0.23.0",
     "dayjs": "1.10.4",
     "debug": "4.3.1",
     "lorem-ipsum": "2.0.3",
