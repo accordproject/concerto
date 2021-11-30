@@ -14,7 +14,7 @@
 
 'use strict';
 
-const debug = require('debug')('concerto:ModelFileDownloader');
+const debug = require('debug')('concerto:FileDownloader');
 const PromisePool = require('@supercharge/promise-pool');
 
 const flatten = arr => [].concat(...arr);
@@ -36,24 +36,26 @@ const handleJobError = async (error, job) => {
  * @class
  * @memberof module:concerto-core
  */
-class ModelFileDownloader {
+class FileDownloader {
     /**
-     * Create a ModelFileDownloader and bind to a ModelFileLoader.
-     * @param {ModelFileLoader} modelFileLoader - the loader to use to download model files
+     * Create a FileDownloader and bind to a FileLoader.
+     * @param {fileLoader} fileLoader - the loader to use to download model files
+     * @param {*} getExternalImports - a function taking a file and returning new files
      * @param {Number} concurrency - the number of model files to download concurrently
      */
-    constructor(modelFileLoader, concurrency = 10) {
-        this.modelFileLoader = modelFileLoader;
+    constructor(fileLoader, getExternalImports, concurrency = 10) {
+        this.fileLoader = fileLoader;
         this.concurrency = concurrency;
+        this.getExternalImports = getExternalImports;
     }
 
     /**
      * Download all external dependencies for an array of model files
-     * @param {ModelFile[]} modelFiles - the model files
-     * @param {Object} [options] - Options object passed to ModelFileLoaders
-     * @return {Promise} a promise that resolves to ModelFiles[] for the external model files
+     * @param {File[]} files - the model files
+     * @param {Object} [options] - Options object passed to FileLoaders
+     * @return {Promise} a promise that resolves to Files[] for the external model files
      */
-    downloadExternalDependencies(modelFiles, options) {
+    downloadExternalDependencies(files, options) {
         const method = 'downloadExternalDependencies';
         debug(method);
 
@@ -63,8 +65,8 @@ class ModelFileDownloader {
             options = {};
         }
 
-        const jobs = flatten(modelFiles.map(modelFile => {
-            const externalImports = modelFile.getExternalImports();
+        const jobs = flatten(files.map(file => {
+            const externalImports = this.getExternalImports(file);
             return Object.keys(externalImports).map(importDeclaration => ({
                 downloadedUris: downloadedUris,
                 url: externalImports[importDeclaration],
@@ -76,17 +78,17 @@ class ModelFileDownloader {
             .withConcurrency(this.concurrency)
             .for(jobs)
             .handleError(handleJobError)
-            .process(x => this.runJob(x, this.modelFileLoader))
+            .process(x => this.runJob(x, this.fileLoader))
             .then(({ results }) => filterUndefined(flatten(results)));
     }
 
     /**
      * Execute a Job
      * @param {Object} job - the job to execute
-     * @param {Object} modelFileLoader - the loader to use to download model files.
+     * @param {Object} fileLoader - the loader to use to download model files.
      * @return {Promise} a promise to the job results
      */
-    runJob(job, modelFileLoader) {
+    runJob(job, fileLoader) {
         const downloadedUris = job.downloadedUris;
         const options = job.options;
         const url = job.url;
@@ -95,12 +97,12 @@ class ModelFileDownloader {
         downloadedUris.add(url);
 
         debug('runJob', 'Loading', url);
-        return modelFileLoader.load(url, options).
-            then(async modelFile => {
+        return fileLoader.load(url, options).
+            then(async file => {
                 debug('runJob', 'Loaded', url, );
 
                 // get the external imports
-                const externalImports = modelFile.getExternalImports();
+                const externalImports = this.getExternalImports(file);
                 const importedUris = Array.from(
                     new Set(
                         Object.keys(externalImports)
@@ -109,7 +111,7 @@ class ModelFileDownloader {
                 );
                 debug('runJob', 'importedUris', importedUris);
 
-                const externalImportsModelFiles = await PromisePool
+                const externalImportsFiles = await PromisePool
                     .withConcurrency(this.concurrency)
                     .for(importedUris)
                     .handleError(handleJobError)
@@ -120,14 +122,14 @@ class ModelFileDownloader {
                                 options: options,
                                 url: uri,
                                 downloadedUris: downloadedUris
-                            }, modelFileLoader);
+                            }, fileLoader);
                         }
                     })
                     .then(({ results }) => filterUndefined(flatten(results)));
 
-                return externalImportsModelFiles.concat([modelFile]);
+                return externalImportsFiles.concat([file]);
             });
     }
 }
 
-module.exports = ModelFileDownloader;
+module.exports = FileDownloader;

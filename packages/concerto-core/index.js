@@ -54,9 +54,6 @@ module.exports.Identifiable = require('./lib/model/identifiable');
 module.exports.Relationship = require('./lib/model/relationship');
 module.exports.Resource = require('./lib/model/resource');
 
-// Writers
-module.exports.Writer = require('./lib/writer');
-
 // Factory
 module.exports.Factory = require('./lib/factory');
 
@@ -78,21 +75,12 @@ module.exports.Serializer = require('./lib/serializer');
 // ModelUtil
 module.exports.ModelUtil = require('./lib/modelutil');
 
-// ModelFileLoaders
-module.exports.DefaultModelFileLoader = require('./lib/introspect/loaders/defaultmodelfileloader');
-
 // ModelLoader
 module.exports.ModelLoader = require('./lib/modelloader');
 
 
 // DateTimeUtil
 module.exports.DateTimeUtil = require('./lib/datetimeutil');
-
-// Logger
-module.exports.Logger = require('./lib/logger');
-
-// TypedStack
-module.exports.TypedStack = require('./lib/serializer/typedstack');
 
 // Concerto
 module.exports.Concerto = require('./lib/concerto');

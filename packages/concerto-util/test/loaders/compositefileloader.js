@@ -14,13 +14,13 @@
 
 'use strict';
 
-const CompositeModelFileLoader = require('../../../lib/introspect/loaders/compositemodelfileloader');
-const HTTPModelFileLoader = require('../../../lib/introspect/loaders/httpmodelfileloader');
+const CompositeFileLoader = require('../../lib/loaders/compositefileloader');
+const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
 
 require('chai').should();
 const sinon = require('sinon');
 
-describe('CompositeModelFileLoader', () => {
+describe('CompositeFileLoader', () => {
 
     let sandbox;
 
@@ -35,32 +35,32 @@ describe('CompositeModelFileLoader', () => {
     describe('#constructor', () => {
 
         it('should have no loaders', () => {
-            const cmfl = new CompositeModelFileLoader();
-            cmfl.getModelFileLoaders().length.should.equal(0);
+            const cmfl = new CompositeFileLoader();
+            cmfl.getFileLoaders().length.should.equal(0);
         });
 
     });
 
-    describe('#addModelFileLoader', () => {
+    describe('#addFileLoader', () => {
 
         it('should be able to add/get a model file loader', () => {
-            const cmfl = new CompositeModelFileLoader();
-            const ml = sinon.createStubInstance(HTTPModelFileLoader);
-            cmfl.addModelFileLoader(ml);
-            cmfl.getModelFileLoaders().length.should.equal(1);
+            const cmfl = new CompositeFileLoader();
+            const ml = sinon.createStubInstance(HTTPFileLoader);
+            cmfl.addFileLoader(ml);
+            cmfl.getFileLoaders().length.should.equal(1);
         });
 
     });
 
-    describe('#clearModelFileLoader', () => {
+    describe('#clearFileLoader', () => {
 
         it('should be able to add/get a model file loader', () => {
-            const cmfl = new CompositeModelFileLoader();
-            const ml = sinon.createStubInstance(HTTPModelFileLoader);
-            cmfl.addModelFileLoader(ml);
-            cmfl.getModelFileLoaders().length.should.equal(1);
-            cmfl.clearModelFileLoaders();
-            cmfl.getModelFileLoaders().length.should.equal(0);
+            const cmfl = new CompositeFileLoader();
+            const ml = sinon.createStubInstance(HTTPFileLoader);
+            cmfl.addFileLoader(ml);
+            cmfl.getFileLoaders().length.should.equal(1);
+            cmfl.clearFileLoaders();
+            cmfl.getFileLoaders().length.should.equal(0);
         });
 
     });
@@ -68,11 +68,11 @@ describe('CompositeModelFileLoader', () => {
     describe('#accepts', () => {
 
         it('should delegate accepts call to model file loader', () => {
-            const cmfl = new CompositeModelFileLoader();
-            const ml = sinon.createStubInstance(HTTPModelFileLoader);
+            const cmfl = new CompositeFileLoader();
+            const ml = sinon.createStubInstance(HTTPFileLoader);
             ml.accepts.withArgs('yes').returns(true);
             ml.accepts.withArgs('no').returns(false);
-            cmfl.addModelFileLoader(ml);
+            cmfl.addFileLoader(ml);
             cmfl.accepts('yes').should.equal(true);
             cmfl.accepts('no').should.equal(false);
         });
@@ -82,12 +82,12 @@ describe('CompositeModelFileLoader', () => {
     describe('#load', () => {
 
         it('should delegate load call to model file loader', () => {
-            const cmfl = new CompositeModelFileLoader();
-            const ml = sinon.createStubInstance(HTTPModelFileLoader);
+            const cmfl = new CompositeFileLoader();
+            const ml = sinon.createStubInstance(HTTPFileLoader);
             ml.load.returns('result');
             ml.accepts.withArgs('yes').returns(true);
             ml.accepts.withArgs('no').returns(false);
-            cmfl.addModelFileLoader(ml);
+            cmfl.addFileLoader(ml);
             cmfl.load('yes').should.equal('result');
             cmfl.load('yes', {foo: 1}).should.equal('result');
 

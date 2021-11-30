@@ -21,8 +21,8 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const fs = require('fs');
+const Writer = require('@accordproject/concerto-util').Writer;
 const APISignatureGenerator = require('../../scripts/apisignaturegenerator');
-const Writer = require('../../lib/writer');
 
 describe('APISignatureGenerator', function () {
 

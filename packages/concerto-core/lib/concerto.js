@@ -16,7 +16,7 @@
 
 const URIJS = require('urijs');
 const RESOURCE_SCHEME = 'resource';
-const TypedStack = require('./serializer/typedstack');
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const ObjectValidator = require('./serializer/objectvalidator');
 
 /**

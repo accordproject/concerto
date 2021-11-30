@@ -14,9 +14,9 @@
 
 'use strict';
 
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const ModelManager = require('../../lib/modelmanager');
 const Factory = require('../../lib/factory');
-const TypedStack = require('../../lib/serializer/typedstack');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const ResourceValidator = require('../../lib/serializer/resourcevalidator');
 const Identifiable = require('../../lib/model/identifiable');

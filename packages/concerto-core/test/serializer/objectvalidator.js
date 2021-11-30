@@ -14,9 +14,9 @@
 
 'use strict';
 
+const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const ModelManager = require('../../lib/modelmanager');
 const ObjectValidator = require('../../lib/serializer/objectvalidator');
-const TypedStack = require('../../lib/serializer/typedstack');
 const Concerto = require('../../lib/concerto');
 const chai = require('chai');
 chai.should();

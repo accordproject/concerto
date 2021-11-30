@@ -15,7 +15,7 @@
 'use strict';
 
 const fs = require('fs');
-const Writer = require('../lib/writer');
+const Writer = require('@accordproject/concerto-util').Writer;
 
 /**
  * Converts an array of parameter types to a string

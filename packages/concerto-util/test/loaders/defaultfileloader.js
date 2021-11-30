@@ -14,12 +14,12 @@
 
 'use strict';
 
-const DefaultModelFileLoader = require('../../../lib/introspect/loaders/defaultmodelfileloader');
+const DefaultFileLoader = require('../../lib/loaders/defaultfileloader');
 
 require('chai').should();
 const sinon = require('sinon');
 
-describe('DefaultModelFileLoader', () => {
+describe('DefaultFileLoader', () => {
 
     let sandbox;
 
@@ -34,8 +34,8 @@ describe('DefaultModelFileLoader', () => {
     describe('#constructor', () => {
 
         it('should have two loaders (HTTP and GitHub)', () => {
-            const dmfl = new DefaultModelFileLoader();
-            dmfl.getModelFileLoaders().length.should.equal(2);
+            const dmfl = new DefaultFileLoader();
+            dmfl.getFileLoaders().length.should.equal(2);
         });
 
     });

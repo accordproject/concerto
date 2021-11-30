@@ -1,7 +1,7 @@
 {
   "name": "@accordproject/concerto-cto",
   "version": "1.2.1",
-  "description": "Parser the Concerto Modeling Language",
+  "description": "Parser for Concerto CTO files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=12",
@@ -9,7 +9,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "prepare": "peggy ./lib/parser.pegjs",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
@@ -24,7 +23,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-core"
+    "directory": "packages/concerto-cto"
   },
   "keywords": [
     "blockchain",
@@ -42,7 +41,9 @@
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
     "nyc": "15.1.0",
-    "peggy": "1.2.0"
+    "peggy": "1.2.0",
+    "sinon": "10.0.0",
+    "sinon-chai": "3.6.0"
   },
   "dependencies": {
   },

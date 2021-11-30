@@ -14,8 +14,7 @@
 
 'use strict';
 
-const HTTPModelFileLoader = require('../../../lib/introspect/loaders/httpmodelfileloader');
-const ModelManager = require('../../../lib/modelmanager');
+const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
 const moxios = require('moxios');
 
 const chai = require('chai');
@@ -24,9 +23,11 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
-describe('HTTPModeFilelLoader', () => {
+const defaultProcessFile = (name, data) => {
+    return { name, data };
+};
 
-    let modelManager;
+describe('HTTPModeFilelLoader', () => {
     let sandbox;
 
     let model = `namespace test
@@ -35,7 +36,6 @@ describe('HTTPModeFilelLoader', () => {
     }`;
 
     beforeEach(() => {
-        modelManager = new ModelManager();
         sandbox = sinon.createSandbox();
         moxios.install();
     });
@@ -46,19 +46,18 @@ describe('HTTPModeFilelLoader', () => {
     });
 
     describe('#accept', () => {
-
         it('should accept http URIs', () => {
-            const ml = new HTTPModelFileLoader(modelManager);
+            const ml = new HTTPFileLoader(defaultProcessFile);
             ml.accepts('http://goo').should.be.true;
         });
 
         it('should accept https URIs', () => {
-            const ml = new HTTPModelFileLoader(modelManager);
+            const ml = new HTTPFileLoader(defaultProcessFile);
             ml.accepts('https://goo').should.be.true;
         });
 
         it('should reject unknown URIs', () => {
-            const ml = new HTTPModelFileLoader(modelManager);
+            const ml = new HTTPFileLoader(defaultProcessFile);
             ml.accepts('foo://goo').should.be.false;
         });
     });
@@ -75,10 +74,13 @@ describe('HTTPModeFilelLoader', () => {
                 responseText: model
             });
 
-            const ml = new HTTPModelFileLoader(modelManager);
+            const ml = new HTTPFileLoader(defaultProcessFile);
             return ml.load(url)
                 .then((mf) => {
-                    mf.getDefinitions().should.be.deep.equal(model);
+                    mf.should.be.deep.equal({
+                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        data: model
+                    });
                 });
         });
     });

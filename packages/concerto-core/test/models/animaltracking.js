@@ -16,7 +16,7 @@
 
 //const assert = require('assert');
 require('chai').should();
-const Logger = require('../../lib/logger');
+const Logger = require('@accordproject/concerto-util').Logger;
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Relationship = require('../../lib/model/relationship');

@@ -15,24 +15,21 @@
 'use strict';
 
 const axios = require('axios');
-const ModelFile = require('../modelfile');
 const url = require('url');
-const Parser = require('@accordproject/concerto-cto').Parser;
 
 /**
- * Loads ModelFiles from an HTTP(S) URL using the axios library.
+ * Loads Files from an HTTP(S) URL using the axios library.
  * @class
  * @private
- * @memberof module:concerto-core
+ * @memberof module:concerto-util
  */
-class HTTPModelFileLoader {
+class HTTPFileLoader {
     /**
-     * Create the ModelLoader.
-     * @param {ModelManager} modelManager - the modelManager for the modelFile
-     * @private
+     * Create the HTTPFileLoader.
+     * @param {*} processFile - a function to apply to the content of the file
      */
-    constructor(modelManager) {
-        this.modelManager = modelManager;
+    constructor(processFile) {
+        this.processFile = processFile;
     }
 
     /**
@@ -46,10 +43,10 @@ class HTTPModelFileLoader {
     }
 
     /**
-     * Load a ModelFile from a URL and return it
+     * Load a File from a URL and return it
      * @param {string} requestUrl - the url to get
      * @param {object} options - additional options
-     * @return {Promise} a promise to the ModelFile
+     * @return {Promise} a promise to the File
      */
     load(requestUrl, options) {
 
@@ -65,13 +62,12 @@ class HTTPModelFileLoader {
         return axios(request)
             .then((response) => {
                 let parsedUrl = url.parse(requestUrl);
-                // external ModelFiles have a name that starts with '@'
+                // external Files have a name that starts with '@'
                 // (so that they are identified as external when an archive is read back in)
-                const name = (parsedUrl.host + parsedUrl.pathname).replace(/\//g, '.');
-                const ast = Parser.parse(response.data, '@' + name);
-                return new ModelFile(this.modelManager, ast, response.data, '@' + name);
+                const name = '@' + (parsedUrl.host + parsedUrl.pathname).replace(/\//g, '.');
+                return this.processFile(name, response.data);
             });
     }
 }
 
-module.exports = HTTPModelFileLoader;
+module.exports = HTTPFileLoader;
