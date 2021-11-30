@@ -1,11 +1,11 @@
-# Concerto Core
+# Concerto Utilities
 
-Main library for Concerto models, model manager, JSON instance validation and serialization.
+Those are various utilities independent of Concerto itself covering things like: logging, external files downloads, stacks etc.
 
 # Installation
 
 ```
-npm install @accordproject/concerto-core --save
+npm install @accordproject/concerto-util --save
 ```
 
 ## License <a name="license"></a>
