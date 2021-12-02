@@ -61,7 +61,7 @@ declare class Serializer {
      * The Resource is populated based on the JavaScript object.
      *
      * @param {Object} jsonObject The JavaScript Object for a Resource
-     * @param {Object} options - the optional serialization options
+     * @param {Object} [options] - the optional serialization options
      * @param {boolean} options.acceptResourcesForRelationships - handle JSON objects
      * in the place of strings for relationships, defaults to false.
      * @param {boolean} options.validate - validate the structure of the Resource
@@ -69,7 +69,7 @@ declare class Serializer {
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @return {Resource} The new populated resource
      */
-    fromJSON(jsonObject: any, options: {
+    fromJSON(jsonObject: any, options?: {
         acceptResourcesForRelationships: boolean;
         validate: boolean;
         utcOffset?: number;

@@ -6,7 +6,6 @@ export = FileDownloader;
 declare class FileDownloader {
     /**
      * Create a FileDownloader and bind to a FileLoader.
-     * @constructor
      * @param {*} fileLoader - the loader to use to download model files
      * @param {*} getExternalImports - a function taking a file and returning new files
      * @param {Number} concurrency - the number of model files to download concurrently

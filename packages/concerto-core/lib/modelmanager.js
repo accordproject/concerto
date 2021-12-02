@@ -504,7 +504,6 @@ abstract concept Event {}
      * @param {string} qualifiedName - fully qualified type name.
      * @return {ClassDeclaration} - the class declaration for the specified type.
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
-     * @private
      */
     getType(qualifiedName) {
 
