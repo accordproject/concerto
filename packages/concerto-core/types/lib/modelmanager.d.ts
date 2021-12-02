@@ -184,9 +184,8 @@ declare class ModelManager {
      * @param {string} qualifiedName - fully qualified type name.
      * @return {ClassDeclaration} - the class declaration for the specified type.
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
-     * @private
      */
-    private getType;
+    getType(qualifiedName: string): ClassDeclaration;
     /**
      * Get the AssetDeclarations defined in this model manager
      * @return {AssetDeclaration[]} the AssetDeclarations defined in the model manager

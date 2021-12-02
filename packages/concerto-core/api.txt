@@ -209,6 +209,7 @@ class ModelManager {
    + void clearModelFiles() 
    + ModelFile getModelFile(string) 
    + string[] getNamespaces() 
+   + ClassDeclaration getType(string) throws TypeNotFoundException
    + AssetDeclaration[] getAssetDeclarations() 
    + TransactionDeclaration[] getTransactionDeclarations() 
    + EventDeclaration[] getEventDeclarations() 
@@ -228,7 +229,7 @@ class Serializer {
    + void constructor(Factory,ModelManager,object?) 
    + void setDefaultOptions(Object) 
    + Object toJSON(Resource,Object?,boolean?,boolean?,boolean?,boolean?,boolean?,number?) throws Error
-   + Resource fromJSON(Object,Object,boolean,boolean,number?) 
+   + Resource fromJSON(Object,Object?,boolean,boolean,number?) 
 }
 class TypeNotFoundException extends BaseException {
    + void constructor(string,string?,string) 

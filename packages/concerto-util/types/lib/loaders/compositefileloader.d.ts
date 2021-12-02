@@ -17,7 +17,7 @@ declare class CompositeFileLoader {
     addFileLoader(fileLoader: any): void;
     /**
      * Get the array of FileLoader instances
-     * @return {*[]} The FileLoader registered
+     * @return {*} The FileLoader registered
      * @private
      */
     private getFileLoaders;
