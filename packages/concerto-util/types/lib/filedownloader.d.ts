@@ -1,18 +1,18 @@
 export = FileDownloader;
 /**
  * Downloads the transitive closure of a set of model files.
- * @class
  * @memberof module:concerto-core
  */
 declare class FileDownloader {
     /**
      * Create a FileDownloader and bind to a FileLoader.
-     * @param {fileLoader} fileLoader - the loader to use to download model files
+     * @constructor
+     * @param {*} fileLoader - the loader to use to download model files
      * @param {*} getExternalImports - a function taking a file and returning new files
      * @param {Number} concurrency - the number of model files to download concurrently
      */
-    constructor(fileLoader: fileLoader, getExternalImports: any, concurrency?: number);
-    fileLoader: fileLoader;
+    constructor(fileLoader: any, getExternalImports: any, concurrency?: number);
+    fileLoader: any;
     concurrency: number;
     getExternalImports: any;
     /**

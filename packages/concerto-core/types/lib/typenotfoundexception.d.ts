@@ -1,4 +1,5 @@
 export = TypeNotFoundException;
+declare const TypeNotFoundException_base: typeof import("@accordproject/concerto-cto/types/lib/baseexception");
 /**
  * Error thrown when a Concerto type does not exist.
  * @extends BaseException
@@ -6,7 +7,7 @@ export = TypeNotFoundException;
  * @class
  * @memberof module:concerto-core
  */
-declare class TypeNotFoundException extends BaseException {
+declare class TypeNotFoundException extends TypeNotFoundException_base {
     /**
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
@@ -22,4 +23,3 @@ declare class TypeNotFoundException extends BaseException {
      */
     getTypeName(): string;
 }
-import BaseException = require("./baseexception");

@@ -33,13 +33,13 @@ const handleJobError = async (error, job) => {
 
 /**
  * Downloads the transitive closure of a set of model files.
- * @class
  * @memberof module:concerto-core
  */
 class FileDownloader {
     /**
      * Create a FileDownloader and bind to a FileLoader.
-     * @param {fileLoader} fileLoader - the loader to use to download model files
+     * @constructor
+     * @param {*} fileLoader - the loader to use to download model files
      * @param {*} getExternalImports - a function taking a file and returning new files
      * @param {Number} concurrency - the number of model files to download concurrently
      */

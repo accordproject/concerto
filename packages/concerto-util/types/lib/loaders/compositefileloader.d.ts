@@ -12,12 +12,12 @@ declare class CompositeFileLoader {
     fileLoaders: any[];
     /**
      * Adds a FileLoader implemenetation to the FileLoader
-     * @param {FileLoader} fileLoader - The script to add to the ScriptManager
+     * @param {*} fileLoader - The script to add to the ScriptManager
      */
-    addFileLoader(fileLoader: FileLoader): void;
+    addFileLoader(fileLoader: any): void;
     /**
      * Get the array of FileLoader instances
-     * @return {FileLoaders[]} The FileLoader registered
+     * @return {*[]} The FileLoader registered
      * @private
      */
     private getFileLoaders;
