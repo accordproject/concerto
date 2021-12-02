@@ -39,8 +39,8 @@ class ModelFile {
      * Use the ModelManager to manage ModelFiles.
      * @param {ModelManager} modelManager - the ModelManager that manages this
      * ModelFile
-     * @param {object} ast - The DSL model as a string.
-     * @param {string} [definitions] - The (optional) CTO model as a string.
+     * @param {object} ast - The abstract syntax tree of the model as a JSON object.
+     * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */

@@ -197,7 +197,7 @@ class ModelManager {
    + void constructor(object?) 
    + boolean isModelManager() 
    + Object accept(Object,Object) 
-   + void validateModelFile(string,string?) throws IllegalModelException
+   + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(string|ModelFile,string,boolean?) throws IllegalModelException
    + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
    + void deleteModelFile(string) 
