@@ -1,4 +1,5 @@
 export = ValidationException;
+declare const ValidationException_base: typeof import("@accordproject/concerto-cto/types/lib/baseexception");
 /**
  * Exception thrown when a resource fails to model against the model
  * @extends BaseException
@@ -7,6 +8,5 @@ export = ValidationException;
  * @memberof module:concerto-core
  * @private
  */
-declare class ValidationException extends BaseException {
+declare class ValidationException extends ValidationException_base {
 }
-import BaseException = require("../baseexception");

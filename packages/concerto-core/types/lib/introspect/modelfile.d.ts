@@ -12,11 +12,12 @@ declare class ModelFile {
      * Use the ModelManager to manage ModelFiles.
      * @param {ModelManager} modelManager - the ModelManager that manages this
      * ModelFile
-     * @param {string} definitions - The DSL model as a string.
+     * @param {object} ast - The abstract syntax tree of the model as a JSON object.
+     * @param {string} [definitions] - The optional CTO model as a string.
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */
-    constructor(modelManager: ModelManager, definitions: string, fileName?: string);
+    constructor(modelManager: ModelManager, ast: object, definitions?: string, fileName?: string);
     modelManager: ModelManager;
     external: boolean;
     declarations: any[];
@@ -27,8 +28,8 @@ declare class ModelFile {
     importUriMap: {};
     fileName: string;
     concertoVersion: any;
-    definitions: string;
     ast: any;
+    definitions: string;
     /**
      * Returns true
      * @returns {boolean} true
@@ -227,6 +228,11 @@ declare class ModelFile {
      * @return {string} The definitions for this model.
      */
     getDefinitions(): string;
+    /**
+     * Get the ast for this model.
+     * @return {object} The definitions for this model.
+     */
+    getAst(): object;
     /**
      * Get the expected concerto version
      * @return {string} The semver range for compatible concerto versions

@@ -12,27 +12,27 @@ declare class Writer {
     linesWritten: number;
     /**
      * Writes text to the start of the buffer
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
-    writeBeforeLine(tabs: int, text: string): void;
+    writeBeforeLine(tabs: number, text: string): void;
     /**
      * Append text to the buffer
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
-    writeLine(tabs: int, text: string): void;
+    writeLine(tabs: number, text: string): void;
     /**
      * Returns the number of lines that have been written to the buffer.
-     * @return {int} the number of lines written to the buffer.
+     * @return {number} the number of lines written to the buffer.
      */
-    getLineCount(): int;
+    getLineCount(): number;
     /**
      * Append text to the buffer, prepending tabs
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
-    writeIndented(tabs: int, text: string): void;
+    writeIndented(tabs: number, text: string): void;
     /**
      * Append text to the buffer (no automatic newline). The
      * text may contain newline, and these will increment the linesWritten

@@ -12,12 +12,12 @@ export = ModelManager;
  *
  * Use the {@link Concerto} class to validate instances.
  *
- * @class
  * @memberof module:concerto-core
  */
 declare class ModelManager {
     /**
      * Create the ModelManager.
+     * @constructor
      * @param {object} [options] - Serializer options
      */
     constructor(options?: object);
@@ -49,11 +49,11 @@ declare class ModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string} modelFile - The Concerto file as a string
+     * @param {string|ModelFile} modelFile - The Concerto file as a string
      * @param {string} [fileName] - a file name to associate with the model file
      * @throws {IllegalModelException}
      */
-    validateModelFile(modelFile: string, fileName?: string): void;
+    validateModelFile(modelFile: string | ModelFile, fileName?: string): void;
     /**
      * Throws an error with details about the existing namespace.
      * @param {ModelFile} modelFile The model file that is trying to declare an existing namespace
@@ -108,11 +108,11 @@ declare class ModelManager {
      * Downloads all ModelFiles that are external dependencies and adds or
      * updates them in this ModelManager.
      * @param {Object} [options] - Options object passed to ModelFileLoaders
-     * @param {ModelFileDownloader} [modelFileDownloader] - an optional ModelFileDownloader
+     * @param {FileDownloader} [fileDownloader] - an optional FileDownloader
      * @throws {IllegalModelException} if the models fail validation
      * @return {Promise} a promise when the download and update operation is completed.
      */
-    updateExternalModels(options?: any, modelFileDownloader?: ModelFileDownloader): Promise<any>;
+    updateExternalModels(options?: any, fileDownloader?: typeof import("@accordproject/concerto-util/types/lib/filedownloader")): Promise<any>;
     /**
      * Write all models in this model manager to the specified path in the file system
      *
@@ -249,4 +249,3 @@ declare class ModelManager {
 import Factory = require("./factory");
 import Serializer = require("./serializer");
 import ModelFile = require("./introspect/modelfile");
-import ModelFileDownloader = require("./introspect/loaders/modelfiledownloader");

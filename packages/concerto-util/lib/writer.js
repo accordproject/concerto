@@ -33,7 +33,7 @@ class Writer {
 
     /**
      * Writes text to the start of the buffer
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
     writeBeforeLine(tabs, text) {
@@ -47,7 +47,7 @@ class Writer {
 
     /**
      * Append text to the buffer
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
     writeLine(tabs, text) {
@@ -61,7 +61,7 @@ class Writer {
 
     /**
      * Returns the number of lines that have been written to the buffer.
-     * @return {int} the number of lines written to the buffer.
+     * @return {number} the number of lines written to the buffer.
      */
     getLineCount() {
         return this.linesWritten;
@@ -70,7 +70,7 @@ class Writer {
 
     /**
      * Append text to the buffer, prepending tabs
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
     writeIndented(tabs,text) {

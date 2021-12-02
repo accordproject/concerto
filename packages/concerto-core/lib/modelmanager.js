@@ -45,12 +45,12 @@ const debug = require('debug')('concerto:ModelManager');
  *
  * Use the {@link Concerto} class to validate instances.
  *
- * @class
  * @memberof module:concerto-core
  */
 class ModelManager {
     /**
      * Create the ModelManager.
+     * @constructor
      * @param {object} [options] - Serializer options
      */
     constructor(options) {
