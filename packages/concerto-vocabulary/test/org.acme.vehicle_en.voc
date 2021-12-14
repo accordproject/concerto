@@ -1,0 +1,6 @@
+locale: en
+namespace: org.acme
+declarations:
+  - Vehicle: A road vehicle
+    properties:
+      - vin: Vehicle Identification Number
