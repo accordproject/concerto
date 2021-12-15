@@ -1,6 +1,7 @@
 locale: en
 namespace: org.acme
 declarations:
+  - Color: A color
   - Vehicle: A road vehicle
     properties:
       - vin: Vehicle Identification Number

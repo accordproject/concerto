@@ -101,8 +101,8 @@ describe('VocabularyManager', () => {
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
         result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck']);
-        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Vehicle.color']);
-        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Vehicle.color']);
+        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color']);
+        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color']);
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
     });
 });
