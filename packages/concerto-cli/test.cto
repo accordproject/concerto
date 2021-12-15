@@ -1,0 +1,5 @@
+concerto version ">= 1.0.0"
+
+namespace foo
+
+concept Foo {}
