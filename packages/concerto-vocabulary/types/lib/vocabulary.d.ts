@@ -30,12 +30,24 @@ declare class Vocabulary {
      */
     getIdentifier(): string;
     /**
+     * Returns all the declarations for this vocabulary
+     * @returns {*} an array of objects
+     */
+    getTerms(): any;
+    /**
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName: string, propertyName?: string): string;
+    /**
+     * Validates a vocabulary against a ModelFile, returning errors for
+     * missing and additional terms.
+     * @param {ModelFile} modelFile the model file for this vocabulary
+     * @returns {*} an object with missingTerms and additionalTerms properties
+     */
+    validate(modelFile: ModelFile): any;
     /**
      * Converts the object to JSON
      * @returns {*} the contens of this vocabulary
