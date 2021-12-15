@@ -165,6 +165,36 @@ describe('MetaModel (Car)', () => {
     });
 });
 
+describe('MetaModel (Version)', () => {
+    const versionModelPath = path.resolve(__dirname, '../data/model/versionMeta.cto');
+    const versionModel = fs.readFileSync(versionModelPath, 'utf8');
+    const versionMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/versionMeta.json'), 'utf8'));
+
+    describe('#toMetaModel', () => {
+        it('should convert a CTO model to its metamodel', () => {
+            const mm1 = Parser.parse(versionModel);
+            mm1.should.deep.equal(versionMetaModel);
+        });
+
+        it('should convert and validate a CTO model to its metamodel', () => {
+            const mm1 = Parser.parse(versionModel);
+            mm1.should.deep.equal(versionMetaModel);
+        });
+
+        it('should convert and validate a ModelFile to its metamodel', () => {
+            const modelManager1 = new ModelManager();
+            const mf1 = ParserUtil.newModelFile(modelManager1, versionModel);
+            const mm1 = MetaModel.modelFileToMetaModel(mf1);
+            mm1.should.deep.equal(versionMetaModel);
+            const model2 = Printer.toCTO(mm1);
+            const modelManager2 = new ModelManager();
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
+            const mm2 = MetaModel.modelFileToMetaModel(mf2);
+            mm2.should.deep.equal(versionMetaModel);
+        });
+    });
+});
+
 describe('MetaMetaModel', () => {
     describe('#meta-metamodel', () => {
         it('should roundtrip the metamodel', () => {
