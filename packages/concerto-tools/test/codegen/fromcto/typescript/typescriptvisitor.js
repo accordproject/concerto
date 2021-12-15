@@ -443,7 +443,7 @@ describe('TypescriptVisitor', function () {
     });
 
     describe('visitEnumValueDeclaration', () => {
-        it('should write a line with the name of the enum value', () => {
+        it('should write a line with the name and value of the enum value', () => {
             let param = {
                 fileWriter: mockFileWriter
             };
@@ -454,7 +454,7 @@ describe('TypescriptVisitor', function () {
 
             typescriptVisitor.visitEnumValueDeclaration(mockEnumValueDeclaration, param);
 
-            param.fileWriter.writeLine.withArgs(1, 'Bob,').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'Bob = \'Bob\',').calledOnce.should.be.ok;
         });
     });
 

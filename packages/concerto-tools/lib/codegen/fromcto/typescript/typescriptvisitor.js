@@ -221,7 +221,8 @@ class TypescriptVisitor {
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        parameters.fileWriter.writeLine(1, enumValueDeclaration.getName() + ',');
+        const name = enumValueDeclaration.getName();
+        parameters.fileWriter.writeLine(1,`${name} = '${name}',`);
         return null;
     }
 
