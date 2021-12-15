@@ -75,7 +75,7 @@ class Vocabulary {
 
     /**
      * Returns all the declarations for this vocabulary
-     * @returns {*} an array of objects
+     * @returns {Array} an array of objects
      */
     getTerms() {
         return this.content.declarations;

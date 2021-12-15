@@ -31,9 +31,9 @@ declare class Vocabulary {
     getIdentifier(): string;
     /**
      * Returns all the declarations for this vocabulary
-     * @returns {*} an array of objects
+     * @returns {Array} an array of objects
      */
-    getTerms(): any;
+    getTerms(): any[];
     /**
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
