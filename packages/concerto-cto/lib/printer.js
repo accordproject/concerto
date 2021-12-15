@@ -225,6 +225,11 @@ function declFromMetaModel(mm) {
  */
 function toCTO(metaModel) {
     let result = '';
+    if (metaModel.concertoVersion) {
+        result += `concerto version "${metaModel.concertoVersion}"`;
+        result += '\n';
+        result += '\n';
+    }
     result += `namespace ${metaModel.namespace}`;
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';
