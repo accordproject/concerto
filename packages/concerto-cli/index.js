@@ -15,7 +15,7 @@
 
 'use strict';
 
-const Logger = require('@accordproject/concerto-core').Logger;
+const Logger = require('@accordproject/concerto-util').Logger;
 const Commands = require('./lib/commands');
 
 require('yargs')
