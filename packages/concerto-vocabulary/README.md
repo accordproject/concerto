@@ -1,11 +1,13 @@
-# Concerto Parser
+# Concerto Vocabulary
 
-Library for Concerto model parsing and printing using CTO syntax.
+Library to manage vocabulary terms associated with Concerto models. Vocabulary terms are human-readable labels (for a specific locale) for model elements, 
+
+Terms may be loaded from YAML format files and then validated against a Concerto ModelManager to detect missing and additional terms.
 
 # Installation
 
 ```
-npm install @accordproject/concerto-parser --save
+npm install @accordproject/concerto-vocabulary --save
 ```
 
 ## License <a name="license"></a>

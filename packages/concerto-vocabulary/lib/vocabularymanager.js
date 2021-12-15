@@ -61,7 +61,7 @@ class VocabularyManager {
      * @returns {Vocabulary[]} the array of vocabularies
      */
     getVocabulariesForNamespace(namespace) {
-        return Object.keys(this.vocabularies).filter( k => k.startsWith(`${namespace}/`));
+        return Object.values(this.vocabularies).filter( v => v.getNamespace() === namespace);
     }
 
     /**
@@ -71,7 +71,7 @@ class VocabularyManager {
      */
     getVocabulariesForLocale(locale) {
         const loc = new Intl.Locale(locale).toString();
-        return Object.keys(this.vocabularies).filter( k => k.endsWith(`/${loc}`));
+        return Object.values(this.vocabularies).filter( v => v.getLocale() === loc);
     }
 
     /**
@@ -81,19 +81,45 @@ class VocabularyManager {
      * @returns {*} the result of validation
      */
     validate(modelManager) {
-        // missing namespaces
+        // missing vocabularies
         const missingVocabularies = modelManager.getModelFiles()
             .map( m => this.getVocabulariesForNamespace(m.getNamespace()).length === 0 ? m.getNamespace() : null)
             .filter( m => m !== null);
 
-        // additional namespaces
-        const additionalNamespaces = Object.values(this.vocabularies)
-            .filter( v => modelManager.getModelFile(v.namespace) === null);
+        // additional vocabularies
+        const additionalVocabularies = Object.values(this.vocabularies)
+            .filter( v => !modelManager.getModelFile(v.getNamespace()));
 
-        return {
+        const result = {
             missingVocabularies,
-            additionalNamespaces
+            additionalVocabularies,
+            vocabularies: {}
         };
+
+        // validate the models against the vocs
+        Object.values(this.vocabularies)
+            .forEach(voc => {
+                const vocResult = {
+                    locale: voc.getLocale(),
+                    namespace: voc.getNamespace(),
+                    missingTerms: [],
+                    additionalTerms: []
+                };
+
+                const model = modelManager.getModelFile(voc.getNamespace());
+                if(model) {
+                    const errors = voc.validate(model);
+                    if(errors.missingTerms) {
+                        vocResult.missingTerms = vocResult.missingTerms.concat(errors.missingTerms);
+                    }
+                    if(errors.additionalTerms) {
+                        vocResult.additionalTerms = vocResult.additionalTerms.concat(errors.additionalTerms);
+                    }
+
+                    result.vocabularies[`${vocResult.namespace}/${vocResult.locale}`] = vocResult;
+                }
+            });
+        return result;
     }
 }
 

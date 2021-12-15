@@ -31,14 +31,16 @@ let vocabularyManager = null;
 describe('VocabularyManager', () => {
     beforeEach(() => {
         modelManager = new ModelManager();
-        const model = fs.readFileSync('./test/org.acme.vehicle.cto', 'utf-8');
+        const model = fs.readFileSync('./test/org.acme.cto', 'utf-8');
         modelManager.addModelFile(model);
         vocabularyManager = new VocabularyManager();
         vocabularyManager.should.not.be.null;
-        const enVocString = fs.readFileSync('./test/org.acme.vehicle_en.voc', 'utf-8');
+        const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
         vocabularyManager.addVocabulary(enVocString);
-        const frVocString = fs.readFileSync('./test/org.acme.vehicle_fr.voc', 'utf-8');
+        const frVocString = fs.readFileSync('./test/org.acme_fr.voc', 'utf-8');
         vocabularyManager.addVocabulary(frVocString);
+        const enVoc2String = fs.readFileSync('./test/com.example_en.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enVoc2String);
     });
 
     afterEach(() => {
@@ -68,7 +70,7 @@ describe('VocabularyManager', () => {
 
     it('getVocabulariesForLocale', () => {
         const voc = vocabularyManager.getVocabulariesForLocale('en');
-        voc.length.should.equal(1);
+        voc.length.should.equal(2);
         const vocFr = vocabularyManager.getVocabulariesForLocale('fr');
         vocFr.length.should.equal(1);
         const missing = vocabularyManager.getVocabulariesForLocale('foo');
@@ -96,7 +98,11 @@ describe('VocabularyManager', () => {
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
         result.missingVocabularies.length.should.equal(0);
-        result.additionalNamespaces.length.should.equal(0);
+        result.additionalVocabularies.length.should.equal(1);
+        result.additionalVocabularies[0].getNamespace().should.equal('com.example');
+        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck']);
+        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Vehicle.color']);
+        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Vehicle.color']);
+        result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
     });
-
 });

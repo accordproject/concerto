@@ -2,4 +2,5 @@ namespace org.acme
 
 asset Vehicle identified by vin {
     o String vin
+    o String color
 }

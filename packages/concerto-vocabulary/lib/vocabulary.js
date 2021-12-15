@@ -90,6 +90,25 @@ class Vocabulary {
     }
 
     /**
+     * Validates a vocabulary against a ModelFile, returning errors for
+     * missing and additional terms.
+     * @param {ModelFile} modelFile the model file for this vocabulary
+     * @returns {*} an object with missingTerms and additionalTerms properties
+     */
+    validate(modelFile) {
+        const result = {
+            missingTerms: modelFile.getAllDeclarations().flatMap( d => this.getTerm(d.getName())
+                ? d.getOwnProperties().flatMap( p => this.getTerm(d.getName(), p.getName()) ? null : `${d.getName()}.${p.getName()}`)
+                : d.getName() ).filter( i => i !== null),
+            additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
+                ? k.properties.flatMap( p => this.getTerm(Object.keys(k)[0], Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`)
+                : Object.keys(k)[0] ).filter( i => i !== null)
+        };
+
+        return result;
+    }
+
+    /**
      * Converts the object to JSON
      * @returns {*} the contens of this vocabulary
      */
