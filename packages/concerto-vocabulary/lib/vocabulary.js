@@ -34,6 +34,10 @@ class Vocabulary {
             throw new Error('Vocabulary object must be specified');
         }
 
+        if(!voc.declarations) {
+            throw new Error('Vocabulary object must have declarations');
+        }
+
         if(!voc.locale) {
             throw new Error('A vocabulary must specify a locale');
         }
@@ -67,6 +71,14 @@ class Vocabulary {
      */
     getIdentifier() {
         return `${this.getNamespace()}/${new Intl.Locale(this.content.locale).toString()}`;
+    }
+
+    /**
+     * Returns all the declarations for this vocabulary
+     * @returns {*} an array of objects
+     */
+    getTerms() {
+        return this.content.declarations;
     }
 
     /**

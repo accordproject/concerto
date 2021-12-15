@@ -77,6 +77,13 @@ describe('VocabularyManager', () => {
         missing.length.should.equal(0);
     });
 
+    it('getTerms - en', () => {
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        voc.should.not.be.null;
+        const terms = voc.getTerms();
+        terms.length.should.equal(3);
+    });
+
     it('getTerm - en', () => {
         const voc = vocabularyManager.getVocabulary('org.acme', 'en');
         voc.should.not.be.null;
