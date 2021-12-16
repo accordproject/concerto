@@ -157,11 +157,11 @@ function propertyFromMetaModel(mm) {
         result += '[]';
     }
     result += ` ${mm.name}`;
+    result += defaultString;
+    result += validatorString;
     if (mm.isOptional) {
         result += ' optional';
     }
-    result += defaultString;
-    result += validatorString;
     return result;
 }
 
