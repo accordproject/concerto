@@ -192,7 +192,7 @@ require('yargs')
             type: 'string'
         });
     }, (argv) => {
-        return Commands.print(argv.input, argv.model, argv.all, argv.output)
+        return Commands.print(argv.input, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);
