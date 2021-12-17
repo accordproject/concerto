@@ -1,0 +1,5 @@
+namespace test.field
+
+concept Foo identified extends Concept {
+  o String foo default="FOO" optional
+}

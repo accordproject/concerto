@@ -199,16 +199,15 @@ function declFromMetaModel(mm) {
         result += `enum ${mm.name} `;
         break;
     }
-    if (mm.superType) {
-        result += `extends ${mm.superType.name} `;
-    }
-    // XXX Needs to be fixed to support `identified`
     if (mm.identified) {
         if (mm.identified.$class === 'concerto.metamodel.IdentifiedBy') {
             result += `identified by ${mm.identified.name} `;
         } else {
             result += 'identified ';
         }
+    }
+    if (mm.superType) {
+        result += `extends ${mm.superType.name} `;
     }
     result += '{';
     mm.properties.forEach((property) => {
