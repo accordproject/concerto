@@ -33,6 +33,8 @@ describe('VocabularyManager', () => {
         modelManager = new ModelManager();
         const model = fs.readFileSync('./test/org.acme.cto', 'utf-8');
         modelManager.addModelFile(model);
+        const model2 = fs.readFileSync('./test/org.accordproject.cto', 'utf-8');
+        modelManager.addModelFile(model2);
         vocabularyManager = new VocabularyManager();
         vocabularyManager.should.not.be.null;
         const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
@@ -46,6 +48,10 @@ describe('VocabularyManager', () => {
     afterEach(() => {
         modelManager = null;
         vocabularyManager = null;
+    });
+
+    it('addVocabulary (null)', () => {
+        should.Throw(() => vocabularyManager.addVocabulary(), Error);
     });
 
     it('getVocabulary', () => {
@@ -99,12 +105,13 @@ describe('VocabularyManager', () => {
         const term = voc.getTerm('Vehicle');
         term.should.equal('Véhicule');
         const term2 = voc.getTerm('Vehicle', 'vin');
-        term2.should.equal('Le numéro d\'identification du véhicule (NIV).');
+        term2.should.equal('Le numéro d\'identification du véhicule (NIV)');
     });
 
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
-        result.missingVocabularies.length.should.equal(0);
+        result.missingVocabularies.length.should.equal(1);
+        result.missingVocabularies[0].should.equal('org.accordproject');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
         result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck']);

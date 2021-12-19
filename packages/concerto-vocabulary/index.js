@@ -22,3 +22,4 @@
  */
 
 module.exports.VocabularyManager = require('./lib/vocabularymanager');
+module.exports.Vocabulary = require('./lib/vocabulary');

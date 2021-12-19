@@ -3,4 +3,4 @@ namespace: org.acme
 declarations:
   - Vehicle: Véhicule
     properties:
-      - vin: Le numéro d'identification du véhicule (NIV).
+      - vin: Le numéro d'identification du véhicule (NIV)
