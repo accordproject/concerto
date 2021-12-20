@@ -145,6 +145,11 @@ describe('VocabularyManager', () => {
         term.should.equal('A lorry (a vehicle capable of carrying cargo)');
     });
 
+    it('getTerm - lookup declaration', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Color');
+        term.should.equal('A colour');
+    });
+
     it('getTerm - lookup property', () => {
         const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin');
         term.should.equal('Vehicle Identification Number');
