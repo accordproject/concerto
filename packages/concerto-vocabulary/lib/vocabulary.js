@@ -14,6 +14,8 @@
 
 'use strict';
 
+// const {validate} = require('bcp47-validate');
+
 /**
 * A vocabulary for a concerto model
 * @class
@@ -43,6 +45,12 @@ class Vocabulary {
         }
         if(!voc.namespace) {
             throw new Error('A vocabulary must specify a namespace');
+        }
+
+        // validate the locale
+        new Intl.Locale(voc.locale);
+        if(voc.locale !== voc.locale.toLowerCase()) {
+            throw new Error('Locale should be lowercase with dashes');
         }
 
         this.vocabularyManager = vocabularyManager;

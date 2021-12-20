@@ -47,6 +47,7 @@
     "sinon-chai": "3.6.0"
   },
   "dependencies": {
+    "bcp47-validate": "1.0.0",
     "yaml": "2.0.0-9"
   },
   "browserslist": "> 0.25%, not dead",

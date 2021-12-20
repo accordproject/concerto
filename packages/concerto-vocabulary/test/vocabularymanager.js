@@ -39,6 +39,8 @@ describe('VocabularyManager', () => {
         vocabularyManager.should.not.be.null;
         const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
         vocabularyManager.addVocabulary(enVocString);
+        const enGbVocString = fs.readFileSync('./test/org.acme_en-gb.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enGbVocString);
         const frVocString = fs.readFileSync('./test/org.acme_fr.voc', 'utf-8');
         vocabularyManager.addVocabulary(frVocString);
         const enVoc2String = fs.readFileSync('./test/com.example_en.voc', 'utf-8');
@@ -54,6 +56,11 @@ describe('VocabularyManager', () => {
         should.Throw(() => vocabularyManager.addVocabulary(), Error);
     });
 
+    it('addVocabulary (duplicate)', () => {
+        const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
+        should.Throw(() => vocabularyManager.addVocabulary(enVocString), Error);
+    });
+
     it('getVocabulary', () => {
         const voc = vocabularyManager.getVocabulary('org.acme', 'en');
         voc.should.not.be.null;
@@ -61,17 +68,37 @@ describe('VocabularyManager', () => {
 
     it('getVocabulary - undefined', () => {
         const voc = vocabularyManager.getVocabulary('foo', 'en');
-        (voc === undefined).should.be.true;
+        (voc === null).should.be.true;
     });
 
     it('getVocabulary - missing locale', () => {
         const voc = vocabularyManager.getVocabulary('org.acme', 'foo');
-        (voc === undefined).should.be.true;
+        (voc === null).should.be.true;
+    });
+
+    it('getVocabulary - lookup', () => {
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en-us', {localeMatcher: 'lookup'});
+        voc.should.not.be.null;
+    });
+
+    it('getVocabulary - lookup fail case insensitive', () => {
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en-US');
+        (voc === null).should.be.true;
+    });
+
+    it('getVocabulary - case insensitive', () => {
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en-GB');
+        voc.should.not.be.null;
+    });
+
+    it('getVocabulary - lookup fail', () => {
+        const voc = vocabularyManager.getVocabulary('org.acme', 'zh', {localeMatcher: 'lookup'});
+        (voc === null).should.be.true;
     });
 
     it('getVocabulariesForNamespace', () => {
         const voc = vocabularyManager.getVocabulariesForNamespace('org.acme');
-        voc.length.should.equal(2);
+        voc.length.should.equal(3);
     });
 
     it('getVocabulariesForLocale', () => {
@@ -106,6 +133,31 @@ describe('VocabularyManager', () => {
         term.should.equal('Véhicule');
         const term2 = voc.getTerm('Vehicle', 'vin');
         term2.should.equal('Le numéro d\'identification du véhicule (NIV)');
+    });
+
+    it('findVocabulary', () => {
+        const voc = VocabularyManager.findVocabulary('en-gb', vocabularyManager.getVocabulariesForNamespace('org.acme'));
+        voc.should.not.be.null;
+    });
+
+    it('getTerm - lookup declaration', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Truck');
+        term.should.equal('A lorry (a vehicle capable of carrying cargo)');
+    });
+
+    it('getTerm - lookup property', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin');
+        term.should.equal('Vehicle Identification Number');
+    });
+
+    it('getTerm - lookup missing property', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'foo');
+        (term === null).should.be.true;
+    });
+
+    it('getTerm - lookup missing locale', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'zh', 'Vehicle', 'vin');
+        (term === null).should.be.true;
     });
 
     it('validate', () => {

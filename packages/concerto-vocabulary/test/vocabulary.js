@@ -57,11 +57,31 @@ describe('Vocabulary', () => {
         should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
     });
 
+    it('constructor - invalid locale', () => {
+        const vocabularyManager = {};
+        const voc = {
+            declarations: [],
+            locale: 'en_US',
+            namespace: 'org.acme'
+        };
+        should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
+    });
+
+    it('constructor - invalid locale case', () => {
+        const vocabularyManager = {};
+        const voc = {
+            declarations: [],
+            locale: 'en-US',
+            namespace: 'org.acme'
+        };
+        should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
+    });
+
     it('constructor', () => {
         const vocabularyManager = {};
         const obj = {
             declarations: [],
-            locale: 'en',
+            locale: 'en-us',
             namespace: 'org.acme'
         };
         const voc = new Vocabulary(vocabularyManager, obj);
