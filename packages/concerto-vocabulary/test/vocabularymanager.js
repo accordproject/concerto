@@ -160,6 +160,18 @@ describe('VocabularyManager', () => {
         (term === null).should.be.true;
     });
 
+    it('clear', () => {
+        vocabularyManager.clear();
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        (voc === null).should.be.true;
+    });
+
+    it('removeVocabulary', () => {
+        vocabularyManager.removeVocabulary('org.acme', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        (voc === null).should.be.true;
+    });
+
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
         result.missingVocabularies.length.should.equal(1);

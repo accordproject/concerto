@@ -78,7 +78,7 @@ class Vocabulary {
      * @returns {string} the identifier for this vocabulary
      */
     getIdentifier() {
-        return `${this.getNamespace()}/${new Intl.Locale(this.content.locale).toString()}`;
+        return `${this.getNamespace()}/${this.content.locale}`;
     }
 
     /**

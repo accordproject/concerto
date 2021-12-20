@@ -35,6 +35,22 @@ class VocabularyManager {
     }
 
     /**
+     * Removes all vocabularies
+     */
+    clear() {
+        this.vocabularies = {};
+    }
+
+    /**
+     * Removes a vocabulary from the vocabulary manager
+     * @param {string} namespace the namespace for the vocabulary
+     * @param {string} locale the BCP-47 locale identifier
+     */
+    removeVocabulary(namespace, locale) {
+        delete this.vocabularies[`${namespace}/${locale}`];
+    }
+
+    /**
      * Adds a vocabulary to the vocabulary manager
      * @param {string} contents the YAML string for the vocabulary
      */

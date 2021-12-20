@@ -21,6 +21,16 @@ declare class VocabularyManager {
     static findVocabulary(requestedLocale: string, vocabularies: Vocabulary[], options?: any): Vocabulary;
     vocabularies: {};
     /**
+     * Removes all vocabularies
+     */
+    clear(): void;
+    /**
+     * Removes a vocabulary from the vocabulary manager
+     * @param {string} namespace the namespace for the vocabulary
+     * @param {string} locale the BCP-47 locale identifier
+     */
+    removeVocabulary(namespace: string, locale: string): void;
+    /**
      * Adds a vocabulary to the vocabulary manager
      * @param {string} contents the YAML string for the vocabulary
      */
