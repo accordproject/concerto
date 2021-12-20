@@ -14,8 +14,6 @@
 
 'use strict';
 
-// const {validate} = require('bcp47-validate');
-
 /**
 * A vocabulary for a concerto model
 * @class
