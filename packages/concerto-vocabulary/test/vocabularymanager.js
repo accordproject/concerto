@@ -191,7 +191,6 @@ describe('VocabularyManager', () => {
         term.should.equal('Gross Weight of the Truck');
     });
 
-
     it('resolveTerm - class', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck');
         term.should.equal('A lorry (a vehicle capable of carrying cargo)');

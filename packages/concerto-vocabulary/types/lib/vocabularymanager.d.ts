@@ -9,6 +9,15 @@ export = VocabularyManager;
 */
 declare class VocabularyManager {
     /**
+     * Computes a term in English based on declaration and property name.
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    static englishMissingTermGenerator(namespace: string, locale: string, declarationName: string, propertyName?: string): string;
+    /**
      * Finds the vocabulary for a requested locale, removing language
      * identifiers from the locale until the locale matches, or if no
      * vocabulary is found, null is returned
@@ -19,7 +28,16 @@ declare class VocabularyManager {
      * @returns {Vocabulary} the most specific vocabulary, or null
      */
     static findVocabulary(requestedLocale: string, vocabularies: Vocabulary[], options?: any): Vocabulary;
+    /**
+     * Create the VocabularyManager
+     * @param {*} [options] options to configure vocabulary lookup
+     * @param {*} [options.missingTermGenerator] A function to call for missing terms. The function
+     * should accept namespace, locale, declarationName, propertyName as arguments
+     * @constructor
+     */
+    constructor(options?: any);
     vocabularies: {};
+    missingTermGenerator: any;
     /**
      * Removes all vocabularies
      */
@@ -56,6 +74,18 @@ declare class VocabularyManager {
      * @returns {Vocabulary[]} the array of vocabularies
      */
     getVocabulariesForLocale(locale: string): Vocabulary[];
+    /**
+     * Resolve the term for a property, looking up terms from a more general vocabulary
+     * if required, and resolving properties using an object manager, allowing terms defined
+     * on super types to be automatically resolved.
+     * @param {ModelManager} modelManager the model manager
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string): string;
     /**
      * Gets the term for a concept, enum or property, looking up terms
      * from a more general vocabulary if required
