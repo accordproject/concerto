@@ -102,7 +102,7 @@ class Vocabulary {
             return decl[declarationName];
         }
         else {
-            const property = decl.properties ? decl.properties.find( d => d[propertyName] !== null) : null;
+            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
             return property ? property[propertyName] : null;
         }
     }
@@ -119,8 +119,8 @@ class Vocabulary {
                 ? d.getOwnProperties().flatMap( p => this.getTerm(d.getName(), p.getName()) ? null : `${d.getName()}.${p.getName()}`)
                 : d.getName() ).filter( i => i !== null),
             additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
-                ? k.properties ? k.properties.flatMap( p => this.getTerm(Object.keys(k)[0], Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
-                : Object.keys(k)[0] ).filter( i => i !== null)
+                ? k.properties ? k.properties.flatMap( p => modelFile.getLocalType(Object.keys(k)[0]).getOwnProperty(Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
+                : k ).filter( i => i !== null)
         };
 
         return result;

@@ -43,6 +43,8 @@ describe('VocabularyManager', () => {
         vocabularyManager.addVocabulary(enGbVocString);
         const frVocString = fs.readFileSync('./test/org.acme_fr.voc', 'utf-8');
         vocabularyManager.addVocabulary(frVocString);
+        const zhVocString = fs.readFileSync('./test/org.acme_zh-cn.voc', 'utf-8');
+        vocabularyManager.addVocabulary(zhVocString);
         const enVoc2String = fs.readFileSync('./test/com.example_en.voc', 'utf-8');
         vocabularyManager.addVocabulary(enVoc2String);
     });
@@ -98,7 +100,7 @@ describe('VocabularyManager', () => {
 
     it('getVocabulariesForNamespace', () => {
         const voc = vocabularyManager.getVocabulariesForNamespace('org.acme');
-        voc.length.should.equal(3);
+        voc.length.should.equal(4); // en, en-gb, fr, zh-cn
     });
 
     it('getVocabulariesForLocale', () => {
@@ -155,6 +157,22 @@ describe('VocabularyManager', () => {
         term.should.equal('Vehicle Identification Number');
     });
 
+    it('getTerm - lookup unicode', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color');
+        term.should.equal('颜色');
+    });
+
+    it('getTerm - lookup unicode property', () => {
+        let term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'RED');
+        term.should.equal('红色');
+
+        term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'GREEN');
+        term.should.equal('绿色');
+
+        term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'BLUE');
+        term.should.equal('蓝色');
+    });
+
     it('getTerm - lookup missing property', () => {
         const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'foo');
         (term === null).should.be.true;
@@ -179,13 +197,17 @@ describe('VocabularyManager', () => {
 
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
+        console.log(JSON.stringify(result, null, 2));
         result.missingVocabularies.length.should.equal(1);
         result.missingVocabularies[0].should.equal('org.accordproject');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
-        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck']);
-        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color']);
-        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color']);
+        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model']);
+        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color', 'Truck.weight']);
+        result.vocabularies['org.acme/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
+        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color', 'Truck']);
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
+        result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['Truck']);
+        result.vocabularies['org.acme/zh-cn'].additionalTerms.should.have.members([]);
     });
 });

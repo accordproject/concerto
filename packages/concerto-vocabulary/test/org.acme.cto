@@ -10,3 +10,7 @@ asset Vehicle identified by vin {
     o String vin
     o Color color
 }
+
+asset Truck extends Vehicle {
+    o Double weight
+}
