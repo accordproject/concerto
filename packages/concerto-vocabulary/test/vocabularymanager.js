@@ -183,6 +183,36 @@ describe('VocabularyManager', () => {
         (term === null).should.be.true;
     });
 
+    it('resolveTerm - class', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck');
+        term.should.equal('A lorry (a vehicle capable of carrying cargo)');
+    });
+
+    it('resolveTerm - property', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight');
+        term.should.equal('The weight of the truck in KG');
+    });
+
+    it('resolveTerm - property on super type', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'vin');
+        term.should.equal('Vehicle Identification Number');
+    });
+
+    it('resolveTerm - missing property', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'foo');
+        (term === null).should.be.true;
+    });
+
+    it('resolveTerm - missing class', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Dog');
+        (term === null).should.be.true;
+    });
+
+    it('resolveTerm - missing namespace', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.foo', 'en-gb', 'Dog');
+        (term === null).should.be.true;
+    });
+
     it('clear', () => {
         vocabularyManager.clear();
         const voc = vocabularyManager.getVocabulary('org.acme', 'en');
@@ -197,13 +227,12 @@ describe('VocabularyManager', () => {
 
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
-        console.log(JSON.stringify(result, null, 2));
         result.missingVocabularies.length.should.equal(1);
         result.missingVocabularies[0].should.equal('org.accordproject');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
         result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model']);
-        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color', 'Truck.weight']);
+        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color']);
         result.vocabularies['org.acme/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
         result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color', 'Truck']);
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);

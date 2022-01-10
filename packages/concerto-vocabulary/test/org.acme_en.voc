@@ -7,3 +7,5 @@ declarations:
       - vin: Vehicle Identification Number
       - model: Model of the vehicle
   - Truck: A vehicle capable of carrying cargo
+    properties:
+      - weight: The weight of the truck in KG

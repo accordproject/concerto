@@ -133,6 +133,24 @@ class VocabularyManager {
     }
 
     /**
+     * Resolve the term for a property, looking up terms from a more general vocabulary
+     * if required, and resolving properties using an object manager, allowing terms defined
+     * on super types to be automatically resolved.
+     * @param {ModelManager} modelManager the model manager
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    resolveTerm(modelManager, namespace, locale, declarationName, propertyName) {
+        const modelFile = modelManager.getModelFile(namespace);
+        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
+        const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
+        return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName);
+    }
+
+    /**
      * Gets the term for a concept, enum or property, looking up terms
      * from a more general vocabulary if required
      * @param {string} namespace the namespace
