@@ -79,7 +79,7 @@ describe('VocabularyManager', () => {
     });
 
     it('getVocabulary - lookup', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en-us', {localeMatcher: 'lookup'});
+        const voc = vocabularyManager.getVocabulary('org.acme', 'en-us', { localeMatcher: 'lookup' });
         voc.should.not.be.null;
     });
 
@@ -94,7 +94,7 @@ describe('VocabularyManager', () => {
     });
 
     it('getVocabulary - lookup fail', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'zh', {localeMatcher: 'lookup'});
+        const voc = vocabularyManager.getVocabulary('org.acme', 'zh', { localeMatcher: 'lookup' });
         (voc === null).should.be.true;
     });
 
@@ -182,6 +182,15 @@ describe('VocabularyManager', () => {
         const term = vocabularyManager.getTerm('org.acme', 'zh', 'Vehicle', 'vin');
         (term === null).should.be.true;
     });
+
+    it('getTerm - missingTermGenerator', () => {
+        vocabularyManager = new VocabularyManager({
+            missingTermGenerator: VocabularyManager.englishMissingTermGenerator
+        });
+        let term = vocabularyManager.getTerm('org.acme', 'en', 'Truck', 'grossWeight');
+        term.should.equal('Gross Weight of the Truck');
+    });
+
 
     it('resolveTerm - class', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck');

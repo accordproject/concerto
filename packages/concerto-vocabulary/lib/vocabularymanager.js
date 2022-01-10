@@ -18,6 +18,16 @@ const YAML = require('yaml');
 const Vocabulary = require('./vocabulary');
 
 /**
+ * Converts a camel case string to a sentence
+ * @param {string} text input
+ * @returns {string} modified string
+ */
+function camelCaseToSentence(text) {
+    const result = text.replace( /([A-Z])/g, ' $1' );
+    return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+/**
 * A vocabulary manager for concerto models. The vocabulary manager
 * stores and provides API access to a set of vocabulary files, where each file
 * is associated with a BCP-47 language tag and a Concerto namespace.
@@ -28,10 +38,27 @@ const Vocabulary = require('./vocabulary');
 class VocabularyManager {
     /**
      * Create the VocabularyManager
+     * @param {*} [options] options to configure vocabulary lookup
+     * @param {*} [options.missingTermGenerator] A function to call for missing terms. The function
+     * should accept namespace, locale, declarationName, propertyName as arguments
      * @constructor
      */
-    constructor() {
+    constructor(options) {
         this.vocabularies = {}; // key is namespace/locale, value is a Vocabulary object
+        this.missingTermGenerator = options ? options.missingTermGenerator : null;
+    }
+
+    /**
+     * Computes a term in English based on declaration and property name.
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
+        const firstPart = propertyName ? propertyName + ' of the' : '';
+        return camelCaseToSentence(firstPart + declarationName);
     }
 
     /**
@@ -55,13 +82,13 @@ class VocabularyManager {
      * @param {string} contents the YAML string for the vocabulary
      */
     addVocabulary(contents) {
-        if(!contents) {
+        if (!contents) {
             throw new Error('Vocabulary contents must be specified');
         }
         const voc = new Vocabulary(this, YAML.parse(contents));
 
-        const existing = Object.values(this.vocabularies).find( v => v.getIdentifier() === voc.getIdentifier());
-        if(existing) {
+        const existing = Object.values(this.vocabularies).find(v => v.getIdentifier() === voc.getIdentifier());
+        if (existing) {
             throw new Error('Vocabulary has already been added.');
         }
         this.vocabularies[voc.getIdentifier()] = voc;
@@ -120,7 +147,7 @@ class VocabularyManager {
      * @returns {Vocabulary[]} the array of vocabularies
      */
     getVocabulariesForNamespace(namespace) {
-        return Object.values(this.vocabularies).filter( v => v.getNamespace() === namespace);
+        return Object.values(this.vocabularies).filter(v => v.getNamespace() === namespace);
     }
 
     /**
@@ -129,7 +156,7 @@ class VocabularyManager {
      * @returns {Vocabulary[]} the array of vocabularies
      */
     getVocabulariesForLocale(locale) {
-        return Object.values(this.vocabularies).filter( v => v.getLocale() === locale.toLowerCase());
+        return Object.values(this.vocabularies).filter(v => v.getLocale() === locale.toLowerCase());
     }
 
     /**
@@ -162,19 +189,19 @@ class VocabularyManager {
     getTerm(namespace, locale, declarationName, propertyName) {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
-        if(voc) {
+        if (voc) {
             term = voc.getTerm(declarationName, propertyName);
         }
-        if(term) {
+        if (term) {
             return term;
         }
         else {
             const dashIndex = locale.lastIndexOf('-');
-            if(dashIndex >= 0) {
+            if (dashIndex >= 0) {
                 return this.getTerm(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
-                return null;
+                return this.missingTermGenerator ? this.missingTermGenerator(namespace, locale, declarationName, propertyName) : null;
             }
         }
     }
@@ -188,12 +215,12 @@ class VocabularyManager {
     validate(modelManager) {
         // missing vocabularies
         const missingVocabularies = modelManager.getModelFiles()
-            .map( m => this.getVocabulariesForNamespace(m.getNamespace()).length === 0 ? m.getNamespace() : null)
-            .filter( m => m !== null);
+            .map(m => this.getVocabulariesForNamespace(m.getNamespace()).length === 0 ? m.getNamespace() : null)
+            .filter(m => m !== null);
 
         // additional vocabularies
         const additionalVocabularies = Object.values(this.vocabularies)
-            .filter( v => !modelManager.getModelFile(v.getNamespace()));
+            .filter(v => !modelManager.getModelFile(v.getNamespace()));
 
         const result = {
             missingVocabularies,
@@ -212,12 +239,12 @@ class VocabularyManager {
                 };
 
                 const model = modelManager.getModelFile(voc.getNamespace());
-                if(model) {
+                if (model) {
                     const errors = voc.validate(model);
-                    if(errors.missingTerms) {
+                    if (errors.missingTerms) {
                         vocResult.missingTerms = vocResult.missingTerms.concat(errors.missingTerms);
                     }
-                    if(errors.additionalTerms) {
+                    if (errors.additionalTerms) {
                         vocResult.additionalTerms = vocResult.additionalTerms.concat(errors.additionalTerms);
                     }
 
