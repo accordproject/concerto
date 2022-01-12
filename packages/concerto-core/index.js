@@ -15,7 +15,7 @@
 'use strict';
 
 /**
- * Concerto module. Concerto is a framework for defining domain
+ * Concerto core module. Concerto is a framework for defining domain
  * specific models.
  *
  * @module concerto-core
