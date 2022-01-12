@@ -1,0 +1,16 @@
+namespace org.acme
+
+enum Color {
+    o RED
+    o BLUE
+    o GREEN
+}
+
+asset Vehicle identified by vin {
+    o String vin
+    o Color color
+}
+
+asset Truck extends Vehicle {
+    o Double weight
+}

@@ -1,0 +1,11 @@
+locale: en
+namespace: org.acme
+declarations:
+  - Color: A color
+  - Vehicle: A road vehicle
+    properties:
+      - vin: Vehicle Identification Number
+      - model: Model of the vehicle
+  - Truck: A vehicle capable of carrying cargo
+    properties:
+      - weight: The weight of the truck in KG
