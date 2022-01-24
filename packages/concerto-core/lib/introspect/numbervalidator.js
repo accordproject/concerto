@@ -82,11 +82,11 @@ class NumberValidator extends Validator{
     validate(identifier, value) {
         if(value !== null) {
             if(this.lowerBound !== null && value < this.lowerBound) {
-                this.reportError(identifier, 'Value is outside lower bound ' + value);
+                this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
             }
 
             if(this.upperBound !== null && value > this.upperBound) {
-                this.reportError(identifier, 'Value is outside upper bound ' + value);
+                this.reportError(identifier, `Value ${value} is outside upper bound ${this.upperBound}`);
             }
         }
     }

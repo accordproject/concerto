@@ -86,7 +86,7 @@ describe('NumberValidator', () => {
 
             (() => {
                 v.validate('id', -1);
-            }).should.throw(/org.acme.myField: Value is outside lower bound -1/);
+            }).should.throw(/org.acme.myField: Value -1 is outside lower bound 0/);
         });
 
         it('should detect upper bound violation', () => {
@@ -94,7 +94,7 @@ describe('NumberValidator', () => {
 
             (() => {
                 v.validate('id', 101);
-            }).should.throw(/org.acme.myField: Value is outside upper bound 101/);
+            }).should.throw(/org.acme.myField: Value 101 is outside upper bound 100/);
         });
 
         it('should ignore missing upper bound', () => {
@@ -103,7 +103,7 @@ describe('NumberValidator', () => {
 
             (() => {
                 v.validate('id', -1);
-            }).should.throw(/org.acme.myField: Value is outside lower bound -1/);
+            }).should.throw(/org.acme.myField: Value -1 is outside lower bound 0/);
         });
 
         it('should ignore missing lower bound', () => {
@@ -112,7 +112,7 @@ describe('NumberValidator', () => {
 
             (() => {
                 v.validate('id', 101);
-            }).should.throw(/org.acme.myField: Value is outside upper bound 101/);
+            }).should.throw(/org.acme.myField: Value 101 is outside upper bound 100/);
         });
 
         it('should do nothing if no value is given', () => {
