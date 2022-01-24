@@ -32,6 +32,7 @@ module.exports.HTTPFileLoader = require('./lib/loaders/httpfileloader');
 
 // Writers
 module.exports.Writer = require('./lib/writer');
+module.exports.ModelWriter = require('./lib/modelwriter');
 
 // Logger
 module.exports.Logger = require('./lib/logger');

@@ -14,12 +14,11 @@
 
 'use strict';
 
-const fs = require('fs');
 const fsPath = require('path');
-const slash = require('slash');
 
 const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
+const ModelWriter = require('@accordproject/concerto-util').ModelWriter;
 const Parser = require('@accordproject/concerto-cto').Parser;
 
 const Factory = require('./factory');
@@ -356,22 +355,7 @@ abstract concept Event {}
      *  If true, external models are written to the file system. Defaults to true
      */
     writeModelsToFileSystem(path, options = {}) {
-        if(!path){
-            throw new Error('`path` is a required parameter of writeModelsToFileSystem');
-        }
-
-        const opts = Object.assign({
-            includeExternalModels: true,
-        }, options);
-
-        this.getModelFiles().forEach(function (file) {
-            if (file.isExternal() && !opts.includeExternalModels) {
-                return;
-            }
-            // Always assume file names have been normalized from `\` to `/`
-            const filename = slash(file.fileName).split('/').pop();
-            fs.writeFileSync(path + fsPath.sep + filename, file.definitions);
-        });
+        ModelWriter.writeModelsToFileSystem(this.getModelFiles(), path, options);
     }
 
     /**
