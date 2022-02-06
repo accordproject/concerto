@@ -23,8 +23,14 @@ const Vocabulary = require('./vocabulary');
  * @returns {string} modified string
  */
 function camelCaseToSentence(text) {
-    const result = text.replace( /([A-Z])/g, ' $1' );
-    return result.charAt(0).toUpperCase() + result.slice(1);
+    return(
+        text
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([a-z])/g, ' $1$2')
+        .replace(/ +/g, ' ')
+        .replace(/^./, str => str.toUpperCase())
+        .trim()
+    )
 }
 
 /**
