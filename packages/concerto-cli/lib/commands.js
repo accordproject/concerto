@@ -28,6 +28,7 @@ const Concerto = require('@accordproject/concerto-core').Concerto;
 const MetaModel = require('@accordproject/concerto-core').MetaModel;
 const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
+const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
 
 const GoLangVisitor = CodeGen.GoLangVisitor;
 const JavaVisitor = CodeGen.JavaVisitor;
@@ -206,13 +207,27 @@ class Commands {
         if (!ctoFiles.includes(input)) {
             ctoFiles.push(input);
         }
-        const modelManager = await ModelLoader.loadModelManager(ctoFiles);
+
+        const allFiles = [];
+        ctoFiles.forEach((file) => {
+            const content = fs.readFileSync(file, 'utf8');
+            allFiles.push(content);
+        });
 
         const inputString = fs.readFileSync(input, 'utf8');
         let result;
 
         if (all) {
-            result = MetaModel.modelManagerToMetaModel(modelManager, resolve);
+            const allModels = Parser.parseModels(allFiles);
+            if (resolve) {
+                // First resolve external models
+                const allResolvedModels = await Parser.resolveExternal(allModels, {}, null);
+                result = allResolvedModels;
+                // Second resolve fully qualified names
+                result = MetaModelUtil.resolveLocalNamesForAll(result);
+            } else {
+                result = allModels;
+            }
         } else {
             result = Parser.parse(inputString);
             if (resolve) {

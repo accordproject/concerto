@@ -24,7 +24,7 @@ describe('TypedStack', function () {
     describe('#push', function() {
         it('check push with wrong type', function() {
             const ts = new TypedStack('ROOT');
-            assert.throws( function() {ts.push(1, String);}, /.+Did not find expected type Function as argument to push. Found: 1/, 'did not throw with expected message');
+            assert.throws(function() {ts.push(1, String);}, /.+Did not find expected type Function as argument to push. Found: 1/, 'did not throw with expected message');
         });
 
     });
@@ -33,19 +33,28 @@ describe('TypedStack', function () {
         it('check pop with empty stack', function() {
             const ts = new TypedStack('ROOT');
             ts.pop();
-            assert.throws( function() {ts.pop();}, /.+Stack is empty!/, 'did not throw with expected message');
+            assert.throws(function() {ts.pop();}, /.+Stack is empty!/, 'did not throw with expected message');
         });
 
         it('check pop with wrong type', function() {
             const ts = new TypedStack('ROOT');
-            assert.throws( function() {ts.pop(Number);}, /.+Found: ROOT/, 'did not throw with expected message');
+            assert.throws(function() {ts.pop(Number);}, /.+Found: ROOT/, 'did not throw with expected message');
         });
     });
 
     describe('#peek', () => {
         it('should throw an error if value given has wrong types', () => {
             const ts = new TypedStack('ROOT');
-            assert.throws( function() {ts.peek(Number);}, /.+Found: ROOT/, 'did not throw with expected message');
+            assert.throws(function() {ts.peek(Number);}, /.+Found: ROOT/, 'did not throw with expected message');
+        });
+    });
+
+    describe('#clear', () => {
+        it('should clear the stack', () => {
+            const ts = new TypedStack('ROOT');
+            ts.peek().should.equal('ROOT');
+            ts.clear();
+            (() => ts.peek()).should.Throw('Stack is empty!');
         });
     });
 });

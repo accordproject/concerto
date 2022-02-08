@@ -60,6 +60,7 @@
   "dependencies": {
     "@accordproject/concerto-util": "1.2.1",
     "@accordproject/concerto-cto": "1.2.1",
+    "@accordproject/concerto-metamodel": "1.2.1",
     "dayjs": "1.10.4",
     "debug": "4.3.1",
     "lorem-ipsum": "2.0.3",

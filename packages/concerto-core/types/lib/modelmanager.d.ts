@@ -244,6 +244,11 @@ declare class ModelManager {
      * qualified type name, false otherwise.
      */
     derivesFrom(fqt1: string, fqt2: string): boolean;
+    /**
+     * Get the full metamodel for a modelmanager
+     * @returns {*} the metamodel
+     */
+    getMetaModel(): any;
 }
 import Factory = require("./factory");
 import Serializer = require("./serializer");

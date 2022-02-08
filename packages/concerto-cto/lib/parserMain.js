@@ -14,11 +14,15 @@
 
 'use strict';
 
+const path = require('path');
+
 const Parser = require('./parser');
 const ParseException = require('./parseexception');
 
 const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
+
+const debug = require('debug')('concerto:ModelManager');
 
 /**
  * Create decorator argument string from a metamodel
@@ -51,19 +55,49 @@ function importFullyQualifiedName(imp) {
 
 /**
  * Returns an object that maps from the import declarations to the URIs specified
- * @param {*} the model ast
+ * @param {*} ast - the model ast
  * @return {Object} keys are import declarations, values are URIs
  * @private
  */
 function getExternalImports(ast) {
     const uriMap = {};
-    ast.imports.forEach((imp) => {
-        const fqn = importFullyQualifiedName(imp);
-        if(imp.uri) {
-            uriMap[fqn] = imp.uri;
+    if (ast.imports) {
+        ast.imports.forEach((imp) => {
+            const fqn = importFullyQualifiedName(imp);
+            if(imp.uri) {
+                uriMap[fqn] = imp.uri;
+            }
+        });
+    }
+    return uriMap;
+}
+
+/**
+ * Update models with a new model
+ * @param {*} models - existing models
+ * @param {*} newModel - new model
+ * @return {*} the updated models
+ */
+function updateModels(models, newModel) {
+    const result = {
+        $class: 'concerto.metamodel.Models',
+        models: [],
+    };
+    const newNamespace = newModel.namespace;
+    const priors = models.models;
+    let found = false;
+    priors.forEach((priorModel, index) => {
+        if (priorModel.namespace === newNamespace) {
+            result.models.push(newModel);
+            found = true;
+        } else {
+            result.models.push(priorModel);
         }
     });
-    return uriMap;
+    if (!found) {
+        result.models.push(newModel);
+    }
+    return result;
 }
 
 /**
@@ -75,69 +109,81 @@ function getExternalImports(ast) {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-async function resolve(options, fileDownloader) {
+async function resolveExternal(models, options, fileDownloader) {
     const NAME = 'updateExternalModels';
     debug(NAME, 'updateExternalModels', options);
 
     if(!fileDownloader) {
         // How to create a modelfile from the external content
         const processFile = (name, data) => {
-            const ast = Parser.parse(data);
-            return { ast, data, name };
+            // Note: JSON URLs seem to be already parsed in 'data'
+            // return { ast: data, data, name };
+            if (path.extname(name) === '.cto') {
+                return Parser.parse(data);
+            }
+            return data;
         };
         fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), getExternalImports);
     }
 
-    const externalModelFiles = await fileDownloader.downloadExternalDependencies(models, options)
-          .catch(error => {
-              // If we're not able to download the latest dependencies, see whether the models all validate based on the available cached models.
-              if(error.code === 'MISSING_DEPENDENCY'){
-                  try {
-                      // this.validateModelFiles();
-                      return [];
-                  } catch (validationError) {
-                      // The validation error tells us the first model that is missing from the model manager, but the dependency download
-                      // will fail at the first external model, regardless of whether there is already a local copy.
-                      // As a hint to the user we display the URL of the external model that can't be found.
-                      /* XXX
-                      const modelFile = this.getModelFileByFileName(validationError.fileName);
-                      const namespaces = modelFile.getExternalImports();
-                      const missingNs = Object.keys(namespaces).find((ns) => validationError.shortMessage.includes(ns));
-                      const url = modelFile.getImportURI(missingNs);
-                      const err = new Error(`Unable to download external model dependency '${url}'`);
-                      err.code = 'MISSING_DEPENDENCY';
-                      throw err;
-                      */
-                      throw validationError;
-                  }
-              } else {
-                  throw error;
-              }
-          });
-    const originalModelFiles = {};
-    Object.assign(originalModelFiles, models);
-
-    try {
-        externalModelFiles.forEach((mf) => {
-            const existing = this.modelFiles[mf.getNamespace()];
-
-            if (existing) {
-                this.updateModelFile(mf, mf.getName(), true); // disable validation
+    const externalModelFiles = await fileDownloader.downloadExternalDependencies(models.models, options)
+        .catch(error => {
+            // If we're not able to download the latest dependencies, see whether the models all validate based on the available cached models.
+            if(error.code === 'MISSING_DEPENDENCY'){
+                try {
+                    // this.validateModelFiles();
+                    const condition = false;
+                    if (condition) {
+                        throw new Error('error');
+                    }
+                    return [];
+                } catch (validationError) {
+                    // The validation error tells us the first model that is missing from the model manager, but the dependency download
+                    // will fail at the first external model, regardless of whether there is already a local copy.
+                    // As a hint to the user we display the URL of the external model that can't be found.
+                    /* XXX
+                       const modelFile = this.getModelFileByFileName(validationError.fileName);
+                       const namespaces = modelFile.getExternalImports();
+                       const missingNs = Object.keys(namespaces).find((ns) => validationError.shortMessage.includes(ns));
+                       const url = modelFile.getImportURI(missingNs);
+                    */
+                    const url = 'https://test';
+                    const err = new Error(`Unable to download external model dependency '${url}'`);
+                    err.code = 'MISSING_DEPENDENCY';
+                    throw err;
+                }
             } else {
-                this.addModelFile(mf, mf.getName(), true); // disable validation
+                throw error;
             }
         });
 
-        // now everything is applied, we need to revalidate all models
-        this.validateModelFiles();
-        return externalModelFiles;
-    } catch (err) {
-        this.modelFiles = {};
-        Object.assign(this.modelFiles, originalModelFiles);
-        throw err;
-    }
+    let result = models;
+    externalModelFiles.forEach((mf) => {
+        result = updateModels(result, mf);
+    });
+
+    return result;
+}
+
+/**
+ * Parses an array of model files
+ * @param {string[]} files - array of cto files
+ * @return {*} the AST / metamodel
+ */
+function parseModels(files) {
+    const result = {
+        $class: 'concerto.metamodel.Models',
+        models: [],
+    };
+    files.forEach((modelFile) => {
+        let metaModel = Parser.parse(modelFile);
+        result.models.push(metaModel);
+    });
+    return result;
 }
 
 module.exports = {
     parse,
+    parseModels,
+    resolveExternal,
 };
