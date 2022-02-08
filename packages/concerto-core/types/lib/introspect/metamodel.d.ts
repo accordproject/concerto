@@ -20,27 +20,6 @@ declare class MetaModel {
      */
     static validateMetaModel(input: object): object;
     /**
-     * Create a name resolution table
-     * @param {*} modelManager - the model manager
-     * @param {object} metaModel - the metamodel (JSON)
-     * @return {object} mapping from a name to its namespace
-     */
-    static createNameTable(modelManager: any, metaModel: object): object;
-    /**
-     * Resolve a name using the name table
-     * @param {string} name - the name of the type to resolve
-     * @param {object} table - the name table
-     * @return {string} the namespace for that name
-     */
-    static resolveName(name: string, table: object): string;
-    /**
-     * Name resolution for metamodel
-     * @param {object} metaModel - the metamodel (JSON)
-     * @param {object} table - the name table
-     * @return {object} the metamodel with fully qualified names
-     */
-    static resolveTypeNames(metaModel: object, table: object): object;
-    /**
      * Resolve the namespace for names in the metamodel
      * @param {object} modelManager - the ModelManager
      * @param {object} metaModel - the MetaModel

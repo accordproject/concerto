@@ -623,6 +623,22 @@ abstract concept Event {}
         }
         return false;
     }
+
+    /**
+     * Get the full metamodel for a modelmanager
+     * @returns {*} the metamodel
+     */
+    getMetaModel() {
+        const result = {
+            $class: 'concerto.metamodel.Models',
+            models: [],
+        };
+        const modelFiles = this.getModelFiles();
+        modelFiles.forEach((thisModelFile) => {
+            result.models.push(thisModelFile.getAst());
+        });
+        return result;
+    }
 }
 
 module.exports = ModelManager;

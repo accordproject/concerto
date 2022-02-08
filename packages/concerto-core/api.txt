@@ -94,9 +94,6 @@ class MetaModel {
    + string getMetaModelCto() 
    + void createMetaModelManager() 
    + object validateMetaModel(object) 
-   + object createNameTable(modelManager,object) 
-   + string resolveName(string,object) 
-   + object resolveTypeNames(object,object) 
    + object resolveMetaModel(object,object,boolean?) 
    + object modelFileToMetaModel(object,boolean?) 
    + object modelManagerToMetaModel(object,boolean?,boolean?) 
@@ -221,6 +218,7 @@ class ModelManager {
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean derivesFrom(string,string) 
+   + void getMetaModel() 
 }
 class SecurityException extends BaseException {
    + void constructor(string) 

@@ -32,7 +32,7 @@ function writeModelsToFileSystem(files, path, options = {}) {
     const opts = Object.assign({
         includeExternalModels: true,
     }, options);
-
+    console.log(JSON.stringify(opts));
     files.forEach(function (file) {
         if (file.external && !opts.includeExternalModels) {
             return;
