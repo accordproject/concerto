@@ -31,3 +31,6 @@ module.exports.Parser = require('./lib/parserMain');
 
 // Printer
 module.exports.Printer = require('./lib/printer');
+
+// External models resolution
+module.exports.External = require('./lib/external');

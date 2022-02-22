@@ -212,14 +212,14 @@ describe('cicero-cli', () => {
     describe('#parse', async () => {
         it('should transform cto to metamodel', async () => {
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contract.json')));
-            const result = JSON.parse(await Commands.parse(path.resolve(__dirname, 'models/contract.cto')));
+            const result = JSON.parse(await Commands.parse([path.resolve(__dirname, 'models/contract.cto')]));
             result.should.deep.equal(expected);
         });
 
         it('should transform cto to metamodel and save it', async () => {
             const output = await tmp.file({ unsafeCleanup: true });
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contract.json')));
-            await Commands.parse(path.resolve(__dirname, 'models/contract.cto'), undefined, undefined, undefined, output.path);
+            await Commands.parse([path.resolve(__dirname, 'models/contract.cto')], undefined, undefined, output.path);
             const result = JSON.parse(fs.readFileSync(output.path));
             result.should.deep.equal(expected);
             output.cleanup();
@@ -228,14 +228,14 @@ describe('cicero-cli', () => {
         it('should transform cto to metamodel and resolve names', async () => {
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contractResolved.json')));
             const contractFile = path.resolve(__dirname, 'models/contract.cto');
-            const result = JSON.parse(await Commands.parse(contractFile, [contractFile], true));
+            const result = JSON.parse(await Commands.parse([contractFile], true));
             result.should.deep.equal(expected);
         });
 
         it('should transform cto to metamodel and resolve names', async () => {
             const expected = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'models/contractResolvedAll.json')));
             const contractFile = path.resolve(__dirname, 'models/contract.cto');
-            const result = JSON.parse(await Commands.parse(contractFile, [contractFile], true, true));
+            const result = JSON.parse(await Commands.parse([contractFile], true, true));
             result.should.deep.equal(expected);
         });
     });

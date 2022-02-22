@@ -146,15 +146,11 @@ require('yargs')
             });
     })
     .command('parse', 'parse a cto string to a JSON syntax tree', (yargs) => {
-        yargs.demandOption(['input'], 'Please provide an input cto string');
+        yargs.demandOption(['model'], 'Please provide Concerto model(s)');
         yargs.option('model', {
             describe: 'array of concerto model files',
             type: 'string',
             array: true
-        });
-        yargs.option('input', {
-            describe: 'the cto model to import',
-            type: 'string'
         });
         yargs.option('resolve', {
             describe: 'resolve names to fully qualified names',
@@ -171,7 +167,7 @@ require('yargs')
             type: 'string'
         });
     }, (argv) => {
-        return Commands.parse(argv.input, argv.model, argv.resolve, argv.all, argv.output)
+        return Commands.parse(argv.model, argv.resolve, argv.all, argv.output)
             .then((result) => {
                 if (result) {
                     Logger.info(result);

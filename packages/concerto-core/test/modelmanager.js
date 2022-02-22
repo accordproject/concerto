@@ -624,25 +624,6 @@ concept Bar {
             // import all external models
             return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to find a model file loader that can handle: foo://external.cto');
         });
-
-        it('should not fail when an external model file can\'t be downloaded, but that isn\'t needed', () => {
-
-            // disable validation, we are using an external model
-            modelManager.addModelFile(`namespace org.acme
-import org.external.* from github://external.cto
-
-concept Bar {
-    o Foo foo
-}`, 'internal.cto', true);
-            modelManager.addModelFile(`namespace org.external
-concept Foo {
-    o String foo
-}`, 'internal.cto', true);
-            modelManager.getModelFile('org.acme').should.not.be.null;
-
-            // import all external models
-            return modelManager.updateExternalModels().should.be.fulfilled;
-        });
     });
 
     describe('#writeModelsToFileSystem', () => {
