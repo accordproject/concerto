@@ -21,11 +21,11 @@ const mkdirp = require('mkdirp');
 const Logger = require('@accordproject/concerto-util').Logger;
 const Printer = require('@accordproject/concerto-cto').Printer;
 const Parser = require('@accordproject/concerto-cto').Parser;
+const External = require('@accordproject/concerto-cto').External;
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
 const Concerto = require('@accordproject/concerto-core').Concerto;
-const MetaModel = require('@accordproject/concerto-core').MetaModel;
 const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
@@ -195,44 +195,37 @@ class Commands {
     /**
      * Parse a cto string to a JSON syntax tree
      *
-     * @param {string} input - CTO
      * @param {string[]} [ctoFiles] - the CTO files used for import resolution
      * @param {boolean} resolve - whether to resolve the names
      * @param {boolean} all - whether to import all models
      * @param {string} outputPath to an output file
      * @param {string} the metamodel
      */
-    static async parse(input, ctoFiles = [], resolve = false, all = false, outputPath) {
-        // Add input to ctoFiles for convenience
-        if (!ctoFiles.includes(input)) {
-            ctoFiles.push(input);
-        }
+    static async parse(ctoFiles, resolve = false, all = false, outputPath) {
+        let result;
 
         const allFiles = [];
         ctoFiles.forEach((file) => {
             const content = fs.readFileSync(file, 'utf8');
-            allFiles.push(content);
+            allFiles.unshift(content);
         });
 
-        const inputString = fs.readFileSync(input, 'utf8');
-        let result;
-
-        if (all) {
-            const allModels = Parser.parseModels(allFiles);
-            if (resolve) {
-                // First resolve external models
-                const allResolvedModels = await Parser.resolveExternal(allModels, {}, null);
-                result = allResolvedModels;
-                // Second resolve fully qualified names
-                result = MetaModelUtil.resolveLocalNamesForAll(result);
-            } else {
-                result = allModels;
-            }
+        const allModels = Parser.parseModels(allFiles);
+        if (resolve) {
+            // First resolve external models
+            const allResolvedModels = await External.resolveExternal(allModels, {}, null);
+            result = allResolvedModels;
+            // Second resolve fully qualified names
+            result = MetaModelUtil.resolveLocalNamesForAll(result);
         } else {
-            result = Parser.parse(inputString);
-            if (resolve) {
-                result = MetaModel.resolveMetaModel(modelManager, result);
-            }
+            result = allModels;
+        }
+
+        // Validate the model
+        // await ModelLoader.loadModelManagerFromMetaModel(result);
+
+        if (!all) {
+            result = result.models[0];
         }
         if (outputPath) {
             Logger.info('Creating file: ' + outputPath);

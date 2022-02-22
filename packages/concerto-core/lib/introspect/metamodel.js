@@ -68,7 +68,7 @@ class MetaModel {
         // First, validate the JSON metaModel
         const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
 
-        const priorModels = modelManager.getMetaModel();
+        const priorModels = modelManager.getAst();
         return MetaModelUtil.resolveLocalNames(priorModels, mm);
     }
 

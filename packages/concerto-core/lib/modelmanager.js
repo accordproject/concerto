@@ -282,7 +282,6 @@ abstract concept Event {}
      * @return {Promise} a promise when the download and update operation is completed.
      */
     async updateExternalModels(options, fileDownloader) {
-
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
@@ -299,29 +298,7 @@ abstract concept Event {}
             fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), getExternalImports);
         }
 
-        const externalModelFiles = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options)
-            .catch(error => {
-                // If we're not able to download the latest dependencies, see whether the models all validate based on the available cached models.
-                if(error.code === 'MISSING_DEPENDENCY'){
-                    try {
-                        this.validateModelFiles();
-                        return [];
-                    } catch (validationError) {
-                        // The validation error tells us the first model that is missing from the model manager, but the dependency download
-                        // will fail at the first external model, regardless of whether there is already a local copy.
-                        // As a hint to the user we display the URL of the external model that can't be found.
-                        const modelFile = this.getModelFileByFileName(validationError.fileName);
-                        const namespaces = modelFile.getExternalImports();
-                        const missingNs = Object.keys(namespaces).find((ns) => validationError.shortMessage.includes(ns));
-                        const url = modelFile.getImportURI(missingNs);
-                        const err = new Error(`Unable to download external model dependency '${url}'`);
-                        err.code = 'MISSING_DEPENDENCY';
-                        throw err;
-                    }
-                } else {
-                    throw error;
-                }
-            });
+        const externalModelFiles = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options);
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
 
@@ -625,10 +602,10 @@ abstract concept Event {}
     }
 
     /**
-     * Get the full metamodel for a modelmanager
+     * Get the full ast (metamodel instances) for a modelmanager
      * @returns {*} the metamodel
      */
-    getMetaModel() {
+    getAst() {
         const result = {
             $class: 'concerto.metamodel.Models',
             models: [],
