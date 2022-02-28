@@ -38,6 +38,7 @@ describe('AssetDeclaration', () => {
         mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);
+        mockClassDeclaration.declarationKind.returns('AssetDeclaration');
     });
 
     afterEach(() => {
@@ -153,6 +154,13 @@ describe('AssetDeclaration', () => {
         it('should return true for a valid Asset Declaration', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
             (asset instanceof AssetDeclaration).should.be.true;
+        });
+    });
+
+    describe('#declarationKind', () => {
+        it('should return that is is an Asset Declaration', () => {
+            let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.resolve.cto');
+            (asset.declarationKind()).should.equal('AssetDeclaration');
         });
     });
 

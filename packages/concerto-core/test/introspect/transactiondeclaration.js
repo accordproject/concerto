@@ -50,7 +50,7 @@ describe('TransactionDeclaration', () => {
             const modelFile = ParserUtil.newModelFile(modelManager, model);
             let td = modelFile.getTransactionDeclaration('T');
             td.validate();
-
+            td.declarationKind().should.equal('TransactionDeclaration');
         });
     });
 });

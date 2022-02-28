@@ -33,6 +33,15 @@ class ParticipantDeclaration extends IdentifiedDeclaration {
     constructor(modelFile, ast) {
         super(modelFile, ast);
     }
+
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind() {
+        return 'ParticipantDeclaration';
+    }
 }
 
 module.exports = ParticipantDeclaration;

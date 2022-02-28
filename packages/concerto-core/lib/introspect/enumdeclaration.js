@@ -42,6 +42,15 @@ class EnumDeclaration extends ClassDeclaration {
     toString() {
         return 'EnumDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
+
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind() {
+        return 'EnumDeclaration';
+    }
 }
 
 module.exports = EnumDeclaration;

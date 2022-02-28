@@ -171,8 +171,9 @@ class ClassDeclaration extends Decorated {
 
         // if super type is not a concept, then check that this type and the super type
         // are of the same type. E.g. an asset cannot extend a participant
-        if (classDecl.constructor.name !== 'ConceptDeclaration' && this.constructor.name !== classDecl.constructor.name) {
-            throw new IllegalModelException(`${this.constructor.name} (${this.getName()}) cannot extend ${classDecl.constructor.name} (${classDecl.getName()})`, this.modelFile, this.ast.location);
+        if (classDecl.declarationKind() !== 'ConceptDeclaration' && this.declarationKind() !== classDecl.declarationKind()) {
+            console.log(`CLASSDECL: ${classDecl.constructor.name}`);
+            throw new IllegalModelException(`${this.declarationKind()} (${this.getName()}) cannot extend ${classDecl.declarationKind()} (${classDecl.getName()})`, this.modelFile, this.ast.location);
         }
         this.superTypeDeclaration = classDecl;
         return classDecl;
