@@ -108,27 +108,27 @@ function inferType(definition, context) {
 
     if (definition.type) {
         switch (definition.type) {
-            case 'string':
-                if (definition.format) {
-                    if (definition.format === 'date-time' || definition.format === 'date') {
-                        return 'DateTime';
-                    } else {
-                        throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
-                    }
+        case 'string':
+            if (definition.format) {
+                if (definition.format === 'date-time' || definition.format === 'date') {
+                    return 'DateTime';
+                } else {
+                    throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
                 }
-                return 'String';
-            case 'boolean':
-                return 'Boolean';
-            case 'number':
-                return 'Double';
-            case 'integer':
-                return 'Integer'; // Could also be Long?
-            case 'array':
-                return inferType(definition.items, context) + '[]';
-            case 'object':
-                return inferTypeName(definition, context);
-            default:
-                throw new Error(`Type keyword '${definition.type}' in '${name}' is not supported`);
+            }
+            return 'String';
+        case 'boolean':
+            return 'Boolean';
+        case 'number':
+            return 'Double';
+        case 'integer':
+            return 'Integer'; // Could also be Long?
+        case 'array':
+            return inferType(definition.items, context) + '[]';
+        case 'object':
+            return inferTypeName(definition, context);
+        default:
+            throw new Error(`Type keyword '${definition.type}' in '${name}' is not supported`);
         }
     }
     throw new Error(`Unsupported definition: ${JSON.stringify(definition)}`);

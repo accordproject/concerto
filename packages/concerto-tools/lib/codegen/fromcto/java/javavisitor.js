@@ -15,14 +15,7 @@
 'use strict';
 
 const EmptyPlugin = require('./emptyplugin');
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
-const ModelFile = require('@accordproject/concerto-core').ModelFile;
-const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const util = require('util');
 
 /**

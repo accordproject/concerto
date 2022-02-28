@@ -17,6 +17,9 @@ logs
 *.log
 npm-debug.log*
 
+# Test output
+output
+
 # Runtime data
 pids
 *.pid
@@ -65,9 +68,9 @@ jspm_packages
 package-lock.jsonyarn
 out
 
-# minimised build folder
-dist
-
 # windowsjunk
 
 thumbs.db
+
+# umd build folder
+umd

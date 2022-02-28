@@ -14,10 +14,6 @@
 
 'use strict';
 
-const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const debug = require('debug')('concerto-core:recursiondetectionvisitor');
 const util = require('util');
 

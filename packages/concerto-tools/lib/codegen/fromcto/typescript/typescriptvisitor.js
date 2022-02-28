@@ -14,14 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
-const ModelFile = require('@accordproject/concerto-core').ModelFile;
-const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const util = require('util');
 
 /**
@@ -260,20 +253,20 @@ class TypescriptVisitor {
      */
     toTsType(type, useInterface) {
         switch (type) {
-            case 'DateTime':
-                return 'Date';
-            case 'Boolean':
-                return 'boolean';
-            case 'String':
-                return 'string';
-            case 'Double':
-                return 'number';
-            case 'Long':
-                return 'number';
-            case 'Integer':
-                return 'number';
-            default:
-                return useInterface ? `I${type}` : type;
+        case 'DateTime':
+            return 'Date';
+        case 'Boolean':
+            return 'boolean';
+        case 'String':
+            return 'string';
+        case 'Double':
+            return 'number';
+        case 'Long':
+            return 'number';
+        case 'Integer':
+            return 'number';
+        default:
+            return useInterface ? `I${type}` : type;
         }
     }
 }
