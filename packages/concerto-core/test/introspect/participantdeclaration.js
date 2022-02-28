@@ -30,8 +30,9 @@ describe('ParticipantDeclaration', () => {
 
     describe('#getParticipantDeclarations', () => {
         it('should get participants', () => {
-            let assets = modelManager.getParticipantDeclarations();
-            assets.should.have.lengthOf(3);
+            let participants = modelManager.getParticipantDeclarations();
+            participants.should.have.lengthOf(3);
+            participants[0].declarationKind().should.equal('ParticipantDeclaration');
         });
     });
 });

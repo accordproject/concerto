@@ -42,6 +42,15 @@ class EventDeclaration extends IdentifiedDeclaration {
     process() {
         super.process();
     }
+
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind() {
+        return 'EventDeclaration';
+    }
 }
 
 module.exports = EventDeclaration;

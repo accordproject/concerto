@@ -26,6 +26,7 @@ class Factory {
 }
 class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + string declarationKind() 
 }
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
@@ -58,6 +59,7 @@ class ClassDeclaration extends Decorated {
 }
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + string declarationKind() 
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
@@ -71,6 +73,7 @@ class DecoratorFactory {
 class EnumDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + String toString() 
+   + string declarationKind() 
 }
 class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
@@ -78,6 +81,7 @@ class EnumValueDeclaration extends Property {
 }
 class EventDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + string declarationKind() 
 }
 class IdentifiedDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
@@ -129,6 +133,7 @@ class ModelFile {
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + string declarationKind() 
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
@@ -150,6 +155,7 @@ class RelationshipDeclaration extends Property {
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + string declarationKind() 
 }
 class Identifiable extends Typed {
    + string getTimestamp() 

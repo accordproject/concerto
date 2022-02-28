@@ -68,6 +68,7 @@ describe('EventDeclaration', () => {
             abstractEvent.isAbstract().should.be.true;
             abstractEvent.isEvent().should.be.true;
             abstractEvent.validate();
+            abstractEvent.declarationKind().should.equal('EventDeclaration');
 
             const concreteEvent = modelFile.getEventDeclaration('ConcreteEvent');
             concreteEvent.getFullyQualifiedName().should.equal('org.acme.ConcreteEvent');

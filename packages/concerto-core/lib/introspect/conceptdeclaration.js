@@ -37,6 +37,15 @@ class ConceptDeclaration extends ClassDeclaration {
     constructor(modelFile, ast) {
         super(modelFile, ast);
     }
+
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind() {
+        return 'ConceptDeclaration';
+    }
 }
 
 module.exports = ConceptDeclaration;

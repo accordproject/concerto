@@ -75,4 +75,12 @@ describe('EnumDeclaration', () => {
             (value[0].isEnumValue()).should.be.true;
         });
     });
+
+    describe('#declarationKind', () => {
+        it('should return that is is an Enum Declaration', () => {
+            let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
+            (declaration.declarationKind()).should.equal('EnumDeclaration');
+        });
+    });
+
 });

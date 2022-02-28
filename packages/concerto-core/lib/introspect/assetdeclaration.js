@@ -37,6 +37,15 @@ class AssetDeclaration extends IdentifiedDeclaration {
     constructor(modelFile, ast) {
         super(modelFile, ast);
     }
+
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind() {
+        return 'AssetDeclaration';
+    }
 }
 
 module.exports = AssetDeclaration;
