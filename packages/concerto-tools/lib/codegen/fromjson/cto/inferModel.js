@@ -170,7 +170,8 @@ function handleArray(typeName, context, input) {
     }
     const itemTypeName = isObject(item) ? typeName : getType(item);
 
-    result = handleType(itemTypeName, context, item);
+    // Note: handleArray and handleType are mutually recursive
+    result = handleType(itemTypeName, context, item); // eslint-disable-line no-use-before-define
     result.array = '[]';
     result.optional = '',
     result.name = typeName;

@@ -14,14 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
-const ModelFile = require('@accordproject/concerto-core').ModelFile;
-const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const util = require('util');
 
 /**
@@ -234,20 +227,20 @@ class CSharpVisitor {
      */
     toCSharpType(type) {
         switch (type) {
-            case 'DateTime':
-                return 'DateTime';
-            case 'Boolean':
-                return 'bool';
-            case 'String':
-                return 'string';
-            case 'Double':
-                return 'float';
-            case 'Long':
-                return 'long';
-            case 'Integer':
-                return 'int';
-            default:
-                return type;
+        case 'DateTime':
+            return 'DateTime';
+        case 'Boolean':
+            return 'bool';
+        case 'String':
+            return 'string';
+        case 'Double':
+            return 'float';
+        case 'Long':
+            return 'long';
+        case 'Integer':
+            return 'int';
+        default:
+            return type;
         }
     }
 }

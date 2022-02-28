@@ -14,17 +14,6 @@
 
 'use strict';
 
-const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
-const ParticipantDeclaration = require('@accordproject/concerto-core').ParticipantDeclaration;
-const ConceptDeclaration = require('@accordproject/concerto-core').ConceptDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
-const EventDeclaration = require('@accordproject/concerto-core').EventDeclaration;
-const Field = require('@accordproject/concerto-core').Field;
-const ModelFile = require('@accordproject/concerto-core').ModelFile;
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const debug = require('debug')('concerto-core:loopbackvisitor');
 const util = require('util');
 

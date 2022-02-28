@@ -14,18 +14,6 @@
 
 'use strict';
 
-const ModelFile = require('@accordproject/concerto-core').ModelFile;
-const ModelManager = require('@accordproject/concerto-core').ModelManager;
-const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
-const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
-const ParticipantDeclaration = require('@accordproject/concerto-core').ParticipantDeclaration;
-const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-
-const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
-
 /**
  * Convert the contents of a ModelManager
  * to PlantUML format files.
