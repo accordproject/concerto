@@ -39,3 +39,6 @@ module.exports.Logger = require('./lib/logger');
 
 // TypedStack
 module.exports.TypedStack = require('./lib/typedstack');
+
+// Label
+module.exports.Label = require('./lib/label');
