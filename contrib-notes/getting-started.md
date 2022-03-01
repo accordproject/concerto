@@ -1,11 +1,8 @@
 # Contributing to Concerto
 
 * Currently reading -> [Step-by-step development environment setup](./getting-started.md)
-* [Suggested IDE setup](./ide-setup.md)
 * [Coding Guidelines](./coding-guidelines.md)
 * [Pull Request Guidelines](./submitting-pull-request.md)
-* [Release process](./release-process/weekly-qa-validation.md)
-
 
 # Getting Started Developing Concerto
 
@@ -97,7 +94,6 @@ This will run the unit tests that are associated with all the modules.
 ## Next step
 Moving on to read
 
-* [Suggested IDE setup](./ide-setup.md)
 * [Coding Guidelines](./coding-guidelines.md)
 
 ## License <a name="license"></a>
