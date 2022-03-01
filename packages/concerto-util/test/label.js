@@ -25,6 +25,10 @@ describe('Label', function () {
             labelToSentence('fullName').should.equal('Full Name');
         });
 
+        it('should create a sentence for a longer label', function() {
+            labelToSentence('fullNameOrEmailAddress').should.equal('Full Name Or Email Address');
+        });
+
         it('should handle null', function() {
             labelToSentence().should.equal('');
         });
@@ -32,8 +36,12 @@ describe('Label', function () {
     });
 
     describe('#sentenceToLabel', function() {
-        it('should create a sentence', function() {
+        it('should create a label', function() {
             sentenceToLabel('Full Name').should.equal('fullName');
+        });
+
+        it('should create a label for a longer sentence', function() {
+            sentenceToLabel('Full name or email address').should.equal('fullNameOrEmailAddress');
         });
 
         it('should handle null', function() {
