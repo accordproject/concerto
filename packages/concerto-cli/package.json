@@ -26,22 +26,16 @@
     "url": "https://github.com/accordproject/concerto/issues"
   },
   "devDependencies": {
-    "ajv": "8.1.0",
-    "babel-preset-latest": "6.24.1",
-    "chai": "4.3.4",
+    "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "eslint": "8.2.0",
     "jsdoc": "^3.6.7",
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
-    "mockery": "2.1.0",
-    "moxios": "0.4.0",
-    "nunjucks": "3.2.3",
     "nyc": "15.1.0",
-    "peggy": "1.2.0",
-    "sinon": "10.0.0",
-    "sinon-chai": "3.6.0",
+    "sinon": "12.0.0",
+    "sinon-chai": "3.7.0",
     "tmp-promise": "3.0.2"
   },
   "dependencies": {
@@ -51,7 +45,7 @@
     "@accordproject/concerto-metamodel": "1.2.1",
     "@accordproject/concerto-tools": "1.2.1",
     "mkdirp": "1.0.4",
-    "yargs": "17.1.0"
+    "yargs": "17.3.1"
   },
   "license-check-and-add-config": {
     "folder": "./lib",

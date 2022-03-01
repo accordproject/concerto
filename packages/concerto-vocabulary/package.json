@@ -35,7 +35,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "chai": "4.3.4",
+    "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "eslint": "8.2.0",
@@ -43,8 +43,8 @@
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
     "nyc": "15.1.0",
-    "sinon": "10.0.0",
-    "sinon-chai": "3.6.0"
+    "sinon": "12.0.0",
+    "sinon-chai": "3.7.0"
   },
   "dependencies": {
     "yaml": "2.0.0-9"
