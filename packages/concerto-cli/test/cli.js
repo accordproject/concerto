@@ -63,7 +63,7 @@ describe('cicero-cli', () => {
                 const result = await Commands.validate(input2, models, {offline:false});
                 JSON.parse(result).should.deep.equal(JSON.parse(inputText2));
             } catch (err) {
-                err.message.should.equal('Instance org.accordproject.money.MonetaryAmount#null invalid enum value true for field CurrencyCode');
+                err.message.should.equal('Instance org.accordproject.money.MonetaryAmount invalid enum value true for field CurrencyCode');
             }
         });
 
@@ -77,7 +77,7 @@ describe('cicero-cli', () => {
                 const result = await Commands.validate(input2, offlineModels, {offline:true});
                 JSON.parse(result).should.deep.equal(JSON.parse(inputText2));
             } catch (err) {
-                err.message.should.equal('Instance org.accordproject.money.MonetaryAmount#null invalid enum value true for field CurrencyCode');
+                err.message.should.equal('Instance org.accordproject.money.MonetaryAmount invalid enum value true for field CurrencyCode');
             }
         });
 
