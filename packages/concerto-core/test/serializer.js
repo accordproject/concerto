@@ -85,13 +85,13 @@ describe('Serializer', () => {
         it('should throw if factory not specified', () => {
             (() => {
                 new Serializer(null, modelManager);
-            }).should.throw(/Factory cannot be null/);
+            }).should.throw(/"Factory" cannot be "null"./);
         });
 
         it('should throw if modelManager not specified', () => {
             (() => {
                 new Serializer(factory, null);
-            }).should.throw(/ModelManager cannot be null/);
+            }).should.throw(/"ModelManager" cannot be "null"./);
         });
 
     });
@@ -137,7 +137,7 @@ describe('Serializer', () => {
             resource.doubleValue = NaN;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value NaN/);
+            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "NaN"./);
         });
 
         it('should throw validation errors during JSON object generation if Double is Infinity', () => {
@@ -147,7 +147,7 @@ describe('Serializer', () => {
             resource.doubleValue = Infinity;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value Infinity/);
+            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "Infinity"./);
         });
 
         it('should throw validation errors during JSON object generation if Double is -Infinity', () => {
@@ -157,14 +157,14 @@ describe('Serializer', () => {
             resource.doubleValue = -Infinity;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in instance org.acme.sample.SampleAsset#1 field doubleValue has value -Infinity/);
+            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "-Infinity"./);
         });
 
         it('should throw validation errors during JSON object generation if the validate flag is not specified and errors are present', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should throw validation errors during JSON object generation if the validate flag is set to true and errors are present', () => {
@@ -173,7 +173,7 @@ describe('Serializer', () => {
                 serializer.toJSON(resource, {
                     validate: true
                 });
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should generate a JSON object if errors are present but the validate flag is set to false', () => {
@@ -206,7 +206,7 @@ describe('Serializer', () => {
                 serializer.toJSON(resource, {
                     validate: true
                 });
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should generate a concept', () => {
@@ -329,7 +329,7 @@ describe('Serializer', () => {
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should throw validation errors if the validate flag is set to true', () => {
@@ -340,7 +340,7 @@ describe('Serializer', () => {
             };
             (() => {
                 serializer.fromJSON(json, { validate: true });
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should not validate if the validate flag is set to false', () => {
@@ -381,7 +381,7 @@ describe('Serializer', () => {
             };
             (() => {
                 serializer.fromJSON(json, { validate: true });
-            }).should.throw(/missing required field/);
+            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should error on unexpected properties', () => {

@@ -93,14 +93,14 @@ describe('Globalization', function() {
             let formatter = Globalize('en').messageFormatter('classdeclaration-process-unrecmodelelem');
             formatter({
                 'type': 'Cow'
-            }).should.equal('Unrecognised model element Cow');
+            }).should.equal('Unrecognised model element "Cow".');
         });
 
         it('check message in getFields()', function() {
             let formatter = Globalize('en').messageFormatter('classdeclaration-getfield-notfindsupertype');
             formatter({
                 'type': 'Bar'
-            }).should.equal('Could not find super type Bar');
+            }).should.equal('Could not find supertype "Bar".');
 
             // TODO (LG) functionally test this function
         });
@@ -111,7 +111,7 @@ describe('Globalization', function() {
                 formatter({
                     'class': 'Cow',
                     'idField': 'CowID'
-                }).should.equal('Class Cow is identified by field (CowID) but does not contain this property.');
+                }).should.equal('Class "Cow" is identified by field "CowID", but does not contain this property.');
 
                 // create and polulate the modelManager with a model file
                 const modelManager = new ModelManager();
@@ -123,7 +123,7 @@ describe('Globalization', function() {
 
                 expect(function() {
                     modelManager.addModelFile(invalidFile,fileName);
-                }).to.throw(IllegalModelException, 'Class foo is identified by field (fooID) but does not contain this property.');
+                }).to.throw(IllegalModelException, 'Class "foo" is identified by field "fooID", but does not contain this property.');
             });
 
             it('where identifier is not a string', function() {
@@ -131,7 +131,7 @@ describe('Globalization', function() {
                 formatter({
                     'class': 'Cow',
                     'idField': 'CowID'
-                }).should.equal('Class Cow is identified by field (CowID) but the type of the field is not String.');
+                }).should.equal('Class "Cow" is identified by field "CowID", but the type of the field is not "String".');
 
                 // create and polulate the modelManager with a model file
                 const modelManager = new ModelManager();
@@ -142,7 +142,7 @@ describe('Globalization', function() {
                 invalidFile.should.not.be.null;
                 expect(function() {
                     modelManager.addModelFile(invalidFile,fileName);
-                }).to.throw(IllegalModelException, 'Class foo is identified by field (fooID) but the type of the field is not String.');
+                }).to.throw(IllegalModelException, 'Class "foo" is identified by field "fooID", but the type of the field is not "String".');
             });
         });
     });
@@ -152,7 +152,7 @@ describe('Globalization', function() {
             let formatter = Globalize.messageFormatter('modelfile-constructor-unrecmodelelem');
             formatter({
                 'type': 'Person',
-            }).should.equal('Unrecognised model element Person');
+            }).should.equal('Unrecognised model element "Person".');
 
             // TODO (LG) functionally test this function
         });
@@ -162,7 +162,7 @@ describe('Globalization', function() {
             formatter({
                 'type': 'Person',
                 'context': 'Context'
-            }).should.equal('Undeclared type Person in Context');
+            }).should.equal('Undeclared type "Person" in "Context".');
 
             // create and polulate the modelManager with a model file
             const modelManager = new ModelManager();
@@ -173,7 +173,7 @@ describe('Globalization', function() {
             invalidFile.should.not.be.null;
             expect(function() {
                 modelManager.addModelFile(invalidFile,fileName);
-            }).to.throw(IllegalModelException, 'Undeclared type Person in property Bar.foo.fooProperty');
+            }).to.throw(IllegalModelException, 'Undeclared type "Person" in "property Bar.foo.fooProperty"');
         });
 
         it('check message in resolveImport()', function() {
@@ -182,7 +182,7 @@ describe('Globalization', function() {
                 'type': 'Type',
                 'imports': 'Imports',
                 'namespace': 'Namespace'
-            }).should.equal('Failed to find Type in list of imports [Imports] for namespace Namespace');
+            }).should.equal('Failed to find "Type" in list of imports "[Imports]" for namespace "Namespace".');
             // TODO (LG) functionally test this function (will never be thrown)
         });
     });
@@ -318,14 +318,14 @@ describe('Globalization', function() {
                 formatter({
                     type: 'bar',
                     context: 'foo'
-                }).should.equal('No registered namespace for type bar in foo');
+                }).should.equal('No registered namespace for type "bar" in "foo".');
 
                 const modelManager = new ModelManager();
                 Util.addComposerModel(modelManager);
 
                 expect(function() {
                     modelManager.resolveType('foo', 'bar');
-                }).to.throw(IllegalModelException, 'No registered namespace for type bar in foo');
+                }).to.throw(IllegalModelException, 'No registered namespace for type "bar" in "foo".');
             });
 
             it('when a type doesn\'t exist in a namespace for a context', function() {
@@ -334,7 +334,7 @@ describe('Globalization', function() {
                     namespace: 'baz',
                     type: 'bar',
                     context: 'foo'
-                }).should.equal('No type bar in namespace baz for foo');
+                }).should.equal('No type "bar" in namespace "baz" for "foo".');
 
                 // Cannot be tested - will throw error on line 85 modelmanager.js first
             });
@@ -345,13 +345,13 @@ describe('Globalization', function() {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
                 formatter({
                     type: 'TYPE'
-                }).should.equal('Namespace is not defined for type TYPE');
+                }).should.equal('Namespace is not defined for type "TYPE".');
 
                 const modelManager = new ModelManager();
 
                 expect(function() {
                     modelManager.getType('NAMESPACE.TYPE');
-                }).to.throw(Error, 'Namespace is not defined for type NAMESPACE.TYPE');
+                }).to.throw(Error, 'Namespace is not defined for type "NAMESPACE.TYPE".');
             });
 
             it('check type exists in namespace', function() {
@@ -359,7 +359,7 @@ describe('Globalization', function() {
                 formatter({
                     type: 'TYPE',
                     namespace: 'NAMESPACE'
-                }).should.equal('Type TYPE is not defined in namespace NAMESPACE');
+                }).should.equal('Type "TYPE" is not defined in namespace "NAMESPACE".');
 
                 // Cannot be tested - will throw error on line 139 modelmanager.js first
             });
@@ -369,25 +369,25 @@ describe('Globalization', function() {
     describe('#check Serializer messages are correct', function() {
         it('check message in constructor()', function() {
             let formatter = Globalize.messageFormatter('serializer-constructor-factorynull');
-            formatter().should.equal('Factory cannot be null');
+            formatter().should.equal('"Factory" cannot be "null".');
 
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             expect(function() {
                 new Serializer(null, modelManager);
-            }).to.throw(Error, 'Factory cannot be null');
+            }).to.throw(Error, '"Factory" cannot be "null".');
         });
 
         it('check message in toJSON()', function() {
             let formatter = Globalize.messageFormatter('serializer-tojson-notcobject');
-            formatter().should.equal('Serializer.toJSON only accepts Concept, Event, Asset, Participant or Transaction.');
+            formatter().should.equal('"Serializer.toJSON" only accepts "Concept", "Event", "Asset", "Participant" or "Transaction".');
 
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             expect(function() {
                 let serializer = new Serializer(true, modelManager);
                 serializer.toJSON({});
-            }).to.throw(Error, 'Serializer.toJSON only accepts Concept, Event, Asset, Participant or Transaction.');
+            }).to.throw(Error, '"Serializer.toJSON" only accepts "Concept", "Event", "Asset", "Participant" or "Transaction".');
         });
     });
 

@@ -88,7 +88,7 @@ describe('AssetDeclaration', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.numid.cto');
             (() => {
                 asset.validate();
-            }).should.throw(/type of the field is not String/);
+            }).should.throw(/Class "TestAsset" is identified by field "assetId", but the type of the field is not "String". Line 19 column 1, to line 21 column 2. /);
         });
 
         it('should throw when identifying field is optional', () => {

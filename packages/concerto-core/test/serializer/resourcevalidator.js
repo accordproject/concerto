@@ -160,7 +160,7 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/.+expected a Relationship/);
+            }).should.throw('Model violation in the "TEST" instance. Class "org.acme.l1.Person" has a value of "Resource {id=org.acme.l1.Employee#DAN}". Expected a "Relationship".');
         });
         it('should allow assigning a relationship to a derived type', function () {
             const baseRel = factory.newRelationship('org.acme.l2', 'PrivateOwner', 'DAN');
@@ -188,7 +188,7 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 vehicleDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/has property owners with type/);
+            }).should.throw('Instance "org.acme.l3.Car#123" has a property "owners" with type "org.acme.l1.Person" that is not derived from "org.acme.l1.Person[]".');
         });
     });
 
@@ -211,7 +211,7 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Instance TEST has property containment with type org.acme.l1.Base that is not derived from org.acme.l1.Person/);
+            }).should.throw('Instance "TEST" has a property "containment" with type "org.acme.l1.Base" that is not derived from "org.acme.l1.Person[]".');
         });
 
         it('should allow assigning a derived type', function () {
@@ -231,7 +231,7 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Instance TEST has property owner with type org.acme.l1.Base that is not derived from org.acme.l1.Person/);
+            }).should.throw('Instance "TEST" has a property "owner" with type "org.acme.l1.Base" that is not derived from "org.acme.l1.Person".');
         });
 
         it('should detect using a number type for a string field', function () {
@@ -242,7 +242,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field model has value 123 \(number\) expected type String/);
+            }).should.throw(/Model violation in the "TEST" instance. The field "model" has a value of "123" \(type of value: "number"\). Expected type of value: "String"./);
         });
 
         it('should detect using a date type for a string field', function () {
@@ -253,7 +253,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field model has value "2016-10-13T14:49:47.971Z" \(object\) expected type String/);
+            }).should.throw('Model violation in the "TEST" instance. The field "model" has a value of ""2016-10-13T14:49:47.971Z"" (type of value: "object"). Expected type of value: "String".');
         });
 
         it('should detect using a boolean type for a string field', function () {
@@ -264,7 +264,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field model has value false \(boolean\) expected type String/);
+            }).should.throw('Model violation in the "TEST" instance. The field "model" has a value of "false" (type of value: "boolean"). Expected type of value: "String".');
         });
 
         it('should detect using an array type for string field', function () {
@@ -275,7 +275,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field model has value \["FOO"\] \(object\) expected type String/);
+            }).should.throw('Model violation in the "TEST" instance. The field "model" has a value of "["FOO"]" (type of value: "object"). Expected type of value: "String".');
         });
 
         it('should detect using an invalid array for string[] field', function () {
@@ -286,7 +286,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance TEST field serviceHistory has value 1 \(number\) expected type String\[\]/);
+            }).should.throw('Model violation in the "TEST" instance. The field "serviceHistory" has a value of "1" (type of value: "number"). Expected type of value: "String[]".');
         });
 
         it('should detect using an invalid array for enum field', function () {
@@ -297,7 +297,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw(/Instance TEST invalid enum value 1 for field VehicleType/);
+            }).should.throw('Model violation in the "TEST" instance. Invalid enum value of "1" for the field "VehicleType".');
         });
 
         it('should allow using an valid array for enum field', function () {
@@ -313,7 +313,7 @@ describe('ResourceValidator', function () {
             mockField.getName.returns('propName');
             (() => {
                 resourceValidator.visitField(mockField, {stack: {pop: () => {return undefined;}}});
-            }).should.throw(/Model violation in instance undefined/);
+            }).should.throw('Model violation in the "undefined" instance. The field "propName" has a value of "undefined" (type of value: "undefined"). Expected type of value: "undefined".');
         });
     });
 
@@ -325,7 +325,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 enumDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Instance TEST invalid enum value MISSING for field AnimalType/);
+            }).should.throw('Model violation in the "TEST" instance. Invalid enum value of "MISSING" for the field "AnimalType".');
         });
 
         it('should validate enum', function () {
@@ -345,7 +345,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Model violation in instance ABC class org.acme.l2.Vehicle has value Invalid expected a Resource./);
+            }).should.throw('Model violation in the "ABC" instance. Class "org.acme.l2.Vehicle" has the value of "Invalid". Expected a "Resource" or a "Concept".');
         });
 
         it('should detect using a missing super type', function () {
@@ -390,7 +390,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/The class org.acme.l3.Car is abstract. Should not have an instance!/);
+            }).should.throw('The class "org.acme.l3.Car" is abstract and should not contain an instance.');
         });
 
         it('should detect additional field', function () {
@@ -402,7 +402,7 @@ describe('ResourceValidator', function () {
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/Instance ABC has a property named foo which is not declared in org.acme.l3.Car/);
+            }).should.throw('Instance "ABC" has a property named "foo", which is not declared in "org.acme.l3.Car".');
         });
 
         it('should detect an empty identifier', function () {
@@ -432,7 +432,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 assetDeclaration.accept(resourceValidator,parameters);
-            }).should.throw(/Model violation in instance org.acme.l3.Car#42 field milage has value NaN/);
+            }).should.throw('Model violation in the "org.acme.l3.Car#42" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
         });
 
         it('should report undeclared field if not identifiable', () => {
@@ -445,7 +445,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
-            }).should.throw(/property named numberOfWipers which is not declared/);
+            }).should.throw('Instance "undefined" has a property named "numberOfWipers", which is not declared in "org.acme.l1.Data".');
         });
     });
 
@@ -462,7 +462,7 @@ describe('ResourceValidator', function () {
             mockIdentifiable.getFullyQualifiedIdentifier.returns('com.doge');
             (() => {
                 ResourceValidator.reportFieldTypeViolation('id', 'property', mockIdentifiable, mockField);
-            }).should.throw(/property has value com.doge \(doge\)/);
+            }).should.throw('Model violation in the "id" instance. The field "property" has a value of "com.doge" (type of value: "doge"). Expected type of value: "undefined".');
         });
 
         it('should not fail if strigify fails', () => {
@@ -472,7 +472,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 ResourceValidator.reportFieldTypeViolation('id', 'property', obj, mockField);
-            }).should.throw(/id field property has value/);
+            }).should.throw('Model violation in the "id" instance. The field "property" has a value of "[object Object]" (type of value: "object"). Expected type of value: "undefined".');
         });
     });
 
@@ -482,7 +482,7 @@ describe('ResourceValidator', function () {
             mockField.getName.returns('propName');
             (() => {
                 resourceValidator.checkItem(undefined, mockField, {rootResourceIdentifier: 'identifier'});
-            }).should.throw(/Model violation in instance identifier field propName/);
+            }).should.throw('Model violation in the "identifier" instance. The field "propName" has a value of "undefined" (type of value: "undefined"). Expected type of value: "undefined".');
         });
 
         it('should throw if class declaration is not found', () => {
@@ -499,7 +499,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 resourceValidator.checkItem(mockIdentifiable, mockField, parameters);
-            }).should.throw(/Model violation in instance identifier field propName/);
+            }).should.throw('Model violation in the "identifier" instance. The field "propName" has a value of "undefined" (type of value: "undefined"). Expected type of value: "undefined".');
         });
     });
 
