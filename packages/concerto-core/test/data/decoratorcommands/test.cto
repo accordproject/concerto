@@ -1,0 +1,9 @@
+namespace test
+
+@Editable
+concept Person {
+    @Custom
+    o String firstName
+    o String lastName
+    o String bio
+}

@@ -15,6 +15,12 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
+class DecoratorManager {
+   + void decorateModels(ModelManager,decoratorCommandSet) 
+   + Boolean isMatch(string|,string) 
+   + void applyDecorator(Decorated,string,Decorator) 
+   + void executeCommand(ClassDeclaration,command) 
+}
 class Factory {
    + string newId() 
    + void constructor(ModelManager) 

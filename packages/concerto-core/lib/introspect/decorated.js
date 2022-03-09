@@ -141,6 +141,34 @@ class Decorated {
 
         return null;
     }
+
+    /**
+     * Upserts (updates if existing, if not inserts) a decorator.
+     * @param {string} name the name of the decorator
+     * @param {Decorator} newDecorator the new decorator
+     */
+    upsertDecorator(name, newDecorator) {
+        let updated = false;
+        for(let n=0; n < this.decorators.length; n++) {
+            let decorator = this.decorators[n];
+            if(decorator.getName() === name) {
+                this.decorators[n] = newDecorator;
+                updated = true;
+            }
+        }
+
+        if(!updated) {
+            this.decorators.push(newDecorator);
+        }
+    }
+
+    /**
+     * Adds a decorator.
+     * @param {Decorator} newDecorator the new decorator
+     */
+    addDecorator(newDecorator) {
+        this.decorators.push(newDecorator);
+    }
 }
 
 module.exports = Decorated;

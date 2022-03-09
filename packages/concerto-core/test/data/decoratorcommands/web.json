@@ -1,0 +1,53 @@
+{
+    "$class" : "org.accordproject.decoratorcommands.DecoratorCommandSet",
+    "name" : "web",
+    "version": "1.0.0",
+    "commands" : [
+        {
+            "$class" : "org.accordproject.decoratorcommands.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "type" : "String"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel.Decorator",
+                "name" : "Form",
+                "arguments" : [
+                    {
+                        "$class" : "concerto.metamodel.DecoratorString",
+                        "value" : "inputType"
+                    },
+                    {
+                        "$class" : "concerto.metamodel.DecoratorString",
+                        "value" : "text"
+                    }
+                ]
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
+                "property" : "bio"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel.Decorator",
+                "name" : "Form",
+                "arguments" : [
+                    {
+                        "$class" : "concerto.metamodel.DecoratorString",
+                        "value" : "inputType"
+                    },
+                    {
+                        "$class" : "concerto.metamodel.DecoratorString",
+                        "value" : "textArea"
+                    }
+                ]
+            }
+        }
+    ]
+}

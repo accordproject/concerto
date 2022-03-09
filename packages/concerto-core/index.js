@@ -78,6 +78,8 @@ module.exports.ModelUtil = require('./lib/modelutil');
 // ModelLoader
 module.exports.ModelLoader = require('./lib/modelloader');
 
+// DecoratorManager
+module.exports.DecoratorManager = require('./lib/decoratormanager');
 
 // DateTimeUtil
 module.exports.DateTimeUtil = require('./lib/datetimeutil');
