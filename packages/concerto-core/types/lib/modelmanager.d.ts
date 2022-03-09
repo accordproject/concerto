@@ -245,10 +245,10 @@ declare class ModelManager {
      */
     derivesFrom(fqt1: string, fqt2: string): boolean;
     /**
-     * Get the full metamodel for a modelmanager
+     * Get the full ast (metamodel instances) for a modelmanager
      * @returns {*} the metamodel
      */
-    getMetaModel(): any;
+    getAst(): any;
 }
 import Factory = require("./factory");
 import Serializer = require("./serializer");

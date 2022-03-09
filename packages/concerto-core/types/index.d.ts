@@ -27,6 +27,7 @@ export var ModelManager: typeof import("./lib/modelmanager");
 export var Serializer: typeof import("./lib/serializer");
 export var ModelUtil: typeof import("./lib/modelutil");
 export var ModelLoader: typeof import("./lib/modelloader");
+export var DecoratorManager: typeof import("./lib/decoratormanager");
 export var DateTimeUtil: typeof import("./lib/datetimeutil");
 export var Concerto: typeof import("./lib/concerto");
 export var MetaModel: typeof import("./lib/introspect/metamodel");

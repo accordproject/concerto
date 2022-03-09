@@ -14,4 +14,10 @@ declare class TransactionDeclaration {
      * @throws {IllegalModelException}
      */
     constructor(modelFile: ModelFile, ast: any);
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind(): string;
 }
