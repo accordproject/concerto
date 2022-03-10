@@ -47,7 +47,7 @@ participant Employee identified by ssn {
 `;
 
 const modelManager = new ModelManager();
-modelManager.addModelFile( concertoModel, 'test.cto');
+modelManager.addCTOFile( concertoModel, 'test.cto');
 const obj = {
     $class : 'org.accordproject.test.Employee',
     ssn: '123456789',

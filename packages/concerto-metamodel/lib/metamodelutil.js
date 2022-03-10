@@ -14,6 +14,8 @@
 
 'use strict';
 
+const metaModelAst = require('./metamodel.json');
+
 /**
  * The metamodel itself, as a CTO string
  */
@@ -24,7 +26,6 @@ concept Position {
   o Integer column
   o Integer offset
 }
-
 concept Range {
   o Position start
   o Position end
@@ -373,4 +374,4 @@ function resolveLocalNamesForAll(allModels) {
     return result;
 }
 
-module.exports = { metaModelCto, resolveLocalNames, resolveLocalNamesForAll };
+module.exports = { metaModelAst, metaModelCto, resolveLocalNames, resolveLocalNamesForAll };

@@ -47,7 +47,7 @@ describe('Concept', function () {
     });
 
     beforeEach(function () {
-        modelManager.addModelFile(levelOneModel);
+        modelManager.addCTOFile(levelOneModel);
         classDecl = modelManager.getType('org.acme.l1.Person');
     });
 
@@ -71,7 +71,7 @@ describe('Concept', function () {
 
         it('should generate JSON for an asset that contains a concept', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
-            modelManager.addModelFile(conceptModel, 'concept.cto');
+            modelManager.addCTOFile(conceptModel, 'concept.cto');
             const factory = new Factory(modelManager);
             const asset = factory.newResource('org.acme.biznet', 'MakerInventory', '123' );
             const inventorySets = factory.newConcept('org.acme.biznet', 'InventorySets' );
@@ -87,7 +87,7 @@ describe('Concept', function () {
 
         it('should generate JSON for an asset that contains a concept', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept2.cto', 'utf8');
-            modelManager.addModelFile(conceptModel, 'concept2.cto');
+            modelManager.addCTOFile(conceptModel, 'concept2.cto');
             const factory = new Factory(modelManager);
             const options = {'generate': 'true'};
             const asset = factory.newResource('ibm.procurement.contingentLabor', 'POContractorRecord', '123', options );
@@ -99,7 +99,7 @@ describe('Concept', function () {
     describe('#fromJSON', () => {
         it('should generate an asset from JSON that contains a concept', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
-            modelManager.addModelFile(conceptModel, 'concept.cto');
+            modelManager.addCTOFile(conceptModel, 'concept.cto');
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.MakerInventory","makerId":"123","invSets":[{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}]}');
@@ -109,7 +109,7 @@ describe('Concept', function () {
 
         it('should generate a concept from JSON', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
-            modelManager.addModelFile(conceptModel, 'concept.cto');
+            modelManager.addCTOFile(conceptModel, 'concept.cto');
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.InventorySets","Make":"Make","Model":"Model","invCount":10,"invType":"NEWBATCH"}');
@@ -119,7 +119,7 @@ describe('Concept', function () {
 
         it('should generate an error trying to create an ENUM from JSON', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
-            modelManager.addModelFile(conceptModel, 'concept.cto');
+            modelManager.addCTOFile(conceptModel, 'concept.cto');
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.assetStatus"}');

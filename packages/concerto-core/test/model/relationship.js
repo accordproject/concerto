@@ -43,7 +43,7 @@ describe('Relationship', function () {
     });
 
     beforeEach(function () {
-        modelManager.addModelFile(levelOneModel);
+        modelManager.addCTOFile(levelOneModel);
         classDecl = modelManager.getType('org.acme.l1.Person');
     });
 

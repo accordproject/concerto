@@ -43,7 +43,7 @@ describe('JSONGenerator', () => {
     before(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`
+        modelManager.addCTOFile(`
             namespace org.acme
             asset MyAsset1 identified by assetId {
                 o String assetId
@@ -76,14 +76,14 @@ describe('JSONGenerator', () => {
             }
         `);
 
-        modelManager.addModelFile(`
+        modelManager.addCTOFile(`
             namespace org.foo
             asset AnotherAsset identified by assetId {
                 o String assetId
             }
         `);
 
-        modelManager.addModelFile(`
+        modelManager.addCTOFile(`
             namespace org.acme.sample
 
             asset SampleAsset identified by assetId {

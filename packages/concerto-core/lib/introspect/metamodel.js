@@ -14,7 +14,6 @@
 
 'use strict';
 
-const Printer = require('@accordproject/concerto-cto').Printer;
 const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
 
 const ModelManager = require('../modelmanager');
@@ -22,41 +21,33 @@ const Factory = require('../factory');
 const Serializer = require('../serializer');
 
 /**
+ * Create a metamodel manager (for validation against the metamodel)
+ * @return {*} the metamodel manager
+ */
+function createMetaModelManager() {
+    const metaModelManager = new ModelManager();
+    metaModelManager.addModelFile(MetaModelUtil.metaModelAst, MetaModelUtil.metaModelCto, 'concerto.metamodel');
+    return metaModelManager;
+}
+const metaModelManager = createMetaModelManager();
+
+/**
+ * Validate metamodel instance against the metamodel
+ * @param {object} input - the metamodel instance in JSON
+ * @return {object} the validated metamodel instance in JSON
+ */
+function validateMetaModel(input) {
+    const factory = new Factory(metaModelManager);
+    const serializer = new Serializer(factory, metaModelManager);
+    // First validate the metaModel
+    const object = serializer.fromJSON(input);
+    return serializer.toJSON(object);
+}
+
+/**
  * Class to work with the Concerto metamodel
  */
 class MetaModel {
-    /**
-     * Returns the metamodel CTO
-     * @returns {string} the metamodel as a CTO string
-     */
-    static getMetaModelCto() {
-        return MetaModelUtil.metaModelCto;
-    }
-
-    /**
-     * Create a metamodel manager (for validation against the metamodel)
-     * @return {*} the metamodel manager
-     */
-    static createMetaModelManager() {
-        const metaModelManager = new ModelManager();
-        metaModelManager.addModelFile(MetaModel.getMetaModelCto(), 'concerto.metamodel');
-        return metaModelManager;
-    }
-
-    /**
-     * Validate against the metamodel
-     * @param {object} input - the metamodel in JSON
-     * @return {object} the validated metamodel in JSON
-     */
-    static validateMetaModel(input) {
-        const metaModelManager = MetaModel.createMetaModelManager();
-        const factory = new Factory(metaModelManager);
-        const serializer = new Serializer(factory, metaModelManager);
-        // First validate the metaModel
-        const object = serializer.fromJSON(input);
-        return serializer.toJSON(object);
-    }
-
     /**
      * Resolve the namespace for names in the metamodel
      * @param {object} modelManager - the ModelManager
@@ -66,7 +57,7 @@ class MetaModel {
      */
     static resolveMetaModel(modelManager, metaModel, validate = true) {
         // First, validate the JSON metaModel
-        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
+        const mm = validate ? validateMetaModel(metaModel) : metaModel;
 
         const priorModels = modelManager.getAst();
         return MetaModelUtil.resolveLocalNames(priorModels, mm);
@@ -80,7 +71,7 @@ class MetaModel {
      */
     static modelFileToMetaModel(modelFile, validate = true) {
         // Last, validate the JSON metaModel
-        return validate ? MetaModel.validateMetaModel(modelFile.ast) : modelFile.ast;
+        return validate ? validateMetaModel(modelFile.ast) : modelFile.ast;
     }
 
     /**
@@ -114,13 +105,12 @@ class MetaModel {
      */
     static modelManagerFromMetaModel(metaModel, validate = true) {
         // First, validate the JSON metaModel
-        const mm = validate ? MetaModel.validateMetaModel(metaModel) : metaModel;
+        const mm = validate ? validateMetaModel(metaModel) : metaModel;
 
         const modelManager = new ModelManager();
 
         mm.models.forEach((mm) => {
-            const cto = Printer.toCTO(mm); // No need to re-validate
-            modelManager.addModelFile(cto, null, false);
+            modelManager.addModelFile(mm, null, null, false);
         });
 
         modelManager.validateModelFiles();
@@ -128,4 +118,4 @@ class MetaModel {
     }
 }
 
-module.exports = MetaModel;
+module.exports = { MetaModel, validateMetaModel };

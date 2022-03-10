@@ -49,7 +49,7 @@ class ModelLoader {
             modelFile = new ModelFile(modelManager, ast, content, ctoFile);
         }
 
-        modelManager.addModelFile(modelFile, modelFile.getName(), true);
+        modelManager.addModelFile(modelFile, null, modelFile.getName(), true);
 
         return modelManager;
     }

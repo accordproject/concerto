@@ -35,7 +35,7 @@ describe('Factory', function() {
     before(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`
+        modelManager.addCTOFile(`
         namespace org.acme.test
         abstract concept AbstractConcept {
             o String newValue
