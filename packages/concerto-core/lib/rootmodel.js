@@ -14,16 +14,14 @@
 
 'use strict';
 
-const debug = require('debug')('concerto-core:composermodelutility');
+const rootModelFile = 'concerto.cto';
+const rootModelCto = `namespace concerto
+abstract concept Concept {}
+abstract concept Asset identified {}
+abstract concept Participant identified {}
+abstract concept Transaction {}
+abstract concept Event {}
+`;
+const rootModelAst = require('./rootmodel.json'); // Bootstrapped by applying the parser to the rootModelCto
 
-const COMPOSER_MODEL = require('./composermodel');
-
-module.exports = {
-    addComposerModel: (modelManager) => {
-        debug('addComposerModel', COMPOSER_MODEL);
-        modelManager.addCTOFile(COMPOSER_MODEL.contents, COMPOSER_MODEL.fileName, true);
-
-        // now validate the model
-        modelManager.validateModelFiles();
-    },
-};
+module.exports = { rootModelFile, rootModelCto, rootModelAst };

@@ -16,7 +16,7 @@
 
 const ModelManager = require('../../lib/modelmanager');
 const ModelLoader = require('../../lib/modelloader');
-const MetaModel = require('../../lib/introspect/metamodel');
+const { MetaModel } = require('../../lib/introspect/metamodel');
 const ParserUtil = require('./parserutility');
 
 const { Parser, Printer } = require('@accordproject/concerto-cto');
@@ -191,18 +191,6 @@ describe('MetaModel (Version)', () => {
             const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = MetaModel.modelFileToMetaModel(mf2);
             mm2.should.deep.equal(versionMetaModel);
-        });
-    });
-});
-
-describe('MetaMetaModel', () => {
-    describe('#meta-metamodel', () => {
-        it('should roundtrip the metamodel', () => {
-            const metaModel = MetaModel.getMetaModelCto();
-            const mm1 = Parser.parse(metaModel);
-            const model2 = Printer.toCTO(mm1);
-            const mm2 = Parser.parse(model2);
-            mm2.should.deep.equal(mm1);
         });
     });
 });

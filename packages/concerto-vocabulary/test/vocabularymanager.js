@@ -32,9 +32,9 @@ describe('VocabularyManager', () => {
     beforeEach(() => {
         modelManager = new ModelManager();
         const model = fs.readFileSync('./test/org.acme.cto', 'utf-8');
-        modelManager.addModelFile(model);
+        modelManager.addCTOFile(model);
         const model2 = fs.readFileSync('./test/org.accordproject.cto', 'utf-8');
-        modelManager.addModelFile(model2);
+        modelManager.addCTOFile(model2);
         vocabularyManager = new VocabularyManager();
         vocabularyManager.should.not.be.null;
         const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');

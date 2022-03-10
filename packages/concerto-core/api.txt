@@ -95,14 +95,13 @@ class Introspector {
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
 class MetaModel {
-   + string getMetaModelCto() 
-   + void createMetaModelManager() 
-   + object validateMetaModel(object) 
    + object resolveMetaModel(object,object,boolean?) 
    + object modelFileToMetaModel(object,boolean?) 
    + object modelManagerToMetaModel(object,boolean?,boolean?) 
    + object modelManagerFromMetaModel(object,boolean?) 
 }
+   + void createMetaModelManager() 
+   + object validateMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
@@ -201,7 +200,8 @@ class ModelManager {
    + boolean isModelManager() 
    + Object accept(Object,Object) 
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
-   + Object addModelFile(string|ModelFile,string,boolean?) throws IllegalModelException
+   + Object addModelFile(ModelFile|,string,string,boolean?) throws IllegalModelException
+   + Object addCTOFile(string|ModelFile,string,boolean?) throws IllegalModelException
    + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
    + void deleteModelFile(string) 
    + Object[] addModelFiles(|,string[],boolean?) 

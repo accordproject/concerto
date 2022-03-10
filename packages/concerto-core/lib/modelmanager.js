@@ -28,6 +28,7 @@ const ModelFile = require('./introspect/modelfile');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
+const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
 
 const debug = require('debug')('concerto:ModelManager');
 
@@ -73,13 +74,7 @@ class ModelManager {
      * @private
      */
     addRootModel() {
-        this.addModelFile( `namespace concerto
-abstract concept Concept {}
-abstract concept Asset identified {}
-abstract concept Participant identified {}
-abstract concept Transaction {}
-abstract concept Event {}
-`, 'concerto.cto');
+        this.addModelFile(rootModelAst, rootModelCto, rootModelFile);
     }
 
     /**
@@ -127,28 +122,28 @@ abstract concept Event {}
     }
 
     /**
-     * Adds a Concerto file (as a string) to the ModelManager.
+     * Adds a Concerto file (as an AST) to the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string|ModelFile} modelFile - Model as a string or object
+     * @param {ModelFile|*} modelFile - Model as an AST or object
+     * @param {string} cto - an optional cto string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addModelFile(modelFile, fileName, disableValidation) {
+    addModelFile(modelFile, cto, fileName, disableValidation) {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
         let m = null;
 
-        if (typeof modelFile === 'string') {
-            const ast = Parser.parse(modelFile, fileName);
-            m = new ModelFile(this, ast, modelFile, fileName);
+        if (!modelFile.isModelFile || !modelFile.isModelFile()) {
+            m = new ModelFile(this, modelFile, cto, fileName);
         } else {
             m = modelFile;
         }
@@ -160,6 +155,36 @@ abstract concept Event {}
             this.modelFiles[m.getNamespace()] = m;
         } else {
             this._throwAlreadyExists(m);
+        }
+
+        return m;
+    }
+
+    /**
+     * Adds a Concerto file (as a CTO string) to the ModelManager.
+     * Concerto files have a single namespace. If a Concerto file with the
+     * same namespace has already been added to the ModelManager then it
+     * will be replaced.
+     * Note that if there are dependencies between multiple files the files
+     * must be added in dependency order, or the addCTOFiles method can be
+     * used to add a set of files irrespective of dependencies.
+     * @param {string|ModelFile} modelFile - Model as a string or object
+     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {boolean} [disableValidation] - If true then the model files are not validated
+     * @throws {IllegalModelException}
+     * @return {Object} The newly added model file (internal).
+     */
+    addCTOFile(modelFile, fileName, disableValidation) {
+        const NAME = 'addCTOFile';
+        debug(NAME, 'addCTOFile', modelFile, fileName);
+
+        let m = null;
+
+        if (typeof modelFile === 'string') {
+            const ast = Parser.parse(modelFile, fileName);
+            m = this.addModelFile(ast, modelFile, fileName, disableValidation);
+        } else {
+            m = this.addModelFile(modelFile, null, fileName, disableValidation);
         }
 
         return m;
@@ -309,7 +334,7 @@ abstract concept Event {}
                 if (existing) {
                     this.updateModelFile(mf, mf.getName(), true); // disable validation
                 } else {
-                    this.addModelFile(mf, mf.getName(), true); // disable validation
+                    this.addCTOFile(mf, mf.getName(), true); // disable validation
                 }
             });
 
