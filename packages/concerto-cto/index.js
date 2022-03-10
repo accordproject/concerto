@@ -22,8 +22,6 @@
  */
 
 // Exceptions
-module.exports.BaseException = require('./lib/baseexception');
-module.exports.BaseFileException = require('./lib/basefileexception');
 module.exports.ParseException = require('./lib/parseexception');
 
 // Parser

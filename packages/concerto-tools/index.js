@@ -20,5 +20,5 @@
  */
 
 module.exports.FileWriter = require('./lib/filewriter');
-module.exports.CodeGen = require('./lib/codegen/codegen.js');
+module.exports.CodeGen = require('./lib/codegen/codegen');
 module.exports.version = require('./package.json');

@@ -21,6 +21,10 @@
  * @module concerto-util
  */
 
+// Exceptions
+module.exports.BaseException = require('./lib/baseexception');
+module.exports.BaseFileException = require('./lib/basefileexception');
+
 // Transitive closure downloader
 module.exports.FileDownloader = require('./lib/filedownloader');
 
