@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseFileException = require('../lib/basefileexception');
+const BaseFileException = require('@accordproject/concerto-util').BaseFileException;
 const ParseException = require('../lib/parseexception');
 
 require('chai').should();

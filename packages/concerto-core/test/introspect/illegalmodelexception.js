@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseFileException = require('@accordproject/concerto-cto').BaseFileException;
+const BaseFileException = require('@accordproject/concerto-util').BaseFileException;
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ModelFile = require('../../lib/introspect/modelfile');
 
@@ -37,7 +37,7 @@ describe('IllegalModelException', function () {
         it('should return an instance of BaseFileException', function () {
             let exc = new IllegalModelException('message', modelFile, fileLocation);
             exc.should.be.an.instanceOf(BaseFileException);
-            exc.component.should.equal('@accordproject/concerto-cto');
+            exc.component.should.equal('@accordproject/concerto-util');
         });
 
         it('should return an instance of BaseFileException for another component', function () {

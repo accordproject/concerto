@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseException = require('@accordproject/concerto-cto').BaseException;
+const BaseException = require('@accordproject/concerto-util').BaseException;
 const Globalize = require('./globalize');
 
 /**
