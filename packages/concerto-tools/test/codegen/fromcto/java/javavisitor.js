@@ -27,14 +27,14 @@ const Field = require('@accordproject/concerto-core').Field;
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('JavaVisitor', function () {
     let javaVisit;
     let mockFileWriter;
     beforeEach(() => {
         javaVisit = new JavaVisitor();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('visit', () => {

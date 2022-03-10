@@ -21,7 +21,7 @@ const { expect } = require('chai');
 const chai = require('chai');
 chai.should();
 
-const FileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const JSONSchemaVisitor = require('../../../../lib/codegen/fromcto/jsonschema/jsonschemavisitor.js');
 const RecursionDetectionVisitor = require('../../../../lib/codegen/fromcto/jsonschema/recursionvisitor.js');
