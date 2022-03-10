@@ -27,7 +27,7 @@ const Field = require('@accordproject/concerto-core').Field;
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const FileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('CSharpVisitor', function () {
     let csharpVisitor;

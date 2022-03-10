@@ -27,14 +27,14 @@ const Field = require('@accordproject/concerto-core').Field;
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('XmlSchemaVisitor', function () {
     let xmlSchemaVisitor;
     let mockFileWriter;
     beforeEach(() => {
         xmlSchemaVisitor = new XmlSchemaVisitor();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('visit', () => {

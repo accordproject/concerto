@@ -32,14 +32,14 @@ const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('LoopbackVisitor', () => {
     let loopbackVisit;
     let mockFileWriter;
     beforeEach(() => {
         loopbackVisit = new LoopbackVisitor();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('visit', () => {
