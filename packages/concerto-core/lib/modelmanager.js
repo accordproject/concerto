@@ -20,6 +20,7 @@ const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoa
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const ModelWriter = require('@accordproject/concerto-util').ModelWriter;
 const Parser = require('@accordproject/concerto-cto').Parser;
+const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
 
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -29,6 +30,7 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
+
 
 const debug = require('debug')('concerto:ModelManager');
 
@@ -627,17 +629,32 @@ class ModelManager {
     }
 
     /**
+     * Resolve the namespace for names in the metamodel
+     * @param {object} metaModel - the MetaModel
+     * @return {object} the resolved metamodel
+     */
+    resolveMetaModel(metaModel) {
+        const priorModels = this.getAst();
+        return MetaModelUtil.resolveLocalNames(priorModels, metaModel);
+    }
+
+    /**
      * Get the full ast (metamodel instances) for a modelmanager
+     * @param {boolean} [resolve] - whether to resolve names
      * @returns {*} the metamodel
      */
-    getAst() {
+    getAst(resolve) {
         const result = {
             $class: 'concerto.metamodel.Models',
             models: [],
         };
         const modelFiles = this.getModelFiles();
         modelFiles.forEach((thisModelFile) => {
-            result.models.push(thisModelFile.getAst());
+            let metaModel = thisModelFile.getAst();
+            if (resolve) {
+                metaModel = this.resolveMetaModel(metaModel);
+            }
+            result.models.push(metaModel);
         });
         return result;
     }
