@@ -94,14 +94,9 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
-class MetaModel {
-   + object resolveMetaModel(object,object,boolean?) 
-   + object modelFileToMetaModel(object,boolean?) 
-   + object modelManagerToMetaModel(object,boolean?,boolean?) 
-   + object modelManagerFromMetaModel(object,boolean?) 
-}
-   + void createMetaModelManager() 
+   + void newMetaModelManager() 
    + object validateMetaModel() 
+   + object modelManagerFromMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
@@ -224,7 +219,8 @@ class ModelManager {
    + DecoratorFactory[] getDecoratorFactories() 
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean derivesFrom(string,string) 
-   + void getAst() 
+   + object resolveMetaModel(object) 
+   + void getAst(boolean?) 
 }
 class SecurityException extends BaseException {
    + void constructor(string) 
