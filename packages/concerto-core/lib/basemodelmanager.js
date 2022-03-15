@@ -141,9 +141,9 @@ class BaseModelManager {
      * Note that if there are dependencies between multiple files the files
      * must be added in dependency order, or the addModelFiles method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {ModelFile|*} modelFile - Model as an AST or object
-     * @param {string} cto - an optional cto string
-     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {ModelFile} modelFile - Model as a ModelFile object
+     * @param {string} [cto] - an optional cto string
+     * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
@@ -173,8 +173,8 @@ class BaseModelManager {
      * must be added in dependency order, or the addModel method can be
      * used to add a set of files irrespective of dependencies.
      * @param {*} modelInput - Model (as a string or object)
-     * @param {string} cto - an optional cto string
-     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {string} [cto] - an optional cto string
+     * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
