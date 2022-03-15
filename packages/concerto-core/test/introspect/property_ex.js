@@ -42,7 +42,7 @@ describe('Property', function () {
     });
 
     beforeEach(function () {
-        modelManager.addCTOFile(levelOneModel);
+        modelManager.addCTOModel(levelOneModel);
     });
 
     afterEach(function () {

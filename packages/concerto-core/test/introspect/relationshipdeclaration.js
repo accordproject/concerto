@@ -49,7 +49,7 @@ describe('RelationshipDeclaration', function () {
 
     describe('#validate', function() {
         it('should detect relationships with no type', function () {
-            modelManager.addCTOFile(levelOneModel);
+            modelManager.addCTOModel(levelOneModel);
             const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
@@ -77,8 +77,8 @@ describe('RelationshipDeclaration', function () {
             }
             `;
 
-            modelManager.addCTOFile(model);
-            modelManager.addCTOFile(model2);
+            modelManager.addCTOModel(model);
+            modelManager.addCTOModel(model2);
             const vehicleDeclaration = modelManager.getType('org.acme.l2.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
@@ -101,7 +101,7 @@ describe('RelationshipDeclaration', function () {
             -->Person owner
             }
             `;
-            modelManager.addCTOFile(model);
+            modelManager.addCTOModel(model);
             const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;

@@ -378,7 +378,7 @@ describe('GraphQLVisitor', function () {
                 fileWriter: mockFileWriter
             };
             const modelManager = new ModelManager();
-            modelManager.addCTOFile(MODEL_WITH_DECORATORS);
+            modelManager.addCTOModel(MODEL_WITH_DECORATORS);
             graphQLVisitor.visit(modelManager, param);
             param.fileWriter.writeBeforeLine.getCall(0).args.should.deep.equal([0, 'directive @single on OBJECT | FIELD_DEFINITION']);
             param.fileWriter.writeBeforeLine.getCall(1).args.should.deep.equal([0, `directive @role(boolean: Boolean

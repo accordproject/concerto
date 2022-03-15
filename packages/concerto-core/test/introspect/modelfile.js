@@ -197,7 +197,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.validate();
@@ -217,7 +217,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
         });
@@ -235,7 +235,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
         });
@@ -306,7 +306,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset2').should.be.true;
         });
@@ -324,7 +324,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset3').should.be.false;
         });
@@ -342,7 +342,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.isImportedType('MyAsset3').should.be.false;
         });
@@ -372,7 +372,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             modelFile2.resolveImport('MyAsset2').should.equal('org.acme.ext.MyAsset2');
         });
@@ -400,7 +400,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.resolveImport('Coin');
@@ -420,7 +420,7 @@ describe('ModelFile', () => {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addCTOFile(modelFile1);
+            modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => {
                 modelFile2.resolveImport('Coin');
@@ -453,7 +453,7 @@ describe('ModelFile', () => {
         before(() => {
             modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            modelFile = modelManager.addCTOFile(`namespace org.acme
+            modelFile = modelManager.addCTOModel(`namespace org.acme
             asset MyAsset identified by assetId {
                 o String assetId
             }`);

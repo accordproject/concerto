@@ -4,7 +4,7 @@ class BaseModelManager {
    + Object accept(Object,Object) 
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(ModelFile|,string,string,boolean?) throws IllegalModelException
-   + Object addCTOFile(string|ModelFile,string,boolean?) throws IllegalModelException
+   + Object addModel(modelInput,string,string,boolean?) throws IllegalModelException
    + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
    + void deleteModelFile(string) 
    + Object[] addModelFiles(|,string[],boolean?) 
@@ -224,6 +224,7 @@ class ModelLoader {
 }
 class ModelManager extends BaseModelManager {
    + void constructor(object?,processFile?) 
+   + Object addCTOModel(string,string,boolean?) throws IllegalModelException
 }
 class SecurityException extends BaseException {
    + void constructor(string) 

@@ -31,7 +31,7 @@ describe('IdentifiedDeclaration', () => {
 
         it('should identify instance', () => {
             const mm = new ModelManager();
-            mm.addCTOFile( `
+            mm.addCTOModel( `
 namespace test
 
 asset Order {
@@ -49,7 +49,7 @@ asset Order {
 
         it('should create a system identifier', () => {
             const mm = new ModelManager();
-            mm.addCTOFile( `
+            mm.addCTOModel( `
 namespace test
 
 asset Order {
@@ -65,7 +65,7 @@ asset Order {
 
         it('should allow declaring system identifier', () => {
             const mm = new ModelManager();
-            mm.addCTOFile( `
+            mm.addCTOModel( `
 namespace test
 
 asset Order {
@@ -81,7 +81,7 @@ asset Order {
 
         it('should allow declaring explicit identifier', () => {
             const mm = new ModelManager();
-            mm.addCTOFile( `
+            mm.addCTOModel( `
 namespace test
 
 asset Order identified by sku {
@@ -102,7 +102,7 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             (() => {
-                mm.addCTOFile( `
+                mm.addCTOModel( `
                 namespace test
                 
                 asset Order identified by sku {
@@ -121,7 +121,7 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             (() => {
-                mm.addCTOFile( `
+                mm.addCTOModel( `
                 namespace test
                 
                 asset FancyOrder identified {
@@ -136,7 +136,7 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             (() => {
-                mm.addCTOFile( `
+                mm.addCTOModel( `
                 namespace test
                 
                 asset Order identified by sku {
@@ -156,7 +156,7 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             (() => {
-                mm.addCTOFile( `
+                mm.addCTOModel( `
                 namespace test
                 
                 asset Order identified by sku {
@@ -176,7 +176,7 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             (() => {
-                mm.addCTOFile( `
+                mm.addCTOModel( `
                 namespace test
                 
                 asset Order {
@@ -187,7 +187,7 @@ asset Order identified by sku {
 
         it('should allow abstract assets without an identifier', () => {
             const mm = new ModelManager();
-            mm.addCTOFile( `
+            mm.addCTOModel( `
                 namespace test
                 
                 abstract asset Order {
