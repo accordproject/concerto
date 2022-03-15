@@ -1,3 +1,6 @@
+class AstModelManager extends BaseModelManager {
+   + void constructor(object?) 
+}
 class BaseModelManager {
    + void constructor(object?,processFile?) 
    + boolean isModelManager() 
@@ -223,7 +226,7 @@ class ModelLoader {
    + object loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?,processFile?) 
+   + void constructor(object?) 
    + Object addCTOModel(string,string,boolean?) throws IllegalModelException
 }
 class SecurityException extends BaseException {
