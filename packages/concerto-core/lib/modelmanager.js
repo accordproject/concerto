@@ -17,7 +17,6 @@
 const Parser = require('@accordproject/concerto-cto').Parser;
 
 const BaseModelManager = require('./basemodelmanager');
-const ModelFile = require('./introspect/modelfile');
 
 const debug = require('debug')('concerto:BaseModelManager');
 
@@ -56,12 +55,7 @@ class ModelManager extends BaseModelManager {
 
     /**
      * Adds a model in CTO format to the ModelManager.
-     * Concerto files have a single namespace. If a Concerto file with the
-     * same namespace has already been added to the ModelManager then it
-     * will be replaced.
-     * Note that if there are dependencies between multiple files the files
-     * must be added in dependency order, or the addModel method can be
-     * used to add a set of files irrespective of dependencies.
+     * This is a convenience function equivalent to `addModel` but useful since it avoids having to copy the input CTO.
      * @param {string} cto - a cto string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
@@ -72,11 +66,7 @@ class ModelManager extends BaseModelManager {
         const NAME = 'addCTOModel';
         debug(NAME, 'addCTOModel', cto, fileName);
 
-        const { ast } = this.processFile(fileName, cto);
-        const m = new ModelFile(this, ast, cto, fileName);
-        this.addModelFile(m, cto, fileName, disableValidation);
-
-        return m;
+        return this.addModel(cto, cto, fileName, disableValidation);
     }
 
 }
