@@ -227,7 +227,7 @@ class ModelLoader {
 }
 class ModelManager extends BaseModelManager {
    + void constructor(object?) 
-   + Object addCTOModel(string,string,boolean?) throws IllegalModelException
+   + Object addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
 class SecurityException extends BaseException {
    + void constructor(string) 
