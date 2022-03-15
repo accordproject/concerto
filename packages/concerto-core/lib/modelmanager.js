@@ -56,7 +56,7 @@ class ModelManager extends BaseModelManager {
      * Adds a model in CTO format to the ModelManager.
      * This is a convenience function equivalent to `addModel` but useful since it avoids having to copy the input CTO.
      * @param {string} cto - a cto string
-     * @param {string} fileName - an optional file name to associate with the model file
+     * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
