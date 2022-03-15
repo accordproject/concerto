@@ -148,16 +148,16 @@ describe('ModelManager', () => {
         });
     });
 
-    describe('#addCTOFile', () => {
+    describe('#addCTOModel', () => {
 
         it('should add a model file from a string', () => {
-            let res = modelManager.addCTOFile(modelBase);
+            let res = modelManager.addCTOModel(modelBase);
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
             res.should.be.an.instanceOf(ModelFile);
         });
 
         it('should support associating a file name with a model file', () => {
-            let res = modelManager.addCTOFile(modelBase, 'model-base.cto');
+            let res = modelManager.addCTOModel(modelBase, 'model-base.cto');
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
             res.should.be.an.instanceOf(ModelFile);
             res.getName().should.equal('model-base.cto');
@@ -167,61 +167,61 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
-            let res = modelManager.addCTOFile(mf1);
+            let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
         });
 
         it('should return error for duplicate namespaces for a string', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.acme.base');
             mf1.isModelFile.returns(true);
             (() => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
             }).should.throw(/Namespace org.acme.base is already declared/);
         });
 
         it('should return error for duplicate namespaces from an object', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.acme.base');
             mf1.isModelFile.returns(true);
             (() => {
-                modelManager.addCTOFile(mf1);
+                modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base is already declared/);
         });
 
         it('should return error for duplicate namespaces from an model file with a filename', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.acme.base');
             mf1.isModelFile.returns(true);
             mf1.getName.returns('duplFile');
             (() => {
-                modelManager.addCTOFile(mf1);
+                modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base specified in file duplFile is already declared/);
         });
 
         it('should return error for duplicate namespaces from an model file where original filename was provided', () => {
-            modelManager.addCTOFile(modelBase, 'origFile');
+            modelManager.addCTOModel(modelBase, 'origFile');
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.acme.base');
             mf1.isModelFile.returns(true);
             (() => {
-                modelManager.addCTOFile(mf1);
+                modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base is already declared in file origFile/);
         });
 
         it('should return error for duplicate namespaces from an model file where original filename and new filename were provided', () => {
-            modelManager.addCTOFile(modelBase, 'origFile');
+            modelManager.addCTOModel(modelBase, 'origFile');
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.acme.base');
             mf1.isModelFile.returns(true);
             mf1.getName.returns('duplFile');
             (() => {
-                modelManager.addCTOFile(mf1);
+                modelManager.addModelFile(mf1);
             }).should.throw(/Namespace org.acme.base specified in file duplFile is already declared in file origFile/);
         });
 
@@ -256,7 +256,7 @@ describe('ModelManager', () => {
         });
 
         it('should add to existing model files from strings', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
             modelManager.addModelFiles([composerModel, farm2fork]);
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
@@ -285,7 +285,7 @@ describe('ModelManager', () => {
         });
 
         it('should restore existing model files on validation error from strings', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             modelManager.getModelFile('org.acme.base').getNamespace().should.equal('org.acme.base');
 
             try {
@@ -463,7 +463,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
             mf1.$marker = 'mf1';
-            let res = modelManager.addCTOFile(mf1);
+            let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
@@ -480,7 +480,7 @@ describe('ModelManager', () => {
 
         it('should update from a string', () => {
             let model = 'namespace org.doge\nasset TestAsset identified by assetId { o String assetId }';
-            modelManager.addCTOFile(model);
+            modelManager.addCTOModel(model);
             modelManager.modelFiles['org.doge'].definitions.should.equal(model);
 
             model = 'namespace org.doge\nasset TestAsset2 identified by assetId2 { o String assetId2 }';
@@ -493,7 +493,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
             mf1.$marker = 'mf1';
-            let res = modelManager.addCTOFile(mf1);
+            let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
@@ -512,7 +512,7 @@ describe('ModelManager', () => {
 
         it('should keep the original if an update from an string throws', () => {
             let model = 'namespace org.doge\nasset TestAsset identified by assetId { o String assetId }';
-            modelManager.addCTOFile(model);
+            modelManager.addCTOModel(model);
             modelManager.modelFiles['org.doge'].definitions.should.equal(model);
 
             let model2 = 'not a verb org.doge\nasset TestAsset2 identified by assetId2 { o String assetId2 }';
@@ -540,7 +540,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
             mf1.$marker = 'mf1';
-            let res = modelManager.addCTOFile(mf1);
+            let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
             res.should.equal(mf1);
@@ -559,7 +559,7 @@ concept Foo{ o String baz }`, '@external.cto');
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -599,7 +599,7 @@ concept Foo{ o String baz }`, '@external.cto');
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -622,7 +622,7 @@ concept Bar {
         it('should fail using bad URL and default model file loader', () => {
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -637,7 +637,7 @@ concept Bar {
         it('should fail using bad protocol and default model file loader', () => {
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from foo://external.cto
 
 concept Bar {
@@ -658,7 +658,7 @@ concept Bar {
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -713,7 +713,7 @@ concept Bar {
 
     describe('#getModels', () => {
         it('should return a list of name / content pairs', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             const models = modelManager.getModels();
             models.length.should.equal(2);
             models[0].should.deep.equal({
@@ -729,7 +729,7 @@ concept Bar {
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -751,7 +751,7 @@ concept Bar {
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
 
             // disable validation, we are using an external model
-            modelManager.addCTOFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
 import org.external.* from github://external.cto
 
 concept Bar {
@@ -775,11 +775,11 @@ concept Bar {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.wow');
             mf1.isModelFile.returns(true);
-            modelManager.addCTOFile(mf1);
+            modelManager.addModelFile(mf1);
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.such');
             mf2.isModelFile.returns(true);
-            modelManager.addCTOFile(mf2);
+            modelManager.addModelFile(mf2);
             let ns = modelManager.getNamespaces();
             ns.should.include('org.wow');
             ns.should.include('org.such');
@@ -798,7 +798,7 @@ concept Bar {
         describe('#getAssetDeclarations', () => {
 
             it('should return all of the asset declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getAssetDeclarations();
                 decls.should.all.be.an.instanceOf(AssetDeclaration);
                 decls.length.should.equal(numberModelBaseAssets);
@@ -809,7 +809,7 @@ concept Bar {
         describe('#getEnumDeclarations', () => {
 
             it('should return all of the enum declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getEnumDeclarations();
                 decls.should.all.be.an.instanceOf(EnumDeclaration);
                 decls.length.should.equal(numberModelBaseEnums);
@@ -820,7 +820,7 @@ concept Bar {
         describe('#getParticipantDeclarations', () => {
 
             it('should return all of the participant declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getParticipantDeclarations();
                 decls.should.all.be.an.instanceOf(ParticipantDeclaration);
                 decls.length.should.equal(numberModelBaseParticipants);
@@ -831,7 +831,7 @@ concept Bar {
         describe('#getEventDeclarations', () => {
 
             it('should return all of the event declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getEventDeclarations();
                 decls.should.all.be.an.instanceOf(EventDeclaration);
                 decls.length.should.equal(numberModelBaseEvents);
@@ -842,7 +842,7 @@ concept Bar {
         describe('#getTransactionDeclarations', () => {
 
             it('should return all of the transaction declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getTransactionDeclarations();
                 decls.length.should.equal(numberModelBaseTransactions);
             });
@@ -852,7 +852,7 @@ concept Bar {
         describe('#getConceptDeclarations', () => {
 
             it('should return all of the concept declarations', () => {
-                modelManager.addCTOFile(modelBase);
+                modelManager.addCTOModel(modelBase);
                 let decls = modelManager.getConceptDeclarations();
                 decls.should.all.be.an.instanceOf(ConceptDeclaration);
                 decls.length.should.equal(numberModelBaseConcepts);
@@ -863,26 +863,26 @@ concept Bar {
     describe('#resolveType', () => {
 
         it('should pass through primitive types', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             modelManager.resolveType('org.acme.base.SimpleAsset', 'String').should.equal('String');
         });
 
         it('should throw an error for a namespace that does not exist', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (() => {
                 modelManager.resolveType('org.acme.base.SimpleAsset', 'org.acme.nosuchns.SimpleAsset');
             }).should.throw(/No registered namespace/);
         });
 
         it('should throw an error for a type that does not exist', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (() => {
                 modelManager.resolveType('org.acme.base.SimpleAsset', 'org.acme.base.NoSuchAsset');
             }).should.throw(/No type/);
         });
 
         it('should return the fully qualified type', () => {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             let fqt = modelManager.resolveType('org.acme.base.SimpleAsset', 'org.acme.base.AbstractAsset');
             fqt.should.equal('org.acme.base.AbstractAsset');
         });
@@ -891,35 +891,35 @@ concept Bar {
 
     describe('#getType', function() {
         it('should throw an error for a primitive type', function() {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (function() {
                 modelManager.getType('String');
             }).should.throw(TypeNotFoundException);
         });
 
         it('should throw an error for a namespace that does not exist', function() {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (function() {
                 modelManager.getType('org.acme.nosuchns.SimpleAsset');
             }).should.throw(TypeNotFoundException, /org.acme.nosuchns/);
         });
 
         it('should throw an error for an empty namespace', function() {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (function() {
                 modelManager.getType('NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should throw an error for a type that does not exist', function() {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             (function() {
                 modelManager.getType('org.acme.base.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should return the class declaration for a valid type', function() {
-            modelManager.addCTOFile(modelBase);
+            modelManager.addCTOModel(modelBase);
             const declaration = modelManager.getType('org.acme.base.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
         });
@@ -976,37 +976,37 @@ concept Bar {
     describe('#derivesFrom', () => {
 
         it('should get derivesFrom for sub type', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Customer', 'org.accordproject.test.Person');
             result.should.be.true;
         });
 
         it('should get derivesFrom for sub-sub type', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Manager', 'org.accordproject.test.Person');
             result.should.be.true;
         });
 
         it('should get derivesFrom for type', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Customer', 'org.accordproject.test.Customer');
             result.should.be.true;
         });
 
         it('should not get derivesFrom for derived type', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Person', 'org.accordproject.test.Customer');
             result.should.be.false;
         });
 
         it('should be an instance of concerto.Participant', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Participant');
             result.should.be.true;
         });
 
         it('all types should be an instance of concerto.Concept', () => {
-            modelManager.addCTOFile(concertoModel);
+            modelManager.addCTOModel(concertoModel);
             const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Concept');
             result.should.be.true;
         });

@@ -19,6 +19,7 @@ const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil
 const ModelManager = require('../modelmanager');
 const Factory = require('../factory');
 const Serializer = require('../serializer');
+const ModelFile = require('../introspect/modelfile');
 
 /**
  * Create a metamodel manager (for validation against the metamodel)
@@ -26,7 +27,14 @@ const Serializer = require('../serializer');
  */
 function newMetaModelManager() {
     const metaModelManager = new ModelManager();
-    metaModelManager.addModelFile(MetaModelUtil.metaModelAst, MetaModelUtil.metaModelCto, 'concerto.metamodel', true);
+    const mf = new ModelFile(
+        metaModelManager,
+        MetaModelUtil.metaModelAst,
+        MetaModelUtil.metaModelCto,
+        'concerto.metamodel',
+        true
+    );
+    metaModelManager.addModelFile(mf, MetaModelUtil.metaModelCto, 'concerto.metamodel');
     return metaModelManager;
 }
 
@@ -57,7 +65,8 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     const modelManager = new ModelManager();
 
     mm.models.forEach((mm) => {
-        modelManager.addModelFile(mm, null, null, false);
+        const mf = new ModelFile(modelManager, mm, null, null, true);
+        modelManager.addModelFile(mf, null, null);
     });
 
     modelManager.validateModelFiles();

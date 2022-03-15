@@ -165,7 +165,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should detect simple recursive model', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_RECURSIVE_SIMPLE );
+            modelManager.addCTOModel( MODEL_RECURSIVE_SIMPLE );
             const visitor = new RecursionDetectionVisitor();
             const type = modelManager.getType('recursive.Person');
             const result = type.accept(visitor, {stack: []});
@@ -174,7 +174,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should detect simple recursive model 2', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_RECURSIVE_SIMPLE );
+            modelManager.addCTOModel( MODEL_RECURSIVE_SIMPLE );
             const visitor = new RecursionDetectionVisitor();
             const type = modelManager.getType('recursive.Factory');
             const result = type.accept(visitor, {stack: []});
@@ -183,7 +183,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should detect simple recursive model 3', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_RECURSIVE_SIMPLE );
+            modelManager.addCTOModel( MODEL_RECURSIVE_SIMPLE );
             const visitor = new RecursionDetectionVisitor();
             const type = modelManager.getType('recursive.Address');
             const result = type.accept(visitor, {stack: []});
@@ -192,7 +192,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should reference types for simple model', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});
             expect(schema.properties.money.$ref).equal('#/definitions/test.Money');
@@ -200,8 +200,8 @@ describe('JSONSchema (samples)', function () {
 
         it('should handle multiple model files', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
-            modelManager.addCTOFile( MODEL_SIMPLE_2 );
+            modelManager.addCTOModel( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE_2 );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, {rootType: 'test.MyRequest' });
             // console.log(JSON.stringify(schema, null, 2));
@@ -212,7 +212,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should generate regex and bounds', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_BOUNDS );
+            modelManager.addCTOModel( MODEL_BOUNDS );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.Test'});
             expect(schema.properties.myString.pattern).equal('^abc.*$');
@@ -220,7 +220,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should inline types for simple model', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest', inlineTypes: true});
             expect(schema.properties.money.$ref).to.be.undefined;
@@ -229,7 +229,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should write to disk', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE );
             const visitor = new JSONSchemaVisitor();
             const fileWriter = new FileWriter('./output');
             modelManager.accept(visitor, { fileWriter, rootType: 'test.MyRequest', inlineTypes: true});
@@ -239,7 +239,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should only return definitions', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, {});
             expect(schema.title).to.be.undefined;
@@ -247,7 +247,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should detect complex recursive model', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_RECURSIVE_COMPLEX );
+            modelManager.addCTOModel( MODEL_RECURSIVE_COMPLEX );
             const visitor = new RecursionDetectionVisitor();
             const type = modelManager.getType('org.accordproject.ergo.monitor.Monitor');
             const result = type.accept(visitor, {stack: []});
@@ -256,7 +256,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should generate JSON schema for recursive schema with decorators and validators', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_RECURSIVE_COMPLEX );
+            modelManager.addCTOModel( MODEL_RECURSIVE_COMPLEX );
 
             const visitor = new JSONSchemaVisitor();
             const monitorSchema = modelManager.accept(visitor, { rootType: 'org.accordproject.ergo.monitor.Monitor'});
@@ -296,7 +296,7 @@ describe('JSONSchema (samples)', function () {
 
         it('should generate JSON schema for simple schema', () => {
             const modelManager = new ModelManager();
-            modelManager.addCTOFile( MODEL_SIMPLE );
+            modelManager.addCTOModel( MODEL_SIMPLE );
 
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest'});

@@ -30,7 +30,7 @@ describe('ObjectValidator', function () {
 
     before(function () {
         modelManager = new ModelManager();
-        modelManager.addCTOFile(`namespace test
+        modelManager.addCTOModel(`namespace test
 
         concept Wheel {
             o String brand

@@ -30,7 +30,7 @@ const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
 
-const debug = require('debug')('concerto:ModelManager');
+const debug = require('debug')('concerto:BaseModelManager');
 
 // How to create a modelfile from the external content
 const defaultProcessFile = (name, data) => {
@@ -85,7 +85,8 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
-        this.addModelFile(rootModelAst, rootModelCto, rootModelFile);
+        const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
+        this.addModelFile(m, rootModelCto, rootModelFile);
     }
 
     /**
@@ -151,52 +152,42 @@ class BaseModelManager {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
-        let m = null;
-
-        if (!modelFile.isModelFile || !modelFile.isModelFile()) {
-            m = new ModelFile(this, modelFile, cto, fileName);
-        } else {
-            m = modelFile;
-        }
-
-        if (!this.modelFiles[m.getNamespace()]) {
+        if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
-                m.validate();
+                modelFile.validate();
             }
-            this.modelFiles[m.getNamespace()] = m;
+            this.modelFiles[modelFile.getNamespace()] = modelFile;
         } else {
-            this._throwAlreadyExists(m);
+            this._throwAlreadyExists(modelFile);
         }
 
-        return m;
+        return modelFile;
     }
 
     /**
-     * Adds a Concerto file (as a CTO string) to the ModelManager.
+     * Adds a model to the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the
      * same namespace has already been added to the ModelManager then it
      * will be replaced.
      * Note that if there are dependencies between multiple files the files
-     * must be added in dependency order, or the addCTOFiles method can be
+     * must be added in dependency order, or the addModel method can be
      * used to add a set of files irrespective of dependencies.
-     * @param {string|ModelFile} modelFile - Model as a string or object
+     * @param {*} modelInput - Model (as a string or object)
+     * @param {string} cto - an optional cto string
      * @param {string} fileName - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addCTOFile(modelFile, fileName, disableValidation) {
-        const NAME = 'addCTOFile';
-        debug(NAME, 'addCTOFile', modelFile, fileName);
+    addModel(modelInput, cto, fileName, disableValidation) {
+        const NAME = 'addModel';
+        debug(NAME, 'addModel', modelInput, fileName);
 
-        let m = null;
+        const { ast, definitions } = this.processFile(fileName, modelInput);
+        const finalCto = cto || definitions;
+        const m = new ModelFile(this, ast, finalCto, fileName);
 
-        if (typeof modelFile === 'string') {
-            const { ast } = this.processFile(fileName, modelFile);
-            m = this.addModelFile(ast, modelFile, fileName, disableValidation);
-        } else {
-            m = this.addModelFile(modelFile, null, fileName, disableValidation);
-        }
+        this.addModelFile(m, finalCto, fileName, disableValidation);
 
         return m;
     }
@@ -336,7 +327,7 @@ class BaseModelManager {
                 if (existing) {
                     this.updateModelFile(mf, mf.getName(), true); // disable validation
                 } else {
-                    this.addCTOFile(mf, mf.getName(), true); // disable validation
+                    this.addModelFile(mf, null, mf.getName(), true); // disable validation
                 }
             });
 

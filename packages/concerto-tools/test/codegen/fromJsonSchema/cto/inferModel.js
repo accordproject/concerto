@@ -42,7 +42,7 @@ describe('inferModel', function () {
         addFormats(ajv);
 
         const mm = new ModelManager();
-        mm.addCTOFile(cto, undefined, true);
+        mm.addCTOModel(cto, undefined, true);
         await mm.updateExternalModels();
         mm.validateModelFiles();
 

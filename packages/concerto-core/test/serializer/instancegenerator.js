@@ -54,7 +54,7 @@ describe('InstanceGenerator', () => {
     });
 
     const test = (modelFile) => {
-        modelManager.addCTOFile(modelFile);
+        modelManager.addCTOModel(modelFile);
         let resource = factory.newResource('org.acme.test', 'MyAsset', 'asset1');
         parameters.stack = new TypedStack(resource);
         parameters.seen = [resource.getFullyQualifiedType()];
