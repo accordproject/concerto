@@ -22,35 +22,7 @@ const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const debug = require('debug')('concerto:ModelManager');
 
 const Parser = require('./parser');
-
-/**
- * Return the fully qualified name for an import
- * @param {object} imp - the import
- * @return {string} - the fully qualified name for that import
- * @private
- */
-function importFullyQualifiedName(imp) {
-    return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
-}
-
-/**
- * Returns an object that maps from the import declarations to the URIs specified
- * @param {*} ast - the model ast
- * @return {Object} keys are import declarations, values are URIs
- * @private
- */
-function getExternalImports(ast) {
-    const uriMap = {};
-    if (ast.imports) {
-        ast.imports.forEach((imp) => {
-            const fqn = importFullyQualifiedName(imp);
-            if(imp.uri) {
-                uriMap[fqn] = imp.uri;
-            }
-        });
-    }
-    return uriMap;
-}
+const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
 
 /**
  * Update models with a new model
@@ -103,7 +75,7 @@ async function resolveExternal(models, options, fileDownloader) {
             }
             return data;
         };
-        fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), getExternalImports);
+        fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), MetaModelUtil.getExternalImports);
     }
 
     const externalModelFiles = await fileDownloader.downloadExternalDependencies(models.models, options);
