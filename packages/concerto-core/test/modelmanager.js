@@ -553,7 +553,7 @@ describe('ModelManager', () => {
 
         it('should update external models', () => {
 
-            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -593,7 +593,7 @@ concept Bar {
 
         it('should rollback changes on error', () => {
 
-            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external
 concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -652,7 +652,7 @@ concept Bar {
 
     describe('#writeModelsToFileSystem', () => {
         beforeEach(async () => {
-            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -723,7 +723,7 @@ concept Bar {
             });
         });
         it('should return a list of name / content pairs, with External Models', async () => {
-            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));
@@ -745,7 +745,7 @@ concept Bar {
         });
 
         it('should return a list of name / content pairs, without External Models', async () => {
-            const externalModelFile = ParserUtil.newModelFile(modelManager, `namespace org.external
+            const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external
             concept Foo{ o String baz }`, '@external.cto');
             const mfd = sinon.createStubInstance(FileDownloader);
             mfd.downloadExternalDependencies.returns(Promise.resolve([externalModelFile]));

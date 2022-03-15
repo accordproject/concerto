@@ -22,4 +22,8 @@ module.exports = {
         const ast = Parser.parse(definitions, fileName);
         return new ModelFile(modelManager, ast, definitions, fileName);
     },
+    newModelAst: (modelManager, definitions, fileName) => {
+        const ast = Parser.parse(definitions, fileName);
+        return { ast, definitions, fileName };
+    },
 };
