@@ -315,19 +315,20 @@ class BaseModelManager {
             fileDownloader = new FileDownloader(new DefaultFileLoader(this.processFile), (file) => MetaModelUtil.getExternalImports(file.ast));
         }
 
-        const externalModelFiles = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options);
+        const externalModels = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options);
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
 
         try {
-            externalModelFiles.forEach((file) => {
+            const externalModelFiles = [];
+            externalModels.forEach((file) => {
                 const mf = new ModelFile(this, file.ast, file.definitions, file.fileName);
                 const existing = this.modelFiles[mf.getNamespace()];
 
                 if (existing) {
-                    this.updateModelFile(mf, mf.getName(), true); // disable validation
+                    externalModelFiles.push(this.updateModelFile(mf, mf.getName(), true)); // disable validation
                 } else {
-                    this.addModelFile(mf, null, mf.getName(), true); // disable validation
+                    externalModelFiles.push(this.addModelFile(mf, null, mf.getName(), true)); // disable validation
                 }
             });
 
