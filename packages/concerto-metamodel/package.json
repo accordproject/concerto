@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-metamodel",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "Concerto metamodel utilities",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -48,7 +48,7 @@
     "sinon-chai": "3.7.0"
   },
   "dependencies": {
-    "@accordproject/concerto-util": "2.0.0-alpha.1"
+    "@accordproject/concerto-util": "2.0.0-alpha.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
