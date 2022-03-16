@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "1.2.1",
+  "version": "2.0.0-alpha.1",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -22,7 +22,7 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "build:types" : "npx -p typescript tsc ./lib/**/*.js index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "build:types": "npx -p typescript tsc ./lib/**/*.js index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {
     "type": "git",
@@ -38,9 +38,9 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-env": "7.16.11",
-    "babel-loader": "8.2.3",
     "acorn": "8.5.0",
     "acorn-walk": "8.2.0",
+    "babel-loader": "8.2.3",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -63,9 +63,9 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
-    "@accordproject/concerto-util": "1.2.1",
-    "@accordproject/concerto-cto": "1.2.1",
-    "@accordproject/concerto-metamodel": "1.2.1",
+    "@accordproject/concerto-cto": "2.0.0-alpha.1",
+    "@accordproject/concerto-metamodel": "2.0.0-alpha.1",
+    "@accordproject/concerto-util": "2.0.0-alpha.1",
     "dayjs": "1.10.8",
     "debug": "4.3.1",
     "lorem-ipsum": "2.0.3",
@@ -130,8 +130,7 @@
     "include": [
       "lib/**/*.js"
     ],
-    "exclude": [
-    ],
+    "exclude": [],
     "all": true,
     "check-coverage": true,
     "statements": 98,
