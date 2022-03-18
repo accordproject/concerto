@@ -4,7 +4,7 @@
   "description": "Concerto metamodel utilities",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=12",
+    "node": ">=14",
     "npm": ">=6"
   },
   "main": "index.js",
