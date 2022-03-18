@@ -4,6 +4,10 @@
   "description": "Command-line utility for working with Concerto model files",
   "homepage": "https://github.com/accordproject/concerto",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=14",
+    "npm": ">=6"
+  },
   "main": "index.js",
   "bin": {
     "concerto": "./index.js"
