@@ -24,7 +24,7 @@ const ModelManager = require('./modelmanager');
 class DecoratorManager {
     /**
      * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager. Note that the ModelManager is modifed.
+     * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @returns {ModelManager} a new model manager with the decorations applied
