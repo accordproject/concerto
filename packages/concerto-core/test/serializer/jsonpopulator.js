@@ -45,7 +45,7 @@ describe('JSONPopulator', () => {
     before(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`
+        modelManager.addCTOModel(`
             namespace org.acme
             asset MyAsset1 identified by assetId {
                 o String assetId
@@ -70,7 +70,7 @@ describe('JSONPopulator', () => {
                 --> MyAsset1[] myAssets
             }
         `);
-        modelManager.addModelFile(`
+        modelManager.addCTOModel(`
             namespace org.acme.different
             asset MyAsset1 identified by assetId {
                 o String assetId

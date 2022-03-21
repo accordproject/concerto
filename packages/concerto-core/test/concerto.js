@@ -32,7 +32,7 @@ describe('concerto', () => {
 
     beforeEach(() => {
         const modelManager = new ModelManager();
-        modelManager.addModelFile( concertoModel, 'test.cto');
+        modelManager.addCTOModel( concertoModel, 'test.cto');
         concerto = new Concerto(modelManager);
     });
 

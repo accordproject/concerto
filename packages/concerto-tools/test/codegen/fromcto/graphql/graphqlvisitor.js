@@ -26,7 +26,7 @@ const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaratio
 const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const Field = require('@accordproject/concerto-core').Field;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 const MODEL_WITH_DECORATORS = `
 namespace test
@@ -57,7 +57,7 @@ describe('GraphQLVisitor', function () {
     let mockFileWriter;
     beforeEach(() => {
         graphQLVisitor = new GraphQLVisitor();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('visit', () => {
@@ -378,7 +378,7 @@ describe('GraphQLVisitor', function () {
                 fileWriter: mockFileWriter
             };
             const modelManager = new ModelManager();
-            modelManager.addModelFile(MODEL_WITH_DECORATORS);
+            modelManager.addCTOModel(MODEL_WITH_DECORATORS);
             graphQLVisitor.visit(modelManager, param);
             param.fileWriter.writeBeforeLine.getCall(0).args.should.deep.equal([0, 'directive @single on OBJECT | FIELD_DEFINITION']);
             param.fileWriter.writeBeforeLine.getCall(1).args.should.deep.equal([0, `directive @role(boolean: Boolean

@@ -19,16 +19,19 @@ const path = require('path');
 const mkdirp = require('mkdirp');
 
 const Logger = require('@accordproject/concerto-util').Logger;
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
+
+const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
+
 const Printer = require('@accordproject/concerto-cto').Printer;
 const Parser = require('@accordproject/concerto-cto').Parser;
 const External = require('@accordproject/concerto-cto').External;
+
 const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
 const Concerto = require('@accordproject/concerto-core').Concerto;
-const FileWriter = require('@accordproject/concerto-tools').FileWriter;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
-const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
 
 const GoLangVisitor = CodeGen.GoLangVisitor;
 const JavaVisitor = CodeGen.JavaVisitor;

@@ -14,23 +14,19 @@
 
 'use strict';
 
-const Parser = require('@accordproject/concerto-cto').Parser;
-
 const BaseModelManager = require('./basemodelmanager');
 
-const debug = require('debug')('concerto:BaseModelManager');
-
 // How to create a modelfile from a cto file
-const ctoProcessFile = (name, data) => {
+const astProcessFile = (name, data) => {
     return {
-        ast: Parser.parse(data, name),
-        definitions: data,
+        ast: data,
+        definitions: null,
         fileName: name,
     };
 };
 
 /**
- * Manages the Concerto model files in CTO format.
+ * Manages the Concerto model files in AST format.
  *
  * The structure of {@link Resource}s (Assets, Transactions, Participants) is modelled
  * in a set of Concerto files. The contents of these files are managed
@@ -42,32 +38,15 @@ const ctoProcessFile = (name, data) => {
  *
  * @memberof module:concerto-core
  */
-class ModelManager extends BaseModelManager {
+class AstModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - Serializer options
      */
     constructor(options) {
-        super(options, ctoProcessFile);
+        super(options, astProcessFile);
     }
-
-    /**
-     * Adds a model in CTO format to the ModelManager.
-     * This is a convenience function equivalent to `addModel` but useful since it avoids having to copy the input CTO.
-     * @param {string} cto - a cto string
-     * @param {string} [fileName] - an optional file name to associate with the model file
-     * @param {boolean} [disableValidation] - If true then the model files are not validated
-     * @throws {IllegalModelException}
-     * @return {Object} The newly added model file (internal).
-     */
-    addCTOModel(cto, fileName, disableValidation) {
-        const NAME = 'addCTOModel';
-        debug(NAME, 'addCTOModel', cto, fileName);
-
-        return this.addModel(cto, cto, fileName, disableValidation);
-    }
-
 }
 
-module.exports = ModelManager;
+module.exports = AstModelManager;

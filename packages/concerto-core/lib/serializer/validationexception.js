@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseException = require('@accordproject/concerto-cto').BaseException;
+const BaseException = require('@accordproject/concerto-util').BaseException;
 
 /**
  * Exception thrown when a resource fails to model against the model

@@ -51,7 +51,7 @@ describe('ModelFile', () => {
 
         it('should return when concerto version is compatible with model', () => {
             let mf = ParserUtil.newModelFile(modelManager, versionValid);
-            mf.getConcertoVersion().should.equal('^1.0.0');
+            mf.getConcertoVersion().should.equal('>= 1.0.0');
         });
 
         it('should return when concerto version is compatible with model with a pre-release version', () => {
@@ -59,7 +59,7 @@ describe('ModelFile', () => {
             const newVersion = `${version}-unittest.${new Date().getTime()}`;
             sinon.replace(pkgJSON, 'version', newVersion);
             let mf = ParserUtil.newModelFile(modelManager, versionValid);
-            mf.getConcertoVersion().should.equal('^1.0.0');
+            mf.getConcertoVersion().should.equal('>= 1.0.0');
         });
 
         it('should return when model has no concerto version range', () => {

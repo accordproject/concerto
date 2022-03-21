@@ -14,24 +14,14 @@
 
 'use strict';
 
-const BaseException = require('@accordproject/concerto-util').BaseException;
+const rootModelFile = 'concerto.cto';
+const rootModelCto = `namespace concerto
+abstract concept Concept {}
+abstract concept Asset identified {}
+abstract concept Participant identified {}
+abstract concept Transaction {}
+abstract concept Event {}
+`;
+const rootModelAst = require('./rootmodel.json'); // Bootstrapped by applying the parser to the rootModelCto
 
-/**
-* Class representing a security exception
-* @extends BaseException
-* @see See {@link BaseException}
-* @class
-* @memberof module:concerto-core
-*/
-class SecurityException extends BaseException {
-    /**
-     * Create the SecurityException.
-     * @param {string} message - The exception message.
-     */
-    constructor(message) {
-        super(message);
-    }
-
-}
-
-module.exports = SecurityException;
+module.exports = { rootModelFile, rootModelCto, rootModelAst };

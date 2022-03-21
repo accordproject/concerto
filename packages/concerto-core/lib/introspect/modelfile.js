@@ -59,6 +59,7 @@ class ModelFile {
         if(!ast || typeof ast !== 'object') {
             throw new Error('ModelFile expects a Concerto model AST as input.');
         }
+
         this.ast = ast;
 
         if(definitions && typeof definitions !== 'string') {
@@ -704,6 +705,7 @@ class ModelFile {
             }
         }
     }
+
 }
 
 module.exports = ModelFile;

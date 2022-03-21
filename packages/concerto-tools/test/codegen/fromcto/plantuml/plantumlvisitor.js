@@ -30,14 +30,14 @@ const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDe
 const Field = require('@accordproject/concerto-core').Field;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('PlantUMLVisitor', function () {
     let plantUMLvisitor;
     let mockFileWriter;
     beforeEach(() => {
         plantUMLvisitor = new PlantUMLVisitor();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('visit', () => {

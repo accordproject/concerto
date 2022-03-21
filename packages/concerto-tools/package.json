@@ -1,6 +1,6 @@
 {
     "name": "@accordproject/concerto-tools",
-    "version": "1.2.1",
+    "version": "2.0.0-alpha.2",
     "description": "Tools for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
@@ -55,8 +55,8 @@
         "webpack-cli": "4.9.1"
     },
     "dependencies": {
-        "@accordproject/concerto-util": "1.2.1",
-        "@accordproject/concerto-core": "1.2.1",
+        "@accordproject/concerto-core": "2.0.0-alpha.2",
+        "@accordproject/concerto-util": "2.0.0-alpha.2",
         "ajv": "8.10.0",
         "ajv-formats": "2.1.1",
         "debug": "4.3.1",

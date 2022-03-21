@@ -40,7 +40,7 @@ describe('animaltracking Model', function(){
 
         animaltrackingModel = fs.readFileSync('./test/data/model/animaltracking.cto', 'utf8');
         animaltrackingModel.should.not.be.null;
-        modelManager.addModelFile(animaltrackingModel, 'animaltracking.cto');
+        modelManager.addCTOModel(animaltrackingModel, 'animaltracking.cto');
         Logger.info('no###');
         Logger.info(modelManager.getNamespaces());
 

@@ -1,3 +1,38 @@
+class AstModelManager extends BaseModelManager {
+   + void constructor(object?) 
+}
+class BaseModelManager {
+   + void constructor(object?,processFile?) 
+   + boolean isModelManager() 
+   + Object accept(Object,Object) 
+   + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
+   + Object addModelFile(ModelFile,string?,string?,boolean?) throws IllegalModelException
+   + Object addModel(modelInput,string?,string?,boolean?) throws IllegalModelException
+   + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
+   + void deleteModelFile(string) 
+   + Object[] addModelFiles(|,string[],boolean?) 
+   + void validateModelFiles() 
+   + Promise updateExternalModels(Object?,FileDownloader?) throws IllegalModelException
+   + void writeModelsToFileSystem(string,Object?,boolean) 
+   + Object[] getModels(Object?,boolean) 
+   + void clearModelFiles() 
+   + ModelFile getModelFile(string) 
+   + string[] getNamespaces() 
+   + ClassDeclaration getType(string) throws TypeNotFoundException
+   + AssetDeclaration[] getAssetDeclarations() 
+   + TransactionDeclaration[] getTransactionDeclarations() 
+   + EventDeclaration[] getEventDeclarations() 
+   + ParticipantDeclaration[] getParticipantDeclarations() 
+   + EnumDeclaration[] getEnumDeclarations() 
+   + ConceptDeclaration[] getConceptDeclarations() 
+   + Factory getFactory() 
+   + Serializer getSerializer() 
+   + DecoratorFactory[] getDecoratorFactories() 
+   + void addDecoratorFactory(DecoratorFactory) 
+   + boolean derivesFrom(string,string) 
+   + object resolveMetaModel(object) 
+   + void getAst(boolean?) 
+}
 class Concerto {
    + void constructor(modelManager) 
    + void validate(obj,options?) throws Error
@@ -100,15 +135,9 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
-class MetaModel {
-   + string getMetaModelCto() 
-   + void createMetaModelManager() 
-   + object validateMetaModel(object) 
-   + object resolveMetaModel(object,object,boolean?) 
-   + object modelFileToMetaModel(object,boolean?) 
-   + object modelManagerToMetaModel(object,boolean?,boolean?) 
-   + object modelManagerFromMetaModel(object,boolean?) 
-}
+   + void newMetaModelManager() 
+   + object validateMetaModel() 
+   + object modelManagerFromMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
@@ -202,35 +231,9 @@ class ModelLoader {
    + object loadModelManager(string[],object,boolean?,number?) 
    + object loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
-class ModelManager {
+class ModelManager extends BaseModelManager {
    + void constructor(object?) 
-   + boolean isModelManager() 
-   + Object accept(Object,Object) 
-   + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
-   + Object addModelFile(string|ModelFile,string,boolean?) throws IllegalModelException
-   + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
-   + void deleteModelFile(string) 
-   + Object[] addModelFiles(|,string[],boolean?) 
-   + void validateModelFiles() 
-   + Promise updateExternalModels(Object?,FileDownloader?) throws IllegalModelException
-   + void writeModelsToFileSystem(string,Object?,boolean) 
-   + Object[] getModels(Object?,boolean) 
-   + void clearModelFiles() 
-   + ModelFile getModelFile(string) 
-   + string[] getNamespaces() 
-   + ClassDeclaration getType(string) throws TypeNotFoundException
-   + AssetDeclaration[] getAssetDeclarations() 
-   + TransactionDeclaration[] getTransactionDeclarations() 
-   + EventDeclaration[] getEventDeclarations() 
-   + ParticipantDeclaration[] getParticipantDeclarations() 
-   + EnumDeclaration[] getEnumDeclarations() 
-   + ConceptDeclaration[] getConceptDeclarations() 
-   + Factory getFactory() 
-   + Serializer getSerializer() 
-   + DecoratorFactory[] getDecoratorFactories() 
-   + void addDecoratorFactory(DecoratorFactory) 
-   + boolean derivesFrom(string,string) 
-   + void getAst() 
+   + Object addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
 class SecurityException extends BaseException {
    + void constructor(string) 
