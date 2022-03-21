@@ -8,7 +8,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands.CommandTarget",
-                "type" : "String"
+                "type" : "concerto.metamodel.StringProperty"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel.Decorator",

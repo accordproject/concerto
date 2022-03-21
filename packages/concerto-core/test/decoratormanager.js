@@ -54,17 +54,18 @@ describe('DecoratorManager', () => {
             const decoratorModelManager = new ModelManager();
             // validate the decorator model
             const decoratorModelText = fs.readFileSync('./test/data/decoratorcommands/decorators.cto', 'utf-8');
-            decoratorModelManager.addModelFile(decoratorModelText, 'decorators.cto', true);
+            decoratorModelManager.addCTOModel(decoratorModelText, 'decorators.cto', true);
             decoratorModelManager.updateExternalModels();
 
             // load a model to decorate
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
-            testModelManager.addModelFile(modelText, 'test.cto');
+            testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
-            DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
-            const decl = testModelManager.getType('test.Person');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+
+            const decl = decoratedModelManager.getType('test.Person');
             decl.should.not.be.null;
 
             decl.getDecorator('Editable').should.not.be.null;

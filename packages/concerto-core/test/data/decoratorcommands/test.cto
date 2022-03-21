@@ -6,4 +6,5 @@ concept Person {
     o String firstName
     o String lastName
     o String bio
+    o String ssn
 }

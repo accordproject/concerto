@@ -631,6 +631,19 @@ class BaseModelManager {
     }
 
     /**
+     * Populates the model manager from a models metamodel AST
+     * @param {*} ast the metamodel
+     */
+    fromAst(ast) {
+        this.clearModelFiles();
+        ast.models.forEach( model => {
+            const modelFile = new ModelFile( this, model );
+            this.addModelFile( modelFile, null, null, true );
+        });
+        this.validateModelFiles();
+    }
+
+    /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names
      * @returns {*} the metamodel

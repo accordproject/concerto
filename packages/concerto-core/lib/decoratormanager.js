@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Decorator = require('./introspect/decorator');
+const ModelManager = require('./modelmanager');
 
 /**
  * Utility functions to work with
@@ -25,20 +25,23 @@ class DecoratorManager {
     /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager. Note that the ModelManager is modifed.
-     * @param {ModelManager} modelManager the model manager
+     * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet) {
-        let declarations = [];
-        modelManager.getModelFiles().forEach(mf => {
-            const decls = mf.getAllDeclarations();
-            declarations = declarations.concat(decls);
-        });
-        declarations.forEach(decl => {
-            decoratorCommandSet.commands.forEach(command => {
-                this.executeCommand(decl, command);
+        const ast = modelManager.getAst(true);
+        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        decoratedAst.models.forEach(model => {
+            model.declarations.forEach(decl => {
+                decoratorCommandSet.commands.forEach(command => {
+                    this.executeCommand(model.namespace, decl, command);
+                });
             });
         });
+        const newModelManager = new ModelManager();
+        newModelManager.fromAst(decoratedAst);
+        return newModelManager;
     }
 
     /**
@@ -53,16 +56,31 @@ class DecoratorManager {
 
     /**
      * Applies a decorator to a decorated model element.
-     * @param {Decorated} decorated the type to apply the decorator to
+     * @param {*} decorated the type to apply the decorator to
      * @param {string} type the command type
-     * @param {Decorator} newDecorator the decorator to add
+     * @param {*} newDecorator the decorator to add
      */
     static applyDecorator(decorated, type, newDecorator) {
         if (type === 'UPSERT') {
-            decorated.upsertDecorator(newDecorator.getName(), newDecorator);
+            let updated = false;
+            if(decorated.decorators) {
+                for (let n = 0; n < decorated.decorators.length; n++) {
+                    let decorator = decorated.decorators[n];
+                    if (decorator.name === newDecorator.name) {
+                        decorated.decorators[n] = newDecorator;
+                        updated = true;
+                    }
+                }
+            }
+
+            if (!updated) {
+                decorated.decorators ? decorated.decorators.push(newDecorator)
+                    : decorated.decorators = [newDecorator];
+            }
         }
         else if (type === 'APPEND') {
-            decorated.addDecorator(newDecorator);
+            decorated.decorators ? decorated.decorators.push(newDecorator)
+                : decorated.decorators = [newDecorator];
         }
         else {
             throw new Error(`Unknown command type ${type}`);
@@ -72,24 +90,23 @@ class DecoratorManager {
     /**
      * Executes a Command against a ClassDeclaration, adding
      * decorators to the ClassDeclaration, or its properties, as required.
-     * @param {ClassDeclaration} declaration the class declaration
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
      * @param {*} command the Command object from the
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(declaration, command) {
+    static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        if (this.isMatch(target.namespace, declaration.getNamespace()) &&
-            this.isMatch(target.declaration, declaration.getName())) {
+        if (this.isMatch(target.namespace, namespace) &&
+            this.isMatch(target.declaration, declaration.name)) {
             if (!target.property && !target.type) {
-                const newDecorator = new Decorator(declaration, decorator);
-                this.applyDecorator(declaration, type, newDecorator);
+                this.applyDecorator(declaration, type, decorator);
             }
             else {
-                declaration.getProperties().forEach(property => {
-                    if (this.isMatch(target.property, property.getName()) &&
-                        this.isMatch(target.type, property.getType())) {
-                        const newDecorator = new Decorator(property, decorator);
-                        this.applyDecorator(property, type, newDecorator);
+                declaration.properties.forEach(property => {
+                    if (this.isMatch(target.property, property.name) &&
+                        this.isMatch(target.type, property.$class)) {
+                        this.applyDecorator(property, type, decorator);
                     }
                 });
             }

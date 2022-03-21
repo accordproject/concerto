@@ -31,6 +31,7 @@ class BaseModelManager {
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean derivesFrom(string,string) 
    + object resolveMetaModel(object) 
+   + void fromAst(ast) 
    + void getAst(boolean?) 
 }
 class Concerto {
@@ -51,10 +52,10 @@ class Concerto {
 }
    + object setCurrentTime() 
 class DecoratorManager {
-   + void decorateModels(ModelManager,decoratorCommandSet) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet) 
    + Boolean isMatch(string|,string) 
-   + void applyDecorator(Decorated,string,Decorator) 
-   + void executeCommand(ClassDeclaration,command) 
+   + void applyDecorator(decorated,string,newDecorator) 
+   + void executeCommand(string,declaration,command) 
 }
 class Factory {
    + string newId() 
