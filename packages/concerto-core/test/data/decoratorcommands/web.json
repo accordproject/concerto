@@ -27,6 +27,19 @@
         },
         {
             "$class" : "org.accordproject.decoratorcommands.Command",
+            "type" : "APPEND",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "type" : "concerto.metamodel.StringProperty"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel.Decorator",
+                "name" : "New",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands.Command",
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands.CommandTarget",
