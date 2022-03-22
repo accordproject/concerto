@@ -1,3 +1,4 @@
+export var DecoratorManager: typeof import("./lib/decoratormanager");
 import SecurityException = require("./lib/securityexception");
 import IllegalModelException = require("./lib/introspect/illegalmodelexception");
 import TypeNotFoundException = require("./lib/typenotfoundexception");

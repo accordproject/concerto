@@ -31,12 +31,5 @@ declare class Resource extends Identifiable {
      * false if not.
      */
     isIdentifiable(): boolean;
-    /**
-     * Serialize this resource into a JavaScript object suitable for serialization to JSON,
-     * using the default options for the serializer. If you need to set additional options
-     * for the serializer, use the {@link Serializer#toJSON} method instead.
-     * @return {Object} A JavaScript object suitable for serialization to JSON.
-     */
-    toJSON(): any;
 }
 import Identifiable = require("./identifiable");

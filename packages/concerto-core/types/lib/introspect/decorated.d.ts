@@ -62,16 +62,5 @@ declare class Decorated {
      * @return {Decorator} the decorator attached to this class with the given name, or null if it does not exist.
      */
     getDecorator(name: string): Decorator;
-    /**
-     * Upserts (updates if existing, if not inserts) a decorator.
-     * @param {string} name the name of the decorator
-     * @param {Decorator} newDecorator the new decorator
-     */
-    upsertDecorator(name: string, newDecorator: Decorator): void;
-    /**
-     * Adds a decorator.
-     * @param {Decorator} newDecorator the new decorator
-     */
-    addDecorator(newDecorator: Decorator): void;
 }
 import Decorator = require("./decorator");

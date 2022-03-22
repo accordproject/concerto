@@ -7,11 +7,12 @@ export = DecoratorManager;
 declare class DecoratorManager {
     /**
      * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager. Note that the ModelManager is modifed.
-     * @param {ModelManager} modelManager the model manager
+     * to the ModelManager.
+     * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {ModelManager} a new model manager with the decorations applied
      */
-    static decorateModels(modelManager: ModelManager, decoratorCommandSet: any): void;
+    static decorateModels(modelManager: ModelManager, decoratorCommandSet: any): ModelManager;
     /**
      * Compares two values
      * @param {string | null} test the value to test (lhs)
@@ -21,18 +22,19 @@ declare class DecoratorManager {
     static isMatch(test: string | null, value: string): boolean;
     /**
      * Applies a decorator to a decorated model element.
-     * @param {Decorated} decorated the type to apply the decorator to
+     * @param {*} decorated the type to apply the decorator to
      * @param {string} type the command type
-     * @param {Decorator} newDecorator the decorator to add
+     * @param {*} newDecorator the decorator to add
      */
-    static applyDecorator(decorated: Decorated, type: string, newDecorator: Decorator): void;
+    static applyDecorator(decorated: any, type: string, newDecorator: any): void;
     /**
      * Executes a Command against a ClassDeclaration, adding
      * decorators to the ClassDeclaration, or its properties, as required.
-     * @param {ClassDeclaration} declaration the class declaration
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
      * @param {*} command the Command object from the
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(declaration: ClassDeclaration, command: any): void;
+    static executeCommand(namespace: string, declaration: any, command: any): void;
 }
-import Decorator = require("./introspect/decorator");
+import ModelManager = require("./modelmanager");
