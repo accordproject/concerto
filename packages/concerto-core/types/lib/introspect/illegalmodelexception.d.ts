@@ -1,5 +1,4 @@
 export = IllegalModelException;
-declare const IllegalModelException_base: typeof import("@accordproject/concerto-cto/types/lib/basefileexception");
 /**
  * Exception throws when a composer file is semantically invalid
  * @extends BaseFileException
@@ -7,7 +6,7 @@ declare const IllegalModelException_base: typeof import("@accordproject/concerto
  * @class
  * @memberof module:concerto-core
  */
-declare class IllegalModelException extends IllegalModelException_base {
+declare class IllegalModelException {
     /**
      * Create an IllegalModelException.
      * @param {string} message - the message for the exception

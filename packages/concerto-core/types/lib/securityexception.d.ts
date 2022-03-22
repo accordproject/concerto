@@ -1,5 +1,4 @@
 export = SecurityException;
-declare const SecurityException_base: typeof import("@accordproject/concerto-cto/types/lib/baseexception");
 /**
 * Class representing a security exception
 * @extends BaseException
@@ -7,7 +6,7 @@ declare const SecurityException_base: typeof import("@accordproject/concerto-cto
 * @class
 * @memberof module:concerto-core
 */
-declare class SecurityException extends SecurityException_base {
+declare class SecurityException {
     /**
      * Create the SecurityException.
      * @param {string} message - The exception message.
