@@ -11,5 +11,11 @@ export = ConceptDeclaration;
  * @memberof module:concerto-core
  */
 declare class ConceptDeclaration extends ClassDeclaration {
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind(): string;
 }
 import ClassDeclaration = require("./classdeclaration");
