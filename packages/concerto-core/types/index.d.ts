@@ -1,9 +1,9 @@
-export var DecoratorManager: typeof import("./lib/decoratormanager");
 import SecurityException = require("./lib/securityexception");
 import IllegalModelException = require("./lib/introspect/illegalmodelexception");
 import TypeNotFoundException = require("./lib/typenotfoundexception");
 import Decorator = require("./lib/introspect/decorator");
 import DecoratorFactory = require("./lib/introspect/decoratorfactory");
+import DecoratorManager = require("./lib/decoratormanager");
 import ClassDeclaration = require("./lib/introspect/classdeclaration");
 import IdentifiedDeclaration = require("./lib/introspect/identifieddeclaration");
 import AssetDeclaration = require("./lib/introspect/assetdeclaration");
@@ -31,4 +31,4 @@ import ModelLoader = require("./lib/modelloader");
 import DateTimeUtil = require("./lib/datetimeutil");
 import Concerto = require("./lib/concerto");
 import MetaModel = require("./lib/introspect/metamodel");
-export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel, version };
+export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel, version };

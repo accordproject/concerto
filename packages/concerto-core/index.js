@@ -79,7 +79,7 @@ const ModelUtil = require('./lib/modelutil');
 const ModelLoader = require('./lib/modelloader');
 
 // DecoratorManager
-module.exports.DecoratorManager = require('./lib/decoratormanager');
+const DecoratorManager = require('./lib/decoratormanager');
 
 // DateTimeUtil
 const DateTimeUtil = require('./lib/datetimeutil');
@@ -99,6 +99,7 @@ module.exports = {
     TypeNotFoundException,
     Decorator,
     DecoratorFactory,
+    DecoratorManager,
     ClassDeclaration,
     IdentifiedDeclaration,
     AssetDeclaration,
