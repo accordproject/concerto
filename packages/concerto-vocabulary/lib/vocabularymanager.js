@@ -23,7 +23,7 @@ const Vocabulary = require('./vocabulary');
  * @returns {string} modified string
  */
 function camelCaseToSentence(text) {
-    const result = text.replace( /([A-Z])/g, ' $1' );
+    const result = text.replace(/([A-Z]+)/g, ' $1').trim();
     return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
@@ -57,7 +57,7 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
-        const firstPart = propertyName ? propertyName + ' of the' : '';
+        const firstPart = propertyName ? propertyName.replace('$', '') + ' of the' : '';
         return camelCaseToSentence(firstPart + declarationName);
     }
 
@@ -207,9 +207,83 @@ class VocabularyManager {
     }
 
     /**
+     * Creates a DecoractorCommandSet with @Term decorators
+     * to decorate all model elements based on the vocabulary for a locale.
+     * Pass the return value to the DecoratorManager.decorateModel to apply
+     * the decorators to a ModelManager.
+     * @param {ModelManager} modelManager - the Model Manager
+     * @param {string} locale the BCP-47 locale identifier
+     * @returns {*} the decorator command set used to decorate the model.
+     */
+    generateDecoratorCommands(modelManager, locale) {
+        const decoratorCommandSet = {
+            '$class': 'org.accordproject.decoratorcommands.DecoratorCommandSet',
+            'name': `terms-${locale}`,
+            'version': '1.0.0',
+            'commands': []
+        };
+
+        modelManager.getModelFiles().forEach(model => {
+            model.getAllDeclarations().forEach(decl => {
+                const term = this.resolveTerm(modelManager, model.getNamespace(), locale, decl.getName());
+                if (term) {
+                    decoratorCommandSet.commands.push({
+                        '$class': 'org.accordproject.decoratorcommands.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                            'namespace': model.getNamespace(),
+                            'declaration': decl.getName(),
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel.Decorator',
+                            'name': 'Term',
+                            'arguments': [
+                                {
+                                    '$class': 'concerto.metamodel.DecoratorString',
+                                    'value': term
+                                },
+                            ]
+                        }
+                    });
+                }
+
+                decl.getProperties().forEach(property => {
+                    const propertyTerm = this.resolveTerm(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
+
+                    if (propertyTerm) {
+                        decoratorCommandSet.commands.push({
+                            '$class': 'org.accordproject.decoratorcommands.Command',
+                            'type': 'UPSERT',
+                            'target': {
+                                '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                'namespace': model.getNamespace(),
+                                'declaration': decl.getName(),
+                                'property': property.getName()
+                            },
+                            'decorator': {
+                                '$class': 'concerto.metamodel.Decorator',
+                                'name': 'Term',
+                                'arguments': [
+                                    {
+                                        '$class': 'concerto.metamodel.DecoratorString',
+                                        'value': propertyTerm
+                                    },
+                                ]
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        return decoratorCommandSet;
+    }
+
+    /**
      * Validates the terms in the vocabulary against the namespaces and declarations
      * within a ModelManager
      * @param {ModelManager} modelManager - the Model Manager
+     * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the result of validation
      */
     validate(modelManager) {

@@ -24,6 +24,7 @@ chai.use(require('chai-as-promised'));
 
 const { VocabularyManager } = require('..');
 const ModelManager = require('../../concerto-core/lib/modelmanager');
+const DecoratorManager = require('../../concerto-core/lib/decoratormanager');
 
 let modelManager = null;
 let vocabularyManager = null;
@@ -246,5 +247,18 @@ describe('VocabularyManager', () => {
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
         result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['Truck']);
         result.vocabularies['org.acme/zh-cn'].additionalTerms.should.have.members([]);
+    });
+
+    it('decorateModels', () => {
+        vocabularyManager = new VocabularyManager({
+            missingTermGenerator: VocabularyManager.englishMissingTermGenerator
+        });
+        const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-gb');
+        const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet);
+        const mf = newModelManager.getModelFile('org.acme');
+        const vehicleDecl = mf.getAssetDeclaration('Vehicle');
+        const decorator = vehicleDecl.getDecorator('Term');
+        decorator.getArguments()[0].should.equal('Vehicle');
+        vehicleDecl.getProperty('vin').getDecorator('Term').getArguments()[0].should.equal('Vin of the Vehicle');
     });
 });
