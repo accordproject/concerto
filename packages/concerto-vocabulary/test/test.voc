@@ -1,0 +1,4 @@
+locale: en
+namespace: com.test
+declarations:
+  - Human: A human being

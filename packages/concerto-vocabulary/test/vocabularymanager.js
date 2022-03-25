@@ -59,6 +59,13 @@ describe('VocabularyManager', () => {
         should.Throw(() => vocabularyManager.addVocabulary(), Error);
     });
 
+    it('addVocabulary', () => {
+        const enVocString = fs.readFileSync('./test/test.voc', 'utf-8');
+        const voc = vocabularyManager.addVocabulary(enVocString);
+        voc.should.not.be.null;
+        voc.getNamespace().should.equal('com.test');
+    });
+
     it('addVocabulary (duplicate)', () => {
         const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
         should.Throw(() => vocabularyManager.addVocabulary(enVocString), Error);
@@ -253,12 +260,16 @@ describe('VocabularyManager', () => {
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator
         });
-        const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-gb');
+        const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enVocString);
+        const enGbVocString = fs.readFileSync('./test/org.acme_en-gb.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enGbVocString);
+        const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-GB');
         const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet);
         const mf = newModelManager.getModelFile('org.acme');
         const vehicleDecl = mf.getAssetDeclaration('Vehicle');
         const decorator = vehicleDecl.getDecorator('Term');
-        decorator.getArguments()[0].should.equal('Vehicle');
-        vehicleDecl.getProperty('vin').getDecorator('Term').getArguments()[0].should.equal('Vin of the Vehicle');
+        decorator.getArguments()[0].should.equal('A road vehicle');
+        vehicleDecl.getProperty('vin').getDecorator('Term').getArguments()[0].should.equal('Vehicle Identification Number');
     });
 });

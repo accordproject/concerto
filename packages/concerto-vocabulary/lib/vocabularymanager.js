@@ -80,6 +80,7 @@ class VocabularyManager {
     /**
      * Adds a vocabulary to the vocabulary manager
      * @param {string} contents the YAML string for the vocabulary
+     * @returns {Vocabulary} the vocabulary the was added
      */
     addVocabulary(contents) {
         if (!contents) {
@@ -92,6 +93,7 @@ class VocabularyManager {
             throw new Error('Vocabulary has already been added.');
         }
         this.vocabularies[voc.getIdentifier()] = voc;
+        return voc;
     }
 
     /**
