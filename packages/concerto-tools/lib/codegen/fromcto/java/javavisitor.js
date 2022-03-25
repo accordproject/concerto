@@ -40,7 +40,7 @@ class JavaVisitor {
      * @param {Object} thing - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
+     * @public
      */
     visit(thing, parameters) {
         if (thing.isModelManager?.()) {
@@ -83,14 +83,14 @@ public abstract class Resource
 {
     public abstract String getID();
     private String $id;
-    
+
     @JsonProperty("$id")
     public String get$id() {
-        return $id; 
+        return $id;
     }
     @JsonProperty("$id")
     public void set$id(String i) {
-        $id = i; 
+        $id = i;
     }
 
 }

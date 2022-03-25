@@ -42,9 +42,9 @@ declare class JSONSchemaVisitor {
      * @param {Object} thing - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
-     * @private
+     * @public
      */
-    private visit;
+    public visit(thing: any, parameters: any): any;
     /**
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited

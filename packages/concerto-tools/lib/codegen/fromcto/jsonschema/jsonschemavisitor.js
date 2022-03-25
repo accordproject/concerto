@@ -75,7 +75,7 @@ class JSONSchemaVisitor {
      * @param {Object} thing - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
-     * @private
+     * @public
      */
     visit(thing, parameters) {
         if (thing.isModelManager?.()) {
