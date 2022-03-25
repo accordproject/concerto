@@ -20,4 +20,10 @@ declare class EventDeclaration {
      * @private
      */
     private process;
+    /**
+     * Returns the kind of declaration
+     *
+     * @return {string} what kind of declaration this is
+     */
+    declarationKind(): string;
 }

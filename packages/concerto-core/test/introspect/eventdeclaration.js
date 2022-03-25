@@ -44,7 +44,7 @@ describe('EventDeclaration', () => {
             }`;
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            const modelFile = modelManager.addModelFile(model, 'awesome.cto' );
+            const modelFile = modelManager.addCTOModel(model, 'awesome.cto' );
 
             let ed = modelFile.getEventDeclaration('E');
             ed.validate();
@@ -61,7 +61,7 @@ describe('EventDeclaration', () => {
             let modelDefinitions = fs.readFileSync(fileName, 'utf8');
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            const modelFile = modelManager.addModelFile(modelDefinitions, fileName );
+            const modelFile = modelManager.addCTOModel(modelDefinitions, fileName );
 
             const abstractEvent = modelFile.getEventDeclaration('AbstractEvent');
             abstractEvent.getFullyQualifiedName().should.equal('org.acme.AbstractEvent');

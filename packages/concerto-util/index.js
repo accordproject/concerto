@@ -21,6 +21,10 @@
  * @module concerto-util
  */
 
+// Exceptions
+module.exports.BaseException = require('./lib/baseexception');
+module.exports.BaseFileException = require('./lib/basefileexception');
+
 // Transitive closure downloader
 module.exports.FileDownloader = require('./lib/filedownloader');
 
@@ -32,6 +36,7 @@ module.exports.HTTPFileLoader = require('./lib/loaders/httpfileloader');
 
 // Writers
 module.exports.Writer = require('./lib/writer');
+module.exports.FileWriter = require('./lib/filewriter');
 module.exports.ModelWriter = require('./lib/modelwriter');
 
 // Logger
@@ -39,3 +44,6 @@ module.exports.Logger = require('./lib/logger');
 
 // TypedStack
 module.exports.TypedStack = require('./lib/typedstack');
+
+// Label
+module.exports.Label = require('./lib/label');

@@ -453,7 +453,7 @@ describe('ModelFile', () => {
         before(() => {
             modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            modelFile = modelManager.addModelFile(`namespace org.acme
+            modelFile = modelManager.addCTOModel(`namespace org.acme
             asset MyAsset identified by assetId {
                 o String assetId
             }`);

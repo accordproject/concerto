@@ -1,10 +1,10 @@
 {
   "name": "@accordproject/concerto-metamodel",
-  "version": "1.2.1",
+  "version": "2.0.0-alpha.2",
   "description": "Concerto metamodel utilities",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=12",
+    "node": ">=14",
     "npm": ">=6"
   },
   "main": "index.js",
@@ -20,7 +20,7 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "build:types" : "npx -p typescript tsc ./lib/*.js index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "build:types": "npx -p typescript tsc ./lib/*.js index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "chai": "4.3.4",
+    "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "debug": "4.3.1",
@@ -44,12 +44,11 @@
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
     "nyc": "15.1.0",
-    "peggy": "1.2.0",
-    "sinon": "10.0.0",
-    "sinon-chai": "3.6.0"
+    "sinon": "12.0.0",
+    "sinon-chai": "3.7.0"
   },
   "dependencies": {
-    "@accordproject/concerto-util": "1.2.1"
+    "@accordproject/concerto-util": "2.0.0-alpha.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

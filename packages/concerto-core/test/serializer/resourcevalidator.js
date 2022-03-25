@@ -114,10 +114,10 @@ describe('ResourceValidator', function () {
     });
 
     beforeEach(function () {
-        modelManager.addModelFile(enumModelString);
-        modelManager.addModelFile(levelOneModel);
-        modelManager.addModelFile(levelTwoModel);
-        modelManager.addModelFile(levelThreeModel);
+        modelManager.addCTOModel(enumModelString);
+        modelManager.addCTOModel(levelOneModel);
+        modelManager.addCTOModel(levelTwoModel);
+        modelManager.addCTOModel(levelThreeModel);
     });
 
     afterEach(function () {
@@ -386,7 +386,7 @@ describe('ResourceValidator', function () {
             modelManager.deleteModelFile('org.acme.l3');
 
             // replace with the same class declared abstract
-            modelManager.addModelFile(abstractLevelThreeModel);
+            modelManager.addCTOModel(abstractLevelThreeModel);
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );

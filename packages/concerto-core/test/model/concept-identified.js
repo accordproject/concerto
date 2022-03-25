@@ -29,7 +29,7 @@ describe('Concept Identifiers', function () {
     let classDecl;
     before(function () {
         modelManager = new ModelManager();
-        modelManager.addModelFile(`namespace org.accordproject
+        modelManager.addCTOModel(`namespace org.accordproject
         concept Address {
             o String country
         }
@@ -57,7 +57,7 @@ describe('Concept Identifiers', function () {
         it('should not parse a model with a relationship to a concept without an identifier', function () {
             const temp = new ModelManager();
             (function () {
-                temp.addModelFile(`namespace org.accordproject
+                temp.addCTOModel(`namespace org.accordproject
                 concept Address {
                     o String country
                 }

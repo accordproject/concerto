@@ -41,12 +41,12 @@ describe('Test Model', function(){
             let fileName = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName);
+            modelManager.addCTOModel(systemModel,fileName);
 
             fileName = './test/data/model/carlease.cto';
             let file = fs.readFileSync(fileName, 'utf8');
             file.should.not.be.null;
-            modelManager.addModelFile(file,fileName);
+            modelManager.addCTOModel(file,fileName);
 
             // create a factory
             let factory = new Factory(modelManager);
@@ -80,12 +80,12 @@ describe('Test Model', function(){
             let fileName = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName);
+            modelManager.addCTOModel(systemModel,fileName);
 
             fileName = './test/data/model/carlease.cto';
             let file = fs.readFileSync(fileName, 'utf8');
             file.should.not.be.null;
-            modelManager.addModelFile(file,fileName);
+            modelManager.addCTOModel(file,fileName);
 
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
@@ -148,12 +148,12 @@ describe('Test Model', function(){
             let fileName = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName);
+            modelManager.addCTOModel(systemModel,fileName);
 
             fileName = './test/data/model/carlease.cto';
             let file = fs.readFileSync(fileName, 'utf8');
             file.should.not.be.null;
-            modelManager.addModelFile(file,fileName);
+            modelManager.addCTOModel(file,fileName);
 
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
@@ -232,12 +232,12 @@ describe('Test Model', function(){
             let fileName1 = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName1, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName1);
+            modelManager.addCTOModel(systemModel,fileName1);
 
             let fileName2 = './test/data/model/carlease.cto';
             let file = fs.readFileSync(fileName2, 'utf8');
             file.should.not.be.null;
-            modelManager.addModelFile(file,fileName2);
+            modelManager.addCTOModel(file,fileName2);
 
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.getNamespace().should.equal('org.acme');
@@ -248,8 +248,8 @@ describe('Test Model', function(){
             // the system model will remain hence 1.
 
             // re-add
-            modelManager.addModelFile(systemModel);
-            modelManager.addModelFile(file);
+            modelManager.addCTOModel(systemModel);
+            modelManager.addCTOModel(file);
 
             // getType
             let vehicleDecl = modelManager.getType('org.acme.Vehicle');
@@ -325,12 +325,12 @@ describe('Test Model', function(){
             let fileName = './test/data/model/composer.cto';
             let systemModel = fs.readFileSync(fileName, 'utf8');
             systemModel.should.not.be.null;
-            modelManager.addModelFile(systemModel,fileName);
+            modelManager.addCTOModel(systemModel,fileName);
 
             fileName = './test/data/model/carlease.cto';
             let file = fs.readFileSync(fileName, 'utf8');
             file.should.not.be.null;
-            modelManager.addModelFile(file,fileName);
+            modelManager.addCTOModel(file,fileName);
 
             let modelFile = modelManager.getModelFile('org.acme');
             modelFile.isLocalType('MyParticipant').should.equal(false);
@@ -356,22 +356,22 @@ describe('Test Model', function(){
             let fileName = './test/data/model/dependencies/base/base.cto';
             let baseModel = fs.readFileSync(fileName, 'utf8');
             baseModel.should.not.be.null;
-            modelManager.addModelFile(baseModel,fileName);
+            modelManager.addCTOModel(baseModel,fileName);
 
             fileName = './test/data/model/dependencies/business/business.cto';
             let businessModel = fs.readFileSync(fileName, 'utf8');
             businessModel.should.not.be.null;
-            modelManager.addModelFile(businessModel,fileName);
+            modelManager.addCTOModel(businessModel,fileName);
 
             fileName = './test/data/model/dependencies/contract/proforma.cto';
             let proformaModel = fs.readFileSync(fileName, 'utf8');
             proformaModel.should.not.be.null;
-            modelManager.addModelFile(proformaModel,fileName);
+            modelManager.addCTOModel(proformaModel,fileName);
 
             fileName = './test/data/model/dependencies/contract/contract.cto';
             let contractModel = fs.readFileSync(fileName, 'utf8');
             contractModel.should.not.be.null;
-            modelManager.addModelFile(contractModel,fileName);
+            modelManager.addCTOModel(contractModel,fileName);
 
             let modelFile = modelManager.getModelFile('stdlib.business');
             modelFile.isLocalType('Business').should.equal(true);

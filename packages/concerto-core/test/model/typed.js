@@ -31,7 +31,7 @@ describe('Typed', () => {
     beforeEach(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`
+        modelManager.addCTOModel(`
         namespace org.acme.base
         abstract asset BaseAsset {
         }
@@ -39,7 +39,7 @@ describe('Typed', () => {
         }`);
         baseAssetClassDecl = modelManager.getType('org.acme.base.BaseAsset');
         baseAsset2ClassDecl = modelManager.getType('org.acme.base.BaseAsset2');
-        modelManager.addModelFile(`
+        modelManager.addCTOModel(`
         namespace org.acme.ext
         import org.acme.base.BaseAsset2
         asset MyAsset identified by assetId extends BaseAsset2 {
@@ -90,7 +90,7 @@ describe('Typed', () => {
 
             it(`should assign the default value for primitive type ${defaultValueType}`, () => {
                 const defaultValue = defaultValues[defaultValueType];
-                modelManager.addModelFile(`
+                modelManager.addCTOModel(`
                 namespace org.acme.defaults
                 enum Test {
                     o ONE

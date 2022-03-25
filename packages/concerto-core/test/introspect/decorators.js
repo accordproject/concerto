@@ -83,7 +83,7 @@ describe('Decorators', () => {
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             let modelDefinitions = fs.readFileSync('test/data/decorators/model.cto', 'utf8');
-            modelManager.addModelFile(modelDefinitions);
+            modelManager.addCTOModel(modelDefinitions);
             const introspector = new Introspector(modelManager);
 
             const car = introspector.getClassDeclaration('org.acme.Car');
@@ -170,7 +170,7 @@ describe('Decorators', () => {
                 const modelManager = new ModelManager();
                 Util.addComposerModel(modelManager);
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid.cto', 'utf8');
-                modelManager.addModelFile(modelDefinitions);
+                modelManager.addCTOModel(modelDefinitions);
             }).should.throw(/Duplicate decorator/);
         });
     });
@@ -217,7 +217,7 @@ describe('Decorators', () => {
             Util.addComposerModel(modelManager);
             modelManager.addDecoratorFactory(decoratorFactory);
             let modelDefinitions = fs.readFileSync('test/data/decorators/model.cto', 'utf8');
-            modelManager.addModelFile(modelDefinitions);
+            modelManager.addCTOModel(modelDefinitions);
             const introspector = new Introspector(modelManager);
 
             const driver = introspector.getClassDeclaration('org.acme.Driver');

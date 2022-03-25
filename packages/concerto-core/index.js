@@ -22,71 +22,107 @@
  */
 
 // Exceptions
-module.exports.SecurityException = require('./lib/securityexception');
-module.exports.IllegalModelException = require('./lib/introspect/illegalmodelexception');
-module.exports.TypeNotFoundException = require('./lib/typenotfoundexception');
+const SecurityException = require('./lib/securityexception');
+const IllegalModelException = require('./lib/introspect/illegalmodelexception');
+const TypeNotFoundException = require('./lib/typenotfoundexception');
 
 // Decorated
-module.exports.Decorator = require('./lib/introspect/decorator');
-module.exports.DecoratorFactory = require('./lib/introspect/decoratorfactory');
+const Decorator = require('./lib/introspect/decorator');
+const DecoratorFactory = require('./lib/introspect/decoratorfactory');
 
 // ClassDeclarations
-module.exports.ClassDeclaration = require('./lib/introspect/classdeclaration');
-module.exports.IdentifiedDeclaration = require('./lib/introspect/identifieddeclaration');
-module.exports.AssetDeclaration = require('./lib/introspect/assetdeclaration');
-module.exports.ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
-module.exports.EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
-module.exports.EventDeclaration = require('./lib/introspect/eventdeclaration');
-module.exports.ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
-module.exports.TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
+const ClassDeclaration = require('./lib/introspect/classdeclaration');
+const IdentifiedDeclaration = require('./lib/introspect/identifieddeclaration');
+const AssetDeclaration = require('./lib/introspect/assetdeclaration');
+const ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
+const EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
+const EventDeclaration = require('./lib/introspect/eventdeclaration');
+const ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
+const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
 
 // Properties
-module.exports.Property = require('./lib/introspect/property');
-module.exports.Field = require('./lib/introspect/field');
-module.exports.EnumDeclaration = require('./lib/introspect/enumdeclaration');
-module.exports.RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
+const Property = require('./lib/introspect/property');
+const Field = require('./lib/introspect/field');
+const EnumDeclaration = require('./lib/introspect/enumdeclaration');
+const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
 
 // Typed
-module.exports.Typed = require('./lib/model/typed');
+const Typed = require('./lib/model/typed');
 
 // Identifiables
-module.exports.Identifiable = require('./lib/model/identifiable');
-module.exports.Relationship = require('./lib/model/relationship');
-module.exports.Resource = require('./lib/model/resource');
+const Identifiable = require('./lib/model/identifiable');
+const Relationship = require('./lib/model/relationship');
+const Resource = require('./lib/model/resource');
 
 // Factory
-module.exports.Factory = require('./lib/factory');
+const Factory = require('./lib/factory');
 
 // Globalize
-module.exports.Globalize = require('./lib/globalize');
+const Globalize = require('./lib/globalize');
 
 // Introspector
-module.exports.Introspector = require('./lib/introspect/introspector');
+const Introspector = require('./lib/introspect/introspector');
 
 // ModelFile
-module.exports.ModelFile = require('./lib/introspect/modelfile');
+const ModelFile = require('./lib/introspect/modelfile');
 
 // ModelManager
-module.exports.ModelManager = require('./lib/modelmanager');
+const ModelManager = require('./lib/modelmanager');
 
 // Serializer
-module.exports.Serializer = require('./lib/serializer');
+const Serializer = require('./lib/serializer');
 
 // ModelUtil
-module.exports.ModelUtil = require('./lib/modelutil');
+const ModelUtil = require('./lib/modelutil');
 
 // ModelLoader
-module.exports.ModelLoader = require('./lib/modelloader');
+const ModelLoader = require('./lib/modelloader');
 
 
 // DateTimeUtil
-module.exports.DateTimeUtil = require('./lib/datetimeutil');
+const DateTimeUtil = require('./lib/datetimeutil');
 
 // Concerto
-module.exports.Concerto = require('./lib/concerto');
+const Concerto = require('./lib/concerto');
 
 // MetaModel
-module.exports.MetaModel = require('./lib/introspect/metamodel');
+const MetaModel = require('./lib/introspect/metamodel');
 
 // Version
-module.exports.version = require('./package.json');
+const version = require('./package.json');
+
+module.exports = {
+    SecurityException,
+    IllegalModelException,
+    TypeNotFoundException,
+    Decorator,
+    DecoratorFactory,
+    ClassDeclaration,
+    IdentifiedDeclaration,
+    AssetDeclaration,
+    ConceptDeclaration,
+    EnumValueDeclaration,
+    EventDeclaration,
+    ParticipantDeclaration,
+    TransactionDeclaration,
+    Property,
+    Field,
+    EnumDeclaration,
+    RelationshipDeclaration,
+    Typed,
+    Identifiable,
+    Relationship,
+    Resource,
+    Factory,
+    Globalize,
+    Introspector,
+    ModelFile,
+    ModelManager,
+    Serializer,
+    ModelUtil,
+    ModelLoader,
+    DateTimeUtil,
+    Concerto,
+    MetaModel,
+    version
+};

@@ -226,7 +226,7 @@ describe('Globalization', function() {
                 let fileName = './test/composer/models/factory/newinstance/foo-typenotdeclaredinns.cto';
                 let file = fs.readFileSync(fileName, 'utf8');
                 file.should.not.be.null;
-                modelManager.addModelFile(file,fileName);
+                modelManager.addCTOModel(file,fileName);
 
                 expect(function() {
                     let factory = new Factory(modelManager);
@@ -263,7 +263,7 @@ describe('Globalization', function() {
                 let fileName = './test/composer/models/factory/newinstance/foo-typenotdeclaredinns.cto';
                 let file = fs.readFileSync(fileName, 'utf8');
                 file.should.not.be.null;
-                modelManager.addModelFile(file,fileName);
+                modelManager.addCTOModel(file,fileName);
 
                 expect(function() {
                     let factory = new Factory(modelManager);
@@ -301,7 +301,7 @@ describe('Globalization', function() {
                 let fileName = './test/composer/models/factory/newrelationship/foo-typenotdeclaredinns.cto';
                 let file = fs.readFileSync(fileName, 'utf8');
                 file.should.not.be.null;
-                modelManager.addModelFile(file,fileName);
+                modelManager.addCTOModel(file,fileName);
 
                 expect(function() {
                     let factory = new Factory(modelManager);

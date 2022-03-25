@@ -2,7 +2,7 @@
   "devDependencies": {
     "colors": "1.4.0",
     "coveralls": "3.1.0",
-    "dayjs": "1.10.4",
+    "dayjs": "1.10.8",
     "eslint": "8.2.0",
     "jsdoc": "^3.6.7",
     "glob": "^7.1.7",
@@ -12,12 +12,12 @@
     "semver": "7.3.5"
   },
   "engines": {
-    "node": ">=12",
-    "npm": ">=5"
+    "node": ">=14",
+    "npm": ">=6"
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-  "version": "1.2.1",
+  "version": "2.0.0-alpha.2",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",

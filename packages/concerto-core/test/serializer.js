@@ -37,7 +37,7 @@ describe('Serializer', () => {
 
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`
+        modelManager.addCTOModel(`
         namespace org.acme.sample
 
         asset SampleAsset identified by assetId {

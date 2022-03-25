@@ -29,7 +29,7 @@ describe('Identifiable', function () {
     before(function () {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(`namespace com.composer
+        modelManager.addCTOModel(`namespace com.composer
         participant Farmer identified by farmerId {
             o String farmerId
         }`);

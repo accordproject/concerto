@@ -21,7 +21,7 @@ const COMPOSER_MODEL = require('./composermodel');
 module.exports = {
     addComposerModel: (modelManager) => {
         debug('addComposerModel', COMPOSER_MODEL);
-        modelManager.addModelFile(COMPOSER_MODEL.contents, COMPOSER_MODEL.fileName, true);
+        modelManager.addCTOModel(COMPOSER_MODEL.contents, COMPOSER_MODEL.fileName, true);
 
         // now validate the model
         modelManager.validateModelFiles();

@@ -331,7 +331,7 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return Concept for a super class', () => {
-            modelManager.addModelFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
             asset TestAsset identified by assetId { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
@@ -339,7 +339,7 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
-            modelManager.addModelFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
             abstract asset BaseAsset { }
             asset TestAsset identified by assetId extends BaseAsset { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');
@@ -348,9 +348,9 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return the super class declaration for a super class in another file', () => {
-            modelManager.addModelFile(`namespace org.base
+            modelManager.addCTOModel(`namespace org.base
             abstract asset BaseAsset { }`);
-            modelManager.addModelFile(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme
             import org.base.BaseAsset
             asset TestAsset identified by assetId extends BaseAsset { o String assetId }`);
             let classDecl = modelManager.getType('org.acme.TestAsset');

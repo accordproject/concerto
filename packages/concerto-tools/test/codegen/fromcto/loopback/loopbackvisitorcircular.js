@@ -15,7 +15,7 @@
 'use strict';
 
 const fs = require('fs');
-const FileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const LoopbackVisitor = require('../../../../lib/codegen/fromcto/loopback/loopbackvisitor');
 const path = require('path');
@@ -38,7 +38,7 @@ describe('LoopbackVisitor with Circular Model', () => {
             beforeEach(() => {
                 mockFileWriter = sinon.createStubInstance(FileWriter);
                 modelManager = new ModelManager();
-                modelManager.addModelFile(fs.readFileSync(path.resolve(__dirname, '../data/model/circular.cto'), 'utf8'), 'circular.cto');
+                modelManager.addCTOModel(fs.readFileSync(path.resolve(__dirname, '../data/model/circular.cto'), 'utf8'), 'circular.cto');
                 visitor = new LoopbackVisitor(namespaces);
                 sandbox = sinon.createSandbox();
             });

@@ -46,7 +46,7 @@ describe('Resource', function () {
     beforeEach(function () {
         modelManager = new ModelManager({ utcOffset: 0 });
         Util.addComposerModel(modelManager);
-        modelManager.addModelFile(levelOneModel);
+        modelManager.addCTOModel(levelOneModel);
     });
 
     describe('#getClassDeclaration', function() {

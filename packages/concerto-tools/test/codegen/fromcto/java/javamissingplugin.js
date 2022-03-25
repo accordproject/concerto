@@ -23,7 +23,7 @@ const AbstractPlugin = require('../../../../lib/codegen/abstractplugin.js');
 
 const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
 const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const fileWriter = require('../../../../lib/filewriter');
+const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('JavaMissingPlugin', function () {
     let javaVisit;
@@ -31,7 +31,7 @@ describe('JavaMissingPlugin', function () {
     beforeEach(() => {
         javaVisit = new JavaVisitor();
         javaVisit.plugin = new AbstractPlugin();
-        mockFileWriter = sinon.createStubInstance(fileWriter);
+        mockFileWriter = sinon.createStubInstance(FileWriter);
     });
 
     describe('startClassFile', () => {

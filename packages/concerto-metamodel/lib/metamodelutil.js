@@ -14,6 +14,8 @@
 
 'use strict';
 
+const metaModelAst = require('./metamodel.json');
+
 /**
  * The metamodel itself, as a CTO string
  */
@@ -24,7 +26,6 @@ concept Position {
   o Integer column
   o Integer offset
 }
-
 concept Range {
   o Position start
   o Position end
@@ -373,4 +374,40 @@ function resolveLocalNamesForAll(allModels) {
     return result;
 }
 
-module.exports = { metaModelCto, resolveLocalNames, resolveLocalNamesForAll };
+/**
+ * Return the fully qualified name for an import
+ * @param {object} imp - the import
+ * @return {string} - the fully qualified name for that import
+ * @private
+ */
+function importFullyQualifiedName(imp) {
+    return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
+}
+
+/**
+ * Returns an object that maps from the import declarations to the URIs specified
+ * @param {*} ast - the model ast
+ * @return {Object} keys are import declarations, values are URIs
+ * @private
+ */
+function getExternalImports(ast) {
+    const uriMap = {};
+    if (ast.imports) {
+        ast.imports.forEach((imp) => {
+            const fqn = importFullyQualifiedName(imp);
+            if(imp.uri) {
+                uriMap[fqn] = imp.uri;
+            }
+        });
+    }
+    return uriMap;
+}
+
+module.exports = {
+    metaModelAst,
+    metaModelCto,
+    resolveLocalNames,
+    resolveLocalNamesForAll,
+    importFullyQualifiedName,
+    getExternalImports,
+};
