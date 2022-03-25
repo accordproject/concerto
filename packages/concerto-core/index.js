@@ -14,9 +14,6 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
 /**
  * Concerto core module. Concerto is a framework for defining domain
  * specific models.
@@ -92,7 +89,8 @@ const Concerto = require('./lib/concerto');
 const MetaModel = require('./lib/introspect/metamodel');
 
 // Version
-const version = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
+/** @type {{ name: string, version: string }} */
+const version = require('./package.json');
 
 module.exports = {
     SecurityException,

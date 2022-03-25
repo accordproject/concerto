@@ -1,7 +1,8 @@
 /**
  * The metamodel itself, as an AST.
+ * @type unknown
  */
-export const metaModelAst: any;
+export const metaModelAst: unknown;
 /**
  * The metamodel itself, as a CTO string
  */

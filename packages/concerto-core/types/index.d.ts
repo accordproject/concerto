@@ -30,5 +30,9 @@ import ModelLoader = require("./lib/modelloader");
 import DateTimeUtil = require("./lib/datetimeutil");
 import Concerto = require("./lib/concerto");
 import MetaModel = require("./lib/introspect/metamodel");
-export const version: any;
+/** @type {{ name: string, version: string }} */
+export const version: {
+    name: string;
+    version: string;
+};
 export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
