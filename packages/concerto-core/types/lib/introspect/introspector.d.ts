@@ -41,3 +41,5 @@ declare class Introspector {
      */
     private getModelManager;
 }
+import ModelManager = require("../modelmanager");
+import ClassDeclaration = require("./classdeclaration");

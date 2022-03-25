@@ -46,10 +46,11 @@ declare class Decorated {
      * override this method to impose additional semantic constraints on the
      * contents/relations of fields.
      *
+     * @param {...*} args the validation arguments
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
-    private validate;
+    protected validate(...args: any[]): void;
     /**
      * Returns the decorators for this class.
      *
@@ -63,4 +64,5 @@ declare class Decorated {
      */
     getDecorator(name: string): Decorator;
 }
+import ModelFile = require("./modelfile");
 import Decorator = require("./decorator");

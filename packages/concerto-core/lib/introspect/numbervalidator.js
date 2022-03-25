@@ -16,6 +16,14 @@
 
 const Validator = require('./validator');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const Field = require('./field');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * A Validator to enforce that non null numeric values are between two values.
  * @private

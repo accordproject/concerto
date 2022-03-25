@@ -89,6 +89,7 @@ const Concerto = require('./lib/concerto');
 const MetaModel = require('./lib/introspect/metamodel');
 
 // Version
+/** @type {{ name: string, version: string }} */
 const version = require('./package.json');
 
 module.exports = {

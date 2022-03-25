@@ -25,3 +25,4 @@ declare class AssetDeclaration {
      */
     declarationKind(): string;
 }
+import ModelFile = require("./modelfile");

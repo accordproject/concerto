@@ -14,7 +14,7 @@
 
 'use strict';
 
-const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
+const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 
 const ModelManager = require('../modelmanager');
 const Factory = require('../factory');

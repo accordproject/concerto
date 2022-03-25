@@ -14,7 +14,15 @@
 
 'use strict';
 
-const BaseFileException = require('@accordproject/concerto-util').BaseFileException;
+const { BaseFileException } = require('@accordproject/concerto-util');
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./modelfile');
+}
+/* eslint-enable no-unused-vars */
 
 /**
  * Exception throws when a composer file is semantically invalid

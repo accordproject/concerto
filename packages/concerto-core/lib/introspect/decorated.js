@@ -17,6 +17,14 @@
 const Decorator = require('./decorator');
 const IllegalModelException = require('./illegalmodelexception');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./modelfile');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Decorated defines a model element that may have decorators attached.
  *
@@ -99,10 +107,11 @@ class Decorated {
      * override this method to impose additional semantic constraints on the
      * contents/relations of fields.
      *
+     * @param {...*} args the validation arguments
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
-    validate() {
+    validate(...args) {
         for(let n=0; n < this.decorators.length; n++) {
             let decorator = this.decorators[n];
             decorator.validate();

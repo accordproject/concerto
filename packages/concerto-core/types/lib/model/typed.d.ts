@@ -19,9 +19,9 @@ declare class Typed {
      * @param {ClassDeclaration} classDeclaration - The class declaration for this instance.
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
-     * @private
+     * @protected
      */
-    private constructor();
+    protected constructor();
     $modelManager: ModelManager;
     $classDeclaration: ClassDeclaration;
     $namespace: string;
@@ -90,7 +90,9 @@ declare class Typed {
     /**
      * Overriden to prevent people accidentally converting a resource to JSON
      * without using the Serializer.
-     * @private
+     * @protected
      */
-    private toJSON;
+    protected toJSON(): void;
 }
+import ModelManager = require("../modelmanager");
+import ClassDeclaration = require("../introspect/classdeclaration");

@@ -23,6 +23,15 @@ const Introspector = require('./introspector');
 const ModelUtil = require('../modelutil');
 const RelationshipDeclaration = require('./relationshipdeclaration');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./modelfile');
+    const Property = require('./property');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * ClassDeclaration defines the structure (model/schema) of composite data.
  * It is composed of a set of Properties, may have an identifying field, and may
@@ -184,7 +193,7 @@ class ClassDeclaration extends Decorated {
      * contents/relations of fields.
      *
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
     validate() {
         super.validate();

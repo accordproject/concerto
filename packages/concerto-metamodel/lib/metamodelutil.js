@@ -14,6 +14,10 @@
 
 'use strict';
 
+/**
+ * The metamodel itself, as an AST.
+ * @type unknown
+ */
 const metaModelAst = require('./metamodel.json');
 
 /**

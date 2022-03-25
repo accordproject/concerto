@@ -72,7 +72,7 @@ class FileWriter extends Writer {
 
     /**
      * Writes text to the current open file
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
     writeLine(tabs,text) {
@@ -85,7 +85,7 @@ class FileWriter extends Writer {
 
     /**
      * Writes text to the start of the current open file
-     * @param {int} tabs - the number of tabs to use
+     * @param {number} tabs - the number of tabs to use
      * @param {string} text - the text to write
      */
     writeBeforeLine(tabs,text) {

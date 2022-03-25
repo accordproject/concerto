@@ -1,1 +1,2 @@
-export var MetaModelUtil: typeof import("./lib/metamodelutil");
+export { MetaModelUtil };
+import MetaModelUtil = require("./lib/metamodelutil");

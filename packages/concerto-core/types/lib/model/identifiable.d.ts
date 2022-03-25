@@ -22,9 +22,9 @@ declare class Identifiable extends Typed {
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
      * @param {string} timestamp - The timestamp of this instance
-     * @private
+     * @protected
      */
-    private constructor();
+    protected constructor();
     $identifier: string;
     $timestamp: string;
     /**

@@ -1,5 +1,5 @@
-export var BaseException: typeof import("./lib/baseexception");
-export var BaseFileException: typeof import("./lib/basefileexception");
-export var ParseException: typeof import("./lib/parseexception");
-export var Parser: typeof import("./lib/parserMain");
-export var Printer: typeof import("./lib/printer");
+import ParseException = require("./lib/parseexception");
+import Parser = require("./lib/parserMain");
+import Printer = require("./lib/printer");
+import External = require("./lib/external");
+export { ParseException, Parser, Printer, External };
