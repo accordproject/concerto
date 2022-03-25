@@ -66,6 +66,7 @@ class AssetDeclaration extends IdentifiedDeclaration {
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + ClassDeclaration _resolveSuperType() 
+   ~ void validate() throws IllegalModelException
    + boolean isAbstract() 
    + string getName() 
    + string getNamespace() 
@@ -167,6 +168,7 @@ class ParticipantDeclaration extends IdentifiedDeclaration {
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    + ClassDeclaration getParent() 
+   ~ void validate(ClassDeclaration) throws IllegalModelException
    + string getName() 
    + string getType() 
    + boolean isOptional() 
@@ -179,6 +181,7 @@ class Property extends Decorated {
 }
 class RelationshipDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
+   ~ void validate(ClassDeclaration) throws IllegalModelException
    + String toString() 
    + boolean isRelationship() 
 }
@@ -187,6 +190,7 @@ class TransactionDeclaration extends IdentifiedDeclaration {
    + string declarationKind() 
 }
 class Identifiable extends Typed {
+   ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string) 
    + string getTimestamp() 
    + string getIdentifier() 
    + void setIdentifier(string) 
@@ -209,12 +213,14 @@ class Resource extends Identifiable {
    + Object toJSON() 
 }
 class Typed {
+   ~ void constructor(ModelManager,ClassDeclaration,string,string) 
    + string getType() 
    + string getFullyQualifiedType() 
    + string getNamespace() 
    + void setPropertyValue(string,string) 
    + void addArrayValue(string,string) 
    + boolean instanceOf(String) 
+   ~ void toJSON() 
 }
 class ValidatedResource extends Resource {
    + void setPropertyValue(string,string) throws Error
@@ -239,6 +245,6 @@ class Serializer {
    + Resource fromJSON(Object,Object?,boolean,boolean,number?) 
 }
 class TypeNotFoundException extends BaseException {
-   + void constructor(string,string?,string) 
+   + void constructor(string,string|,string) 
    + string getTypeName() 
 }

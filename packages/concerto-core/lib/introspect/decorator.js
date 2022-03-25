@@ -14,6 +14,15 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+    const Property = require('./property');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Decorator encapsulates a decorator (annotation) on a class or property.
  * @class

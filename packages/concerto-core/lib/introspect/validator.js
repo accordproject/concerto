@@ -14,6 +14,14 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const Field = require('./field');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * An Abstract field validator. Extend this class and override the
  * validate method.

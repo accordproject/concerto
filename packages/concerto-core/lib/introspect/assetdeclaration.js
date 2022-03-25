@@ -16,6 +16,14 @@
 
 const IdentifiedDeclaration = require('./identifieddeclaration');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./modelfile');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * AssetDeclaration defines the schema (aka model or class) for
  * an Asset. It extends ClassDeclaration which manages a set of

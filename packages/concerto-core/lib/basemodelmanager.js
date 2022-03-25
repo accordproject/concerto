@@ -16,10 +16,8 @@
 
 const fsPath = require('path');
 
-const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
-const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
-const ModelWriter = require('@accordproject/concerto-util').ModelWriter;
-const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
+const { DefaultFileLoader, FileDownloader, ModelWriter } = require('@accordproject/concerto-util');
+const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -29,6 +27,21 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const AssetDeclaration = require('./introspect/assetdeclaration');
+    const ClassDeclaration = require('./introspect/classdeclaration');
+    const ConceptDeclaration = require('./introspect/conceptdeclaration');
+    const DecoratorFactory = require('./introspect/decoratorfactory');
+    const EnumDeclaration = require('./introspect/enumdeclaration');
+    const EventDeclaration = require('./introspect/eventdeclaration');
+    const ParticipantDeclaration = require('./introspect/participantdeclaration');
+    const TransactionDeclaration = require('./introspect/transactiondeclaration');
+}
+/* eslint-enable no-unused-vars */
 
 const debug = require('debug')('concerto:BaseModelManager');
 

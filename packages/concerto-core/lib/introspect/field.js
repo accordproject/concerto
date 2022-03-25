@@ -18,6 +18,14 @@ const Property = require('./property');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Class representing the definition of a Field. A Field is owned
  * by a ClassDeclaration and has a name, type and additional metadata

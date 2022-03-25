@@ -16,13 +16,12 @@
 
 const path = require('path');
 
-const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
-const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
+const { DefaultFileLoader, FileDownloader }  = require('@accordproject/concerto-util');
 
 const debug = require('debug')('concerto:ModelManager');
 
 const Parser = require('./parser');
-const MetaModelUtil = require('@accordproject/concerto-metamodel').MetaModelUtil;
+const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 
 /**
  * Update models with a new model

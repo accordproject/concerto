@@ -16,6 +16,14 @@
 
 const Property = require('./property');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Class representing a value from a set of enumerated values
  *

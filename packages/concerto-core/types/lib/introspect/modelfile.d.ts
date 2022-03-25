@@ -250,6 +250,8 @@ declare class ModelFile {
     private fromAst;
     namespace: any;
 }
+import ModelManager = require("../modelmanager");
+import ClassDeclaration = require("./classdeclaration");
 import AssetDeclaration = require("./assetdeclaration");
 import TransactionDeclaration = require("./transactiondeclaration");
 import EventDeclaration = require("./eventdeclaration");

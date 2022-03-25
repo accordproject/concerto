@@ -14,7 +14,7 @@
 
 'use strict';
 
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
+const { TypedStack } = require('@accordproject/concerto-util');
 
 const debug = require('debug')('concerto:Factory');
 const Globalize = require('./globalize');
@@ -34,6 +34,14 @@ const uuid = require('uuid');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelManager = require('./modelmanager');
+}
+/* eslint-enable no-unused-vars */
 
 /**
  * Use the Factory to create instances of Resource: transactions, participants

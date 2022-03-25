@@ -21,3 +21,4 @@ declare class TransactionDeclaration {
      */
     declarationKind(): string;
 }
+import ModelFile = require("./modelfile");

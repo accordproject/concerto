@@ -45,3 +45,4 @@ declare class Validator {
      */
     private validate;
 }
+import Field = require("./field");

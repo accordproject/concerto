@@ -29,9 +29,9 @@ declare class Property extends Decorated {
      * Validate the property
      * @param {ClassDeclaration} classDecl the class declaration of the property
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
-    private validate;
+    protected validate(classDecl: ClassDeclaration): void;
     /**
      * Returns the name of a property
      * @return {string} the name of this field
@@ -79,3 +79,4 @@ declare class Property extends Decorated {
     isPrimitive(): boolean;
 }
 import Decorated = require("./decorated");
+import ClassDeclaration = require("./classdeclaration");

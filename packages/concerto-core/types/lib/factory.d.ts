@@ -131,5 +131,6 @@ declare class Factory {
      */
     private parseGenerateOptions;
 }
+import ModelManager = require("./modelmanager");
 import Resource = require("./model/resource");
 import Relationship = require("./model/relationship");

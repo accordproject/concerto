@@ -14,7 +14,13 @@
 
 'use strict';
 
-const metaModelAst = require('./metamodel.json');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * The metamodel itself, as an AST.
+ */
+const metaModelAst = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'metamodel.json'), 'utf-8'));
 
 /**
  * The metamodel itself, as a CTO string

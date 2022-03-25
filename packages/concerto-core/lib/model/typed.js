@@ -18,6 +18,15 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('../introspect/classdeclaration');
+    const ModelManager = require('../modelmanager');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Object is an instance with a namespace and a type.
  *
@@ -38,7 +47,7 @@ class Typed {
      * @param {ClassDeclaration} classDeclaration - The class declaration for this instance.
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
-     * @private
+     * @protected
      */
     constructor(modelManager, classDeclaration, ns, type) {
         this.$modelManager = modelManager;
@@ -187,7 +196,7 @@ class Typed {
     /**
      * Overriden to prevent people accidentally converting a resource to JSON
      * without using the Serializer.
-     * @private
+     * @protected
      */
     toJSON() {
         throw new Error('Use Serializer.toJSON to convert resource instances to JSON objects.');

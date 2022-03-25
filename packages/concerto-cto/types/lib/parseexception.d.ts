@@ -18,4 +18,4 @@ declare class ParseException extends BaseFileException {
      */
     constructor(message: string, fileLocation?: string, fileName?: string, fullMessageOverride?: string, component?: string);
 }
-import BaseFileException = require("./basefileexception");
+import { BaseFileException } from "@accordproject/concerto-util";

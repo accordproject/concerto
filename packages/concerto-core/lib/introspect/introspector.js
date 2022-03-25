@@ -14,6 +14,15 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+    const ModelManager = require('../modelmanager');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  *
  * Provides access to the structure of transactions, assets and participants.

@@ -18,6 +18,14 @@ const Property = require('./property');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Class representing a relationship between model elements
  * @extends Property
@@ -41,7 +49,7 @@ class RelationshipDeclaration extends Property {
      * Validate the property
      * @param {ClassDeclaration} classDecl the class declaration of the property
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
     validate(classDecl) {
         super.validate(classDecl);

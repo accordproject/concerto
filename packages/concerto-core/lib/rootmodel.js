@@ -14,6 +14,9 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const rootModelFile = 'concerto.cto';
 const rootModelCto = `namespace concerto
 abstract concept Concept {}
@@ -22,6 +25,6 @@ abstract concept Participant identified {}
 abstract concept Transaction {}
 abstract concept Event {}
 `;
-const rootModelAst = require('./rootmodel.json'); // Bootstrapped by applying the parser to the rootModelCto
+const rootModelAst = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'rootmodel.json'), 'utf-8')); // Bootstrapped by applying the parser to the rootModelCto
 
 module.exports = { rootModelFile, rootModelCto, rootModelAst };

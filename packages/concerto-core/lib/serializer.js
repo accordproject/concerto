@@ -14,7 +14,7 @@
 
 'use strict';
 
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
+const { TypedStack } = require('@accordproject/concerto-util');
 const DateTimeUtil = require('./datetimeutil');
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
@@ -28,6 +28,16 @@ const baseDefaultOptions = {
     ergo: false,
     utcOffset: defaultUtcOffset,
 };
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const Factory = require('./factory');
+    const ModelManager = require('./modelmanager');
+    const Resource = require('./model/resource');
+}
+/* eslint-enable no-unused-vars */
 
 /**
  * Serialize Resources instances to/from various formats for long-term storage

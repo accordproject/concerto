@@ -22,4 +22,8 @@
  */
 
 // MetaModel handling
-module.exports.MetaModelUtil = require('./lib/metamodelutil');
+const MetaModelUtil = require('./lib/metamodelutil');
+
+module.exports = {
+    MetaModelUtil
+};
