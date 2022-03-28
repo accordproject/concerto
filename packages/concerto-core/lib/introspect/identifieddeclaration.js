@@ -16,6 +16,14 @@
 
 const ClassDeclaration = require('./classdeclaration');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./modelfile');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * IdentifiedDeclaration
  *

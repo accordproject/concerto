@@ -75,3 +75,6 @@ declare class Serializer {
         utcOffset?: number;
     }): Resource;
 }
+import Factory = require("./factory");
+import ModelManager = require("./modelmanager");
+import Resource = require("./model/resource");

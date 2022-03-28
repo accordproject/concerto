@@ -18,6 +18,14 @@ const Identifiable = require('./identifiable');
 const ModelUtil = require('../modelutil');
 const ResourceId = require('./resourceid');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelManager = require('../modelmanager');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * A Relationship is a typed pointer to an instance. I.e the relationship
  * with namespace = 'org.example', type = 'Vehicle' and id = 'ABC' creates

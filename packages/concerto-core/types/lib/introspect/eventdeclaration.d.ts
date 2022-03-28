@@ -27,3 +27,4 @@ declare class EventDeclaration {
      */
     declarationKind(): string;
 }
+import ModelFile = require("./modelfile");

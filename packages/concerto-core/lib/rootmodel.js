@@ -22,6 +22,8 @@ abstract concept Participant identified {}
 abstract concept Transaction {}
 abstract concept Event {}
 `;
-const rootModelAst = require('./rootmodel.json'); // Bootstrapped by applying the parser to the rootModelCto
+
+/** @type unknown */
+const rootModelAst = require('./rootmodel.json');
 
 module.exports = { rootModelFile, rootModelCto, rootModelAst };

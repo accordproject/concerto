@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseException = require('@accordproject/concerto-util').BaseException;
+const { BaseException } = require('@accordproject/concerto-util');
 const Globalize = require('./globalize');
 
 /**
@@ -29,7 +29,7 @@ class TypeNotFoundException extends BaseException {
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
      * @param {string} typeName - fully qualified type name.
-     * @param {string} [message] - error message.
+     * @param {string|undefined} message - error message.
      * @param {string} component - the optional component which throws this error
      */
     constructor(typeName, message, component) {

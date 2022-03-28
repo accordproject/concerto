@@ -14,13 +14,25 @@
 
 'use strict';
 
-module.exports.AbstractPlugin = require('./abstractplugin');
+const AbstractPlugin = require('./abstractplugin');
 
-module.exports.GoLangVisitor = require('./fromcto/golang/golangvisitor');
-module.exports.JSONSchemaVisitor = require('./fromcto/jsonschema/jsonschemavisitor');
-module.exports.XmlSchemaVisitor = require('./fromcto/xmlschema/xmlschemavisitor');
-module.exports.PlantUMLVisitor = require('./fromcto/plantuml/plantumlvisitor');
-module.exports.TypescriptVisitor = require('./fromcto/typescript/typescriptvisitor');
-module.exports.JavaVisitor = require('./fromcto/java/javavisitor');
-module.exports.GraphQLVisitor = require('./fromcto/graphql/graphqlvisitor');
-module.exports.CSharpVisitor = require('./fromcto/csharp/csharpvisitor');
+const GoLangVisitor = require('./fromcto/golang/golangvisitor');
+const JSONSchemaVisitor = require('./fromcto/jsonschema/jsonschemavisitor');
+const XmlSchemaVisitor = require('./fromcto/xmlschema/xmlschemavisitor');
+const PlantUMLVisitor = require('./fromcto/plantuml/plantumlvisitor');
+const TypescriptVisitor = require('./fromcto/typescript/typescriptvisitor');
+const JavaVisitor = require('./fromcto/java/javavisitor');
+const GraphQLVisitor = require('./fromcto/graphql/graphqlvisitor');
+const CSharpVisitor = require('./fromcto/csharp/csharpvisitor');
+
+module.exports = {
+    AbstractPlugin,
+    GoLangVisitor,
+    JSONSchemaVisitor,
+    XmlSchemaVisitor,
+    PlantUMLVisitor,
+    TypescriptVisitor,
+    JavaVisitor,
+    GraphQLVisitor,
+    CSharpVisitor
+};

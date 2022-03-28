@@ -22,6 +22,23 @@ declare class Relationship extends Identifiable {
      * @return {Relationship} the relationship
      */
     static fromURI(modelManager: ModelManager, uriAsString: string, defaultNamespace?: string, defaultType?: string): Relationship;
+    /**
+     * Create an asset. Use the Factory to create instances.
+     * <p>
+     * <strong>Note: Only to be called by framework code. Applications should
+     * retrieve instances from {@link Factory}</strong>
+     * </p>
+     *
+     * @param {ModelManager} modelManager - The ModelManager for this instance
+     * @param {ClassDeclaration} classDeclaration - The class declaration for this instance.
+     * @param {string} ns - The namespace this instance.
+     * @param {string} type - The type this instance.
+     * @param {string} id - The identifier of this instance.
+     * @param {string} timestamp - The timestamp of this instance
+     * @private
+     */
+    private constructor();
     $class: string;
 }
 import Identifiable = require("./identifiable");
+import ModelManager = require("../modelmanager");

@@ -14,6 +14,16 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+    const Decorator = require('./decorator');
+    const Property = require('./property');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * An interface for a class that processes a decorator and returns a specific
  * implementation class for that decorator.

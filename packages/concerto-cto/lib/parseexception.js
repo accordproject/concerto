@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseFileException = require('@accordproject/concerto-util').BaseFileException;
+const { BaseFileException } = require('@accordproject/concerto-util');
 
 /**
  * Exception throws when a Concerto file is syntactically invalid

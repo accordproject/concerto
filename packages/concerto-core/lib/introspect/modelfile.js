@@ -26,6 +26,15 @@ const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ClassDeclaration = require('./classdeclaration');
+    const ModelManager = require('../modelmanager');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Class representing a Model File. A Model File contains a single namespace
  * and a set of model elements: assets, transactions etc.

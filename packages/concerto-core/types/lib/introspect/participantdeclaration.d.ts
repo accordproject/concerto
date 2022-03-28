@@ -21,3 +21,4 @@ declare class ParticipantDeclaration {
      */
     declarationKind(): string;
 }
+import ModelFile = require("./modelfile");

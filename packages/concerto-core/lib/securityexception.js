@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseException = require('@accordproject/concerto-util').BaseException;
+const { BaseException } = require('@accordproject/concerto-util');
 
 /**
 * Class representing a security exception

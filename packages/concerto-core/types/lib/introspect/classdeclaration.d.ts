@@ -48,6 +48,15 @@ declare class ClassDeclaration extends Decorated {
      */
     _resolveSuperType(): ClassDeclaration;
     /**
+     * Semantic validation of the structure of this class. Subclasses should
+     * override this method to impose additional semantic constraints on the
+     * contents/relations of fields.
+     *
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    protected validate(): void;
+    /**
      * Returns true if this class is declared as abstract in the model file
      *
      * @return {boolean} true if the class is abstract
@@ -198,3 +207,5 @@ declare class ClassDeclaration extends Decorated {
     isClassDeclaration(): boolean;
 }
 import Decorated = require("./decorated");
+import Property = require("./property");
+import ModelFile = require("./modelfile");

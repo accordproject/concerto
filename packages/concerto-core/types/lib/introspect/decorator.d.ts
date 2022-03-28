@@ -11,9 +11,9 @@ declare class Decorator {
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent: ClassDeclaration | Property, ast: any);
+    constructor(parent: Property | ClassDeclaration, ast: any);
     ast: any;
-    parent: any;
+    parent: Property | ClassDeclaration;
     arguments: any[];
     /**
      * Visitor design pattern
@@ -27,7 +27,7 @@ declare class Decorator {
      * Returns the owner of this property
      * @return {ClassDeclaration|Property} the parent class or property declaration
      */
-    getParent(): ClassDeclaration | Property;
+    getParent(): Property | ClassDeclaration;
     /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
@@ -52,3 +52,5 @@ declare class Decorator {
      */
     getArguments(): object[];
 }
+import Property = require("./property");
+import ClassDeclaration = require("./classdeclaration");

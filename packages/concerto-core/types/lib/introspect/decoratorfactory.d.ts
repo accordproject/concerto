@@ -14,5 +14,8 @@ declare class DecoratorFactory {
      * @param {Object} ast - The AST created by the parser
      * @return {Decorator} The decorator.
      */
-    newDecorator(parent: ClassDeclaration | Property, ast: any): Decorator;
+    newDecorator(parent: Property | ClassDeclaration, ast: any): Decorator;
 }
+import Property = require("./property");
+import ClassDeclaration = require("./classdeclaration");
+import Decorator = require("./decorator");

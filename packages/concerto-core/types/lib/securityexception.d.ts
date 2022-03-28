@@ -6,10 +6,11 @@ export = SecurityException;
 * @class
 * @memberof module:concerto-core
 */
-declare class SecurityException {
+declare class SecurityException extends BaseException {
     /**
      * Create the SecurityException.
      * @param {string} message - The exception message.
      */
     constructor(message: string);
 }
+import { BaseException } from "@accordproject/concerto-util";
