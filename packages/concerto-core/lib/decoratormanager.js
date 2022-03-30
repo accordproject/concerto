@@ -45,12 +45,13 @@ class DecoratorManager {
     }
 
     /**
-     * Compares two values
+     * Compares two values. If the first argument is falsy
+     * the function returns true.
      * @param {string | null} test the value to test (lhs)
      * @param {string} value the value to compare (rhs)
      * @returns {Boolean} true if the lhs is falsy or test === value
      */
-    static isMatch(test, value) {
+    static falsyOrEqual(test, value) {
         return test ? test === value : true;
     }
 
@@ -97,15 +98,15 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        if (this.isMatch(target.namespace, namespace) &&
-            this.isMatch(target.declaration, declaration.name)) {
+        if (this.falsyOrEqual(target.namespace, namespace) &&
+            this.falsyOrEqual(target.declaration, declaration.name)) {
             if (!target.property && !target.type) {
                 this.applyDecorator(declaration, type, decorator);
             }
             else {
                 declaration.properties.forEach(property => {
-                    if (this.isMatch(target.property, property.name) &&
-                        this.isMatch(target.type, property.$class)) {
+                    if (this.falsyOrEqual(target.property, property.name) &&
+                        this.falsyOrEqual(target.type, property.$class)) {
                         this.applyDecorator(property, type, decorator);
                     }
                 });

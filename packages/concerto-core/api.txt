@@ -53,7 +53,7 @@ class Concerto {
    + object setCurrentTime() 
 class DecoratorManager {
    + ModelManager decorateModels(ModelManager,decoratorCommandSet) 
-   + Boolean isMatch(string|,string) 
+   + Boolean falsyOrEqual(string|,string) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command) 
 }

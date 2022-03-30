@@ -31,21 +31,21 @@ describe('DecoratorManager', () => {
     afterEach(() => {
     });
 
-    describe('#isMatch', function() {
+    describe('#falsyOrEqual', function() {
         it('should match null', async function() {
-            DecoratorManager.isMatch( null, 'one').should.be.true;
+            DecoratorManager.falsyOrEqual( null, 'one').should.be.true;
         });
 
         it('should match undefined', async function() {
-            DecoratorManager.isMatch( undefined, 'one').should.be.true;
+            DecoratorManager.falsyOrEqual( undefined, 'one').should.be.true;
         });
 
         it('should match token', async function() {
-            DecoratorManager.isMatch( 'one', 'one').should.be.true;
+            DecoratorManager.falsyOrEqual( 'one', 'one').should.be.true;
         });
 
         it('should not match token', async function() {
-            DecoratorManager.isMatch( 'one', 'two').should.be.false;
+            DecoratorManager.falsyOrEqual( 'one', 'two').should.be.false;
         });
     });
 
