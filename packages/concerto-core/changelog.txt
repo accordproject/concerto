@@ -24,13 +24,14 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 2.0.0-alpha.1 {4169a97a927d336f3c76f85f00725c13} 2021-11-24
+Version 2.0.0-alpha.1 {292b93fc879d3b0c3969711b24312ffd} 2022-03-30
 - Remove custom instanceof and add methods to check runtime type
 - Remove support for Node 12
 - Generate Typescript definitions from JSDoc
 - Parser directly constructs metamodel instance
 - Convert MetaModel to a class for Typescript + Webpack compatability
 - Update Acorn to latest and refactor the JavaScript parser so we can use static class members
+- Add DecoratorManager
 - New packages for parsing and metamodel, distinct from core
 - Revisions to model manager API to support various inputs (e.g., CTO or AST)
 - New vocabulary package for handling model vocabularies

@@ -3,6 +3,7 @@ import IllegalModelException = require("./lib/introspect/illegalmodelexception")
 import TypeNotFoundException = require("./lib/typenotfoundexception");
 import Decorator = require("./lib/introspect/decorator");
 import DecoratorFactory = require("./lib/introspect/decoratorfactory");
+import DecoratorManager = require("./lib/decoratormanager");
 import ClassDeclaration = require("./lib/introspect/classdeclaration");
 import IdentifiedDeclaration = require("./lib/introspect/identifieddeclaration");
 import AssetDeclaration = require("./lib/introspect/assetdeclaration");
@@ -35,4 +36,4 @@ export const version: {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
+export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };

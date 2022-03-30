@@ -1,0 +1,54 @@
+
+/**
+ * DecoratorCommandSet defines a set of instructions to add or update decorators
+ * on model elements.
+ */
+namespace org.accordproject.decoratorcommands
+
+import concerto.metamodel.Decorator from https://models.accordproject.org/concerto/metamodel@0.3.0.cto
+
+/**
+ * A reference to an existing named & versioned DecoratorCommandSet
+ */
+concept DecoratorCommandSetReference {
+    o String name
+    o String version
+}
+
+/**
+ * Whether to upsert or append the decorator
+ */
+enum CommandType {
+    o UPSERT
+    o APPEND
+}
+
+/**
+ * Which models elements to add the decorator to. Any null
+ * elements are 'wildcards'. 
+ */
+concept CommandTarget {
+    o String namespace optional
+    o String declaration optional
+    o String property optional
+    o String type optional 
+}
+
+/**
+ * Applies a decorator to a given target
+ */
+concept Command {
+    o CommandTarget target
+    o Decorator decorator
+    o CommandType type
+}
+
+/**
+ * A named and versioned set of commands. Includes are supported for modularity/reuse.
+ */
+concept DecoratorCommandSet {
+    o String name
+    o String version
+    o DecoratorCommandSetReference[] includes optional
+    o Command[] commands
+}

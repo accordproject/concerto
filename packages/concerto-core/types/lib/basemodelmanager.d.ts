@@ -270,6 +270,11 @@ declare class BaseModelManager {
      */
     resolveMetaModel(metaModel: object): object;
     /**
+     * Populates the model manager from a models metamodel AST
+     * @param {*} ast the metamodel
+     */
+    fromAst(ast: any): void;
+    /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names
      * @returns {*} the metamodel

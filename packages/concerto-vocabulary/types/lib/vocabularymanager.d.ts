@@ -51,8 +51,9 @@ declare class VocabularyManager {
     /**
      * Adds a vocabulary to the vocabulary manager
      * @param {string} contents the YAML string for the vocabulary
+     * @returns {Vocabulary} the vocabulary the was added
      */
-    addVocabulary(contents: string): void;
+    addVocabulary(contents: string): Vocabulary;
     /**
      * Gets a vocabulary for a given namespace plus locale
      * @param {string} namespace the namespace for the vocabulary
@@ -97,9 +98,20 @@ declare class VocabularyManager {
      */
     getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string): string;
     /**
+     * Creates a DecoractorCommandSet with @Term decorators
+     * to decorate all model elements based on the vocabulary for a locale.
+     * Pass the return value to the DecoratorManager.decorateModel to apply
+     * the decorators to a ModelManager.
+     * @param {ModelManager} modelManager - the Model Manager
+     * @param {string} locale the BCP-47 locale identifier
+     * @returns {*} the decorator command set used to decorate the model.
+     */
+    generateDecoratorCommands(modelManager: ModelManager, locale: string): any;
+    /**
      * Validates the terms in the vocabulary against the namespaces and declarations
      * within a ModelManager
      * @param {ModelManager} modelManager - the Model Manager
+     * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the result of validation
      */
     validate(modelManager: ModelManager): any;

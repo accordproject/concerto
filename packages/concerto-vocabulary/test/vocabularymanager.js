@@ -24,6 +24,7 @@ chai.use(require('chai-as-promised'));
 
 const { VocabularyManager } = require('..');
 const ModelManager = require('../../concerto-core/lib/modelmanager');
+const DecoratorManager = require('../../concerto-core/lib/decoratormanager');
 
 let modelManager = null;
 let vocabularyManager = null;
@@ -56,6 +57,13 @@ describe('VocabularyManager', () => {
 
     it('addVocabulary (null)', () => {
         should.Throw(() => vocabularyManager.addVocabulary(), Error);
+    });
+
+    it('addVocabulary', () => {
+        const enVocString = fs.readFileSync('./test/test.voc', 'utf-8');
+        const voc = vocabularyManager.addVocabulary(enVocString);
+        voc.should.not.be.null;
+        voc.getNamespace().should.equal('com.test');
     });
 
     it('addVocabulary (duplicate)', () => {
@@ -246,5 +254,22 @@ describe('VocabularyManager', () => {
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
         result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['Truck']);
         result.vocabularies['org.acme/zh-cn'].additionalTerms.should.have.members([]);
+    });
+
+    it('decorateModels', () => {
+        vocabularyManager = new VocabularyManager({
+            missingTermGenerator: VocabularyManager.englishMissingTermGenerator
+        });
+        const enVocString = fs.readFileSync('./test/org.acme_en.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enVocString);
+        const enGbVocString = fs.readFileSync('./test/org.acme_en-gb.voc', 'utf-8');
+        vocabularyManager.addVocabulary(enGbVocString);
+        const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-GB');
+        const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet);
+        const mf = newModelManager.getModelFile('org.acme');
+        const vehicleDecl = mf.getAssetDeclaration('Vehicle');
+        const decorator = vehicleDecl.getDecorator('Term');
+        decorator.getArguments()[0].should.equal('A road vehicle');
+        vehicleDecl.getProperty('vin').getDecorator('Term').getArguments()[0].should.equal('Vehicle Identification Number');
     });
 });
