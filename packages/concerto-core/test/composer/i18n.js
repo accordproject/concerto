@@ -24,6 +24,7 @@ const Serializer = require('./../../lib/serializer');
 const ModelManager = require('./../../lib/modelmanager');
 const ModelUtil = require('./../../lib/modelutil');
 const Util = require('../composer/composermodelutility');
+const ParserUtil = require('../introspect/parserutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -120,9 +121,10 @@ describe('Globalization', function() {
                 let fileName = './test/composer/models/classdeclaration/validate/foo-identifiernotproperty.cto';
                 let invalidFile = fs.readFileSync(fileName, 'utf8');
                 invalidFile.should.not.be.null;
+                let invalidModelFile = ParserUtil.newModelFile(modelManager, invalidFile);
 
                 expect(function() {
-                    modelManager.addModelFile(invalidFile,fileName);
+                    modelManager.addModelFile(invalidModelFile, fileName);
                 }).to.throw(IllegalModelException, 'Class "foo" is identified by field "fooID", but does not contain this property.');
             });
 
@@ -140,8 +142,10 @@ describe('Globalization', function() {
                 let fileName = './test/composer/models/classdeclaration/validate/foo-identifiernotstring.cto';
                 let invalidFile = fs.readFileSync(fileName, 'utf8');
                 invalidFile.should.not.be.null;
+                let invalidModelFile = ParserUtil.newModelFile(modelManager, invalidFile);
+
                 expect(function() {
-                    modelManager.addModelFile(invalidFile,fileName);
+                    modelManager.addModelFile(invalidModelFile, fileName);
                 }).to.throw(IllegalModelException, 'Class "foo" is identified by field "fooID", but the type of the field is not "String".');
             });
         });
@@ -156,7 +160,6 @@ describe('Globalization', function() {
 
             // TODO (LG) functionally test this function
         });
-
         it('check message in resolveType()', function() {
             let formatter = Globalize.messageFormatter('modelfile-resolvetype-undecltype');
             formatter({
@@ -171,8 +174,10 @@ describe('Globalization', function() {
             let fileName = './test/composer/models/modelfile/resolvetype/foo-undecltype.cto';
             let invalidFile = fs.readFileSync(fileName, 'utf8');
             invalidFile.should.not.be.null;
+            let invalidModelFile = ParserUtil.newModelFile(modelManager, invalidFile);
+
             expect(function() {
-                modelManager.addModelFile(invalidFile,fileName);
+                modelManager.addModelFile(invalidModelFile, fileName);
             }).to.throw(IllegalModelException, 'Undeclared type "Person" in "property Bar.foo.fooProperty"');
         });
 
