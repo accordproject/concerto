@@ -71,7 +71,7 @@ describe('Model Tests', function(){
             let factory = new Factory(modelManager);
 
             // attempt to create an abstract asset
-            assert.throws( function() {factory.newResource('org.acme.base', 'AbstractAsset', '123' );}, /.+Cannot instantiate Abstract Type AbstractAsset in namespace org.acme.base/, 'did not throw with expected message');
+            assert.throws( function() {factory.newResource('org.acme.base', 'AbstractAsset', '123' );}, 'Error: Cannot instantiate Abstract Type "AbstractAsset" in namespace "org.acme.base".');
 
             // create a new instance
             let resource = factory.newResource(
@@ -83,75 +83,75 @@ describe('Model Tests', function(){
             // o String stringProperty
             resource.setPropertyValue('stringProperty', 'string');
             resource.stringProperty.should.equal('string');
-            assert.throws( function() {resource.setPropertyValue('stringProperty', 1);}, /.+expected type String/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('stringProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stringProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String"./);
 
             // o Integer integerProperty
             resource.setPropertyValue('integerProperty', 999);
             resource.integerProperty.should.equal(999);
-            assert.throws( function() {resource.setPropertyValue('integerProperty', 'Foo');}, /.+expected type Integer/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('integerProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "integerProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer"./);
 
             // o Double doubleProperty
             resource.setPropertyValue('doubleProperty', 10.0);
             resource.doubleProperty.should.equal(10.0);
-            assert.throws( function() {resource.setPropertyValue('doubleProperty', 'Foo');}, /.+expected type Double/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('doubleProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "doubleProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double"./);
 
             // o Boolean booleanProperty
             resource.setPropertyValue('booleanProperty', true );
             resource.booleanProperty.should.equal(true);
-            assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /.+expected type Boolean/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "booleanProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean"./);
 
             // o DateTime dateTimeProperty
             const dateTime = dayjs.utc('2016-10-11T02:30:26.262Z');
             resource.setPropertyValue('dateTimeProperty', dateTime );
             resource.dateTimeProperty.should.equal(dateTime);
-            assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /.+expected type DateTime/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "dateTimeProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime"./);
 
             // o Long longProperty
             resource.setPropertyValue('longProperty', 100 );
             resource.longProperty.should.equal(100);
-            assert.throws( function() {resource.setPropertyValue('longProperty', 'Foo');}, /.+expected type Long/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('longProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "longProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long"./);
 
             // o State stateProperty
             resource.setPropertyValue('stateProperty', 'GOLD' );
             resource.stateProperty.should.equal('GOLD');
-            assert.throws( function() {resource.setPropertyValue('stateProperty', 'Foo');}, /.+for field State/, 'did not throw with expected message');
-            assert.throws( function() {resource.setPropertyValue('stateProperty', 1);}, /.+for field State/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('stateProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "Foo" for the field "State"./);
+            assert.throws( function() {resource.setPropertyValue('stateProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "1" for the field "State"./);
 
             // o String[] stringArrayProperty
             resource.setPropertyValue('stringArrayProperty', ['string'] );
             resource.stringArrayProperty.should.contain('string');
-            assert.throws( function() {resource.setPropertyValue('stringArrayProperty', 1);}, /.+expected type String\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('stringArrayProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stringArrayProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String\[\]"./);
 
             // o Integer[] integerArrayProperty
             resource.setPropertyValue('integerArrayProperty', [999] );
             resource.integerArrayProperty.should.contain(999);
-            assert.throws( function() {resource.setPropertyValue('integerArrayProperty', 'Foo');}, /.+expected type Integer\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('integerArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "integerArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer\[\]"./);
 
             // o Double[] doubleArrayProperty
             resource.setPropertyValue('doubleArrayProperty', [999.0] );
             resource.doubleArrayProperty.should.contain(999.0);
-            assert.throws( function() {resource.setPropertyValue('doubleArrayProperty', 'Foo');}, /.+expected type Double\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('doubleArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "doubleArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double\[\]"./);
 
             // o Boolean[] booleanArrayProperty
             resource.setPropertyValue('booleanArrayProperty', [true, false] );
             resource.booleanArrayProperty.should.contain(true);
-            assert.throws( function() {resource.setPropertyValue('booleanArrayProperty', 'Foo');}, /.+expected type Boolean\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('booleanArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "booleanArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean\[\]"./);
 
             // o DateTime[] dateTimeArrayProperty
             resource.setPropertyValue('dateTimeArrayProperty', [dateTime] );
             resource.dateTimeArrayProperty.should.contain(dateTime);
-            assert.throws( function() {resource.setPropertyValue('dateTimeArrayProperty', 'Foo');}, /.+expected type DateTime\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('dateTimeArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "dateTimeArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime\[\]"./);
 
             // o Long[] longArrayProperty
             resource.setPropertyValue('longArrayProperty', [1,2,3] );
             resource.longArrayProperty.should.contain(3);
-            assert.throws( function() {resource.setPropertyValue('longArrayProperty', 'Foo');}, /.+expected type Long\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('longArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "longArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long\[\]"./);
 
             // o State[] stateArrayProperty
             resource.setPropertyValue('stateArrayProperty', ['GOLD', 'SILVER'] );
             resource.stateArrayProperty.should.contain('SILVER');
-            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', ['GOLD', 'Foo']);}, /.+for field State/, 'did not throw with expected message');
-            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', 'GOLD');}, /.+expected type State\[\]/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', ['GOLD', 'Foo']);}, 'ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "Foo" for the field "State".');
+            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', 'GOLD');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stateArrayProperty" has a value of ""GOLD"" \(type of value: "string"\). Expected type of value: "State\[\]"./);
 
             // set the relationships
             const personRelationship = factory.newRelationship('org.acme.base', 'Person', 'DAN' );
@@ -160,7 +160,7 @@ describe('Model Tests', function(){
 
             // set an invalid relationship
             const blokeRelationship = factory.newRelationship('org.acme.base', 'Bloke', 'DAN' );
-            assert.throws( function() {resource.setPropertyValue('singlePerson', blokeRelationship );}, /.+not derived from org.acme.base.Person/, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('singlePerson', blokeRelationship );}, /ValidationException: Instance "org.acme.base.BaseAsset#123" has a property "singlePerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
 
             // create a Person
             const person = factory.newResource('org.acme.base', 'Person', 'P1' );
@@ -182,22 +182,22 @@ describe('Model Tests', function(){
 
             resource.myPeople = [person,person];
 
-            assert.throws( function() {resource.validate();}, /.+type org.acme.base.Bloke that is not derived from org.acme.base.Person/, 'did not throw with expected message');
+            assert.throws( function() {resource.validate();}, /ValidationException: Instance "org.acme.base.BaseAsset#123" has a property "myPerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
             resource.myPerson = person;
 
             // set an extra property
             resource.blotto = 'Yes!';
-            assert.throws( function() {resource.validate();}, /.+blotto which is not declared in org.acme.base.BaseAsset/, 'did not throw with expected message');
+            assert.throws( function() {resource.validate();}, /ValidationException: Instance "123" has a property named "blotto", which is not declared in "org.acme.base.BaseAsset"./);
             delete resource.blotto;
 
             // set a missing property
-            assert.throws( function() {resource.setPropertyValue('missing', 'Foo');}, /.+trying to set field missing which is not declared in the model./, 'did not throw with expected message');
+            assert.throws( function() {resource.setPropertyValue('missing', 'Foo');}, '/.+trying to set field missing which is not declared in the model./');
 
             // add a missing array value
-            assert.throws( function() {resource.addArrayValue('missing', 'Foo');}, /.+trying to set field missing which is not declared in the model./, 'did not throw with expected message');
+            assert.throws( function() {resource.addArrayValue('missing', 'Foo');}, /.+trying to set field missing which is not declared in the model./);
 
             // not an array
-            assert.throws( function() {resource.addArrayValue('longProperty', '[1]');}, /.+longProperty which is not declared as an array in the model./, 'did not throw with expected message');
+            assert.throws( function() {resource.addArrayValue('longProperty', '[1]');}, /.+longProperty which is not declared as an array in the model./);
 
             const serializer = new Serializer(factory, modelManager);
             let json = serializer.toJSON(resource, { utcOffset: 0 });
@@ -236,12 +236,12 @@ describe('Model Tests', function(){
 
             tx.setPropertyValue('myAsset', resource );
             tx.myAsset.should.equal(resource);
-            assert.throws( function() {tx.setPropertyValue('myAsset', ['GOLD', 'Foo']);}, /.+GOLD,Foo expected a Resource./, 'did not throw with expected message');
+            assert.throws( function() {tx.setPropertyValue('myAsset', ['GOLD', 'Foo']);}, /ValidationException: Model violation in the "org.acme.base.MyTransaction#TX_123" instance. Class "org.acme.base.BaseAsset" has the value of "GOLD,Foo". Expected a "Resource" or a "Concept"./);
             json = serializer.toJSON(tx);
 
             txEx.setPropertyValue('myAsset', resource );
             txEx.myAsset.should.equal(resource);
-            assert.throws( function() {txEx.setPropertyValue('myAsset', txEx);}, /.+type org.acme.base.MyTransactionEx that is not derived from org.acme.base.BaseAsset/, 'did not throw with expected message');
+            assert.throws( function() {txEx.setPropertyValue('myAsset', txEx);}, /ValidationException: Instance "org.acme.base.MyTransactionEx#TX_456" has a property "myAsset" with type "org.acme.base.MyTransactionEx" that is not derived from "org.acme.base.BaseAsset"./);
 
             const derivedDerivedAsset = factory.newResource('org.acme.base', 'DerivedDerivedAsset', 'DERIVED_001' );
 

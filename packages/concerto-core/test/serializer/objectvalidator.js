@@ -92,7 +92,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type TestEnum\[\]/);
+            }).should.throw('Model violation in the "undefined" instance. The field "testEnums" has a value of ""ONE"" (type of value: "string"). Expected type of value: "TestEnum[]".');
         });
 
         it('should pass', () => {
@@ -121,7 +121,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type Integer/);
+            }).should.throw('Model violation in the "undefined" instance. The field "integerProperty" has a value of ""bad"" (type of value: "string"). Expected type of value: "Integer".');
         });
 
         it('should fail if property not a string', () => {
@@ -134,7 +134,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type String/);
+            }).should.throw('Model violation in the "undefined" instance. The field "stringProperty" has a value of "1" (type of value: "number"). Expected type of value: "String".');
         });
 
         it('should fail if property type is symbol', () => {
@@ -147,7 +147,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type String/);
+            }).should.throw('Model violation in the "undefined" instance. The field "stringProperty" has a value of "undefined" (type of value: "symbol"). Expected type of value: "String".');
         });
 
         it('should fail if property not a boolean', () => {
@@ -160,7 +160,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type Boolean/);
+            }).should.throw('Model violation in the "undefined" instance. The field "booleanProperty" has a value of ""false"" (type of value: "string"). Expected type of value: "Boolean".');
         });
 
         it('should fail if property not a DateTime', () => {
@@ -173,7 +173,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected type DateTime/);
+            }).should.throw('Model violation in the "undefined" instance. The field "dateTimeProperty" has a value of "true" (type of value: "boolean"). Expected type of value: "DateTime".');
         });
 
         it('should fail if property fails field validator', () => {
@@ -202,7 +202,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/test.Wheel that is not derived from test.Person/);
+            }).should.throw('Instance "undefined" has a property "owner" with type "test.Wheel" that is not derived from "test.Person".');
         });
 
         it('should fail complex property that references a missing type', () => {
@@ -218,7 +218,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/Type Missing is not defined in namespace test/);
+            }).should.throw('Type "Missing" is not defined in namespace "test".');
         });
     });
 
@@ -233,7 +233,7 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/Instance undefined has property previousOwners with type undefined that is not derived from test.Person\[\]/);
+            }).should.throw('Instance "undefined" has a property "previousOwners" with type "undefined" that is not derived from "test.Person[]".');
         });
     });
 
@@ -264,7 +264,7 @@ describe('ObjectValidator', function () {
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected a Relationship/);
+            }).should.throw('Model violation in the "undefined" instance. Class "test.Person" has a value of "[object Object]". Expected a "Relationship".');
         });
 
         it('should fail with non-identifiable instance if convertResourcesToRelationships is not set', () => {
@@ -279,7 +279,7 @@ describe('ObjectValidator', function () {
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/expected a Relationship/);
+            }).should.throw('Model violation in the "undefined" instance. Class "test.Person" has a value of "[object Object]". Expected a "Relationship".');
         });
 
         it('should fail with a relationship to a non identifiable type', () => {
@@ -303,7 +303,7 @@ describe('ObjectValidator', function () {
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw(/not derived from test.Person/);
+            }).should.throw('Instance "undefined" has a property "lastOwner" with type "undefined" that is not derived from "test.Person".');
         });
 
 

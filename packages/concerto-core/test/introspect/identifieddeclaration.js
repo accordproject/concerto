@@ -104,15 +104,15 @@ asset Order identified by sku {
             (() => {
                 mm.addCTOModel( `
                 namespace test
-                
+
                 asset Order identified by sku {
                     o String sku
                     o Double price
                 }
-                
+
                 asset FancyOrder identified extends Order {
                 }
-                
+
                             `, 'test.cto');
             }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
@@ -123,13 +123,13 @@ asset Order identified by sku {
             (() => {
                 mm.addCTOModel( `
                 namespace test
-                
+
                 asset FancyOrder identified {
                     o String sku
                 }
-                
+
                             `, 'test.cto');
-            }).should.throw(/Class FancyOrder has more than one field named \(\$identifier\)/);
+            }).should.throw(/Class "FancyOrder" has more than one field named "\$identifier". File 'test.cto': line 4 column 17, to line 6 column 18. /);
         });
 
         it('should not allow overriding explicit identifier with a system identifier', () => {
@@ -138,16 +138,16 @@ asset Order identified by sku {
             (() => {
                 mm.addCTOModel( `
                 namespace test
-                
+
                 asset Order identified by sku {
                     o Double price
                     o String sku
                 }
-                
+
                 asset FancyOrder identified extends Order {
                     o String model
                 }
-                
+
                             `, 'test.cto');
             }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
@@ -158,16 +158,16 @@ asset Order identified by sku {
             (() => {
                 mm.addCTOModel( `
                 namespace test
-                
+
                 asset Order identified by sku {
                     o Double price
                     o String sku
                 }
-                
+
                 asset FancyOrder identified by model extends Order {
                     o String model
                 }
-                
+
                             `, 'test.cto');
             }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
         });
@@ -178,7 +178,7 @@ asset Order identified by sku {
             (() => {
                 mm.addCTOModel( `
                 namespace test
-                
+
                 asset Order {
                     o String $identifier
                 }`, 'test.cto');
@@ -189,11 +189,11 @@ asset Order identified by sku {
             const mm = new ModelManager();
             mm.addCTOModel( `
                 namespace test
-                
+
                 abstract asset Order {
                     o Double price
                 }
-                
+
                 asset FancyOrder identified by sku extends Order {
                     o String sku
                 }

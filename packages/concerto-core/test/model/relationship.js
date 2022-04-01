@@ -132,13 +132,13 @@ describe('Relationship', function () {
         it('check invalid name space gets error', function() {
             (function () {
                 Relationship.fromURI(modelManager, '123', 'org.acme.empty', 'Person' );
-            }).should.throw(/Namespace is not defined for type org.acme.empty/);
+            }).should.throw(/Namespace is not defined for type "org.acme.empty.Person"./);
         });
 
-        it('check that relationships can be created from a URI', function() {
+        it('', function() {
             (function () {
                 Relationship.fromURI(modelManager, 'resource:org.acme.l1.Unkown#123' );
-            }).should.throw(/Type Unkown is not defined in namespace org.acme.l1/);
+            }).should.throw(/Type "Unkown" is not defined in namespace "org.acme.l1"./);
         });
 
         it('should error on invalid URI scheme', function() {

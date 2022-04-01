@@ -181,7 +181,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.getTypeDeclaration(obj);
-            }).should.throw(/Namespace is not defined for type Foo/);
+            }).should.throw(/Namespace is not defined for type "Foo"./);
         });
     });
 
@@ -279,7 +279,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance 123456789 has a property named name which is not declared in org.accordproject.test.Customer/);
+            }).should.throw(/Instance "123456789" has a property named "name", which is not declared in "org.accordproject.test.Customer"./);
         });
 
         it('should fail with extra property (concept)', () => {
@@ -292,7 +292,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance undefined has a property named price which is not declared in org.accordproject.test.Product/);
+            }).should.throw(/Instance "undefined" has a property named "price", which is not declared in "org.accordproject.test.Product"./);
         });
 
         it('should fail with invalid enum', () => {
@@ -305,7 +305,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance org.accordproject.test.Customer#123456789 invalid enum value FOO for field Department/);
+            }).should.throw(/Model violation in the "org.accordproject.test.Customer#123456789" instance. Invalid enum value of "FOO" for the field "Department"./);
         });
 
         it('should fail with empty identifier', () => {
@@ -318,7 +318,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance org.accordproject.test.Customer# has an empty identifier./);
+            }).should.throw(/Instance "org.accordproject.test.Customer#" has an empty identifier./);
         });
 
         it('should fail with missing required property', () => {
@@ -330,7 +330,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance org.accordproject.test.Customer#001 missing required field department/);
+            }).should.throw(/The instance "org.accordproject.test.Customer#001" is missing the required field "department"./);
         });
 
         it('should fail with string used for string[]', () => {
@@ -343,7 +343,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Model violation in instance org.accordproject.test.Employee#001 field pets has value/);
+            }).should.throw(/Model violation in the "org.accordproject.test.Employee#001" instance. The field "pets" has a value of ""cat"" \(type of value: "string"\). Expected type of value: "String\[\]"./);
         });
 
         it('should fail with abstract type', () => {
@@ -355,7 +355,7 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/The class org.accordproject.test.Person is abstract. Should not have an instance!/);
+            }).should.throw(/The class "org.accordproject.test.Person" is abstract and should not contain an instance./);
         });
 
     });

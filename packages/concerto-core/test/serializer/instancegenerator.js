@@ -391,7 +391,7 @@ describe('InstanceGenerator', () => {
                         o BaseConcept aConcept
                     }`);
             } catch (error) {
-                error.should.match(/^Error: No concrete extending type for org.acme.test.BaseConcept$/);
+                error.should.match(/^Error: No concrete extending type for "org.acme.test.BaseConcept".$/);
             }
         });
 
