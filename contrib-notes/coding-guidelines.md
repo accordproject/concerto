@@ -77,7 +77,7 @@ We welcome contributions of new features. Please look over the github issues, sp
 
 When you start working on new issue, please do the following:
 
-- Use [slack](https://accord-project-slack-signup.herokuapp.com) to notify the community that you are planning to start _feature_ work and notify that the design has been placed in the GitHub issue
+- Use [discord](https://discord.gg/Zm99SKhhtA) to notify the community that you are planning to start _feature_ work and notify that the design has been placed in the GitHub issue
   - this is to ensure that there is a persistent record of what is happening
 - At noteable points please join the weekly community call to share what you have done.
 
