@@ -17,7 +17,7 @@
 
 ## Introduction
 
-Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser. The browserified version of Concerto is ±280KB. We are working on making it even smaller.
+Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser.
 
 This is why you should care: https://www.accordproject.org/news/strongly-typed-data-for-javascript-and-beyond/
 
@@ -39,6 +39,10 @@ Top level repository (concerto), with sub packages. Each sub-package is publishe
 * [concerto-cli](https://github.com/accordproject/concerto/tree/master/packages/concerto-cli) : command-line interface for Concerto
 * [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
 * [concerto-tools](https://github.com/accordproject/concerto/tree/master/packages/concerto-tools) : model converters and tools for Concerto model files
+* [concerto-util](https://github.com/accordproject/concerto/tree/master/packages/concerto-util) : contains utility functions used in other parts of the code and fundamentally independent from Concerto as a modeling language
+* [concerto-metamodel](https://github.com/accordproject/concerto/tree/master/packages/concerto-metamodel) : contains utility functions for accessing and manipulating the new Concerto metamodel
+* [concerto-cto](https://github.com/accordproject/concerto/tree/master/packages/concerto-cto) : contains the parser for the .cto syntax for Concerto. The parser now outputs a proper Concerto object, instance of the metamodel rather than a custom JSON object.
+* [concerto-vocabulary](https://github.com/accordproject/concerto/tree/master/packages/concerto-vocabulary) : contains new functionality to handle model vocabularies
 
 # Installation
 
