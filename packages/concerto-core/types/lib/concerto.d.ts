@@ -8,10 +8,10 @@ export = Concerto;
 declare class Concerto {
     /**
      * Create a Concerto instance.
-     * @param {*} modelManager - The this.modelManager to use for validation etc.
+     * @param {ModelManager} modelManager - The this.modelManager to use for validation etc.
      */
-    constructor(modelManager: any);
-    modelManager: any;
+    constructor(modelManager: ModelManager);
+    modelManager: ModelManager;
     /**
      * Validates the instance against its model.
      * @param {*} obj the input object
@@ -21,9 +21,9 @@ declare class Concerto {
     validate(obj: any, options?: any): void;
     /**
      * Returns the model manager
-     * @returns {*} the model manager associated with this Concerto class
+     * @returns {ModelManager} the model manager associated with this Concerto class
      */
-    getModelManager(): any;
+    getModelManager(): ModelManager;
     /**
      * Returns true if the input object is a Concerto object
      * @param {*} obj the input object
@@ -99,3 +99,4 @@ declare class Concerto {
      */
     getNamespace(obj: any): string;
 }
+import ModelManager = require("./modelmanager");

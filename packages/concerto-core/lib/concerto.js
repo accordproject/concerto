@@ -16,8 +16,16 @@
 
 const URIJS = require('urijs');
 const RESOURCE_SCHEME = 'resource';
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
+const { TypedStack } = require('@accordproject/concerto-util');
 const ObjectValidator = require('./serializer/objectvalidator');
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelManager = require('./modelmanager');
+}
+/* eslint-enable no-unused-vars */
 
 /**
  * Runtime API for Concerto.
@@ -28,7 +36,7 @@ const ObjectValidator = require('./serializer/objectvalidator');
 class Concerto {
     /**
      * Create a Concerto instance.
-     * @param {*} modelManager - The this.modelManager to use for validation etc.
+     * @param {ModelManager} modelManager - The this.modelManager to use for validation etc.
      */
     constructor(modelManager) {
         this.modelManager = modelManager;
@@ -50,7 +58,7 @@ class Concerto {
 
     /**
      * Returns the model manager
-     * @returns {*} the model manager associated with this Concerto class
+     * @returns {ModelManager} the model manager associated with this Concerto class
      */
     getModelManager() {
         return this.modelManager;

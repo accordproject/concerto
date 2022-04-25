@@ -35,9 +35,9 @@ class BaseModelManager {
    + void getAst(boolean?) 
 }
 class Concerto {
-   + void constructor(modelManager) 
+   + void constructor(ModelManager) 
    + void validate(obj,options?) throws Error
-   + void getModelManager() 
+   + ModelManager getModelManager() 
    + boolean isObject(obj) 
    + void getTypeDeclaration(obj) 
    + string getIdentifier(obj) 

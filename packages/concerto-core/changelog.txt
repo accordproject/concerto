@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 2.0.1 {62a8de0d35789bbe523269e4e29cd8e6} 2022-04-25
+- Correct type for Concerto.getModelManager()
+
 Version 2.0.0-alpha.1 {292b93fc879d3b0c3969711b24312ffd} 2022-03-30
 - Remove custom instanceof and add methods to check runtime type
 - Remove support for Node 12
