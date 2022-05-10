@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Command-line utility for working with Concerto model files",
   "homepage": "https://github.com/accordproject/concerto",
   "license": "Apache-2.0",
@@ -43,11 +43,11 @@
     "tmp-promise": "3.0.2"
   },
   "dependencies": {
-    "@accordproject/concerto-core": "2.0.0",
-    "@accordproject/concerto-cto": "2.0.0",
-    "@accordproject/concerto-metamodel": "2.0.0",
-    "@accordproject/concerto-tools": "2.0.0",
-    "@accordproject/concerto-util": "2.0.0",
+    "@accordproject/concerto-core": "2.0.1",
+    "@accordproject/concerto-cto": "2.0.1",
+    "@accordproject/concerto-metamodel": "2.0.1",
+    "@accordproject/concerto-tools": "2.0.1",
+    "@accordproject/concerto-util": "2.0.1",
     "mkdirp": "1.0.4",
     "yargs": "17.3.1"
   },
