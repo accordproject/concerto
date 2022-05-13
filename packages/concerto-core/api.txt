@@ -109,6 +109,7 @@ class Decorator {
    + void getParent() 
    + string getName() 
    + object[] getArguments() 
+   + boolean isDecorator() 
 }
 class DecoratorFactory {
    + Decorator newDecorator(ClassDeclaration|Property,Object) 

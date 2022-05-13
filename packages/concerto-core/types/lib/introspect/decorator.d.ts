@@ -51,6 +51,12 @@ declare class Decorator {
      * @return {object[]} the arguments for this decorator
      */
     getArguments(): object[];
+    /**
+     * Returns true if this class is the definition of a decorator.
+     *
+     * @return {boolean} true if the class is a decorator
+     */
+    isDecorator(): boolean;
 }
 import Property = require("./property");
 import ClassDeclaration = require("./classdeclaration");
