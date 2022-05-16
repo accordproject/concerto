@@ -41,6 +41,7 @@ const TypescriptVisitor = CodeGen.TypescriptVisitor;
 const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
 const GraphQLVisitor = CodeGen.GraphQLVisitor;
 const CSharpVisitor = CodeGen.CSharpVisitor;
+const ODataVisitor = CodeGen.ODataVisitor;
 
 /**
  * Utility class that implements the commands exposed by the CLI.
@@ -168,6 +169,9 @@ class Commands {
             break;
         case 'CSharp':
             visitor = new CSharpVisitor();
+            break;
+        case 'OData':
+            visitor = new ODataVisitor();
             break;
         }
 

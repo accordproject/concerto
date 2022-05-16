@@ -94,7 +94,7 @@ class Decorator {
      * @throws {IllegalModelException}
      * @private
      */
-    validate() {}
+    validate() { }
 
     /**
      * Returns the name of a decorator
@@ -110,6 +110,15 @@ class Decorator {
      */
     getArguments() {
         return this.arguments;
+    }
+
+    /**
+     * Returns true if this class is the definition of a decorator.
+     *
+     * @return {boolean} true if the class is a decorator
+     */
+    isDecorator() {
+        return true;
     }
 }
 

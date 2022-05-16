@@ -7,4 +7,5 @@ import TypescriptVisitor = require("./fromcto/typescript/typescriptvisitor");
 import JavaVisitor = require("./fromcto/java/javavisitor");
 import GraphQLVisitor = require("./fromcto/graphql/graphqlvisitor");
 import CSharpVisitor = require("./fromcto/csharp/csharpvisitor");
-export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor };
+import ODataVisitor = require("./fromcto/odata/odatavisitor");
+export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor };

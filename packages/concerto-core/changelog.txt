@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 2.0.1 {f5d85447683b22d6f4072f9cd7f8986e} 22-05-13
+- Add Decorator.isDecorator for use in visitor
+
 Version 2.0.1 {62a8de0d35789bbe523269e4e29cd8e6} 2022-04-25
 - Correct type for Concerto.getModelManager()
 
