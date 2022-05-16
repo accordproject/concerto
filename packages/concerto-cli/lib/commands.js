@@ -172,7 +172,7 @@ class Commands {
             break;
         case 'OData':
             visitor = new ODataVisitor();
-            break;    
+            break;
         }
 
         if(visitor) {

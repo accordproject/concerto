@@ -191,8 +191,7 @@ class ODataVisitor {
          */
         if (classDeclaration.getNamespace() !== 'concerto') {
             if (classDeclaration.isIdentified() &&
-                classDeclaration.getOwnProperty(classDeclaration.getIdentifierFieldName() ||
-                    classDeclaration.isSystemIdentified())) {
+                classDeclaration.getOwnProperty(classDeclaration.getIdentifierFieldName())) {
                 parameters.fileWriter.writeLine(3, `<Key><PropertyRef Name="${classDeclaration.getIdentifierFieldName()}"/></Key>`);
             }
         }

@@ -27,6 +27,7 @@ const Field = require('@accordproject/concerto-core').Field;
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
+const Decorator = require('@accordproject/concerto-core').Decorator;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('ODataVisitor', function () {
@@ -115,6 +116,17 @@ describe('ODataVisitor', function () {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
             thing.isEnumValue.returns(true);
             let mockSpecialVisit = sinon.stub(oDataVisitor, 'visitEnumValueDeclaration');
+            mockSpecialVisit.returns('Goose');
+
+            oDataVisitor.visit(thing, param).should.deep.equal('Goose');
+
+            mockSpecialVisit.calledWith(thing, param).should.be.ok;
+        });
+
+        it('should return visitDecorator for a Decorator', () => {
+            let thing = sinon.createStubInstance(Decorator);
+            thing.isDecorator.returns(true);
+            let mockSpecialVisit = sinon.stub(oDataVisitor, 'visitDecorator');
             mockSpecialVisit.returns('Goose');
 
             oDataVisitor.visit(thing, param).should.deep.equal('Goose');
@@ -258,6 +270,32 @@ describe('ODataVisitor', function () {
 
             acceptSpy.withArgs(oDataVisitor, param).calledThrice.should.be.ok;
         });
+        it('should create an EntitySet for all non-abstract identifiables', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockModelManager = sinon.createStubInstance(ModelManager);
+            mockModelManager.isModelManager.returns(true);
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockClassDeclaration.getNamespace.returns('org.acme');
+            mockClassDeclaration.isIdentified.returns(true);
+            mockClassDeclaration.getName.returns('TestIdentifiable');
+            mockClassDeclaration.getFullyQualifiedName.returns('org.acme.TestIdentifiable');
+            mockClassDeclaration.accept = acceptSpy;
+
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockModelFile.getNamespace.returns('org.acme');
+            mockModelFile.getAllDeclarations.returns([
+                mockClassDeclaration
+            ]);
+
+            mockModelFile.getImports.returns([]);
+
+            oDataVisitor.visitModelFile(mockModelFile, param);
+            param.fileWriter.writeLine.getCall(8).args.should.deep.equal([2, '<EntitySet Name="TestIdentifiable" EntityType="org.acme.TestIdentifiable"/>']);
+        });
     });
 
     describe('visitEnumDeclaration', () => {
@@ -295,8 +333,12 @@ describe('ODataVisitor', function () {
                 fileWriter: mockFileWriter
             };
         });
-        it('should write the class opening and close', () => {
+        it('should write the complex type opening and close', () => {
             let acceptSpy = sinon.spy();
+
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns([]);
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
@@ -307,13 +349,63 @@ describe('ODataVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
-            mockClassDeclaration.getDecorators.returns([]);
+            mockClassDeclaration.getDecorators.returns([mockDecorator]);
 
             oDataVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(2);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([2, '<ComplexType Name="Bob"  >']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '</ComplexType>']);
+        });
+        it('should handle identified classes', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getDecorators.returns([]);
+            mockClassDeclaration.isIdentified.returns(true);
+            mockClassDeclaration.getIdentifierFieldName.returns('myid');
+            mockClassDeclaration.getOwnProperty.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Bob');
+
+            oDataVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([2, '<EntityType Name="Bob"  >']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([3, '<Key><PropertyRef Name="myid"/></Key>']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '</EntityType>']);
+        });
+        it('should handle system identified classes', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
+            mockClassDeclaration.getDecorators.returns([]);
+            mockClassDeclaration.isSystemIdentified.returns(true);
+            mockClassDeclaration.isIdentified.returns(true);
+            mockClassDeclaration.getIdentifierFieldName.returns('$identifier');
+            mockClassDeclaration.getOwnProperty.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+
+            oDataVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([2, '<EntityType Name="Bob"  >']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([3, '<Key><PropertyRef Name="$identifier"/></Key>']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '</EntityType>']);
         });
         it('should write the class opening and close with abstract and super type', () => {
             let acceptSpy = sinon.spy();
@@ -356,13 +448,38 @@ describe('ODataVisitor', function () {
             };
         });
         it('should write a line for primitive field name and type', () => {
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns([]);
             const mockField = sinon.createStubInstance(Field);
             mockField.getName.returns('name');
             mockField.getFullyQualifiedTypeName.returns('String');
             mockField.isPrimitive.returns(true);
-            mockField.getDecorators.returns([]);
+            mockField.getDecorators.returns([mockDecorator]);
             oDataVisitor.visitField(mockField, param);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<Property Name="name" Type="Edm.String"  >']);
+        });
+
+        it('should write a line for primitive field with default value', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.getName.returns('name');
+            mockField.getFullyQualifiedTypeName.returns('String');
+            mockField.isPrimitive.returns(true);
+            mockField.getDefaultValue.returns('this <is> a & default \' "value"');
+            mockField.getDecorators.returns([]);
+            oDataVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<Property Name="name" Type="Edm.String"  DefaultValue="this &lt;is&gt; a &amp; default &apos; &quot;value&quot;">']);
+        });
+
+        it('should write a line for an optional primitive field', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.getName.returns('name');
+            mockField.getFullyQualifiedTypeName.returns('String');
+            mockField.isPrimitive.returns(true);
+            mockField.isOptional.returns(true);
+            mockField.getDecorators.returns([]);
+            oDataVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<Property Name="name" Type="Edm.String" Nullable="true" >']);
         });
 
         it('should write a line for field name and type thats an array', () => {
@@ -382,11 +499,13 @@ describe('ODataVisitor', function () {
             let param = {
                 fileWriter: mockFileWriter
             };
-
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns([]);
             let mockEnumValueDeclaration = sinon.createStubInstance(EnumValueDeclaration);
             mockEnumValueDeclaration.isEnumValue.returns(true);
             mockEnumValueDeclaration.getName.returns('Bob');
-            mockEnumValueDeclaration.getDecorators.returns([]);
+            mockEnumValueDeclaration.getDecorators.returns([mockDecorator]);
 
             oDataVisitor.visitEnumValueDeclaration(mockEnumValueDeclaration, param);
 
@@ -401,18 +520,21 @@ describe('ODataVisitor', function () {
                 fileWriter: mockFileWriter
             };
         });
-        it('should write a line for field name and type', () => {
+        it('should write a line for relationship name and type', () => {
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns([]);
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
             mockRelationship.isRelationship.returns(true);
             mockRelationship.getName.returns('Bob');
             mockRelationship.getFullyQualifiedTypeName.returns('org.acme.Person');
-            mockRelationship.getDecorators.returns([]);
+            mockRelationship.getDecorators.returns([mockDecorator]);
             oDataVisitor.visitRelationship(mockRelationship, param);
 
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<NavigationProperty Name="Bob" Type="org.acme.Person" >']);
         });
 
-        it('should write a line for field name and type thats an array', () => {
+        it('should write a line for relationship name and type thats an array', () => {
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
             mockRelationship.isRelationship.returns(true);
             mockRelationship.getName.returns('Bob');
@@ -422,6 +544,45 @@ describe('ODataVisitor', function () {
             oDataVisitor.visitRelationship(mockRelationship, param);
 
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<NavigationProperty Name="Bob" Type="Collection(org.acme.Person)" >']);
+        });
+
+        it('should write a line for relationship that is optional', () => {
+            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
+            mockRelationship.isRelationship.returns(true);
+            mockRelationship.isOptional.returns(true);
+            mockRelationship.getName.returns('Bob');
+            mockRelationship.getFullyQualifiedTypeName.returns('org.acme.Person');
+            mockRelationship.getDecorators.returns([]);
+            oDataVisitor.visitRelationship(mockRelationship, param);
+
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<NavigationProperty Name="Bob" Type="org.acme.Person" Nullable="true">']);
+        });
+    });
+
+
+    describe('visitDecorator', () => {
+        let param;
+        beforeEach(() => {
+            param = {
+                fileWriter: mockFileWriter
+            };
+        });
+        it('should write an annotation line for a decorator', () => {
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns([]);
+            oDataVisitor.visitDecorator(mockDecorator, param);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([4, '<Annotation Term="MyDecorator" Bool="true"/>']);
+        });
+        it('should write an annotation line for a decorator with arguments', () => {
+            const mockDecorator = sinon.createStubInstance(Decorator);
+            mockDecorator.getName.returns('MyDecorator');
+            mockDecorator.getArguments.returns(['one', 2, false]);
+            oDataVisitor.visitDecorator(mockDecorator, param);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([4, '<Annotation Term="MyDecorator" Bool="true"/>']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([4, '<Annotation Term="MyDecorator0" String="one" />']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([4, '<Annotation Term="MyDecorator1" Float="2" />']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([4, '<Annotation Term="MyDecorator2" Bool="false" />']);
         });
     });
 
