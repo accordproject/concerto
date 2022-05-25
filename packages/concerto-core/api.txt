@@ -87,6 +87,7 @@ class ClassDeclaration extends Decorated {
    + string getSuperType() 
    + ClassDeclaration getSuperTypeDeclaration() 
    + ClassDeclaration[] getAssignableClassDeclarations() 
+   + ClassDeclaration[] getDirectSubclasses() 
    + ClassDeclaration[] getAllSuperTypeDeclarations() 
    + Property getProperty(string) 
    + Property[] getProperties() 

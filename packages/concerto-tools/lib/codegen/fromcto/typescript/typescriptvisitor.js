@@ -177,6 +177,13 @@ class TypescriptVisitor {
         });
 
         parameters.fileWriter.writeLine(0, '}\n');
+
+        // If there exists direct subclasses for this declaration then generate a union for it
+        const subclasses = classDeclaration.getDirectSubclasses();
+        if (subclasses && subclasses.length > 0) {
+            parameters.fileWriter.writeLine(0, 'export type ' + classDeclaration.getName() +
+                'Union = ' + subclasses.map(subclass => `I${subclass.getName()}`).join(' | \n') + ';\n');
+        }
         return null;
     }
 

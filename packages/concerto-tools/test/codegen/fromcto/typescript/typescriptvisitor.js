@@ -381,6 +381,67 @@ describe('TypescriptVisitor', function () {
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IBob extends IPerson {']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '}\n']);
         });
+
+        it('should create a union given a class that has dependencies but no super class', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockChildClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockChildClassDeclaration.isClassDeclaration.returns(true);
+            mockChildClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockChildClassDeclaration.getName.returns('Child');
+            mockChildClassDeclaration.isAbstract.returns(false);
+            mockChildClassDeclaration.getSuperType.returns('Parent');
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Parent');
+            mockClassDeclaration.isAbstract.returns(true);
+            mockClassDeclaration.getSuperType.returns(null);
+            mockClassDeclaration.getDirectSubclasses.returns([mockChildClassDeclaration]);
+
+            typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IParent {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '$class: string;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '}\n']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'export type ParentUnion = IChild;\n']);
+        });
+
+        it('should not create a union if a class has no sub-classes', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Parent');
+            mockClassDeclaration.isAbstract.returns(true);
+            mockClassDeclaration.getSuperType.returns(null);
+            mockClassDeclaration.getDirectSubclasses.returns([]);
+
+            typescriptVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'export interface IParent {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '$class: string;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '}\n']);
+        });
     });
 
     describe('visitField', () => {

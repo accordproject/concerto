@@ -424,6 +424,40 @@ describe('ClassDeclaration', () => {
         });
     });
 
+    describe('#getDirectSubclasses', function() {
+        it('should return an array with Sub and Sub2 given they extend Super', function() {
+            const modelFileNames = [
+                'test/data/parser/classdeclaration.participantwithparents.parent.cto',
+                'test/data/parser/classdeclaration.participantwithparents.child.cto'
+            ];
+
+            const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
+            modelManager.addModelFiles(modelFiles);
+
+            const testClass = modelManager.getType('com.testing.parent.Super');
+            should.exist(testClass);
+            const subclasses = testClass.getDirectSubclasses();
+            const subclassNames = subclasses.map(classDef => classDef.getName());
+            subclassNames.should.have.length(2);
+            subclassNames.should.have.same.members(['Sub', 'Sub2']);
+        });
+
+        it('should return an empty array given nothing extends Super', function() {
+            const modelFileNames = [
+                'test/data/parser/classdeclaration.participantwithparents.parent.cto'
+            ];
+
+            const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
+            modelManager.addModelFiles(modelFiles);
+
+            const testClass = modelManager.getType('com.testing.parent.Super');
+            should.exist(testClass);
+            const subclasses = testClass.getDirectSubclasses();
+
+            subclasses.should.have.length(0);
+        });
+    });
+
     describe('#isEvent', () => {
         const modelFileNames = [
             'test/data/parser/classdeclaration.participantwithparents.parent.cto',
