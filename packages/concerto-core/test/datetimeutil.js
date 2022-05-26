@@ -34,6 +34,9 @@ describe('Initialize current time', () => {
     it('Should fail for a non-well-formed date/time', function () {
         return (() => DateTimeUtil.setCurrentTime('foobar')).should.throw('Current time \'foobar\' is not in standard UTC format');
     });
+    it('Should fail for an invalid UTC offset', function () {
+        return (() => DateTimeUtil.setCurrentTime('1970-01-01T00:00:00+05:00',999999999999)).should.throw('Cannot set current time to \'1970-01-01T00:00:00+05:00\' with UTC offset \'999999999999\'');
+    });
     it('Should not fail when currentTime is null', function () {
         const { currentTime } = DateTimeUtil.setCurrentTime(null);
         return currentTime.format().should.not.be.null;
