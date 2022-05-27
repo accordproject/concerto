@@ -475,6 +475,35 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
+     * Get the class declarations for just the direct subclasses of this class, excluding this class.
+     * @return {ClassDeclaration[]} direct subclass declarations.
+     */
+    getDirectSubclasses() {
+        const modelManager = this.getModelFile().getModelManager();
+        const introspector = new Introspector(modelManager);
+        const allClassDeclarations = introspector.getClassDeclarations();
+        const subclassMap = new Map();
+
+        // Build map of all direct subclasses relationships
+        allClassDeclarations.forEach((declaration) => {
+            const superType = declaration.getSuperType();
+            if (superType) {
+                const subclasses = subclassMap.get(superType) || new Set();
+                subclasses.add(declaration);
+                subclassMap.set(superType, subclasses);
+            }
+        });
+
+        const superType = this.getFullyQualifiedName();
+        const subclasses = subclassMap.get(superType);
+
+        if (subclasses) {
+            return Array.from(subclasses);
+        }
+        return [];
+    }
+
+    /**
      * Get all the super-type declarations for this type.
      * @return {ClassDeclaration[]} super-type declarations.
      */

@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 2.0.2 {c9e7b234a5786db232520137be0a0fa8} 22-05-25
+- Add ClassDeclaration.getDirectSubclasses for use in visitor
+
 Version 2.0.1 {f5d85447683b22d6f4072f9cd7f8986e} 22-05-13
 - Add Decorator.isDecorator for use in visitor
 

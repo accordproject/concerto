@@ -138,6 +138,11 @@ declare class ClassDeclaration extends Decorated {
      */
     getAssignableClassDeclarations(): ClassDeclaration[];
     /**
+     * Get the class declarations for just the direct subclasses of this class, excluding this class.
+     * @return {ClassDeclaration[]} direct subclass declarations.
+     */
+    getDirectSubclasses(): ClassDeclaration[];
+    /**
      * Get all the super-type declarations for this type.
      * @return {ClassDeclaration[]} super-type declarations.
      */
