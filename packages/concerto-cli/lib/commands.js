@@ -164,7 +164,7 @@ class Commands {
         case 'xmlschema':
             visitor = new XmlSchemaVisitor();
             break;
-        case 'graphq':
+        case 'graphql':
             visitor = new GraphQLVisitor();
             break;
         case 'csharp':
