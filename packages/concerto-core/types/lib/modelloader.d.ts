@@ -14,7 +14,7 @@ declare class ModelLoader {
      * @param {object} modelFileLoader - the model loader
      * @param {object} modelManager - the model manager
      * @param {string} ctoFile - the model file
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      * @private
      */
     private static addModel;
@@ -25,12 +25,12 @@ declare class ModelLoader {
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      * @param {number} [options.utcOffset] - UTC Offset for this execution
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      */
     static loadModelManager(ctoFiles: string[], options?: {
         offline?: boolean;
         utcOffset?: number;
-    }): object;
+    }): Promise<ModelManager>;
     /**
      * Load system and models in a new model manager from model files objects
      *
@@ -39,10 +39,11 @@ declare class ModelLoader {
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      * @param {number} [options.utcOffset] - UTC Offset for this execution
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      */
     static loadModelManagerFromModelFiles(modelFiles: object[], fileNames?: string[], options?: {
         offline?: boolean;
         utcOffset?: number;
-    }): object;
+    }): Promise<ModelManager>;
 }
+import ModelManager = require("./modelmanager");

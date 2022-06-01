@@ -36,7 +36,7 @@ class ModelLoader {
      * @param {object} modelFileLoader - the model loader
      * @param {object} modelManager - the model manager
      * @param {string} ctoFile - the model file
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      * @private
      */
     static async addModel(modelFileLoader, modelManager, ctoFile) {
@@ -61,7 +61,7 @@ class ModelLoader {
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      * @param {number} [options.utcOffset] - UTC Offset for this execution
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      */
     static async loadModelManager(ctoFiles, options = { offline: false }) {
         let modelManager = new ModelManager(options);
@@ -95,7 +95,7 @@ class ModelLoader {
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
      * @param {number} [options.utcOffset] - UTC Offset for this execution
-     * @return {object} the model manager
+     * @return {Promise<ModelManager>} the model manager
      */
     static async loadModelManagerFromModelFiles(modelFiles, fileNames, options = { offline: false }) {
         let modelManager = new ModelManager(options);
