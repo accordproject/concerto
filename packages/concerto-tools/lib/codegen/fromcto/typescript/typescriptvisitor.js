@@ -114,6 +114,8 @@ class TypescriptVisitor {
 
                 const subclasses = classDeclaration.getDirectSubclasses();
                 if (subclasses && subclasses.length > 0) {
+                    parameters.fileWriter.writeLine(0, '\n// Warning: Beware of circular dependencies when modifying these imports');
+
                     // Group subclasses by namespace
                     const namespaceBuckets = {};
                     subclasses.map(subclass => {
@@ -127,7 +129,7 @@ class TypescriptVisitor {
                     Object.entries(namespaceBuckets)
                         .filter(([namespace]) => namespace !== modelFile.getNamespace()) // Skip own namespace
                         .map(([namespace, bucket]) => {
-                            parameters.fileWriter.writeLine(0, `import {\n\t${bucket.map(subclass => `I${subclass.getName()}`).join(',\n\t') }\n} from './${namespace}';`);
+                            parameters.fileWriter.writeLine(0, `import type {\n\t${bucket.map(subclass => `I${subclass.getName()}`).join(',\n\t') }\n} from './${namespace}';`);
                         });
                 }
 

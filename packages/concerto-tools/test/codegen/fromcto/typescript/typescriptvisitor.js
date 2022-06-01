@@ -349,12 +349,13 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitModelFile(mockModelFile, param);
 
             param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(5);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '/* eslint-disable @typescript-eslint/no-empty-interface */']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '\n// imports']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import {\n\tIImportedDirectSubclass,\n\tIImportedDirectSubclass2\n} from \'./org.acme.subclasses\';']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '\n// interfaces']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '\n// Warning: Beware of circular dependencies when modifying these imports']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'import type {\n\tIImportedDirectSubclass,\n\tIImportedDirectSubclass2\n} from \'./org.acme.subclasses\';']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '\n// interfaces']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
 
             acceptSpy.withArgs(typescriptVisitor, param).calledOnce.should.be.ok;
