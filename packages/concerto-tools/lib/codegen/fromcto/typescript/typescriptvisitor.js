@@ -111,6 +111,26 @@ class TypescriptVisitor {
                         properties.get(typeNamespace).add(`I${typeName}`);
                     }
                 });
+
+                const subclasses = classDeclaration.getDirectSubclasses();
+                if (subclasses && subclasses.length > 0) {
+                    // Group subclasses by namespace
+                    const namespaceBuckets = {};
+                    subclasses.map(subclass => {
+                        const bucket = namespaceBuckets[subclass.getNamespace()];
+                        if (bucket){
+                            bucket.push(subclass);
+                        } else {
+                            namespaceBuckets[subclass.getNamespace()] = [subclass];
+                        }
+                    });
+                    Object.entries(namespaceBuckets)
+                        .filter(([namespace]) => namespace !== modelFile.getNamespace()) // Skip own namespace
+                        .map(([namespace, bucket]) => {
+                            parameters.fileWriter.writeLine(0, `import {\n\t${bucket.map(subclass => `I${subclass.getName()}`).join(',\n\t') }\n} from './${namespace}';`);
+                        });
+                }
+
             });
 
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.

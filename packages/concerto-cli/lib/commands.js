@@ -145,32 +145,32 @@ class Commands {
 
         let visitor = null;
 
-        switch(target) {
-        case 'Go':
+        switch(target.toLowerCase()) {
+        case 'go':
             visitor = new GoLangVisitor();
             break;
-        case 'PlantUML':
+        case 'plantuml':
             visitor = new PlantUMLVisitor();
             break;
-        case 'Typescript':
+        case 'typescript':
             visitor = new TypescriptVisitor();
             break;
-        case 'Java':
+        case 'java':
             visitor = new JavaVisitor();
             break;
-        case 'JSONSchema':
+        case 'jsonschema':
             visitor = new JSONSchemaVisitor();
             break;
-        case 'XMLSchema':
+        case 'xmlschema':
             visitor = new XmlSchemaVisitor();
             break;
-        case 'GraphQL':
+        case 'graphq':
             visitor = new GraphQLVisitor();
             break;
-        case 'CSharp':
+        case 'csharp':
             visitor = new CSharpVisitor();
             break;
-        case 'OData':
+        case 'odata':
             visitor = new ODataVisitor();
             break;
         }
