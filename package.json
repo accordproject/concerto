@@ -26,7 +26,8 @@
     "pretest": "npm run licchk",
     "test": "lerna run test",
     "repoclean": "lerna clean",
-    "licchk": "license-check-and-add"
+    "licchk": "license-check-and-add",
+    "build": "lerna run build"
   },
   "repository": {
     "type": "git",
