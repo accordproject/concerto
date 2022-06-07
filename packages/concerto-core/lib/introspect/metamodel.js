@@ -23,7 +23,7 @@ const ModelFile = require('../introspect/modelfile');
 
 /**
  * Create a metamodel manager (for validation against the metamodel)
- * @return {*} the metamodel manager
+ * @return {ModelManager} the metamodel manager
  */
 function newMetaModelManager() {
     const metaModelManager = new ModelManager();
@@ -56,7 +56,7 @@ function validateMetaModel(input) {
  * Import metamodel to a model manager
  * @param {object} metaModel - the metamodel
  * @param {boolean} [validate] - whether to perform validation
- * @return {object} the metamodel for this model manager
+ * @return {ModelManager} the metamodel for this model manager
  */
 function modelManagerFromMetaModel(metaModel, validate = true) {
     // First, validate the JSON metaModel
