@@ -558,6 +558,59 @@ describe('TypescriptVisitor', function () {
 
             param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson[];').calledOnce.should.be.ok;
         });
+
+        it('should write a line for field name who is decorated with union, setting type to be the union type', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('unionTest');
+            mockField.getType.returns('Person');
+            mockField.getDecorators.returns([{
+                getName: () => {
+                    return 'union';
+                }
+            }]);
+
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
+            typescriptVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.withArgs(1, 'unionTest: PersonUnion;').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for field name who is decorated with literal, setting type to be the enum value', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('literalTest');
+            mockField.getType.returns('EnumType');
+            mockField.getDecorators.returns([{
+                getName: () => {
+                    return 'literal';
+                },
+                getArguments: () => {
+                    return 'MyEnumValue';
+                }
+            }]);
+
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
+            typescriptVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.withArgs(1, 'literalTest = EnumType.MyEnumValue;').calledOnce.should.be.ok;
+        });
     });
 
     describe('visitEnumValueDeclaration', () => {

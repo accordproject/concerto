@@ -231,7 +231,23 @@ class TypescriptVisitor {
         const isEnumRef = field.isPrimitive() ? false
             : field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName()).isEnum();
 
-        parameters.fileWriter.writeLine(1, field.getName() + optional + ': ' + this.toTsType(field.getType(), !isEnumRef) + array + ';');
+        const decorators = field.getDecorators();
+        const hasUnion = decorators?.some(decorator => decorator.getName() === 'union');
+        const hasLiteral = decorators?.some(decorator => decorator.getName() === 'literal');
+        let literal = '';
+        if (hasLiteral) {
+            const decoratorArguments = decorators.find(decorator => decorator.getName() === 'literal').getArguments();
+            decoratorArguments.length > 0 && (literal = ` = ${field.getType()}.${decoratorArguments}`);
+        }
+
+        const tsType = this.toTsType(field.getType(), !isEnumRef && !hasUnion, hasUnion);
+
+        if (literal) {
+            parameters.fileWriter.writeLine(1, field.getName() + literal + ';');
+        } else {
+            parameters.fileWriter.writeLine(1, field.getName() + optional + ': ' + tsType + array + literal + ';');
+        }
+
         return null;
     }
 
@@ -277,10 +293,11 @@ class TypescriptVisitor {
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
      * @param {boolean} useInterface  - whether to use an interface type
+     * @param {boolean} useUnion  - whether to use a union type
      * @return {string} the corresponding type in Typescript
      * @private
      */
-    toTsType(type, useInterface) {
+    toTsType(type, useInterface, useUnion) {
         switch (type) {
         case 'DateTime':
             return 'Date';
@@ -294,8 +311,19 @@ class TypescriptVisitor {
             return 'number';
         case 'Integer':
             return 'number';
-        default:
-            return useInterface ? `I${type}` : type;
+        default: {
+            let interfacePrefix = '';
+            let union = '';
+            if (useInterface) {
+                interfacePrefix = 'I';
+            }
+
+            if (useUnion) {
+                union = 'Union';
+            }
+
+            return `${interfacePrefix}${type}${union}`;
+        }
         }
     }
 }

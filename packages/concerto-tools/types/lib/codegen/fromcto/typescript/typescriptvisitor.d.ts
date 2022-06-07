@@ -79,6 +79,7 @@ declare class TypescriptVisitor {
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
      * @param {boolean} useInterface  - whether to use an interface type
+     * @param {boolean} useUnion  - whether to use a union type
      * @return {string} the corresponding type in Typescript
      * @private
      */
