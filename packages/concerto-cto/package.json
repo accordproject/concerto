@@ -10,7 +10,7 @@
   "main": "index.js",
   "typings": "types/index.d.ts",
   "scripts": {
-    "pretest": "npm run lint",
+    "pretest": "npm run lint && peggy -o lib/parser.js lib/parser.pegjs",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
@@ -45,7 +45,7 @@
     "license-check-and-add": "2.3.6",
     "mocha": "8.3.2",
     "nyc": "15.1.0",
-    "peggy": "1.2.0",
+    "peggy": "2.0.1",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
     "typescript": "4.6.3"

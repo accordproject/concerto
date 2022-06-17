@@ -1,0 +1,5 @@
+namespace test.person@1.0.0-alpha.0+build1
+
+participant Person identified by name {
+  o String name
+}
