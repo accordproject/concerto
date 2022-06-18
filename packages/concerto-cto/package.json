@@ -10,7 +10,8 @@
   "main": "index.js",
   "typings": "types/index.d.ts",
   "scripts": {
-    "pretest": "npm run lint && peggy -o lib/parser.js lib/parser.pegjs",
+    "parser": "peggy -o lib/parser.js lib/parser.pegjs",
+    "pretest": "npm run lint && npm run parser",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",

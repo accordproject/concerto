@@ -13,14 +13,6 @@
  */
 
 {
-  function checkNumber() {
-       const value = text();
-      if(value.startsWith('0') && value.length > 1 && !isNaN(value)) {
-        error("Numeric identifier cannot have a leading zero")
-      }
-      return value;
-   }
-
   function extractList(list, index) {
     var result = new Array(list.length), i;
 
@@ -730,59 +722,65 @@ relative_part
 absolute_URI
   = scheme ":" hier_part ("?" query)?
 
-
 /**
  * SemVer.org v2
  * https://semver.org/spec/v2.0.0.html
  */
-valid_semver = version_core ! ("+" build / "-" pre_release)
-                 / version_core "+" build
-                 / version_core "-" pre_release ! "+"
-                 / version_core "-" pre_release "+" build
+semver
+  = versionCore:versionCore
+    pre:('-' @preRelease)?
+    build:('+' @build)?
+  {
+    return { versionCore, pre, build };
+  }
 
-version_core = major "." minor "." patch
+versionCore
+  = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier
+  {
+    return {
+      major: parseInt(major, 10),
+      minor: parseInt(minor, 10),
+      patch: parseInt(patch, 10),
+    };
+  }
 
-major = numeric_identifier
+preRelease
+  = head:$preReleaseIdentifier tail:('.' @$preReleaseIdentifier)*
+  {
+    return [head, ...tail];
+  }
 
-minor = numeric_identifier
+build
+  = head:$buildIdentifier tail:('.' @$buildIdentifier)*
+  {
+    return [head, ...tail];
+  }
 
-patch = numeric_identifier
+preReleaseIdentifier
+  = alphanumericIdentifier
+  / numericIdentifier
 
-pre_release = dot_separated_pre_release_identifiers
+buildIdentifier
+  = alphanumericIdentifier
+  / digit+
 
-dot_separated_pre_release_identifiers = head:pre_release_identifier tail:("." @pre_release_identifier)* { return [head, ...tail]; }
+alphanumericIdentifier
+  = digit* nonDigit identifierChar*
 
-pre_release_identifier = alphanumeric_identifier
-                          / positive_digits
+numericIdentifier
+  = '0' / (positiveDigit digit*)
 
-build = dot_separated_build_identifiers
+identifierChar
+  = [a-z0-9-]i
 
-dot_separated_build_identifiers = head:build_identifier tail:("." @build_identifier)* { return [head, ...tail]; }
+nonDigit
+  = [a-z-]i
 
-build_identifier = alphanumeric_identifier
-                     / digits
+digit
+  = [0-9]
 
-alphanumeric_identifier = non_digit !identifier_characters
-                            / non_digit identifier_characters
-                            / identifier_characters 
-{
-  return checkNumber();
-}
-
-numeric_identifier = [0-9]+
-{
-  return checkNumber();
-}
-
-identifier_characters = [0-9A-Za-z-]+
-
-digits = digit+
-positive_digits = head:positive_digit tail:(@digit)* { return [head, ...tail]; }
-
-non_digit = [A-Za-z-]
-digit = [0-9]
-positive_digit = [1-9]
-letter = [A-Za-z]
+positiveDigit
+  = [1-9]
 
 /* ----- A.5 Functions and Programs ----- */
 
@@ -1362,7 +1360,7 @@ Namespace
   }
 
 VersionedNamespace
-  = NamespaceToken __ ns:QualifiedName '@' version:$valid_semver __ {
+  = NamespaceToken __ ns:QualifiedName '@' version:$semver __ {
   	return `${ns}@${version}`;
   }
 
