@@ -233,11 +233,21 @@ function toCTO(metaModel) {
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';
         metaModel.imports.forEach((imp) => {
-            let name = '*';
-            if (imp.$class === 'concerto.metamodel.ImportType') {
-                name = imp.name;
+            switch(imp.$class) {
+            case 'concerto.metamodel.ImportType':
+            case 'concerto.metamodel.ImportTypeFrom':
+                result += `\nimport ${imp.namespace}.${imp.name}`;
+                break;
+            case 'concerto.metamodel.ImportAll':
+            case 'concerto.metamodel.ImportAllFrom':
+                result += `\nimport ${imp.namespace}.*`;
+                break;
+            case 'concerto.metamodel.ImportTypes':
+                result += `\nimport {${imp.types.join(',')}} from ${imp.namespace}`;
+                break;
+            default:
+                throw new Error('Unrecognized import');
             }
-            result += `\nimport ${imp.namespace}.${name}`;
             if (imp.uri) {
                 result += ` from ${imp.uri}`;
             }

@@ -639,14 +639,20 @@ class ModelFile {
 
         this.imports = imports;
         this.imports.forEach((imp) => {
-            const fqn = ModelUtil.importFullyQualifiedName(imp);
-            if (imp.$class === 'concerto.metamodel.ImportAll') {
+            switch(imp.$class) {
+            case 'concerto.metamodel.ImportAll':
                 this.importWildcardNamespaces.push(imp.namespace);
-            } else {
-                this.importShortNames.set(imp.name, fqn);
+                break;
+            case 'concerto.metamodel.ImportTypes':
+                imp.types.forEach( type => {
+                    this.importShortNames.set(type, `${imp.namespace}.${type}`);
+                });
+                break;
+            default:
+                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedName(imp));
             }
             if(imp.uri) {
-                this.importUriMap[fqn] = imp.uri;
+                this.importUriMap[ModelUtil.importFullyQualifiedName(imp)] = imp.uri;
             }
         });
 
