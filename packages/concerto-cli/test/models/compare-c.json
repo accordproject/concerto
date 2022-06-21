@@ -1,0 +1,92 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "namespace": "compare",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Thing",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "value",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 39,
+              "line": 4,
+              "column": 5,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 58,
+              "line": 5,
+              "column": 5,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "flag",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 58,
+              "line": 5,
+              "column": 5,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 77,
+              "line": 6,
+              "column": 5,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "number",
+          "isArray": false,
+          "isOptional": true,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 77,
+              "line": 6,
+              "column": 5,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 103,
+              "line": 7,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 19,
+          "line": 3,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 104,
+          "line": 7,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+namespace compare
+
+concept Thing {
+    o String value
+    o Boolean flag
+    o Integer number optional
+}

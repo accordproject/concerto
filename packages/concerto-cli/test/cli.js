@@ -18,21 +18,27 @@ const chai = require('chai');
 const path = require('path');
 const tmp = require('tmp-promise');
 const fs = require('fs');
+const sinon = require('sinon');
 
 chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 
 const Commands = require('../lib/commands');
 const { Parser } = require('@accordproject/concerto-cto');
 
-describe('cicero-cli', () => {
+describe('concerto-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
     const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
     const input1 = path.resolve(__dirname, 'data/input1.json');
     const input2 = path.resolve(__dirname, 'data/input2.json');
     const inputText1 = fs.readFileSync(input1, 'utf8');
     const inputText2 = fs.readFileSync(input2, 'utf8');
+
+    afterEach(() => {
+        sinon.restore();
+    });
 
     describe('#validateValidateArgs', () => {
         it('no args specified', () => {
@@ -436,7 +442,63 @@ describe('cicero-cli', () => {
                     metamodel.namespace.should.equal(expectedNamespace);
                 }
             });
+        });
 
+    });
+
+    describe('#compare', async () => {
+        let processExitStub;
+
+        beforeEach(() => {
+            processExitStub = sinon.stub(process, 'exit');
+        });
+
+        it('should compare two cto models that require a major change', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.cto');
+            const bPath = path.resolve(__dirname, 'models', 'compare-b.cto');
+            await Commands.compare(aPath, bPath);
+        });
+
+        it('should compare two cto models that require a minor/patch change', async () => {
+            const bPath = path.resolve(__dirname, 'models', 'compare-b.cto');
+            const cPath = path.resolve(__dirname, 'models', 'compare-c.cto');
+            await Commands.compare(bPath, cPath);
+        });
+
+        it('should compare two cto models that have no changes', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.cto');
+            await Commands.compare(aPath, aPath);
+        });
+
+        it('should compare two cto models that have a namespace change', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.cto');
+            const bPath = path.resolve(__dirname, 'models', 'compare-a-badns.cto');
+            await Commands.compare(aPath, bPath);
+            processExitStub.should.have.been.calledWith(1);
+        });
+
+        it('should compare two json models that require a major change', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.json');
+            const bPath = path.resolve(__dirname, 'models', 'compare-b.json');
+            await Commands.compare(aPath, bPath);
+        });
+
+        it('should compare two json models that require a minor/patch change', async () => {
+            const bPath = path.resolve(__dirname, 'models', 'compare-b.json');
+            const cPath = path.resolve(__dirname, 'models', 'compare-c.json');
+            await Commands.compare(bPath, cPath);
+        });
+
+        it('should compare two json models that have no changes', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.json');
+            await Commands.compare(aPath, aPath);
+        });
+
+        it('should compare two json models that have a namespace change', async () => {
+            const aPath = path.resolve(__dirname, 'models', 'compare-a.json');
+            const bPath = path.resolve(__dirname, 'models', 'compare-a-badns.json');
+            await Commands.compare(aPath, bPath);
+            processExitStub.should.have.been.calledWith(1);
         });
     });
 });
