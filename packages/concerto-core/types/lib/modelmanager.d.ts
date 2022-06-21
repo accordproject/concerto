@@ -26,8 +26,9 @@ declare class ModelManager extends BaseModelManager {
      * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
-     * @return {Object} The newly added model file (internal).
+     * @return {ModelFile} The newly added model file (internal).
      */
-    addCTOModel(cto: string, fileName?: string, disableValidation?: boolean): any;
+    addCTOModel(cto: string, fileName?: string, disableValidation?: boolean): ModelFile;
 }
 import BaseModelManager = require("./basemodelmanager");
+import ModelFile = require("./introspect/modelfile");

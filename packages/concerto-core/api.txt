@@ -7,7 +7,7 @@ class BaseModelManager {
    + Object accept(Object,Object) 
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(ModelFile,string?,string?,boolean?) throws IllegalModelException
-   + Object addModel(modelInput,string?,string?,boolean?) throws IllegalModelException
+   + ModelFile addModel(modelInput,string?,string?,boolean?) throws IllegalModelException
    + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
    + void deleteModelFile(string) 
    + Object[] addModelFiles(|,string[],boolean?) 
@@ -139,9 +139,9 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
-   + void newMetaModelManager() 
+   + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
-   + object modelManagerFromMetaModel() 
+   + ModelManager modelManagerFromMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
@@ -237,12 +237,12 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + object loadModelManager(string[],object,boolean?,number?) 
-   + object loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
    + void constructor(object?) 
-   + Object addCTOModel(string,string?,boolean?) throws IllegalModelException
+   + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
 class SecurityException extends BaseException {
    + void constructor(string) 
