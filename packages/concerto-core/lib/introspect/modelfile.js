@@ -381,6 +381,9 @@ class ModelFile {
                 // check whether type is defined in another file
                 const fqn = this.resolveImport(type);
                 const modelFile = this.getModelManager().getModelFile(ModelUtil.getNamespace(fqn));
+                if (!modelFile) {
+                    return null;
+                }
                 return modelFile.getLocalType(fqn).getFullyQualifiedName();
             }
         }
