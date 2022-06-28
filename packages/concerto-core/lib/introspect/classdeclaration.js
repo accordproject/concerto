@@ -82,7 +82,7 @@ class ClassDeclaration extends Decorated {
         if (this.ast.superType) {
             this.superType = this.ast.superType.name;
         }
-        else if(!(this.modelFile.getNamespace() === 'concerto' && this.name === 'Concept')) {
+        else if(!(this.modelFile.isSystemModelFile() && this.name === 'Concept')) {
             this.superType = 'Concept';
         }
 
@@ -126,7 +126,7 @@ class ClassDeclaration extends Decorated {
 
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
 
-        if (this.fqn === 'concerto.Transaction' || this.fqn === 'concerto.Event') {
+        if (this.fqn === 'concerto@1.0.0.Transaction' || this.fqn === 'concerto@1.0.0.Event') {
             this.addTimestampField();
         }
     }

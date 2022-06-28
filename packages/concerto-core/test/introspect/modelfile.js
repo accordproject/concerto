@@ -100,7 +100,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
@@ -121,7 +121,7 @@ describe('ModelFile', () => {
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });

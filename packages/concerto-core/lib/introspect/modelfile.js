@@ -64,6 +64,7 @@ class ModelFile {
         this.importUriMap = {};
         this.fileName = 'UNKNOWN';
         this.concertoVersion = null;
+        this.version = null;
 
         if(!ast || typeof ast !== 'object') {
             throw new Error('ModelFile expects a Concerto model AST as input.');
@@ -107,11 +108,20 @@ class ModelFile {
     }
 
     /**
+     * Returns the semantic version
+     * @returns {string} the semantic version or null if the namespace for the model file is
+     * unversioned
+     */
+    getVersion() {
+        return this.version;
+    }
+
+    /**
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile() {
-        return this.namespace === 'concerto';
+        return this.namespace === 'concerto@1.0.0';
     }
 
     /**
@@ -173,7 +183,11 @@ class ModelFile {
      * @return {string[]} The array of imports for this ModelFile
      */
     getImports() {
-        return this.imports.map(ModelUtil.importFullyQualifiedName);
+        let result = [];
+        this.imports.forEach( imp => {
+            result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
+        });
+        return result;
     }
 
     /**
@@ -185,22 +199,21 @@ class ModelFile {
     validate() {
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
-        this.imports.forEach((imp) => {
-            const importName = ModelUtil.importFullyQualifiedName(imp);
-            const importNamespace = imp.namespace;
+        this.getImports().forEach((importFqn) => {
+            const importNamespace = ModelUtil.getNamespace(importFqn);
+            const importShortName = ModelUtil.getShortName(importFqn);
             const modelFile = this.getModelManager().getModelFile(importNamespace);
             if (!modelFile) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
                 throw new IllegalModelException(formatter({
-                    type: importName
+                    type: importFqn
                 }), this);
             }
-            if (imp.$class === 'concerto.metamodel.ImportAll') {
+            if (importFqn.endsWith('*')) {
                 // This is a wildcard import, org.acme.*
                 // Doesn't matter if 0 or 100 types in the namespace.
                 return;
             }
-            const importShortName = imp.name;
             if (!modelFile.isLocalType(importShortName)) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
                 throw new IllegalModelException(formatter({
@@ -590,55 +603,51 @@ class ModelFile {
     }
 
     /**
+     * Verifies that an import is versioned if the versionedNamespacesStrict
+     * option has been set on the Model Manager
+     * @param {*} imp - the import to validate
+     */
+    enforceImportVersioning(imp) {
+        if(this.getModelManager().isVersionedNamespacesStrict()) {
+            if(imp.namespace.indexOf('@') < 0) {
+                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'versionedNamespacesStrict' option on Model Manager is set.`);
+            }
+        }
+    }
+
+    /**
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser
      * @private
      */
     fromAst(ast) {
-        this.namespace = ast.namespace;
+        if(ast.namespace.indexOf('@') >= 0) {
+            const parts = ast.namespace.split('@');
+            // this.namespace = parts[0];
+            this.namespace = ast.namespace;
+            this.version = parts[1];
+        }
+        else {
+            this.namespace = ast.namespace;
+            this.version = null;
+        }
+
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];
 
-        if(this.namespace !== 'concerto') {
+        if(!this.isSystemModelFile()) {
             imports.push(
                 {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Concept',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Asset',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Transaction',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Participant',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Event',
+                    $class: 'concerto.metamodel.ImportTypes',
+                    namespace: 'concerto@1.0.0',
+                    types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
                 }
             );
         }
 
         this.imports = imports;
         this.imports.forEach((imp) => {
+            this.enforceImportVersioning(imp);
             switch(imp.$class) {
             case 'concerto.metamodel.ImportAll':
                 this.importWildcardNamespaces.push(imp.namespace);
@@ -649,10 +658,10 @@ class ModelFile {
                 });
                 break;
             default:
-                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedName(imp));
+                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
             }
             if(imp.uri) {
-                this.importUriMap[ModelUtil.importFullyQualifiedName(imp)] = imp.uri;
+                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
             }
         });
 

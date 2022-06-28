@@ -15,7 +15,7 @@
 'use strict';
 
 const rootModelFile = 'concerto.cto';
-const rootModelCto = `namespace concerto
+const rootModelCto = `namespace concerto@1.0.0
 abstract concept Concept {}
 abstract concept Asset identified {}
 abstract concept Participant identified {}

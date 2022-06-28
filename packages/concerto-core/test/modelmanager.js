@@ -118,31 +118,31 @@ describe('ModelManager', () => {
     describe('#concerto namespace', () => {
 
         it('should contain Asset', () => {
-            const fqn = 'concerto.Asset';
+            const fqn = 'concerto@1.0.0.Asset';
             const type = modelManager.getType(fqn);
             type.getFullyQualifiedName().should.equal(fqn);
         });
 
         it('should contain Participant', () => {
-            const fqn = 'concerto.Participant';
+            const fqn = 'concerto@1.0.0.Participant';
             const type = modelManager.getType(fqn);
             type.getFullyQualifiedName().should.equal(fqn);
         });
 
         it('should contain Event', () => {
-            const fqn = 'concerto.Event';
+            const fqn = 'concerto@1.0.0.Event';
             const type = modelManager.getType(fqn);
             type.getFullyQualifiedName().should.equal(fqn);
         });
 
         it('should contain Transaction', () => {
-            const fqn = 'concerto.Transaction';
+            const fqn = 'concerto@1.0.0.Transaction';
             const type = modelManager.getType(fqn);
             type.getFullyQualifiedName().should.equal(fqn);
         });
 
         it('should contain Concept', () => {
-            const fqn = 'concerto.Concept';
+            const fqn = 'concerto@1.0.0.Concept';
             const type = modelManager.getType(fqn);
             type.getFullyQualifiedName().should.equal(fqn);
         });
@@ -1001,13 +1001,13 @@ concept Bar {
 
         it('should be an instance of concerto.Participant', () => {
             modelManager.addCTOModel(concertoModel);
-            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Participant');
+            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto@1.0.0.Participant');
             result.should.be.true;
         });
 
         it('all types should be an instance of concerto.Concept', () => {
             modelManager.addCTOModel(concertoModel);
-            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto.Concept');
+            const result = modelManager.derivesFrom('org.accordproject.test.Person', 'concerto@1.0.0.Concept');
             result.should.be.true;
         });
     });

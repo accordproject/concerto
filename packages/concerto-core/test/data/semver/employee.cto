@@ -1,10 +1,8 @@
 namespace employee@2.0.0
 
 import { Person, Phone} from person@1.0.0
-import { Person} from person
-import person.Person
 
-concept Employee {
+concept Employee extends Person {
     o String name
     o Phone phone
 }

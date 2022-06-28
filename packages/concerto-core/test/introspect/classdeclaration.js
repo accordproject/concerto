@@ -261,7 +261,7 @@ describe('ClassDeclaration', () => {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'concerto.Participant');
+            should.equal(superclassName,'concerto@1.0.0.Participant');
         });
 
         it('toString',()=>{

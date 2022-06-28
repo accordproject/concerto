@@ -25,10 +25,10 @@ declare class ModelUtil {
     /**
      * Return the fully qualified name for an import
      * @param {object} imp - the import
-     * @return {string} - the fully qualified name for that import
+     * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    private static importFullyQualifiedName;
+    private static importFullyQualifiedNames;
     /**
      * Returns true if the type is a primitive type
      * @param {string} typeName - the name of the type

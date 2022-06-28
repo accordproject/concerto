@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 const Globalize = require('./globalize');
 
 /**
@@ -66,11 +67,11 @@ class ModelUtil {
     /**
      * Return the fully qualified name for an import
      * @param {object} imp - the import
-     * @return {string} - the fully qualified name for that import
+     * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    static importFullyQualifiedName(imp) {
-        return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
+    static importFullyQualifiedNames(imp) {
+        return MetaModelUtil.importFullyQualifiedNames(imp);
     }
 
     /**

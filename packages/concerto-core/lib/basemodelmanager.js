@@ -73,7 +73,7 @@ class BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - Serializer options
+     * @param {object} [options] - ModelManager options
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -82,6 +82,7 @@ class BaseModelManager {
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
+        this.versionedNamespacesStrict = !!options?.versionedNamespacesStrict;
         this.addRootModel();
     }
 
@@ -91,6 +92,14 @@ class BaseModelManager {
      */
     isModelManager() {
         return true;
+    }
+
+    /**
+     * Returns the value of the versionedNamespacesStrict option
+     * @returns {boolean} true if the versionedNamespacesStrict has been set
+     */
+    isVersionedNamespacesStrict() {
+        return this.versionedNamespacesStrict;
     }
 
     /**
@@ -164,6 +173,10 @@ class BaseModelManager {
     addModelFile(modelFile, cto, fileName, disableValidation) {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
+
+        if(this.isVersionedNamespacesStrict() && !modelFile.getVersion()) {
+            throw new Error('Cannot add an unversioned namespace when \'versionedNamespacesStrict\' is true');
+        }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
@@ -380,7 +393,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || ns !== 'concerto') {
+            if(includeConcertoNamespace || ns !== 'concerto@1.0.0') {
                 result.push(this.modelFiles[ns]);
             }
         }
