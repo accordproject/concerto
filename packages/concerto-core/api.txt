@@ -65,6 +65,8 @@ class Factory {
    + Relationship newRelationship(String,String,String) throws TypeNotFoundException
    + Resource newTransaction(String,String,String?,Object?,String?,boolean?) 
    + Resource newEvent(String,String,String?,Object?,String?,boolean?) 
+   + void addResourceFactory(string,string,ResourceFactory) 
+   + ResourceFactory getResourceFactory(string,string) 
 }
 class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
@@ -197,6 +199,12 @@ class RelationshipDeclaration extends Property {
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string declarationKind() 
+}
+class CustomResource extends Resource {
+   + void constructor(unknown) 
+   + void setPropertyValue(string,string) throws Error
+   + void addArrayValue(string,string) throws Error
+   + void validate() throws Error
 }
 class Identifiable extends Typed {
    ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string) 

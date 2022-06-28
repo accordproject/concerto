@@ -19,6 +19,7 @@ declare class Factory {
      */
     constructor(modelManager: ModelManager);
     modelManager: ModelManager;
+    resourceFactories: {};
     /**
      * Create a new Resource with a given namespace, type name and id
      * @param {String} ns - the namespace of the Resource
@@ -130,7 +131,28 @@ declare class Factory {
      * @return {Object} InstanceGenerator options.
      */
     private parseGenerateOptions;
+    /**
+     * Add a resource factory for the specified namespace and type.
+     * @param {string} ns The namespace
+     * @param {string} type The type
+     * @param {ResourceFactory} resourceFactory The resource factory.
+     */
+    addResourceFactory(ns: string, type: string, resourceFactory: ResourceFactory): void;
+    /**
+     * Get the resource factory for the specified namespace and type.
+     * @param {string} ns The namespace
+     * @param {string} type The type
+     * @returns {ResourceFactory} The resource factory.
+     */
+    getResourceFactory(ns: string, type: string): ResourceFactory;
+}
+declare namespace Factory {
+    export { ResourceFactory };
 }
 import ModelManager = require("./modelmanager");
 import Resource = require("./model/resource");
 import Relationship = require("./model/relationship");
+/**
+ * A resource factory is called to create a resource.
+ */
+type ResourceFactory = (opaque: unknown) => Resource;

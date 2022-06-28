@@ -20,6 +20,7 @@ import Typed = require("./lib/model/typed");
 import Identifiable = require("./lib/model/identifiable");
 import Relationship = require("./lib/model/relationship");
 import Resource = require("./lib/model/resource");
+import CustomResource = require("./lib/model/customresource");
 import Factory = require("./lib/factory");
 import Globalize = require("./lib/globalize");
 import Introspector = require("./lib/introspect/introspector");
@@ -36,4 +37,4 @@ export const version: {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
+export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Typed, Identifiable, Relationship, Resource, CustomResource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };

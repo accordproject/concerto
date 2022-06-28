@@ -23,6 +23,22 @@ const dayjs = require('dayjs');
 
 const should = require('chai').should();
 const sinon = require('sinon');
+const CustomResource = require('../lib/model/customresource');
+const Resource = require('../lib/model/resource');
+const ValidatedResource = require('../lib/model/validatedresource');
+
+/**
+ * Custom resource class.
+ */
+class MyCustomAsset extends CustomResource {
+    /**
+     * Custom resource constructor.
+     * @param {unknown} opaque Opaque data
+     */
+    constructor(opaque) {
+        super(opaque);
+    }
+}
 
 describe('Factory', function() {
     const namespace = 'org.acme.test';
@@ -58,7 +74,13 @@ describe('Factory', function() {
         event MyEvent identified by eventId {
             o String eventId
             o String value
-        }`);
+        }
+        asset MyCustomAsset identified by assetId {
+            o String assetId
+            o String newValue
+            o String[] otherValues optional
+        }
+        `);
         factory = new Factory(modelManager);
     });
 
@@ -171,6 +193,50 @@ describe('Factory', function() {
         it ('should define optional fields with generated sample data if includeOptionalFields is specified', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1', { generate: 'sample', includeOptionalFields: true });
             assertOptionalIsDefined(resource);
+        });
+
+        it('should use the default resource factory if a custom resource factory is not specified (validation enabled)', () => {
+            const resource = factory.newResource(namespace, 'MyCustomAsset', 'MY_ID_1');
+            resource.should.be.instanceOf(ValidatedResource);
+            resource.setPropertyValue('newValue', 'hello, world');
+            (() => resource.setPropertyValue('noSuchValue', 'hello, world')).should.throw(/not declared in the model/);
+            resource.addArrayValue('otherValues', 'hello');
+            resource.addArrayValue('otherValues', 'world');
+            (() => resource.addArrayValue('noSuchValue', 'hello, world')).should.throw(/not declared in the model/);
+            (() => resource.addArrayValue('newValue', 'hello, world')).should.throw(/not declared as an array in the model/);
+            resource.validate();
+        });
+
+        it('should use the default resource factory if a custom resource factory is not specified (validation disabled)', () => {
+            const resource = factory.newResource(namespace, 'MyCustomAsset', 'MY_ID_1', { disableValidation: true });
+            resource.should.be.instanceOf(Resource);
+            resource.should.not.be.instanceOf(ValidatedResource);
+            resource.setPropertyValue('newValue', 'hello, world');
+            resource.addArrayValue('otherValues', 'hello');
+            resource.addArrayValue('otherValues', 'world');
+        });
+
+        it('should use a custom resource factory if one is specified (validation enabled)', () => {
+            factory.addResourceFactory(namespace, 'MyCustomAsset', opaque => new MyCustomAsset(opaque));
+            const resource = factory.newResource(namespace, 'MyCustomAsset', 'MY_ID_1');
+            resource.should.be.instanceOf(MyCustomAsset);
+            resource.setPropertyValue('newValue', 'hello, world');
+            (() => resource.setPropertyValue('noSuchValue', 'hello, world')).should.throw(/not declared in the model/);
+            resource.addArrayValue('otherValues', 'hello');
+            resource.addArrayValue('otherValues', 'world');
+            (() => resource.addArrayValue('noSuchValue', 'hello, world')).should.throw(/not declared in the model/);
+            (() => resource.addArrayValue('newValue', 'hello, world')).should.throw(/not declared as an array in the model/);
+            resource.validate();
+        });
+
+        it('should use a custom resource factory if one is specified (validation disabled)', () => {
+            factory.addResourceFactory(namespace, 'MyCustomAsset', opaque => new MyCustomAsset(opaque));
+            const resource = factory.newResource(namespace, 'MyCustomAsset', 'MY_ID_1', { disableValidation: true });
+            resource.should.be.instanceOf(MyCustomAsset);
+            resource.setPropertyValue('newValue', 'hello, world');
+            resource.addArrayValue('otherValues', 'hello');
+            resource.addArrayValue('otherValues', 'world');
+            (() => resource.validate()).should.throw(/validation is not enabled/);
         });
 
     });

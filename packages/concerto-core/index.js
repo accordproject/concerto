@@ -53,6 +53,7 @@ const Typed = require('./lib/model/typed');
 const Identifiable = require('./lib/model/identifiable');
 const Relationship = require('./lib/model/relationship');
 const Resource = require('./lib/model/resource');
+const CustomResource = require('./lib/model/customresource');
 
 // Factory
 const Factory = require('./lib/factory');
@@ -117,6 +118,7 @@ module.exports = {
     Identifiable,
     Relationship,
     Resource,
+    CustomResource,
     Factory,
     Globalize,
     Introspector,

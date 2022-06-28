@@ -44,6 +44,28 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 /**
+ * A resource factory is called to create a resource.
+ * @callback ResourceFactory
+ * @param {unknown} opaque Opaque data
+ * @returns {Resource} The resource
+ */
+
+/**
+ * The default resource factory.
+ * @type {ResourceFactory}
+ * @param {unknown} opaque Opaque data
+ * @returns {Resource} The resource
+ */
+const defaultResourceFactory = opaque => {
+    const { modelManager, classDeclaration, ns, type, id, timestamp, resourceValidator } = opaque;
+    if (resourceValidator) {
+        return new ValidatedResource(modelManager, classDeclaration, ns, type, id, timestamp, resourceValidator);
+    } else {
+        return new Resource(modelManager, classDeclaration, ns, type, id, timestamp);
+    }
+};
+
+/**
  * Use the Factory to create instances of Resource: transactions, participants
  * and assets.
  *
@@ -66,6 +88,7 @@ class Factory {
      */
     constructor(modelManager) {
         this.modelManager = modelManager;
+        this.resourceFactories = {};
     }
 
     /**
@@ -128,12 +151,16 @@ class Factory {
         if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
         }
-        if(options.disableValidation) {
-            newObj = new Resource(this.modelManager, classDecl, ns, type, id, timestamp);
-        }
-        else {
-            newObj = new ValidatedResource(this.modelManager, classDecl, ns, type, id, timestamp, new ResourceValidator());
-        }
+        const resourceFactory = this.getResourceFactory(ns, type);
+        newObj = resourceFactory({
+            modelManager: this.modelManager,
+            classDeclaration: classDecl,
+            ns,
+            type,
+            id,
+            timestamp,
+            resourceValidator: options.disableValidation ? null : new ResourceValidator()
+        });
         newObj.assignFieldDefaults();
         this.initializeNewObject(newObj, classDecl, options);
 
@@ -295,6 +322,28 @@ class Factory {
         generateParams.includeOptionalFields = clientOptions.includeOptionalFields ? true : false;
 
         return generateParams;
+    }
+
+    /**
+     * Add a resource factory for the specified namespace and type.
+     * @param {string} ns The namespace
+     * @param {string} type The type
+     * @param {ResourceFactory} resourceFactory The resource factory.
+     */
+    addResourceFactory(ns, type, resourceFactory) {
+        const fqn = ModelUtil.getFullyQualifiedName(ns, type);
+        this.resourceFactories[fqn] = resourceFactory;
+    }
+
+    /**
+     * Get the resource factory for the specified namespace and type.
+     * @param {string} ns The namespace
+     * @param {string} type The type
+     * @returns {ResourceFactory} The resource factory.
+     */
+    getResourceFactory(ns, type) {
+        const fqn = ModelUtil.getFullyQualifiedName(ns, type);
+        return this.resourceFactories[fqn] || defaultResourceFactory;
     }
 }
 

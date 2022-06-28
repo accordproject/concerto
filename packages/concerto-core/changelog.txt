@@ -24,9 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 2.3.0 {28dd70fd922b3b8b491216661796b95b} 2022-06-21
+Version 2.3.0 {eb82de7f5b776322992eb778807ca0b0} 2022-06-21
 - Fix TypeScript types for MetaModel
 - Fix TypeScript types for ModelManager
+- Add resource factories to Factory, and CustomResource class
 
 Version 2.2.0 {3d3fc2a6b3cd623b807ca0c4fc53680d} 2022-06-01
 - Fix TypeScript types for ModelLoader
