@@ -73,7 +73,8 @@ class BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - ModelManager options
+     * @param {object} [options] - ModelManager options, also passed to Serializer
+     * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {

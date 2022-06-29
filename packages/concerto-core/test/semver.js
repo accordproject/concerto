@@ -26,7 +26,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
-describe('Semantic Versioning', () => {
+describe.only('Semantic Versioning', () => {
     let sandbox;
     let modelManager;
     let personCto;
@@ -68,6 +68,24 @@ describe('Semantic Versioning', () => {
             modelManager = new ModelManager();
             modelManager.addCTOModel('namespace test', 'test.cto');
         });
+        it('should serialize unversioned declarations', () => {
+            modelManager = new ModelManager();
+            modelManager.addCTOModel(`namespace test
+concept Person identified by email {
+    o String email
+}
+            `, 'test.cto');
+            const factory = new Factory(modelManager);
+            const serializer = new Serializer(factory, modelManager);
+            const person = factory.newConcept('test', 'Person', 'john.doe@example.com');
+            const json = serializer.toJSON(person);
+            json.should.deep.equal({
+                $class: 'test.Person',
+                email: 'john.doe@example.com',
+            });
+            const person2 = serializer.fromJSON(json);
+            person2.email.should.equal(person.email);
+        });
 
         it('should support versioned system imports', () => {
             modelManager = new ModelManager();
@@ -78,11 +96,12 @@ import {Event} from concerto@1.0.0`, 'test.cto');
 
     describe('#namespace versioning - versionedNamespacesStrict:true', () => {
         it('should support versioned namespaces', () => {
-            modelManager = new ModelManager();
+            modelManager = new ModelManager({ versionedNamespacesStrict: true });
             modelManager.addCTOModel(personCto, 'person.cto');
             modelManager.addCTOModel(employeeCto, 'employee.cto');
             modelManager.getModelFile('person@1.0.0').should.be.not.null;
             modelManager.getModelFile('employee@2.0.0').should.be.not.null;
+            modelManager.getType('employee@2.0.0.Employee').should.be.not.null;
         });
 
         it('should not support unversioned namespaces', () => {
@@ -98,6 +117,20 @@ import {Event} from concerto@1.0.0`, 'test.cto');
                 modelManager.addCTOModel(`namespace test@1.0.0
 import concerto.Event`, 'test.cto');
             }).should.throw(/Cannot use an unversioned import/);
+        });
+
+        it('should not deserialize unversioned declarations', () => {
+            modelManager = new ModelManager({ versionedNamespacesStrict: true });
+            modelManager.addCTOModel(personCto, 'person.cto');
+            modelManager.addCTOModel(employeeCto, 'employee.cto');
+            const factory = new Factory(modelManager);
+            const serializer = new Serializer(factory, modelManager);
+            (() => {
+                serializer.fromJSON({
+                    $class: 'test.Person',
+                    email: 'john.doe@example.com',
+                });
+            }).should.throw(/Namespace is not defined/);
         });
     });
 
