@@ -105,6 +105,16 @@ require('yargs')
             type: 'string',
             default: './output/'
         });
+        yargs.option('useSystemTextJson', {
+            describe: 'Compile for System.Text.Json library',
+            type: 'boolean',
+            default: false
+        });
+        yargs.option('useNewtonsoftJson', {
+            describe: 'Compile for Newtonsoft.Json library',
+            type: 'boolean',
+            default: false
+        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`generate code for target ${argv.target} from models ${argv.model} into directory: ${argv.output}`);
@@ -112,6 +122,8 @@ require('yargs')
 
         const options = {};
         options.offline = argv.offline;
+        options.useSystemTextJson = argv.useSystemTextJson;
+        options.useNewtonsoftJson = argv.useNewtonsoftJson;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);

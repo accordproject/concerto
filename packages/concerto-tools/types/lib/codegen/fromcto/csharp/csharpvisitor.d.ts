@@ -79,9 +79,10 @@ declare class CSharpVisitor {
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
      * @param {string} getset the getter and setter declaration
-    * @returns {string} the property declaration
+     * @param {Object} [parameters]  - the parameter
+     * @returns {string} the property declaration
      */
-    toCSharpProperty(access: string, propertyName: string, propertyType: string, array: string, getset: string): string;
+    toCSharpProperty(access: string, propertyName: string, propertyType: string, array: string, getset: string, parameters?: any): string;
     /**
      * Converts a Concerto type to a CSharp type. Primitive types are converted
      * everything else is passed through unchanged.
