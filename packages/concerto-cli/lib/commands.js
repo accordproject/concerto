@@ -34,15 +34,18 @@ const Serializer = require('@accordproject/concerto-core').Serializer;
 const Concerto = require('@accordproject/concerto-core').Concerto;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 
-const GoLangVisitor = CodeGen.GoLangVisitor;
-const JavaVisitor = CodeGen.JavaVisitor;
-const JSONSchemaVisitor = CodeGen.JSONSchemaVisitor;
-const PlantUMLVisitor = CodeGen.PlantUMLVisitor;
-const TypescriptVisitor = CodeGen.TypescriptVisitor;
-const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
-const GraphQLVisitor = CodeGen.GraphQLVisitor;
-const CSharpVisitor = CodeGen.CSharpVisitor;
-const ODataVisitor = CodeGen.ODataVisitor;
+const {
+    GoLangVisitor,
+    JavaVisitor,
+    JSONSchemaVisitor,
+    PlantUMLVisitor,
+    TypescriptVisitor,
+    XmlSchemaVisitor,
+    GraphQLVisitor,
+    CSharpVisitor,
+    ODataVisitor,
+    NodeVisitor
+} = CodeGen;
 
 /**
  * Utility class that implements the commands exposed by the CLI.
@@ -182,6 +185,9 @@ class Commands {
             break;
         case 'odata':
             visitor = new ODataVisitor();
+            break;
+        case 'node':
+            visitor = new NodeVisitor();
             break;
         }
 

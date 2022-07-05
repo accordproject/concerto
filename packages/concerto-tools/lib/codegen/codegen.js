@@ -25,6 +25,7 @@ const JavaVisitor = require('./fromcto/java/javavisitor');
 const GraphQLVisitor = require('./fromcto/graphql/graphqlvisitor');
 const CSharpVisitor = require('./fromcto/csharp/csharpvisitor');
 const ODataVisitor = require('./fromcto/odata/odatavisitor');
+const NodeVisitor = require('./fromcto/node/nodevisitor');
 
 module.exports = {
     AbstractPlugin,
@@ -36,5 +37,6 @@ module.exports = {
     JavaVisitor,
     GraphQLVisitor,
     CSharpVisitor,
-    ODataVisitor
+    ODataVisitor,
+    NodeVisitor
 };

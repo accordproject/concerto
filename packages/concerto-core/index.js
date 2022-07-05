@@ -43,6 +43,8 @@ const TransactionDeclaration = require('./lib/introspect/transactiondeclaration'
 // Properties
 const Property = require('./lib/introspect/property');
 const Field = require('./lib/introspect/field');
+const NumberValidator = require('./lib/introspect/numbervalidator');
+const StringValidator = require('./lib/introspect/stringvalidator');
 const EnumDeclaration = require('./lib/introspect/enumdeclaration');
 const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
 
@@ -111,6 +113,8 @@ module.exports = {
     TransactionDeclaration,
     Property,
     Field,
+    NumberValidator,
+    StringValidator,
     EnumDeclaration,
     RelationshipDeclaration,
     Typed,

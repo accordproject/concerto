@@ -1,0 +1,12 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+concept Basic {
+    o String value
+}
+
+concept StringTypes {
+    o String string
+    o String[] stringArray
+    o String optionalString optional
+    o String regexString regex=/\d+/
+}

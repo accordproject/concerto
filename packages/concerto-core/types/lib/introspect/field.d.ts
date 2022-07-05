@@ -14,9 +14,9 @@ declare class Field extends Property {
     defaultValue: any;
     /**
      * Returns the validator string for this field
-     * @return {string} the validator for the field or null
+     * @return {Validator} the validator for the field or null
      */
-    getValidator(): string;
+    getValidator(): Validator;
     /**
      * Returns the default value for the field or null
      * @return {string} the default value for the field or null
@@ -32,3 +32,4 @@ declare class Field extends Property {
 import Property = require("./property");
 import NumberValidator = require("./numbervalidator");
 import StringValidator = require("./stringvalidator");
+import Validator = require("./validator");
