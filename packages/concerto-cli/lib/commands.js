@@ -42,6 +42,7 @@ const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
 const GraphQLVisitor = CodeGen.GraphQLVisitor;
 const CSharpVisitor = CodeGen.CSharpVisitor;
 const ODataVisitor = CodeGen.ODataVisitor;
+const MetamodelVisitor = CodeGen.MetamodelVisitor;
 
 /**
  * Utility class that implements the commands exposed by the CLI.
@@ -172,6 +173,10 @@ class Commands {
             break;
         case 'odata':
             visitor = new ODataVisitor();
+            break;
+        case 'jsonast':
+        case 'metamodel':
+            visitor = new MetamodelVisitor();
             break;
         }
 

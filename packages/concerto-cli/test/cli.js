@@ -177,6 +177,18 @@ describe('cicero-cli', () => {
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });
+        it('should compile to an Metamodel instance', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true });
+            await Commands.compile('Metamodel', models, dir.path, {offline:false});
+            fs.readdirSync(dir.path).length.should.be.above(0);
+            dir.cleanup();
+        });
+        it('should compile to an Metamodel instance (JSON AST)', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true });
+            await Commands.compile('JsonAst', models, dir.path, {offline:false});
+            fs.readdirSync(dir.path).length.should.be.above(0);
+            dir.cleanup();
+        });
         it('should not compile to an unknown model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true });
             await Commands.compile('BLAH', models, dir.path, {offline:false});

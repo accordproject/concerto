@@ -59,6 +59,7 @@
     },
     "dependencies": {
         "@accordproject/concerto-core": "2.3.0",
+        "@accordproject/concerto-cto": "2.3.0",
         "@accordproject/concerto-util": "2.3.0",
         "ajv": "8.10.0",
         "ajv-formats": "2.1.1",
