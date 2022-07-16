@@ -21,6 +21,7 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
+    "build": "peggy ./lib/parser.pegjs",
     "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {

@@ -5,7 +5,7 @@ Library for Concerto model parsing and printing using CTO syntax.
 # Installation
 
 ```
-npm install @accordproject/concerto-parser --save
+npm install @accordproject/concerto-cto --save
 ```
 
 ## License <a name="license"></a>

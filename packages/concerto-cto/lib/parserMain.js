@@ -18,14 +18,17 @@ const Parser = require('./parser');
 const ParseException = require('./parseexception');
 
 /**
- * Create decorator argument string from a metamodel
+ * Create a metamodel instance (i.e. JSON AST) object from a CTO string
  * @param {string} cto - the Concerto string
- * @param {string} [fileName] - an optional file name
- * @return {object} the string for the decorator argument
+ * @param {string | Object} [options] - an optional options parameter or filename
+ * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
+ * @param {string} [options.fileName] - when true location nodes will be skipped in the metamodel AST
+ * @return {object} the metamodel instance for the cto argument
  */
-function parse(cto, fileName) {
+function parse(cto, options) {
+    const fileName = typeof options === 'string' ? options : options?.fileName;
     try {
-        return Parser.parse(cto);
+        return Parser.parse(cto, options);
     } catch(err) {
         if(err.location && err.location.start) {
             throw new ParseException(err.message, err.location, fileName);
@@ -39,15 +42,17 @@ function parse(cto, fileName) {
 /**
  * Parses an array of model files
  * @param {string[]} files - array of cto files
+ * @param {Object} [options] - an optional options parameter
+ * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
  * @return {*} the AST / metamodel
  */
-function parseModels(files) {
+function parseModels(files, options) {
     const result = {
         $class: 'concerto.metamodel.Models',
         models: [],
     };
     files.forEach((modelFile) => {
-        let metaModel = Parser.parse(modelFile);
+        let metaModel = Parser.parse(modelFile, options);
         result.models.push(metaModel);
     });
     return result;

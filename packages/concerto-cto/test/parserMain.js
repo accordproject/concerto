@@ -54,6 +54,11 @@ describe('parser', () => {
             mm.should.deep.equal(JSON.parse(ast));
         });
     });
+
+    it('Should parse person.cto without location information', () => {
+        const mm = Parser.parse(fs.readFileSync('./test/cto/person.cto', 'utf8'), { skipLocationNodes: true });
+        mm.should.deep.equal(JSON.parse(fs.readFileSync('./test/cto/person.no-location.json', 'utf8')));
+    });
 });
 
 describe('parser-exception', () => {
