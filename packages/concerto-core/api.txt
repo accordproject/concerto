@@ -139,9 +139,9 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
-   + void newMetaModelManager() 
+   + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
-   + object modelManagerFromMetaModel() 
+   + ModelManager modelManagerFromMetaModel() 
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
@@ -237,8 +237,8 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + object loadModelManager(string[],object,boolean?,number?) 
-   + object loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
    + void constructor(object?) 

@@ -20,13 +20,12 @@ const ParseException = require('./parseexception');
 /**
  * Create a metamodel instance (i.e. JSON AST) object from a CTO string
  * @param {string} cto - the Concerto string
- * @param {string | Object} [options] - an optional options parameter or filename
- * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
- * @param {string} [options.fileName] - when true location nodes will be skipped in the metamodel AST
+ * @param {string} [fileName] - an optional file name
+ * @param {Object} [options] - an optional options parameter or filename
+ * @param {boolean} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
  * @return {object} the metamodel instance for the cto argument
  */
-function parse(cto, options) {
-    const fileName = typeof options === 'string' ? options : options?.fileName;
+function parse(cto, fileName, options) {
     try {
         return Parser.parse(cto, options);
     } catch(err) {
