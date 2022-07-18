@@ -29,9 +29,11 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 // How to create a modelfile from a cto file
-const ctoProcessFile = (name, data) => {
+const ctoProcessFile = (options) => (name, data) => {
+    // Clone individual properties to avoid options injection to Peggy.
+    const parserOptions = { skipLocationNodes: options?.skipLocationNodes };
     return {
-        ast: Parser.parse(data, name),
+        ast: Parser.parse(data, name, parserOptions),
         definitions: data,
         fileName: name,
     };
@@ -57,7 +59,7 @@ class ModelManager extends BaseModelManager {
      * @param {object} [options] - Serializer options
      */
     constructor(options) {
-        super(options, ctoProcessFile);
+        super(options, ctoProcessFile(options));
     }
 
     /**
