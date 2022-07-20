@@ -8,5 +8,4 @@ import JavaVisitor = require("./fromcto/java/javavisitor");
 import GraphQLVisitor = require("./fromcto/graphql/graphqlvisitor");
 import CSharpVisitor = require("./fromcto/csharp/csharpvisitor");
 import ODataVisitor = require("./fromcto/odata/odatavisitor");
-import MetamodelVisitor = require("./fromcto/metamodel/MetamodelVisitor");
 export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor, MetamodelVisitor };

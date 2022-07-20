@@ -51,7 +51,6 @@ function parseModels(files, options) {
         models: [],
     };
     files.forEach((modelFile) => {
-        console.warn(options);
         let metaModel = Parser.parse(modelFile, options);
         result.models.push(metaModel);
     });
