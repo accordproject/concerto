@@ -439,7 +439,7 @@ function peg$parse(input, options) {
   var peg$f1 = function(name) { return name; };
   var peg$f2 = function(first, rest) {
       return {
-        $class: "concerto.metamodel.TypeIdentifier",
+        $class: "concerto.metamodel@1.0.0.TypeIdentifier",
         name: first + rest.join("")
       };
     };
@@ -495,7 +495,7 @@ function peg$parse(input, options) {
     };
   var peg$f31 = function(pattern, flags) {
       return {
-        $class: 'concerto.metamodel.StringRegexValidator',
+        $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
         pattern,
         flags
       };
@@ -536,7 +536,7 @@ function peg$parse(input, options) {
 };
   var peg$f42 = function(type) {
     return {
-      $class: "concerto.metamodel.TypeIdentifier",
+      $class: "concerto.metamodel@1.0.0.TypeIdentifier",
       name: type.name
     }
  };
@@ -545,39 +545,39 @@ function peg$parse(input, options) {
     };
   var peg$f44 = function(idField) {
         return {
-          $class: "concerto.metamodel.IdentifiedBy",
+          $class: "concerto.metamodel@1.0.0.IdentifiedBy",
           name: idField.name
         }
     };
   var peg$f45 = function() {
         return {
-          $class: "concerto.metamodel.Identified"
+          $class: "concerto.metamodel@1.0.0.Identified"
         }
     };
   var peg$f46 = function(s) {
       return {
-      	$class: "concerto.metamodel.DecoratorString",
+      	$class: "concerto.metamodel@1.0.0.DecoratorString",
         value: s.value,
         ...buildRange(location())
       }
   };
   var peg$f47 = function(n) {
       return {
-      	$class: "concerto.metamodel.DecoratorNumber",
+      	$class: "concerto.metamodel@1.0.0.DecoratorNumber",
         value: +n,
         ...buildRange(location())
       }
   };
   var peg$f48 = function(b) {
       return {
-      	$class: "concerto.metamodel.DecoratorBoolean",
+      	$class: "concerto.metamodel@1.0.0.DecoratorBoolean",
         value: (b == "true"),
         ...buildRange(location())
       }
   };
   var peg$f49 = function(value, array) {
       return {
-          $class: "concerto.metamodel.DecoratorTypeReference",
+          $class: "concerto.metamodel@1.0.0.DecoratorTypeReference",
           type: value,
           isArray: !!array,
           ...buildRange(location())
@@ -593,7 +593,7 @@ function peg$parse(input, options) {
     };
   var peg$f52 = function(name, decoratorArgs) {
     const result = {
-      $class: "concerto.metamodel.Decorator",
+      $class: "concerto.metamodel@1.0.0.Decorator",
       name: name,
       ...buildRange(location())
     };
@@ -605,13 +605,13 @@ function peg$parse(input, options) {
   var peg$f53 = function(d) {return d;};
   var peg$f54 = function(ex) {
       return {
-        $class:   "concerto.metamodel.TypeIdentifier",
+        $class:   "concerto.metamodel@1.0.0.TypeIdentifier",
         name:     ex.name
       };
     };
   var peg$f55 = function(decorators, abstract, id, idField, classExtension, body) {
       const result = {
-        $class: "concerto.metamodel.AssetDeclaration",
+        $class: "concerto.metamodel@1.0.0.AssetDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -630,7 +630,7 @@ function peg$parse(input, options) {
     };
   var peg$f56 = function(decorators, abstract, id, idField, classExtension, body) {
       const result = {
-        $class: "concerto.metamodel.ParticipantDeclaration",
+        $class: "concerto.metamodel@1.0.0.ParticipantDeclaration",
         name:  id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -649,7 +649,7 @@ function peg$parse(input, options) {
     };
   var peg$f57 = function(decorators, abstract, id, idField, classExtension, body) {
       const result = {
-        $class: "concerto.metamodel.TransactionDeclaration",
+        $class: "concerto.metamodel@1.0.0.TransactionDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -668,7 +668,7 @@ function peg$parse(input, options) {
     };
   var peg$f58 = function(decorators, abstract, id, idField, classExtension, body) {
       const result = {
-        $class: "concerto.metamodel.EventDeclaration",
+        $class: "concerto.metamodel@1.0.0.EventDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -687,7 +687,7 @@ function peg$parse(input, options) {
     };
   var peg$f59 = function(decorators, abstract, id, idField, classExtension, body) {
       const result = {
-        $class: "concerto.metamodel.ConceptDeclaration",
+        $class: "concerto.metamodel@1.0.0.ConceptDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -730,7 +730,7 @@ function peg$parse(input, options) {
     };
   var peg$f66 = function(decorators, propertyType, array, id, d, optional) {
     	const result = {
-    		$class: "concerto.metamodel.ObjectProperty",
+    		$class: "concerto.metamodel@1.0.0.ObjectProperty",
     		name: id.name,
     		type: propertyType,
     		isArray: buildBoolean(array),
@@ -747,7 +747,7 @@ function peg$parse(input, options) {
     };
   var peg$f67 = function(decorators, array, id, d, optional) {
     	const result = {
-    		$class: "concerto.metamodel.BooleanProperty",
+    		$class: "concerto.metamodel@1.0.0.BooleanProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -763,7 +763,7 @@ function peg$parse(input, options) {
     };
   var peg$f68 = function(decorators, array, id, d, optional) {
     	const result = {
-    		$class: "concerto.metamodel.DateTimeProperty",
+    		$class: "concerto.metamodel@1.0.0.DateTimeProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -779,7 +779,7 @@ function peg$parse(input, options) {
     };
   var peg$f69 = function(decorators, array, id, d, regex, optional) {
     	const result = {
-    		$class: "concerto.metamodel.StringProperty",
+    		$class: "concerto.metamodel@1.0.0.StringProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -801,7 +801,7 @@ function peg$parse(input, options) {
   };
   var peg$f71 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel.DoubleDomainValidator'
+      $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator'
     };
     if (lower) {
       result.lower = parseFloat(lower);
@@ -813,7 +813,7 @@ function peg$parse(input, options) {
   };
   var peg$f72 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel.IntegerDomainValidator'
+      $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator'
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -825,7 +825,7 @@ function peg$parse(input, options) {
   };
   var peg$f73 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel.LongDomainValidator'
+      $class: 'concerto.metamodel@1.0.0.LongDomainValidator'
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -837,7 +837,7 @@ function peg$parse(input, options) {
   };
   var peg$f74 = function(decorators, propertyType, array, id, d, range, optional) {
     	const result = {
-    		$class: "concerto.metamodel.DoubleProperty",
+    		$class: "concerto.metamodel@1.0.0.DoubleProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -856,7 +856,7 @@ function peg$parse(input, options) {
     };
   var peg$f75 = function(decorators, propertyType, array, id, d, range, optional) {
     	const result = {
-    		$class: "concerto.metamodel.IntegerProperty",
+    		$class: "concerto.metamodel@1.0.0.IntegerProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -875,7 +875,7 @@ function peg$parse(input, options) {
     };
   var peg$f76 = function(decorators, propertyType, array, id, d, range, optional) {
     	const result = {
-    		$class: "concerto.metamodel.LongProperty",
+    		$class: "concerto.metamodel@1.0.0.LongProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -894,7 +894,7 @@ function peg$parse(input, options) {
     };
   var peg$f77 = function(decorators, id, body) {
       const result = {
-        $class: "concerto.metamodel.EnumDeclaration",
+        $class: "concerto.metamodel@1.0.0.EnumDeclaration",
         name:   id.name,
         properties:  body.declarations,
         ...buildRange(location())
@@ -912,7 +912,7 @@ function peg$parse(input, options) {
     };
   var peg$f79 = function(decorators, id) {
     	const result = {
-    		$class: "concerto.metamodel.EnumProperty",
+    		$class: "concerto.metamodel@1.0.0.EnumProperty",
     		name: id.name,
             ...buildRange(location())
     	};
@@ -923,7 +923,7 @@ function peg$parse(input, options) {
     };
   var peg$f80 = function(decorators, propertyType, array, id, optional) {
     	const result = {
-    		$class: "concerto.metamodel.RelationshipProperty",
+    		$class: "concerto.metamodel@1.0.0.RelationshipProperty",
     		name: id.name,
     		type: propertyType,
     		isArray: buildBoolean(array),
@@ -946,7 +946,7 @@ function peg$parse(input, options) {
   };
   var peg$f84 = function(ns, u) {
     	return {
-                $class: "concerto.metamodel.ImportAll",
+                $class: "concerto.metamodel@1.0.0.ImportAll",
         		    namespace: ns,
                 uri: u
         }
@@ -954,7 +954,7 @@ function peg$parse(input, options) {
   var peg$f85 = function(ns, u) {
       const { namespace, name } = fullyQualifiedName(ns);
     	return {
-          $class: "concerto.metamodel.ImportType",
+          $class: "concerto.metamodel@1.0.0.ImportType",
           name: name,
           namespace: namespace,
           uri: u
@@ -962,14 +962,14 @@ function peg$parse(input, options) {
   };
   var peg$f86 = function(ns) {
     	return {
-          $class: "concerto.metamodel.ImportAll",
+          $class: "concerto.metamodel@1.0.0.ImportAll",
         	namespace: ns
         }
   };
   var peg$f87 = function(ns) {
       const { namespace, name } = fullyQualifiedName(ns);
     	return {
-          $class: 'concerto.metamodel.ImportType',
+          $class: 'concerto.metamodel@1.0.0.ImportType',
           name: name,
           namespace: namespace
         }
@@ -979,7 +979,7 @@ function peg$parse(input, options) {
   };
   var peg$f89 = function(types, namespace) {
     	return {
-          $class: "concerto.metamodel.ImportTypes",
+          $class: "concerto.metamodel@1.0.0.ImportTypes",
           types,
           namespace
         }
@@ -989,7 +989,7 @@ function peg$parse(input, options) {
      };
   var peg$f91 = function(version, ns, imports, body) {
       const result = {
-        $class: "concerto.metamodel.Model",
+        $class: "concerto.metamodel@1.0.0.Model",
         namespace: ns,
         imports: optionalList(imports),
         declarations: optionalList(body)
@@ -10132,10 +10132,10 @@ function peg$parse(input, options) {
     }
     const start = value.start;
     const end = value.end;
-    start.$class = 'concerto.metamodel.Position';
-    end.$class = 'concerto.metamodel.Position';
+    start.$class = 'concerto.metamodel@1.0.0.Position';
+    end.$class = 'concerto.metamodel@1.0.0.Position';
     const result = {
-      $class: 'concerto.metamodel.Range',
+      $class: 'concerto.metamodel@1.0.0.Range',
       start: start,
       end: end,
     };

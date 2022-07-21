@@ -36,7 +36,7 @@ describe('Field', () => {
 
         it('should not have a validator by default', () => {
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
             });
             should.equal(f.validator, null);
@@ -45,7 +45,7 @@ describe('Field', () => {
         it('should save the incoming string validator', () => {
 
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
                 validator: {
                     pattern: '^suchValidator$',
@@ -58,7 +58,7 @@ describe('Field', () => {
         it('should save the incoming string validator (with flag)', () => {
 
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
                 validator: {
                     pattern: '^suchValidator$',
@@ -70,7 +70,7 @@ describe('Field', () => {
 
         it('should not have a default value by default', () => {
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
             });
             should.equal(f.defaultValue, null);
@@ -78,7 +78,7 @@ describe('Field', () => {
 
         it('should save the incoming default value', () => {
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
                 defaultValue: 'wowSuchDefault'
             });
@@ -87,7 +87,7 @@ describe('Field', () => {
 
         it('should not be optional by default', () => {
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
             });
             f.optional.should.equal(false);
@@ -95,7 +95,7 @@ describe('Field', () => {
 
         it('should detect if field is optional', () => {
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
                 isOptional: true
             });
@@ -107,7 +107,7 @@ describe('Field', () => {
     describe('#toString',()=>{
         it('regular toString',()=>{
             let f = new Field(mockClassDeclaration, {
-                $class: 'concerto.metamodel.StringProperty',
+                $class: 'concerto.metamodel@1.0.0.StringProperty',
                 name: 'field',
             });
             let stub = sinon.stub(f,'getFullyQualifiedTypeName');

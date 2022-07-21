@@ -238,11 +238,11 @@ class VocabularyManager {
                             'declaration': decl.getName(),
                         },
                         'decorator': {
-                            '$class': 'concerto.metamodel.Decorator',
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
                             'name': 'Term',
                             'arguments': [
                                 {
-                                    '$class': 'concerto.metamodel.DecoratorString',
+                                    '$class': 'concerto.metamodel@1.0.0.DecoratorString',
                                     'value': term
                                 },
                             ]
@@ -264,11 +264,11 @@ class VocabularyManager {
                                 'property': property.getName()
                             },
                             'decorator': {
-                                '$class': 'concerto.metamodel.Decorator',
+                                '$class': 'concerto.metamodel@1.0.0.Decorator',
                                 'name': 'Term',
                                 'arguments': [
                                     {
-                                        '$class': 'concerto.metamodel.DecoratorString',
+                                        '$class': 'concerto.metamodel@1.0.0.DecoratorString',
                                         'value': propertyTerm
                                     },
                                 ]

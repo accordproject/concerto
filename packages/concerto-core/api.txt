@@ -240,8 +240,8 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + ModelManager[] loadModelManager(string[],object,boolean?,number?) 
-   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,boolean?,number?) 
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
    + void constructor(object?,boolean?) 

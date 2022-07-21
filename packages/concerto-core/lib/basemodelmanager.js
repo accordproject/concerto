@@ -689,7 +689,7 @@ class BaseModelManager {
      */
     getAst(resolve) {
         const result = {
-            $class: 'concerto.metamodel.Models',
+            $class: 'concerto.metamodel@1.0.0.Models',
             models: [],
         };
         const modelFiles = this.getModelFiles();

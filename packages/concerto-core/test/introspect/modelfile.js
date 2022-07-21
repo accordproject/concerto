@@ -84,16 +84,16 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save any imports', () => {
             const imports = [ {
-                $class: 'concerto.metamodel.ImportType',
+                $class: 'concerto.metamodel@1.0.0.ImportType',
                 namespace: 'org.freddos',
                 name: 'Bar',
             }, {
-                $class: 'concerto.metamodel.ImportType',
+                $class: 'concerto.metamodel@1.0.0.ImportType',
                 namespace: 'org.doge',
                 name: 'Foo',
             } ];
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: 'concerto.metamodel@1.0.0.Model',
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
@@ -105,16 +105,16 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save imports with uris', () => {
             const imports = [ {
-                $class: 'concerto.metamodel.ImportType',
+                $class: 'concerto.metamodel@1.0.0.ImportType',
                 namespace: 'org.doge',
                 name:'Foo',
             }, {
-                $class: 'concerto.metamodel.ImportAll',
+                $class: 'concerto.metamodel@1.0.0.ImportAll',
                 namespace: 'org.freddos',
                 uri: 'https://freddos.org/model.cto'
             } ];
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: 'concerto.metamodel@1.0.0.Model',
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
@@ -128,7 +128,7 @@ describe('ModelFile', () => {
 
         it('should throw for an unrecognized body element', () => {
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: 'concerto.metamodel@1.0.0.Model',
                 namespace: 'org.acme',
                 declarations: [ {
                     $class: 'BlahType'

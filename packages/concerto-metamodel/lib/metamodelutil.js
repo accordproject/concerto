@@ -23,7 +23,7 @@ const metaModelAst = require('./metamodel.json');
 /**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = `namespace concerto.metamodel
+const metaModelCto = `namespace concerto.metamodel@1.0.0
 
 concept Position {
   o Integer line
@@ -241,7 +241,7 @@ function createNameTable(priorModels, metaModel) {
     imports.forEach((imp) => {
         const namespace = imp.namespace;
         const modelFile = findNamespace(priorModels, namespace);
-        if (imp.$class === 'concerto.metamodel.ImportType') {
+        if (imp.$class === 'concerto.metamodel@1.0.0.ImportType') {
             if (!findDeclaration(modelFile, imp.name)) {
                 throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
             }
@@ -285,7 +285,7 @@ function resolveName(name, table) {
  */
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
-    case 'concerto.metamodel.Model': {
+    case 'concerto.metamodel@1.0.0.Model': {
         if (metaModel.declarations) {
             metaModel.declarations.forEach((decl) => {
                 resolveTypeNames(decl, table);
@@ -293,11 +293,11 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.AssetDeclaration':
-    case 'concerto.metamodel.ConceptDeclaration':
-    case 'concerto.metamodel.EventDeclaration':
-    case 'concerto.metamodel.TransactionDeclaration':
-    case 'concerto.metamodel.ParticipantDeclaration': {
+    case 'concerto.metamodel@1.0.0.AssetDeclaration':
+    case 'concerto.metamodel@1.0.0.ConceptDeclaration':
+    case 'concerto.metamodel@1.0.0.EventDeclaration':
+    case 'concerto.metamodel@1.0.0.TransactionDeclaration':
+    case 'concerto.metamodel@1.0.0.ParticipantDeclaration': {
         if (metaModel.superType) {
             const name = metaModel.superType.name;
             metaModel.superType.namespace = resolveName(name, table);
@@ -312,7 +312,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.EnumDeclaration': {
+    case 'concerto.metamodel@1.0.0.EnumDeclaration': {
         if (metaModel.decorators) {
             metaModel.decorators.forEach((decorator) => {
                 resolveTypeNames(decorator, table);
@@ -320,9 +320,9 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.EnumProperty':
-    case 'concerto.metamodel.ObjectProperty':
-    case 'concerto.metamodel.RelationshipProperty': {
+    case 'concerto.metamodel@1.0.0.EnumProperty':
+    case 'concerto.metamodel@1.0.0.ObjectProperty':
+    case 'concerto.metamodel@1.0.0.RelationshipProperty': {
         const name = metaModel.type.name;
         metaModel.type.namespace = resolveName(name, table);
         if (metaModel.decorators) {
@@ -332,7 +332,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.Decorator': {
+    case 'concerto.metamodel@1.0.0.Decorator': {
         if (metaModel.arguments) {
             metaModel.arguments.forEach((argument) => {
                 resolveTypeNames(argument, table);
@@ -340,7 +340,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.DecoratorTypeReference': {
+    case 'concerto.metamodel@1.0.0.DecoratorTypeReference': {
         const name = metaModel.type.name;
         metaModel.type.namespace = resolveName(name, table);
     }
@@ -370,7 +370,7 @@ function resolveLocalNames(priorModels, metaModel) {
  */
 function resolveLocalNamesForAll(allModels) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: 'concerto.metamodel@1.0.0.Models',
         models: [],
     };
     allModels.models.forEach((metaModel) => {
@@ -390,13 +390,13 @@ function importFullyQualifiedNames(imp) {
     const result = [];
 
     switch (imp.$class) {
-    case 'concerto.metamodel.ImportAll':
+    case 'concerto.metamodel@1.0.0.ImportAll':
         result.push(`${imp.namespace}.*`);
         break;
-    case 'concerto.metamodel.ImportType':
+    case 'concerto.metamodel@1.0.0.ImportType':
         result.push(`${imp.namespace}.${imp.name}`);
         break;
-    case 'concerto.metamodel.ImportTypes': {
+    case 'concerto.metamodel@1.0.0.ImportTypes': {
         imp.types.forEach(type => {
             result.push(`${imp.namespace}.${type}`);
         });

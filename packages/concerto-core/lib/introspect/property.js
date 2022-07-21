@@ -68,21 +68,21 @@ class Property extends Decorated {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        if (this.ast.$class === 'concerto.metamodel.BooleanProperty') {
+        if (this.ast.$class === 'concerto.metamodel@1.0.0.BooleanProperty') {
             this.type = 'Boolean';
-        } else if (this.ast.$class === 'concerto.metamodel.StringProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.StringProperty') {
             this.type = 'String';
-        } else if (this.ast.$class === 'concerto.metamodel.IntegerProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.IntegerProperty') {
             this.type = 'Integer';
-        } else if (this.ast.$class === 'concerto.metamodel.LongProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.LongProperty') {
             this.type = 'Long';
-        } else if (this.ast.$class === 'concerto.metamodel.DoubleProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.DoubleProperty') {
             this.type = 'Double';
-        } else if (this.ast.$class === 'concerto.metamodel.DateTimeProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.DateTimeProperty') {
             this.type = 'DateTime';
-        } else if (this.ast.$class === 'concerto.metamodel.ObjectProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.ObjectProperty') {
             this.type = this.ast.type ? this.ast.type.name : null;
-        } else if (this.ast.$class === 'concerto.metamodel.RelationshipProperty') {
+        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.RelationshipProperty') {
             this.type = this.ast.type.name;
         } else {
             this.type = null;

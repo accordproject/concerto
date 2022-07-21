@@ -25,19 +25,19 @@ describe('Decorator', () => {
     let mockAssetDeclaration;
 
     const ast = {
-        $class: 'concerto.metamodel.Decorator',
+        $class: 'concerto.metamodel@1.0.0.Decorator',
         name: 'Test',
         arguments: [
             {
-                $class: 'concerto.metamodel.DecoratorString',
+                $class: 'concerto.metamodel@1.0.0.DecoratorString',
                 value:'one'
             },
             {
-                $class: 'concerto.metamodel.DecoratorString',
+                $class: 'concerto.metamodel@1.0.0.DecoratorString',
                 value:'two'
             },
             {
-                $class: 'concerto.metamodel.DecoratorString',
+                $class: 'concerto.metamodel@1.0.0.DecoratorString',
                 value:'three'
             }
         ]

@@ -31,7 +31,7 @@ const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
  */
 function updateModels(models, newModel) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: 'concerto.metamodel@1.0.0.Models',
         models: [],
     };
     const newNamespace = newModel.namespace;

@@ -22,10 +22,10 @@
 function decoratorArgFromMetaModel(mm) {
     let result = '';
     switch (mm.$class) {
-    case 'concerto.metamodel.DecoratorTypeReference':
+    case 'concerto.metamodel@1.0.0.DecoratorTypeReference':
         result += `${mm.type.name}${mm.isArray ? '[]' : ''}`;
         break;
-    case 'concerto.metamodel.DecoratorString':
+    case 'concerto.metamodel@1.0.0.DecoratorString':
         result += `"${mm.value}"`;
         break;
     default:
@@ -77,16 +77,16 @@ function propertyFromMetaModel(mm) {
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '  ');
     }
-    if (mm.$class === 'concerto.metamodel.RelationshipProperty') {
+    if (mm.$class === 'concerto.metamodel@1.0.0.RelationshipProperty') {
         result += '-->';
     } else {
         result += 'o';
     }
 
     switch (mm.$class) {
-    case 'concerto.metamodel.EnumProperty':
+    case 'concerto.metamodel@1.0.0.EnumProperty':
         break;
-    case 'concerto.metamodel.BooleanProperty':
+    case 'concerto.metamodel@1.0.0.BooleanProperty':
         result += ' Boolean';
         if (mm.defaultValue === true || mm.defaultValue === false) {
             if (mm.defaultValue) {
@@ -96,10 +96,10 @@ function propertyFromMetaModel(mm) {
             }
         }
         break;
-    case 'concerto.metamodel.DateTimeProperty':
+    case 'concerto.metamodel@1.0.0.DateTimeProperty':
         result += ' DateTime';
         break;
-    case 'concerto.metamodel.DoubleProperty':
+    case 'concerto.metamodel@1.0.0.DoubleProperty':
         result += ' Double';
         if (mm.defaultValue) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
@@ -112,7 +112,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.IntegerProperty':
+    case 'concerto.metamodel@1.0.0.IntegerProperty':
         result += ' Integer';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -123,7 +123,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.LongProperty':
+    case 'concerto.metamodel@1.0.0.LongProperty':
         result += ' Long';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -134,7 +134,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.StringProperty':
+    case 'concerto.metamodel@1.0.0.StringProperty':
         result += ' String';
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
@@ -143,13 +143,13 @@ function propertyFromMetaModel(mm) {
             validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
         }
         break;
-    case 'concerto.metamodel.ObjectProperty':
+    case 'concerto.metamodel@1.0.0.ObjectProperty':
         result += ` ${mm.type.name}`;
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }
         break;
-    case 'concerto.metamodel.RelationshipProperty':
+    case 'concerto.metamodel@1.0.0.RelationshipProperty':
         result += ` ${mm.type.name}`;
         break;
     }
@@ -180,27 +180,27 @@ function declFromMetaModel(mm) {
         result += 'abstract ';
     }
     switch (mm.$class) {
-    case 'concerto.metamodel.AssetDeclaration':
+    case 'concerto.metamodel@1.0.0.AssetDeclaration':
         result += `asset ${mm.name} `;
         break;
-    case 'concerto.metamodel.ConceptDeclaration':
+    case 'concerto.metamodel@1.0.0.ConceptDeclaration':
         result += `concept ${mm.name} `;
         break;
-    case 'concerto.metamodel.EventDeclaration':
+    case 'concerto.metamodel@1.0.0.EventDeclaration':
         result += `event ${mm.name} `;
         break;
-    case 'concerto.metamodel.ParticipantDeclaration':
+    case 'concerto.metamodel@1.0.0.ParticipantDeclaration':
         result += `participant ${mm.name} `;
         break;
-    case 'concerto.metamodel.TransactionDeclaration':
+    case 'concerto.metamodel@1.0.0.TransactionDeclaration':
         result += `transaction ${mm.name} `;
         break;
-    case 'concerto.metamodel.EnumDeclaration':
+    case 'concerto.metamodel@1.0.0.EnumDeclaration':
         result += `enum ${mm.name} `;
         break;
     }
     if (mm.identified) {
-        if (mm.identified.$class === 'concerto.metamodel.IdentifiedBy') {
+        if (mm.identified.$class === 'concerto.metamodel@1.0.0.IdentifiedBy') {
             result += `identified by ${mm.identified.name} `;
         } else {
             result += 'identified ';
@@ -234,15 +234,15 @@ function toCTO(metaModel) {
         result += '\n';
         metaModel.imports.forEach((imp) => {
             switch(imp.$class) {
-            case 'concerto.metamodel.ImportType':
-            case 'concerto.metamodel.ImportTypeFrom':
+            case 'concerto.metamodel@1.0.0.ImportType':
+            case 'concerto.metamodel@1.0.0.ImportTypeFrom':
                 result += `\nimport ${imp.namespace}.${imp.name}`;
                 break;
-            case 'concerto.metamodel.ImportAll':
-            case 'concerto.metamodel.ImportAllFrom':
+            case 'concerto.metamodel@1.0.0.ImportAll':
+            case 'concerto.metamodel@1.0.0.ImportAllFrom':
                 result += `\nimport ${imp.namespace}.*`;
                 break;
-            case 'concerto.metamodel.ImportTypes':
+            case 'concerto.metamodel@1.0.0.ImportTypes':
                 result += `\nimport {${imp.types.join(',')}} from ${imp.namespace}`;
                 break;
             default:

@@ -1,116 +1,116 @@
 {
-    "$class": "concerto.metamodel.Model",
+    "$class": "concerto.metamodel@1.0.0.Model",
     "namespace": "concerto@1.0.0",
     "imports": [],
     "declarations": [
         {
-            "$class": "concerto.metamodel.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Concept",
             "isAbstract": true,
             "properties": [],
             "location": {
-                "$class": "concerto.metamodel.Range",
+                "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
                     "offset": 19,
                     "line": 2,
                     "column": 1,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
                     "offset": 46,
                     "line": 2,
                     "column": 28,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 }
             }
         },
         {
-            "$class": "concerto.metamodel.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Asset",
             "isAbstract": true,
             "properties": [],
             "location": {
-                "$class": "concerto.metamodel.Range",
+                "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
                     "offset": 47,
                     "line": 3,
                     "column": 1,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
                     "offset": 83,
                     "line": 3,
                     "column": 37,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 }
             },
             "identified": {
-                "$class": "concerto.metamodel.Identified"
+                "$class": "concerto.metamodel@1.0.0.Identified"
             }
         },
         {
-            "$class": "concerto.metamodel.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Participant",
             "isAbstract": true,
             "properties": [],
             "location": {
-                "$class": "concerto.metamodel.Range",
+                "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
                     "offset": 84,
                     "line": 4,
                     "column": 1,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
                     "offset": 126,
                     "line": 4,
                     "column": 43,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 }
             },
             "identified": {
-                "$class": "concerto.metamodel.Identified"
+                "$class": "concerto.metamodel@1.0.0.Identified"
             }
         },
         {
-            "$class": "concerto.metamodel.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Transaction",
             "isAbstract": true,
             "properties": [],
             "location": {
-                "$class": "concerto.metamodel.Range",
+                "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
                     "offset": 127,
                     "line": 5,
                     "column": 1,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
                     "offset": 158,
                     "line": 5,
                     "column": 32,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 }
             }
         },
         {
-            "$class": "concerto.metamodel.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Event",
             "isAbstract": true,
             "properties": [],
             "location": {
-                "$class": "concerto.metamodel.Range",
+                "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
                     "offset": 159,
                     "line": 6,
                     "column": 1,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
                     "offset": 184,
                     "line": 6,
                     "column": 26,
-                    "$class": "concerto.metamodel.Position"
+                    "$class": "concerto.metamodel@1.0.0.Position"
                 }
             }
         }

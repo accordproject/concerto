@@ -1,9 +1,9 @@
 {
-   "$class": "concerto.metamodel.Model",
+   "$class": "concerto.metamodel@1.0.0.Model",
    "namespace": "test.person@1.0.0-alpha.0+build1",
    "imports": [
       {
-         "$class": "concerto.metamodel.ImportTypes",
+         "$class": "concerto.metamodel@1.0.0.ImportTypes",
          "namespace": "test",
          "types": [
             "Foo",
@@ -13,49 +13,49 @@
    ],
    "declarations": [
       {
-         "$class": "concerto.metamodel.ParticipantDeclaration",
+         "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
          "name": "Person",
          "isAbstract": false,
          "properties": [
             {
-               "$class": "concerto.metamodel.StringProperty",
+               "$class": "concerto.metamodel@1.0.0.StringProperty",
                "name": "name",
                "isArray": false,
                "isOptional": false,
                "location": {
-                  "$class": "concerto.metamodel.Range",
+                  "$class": "concerto.metamodel@1.0.0.Range",
                   "start": {
                      "offset": 114,
                      "line": 6,
                      "column": 3,
-                     "$class": "concerto.metamodel.Position"
+                     "$class": "concerto.metamodel@1.0.0.Position"
                   },
                   "end": {
                      "offset": 128,
                      "line": 7,
                      "column": 1,
-                     "$class": "concerto.metamodel.Position"
+                     "$class": "concerto.metamodel@1.0.0.Position"
                   }
                }
             }
          ],
          "location": {
-            "$class": "concerto.metamodel.Range",
+            "$class": "concerto.metamodel@1.0.0.Range",
             "start": {
                "offset": 72,
                "line": 5,
                "column": 1,
-               "$class": "concerto.metamodel.Position"
+               "$class": "concerto.metamodel@1.0.0.Position"
             },
             "end": {
                "offset": 129,
                "line": 7,
                "column": 2,
-               "$class": "concerto.metamodel.Position"
+               "$class": "concerto.metamodel@1.0.0.Position"
             }
          },
          "identified": {
-            "$class": "concerto.metamodel.IdentifiedBy",
+            "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
             "name": "name"
          }
       }

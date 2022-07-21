@@ -47,7 +47,7 @@ function parse(cto, fileName, options) {
  */
 function parseModels(files, options) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: 'concerto.metamodel@1.0.0.Models',
         models: [],
     };
     files.forEach((modelFile) => {
