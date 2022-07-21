@@ -216,7 +216,7 @@ class BaseModelManager {
      * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
-     * @return {Object} The newly added model file (internal).
+     * @return {ModelFile} The newly added model file (internal).
      */
     addModel(modelInput, cto, fileName, disableValidation) {
         const NAME = 'addModel';

@@ -23,9 +23,15 @@
 #
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
-
-Version 2.0.2 {68b00a6339526cf561cc11f457b76d66}
+Version 2.3.0 {f6300638c3612c5ea7208e5cc0c7e512} 2022-07-21
 - Versioned namespaces
+
+Version 2.3.0 {28dd70fd922b3b8b491216661796b95b} 2022-06-21
+- Fix TypeScript types for MetaModel
+- Fix TypeScript types for ModelManager
+
+Version 2.2.0 {3d3fc2a6b3cd623b807ca0c4fc53680d} 2022-06-01
+- Fix TypeScript types for ModelLoader
 
 Version 2.0.2 {c9e7b234a5786db232520137be0a0fa8} 22-05-25
 - Add ClassDeclaration.getDirectSubclasses for use in visitor

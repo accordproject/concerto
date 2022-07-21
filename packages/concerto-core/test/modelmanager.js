@@ -173,6 +173,19 @@ describe('ModelManager', () => {
             res.should.equal(mf1);
         });
 
+        it('should add a model file with parsing options', () => {
+            const modelManagerWithOptions = new ModelManager({ skipLocationNodes: true });
+            Util.addComposerModel(modelManagerWithOptions);
+
+            modelManagerWithOptions.addCTOModel(`namespace org.acme
+        concept Bar {
+            o Foo foo
+        }`, 'internal.cto', true);
+
+            const ast = modelManagerWithOptions.modelFiles['org.acme'].ast;
+            JSON.stringify(ast).should.not.contain('location');
+        });
+
         it('should return error for duplicate namespaces for a string', () => {
             modelManager.addCTOModel(modelBase);
             let mf1 = sinon.createStubInstance(ModelFile);

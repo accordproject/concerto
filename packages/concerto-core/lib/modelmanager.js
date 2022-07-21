@@ -20,10 +20,20 @@ const BaseModelManager = require('./basemodelmanager');
 
 const debug = require('debug')('concerto:BaseModelManager');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./introspect/modelfile');
+}
+/* eslint-enable no-unused-vars */
+
 // How to create a modelfile from a cto file
-const ctoProcessFile = (name, data) => {
+const ctoProcessFile = (options) => (name, data) => {
+    // Clone individual properties to avoid options injection to Peggy.
+    const parserOptions = { skipLocationNodes: options?.skipLocationNodes };
     return {
-        ast: Parser.parse(data, name),
+        ast: Parser.parse(data, name, parserOptions),
         definitions: data,
         fileName: name,
     };
@@ -50,7 +60,7 @@ class ModelManager extends BaseModelManager {
      * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      */
     constructor(options) {
-        super(options, ctoProcessFile);
+        super(options, ctoProcessFile(options));
     }
 
     /**
@@ -60,7 +70,7 @@ class ModelManager extends BaseModelManager {
      * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
-     * @return {Object} The newly added model file (internal).
+     * @return {ModelFile} The newly added model file (internal).
      */
     addCTOModel(cto, fileName, disableValidation) {
         const NAME = 'addCTOModel';

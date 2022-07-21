@@ -100,9 +100,9 @@ declare class BaseModelManager {
      * @param {string} [fileName] - an optional file name to associate with the model file
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @throws {IllegalModelException}
-     * @return {Object} The newly added model file (internal).
+     * @return {ModelFile} The newly added model file (internal).
      */
-    addModel(modelInput: any, cto?: string, fileName?: string, disableValidation?: boolean): any;
+    addModel(modelInput: any, cto?: string, fileName?: string, disableValidation?: boolean): ModelFile;
     /**
      * Updates a Concerto file (as a string) on the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the

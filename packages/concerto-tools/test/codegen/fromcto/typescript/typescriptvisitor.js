@@ -303,6 +303,63 @@ describe('TypescriptVisitor', function () {
 
             acceptSpy.withArgs(typescriptVisitor, param).calledTwice.should.be.ok;
         });
+
+        it('should write lines for the imports of direct subclasses that are not in the same namespace', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockSubclassDeclaration1 = sinon.createStubInstance(ClassDeclaration);
+            mockSubclassDeclaration1.isClassDeclaration.returns(true);
+            mockSubclassDeclaration1.getProperties.returns([]);
+            mockSubclassDeclaration1.getNamespace.returns('org.acme.subclasses');
+            mockSubclassDeclaration1.getName.returns('ImportedDirectSubclass');
+
+            let mockSubclassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
+            mockSubclassDeclaration2.isClassDeclaration.returns(true);
+            mockSubclassDeclaration2.getProperties.returns([]);
+            mockSubclassDeclaration2.getNamespace.returns('org.acme.subclasses');
+            mockSubclassDeclaration2.getName.returns('ImportedDirectSubclass2');
+
+            let mockSubclassDeclaration3 = sinon.createStubInstance(ClassDeclaration);
+            mockSubclassDeclaration3.isClassDeclaration.returns(true);
+            mockSubclassDeclaration3.getProperties.returns([]);
+            mockSubclassDeclaration3.getNamespace.returns('org.acme');
+            mockSubclassDeclaration3.getName.returns('LocalDirectSubclass');
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getProperties.returns([]);
+            mockClassDeclaration.getDirectSubclasses.returns([
+                mockSubclassDeclaration1, mockSubclassDeclaration2, mockSubclassDeclaration3
+            ]);
+            mockClassDeclaration.accept = acceptSpy;
+
+            let mockModelManager = sinon.createStubInstance(ModelManager);
+            mockModelManager.isModelManager.returns(true);
+
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.isModelFile.returns(true);
+            mockModelFile.getNamespace.returns('org.acme');
+            mockModelFile.getAllDeclarations.returns([
+                mockClassDeclaration,
+                mockSubclassDeclaration2
+            ]);
+            mockModelFile.getImports.returns([]);
+            mockModelFile.getModelManager.returns(mockModelManager);
+
+            typescriptVisitor.visitModelFile(mockModelFile, param);
+
+            param.fileWriter.openFile.withArgs('org.acme.ts').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '/* eslint-disable @typescript-eslint/no-empty-interface */']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '// Generated code for namespace: org.acme']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '\n// imports']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '\n// Warning: Beware of circular dependencies when modifying these imports']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'import type {\n\tIImportedDirectSubclass,\n\tIImportedDirectSubclass2\n} from \'./org.acme.subclasses\';']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '\n// interfaces']);
+            param.fileWriter.closeFile.calledOnce.should.be.ok;
+
+            acceptSpy.withArgs(typescriptVisitor, param).calledOnce.should.be.ok;
+        });
     });
 
     describe('visitEnumDeclaration', () => {
@@ -500,6 +557,59 @@ describe('TypescriptVisitor', function () {
             typescriptVisitor.visitField(mockField, param);
 
             param.fileWriter.writeLine.withArgs(1, 'Bob: IPerson[];').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for field name who is decorated with union, setting type to be the union type', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('unionTest');
+            mockField.getType.returns('Person');
+            mockField.getDecorators.returns([{
+                getName: () => {
+                    return 'union';
+                }
+            }]);
+
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
+            typescriptVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.withArgs(1, 'unionTest: PersonUnion;').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for field name who is decorated with literal, setting type to be the enum value', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('literalTest');
+            mockField.getType.returns('EnumType');
+            mockField.getDecorators.returns([{
+                getName: () => {
+                    return 'literal';
+                },
+                getArguments: () => {
+                    return 'MyEnumValue';
+                }
+            }]);
+
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+
+            mockModelManager.getType.returns(mockClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockClassDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockClassDeclaration);
+            typescriptVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.withArgs(1, 'literalTest = EnumType.MyEnumValue;').calledOnce.should.be.ok;
         });
     });
 

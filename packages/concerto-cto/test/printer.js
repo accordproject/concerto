@@ -33,7 +33,7 @@ function getCTOFiles() {
     const files = fs.readdirSync('./test/cto');
 
     files.forEach(function(file) {
-        if(file.endsWith('.json')) {
+        if(file.endsWith('.json') && !file.endsWith('.no-location.json')) {
             const ctoFile = file.split('.').slice(0, -1).join('.') + '.cto';
             const content = fs.readFileSync('./test/cto/' + ctoFile, 'utf8');
             const ast = fs.readFileSync('./test/cto/' + file, 'utf8');

@@ -558,21 +558,21 @@ function peg$parse(input, options) {
       return {
       	$class: "concerto.metamodel.DecoratorString",
         value: s.value,
-        location: buildRange(location())
+        ...buildRange(location())
       }
   };
   var peg$f47 = function(n) {
       return {
       	$class: "concerto.metamodel.DecoratorNumber",
         value: +n,
-        location: buildRange(location())
+        ...buildRange(location())
       }
   };
   var peg$f48 = function(b) {
       return {
       	$class: "concerto.metamodel.DecoratorBoolean",
         value: (b == "true"),
-        location: buildRange(location())
+        ...buildRange(location())
       }
   };
   var peg$f49 = function(value, array) {
@@ -580,7 +580,7 @@ function peg$parse(input, options) {
           $class: "concerto.metamodel.DecoratorTypeReference",
           type: value,
           isArray: !!array,
-          location: buildRange(location())
+          ...buildRange(location())
       }
   };
   var peg$f50 = function(d) {return d;};
@@ -595,7 +595,7 @@ function peg$parse(input, options) {
     const result = {
       $class: "concerto.metamodel.Decorator",
       name: name,
-      location: buildRange(location())
+      ...buildRange(location())
     };
     if (decoratorArgs) {
       result.arguments = decoratorArgs;
@@ -615,7 +615,7 @@ function peg$parse(input, options) {
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -634,7 +634,7 @@ function peg$parse(input, options) {
         name:  id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -653,7 +653,7 @@ function peg$parse(input, options) {
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -672,7 +672,7 @@ function peg$parse(input, options) {
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -691,7 +691,7 @@ function peg$parse(input, options) {
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (classExtension) {
         result.superType = classExtension;
@@ -725,7 +725,7 @@ function peg$parse(input, options) {
       return {
         type: "ClassDeclarationBody",
         declarations: optionalList(decls),
-        location: buildRange(location())
+        ...buildRange(location())
       };
     };
   var peg$f66 = function(decorators, propertyType, array, id, d, optional) {
@@ -735,7 +735,7 @@ function peg$parse(input, options) {
     		type: propertyType,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -751,7 +751,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = (d === 'true' ? true : false);
@@ -767,7 +767,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -783,7 +783,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = d;
@@ -841,7 +841,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = parseFloat(d);
@@ -860,7 +860,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (d) {
         result.defaultValue = parseInt(d);
@@ -879,7 +879,7 @@ function peg$parse(input, options) {
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	}
       if (d) {
         result.defaultValue = parseInt(d);
@@ -897,7 +897,7 @@ function peg$parse(input, options) {
         $class: "concerto.metamodel.EnumDeclaration",
         name:   id.name,
         properties:  body.declarations,
-        location: buildRange(location())
+        ...buildRange(location())
       };
       if (decorators.length > 0) {
         result.decorators = decorators;
@@ -914,7 +914,7 @@ function peg$parse(input, options) {
     	const result = {
     		$class: "concerto.metamodel.EnumProperty",
     		name: id.name,
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (decorators.length > 0) {
         result.decorators = decorators;
@@ -928,7 +928,7 @@ function peg$parse(input, options) {
     		type: propertyType,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
-        location: buildRange(location())
+            ...buildRange(location())
     	};
       if (decorators.length > 0) {
         result.decorators = decorators;
@@ -10127,6 +10127,9 @@ function peg$parse(input, options) {
   }
 
   function buildRange(value) {
+    if (options?.skipLocationNodes) {
+        return undefined;
+    }
     const start = value.start;
     const end = value.end;
     start.$class = 'concerto.metamodel.Position';
@@ -10139,7 +10142,7 @@ function peg$parse(input, options) {
     if (value.source && value.source[0]) {
       result.source = value.source[0];
     }
-    return result;
+    return { location: result };
   }
 
   function fullyQualifiedName(value) {

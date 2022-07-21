@@ -1,11 +1,10 @@
-# Concerto Parser
+# Concerto Types
+TypeScript types for built in [Concerto](https://github.com/accordproject/concerto/) model files.
 
-Library for Concerto model parsing and printing using CTO syntax.
-
-# Installation
+## Install
 
 ```
-npm install @accordproject/concerto-cto --save
+npm install @accordproject/concerto-types --save
 ```
 
 ## License <a name="license"></a>
