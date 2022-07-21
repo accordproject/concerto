@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,processFile?) 
+   + void constructor(object?,boolean?,processFile?) 
    + boolean isModelManager() 
    + boolean isVersionedNamespacesStrict() 
    + Object accept(Object,Object) 
@@ -244,9 +244,10 @@ class ModelLoader {
    + object loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?) 
+   + void constructor(object?,boolean?) 
    + Object addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
+   + object getRootModel() 
 class SecurityException extends BaseException {
    + void constructor(string) 
 }

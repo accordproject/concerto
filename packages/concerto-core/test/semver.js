@@ -26,7 +26,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
-describe.only('Semantic Versioning', () => {
+describe('Semantic Versioning', () => {
     let sandbox;
     let modelManager;
     let personCto;

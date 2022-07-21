@@ -26,7 +26,7 @@ const ModelFile = require('./introspect/modelfile');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
-const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
+const { getRootModel } = require('./rootmodel');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -108,8 +108,20 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
+        // iff we allow unversioned namespaces we should *also*
+        // allow people to import from concerto@1.0.0 namespace
+        const {rootModelAst, rootModelCto, rootModelFile} = getRootModel(true);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
-        this.addModelFile(m, rootModelCto, rootModelFile);
+
+        if(this.versionedNamespacesStrict ) {
+            this.addModelFile(m, rootModelCto, rootModelFile);
+        }
+        else {
+            this.addModelFile(m, rootModelCto, rootModelFile);
+            const unversioned = getRootModel(false);
+            const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
+            this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile);
+        }
     }
 
     /**
@@ -394,7 +406,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || ns !== 'concerto@1.0.0') {
+            if(includeConcertoNamespace || (ns !== 'concerto@1.0.0' && ns !== 'concerto')) {
                 result.push(this.modelFiles[ns]);
             }
         }

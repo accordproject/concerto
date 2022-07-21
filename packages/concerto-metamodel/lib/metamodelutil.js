@@ -206,7 +206,7 @@ concept Models {
  * @return {*} the model
  */
 function findNamespace(priorModels, namespace) {
-  return priorModels.models.find((thisModel) => thisModel.namespace === namespace);
+    return priorModels.models.find((thisModel) => thisModel.namespace === namespace);
 }
 
 /**
@@ -216,7 +216,7 @@ function findNamespace(priorModels, namespace) {
  * @return {*} the declaration
  */
 function findDeclaration(thisModel, name) {
-  return thisModel.declarations.find((thisDecl) => thisDecl.name === name);
+    return thisModel.declarations.find((thisDecl) => thisDecl.name === name);
 }
 
 /**
@@ -226,42 +226,42 @@ function findDeclaration(thisModel, name) {
  * @return {object} mapping from a name to its namespace
  */
 function createNameTable(priorModels, metaModel) {
-  const concertoNs = 'concerto@1.0.0';
+    const concertoNs = 'concerto@1.0.0';
 
-  const table = {
-    'Concept': concertoNs,
-    'Asset': concertoNs,
-    'Participant': concertoNs,
-    'Transaction ': concertoNs,
-    'Event': concertoNs,
-  };
+    const table = {
+        'Concept': concertoNs,
+        'Asset': concertoNs,
+        'Participant': concertoNs,
+        'Transaction ': concertoNs,
+        'Event': concertoNs,
+    };
 
-  // First list the imported names in order (overriding as we go along)
-  const imports = metaModel.imports;
-  imports.forEach((imp) => {
-    const namespace = imp.namespace;
-    const modelFile = findNamespace(priorModels, namespace);
-    if (imp.$class === 'concerto.metamodel.ImportType') {
-      if (!findDeclaration(modelFile, imp.name)) {
-        throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
-      }
-      table[imp.name] = namespace;
-    } else {
-      const decls = modelFile.declarations;
-      decls.forEach((decl) => {
-        table[decl.name] = namespace;
-      });
-    }
-  });
-
-  // Then add the names local to this metaModel (overriding as we go along)
-  if (metaModel.declarations) {
-    metaModel.declarations.forEach((decl) => {
-      table[decl.name] = metaModel.namespace;
+    // First list the imported names in order (overriding as we go along)
+    const imports = metaModel.imports;
+    imports.forEach((imp) => {
+        const namespace = imp.namespace;
+        const modelFile = findNamespace(priorModels, namespace);
+        if (imp.$class === 'concerto.metamodel.ImportType') {
+            if (!findDeclaration(modelFile, imp.name)) {
+                throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
+            }
+            table[imp.name] = namespace;
+        } else {
+            const decls = modelFile.declarations;
+            decls.forEach((decl) => {
+                table[decl.name] = namespace;
+            });
+        }
     });
-  }
 
-  return table;
+    // Then add the names local to this metaModel (overriding as we go along)
+    if (metaModel.declarations) {
+        metaModel.declarations.forEach((decl) => {
+            table[decl.name] = metaModel.namespace;
+        });
+    }
+
+    return table;
 }
 
 /**
@@ -271,10 +271,10 @@ function createNameTable(priorModels, metaModel) {
  * @return {string} the namespace for that name
  */
 function resolveName(name, table) {
-  if (!table[name]) {
-    throw new Error(`Name ${name} not found`);
-  }
-  return table[name];
+    if (!table[name]) {
+        throw new Error(`Name ${name} not found`);
+    }
+    return table[name];
 }
 
 /**
@@ -284,69 +284,69 @@ function resolveName(name, table) {
  * @return {object} the metamodel with fully qualified names
  */
 function resolveTypeNames(metaModel, table) {
-  switch (metaModel.$class) {
+    switch (metaModel.$class) {
     case 'concerto.metamodel.Model': {
-      if (metaModel.declarations) {
-        metaModel.declarations.forEach((decl) => {
-          resolveTypeNames(decl, table);
-        });
-      }
+        if (metaModel.declarations) {
+            metaModel.declarations.forEach((decl) => {
+                resolveTypeNames(decl, table);
+            });
+        }
     }
-      break;
+        break;
     case 'concerto.metamodel.AssetDeclaration':
     case 'concerto.metamodel.ConceptDeclaration':
     case 'concerto.metamodel.EventDeclaration':
     case 'concerto.metamodel.TransactionDeclaration':
     case 'concerto.metamodel.ParticipantDeclaration': {
-      if (metaModel.superType) {
-        const name = metaModel.superType.name;
-        metaModel.superType.namespace = resolveName(name, table);
-      }
-      metaModel.properties.forEach((property) => {
-        resolveTypeNames(property, table);
-      });
-      if (metaModel.decorators) {
-        metaModel.decorators.forEach((decorator) => {
-          resolveTypeNames(decorator, table);
+        if (metaModel.superType) {
+            const name = metaModel.superType.name;
+            metaModel.superType.namespace = resolveName(name, table);
+        }
+        metaModel.properties.forEach((property) => {
+            resolveTypeNames(property, table);
         });
-      }
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
     }
-      break;
+        break;
     case 'concerto.metamodel.EnumDeclaration': {
-      if (metaModel.decorators) {
-        metaModel.decorators.forEach((decorator) => {
-          resolveTypeNames(decorator, table);
-        });
-      }
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
     }
-      break;
+        break;
     case 'concerto.metamodel.EnumProperty':
     case 'concerto.metamodel.ObjectProperty':
     case 'concerto.metamodel.RelationshipProperty': {
-      const name = metaModel.type.name;
-      metaModel.type.namespace = resolveName(name, table);
-      if (metaModel.decorators) {
-        metaModel.decorators.forEach((decorator) => {
-          resolveTypeNames(decorator, table);
-        });
-      }
+        const name = metaModel.type.name;
+        metaModel.type.namespace = resolveName(name, table);
+        if (metaModel.decorators) {
+            metaModel.decorators.forEach((decorator) => {
+                resolveTypeNames(decorator, table);
+            });
+        }
     }
-      break;
+        break;
     case 'concerto.metamodel.Decorator': {
-      if (metaModel.arguments) {
-        metaModel.arguments.forEach((argument) => {
-          resolveTypeNames(argument, table);
-        });
-      }
+        if (metaModel.arguments) {
+            metaModel.arguments.forEach((argument) => {
+                resolveTypeNames(argument, table);
+            });
+        }
     }
-      break;
+        break;
     case 'concerto.metamodel.DecoratorTypeReference': {
-      const name = metaModel.type.name;
-      metaModel.type.namespace = resolveName(name, table);
+        const name = metaModel.type.name;
+        metaModel.type.namespace = resolveName(name, table);
     }
-      break;
-  }
-  return metaModel;
+        break;
+    }
+    return metaModel;
 }
 
 /**
@@ -356,11 +356,11 @@ function resolveTypeNames(metaModel, table) {
  * @return {object} the resolved metamodel
  */
 function resolveLocalNames(priorModels, metaModel) {
-  const result = JSON.parse(JSON.stringify(metaModel));
-  const nameTable = createNameTable(priorModels, metaModel);
-  // This adds the fully qualified names to the same object
-  resolveTypeNames(result, nameTable);
-  return result;
+    const result = JSON.parse(JSON.stringify(metaModel));
+    const nameTable = createNameTable(priorModels, metaModel);
+    // This adds the fully qualified names to the same object
+    resolveTypeNames(result, nameTable);
+    return result;
 }
 
 /**
@@ -369,15 +369,15 @@ function resolveLocalNames(priorModels, metaModel) {
  * @return {object} the resolved metamodel
  */
 function resolveLocalNamesForAll(allModels) {
-  const result = {
-    $class: 'concerto.metamodel.Models',
-    models: [],
-  };
-  allModels.models.forEach((metaModel) => {
-    const resolved = resolveLocalNames(allModels, metaModel);
-    result.models.push(resolved);
-  });
-  return result;
+    const result = {
+        $class: 'concerto.metamodel.Models',
+        models: [],
+    };
+    allModels.models.forEach((metaModel) => {
+        const resolved = resolveLocalNames(allModels, metaModel);
+        result.models.push(resolved);
+    });
+    return result;
 }
 
 /**
@@ -387,25 +387,25 @@ function resolveLocalNamesForAll(allModels) {
  * @private
  */
 function importFullyQualifiedNames(imp) {
-  const result = [];
+    const result = [];
 
-  switch (imp.$class) {
+    switch (imp.$class) {
     case 'concerto.metamodel.ImportAll':
-      result.push(`${imp.namespace}.*`);
-      break;
+        result.push(`${imp.namespace}.*`);
+        break;
     case 'concerto.metamodel.ImportType':
-      result.push(`${imp.namespace}.${imp.name}`);
-      break;
+        result.push(`${imp.namespace}.${imp.name}`);
+        break;
     case 'concerto.metamodel.ImportTypes': {
-      imp.types.forEach(type => {
-        result.push(`${imp.namespace}.${type}`);
-      })
+        imp.types.forEach(type => {
+            result.push(`${imp.namespace}.${type}`);
+        });
     }
-      break;
+        break;
     default:
-      throw new Error(`Unrecognized imports ${imp.$class}`);
-  }
-  return result;
+        throw new Error(`Unrecognized imports ${imp.$class}`);
+    }
+    return result;
 }
 
 /**
@@ -415,23 +415,23 @@ function importFullyQualifiedNames(imp) {
  * @private
  */
 function getExternalImports(ast) {
-  const uriMap = {};
-  if (ast.imports) {
-    ast.imports.forEach((imp) => {
-      const fqns = importFullyQualifiedNames(imp);
-      if (imp.uri) {
-        uriMap[fqns[0]] = imp.uri;
-      }
-    });
-  }
-  return uriMap;
+    const uriMap = {};
+    if (ast.imports) {
+        ast.imports.forEach((imp) => {
+            const fqns = importFullyQualifiedNames(imp);
+            if (imp.uri) {
+                uriMap[fqns[0]] = imp.uri;
+            }
+        });
+    }
+    return uriMap;
 }
 
 module.exports = {
-  metaModelAst,
-  metaModelCto,
-  resolveLocalNames,
-  resolveLocalNamesForAll,
-  importFullyQualifiedNames,
-  getExternalImports,
+    metaModelAst,
+    metaModelCto,
+    resolveLocalNames,
+    resolveLocalNamesForAll,
+    importFullyQualifiedNames,
+    getExternalImports,
 };

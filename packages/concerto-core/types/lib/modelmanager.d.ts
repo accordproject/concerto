@@ -16,9 +16,12 @@ declare class ModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - Serializer options
+     * @param {object} [options] - ModelManager options, also passed to Serializer
+     * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      */
-    constructor(options?: object);
+    constructor(options?: {
+        versionedNamespacesStrict?: boolean;
+    });
     /**
      * Adds a model in CTO format to the ModelManager.
      * This is a convenience function equivalent to `addModel` but useful since it avoids having to copy the input CTO.

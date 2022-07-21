@@ -23,10 +23,10 @@ export function resolveLocalNamesForAll(allModels: any): object;
 /**
  * Return the fully qualified name for an import
  * @param {object} imp - the import
- * @return {string} - the fully qualified name for that import
+ * @return {string[]} - the fully qualified names for that import
  * @private
  */
-export function importFullyQualifiedName(imp: object): string;
+export function importFullyQualifiedNames(imp: object): string[];
 /**
  * Returns an object that maps from the import declarations to the URIs specified
  * @param {*} ast - the model ast

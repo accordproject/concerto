@@ -189,7 +189,7 @@ class ODataVisitor {
          * We therefore have to ensure that the $identifier key doesn't override any
          * user defined keys.
          */
-        if (classDeclaration.getNamespace() !== 'concerto@1.0.0') {
+        if (classDeclaration.getNamespace() !== 'concerto@1.0.0' && classDeclaration.getNamespace() !== 'concerto') {
             if (classDeclaration.isIdentified() &&
                 classDeclaration.getOwnProperty(classDeclaration.getIdentifierFieldName())) {
                 parameters.fileWriter.writeLine(3, `<Key><PropertyRef Name="${classDeclaration.getIdentifierFieldName()}"/></Key>`);

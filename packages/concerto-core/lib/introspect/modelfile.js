@@ -121,7 +121,7 @@ class ModelFile {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile() {
-        return this.namespace === 'concerto@1.0.0';
+        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
     }
 
     /**

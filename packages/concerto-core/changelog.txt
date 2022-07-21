@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 2.0.2 {157eb13855e9d33e594b29783e69e170}
+Version 2.0.2 {68b00a6339526cf561cc11f457b76d66}
 - Versioned namespaces
 
 Version 2.0.2 {c9e7b234a5786db232520137be0a0fa8} 22-05-25
