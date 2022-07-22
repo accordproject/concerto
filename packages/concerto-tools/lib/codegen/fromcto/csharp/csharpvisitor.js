@@ -78,10 +78,11 @@ class CSharpVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
+        const { mangledNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
         parameters.fileWriter.writeLine(0, 'using System.Text.Json.Serialization;');
-        parameters.fileWriter.writeLine(0, `namespace ${modelFile.getNamespace()} {`);
+        parameters.fileWriter.writeLine(0, `namespace ${mangledNamespace} {`);
 
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports

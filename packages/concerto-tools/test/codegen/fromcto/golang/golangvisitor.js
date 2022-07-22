@@ -198,7 +198,7 @@ describe('GoLangVisitor', function () {
 
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
             mockModelFileDefinition.isModelFile.returns(true);
-            mockModelFileDefinition.getNamespace.returns;
+            mockModelFileDefinition.getNamespace.returns('org.acme');
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
             },
@@ -223,7 +223,7 @@ describe('GoLangVisitor', function () {
 
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
             mockModelFileDefinition.isModelFile.returns(true);
-            mockModelFileDefinition.getNamespace.returns;
+            mockModelFileDefinition.getNamespace.returns('org.acme');
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
             },

@@ -612,7 +612,8 @@ class ModelFile {
      */
     enforceImportVersioning(imp) {
         if(this.getModelManager().isVersionedNamespacesStrict()) {
-            if(imp.namespace.indexOf('@') < 0) {
+            const nsInfo = ModelUtil.parseNamespace(imp.namespace);
+            if(!nsInfo.version) {
                 throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'versionedNamespacesStrict' option on Model Manager is set.`);
             }
         }
@@ -624,16 +625,9 @@ class ModelFile {
      * @private
      */
     fromAst(ast) {
-        if(ast.namespace.indexOf('@') >= 0) {
-            const parts = ast.namespace.split('@');
-            // this.namespace = parts[0];
-            this.namespace = ast.namespace;
-            this.version = parts[1];
-        }
-        else {
-            this.namespace = ast.namespace;
-            this.version = null;
-        }
+        const nsInfo = ModelUtil.parseNamespace(ast.namespace);
+        this.namespace = ast.namespace;
+        this.version = nsInfo.version;
 
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];

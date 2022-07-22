@@ -149,4 +149,37 @@ describe('ModelUtil', function () {
 
     });
 
+    describe('#parseNamespace', function() {
+        it('valid, no version', function() {
+            const nsInfo = ModelUtil.parseNamespace('org.acme');
+            nsInfo.name.should.equal('org.acme');
+            nsInfo.mangledNamespace.should.equal('org.acme');
+        });
+
+        it('valid, with version', function() {
+            const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.0');
+            nsInfo.name.should.equal('org.acme');
+            nsInfo.mangledNamespace.should.equal('org.acme_1.0.0');
+            nsInfo.version.should.equal('1.0.0');
+            nsInfo.versionParsed.major.should.equal(1);
+        });
+
+        it('invalid', function() {
+            (() => {
+                ModelUtil.parseNamespace(null);
+            }).should.throw(/Namespace is null/);
+        });
+
+        it('invalid', function() {
+            (() => {
+                ModelUtil.parseNamespace('org.acme@1.0.0@2.3');
+            }).should.throw(/Invalid namespace/);
+        });
+
+        it('invalid version', function() {
+            (() => {
+                ModelUtil.parseNamespace('org.acme@1.1.2+.123');
+            }).should.throw(/Invalid namespace/);
+        });
+    });
 });
