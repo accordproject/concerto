@@ -139,9 +139,18 @@ class Commands {
      * @param {string} output the output directory
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
+     * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
+     * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
      */
     static async compile(target, ctoFiles, output, options) {
-        const modelManager = await ModelLoader.loadModelManager(ctoFiles, options);
+        const modelManagerOptions = { offline: options && options.offline };
+        const visitorOptions = {
+            useSystemTextJson: options && options.useSystemTextJson,
+            useNewtonsoftJson: options && options.useNewtonsoftJson,
+            namespacePrefix: options && options.namespacePrefix
+        };
+
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);
 
         let visitor = null;
 
@@ -176,7 +185,7 @@ class Commands {
         }
 
         if(visitor) {
-            let parameters = {};
+            let parameters = visitorOptions;
             parameters.fileWriter = new FileWriter(output);
             modelManager.accept(visitor, parameters);
             return `Compiled to ${target} in '${output}'.`;
@@ -206,9 +215,11 @@ class Commands {
      * @param {boolean} resolve - whether to resolve the names
      * @param {boolean} all - whether to import all models
      * @param {string} outputPath to an output file
-     * @param {string} the metamodel
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.excludeLineLocations] - Exclude line location metadata in the metamodel instance
+     * @return {string} the metamodel
      */
-    static async parse(ctoFiles, resolve = false, all = false, outputPath) {
+    static async parse(ctoFiles, resolve = false, all = false, outputPath, options) {
         let result;
 
         const allFiles = [];
@@ -217,7 +228,7 @@ class Commands {
             allFiles.unshift(content);
         });
 
-        const allModels = Parser.parseModels(allFiles);
+        const allModels = Parser.parseModels(allFiles, { skipLocationNodes: options && options.excludeLineLocations});
         if (resolve) {
             // First resolve external models
             const allResolvedModels = await External.resolveExternal(allModels, {}, null);
@@ -236,7 +247,7 @@ class Commands {
         }
         if (outputPath) {
             Logger.info('Creating file: ' + outputPath);
-            fs.writeFileSync(outputPath, JSON.stringify(result));
+            fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
             return;
         }
         return JSON.stringify(result);
