@@ -78,15 +78,37 @@ class CSharpVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
+        // If no serlialization library is specified we default to the .NET one.
+        // However, we also allow both options to be specified
+        if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
+            parameters.useSystemTextJson = true;
+        }
+
+        // Ensure non-empty string, that is separated by a period
+        let namespacePrefix = parameters.namespacePrefix ? parameters.namespacePrefix : '';
+        if (namespacePrefix !== '' && namespacePrefix.slice(-1) !== '.'){
+            namespacePrefix += '.';
+        }
+
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
-        parameters.fileWriter.writeLine(0, 'using System.Text.Json.Serialization;');
-        parameters.fileWriter.writeLine(0, `namespace ${modelFile.getNamespace()} {`);
+
+        if (parameters.useSystemTextJson){
+            parameters.fileWriter.writeLine(0, 'using System.Text.Json.Serialization;');
+            parameters.fileWriter.writeLine(0, 'using Concerto.Serialization;');
+        }
+
+        if (parameters.useNewtonsoftJson){
+            parameters.fileWriter.writeLine(0, 'using NewtonsoftJson = Newtonsoft.Json;');
+            parameters.fileWriter.writeLine(0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;');
+        }
+
+        parameters.fileWriter.writeLine(0, `namespace ${namespacePrefix}${modelFile.getNamespace()} {`);
 
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
             .forEach(namespace => {
-                parameters.fileWriter.writeLine(1, `using ${namespace};`);
+                parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
             });
 
         modelFile.getAllDeclarations().forEach((decl) => {
@@ -107,8 +129,13 @@ class CSharpVisitor {
      * @private
      */
     visitEnumDeclaration(enumDeclaration, parameters) {
+        // If no serlialization library is specified we default to the .NET one.
+        // However, we also allow both options to be specified
+        if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
+            parameters.useSystemTextJson = true;
+        }
 
-        parameters.fileWriter.writeLine(1, 'enum ' + enumDeclaration.getName() + ' {');
+        parameters.fileWriter.writeLine(1, 'public enum ' + enumDeclaration.getName() + ' {');
 
         enumDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
@@ -126,6 +153,11 @@ class CSharpVisitor {
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
+        // If no serlialization library is specified we default to the .NET one.
+        // However, we also allow both options to be specified
+        if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
+            parameters.useSystemTextJson = true;
+        }
 
         let superType = ' ';
         if (classDeclaration.getSuperType()) {
@@ -137,8 +169,13 @@ class CSharpVisitor {
             abstract = 'abstract ';
         }
 
-        parameters.fileWriter.writeLine(1, `${abstract}class ${classDeclaration.getName()}${superType}{`);
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public new', '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`));
+        // classDeclaration has any other subtypes
+        if (classDeclaration.getAssignableClassDeclarations()?.length > 1 && parameters.useNewtonsoftJson){
+            parameters.fileWriter.writeLine(1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]');
+        }
+        parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
+        const override = classDeclaration.getFullyQualifiedName() === 'concerto.Concept' ? 'virtual' : 'override';
+        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
@@ -154,13 +191,24 @@ class CSharpVisitor {
      * @private
      */
     visitField(field, parameters) {
+        // If no serlialization library is specified we default to the .NET one.
+        // However, we also allow both options to be specified
+        if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
+            parameters.useSystemTextJson = true;
+        }
+
         let array = '';
 
         if (field.isArray()) {
             array = '[]';
         }
 
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', field.getName(),field.getType(),array, '{ get; set; }'));
+        let nullableType = '';
+        if(field.isOptional() && field.isTypeEnum()){
+            nullableType = '?';
+        }
+
+        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', field.getName(),field.getType()+nullableType,array, '{ get; set; }', parameters));
         return null;
     }
 
@@ -184,6 +232,12 @@ class CSharpVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
+        // If no serlialization library is specified we default to the .NET one.
+        // However, we also allow both options to be specified
+        if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
+            parameters.useSystemTextJson = true;
+        }
+
         let array = '';
 
         if (relationship.isArray()) {
@@ -191,7 +245,7 @@ class CSharpVisitor {
         }
 
         // we export all relationships
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', relationship.getName(),relationship.getType(),array, '{ get; set; }'));
+        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', relationship.getName(),relationship.getType(),array, '{ get; set; }', parameters));
         return null;
     }
 
@@ -202,19 +256,42 @@ class CSharpVisitor {
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
      * @param {string} getset the getter and setter declaration
-    * @returns {string} the property declaration
+     * @param {Object} [parameters]  - the parameter
+     * @returns {string} the property declaration
      */
-    toCSharpProperty(access, propertyName, propertyType, array, getset) {
+    toCSharpProperty(access, propertyName, propertyType, array, getset, parameters) {
         const type = this.toCSharpType(propertyType);
 
+        const reservedKeywords = ['abstract','as','base','bool','break','byte','case','catch','char','checked',
+            'class','const','continue','decimal','default','delegate','do','double','else',
+            'enum','event','explicit','extern','false','finally','fixed','float','for','foreach',
+            'goto','if','implicit','in','int','interface','internal','is','lock','long','namespace',
+            'new','null','object','operator','out','override','params','private','protected','public',
+            'readonly','ref','return','sbyte','sealed','short','sizeof','stackalloc','static',
+            'string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked',
+            'unsafe','ushort','using','virtual','void','volatile','while'];
+
+        let modifiedPropertyName = propertyName;
+        let annotations = '';
+
         if(propertyName.startsWith('$')) {
-            const newName = '_' + propertyName.substring(1);
-            return `[JsonPropertyName("${propertyName}")]
-      ${access} ${type}${array} ${newName} ${getset}`;
+            modifiedPropertyName = '_' + propertyName.substring(1);
         }
-        else {
-            return `${access} ${type}${array} ${propertyName} ${getset}`;
+
+        if(reservedKeywords.includes(propertyName)) {
+            modifiedPropertyName = '_' + propertyName;
         }
+
+        if (modifiedPropertyName !== propertyName){
+            if (parameters?.useSystemTextJson){
+                annotations += `[JsonPropertyName("${propertyName}")]\n\t\t`;
+            }
+            if (parameters?.useNewtonsoftJson){
+                annotations += `[NewtonsoftJson.JsonProperty("${propertyName}")]\n\t\t`;
+            }
+        }
+
+        return `${annotations}${access} ${type}${array} ${modifiedPropertyName} ${getset}`;
     }
 
     /**
