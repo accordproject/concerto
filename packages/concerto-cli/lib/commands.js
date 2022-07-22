@@ -206,9 +206,11 @@ class Commands {
      * @param {boolean} resolve - whether to resolve the names
      * @param {boolean} all - whether to import all models
      * @param {string} outputPath to an output file
-     * @param {string} the metamodel
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.excludeLineLocations] - Exclude line location metadata in the metamodel instance
+     * @return {string} the metamodel
      */
-    static async parse(ctoFiles, resolve = false, all = false, outputPath) {
+    static async parse(ctoFiles, resolve = false, all = false, outputPath, options) {
         let result;
 
         const allFiles = [];
@@ -217,7 +219,7 @@ class Commands {
             allFiles.unshift(content);
         });
 
-        const allModels = Parser.parseModels(allFiles);
+        const allModels = Parser.parseModels(allFiles, { skipLocationNodes: options && options.excludeLineLocations});
         if (resolve) {
             // First resolve external models
             const allResolvedModels = await External.resolveExternal(allModels, {}, null);
@@ -236,7 +238,7 @@ class Commands {
         }
         if (outputPath) {
             Logger.info('Creating file: ' + outputPath);
-            fs.writeFileSync(outputPath, JSON.stringify(result));
+            fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
             return;
         }
         return JSON.stringify(result);

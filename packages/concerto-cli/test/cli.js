@@ -244,6 +244,12 @@ describe('cicero-cli', () => {
             const result = JSON.parse(await Commands.parse([contractFile], true, true));
             result.should.deep.equal(expected);
         });
+
+        it('should transform cto to metamodel without location info', async () => {
+            const contractFile = path.resolve(__dirname, 'models/contract.cto');
+            const result = JSON.parse(await Commands.parse([contractFile], true, true, null, { excludeLineLocations: true }));
+            JSON.stringify(result).should.not.contain('location');
+        });
     });
 
     describe('#print', async () => {

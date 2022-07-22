@@ -166,8 +166,16 @@ require('yargs')
             describe: 'path to the output file',
             type: 'string'
         });
+        yargs.option('excludeLineLocations', {
+            describe: 'Exclude file line location metadata from metamodel instance',
+            type: 'boolean',
+            default: false
+        });
     }, (argv) => {
-        return Commands.parse(argv.model, argv.resolve, argv.all, argv.output)
+        const options = {};
+        options.excludeLineLocations = argv.excludeLineLocations;
+
+        return Commands.parse(argv.model, argv.resolve, argv.all, argv.output, options)
             .then((result) => {
                 if (result) {
                     Logger.info(result);
