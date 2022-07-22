@@ -12,5 +12,5 @@
  * limitations under the License.
  */
 
-export * from './generated/concerto';
-export * from './generated/concerto.metamodel';
+export * from './generated/concerto@1.0.0';
+export * from './generated/concerto.metamodel@1.0.0';
