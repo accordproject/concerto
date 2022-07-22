@@ -84,6 +84,12 @@ class CSharpVisitor {
             parameters.useSystemTextJson = true;
         }
 
+        // Ensure non-empty string, that is separated by a period
+        let namespacePrefix = parameters.namespacePrefix ? parameters.namespacePrefix : '';
+        if (namespacePrefix !== '' && namespacePrefix.slice(-1) !== '.'){
+            namespacePrefix += '.';
+        }
+
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
 
@@ -97,12 +103,12 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;');
         }
 
-        parameters.fileWriter.writeLine(0, `namespace Concerto.Models.${modelFile.getNamespace()} {`);
+        parameters.fileWriter.writeLine(0, `namespace ${namespacePrefix}${modelFile.getNamespace()} {`);
 
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
             .forEach(namespace => {
-                parameters.fileWriter.writeLine(1, `using Concerto.Models.${namespace};`);
+                parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
             });
 
         modelFile.getAllDeclarations().forEach((decl) => {
@@ -278,10 +284,10 @@ class CSharpVisitor {
 
         if (modifiedPropertyName !== propertyName){
             if (parameters?.useSystemTextJson){
-                annotations += `[JsonPropertyName("${propertyName}")]\n\t`;
+                annotations += `[JsonPropertyName("${propertyName}")]\n\t\t`;
             }
             if (parameters?.useNewtonsoftJson){
-                annotations += `[NewtonsoftJson.JsonProperty("${propertyName}")]\n\t`;
+                annotations += `[NewtonsoftJson.JsonProperty("${propertyName}")]\n\t\t`;
             }
         }
 

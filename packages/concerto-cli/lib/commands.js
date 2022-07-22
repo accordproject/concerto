@@ -146,7 +146,8 @@ class Commands {
         const modelManagerOptions = { offline: options && options.offline };
         const visitorOptions = {
             useSystemTextJson: options && options.useSystemTextJson,
-            useNewtonsoftJson: options && options.useNewtonsoftJson
+            useNewtonsoftJson: options && options.useNewtonsoftJson,
+            namespacePrefix: options && options.namespacePrefix
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);
