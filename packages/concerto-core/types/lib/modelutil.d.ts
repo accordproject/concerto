@@ -23,12 +23,21 @@ declare class ModelUtil {
      */
     private static getNamespace;
     /**
+     * Parses a potentially versioned namespace into
+     * its name and version parts. The version of the namespace
+     * (if present) is parsed using semver.parse.
+     * @param {string} ns the namespace to parse
+     * @returns {object} the result of parsing: an object with properties: name,
+     * escapedNamespace, version and versionParsed
+     */
+    static parseNamespace(ns: string): object;
+    /**
      * Return the fully qualified name for an import
      * @param {object} imp - the import
-     * @return {string} - the fully qualified name for that import
+     * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    private static importFullyQualifiedName;
+    private static importFullyQualifiedNames;
     /**
      * Returns true if the type is a primitive type
      * @param {string} typeName - the name of the type

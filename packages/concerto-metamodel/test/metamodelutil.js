@@ -83,3 +83,42 @@ describe('MetaModel (Car - wrong extends)', () => {
         });
     });
 });
+
+describe('importFullyQualifiedNames', () => {
+
+    describe('#ImportAll', () => {
+        it('should return imports', async () => {
+            const ast = {
+                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                namespace: 'test'
+            };
+            const result = MetaModelUtil.importFullyQualifiedNames(ast);
+            result.should.deep.equal(['test.*']);
+        });
+    });
+
+    describe('#ImportType', () => {
+        it('should return imports', async () => {
+            const ast = {
+                $class: 'concerto.metamodel@1.0.0.ImportType',
+                namespace: 'test',
+                name: 'Foo'
+            };
+            const result = MetaModelUtil.importFullyQualifiedNames(ast);
+            result.should.deep.equal(['test.Foo']);
+        });
+    });
+
+    describe('#ImportTypes', () => {
+        it('should return imports', async () => {
+            const ast = {
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'test',
+                types: ['Foo', 'Bar']
+            };
+            const result = MetaModelUtil.importFullyQualifiedNames(ast);
+            result.should.deep.equal(['test.Foo', 'test.Bar']);
+        });
+    });
+
+});

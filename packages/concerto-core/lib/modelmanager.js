@@ -56,7 +56,8 @@ class ModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - Serializer options
+     * @param {object} [options] - ModelManager options, also passed to Serializer
+     * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      */
     constructor(options) {
         super(options, ctoProcessFile(options));

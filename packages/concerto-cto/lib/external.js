@@ -21,7 +21,7 @@ const { DefaultFileLoader, FileDownloader }  = require('@accordproject/concerto-
 const debug = require('debug')('concerto:ModelManager');
 
 const Parser = require('./parser');
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
+const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
  * Update models with a new model
@@ -31,7 +31,7 @@ const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
  */
 function updateModels(models, newModel) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
     const newNamespace = newModel.namespace;

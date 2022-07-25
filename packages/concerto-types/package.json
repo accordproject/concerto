@@ -58,8 +58,9 @@
             ".nyc-output",
             "out",
             ".tern-project",
+            "./generated/concerto.metamodel@1.0.0.ts",
             "./generated/concerto.ts",
-            "./generated/concerto.metamodel.ts"
+            "./generated/concerto@1.0.0.ts"
         ],
         "file_type_method": "EXCLUDE",
         "file_types": [

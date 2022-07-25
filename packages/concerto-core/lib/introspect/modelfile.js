@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const packageJson = require('../../package.json');
 const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
@@ -64,6 +66,7 @@ class ModelFile {
         this.importUriMap = {};
         this.fileName = 'UNKNOWN';
         this.concertoVersion = null;
+        this.version = null;
 
         if(!ast || typeof ast !== 'object') {
             throw new Error('ModelFile expects a Concerto model AST as input.');
@@ -107,11 +110,20 @@ class ModelFile {
     }
 
     /**
+     * Returns the semantic version
+     * @returns {string} the semantic version or null if the namespace for the model file is
+     * unversioned
+     */
+    getVersion() {
+        return this.version;
+    }
+
+    /**
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile() {
-        return this.namespace === 'concerto';
+        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
     }
 
     /**
@@ -173,7 +185,11 @@ class ModelFile {
      * @return {string[]} The array of imports for this ModelFile
      */
     getImports() {
-        return this.imports.map(ModelUtil.importFullyQualifiedName);
+        let result = [];
+        this.imports.forEach( imp => {
+            result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
+        });
+        return result;
     }
 
     /**
@@ -185,22 +201,21 @@ class ModelFile {
     validate() {
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
-        this.imports.forEach((imp) => {
-            const importName = ModelUtil.importFullyQualifiedName(imp);
-            const importNamespace = imp.namespace;
+        this.getImports().forEach((importFqn) => {
+            const importNamespace = ModelUtil.getNamespace(importFqn);
+            const importShortName = ModelUtil.getShortName(importFqn);
             const modelFile = this.getModelManager().getModelFile(importNamespace);
             if (!modelFile) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
                 throw new IllegalModelException(formatter({
-                    type: importName
+                    type: importFqn
                 }), this);
             }
-            if (imp.$class === 'concerto.metamodel.ImportAll') {
+            if (importFqn.endsWith('*')) {
                 // This is a wildcard import, org.acme.*
                 // Doesn't matter if 0 or 100 types in the namespace.
                 return;
             }
-            const importShortName = imp.name;
             if (!modelFile.isLocalType(importShortName)) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
                 throw new IllegalModelException(formatter({
@@ -593,63 +608,59 @@ class ModelFile {
     }
 
     /**
+     * Verifies that an import is versioned if the versionedNamespacesStrict
+     * option has been set on the Model Manager
+     * @param {*} imp - the import to validate
+     */
+    enforceImportVersioning(imp) {
+        if(this.getModelManager().isVersionedNamespacesStrict()) {
+            const nsInfo = ModelUtil.parseNamespace(imp.namespace);
+            if(!nsInfo.version) {
+                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'versionedNamespacesStrict' option on Model Manager is set.`);
+            }
+        }
+    }
+
+    /**
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser
      * @private
      */
     fromAst(ast) {
+        const nsInfo = ModelUtil.parseNamespace(ast.namespace);
         this.namespace = ast.namespace;
+        this.version = nsInfo.version;
+
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];
 
-        if(this.namespace !== 'concerto') {
+        if(!this.isSystemModelFile()) {
             imports.push(
                 {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Concept',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Asset',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Transaction',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Participant',
-                }
-            );
-            imports.push(
-                {
-                    $class: 'concerto.metamodel.ImportType',
-                    namespace: 'concerto',
-                    name: 'Event',
+                    $class: `${MetaModelNamespace}.ImportTypes`,
+                    namespace: 'concerto@1.0.0',
+                    types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
                 }
             );
         }
 
         this.imports = imports;
         this.imports.forEach((imp) => {
-            const fqn = ModelUtil.importFullyQualifiedName(imp);
-            if (imp.$class === 'concerto.metamodel.ImportAll') {
+            this.enforceImportVersioning(imp);
+            switch(imp.$class) {
+            case `${MetaModelNamespace}.ImportAll`:
                 this.importWildcardNamespaces.push(imp.namespace);
-            } else {
-                this.importShortNames.set(imp.name, fqn);
+                break;
+            case `${MetaModelNamespace}.ImportTypes`:
+                imp.types.forEach( type => {
+                    this.importShortNames.set(type, `${imp.namespace}.${type}`);
+                });
+                break;
+            default:
+                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
             }
             if(imp.uri) {
-                this.importUriMap[fqn] = imp.uri;
+                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
             }
         });
 
@@ -662,50 +673,50 @@ class ModelFile {
             // Make sure to clone since we may add super type
             let thing = Object.assign({}, ast.declarations[n]);
 
-            if(thing.$class === 'concerto.metamodel.AssetDeclaration') {
+            if(thing.$class === `${MetaModelNamespace}.AssetDeclaration`) {
                 // Default super type for asset
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Asset',
                     };
                 }
                 this.declarations.push( new AssetDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel.TransactionDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.TransactionDeclaration`) {
                 // Default super type for transaction
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Transaction',
                     };
                 }
                 this.declarations.push( new TransactionDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel.EventDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.EventDeclaration`) {
                 // Default super type for event
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Event',
                     };
                 }
                 this.declarations.push( new EventDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel.ParticipantDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.ParticipantDeclaration`) {
                 // Default super type for participant
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Participant',
                     };
                 }
                 this.declarations.push( new ParticipantDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel.EnumDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.EnumDeclaration`) {
                 this.declarations.push( new EnumDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel.ConceptDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
             }
             else {

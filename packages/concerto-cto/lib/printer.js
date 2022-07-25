@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 /**
  * Create decorator argument string from a metamodel
  * @param {object} mm - the metamodel
@@ -22,10 +24,10 @@
 function decoratorArgFromMetaModel(mm) {
     let result = '';
     switch (mm.$class) {
-    case 'concerto.metamodel.DecoratorTypeReference':
+    case `${MetaModelNamespace}.DecoratorTypeReference`:
         result += `${mm.type.name}${mm.isArray ? '[]' : ''}`;
         break;
-    case 'concerto.metamodel.DecoratorString':
+    case `${MetaModelNamespace}.DecoratorString`:
         result += `"${mm.value}"`;
         break;
     default:
@@ -77,16 +79,16 @@ function propertyFromMetaModel(mm) {
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '  ');
     }
-    if (mm.$class === 'concerto.metamodel.RelationshipProperty') {
+    if (mm.$class === `${MetaModelNamespace}.RelationshipProperty`) {
         result += '-->';
     } else {
         result += 'o';
     }
 
     switch (mm.$class) {
-    case 'concerto.metamodel.EnumProperty':
+    case `${MetaModelNamespace}.EnumProperty`:
         break;
-    case 'concerto.metamodel.BooleanProperty':
+    case `${MetaModelNamespace}.BooleanProperty`:
         result += ' Boolean';
         if (mm.defaultValue === true || mm.defaultValue === false) {
             if (mm.defaultValue) {
@@ -96,10 +98,10 @@ function propertyFromMetaModel(mm) {
             }
         }
         break;
-    case 'concerto.metamodel.DateTimeProperty':
+    case `${MetaModelNamespace}.DateTimeProperty`:
         result += ' DateTime';
         break;
-    case 'concerto.metamodel.DoubleProperty':
+    case `${MetaModelNamespace}.DoubleProperty`:
         result += ' Double';
         if (mm.defaultValue) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
@@ -112,7 +114,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.IntegerProperty':
+    case `${MetaModelNamespace}.IntegerProperty`:
         result += ' Integer';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -123,7 +125,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.LongProperty':
+    case `${MetaModelNamespace}.LongProperty`:
         result += ' Long';
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
@@ -134,7 +136,7 @@ function propertyFromMetaModel(mm) {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
-    case 'concerto.metamodel.StringProperty':
+    case `${MetaModelNamespace}.StringProperty`:
         result += ' String';
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
@@ -143,13 +145,13 @@ function propertyFromMetaModel(mm) {
             validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
         }
         break;
-    case 'concerto.metamodel.ObjectProperty':
+    case `${MetaModelNamespace}.ObjectProperty`:
         result += ` ${mm.type.name}`;
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }
         break;
-    case 'concerto.metamodel.RelationshipProperty':
+    case `${MetaModelNamespace}.RelationshipProperty`:
         result += ` ${mm.type.name}`;
         break;
     }
@@ -180,27 +182,27 @@ function declFromMetaModel(mm) {
         result += 'abstract ';
     }
     switch (mm.$class) {
-    case 'concerto.metamodel.AssetDeclaration':
+    case `${MetaModelNamespace}.AssetDeclaration`:
         result += `asset ${mm.name} `;
         break;
-    case 'concerto.metamodel.ConceptDeclaration':
+    case `${MetaModelNamespace}.ConceptDeclaration`:
         result += `concept ${mm.name} `;
         break;
-    case 'concerto.metamodel.EventDeclaration':
+    case `${MetaModelNamespace}.EventDeclaration`:
         result += `event ${mm.name} `;
         break;
-    case 'concerto.metamodel.ParticipantDeclaration':
+    case `${MetaModelNamespace}.ParticipantDeclaration`:
         result += `participant ${mm.name} `;
         break;
-    case 'concerto.metamodel.TransactionDeclaration':
+    case `${MetaModelNamespace}.TransactionDeclaration`:
         result += `transaction ${mm.name} `;
         break;
-    case 'concerto.metamodel.EnumDeclaration':
+    case `${MetaModelNamespace}.EnumDeclaration`:
         result += `enum ${mm.name} `;
         break;
     }
     if (mm.identified) {
-        if (mm.identified.$class === 'concerto.metamodel.IdentifiedBy') {
+        if (mm.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
             result += `identified by ${mm.identified.name} `;
         } else {
             result += 'identified ';
@@ -233,11 +235,21 @@ function toCTO(metaModel) {
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';
         metaModel.imports.forEach((imp) => {
-            let name = '*';
-            if (imp.$class === 'concerto.metamodel.ImportType') {
-                name = imp.name;
+            switch(imp.$class) {
+            case `${MetaModelNamespace}.ImportType`:
+            case `${MetaModelNamespace}.ImportTypeFrom`:
+                result += `\nimport ${imp.namespace}.${imp.name}`;
+                break;
+            case `${MetaModelNamespace}.ImportAll`:
+            case `${MetaModelNamespace}.ImportAllFrom`:
+                result += `\nimport ${imp.namespace}.*`;
+                break;
+            case `${MetaModelNamespace}.ImportTypes`:
+                result += `\nimport {${imp.types.join(',')}} from ${imp.namespace}`;
+                break;
+            default:
+                throw new Error('Unrecognized import');
             }
-            result += `\nimport ${imp.namespace}.${name}`;
             if (imp.uri) {
                 result += ` from ${imp.uri}`;
             }

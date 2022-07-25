@@ -2,8 +2,9 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,processFile?) 
+   + void constructor(object?,boolean?,processFile?) 
    + boolean isModelManager() 
+   + boolean isVersionedNamespacesStrict() 
    + Object accept(Object,Object) 
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(ModelFile,string?,string?,boolean?) throws IllegalModelException
@@ -145,6 +146,7 @@ class Introspector {
 class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
+   + string getVersion() 
    + Boolean isSystemModelFile() 
    + boolean isExternal() 
    + ModelManager getModelManager() 
@@ -169,6 +171,7 @@ class ModelFile {
    + object getAst() 
    + string getConcertoVersion() 
    + void isCompatibleVersion() 
+   + void enforceImportVersioning(imp) 
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
@@ -237,13 +240,14 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + ModelManager[] loadModelManager(string[],object,boolean?,number?) 
-   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,boolean?,number?) 
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?) 
+   + void constructor(object?,boolean?) 
    + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
+   + object getRootModel() 
 class SecurityException extends BaseException {
    + void constructor(string) 
 }

@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
+const semver = require('semver');
 const Globalize = require('./globalize');
 
 /**
@@ -64,13 +66,45 @@ class ModelUtil {
     }
 
     /**
+     * Parses a potentially versioned namespace into
+     * its name and version parts. The version of the namespace
+     * (if present) is parsed using semver.parse.
+     * @param {string} ns the namespace to parse
+     * @returns {object} the result of parsing: an object with properties: name,
+     * escapedNamespace, version and versionParsed
+     */
+    static parseNamespace(ns) {
+        if(!ns) {
+            throw new Error('Namespace is null or undefined.');
+        }
+
+        const parts = ns.split('@');
+        if(parts.length > 2) {
+            throw new Error(`Invalid namespace ${ns}`);
+        }
+
+        if(parts.length === 2) {
+            if(!semver.valid(parts[1])) {
+                throw new Error(`Invalid namespace ${ns}`);
+            }
+        }
+
+        return {
+            name: parts[0],
+            escapedNamespace: ns.replace('@', '_'),
+            version: parts.length > 1 ? parts[1] : null,
+            versionParsed: parts.length > 1 ? semver.parse(parts[1]) : null
+        };
+    }
+
+    /**
      * Return the fully qualified name for an import
      * @param {object} imp - the import
-     * @return {string} - the fully qualified name for that import
+     * @return {string[]} - the fully qualified names for that import
      * @private
      */
-    static importFullyQualifiedName(imp) {
-        return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
+    static importFullyQualifiedNames(imp) {
+        return MetaModelUtil.importFullyQualifiedNames(imp);
     }
 
     /**

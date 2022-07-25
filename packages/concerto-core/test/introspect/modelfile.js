@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
 const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
@@ -84,51 +86,51 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save any imports', () => {
             const imports = [ {
-                $class: 'concerto.metamodel.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.freddos',
                 name: 'Bar',
             }, {
-                $class: 'concerto.metamodel.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.doge',
                 name: 'Foo',
             } ];
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
             const imports = [ {
-                $class: 'concerto.metamodel.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.doge',
                 name:'Foo',
             }, {
-                $class: 'concerto.metamodel.ImportAll',
+                $class: `${MetaModelNamespace}.ImportAll`,
                 namespace: 'org.freddos',
                 uri: 'https://freddos.org/model.cto'
             } ];
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto.Concept', 'concerto.Asset', 'concerto.Transaction', 'concerto.Participant', 'concerto.Event']);
+            mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
             mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
         it('should throw for an unrecognized body element', () => {
             const ast = {
-                $class: 'concerto.metamodel.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 declarations: [ {
                     $class: 'BlahType'

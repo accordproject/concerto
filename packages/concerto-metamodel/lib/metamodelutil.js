@@ -21,9 +21,13 @@
 const metaModelAst = require('./metamodel.json');
 
 /**
+ * The namespace for the metamodel
+ */
+const MetaModelNamespace = 'concerto.metamodel@1.0.0';
+/**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = `namespace concerto.metamodel
+const metaModelCto = `namespace ${MetaModelNamespace}
 
 concept Position {
   o Integer line
@@ -186,6 +190,10 @@ concept ImportType extends Import {
   o String name
 }
 
+concept ImportTypes extends Import {
+  o String[] types
+}
+
 concept Model {
   o String namespace
   o String sourceUri optional
@@ -226,12 +234,13 @@ function findDeclaration(thisModel, name) {
  * @return {object} mapping from a name to its namespace
  */
 function createNameTable(priorModels, metaModel) {
+    const concertoNs = 'concerto@1.0.0';
     const table = {
-        'Concept': 'concerto',
-        'Asset': 'concerto',
-        'Participant': 'concerto',
-        'Transaction ': 'concerto',
-        'Event': 'concerto',
+        'Concept': concertoNs,
+        'Asset': concertoNs,
+        'Participant': concertoNs,
+        'Transaction ': concertoNs,
+        'Event': concertoNs,
     };
 
     // First list the imported names in order (overriding as we go along)
@@ -239,7 +248,7 @@ function createNameTable(priorModels, metaModel) {
     imports.forEach((imp) => {
         const namespace = imp.namespace;
         const modelFile = findNamespace(priorModels, namespace);
-        if (imp.$class === 'concerto.metamodel.ImportType') {
+        if (imp.$class === `${MetaModelNamespace}.ImportType`) {
             if (!findDeclaration(modelFile, imp.name)) {
                 throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
             }
@@ -283,7 +292,7 @@ function resolveName(name, table) {
  */
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
-    case 'concerto.metamodel.Model': {
+    case `${MetaModelNamespace}.Model`: {
         if (metaModel.declarations) {
             metaModel.declarations.forEach((decl) => {
                 resolveTypeNames(decl, table);
@@ -291,11 +300,11 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.AssetDeclaration':
-    case 'concerto.metamodel.ConceptDeclaration':
-    case 'concerto.metamodel.EventDeclaration':
-    case 'concerto.metamodel.TransactionDeclaration':
-    case 'concerto.metamodel.ParticipantDeclaration': {
+    case `${MetaModelNamespace}.AssetDeclaration`:
+    case `${MetaModelNamespace}.ConceptDeclaration`:
+    case `${MetaModelNamespace}.EventDeclaration`:
+    case `${MetaModelNamespace}.TransactionDeclaration`:
+    case `${MetaModelNamespace}.ParticipantDeclaration`: {
         if (metaModel.superType) {
             const name = metaModel.superType.name;
             metaModel.superType.namespace = resolveName(name, table);
@@ -310,7 +319,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.EnumDeclaration': {
+    case `${MetaModelNamespace}.EnumDeclaration`: {
         if (metaModel.decorators) {
             metaModel.decorators.forEach((decorator) => {
                 resolveTypeNames(decorator, table);
@@ -318,9 +327,9 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.EnumProperty':
-    case 'concerto.metamodel.ObjectProperty':
-    case 'concerto.metamodel.RelationshipProperty': {
+    case `${MetaModelNamespace}.EnumProperty`:
+    case `${MetaModelNamespace}.ObjectProperty`:
+    case `${MetaModelNamespace}.RelationshipProperty`: {
         const name = metaModel.type.name;
         metaModel.type.namespace = resolveName(name, table);
         if (metaModel.decorators) {
@@ -330,7 +339,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.Decorator': {
+    case `${MetaModelNamespace}.Decorator`: {
         if (metaModel.arguments) {
             metaModel.arguments.forEach((argument) => {
                 resolveTypeNames(argument, table);
@@ -338,7 +347,7 @@ function resolveTypeNames(metaModel, table) {
         }
     }
         break;
-    case 'concerto.metamodel.DecoratorTypeReference': {
+    case `${MetaModelNamespace}.DecoratorTypeReference`: {
         const name = metaModel.type.name;
         metaModel.type.namespace = resolveName(name, table);
     }
@@ -368,7 +377,7 @@ function resolveLocalNames(priorModels, metaModel) {
  */
 function resolveLocalNamesForAll(allModels) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
     allModels.models.forEach((metaModel) => {
@@ -381,11 +390,29 @@ function resolveLocalNamesForAll(allModels) {
 /**
  * Return the fully qualified name for an import
  * @param {object} imp - the import
- * @return {string} - the fully qualified name for that import
+ * @return {string[]} - the fully qualified names for that import
  * @private
  */
-function importFullyQualifiedName(imp) {
-    return imp.$class === 'concerto.metamodel.ImportAll' ? `${imp.namespace}.*` : `${imp.namespace}.${imp.name}`;
+function importFullyQualifiedNames(imp) {
+    const result = [];
+
+    switch (imp.$class) {
+    case `${MetaModelNamespace}.ImportAll`:
+        result.push(`${imp.namespace}.*`);
+        break;
+    case `${MetaModelNamespace}.ImportType`:
+        result.push(`${imp.namespace}.${imp.name}`);
+        break;
+    case `${MetaModelNamespace}.ImportTypes`: {
+        imp.types.forEach(type => {
+            result.push(`${imp.namespace}.${type}`);
+        });
+    }
+        break;
+    default:
+        throw new Error(`Unrecognized imports ${imp.$class}`);
+    }
+    return result;
 }
 
 /**
@@ -398,9 +425,9 @@ function getExternalImports(ast) {
     const uriMap = {};
     if (ast.imports) {
         ast.imports.forEach((imp) => {
-            const fqn = importFullyQualifiedName(imp);
-            if(imp.uri) {
-                uriMap[fqn] = imp.uri;
+            const fqns = importFullyQualifiedNames(imp);
+            if (imp.uri) {
+                uriMap[fqns[0]] = imp.uri;
             }
         });
     }
@@ -412,6 +439,6 @@ module.exports = {
     metaModelCto,
     resolveLocalNames,
     resolveLocalNamesForAll,
-    importFullyQualifiedName,
+    importFullyQualifiedNames,
     getExternalImports,
 };

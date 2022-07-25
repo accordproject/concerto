@@ -28,6 +28,7 @@ declare class ModelFile {
     importUriMap: {};
     fileName: string;
     concertoVersion: any;
+    version: any;
     ast: any;
     definitions: string;
     /**
@@ -35,6 +36,12 @@ declare class ModelFile {
      * @returns {boolean} true
      */
     isModelFile(): boolean;
+    /**
+     * Returns the semantic version
+     * @returns {string} the semantic version or null if the namespace for the model file is
+     * unversioned
+     */
+    getVersion(): string;
     /**
      * Returns true if the ModelFile is a system namespace
      * @returns {Boolean} true if this is a system model file
@@ -242,6 +249,12 @@ declare class ModelFile {
      * Check whether this modelfile is compatible with the concerto version
      */
     isCompatibleVersion(): void;
+    /**
+     * Verifies that an import is versioned if the versionedNamespacesStrict
+     * option has been set on the Model Manager
+     * @param {*} imp - the import to validate
+     */
+    enforceImportVersioning(imp: any): void;
     /**
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser

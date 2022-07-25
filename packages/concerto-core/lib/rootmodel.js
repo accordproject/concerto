@@ -14,16 +14,27 @@
 
 'use strict';
 
-const rootModelFile = 'concerto.cto';
-const rootModelCto = `namespace concerto
-abstract concept Concept {}
-abstract concept Asset identified {}
-abstract concept Participant identified {}
-abstract concept Transaction {}
-abstract concept Event {}
-`;
-
 /** @type unknown */
 const rootModelAst = require('./rootmodel.json');
 
-module.exports = { rootModelFile, rootModelCto, rootModelAst };
+/**
+ * Gets the root 'concerto' model
+ * @param {boolean} versioned if true the concerto namespace is versioned
+ * @returns {object} rootModelFile, rootModelCto and rootModelAst
+ */
+function getRootModel(versioned) {
+    const rootModelFile = versioned ? 'concerto_1.0.0.cto' : 'concerto.cto';
+    const ns = versioned ? 'concerto@1.0.0' : 'concerto';
+    const rootModelCto = `namespace ${ns}
+    abstract concept Concept {}
+    abstract concept Asset identified {}
+    abstract concept Participant identified {}
+    abstract concept Transaction {}
+    abstract concept Event {}
+    `;
+    const ast = JSON.parse(JSON.stringify(rootModelAst));
+    ast.namespace = ns;
+    return { rootModelFile, rootModelCto, rootModelAst: ast };
+}
+
+module.exports = { getRootModel };

@@ -18,20 +18,29 @@ declare class BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - Serializer options
+     * @param {object} [options] - ModelManager options, also passed to Serializer
+     * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
-    constructor(options?: object, processFile?: any);
+    constructor(options?: {
+        versionedNamespacesStrict?: boolean;
+    }, processFile?: any);
     processFile: any;
     modelFiles: {};
     factory: any;
     serializer: any;
     decoratorFactories: any[];
+    versionedNamespacesStrict: boolean;
     /**
      * Returns true
      * @returns {boolean} true
      */
     isModelManager(): boolean;
+    /**
+     * Returns the value of the versionedNamespacesStrict option
+     * @returns {boolean} true if the versionedNamespacesStrict has been set
+     */
+    isVersionedNamespacesStrict(): boolean;
     /**
      * Adds root types
      * @private

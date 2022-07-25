@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
@@ -159,7 +161,7 @@ describe('ClassDeclaration', () => {
         it('should return true for concepts', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.ConceptDeclaration',
+                $class: `${MetaModelNamespace}.ConceptDeclaration`,
                 properties: [
                 ]
             });
@@ -169,7 +171,7 @@ describe('ClassDeclaration', () => {
         it('should return true for assets', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.AssetDeclaration',
+                $class: `${MetaModelNamespace}.AssetDeclaration`,
                 properties: [
                 ]
             });
@@ -179,7 +181,7 @@ describe('ClassDeclaration', () => {
         it('should return true for events', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.EventDeclaration',
+                $class: `${MetaModelNamespace}.EventDeclaration`,
                 properties: [
                 ]
             });
@@ -189,7 +191,7 @@ describe('ClassDeclaration', () => {
         it('should return true for participants', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.ParticipantDeclaration',
+                $class: `${MetaModelNamespace}.ParticipantDeclaration`,
                 properties: [
                 ]
             });
@@ -199,7 +201,7 @@ describe('ClassDeclaration', () => {
         it('should return true for enums', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.EnumDeclaration',
+                $class: `${MetaModelNamespace}.EnumDeclaration`,
                 properties: [
                 ]
             });
@@ -209,7 +211,7 @@ describe('ClassDeclaration', () => {
         it('should return true for transactions', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
-                $class: 'concerto.metamodel.TransactionDeclaration',
+                $class: `${MetaModelNamespace}.TransactionDeclaration`,
                 properties: [
                 ]
             });
@@ -261,7 +263,7 @@ describe('ClassDeclaration', () => {
             const baseclass = modelManager.getType('com.testing.parent.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
-            should.equal(superclassName,'concerto.Participant');
+            should.equal(superclassName,'concerto@1.0.0.Participant');
         });
 
         it('toString',()=>{

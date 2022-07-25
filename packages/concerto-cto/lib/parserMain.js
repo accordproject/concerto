@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const Parser = require('./parser');
 const ParseException = require('./parseexception');
 
@@ -47,7 +49,7 @@ function parse(cto, fileName, options) {
  */
 function parseModels(files, options) {
     const result = {
-        $class: 'concerto.metamodel.Models',
+        $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
     files.forEach((modelFile) => {

@@ -17,7 +17,7 @@
 const fsPath = require('path');
 
 const { DefaultFileLoader, FileDownloader, ModelWriter } = require('@accordproject/concerto-util');
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
+const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -26,7 +26,7 @@ const ModelFile = require('./introspect/modelfile');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
-const { rootModelFile, rootModelCto, rootModelAst } = require('./rootmodel');
+const { getRootModel } = require('./rootmodel');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -73,7 +73,8 @@ class BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
-     * @param {object} [options] - Serializer options
+     * @param {object} [options] - ModelManager options, also passed to Serializer
+     * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -82,6 +83,7 @@ class BaseModelManager {
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
+        this.versionedNamespacesStrict = !!options?.versionedNamespacesStrict;
         this.addRootModel();
     }
 
@@ -94,12 +96,35 @@ class BaseModelManager {
     }
 
     /**
+     * Returns the value of the versionedNamespacesStrict option
+     * @returns {boolean} true if the versionedNamespacesStrict has been set
+     */
+    isVersionedNamespacesStrict() {
+        return this.versionedNamespacesStrict;
+    }
+
+    /**
      * Adds root types
      * @private
      */
     addRootModel() {
+        // create the versioned concerto namespace
+        const {rootModelAst, rootModelCto, rootModelFile} = getRootModel(true);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
-        this.addModelFile(m, rootModelCto, rootModelFile);
+
+        if(this.versionedNamespacesStrict ) {
+            // add the versioned concerto namespace
+            this.addModelFile(m, rootModelCto, rootModelFile);
+        }
+        else {
+            // add the versioned concerto namespace
+            this.addModelFile(m, rootModelCto, rootModelFile);
+
+            // create the unversioned concerto namespace and add
+            const unversioned = getRootModel(false);
+            const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
+            this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile);
+        }
     }
 
     /**
@@ -164,6 +189,10 @@ class BaseModelManager {
     addModelFile(modelFile, cto, fileName, disableValidation) {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
+
+        if(this.isVersionedNamespacesStrict() && !modelFile.getVersion()) {
+            throw new Error('Cannot add an unversioned namespace when \'versionedNamespacesStrict\' is true');
+        }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
@@ -380,7 +409,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || ns !== 'concerto') {
+            if(includeConcertoNamespace || (ns !== 'concerto@1.0.0' && ns !== 'concerto')) {
                 result.push(this.modelFiles[ns]);
             }
         }
@@ -663,7 +692,7 @@ class BaseModelManager {
      */
     getAst(resolve) {
         const result = {
-            $class: 'concerto.metamodel.Models',
+            $class: `${MetaModelNamespace}.Models`,
             models: [],
         };
         const modelFiles = this.getModelFiles();

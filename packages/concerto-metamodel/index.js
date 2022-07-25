@@ -25,5 +25,6 @@
 const MetaModelUtil = require('./lib/metamodelutil');
 
 module.exports = {
-    MetaModelUtil
+    MetaModelUtil,
+    MetaModelNamespace: 'concerto.metamodel@1.0.0'
 };

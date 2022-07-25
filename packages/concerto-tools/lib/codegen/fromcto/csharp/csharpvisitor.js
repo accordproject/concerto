@@ -90,6 +90,7 @@ class CSharpVisitor {
             namespacePrefix += '.';
         }
 
+        const { escapedNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
 
@@ -103,7 +104,7 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;');
         }
 
-        parameters.fileWriter.writeLine(0, `namespace ${namespacePrefix}${modelFile.getNamespace()} {`);
+        parameters.fileWriter.writeLine(0, `namespace ${namespacePrefix}${escapedNamespace} {`);
 
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
