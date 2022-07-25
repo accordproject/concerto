@@ -776,6 +776,23 @@
         },
         {
             "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "ImportTypes",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "types",
+                    "isArray": true,
+                    "isOptional": false
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Import"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Model",
             "isAbstract": false,
             "properties": [

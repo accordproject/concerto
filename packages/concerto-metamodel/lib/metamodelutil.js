@@ -190,6 +190,10 @@ concept ImportType extends Import {
   o String name
 }
 
+concept ImportTypes extends Import {
+  o String[] types
+}
+
 concept Model {
   o String namespace
   o String sourceUri optional
