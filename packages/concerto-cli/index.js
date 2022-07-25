@@ -105,6 +105,20 @@ require('yargs')
             type: 'string',
             default: './output/'
         });
+        yargs.option('useSystemTextJson', {
+            describe: 'Compile for System.Text.Json library (`csharp` target only)',
+            type: 'boolean',
+            default: false
+        });
+        yargs.option('useNewtonsoftJson', {
+            describe: 'Compile for Newtonsoft.Json library (`csharp` target only)',
+            type: 'boolean',
+            default: false
+        });
+        yargs.option('namespacePrefix', {
+            describe: 'A prefix to add to all namespaces (`csharp` target only)',
+            type: 'string',
+        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`generate code for target ${argv.target} from models ${argv.model} into directory: ${argv.output}`);
@@ -112,6 +126,9 @@ require('yargs')
 
         const options = {};
         options.offline = argv.offline;
+        options.useSystemTextJson = argv.useSystemTextJson;
+        options.useNewtonsoftJson = argv.useNewtonsoftJson;
+        options.namespacePrefix = argv.namespacePrefix;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);
@@ -166,8 +183,16 @@ require('yargs')
             describe: 'path to the output file',
             type: 'string'
         });
+        yargs.option('excludeLineLocations', {
+            describe: 'Exclude file line location metadata from metamodel instance',
+            type: 'boolean',
+            default: false
+        });
     }, (argv) => {
-        return Commands.parse(argv.model, argv.resolve, argv.all, argv.output)
+        const options = {};
+        options.excludeLineLocations = argv.excludeLineLocations;
+
+        return Commands.parse(argv.model, argv.resolve, argv.all, argv.output, options)
             .then((result) => {
                 if (result) {
                     Logger.info(result);

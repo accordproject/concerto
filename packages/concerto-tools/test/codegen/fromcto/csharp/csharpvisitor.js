@@ -220,20 +220,107 @@ describe('CSharpVisitor', function () {
                 'super.Parent'
             ]);
 
-            csharpVisitor.visitModelFile(mockModelFile, param);
+            const myParams = {
+                ...param,
+                namespacePrefix: 'Concerto.Models.'
+            };
+            csharpVisitor.visitModelFile(mockModelFile, myParams);
 
             param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.equal(7);
+            param.fileWriter.writeLine.callCount.should.equal(8);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using System.Text.Json.Serialization;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'namespace org.acme {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'using org.org1;']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using org.org2;']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using super;']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using Concerto.Serialization;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, 'using Concerto.Models.super;']);
+            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '}']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
-            acceptSpy.withArgs(csharpVisitor, param).calledThrice.should.be.ok;
+            acceptSpy.withArgs(csharpVisitor, myParams).calledThrice.should.be.ok;
         });
+
+        it('should write lines for the imports that are not in own namespace (including super types) ignoring primitives using Newtonsoft.Json', () => {
+            let acceptSpy = sinon.spy();
+            let mockEnum = sinon.createStubInstance(EnumDeclaration);
+            mockEnum.isEnum.returns(true);
+            mockEnum.accept = acceptSpy;
+
+            let property1 = {
+                isPrimitive: () => {
+                    return false;
+                },
+                getFullyQualifiedTypeName: () => {
+                    return 'org.org1.Property1';
+                }
+            };
+
+            let property2 = {
+                isPrimitive: () => {
+                    return false;
+                },
+                getFullyQualifiedTypeName: () => {
+                    return 'org.acme.Property2';
+                }
+            };
+
+            let property3 = {
+                isPrimitive: () => {
+                    return true;
+                },
+                getFullyQualifiedTypeName: () => {
+                    return 'super.Property3';
+                }
+            };
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockClassDeclaration.getSuperType.returns('super.Parent');
+            mockClassDeclaration.getProperties.returns([property1, property2, property3]);
+            mockClassDeclaration.accept = acceptSpy;
+
+            let mockClassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isEnum.returns(false);
+            mockClassDeclaration2.getSuperType.returns('super.Parent');
+            mockClassDeclaration2.getProperties.returns([]);
+            mockClassDeclaration2.accept = acceptSpy;
+
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.getNamespace.returns('org.acme');
+            mockModelFile.getAllDeclarations.returns([
+                mockEnum,
+                mockClassDeclaration,
+                mockClassDeclaration2
+            ]);
+            mockModelFile.getImports.returns([
+                'org.org1.Import1',
+                'org.org1.Import2',
+                'org.org2.Import1',
+                'super.Property3',
+                'super.Parent'
+            ]);
+
+            const newtonsoftParams = {
+                ...param,
+                useNewtonsoftJson: true,
+                namespacePrefix: 'Concerto.Models'
+            };
+            csharpVisitor.visitModelFile(mockModelFile, newtonsoftParams);
+
+            param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.callCount.should.equal(8);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using NewtonsoftJson = Newtonsoft.Json;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, 'using Concerto.Models.super;']);
+            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '}']);
+            param.fileWriter.closeFile.calledOnce.should.be.ok;
+            acceptSpy.withArgs(csharpVisitor, newtonsoftParams).calledThrice.should.be.ok;
+        });
+
 
         it('should write lines for the imports that are not in own namespace ignoring primitives and write lines for importing system type', () => {
             let acceptSpy = sinon.spy();
@@ -290,18 +377,23 @@ describe('CSharpVisitor', function () {
             ]);
             mockModelFile.getModelManager.returns(mockModelManager);
 
-            csharpVisitor.visitModelFile(mockModelFile, param);
+            const myParams = {
+                ...param,
+                namespacePrefix: 'Concerto.Models.'
+            };
+            csharpVisitor.visitModelFile(mockModelFile, myParams);
 
             param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.equal(6);
+            param.fileWriter.writeLine.callCount.should.equal(7);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using System.Text.Json.Serialization;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'namespace org.acme {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'using org.org1;']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using org.org2;']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using Concerto.Serialization;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '}']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
-            acceptSpy.withArgs(csharpVisitor, param).calledTwice.should.be.ok;
+            acceptSpy.withArgs(csharpVisitor, myParams).calledTwice.should.be.ok;
         });
     });
 
@@ -326,7 +418,7 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(2);
-            param.fileWriter.writeLine.withArgs(1, 'enum Bob {').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'public enum Bob {').calledOnce.should.be.ok;
             param.fileWriter.writeLine.withArgs(1, '}\n').calledOnce.should.be.ok;
 
             acceptSpy.withArgs(csharpVisitor, param).calledTwice.should.be.ok;
@@ -356,9 +448,31 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(3);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'class Bob {']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n      public new string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public class Bob {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get;} = "undefined";']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
+        });
+        it('should write the class opening and close with Newtonsoft.Json', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            let mockClassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getAssignableClassDeclarations.returns([mockClassDeclaration, mockClassDeclaration2]);
+            csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useNewtonsoftJson: true});
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public class Bob {']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[NewtonsoftJson.JsonProperty("$class")]\n\t\tpublic override string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with abstract and super type', () => {
             let acceptSpy = sinon.spy();
@@ -378,8 +492,74 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.callCount.should.deep.equal(3);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'abstract class Bob : Person {']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n      public new string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
+        });
+        it('should write the class opening and close with abstract and super type, with explicit System.Text.Json flag', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.isAbstract.returns(true);
+            mockClassDeclaration.getSuperType.returns('org.acme.Person');
+
+            csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useSystemTextJson: true });
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
+        });
+        it('should write the class opening and close with abstract and super type, with both serializer flags', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.isAbstract.returns(true);
+            mockClassDeclaration.getSuperType.returns('org.acme.Person');
+
+            csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useSystemTextJson: true, useNewtonsoftJson: true });
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\t[NewtonsoftJson.JsonProperty("$class")]\n\t\tpublic override string _class { get;} = "undefined";']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
+        });
+        it('should write the class opening and close with virtual modifier for base class', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Concept');
+            mockClassDeclaration.getFullyQualifiedName.returns('concerto.Concept');
+            mockClassDeclaration.isAbstract.returns(true);
+
+            csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Concept {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get;} = "concerto.Concept";']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
         });
     });
@@ -399,6 +579,27 @@ describe('CSharpVisitor', function () {
             mockField.isPrimitive.returns(true);
             csharpVisitor.visitField(mockField, param);
             param.fileWriter.writeLine.withArgs(2, 'public string name { get; set; }').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for primitive field name and type, where the field name is reserved in C#', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('bool');
+            mockField.getType.returns('String');
+            mockField.isPrimitive.returns(true);
+            csharpVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.withArgs(2, '[JsonPropertyName("bool")]\n\t\tpublic string _bool { get; set; }').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for an optional enum field name and type', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('myEnum');
+            mockField.getType.returns('Enum');
+            mockField.isOptional.returns(true);
+            mockField.isTypeEnum.returns(true);
+            csharpVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.withArgs(2, 'public Enum? myEnum { get; set; }').calledOnce.should.be.ok;
         });
 
         it('should write a line for field name and type thats an array', () => {
