@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const Decorated = require('./decorated');
 const EnumValueDeclaration = require('./enumvaluedeclaration');
 const Field = require('./field');
@@ -87,7 +89,7 @@ class ClassDeclaration extends Decorated {
         }
 
         if (this.ast.identified) {
-            if (this.ast.identified.$class === 'concerto.metamodel@1.0.0.IdentifiedBy') {
+            if (this.ast.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
                 this.idField = this.ast.identified.name;
             } else {
                 this.idField = '$identifier';
@@ -102,18 +104,18 @@ class ClassDeclaration extends Decorated {
                 throw new IllegalModelException(`Invalid field name ${thing.name}`, this.modelFile, this.ast.location);
             }
 
-            if (thing.$class === 'concerto.metamodel@1.0.0.RelationshipProperty') {
+            if (thing.$class === `${MetaModelNamespace}.RelationshipProperty`) {
                 this.properties.push(new RelationshipDeclaration(this, thing));
-            } else if (thing.$class === 'concerto.metamodel@1.0.0.EnumProperty') {
+            } else if (thing.$class === `${MetaModelNamespace}.EnumProperty`) {
                 this.properties.push(new EnumValueDeclaration(this, thing));
             } else if (
-                thing.$class === 'concerto.metamodel@1.0.0.BooleanProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.StringProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.IntegerProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.LongProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.DoubleProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.DateTimeProperty' ||
-                    thing.$class === 'concerto.metamodel@1.0.0.ObjectProperty'
+                thing.$class === `${MetaModelNamespace}.BooleanProperty` ||
+                    thing.$class === `${MetaModelNamespace}.StringProperty` ||
+                    thing.$class === `${MetaModelNamespace}.IntegerProperty` ||
+                    thing.$class === `${MetaModelNamespace}.LongProperty` ||
+                    thing.$class === `${MetaModelNamespace}.DoubleProperty` ||
+                    thing.$class === `${MetaModelNamespace}.DateTimeProperty` ||
+                    thing.$class === `${MetaModelNamespace}.ObjectProperty`
             ) {
                 this.properties.push(new Field(this, thing));
             } else {
@@ -139,7 +141,7 @@ class ClassDeclaration extends Decorated {
      */
     addTimestampField() {
         const definition = {};
-        definition.$class = 'concerto.metamodel@1.0.0.DateTimeProperty';
+        definition.$class = `${MetaModelNamespace}.DateTimeProperty`;
         definition.name = '$timestamp';
         this.properties.push(new Field(this, definition));
     }
@@ -151,7 +153,7 @@ class ClassDeclaration extends Decorated {
      */
     addIdentifierField() {
         const definition = {};
-        definition.$class = 'concerto.metamodel@1.0.0.StringProperty';
+        definition.$class = `${MetaModelNamespace}.StringProperty`;
         definition.name = '$identifier';
         this.properties.push(new Field(this, definition));
     }
@@ -622,7 +624,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isAsset() {
-        return this.type === 'concerto.metamodel@1.0.0.AssetDeclaration';
+        return this.type === `${MetaModelNamespace}.AssetDeclaration`;
     }
 
     /**
@@ -631,7 +633,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isParticipant() {
-        return this.type === 'concerto.metamodel@1.0.0.ParticipantDeclaration';
+        return this.type === `${MetaModelNamespace}.ParticipantDeclaration`;
     }
 
     /**
@@ -640,7 +642,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isTransaction() {
-        return this.type === 'concerto.metamodel@1.0.0.TransactionDeclaration';
+        return this.type === `${MetaModelNamespace}.TransactionDeclaration`;
     }
 
     /**
@@ -649,7 +651,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isEvent() {
-        return this.type === 'concerto.metamodel@1.0.0.EventDeclaration';
+        return this.type === `${MetaModelNamespace}.EventDeclaration`;
     }
 
     /**
@@ -658,7 +660,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isConcept() {
-        return this.type === 'concerto.metamodel@1.0.0.ConceptDeclaration';
+        return this.type === `${MetaModelNamespace}.ConceptDeclaration`;
     }
 
     /**
@@ -667,7 +669,7 @@ class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isEnum() {
-        return this.type === 'concerto.metamodel@1.0.0.EnumDeclaration';
+        return this.type === `${MetaModelNamespace}.EnumDeclaration`;
     }
 
     /**

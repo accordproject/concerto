@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
 const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
@@ -84,16 +86,16 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save any imports', () => {
             const imports = [ {
-                $class: 'concerto.metamodel@1.0.0.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.freddos',
                 name: 'Bar',
             }, {
-                $class: 'concerto.metamodel@1.0.0.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.doge',
                 name: 'Foo',
             } ];
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
@@ -105,16 +107,16 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save imports with uris', () => {
             const imports = [ {
-                $class: 'concerto.metamodel@1.0.0.ImportType',
+                $class: `${MetaModelNamespace}.ImportType`,
                 namespace: 'org.doge',
                 name:'Foo',
             }, {
-                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                $class: `${MetaModelNamespace}.ImportAll`,
                 namespace: 'org.freddos',
                 uri: 'https://freddos.org/model.cto'
             } ];
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 imports: imports,
                 declarations: [ ]
@@ -128,7 +130,7 @@ describe('ModelFile', () => {
 
         it('should throw for an unrecognized body element', () => {
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.Model',
+                $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
                 declarations: [ {
                     $class: 'BlahType'

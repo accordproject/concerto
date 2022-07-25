@@ -14,8 +14,10 @@
 
 'use strict';
 
-const Decorated = require('./decorated');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const ModelUtil = require('../modelutil');
+const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -68,21 +70,21 @@ class Property extends Decorated {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        if (this.ast.$class === 'concerto.metamodel@1.0.0.BooleanProperty') {
+        if (this.ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
             this.type = 'Boolean';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.StringProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.StringProperty`) {
             this.type = 'String';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.IntegerProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
             this.type = 'Integer';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.LongProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.LongProperty`) {
             this.type = 'Long';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.DoubleProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
             this.type = 'Double';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.DateTimeProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
             this.type = 'DateTime';
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.ObjectProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
             this.type = this.ast.type ? this.ast.type.name : null;
-        } else if (this.ast.$class === 'concerto.metamodel@1.0.0.RelationshipProperty') {
+        } else if (this.ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
             this.type = this.ast.type.name;
         } else {
             this.type = null;

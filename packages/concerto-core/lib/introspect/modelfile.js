@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const packageJson = require('../../package.json');
 const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
@@ -635,7 +637,7 @@ class ModelFile {
         if(!this.isSystemModelFile()) {
             imports.push(
                 {
-                    $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                    $class: `${MetaModelNamespace}.ImportTypes`,
                     namespace: 'concerto@1.0.0',
                     types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
                 }
@@ -646,10 +648,10 @@ class ModelFile {
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
             switch(imp.$class) {
-            case 'concerto.metamodel@1.0.0.ImportAll':
+            case `${MetaModelNamespace}.ImportAll`:
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
-            case 'concerto.metamodel@1.0.0.ImportTypes':
+            case `${MetaModelNamespace}.ImportTypes`:
                 imp.types.forEach( type => {
                     this.importShortNames.set(type, `${imp.namespace}.${type}`);
                 });
@@ -671,50 +673,50 @@ class ModelFile {
             // Make sure to clone since we may add super type
             let thing = Object.assign({}, ast.declarations[n]);
 
-            if(thing.$class === 'concerto.metamodel@1.0.0.AssetDeclaration') {
+            if(thing.$class === `${MetaModelNamespace}.AssetDeclaration`) {
                 // Default super type for asset
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel@1.0.0.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Asset',
                     };
                 }
                 this.declarations.push( new AssetDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel@1.0.0.TransactionDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.TransactionDeclaration`) {
                 // Default super type for transaction
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel@1.0.0.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Transaction',
                     };
                 }
                 this.declarations.push( new TransactionDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel@1.0.0.EventDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.EventDeclaration`) {
                 // Default super type for event
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel@1.0.0.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Event',
                     };
                 }
                 this.declarations.push( new EventDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel@1.0.0.ParticipantDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.ParticipantDeclaration`) {
                 // Default super type for participant
                 if (!thing.superType) {
                     thing.superType = {
-                        $class: 'concerto.metamodel@1.0.0.TypeIdentified',
+                        $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Participant',
                     };
                 }
                 this.declarations.push( new ParticipantDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel@1.0.0.EnumDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.EnumDeclaration`) {
                 this.declarations.push( new EnumDeclaration(this, thing) );
             }
-            else if(thing.$class === 'concerto.metamodel@1.0.0.ConceptDeclaration') {
+            else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
             }
             else {

@@ -15,6 +15,7 @@
 'use strict';
 
 const YAML = require('yaml');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
 
 /**
@@ -238,11 +239,11 @@ class VocabularyManager {
                             'declaration': decl.getName(),
                         },
                         'decorator': {
-                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            '$class': `${MetaModelNamespace}.Decorator`,
                             'name': 'Term',
                             'arguments': [
                                 {
-                                    '$class': 'concerto.metamodel@1.0.0.DecoratorString',
+                                    '$class': `${MetaModelNamespace}.DecoratorString`,
                                     'value': term
                                 },
                             ]
@@ -264,11 +265,11 @@ class VocabularyManager {
                                 'property': property.getName()
                             },
                             'decorator': {
-                                '$class': 'concerto.metamodel@1.0.0.Decorator',
+                                '$class': `${MetaModelNamespace}.Decorator`,
                                 'name': 'Term',
                                 'arguments': [
                                     {
-                                        '$class': 'concerto.metamodel@1.0.0.DecoratorString',
+                                        '$class': `${MetaModelNamespace}.DecoratorString`,
                                         'value': propertyTerm
                                     },
                                 ]

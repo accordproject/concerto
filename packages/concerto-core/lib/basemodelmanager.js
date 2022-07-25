@@ -17,7 +17,7 @@
 const fsPath = require('path');
 
 const { DefaultFileLoader, FileDownloader, ModelWriter } = require('@accordproject/concerto-util');
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
+const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Factory = require('./factory');
 const Globalize = require('./globalize');
@@ -108,16 +108,19 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
-        // iff we allow unversioned namespaces we should *also*
-        // allow people to import from concerto@1.0.0 namespace
+        // create the versioned concerto namespace
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel(true);
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
         if(this.versionedNamespacesStrict ) {
+            // add the versioned concerto namespace
             this.addModelFile(m, rootModelCto, rootModelFile);
         }
         else {
+            // add the versioned concerto namespace
             this.addModelFile(m, rootModelCto, rootModelFile);
+
+            // create the unversioned concerto namespace and add
             const unversioned = getRootModel(false);
             const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
             this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile);
@@ -689,7 +692,7 @@ class BaseModelManager {
      */
     getAst(resolve) {
         const result = {
-            $class: 'concerto.metamodel@1.0.0.Models',
+            $class: `${MetaModelNamespace}.Models`,
             models: [],
         };
         const modelFiles = this.getModelFiles();

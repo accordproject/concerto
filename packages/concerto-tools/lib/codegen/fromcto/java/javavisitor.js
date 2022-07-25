@@ -127,10 +127,10 @@ public abstract class Resource
      * @private
      */
     startClassFile(clazz, parameters) {
-        const { mangledNamespace } = ModelUtil.parseNamespace(clazz.getModelFile().getNamespace());
+        const { escapedNamespace } = ModelUtil.parseNamespace(clazz.getModelFile().getNamespace());
         parameters.fileWriter.openFile( clazz.getModelFile().getNamespace().replace(/\./g, '/') + '/' + clazz.getName() + '.java');
         parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
-        parameters.fileWriter.writeLine(0, 'package ' + mangledNamespace + ';');
+        parameters.fileWriter.writeLine(0, 'package ' + escapedNamespace + ';');
         parameters.fileWriter.writeLine(0, '');
         parameters.fileWriter.writeLine(0, 'import org.hyperledger.composer.system.*;');
         this.plugin.addClassImports(clazz, parameters);

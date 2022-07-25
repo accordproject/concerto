@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -74,7 +76,7 @@ class Decorator {
             for (let n = 0; n < this.ast.arguments.length; n++) {
                 let thing = this.ast.arguments[n];
                 if (thing) {
-                    if (thing.$class === 'concerto.metamodel@1.0.0.DecoratorTypeReference') {
+                    if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
                         // XXX Is this really what we want?
                         this.arguments.push({
                             type: 'Identifier',

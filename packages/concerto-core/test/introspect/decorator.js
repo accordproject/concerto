@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
 const Decorator = require('../../lib/introspect/decorator');
 
@@ -25,19 +27,19 @@ describe('Decorator', () => {
     let mockAssetDeclaration;
 
     const ast = {
-        $class: 'concerto.metamodel@1.0.0.Decorator',
+        $class: `${MetaModelNamespace}.Decorator`,
         name: 'Test',
         arguments: [
             {
-                $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                $class: `${MetaModelNamespace}.DecoratorString`,
                 value:'one'
             },
             {
-                $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                $class: `${MetaModelNamespace}.DecoratorString`,
                 value:'two'
             },
             {
-                $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                $class: `${MetaModelNamespace}.DecoratorString`,
                 value:'three'
             }
         ]

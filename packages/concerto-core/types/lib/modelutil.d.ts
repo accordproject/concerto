@@ -28,7 +28,7 @@ declare class ModelUtil {
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @returns {object} the result of parsing: an object with properties: name,
-     * mangledNamespace, version and versionParsed
+     * escapedNamespace, version and versionParsed
      */
     static parseNamespace(ns: string): object;
     /**

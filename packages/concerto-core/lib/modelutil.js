@@ -71,7 +71,7 @@ class ModelUtil {
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @returns {object} the result of parsing: an object with properties: name,
-     * mangledNamespace, version and versionParsed
+     * escapedNamespace, version and versionParsed
      */
     static parseNamespace(ns) {
         if(!ns) {
@@ -91,7 +91,7 @@ class ModelUtil {
 
         return {
             name: parts[0],
-            mangledNamespace: ns.replace('@', '_'),
+            escapedNamespace: ns.replace('@', '_'),
             version: parts.length > 1 ? parts[1] : null,
             versionParsed: parts.length > 1 ? semver.parse(parts[1]) : null
         };
