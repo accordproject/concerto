@@ -82,6 +82,13 @@ declare class ClassDeclaration extends Decorated {
      */
     getFullyQualifiedName(): string;
     /**
+     * Returns the fully qualified name of this class.
+     * The name will include the escaped namespace if present.
+     *
+     * @return {string} the fully-qualified and escaped name of this class
+     */
+    getEscapedFullyQualifiedName(): string;
+    /**
      * Returns true if this class declaration declares an identifying field
      * (system or explicit)
      * @returns {Boolean} true if the class declaration includes an identifier

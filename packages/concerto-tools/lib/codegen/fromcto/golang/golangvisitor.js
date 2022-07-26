@@ -97,7 +97,7 @@ class GoLangVisitor {
     visitModelFile(modelFile, parameters) {
         // we put all the code into the main package, but we
         // seperate out into multiple files using the namespaces
-        const { escapedNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+        const { escapedNamespace } = ModelUtil.escapeNamespace(modelFile.getNamespace());
         parameters.fileWriter.openFile(this.toGoPackageName(escapedNamespace) + '.go');
         parameters.fileWriter.writeLine(0, 'package main');
 

@@ -23,12 +23,19 @@ declare class ModelUtil {
      */
     private static getNamespace;
     /**
+     * Escapes a namespace string for use in typical source code
+     * @param {string} ns the namespace
+     * @returns {*} an object with the properties from parseNamespace as
+     * well as an escapedNamespace property
+     */
+    static escapeNamespace(ns: string): any;
+    /**
      * Parses a potentially versioned namespace into
      * its name and version parts. The version of the namespace
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @returns {object} the result of parsing: an object with properties: name,
-     * escapedNamespace, version and versionParsed
+     * version and versionParsed
      */
     static parseNamespace(ns: string): object;
     /**

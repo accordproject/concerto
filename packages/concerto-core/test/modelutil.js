@@ -151,15 +151,15 @@ describe('ModelUtil', function () {
 
     describe('#parseNamespace', function() {
         it('valid, no version', function() {
-            const nsInfo = ModelUtil.parseNamespace('org.acme');
+            const nsInfo = ModelUtil.escapeNamespace('org.acme');
             nsInfo.name.should.equal('org.acme');
             nsInfo.escapedNamespace.should.equal('org.acme');
         });
 
         it('valid, with version', function() {
-            const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.0');
+            const nsInfo = ModelUtil.escapeNamespace('org.acme@1.0.0');
             nsInfo.name.should.equal('org.acme');
-            nsInfo.escapedNamespace.should.equal('org.acme_1.0.0');
+            nsInfo.escapedNamespace.should.equal('org.acme_1_0_0');
             nsInfo.version.should.equal('1.0.0');
             nsInfo.versionParsed.major.should.equal(1);
         });

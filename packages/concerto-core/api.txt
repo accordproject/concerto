@@ -79,6 +79,7 @@ class ClassDeclaration extends Decorated {
    + string getName() 
    + string getNamespace() 
    + string getFullyQualifiedName() 
+   + string getEscapedFullyQualifiedName() 
    + Boolean isIdentified() 
    + Boolean isSystemIdentified() 
    + Boolean isExplicitlyIdentified() 

@@ -66,12 +66,27 @@ class ModelUtil {
     }
 
     /**
+     * Escapes a namespace string for use in typical source code
+     * @param {string} ns the namespace
+     * @returns {*} an object with the properties from parseNamespace as
+     * well as an escapedNamespace property
+     */
+    static escapeNamespace(ns) {
+        const nsInfo = ModelUtil.parseNamespace(ns);
+        const escapedNamespace = nsInfo.version ? `${nsInfo.name}_${nsInfo.version.replace(/\./g, '_')}` : nsInfo.name;
+        return {
+            escapedNamespace,
+            ...nsInfo
+        };
+    }
+
+    /**
      * Parses a potentially versioned namespace into
      * its name and version parts. The version of the namespace
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @returns {object} the result of parsing: an object with properties: name,
-     * escapedNamespace, version and versionParsed
+     * version and versionParsed
      */
     static parseNamespace(ns) {
         if(!ns) {
@@ -91,7 +106,6 @@ class ModelUtil {
 
         return {
             name: parts[0],
-            escapedNamespace: ns.replace('@', '_'),
             version: parts.length > 1 ? parts[1] : null,
             versionParsed: parts.length > 1 ? semver.parse(parts[1]) : null
         };

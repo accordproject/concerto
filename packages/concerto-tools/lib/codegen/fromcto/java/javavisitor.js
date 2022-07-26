@@ -127,7 +127,7 @@ public abstract class Resource
      * @private
      */
     startClassFile(clazz, parameters) {
-        const { escapedNamespace } = ModelUtil.parseNamespace(clazz.getModelFile().getNamespace());
+        const { escapedNamespace } = ModelUtil.escapeNamespace(clazz.getModelFile().getNamespace());
         parameters.fileWriter.openFile( clazz.getModelFile().getNamespace().replace(/\./g, '/') + '/' + clazz.getName() + '.java');
         parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
         parameters.fileWriter.writeLine(0, 'package ' + escapedNamespace + ';');

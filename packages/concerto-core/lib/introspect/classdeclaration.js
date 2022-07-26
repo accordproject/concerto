@@ -327,6 +327,17 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
+     * Returns the fully qualified name of this class.
+     * The name will include the escaped namespace if present.
+     *
+     * @return {string} the fully-qualified and escaped name of this class
+     */
+    getEscapedFullyQualifiedName() {
+        const { escapedNamespace } = ModelUtil.escapeNamespace(this.getNamespace());
+        return `${escapedNamespace}.${this.getName()}`;
+    }
+
+    /**
      * Returns true if this class declaration declares an identifying field
      * (system or explicit)
      * @returns {Boolean} true if the class declaration includes an identifier

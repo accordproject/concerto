@@ -90,7 +90,7 @@ class CSharpVisitor {
             namespacePrefix += '.';
         }
 
-        const { escapedNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+        const { escapedNamespace } = ModelUtil.escapeNamespace(modelFile.getNamespace());
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
 
@@ -109,7 +109,7 @@ class CSharpVisitor {
         modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
             .forEach(namespace => {
-                parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
+                parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${ModelUtil.escapeNamespace(namespace).escapedNamespace};`);
             });
 
         modelFile.getAllDeclarations().forEach((decl) => {
@@ -175,8 +175,9 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]');
         }
         parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
-        const override = classDeclaration.getFullyQualifiedName() === 'concerto.Concept' ? 'virtual' : 'override';
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
+        const nsInfo = ModelUtil.parseNamespace(classDeclaration.getNamespace());
+        const override = nsInfo.name === 'concerto' && classDeclaration.getName() === 'Concept' ? 'virtual' : 'override';
+        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get;} = "${classDeclaration.getEscapedFullyQualifiedName()}";`, parameters));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });

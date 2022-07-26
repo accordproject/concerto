@@ -437,6 +437,7 @@ describe('CSharpVisitor', function () {
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -458,6 +459,7 @@ describe('CSharpVisitor', function () {
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             let mockClassDeclaration2 = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -479,6 +481,7 @@ describe('CSharpVisitor', function () {
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -501,6 +504,7 @@ describe('CSharpVisitor', function () {
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -523,6 +527,7 @@ describe('CSharpVisitor', function () {
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -545,6 +550,7 @@ describe('CSharpVisitor', function () {
 
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getNamespace.returns('concerto');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -554,6 +560,7 @@ describe('CSharpVisitor', function () {
             mockClassDeclaration.getName.returns('Concept');
             mockClassDeclaration.getFullyQualifiedName.returns('concerto.Concept');
             mockClassDeclaration.isAbstract.returns(true);
+            mockClassDeclaration.getEscapedFullyQualifiedName.returns('concerto.Concept');
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
