@@ -48,7 +48,9 @@
     "@accordproject/concerto-metamodel": "2.3.0",
     "@accordproject/concerto-tools": "2.3.0",
     "@accordproject/concerto-util": "2.3.0",
+    "glob": "7.2.0",
     "mkdirp": "1.0.4",
+    "semver": "7.3.5",
     "yargs": "17.3.1"
   },
   "license-check-and-add-config": {

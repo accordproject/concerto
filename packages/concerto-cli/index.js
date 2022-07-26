@@ -16,6 +16,7 @@
 'use strict';
 
 const Logger = require('@accordproject/concerto-util').Logger;
+const { glob } = require('glob');
 const Commands = require('./lib/commands');
 
 require('yargs')
@@ -214,6 +215,31 @@ require('yargs')
         });
     }, (argv) => {
         return Commands.print(argv.input, argv.output)
+            .then((result) => {
+                if (result) {
+                    Logger.info(result);
+                }
+            })
+            .catch((err) => {
+                Logger.error(err.message);
+            });
+    })
+    .command('version <release>', 'modify the version of one or more model files', yargs => {
+        yargs.demandOption(['model'], 'Please provide Concerto model(s)');
+        yargs.option('model', {
+            alias: 'models',
+            describe: 'array of concerto model files',
+            type: 'string',
+            array: true
+        });
+    }, argv => {
+        const modelFiles = argv.model.flatMap(model => {
+            if (glob.hasMagic(model)) {
+                return glob.sync(model);
+            }
+            return model;
+        });
+        return Commands.version(argv.release, modelFiles)
             .then((result) => {
                 if (result) {
                     Logger.info(result);

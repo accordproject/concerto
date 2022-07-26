@@ -24,6 +24,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
 const Commands = require('../lib/commands');
+const { Parser } = require('@accordproject/concerto-cto');
 
 describe('cicero-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
@@ -268,6 +269,55 @@ describe('cicero-cli', () => {
             const result = fs.readFileSync(output.path, 'utf-8');
             result.should.equal(expected);
             output.cleanup();
+        });
+    });
+
+    describe('#version', async () => {
+        let ctoPath;
+        let metamodelPath;
+
+        beforeEach(async () => {
+            const sourceCtoPath = path.resolve(__dirname, 'models', 'version.cto');
+            const sourceCto = fs.readFileSync(sourceCtoPath, 'utf-8');
+            ctoPath = (await tmp.file({ unsafeCleanup: true })).path;
+            fs.writeFileSync(ctoPath, sourceCto, 'utf-8');
+            metamodelPath = (await tmp.file({ unsafeCleanup: true })).path;
+            const metamodel = Parser.parse(sourceCto);
+            fs.writeFileSync(metamodelPath, JSON.stringify(metamodel, null, 2), 'utf-8');
+        });
+
+        const tests = [
+            { name: 'patch', release: 'patch', expectedNamespace: 'org.accordproject.concerto.test@1.2.4' },
+            { name: 'minor', release: 'minor', expectedNamespace: 'org.accordproject.concerto.test@1.3.0' },
+            { name: 'major', release: 'major', expectedNamespace: 'org.accordproject.concerto.test@2.0.0' },
+            { name: 'explicit', release: '4.5.6', expectedNamespace: 'org.accordproject.concerto.test@4.5.6' },
+            { name: 'prerelease', release: '5.6.7-pr.3472381', expectedNamespace: 'org.accordproject.concerto.test@5.6.7-pr.3472381' }
+        ];
+
+        tests.forEach(({ name, release, expectedNamespace }) => {
+
+            it(`should patch bump a cto file [${name}]`, async () => {
+                await Commands.version(release, [ctoPath]);
+                const cto = fs.readFileSync(ctoPath, 'utf-8');
+                const metamodel = Parser.parse(cto);
+                metamodel.namespace.should.equal(expectedNamespace);
+            });
+
+            it(`should patch bump a metamodel file [${name}]`, async () => {
+                await Commands.version(release, [metamodelPath]);
+                const metamodel = JSON.parse(fs.readFileSync(metamodelPath, 'utf-8'));
+                metamodel.namespace.should.equal(expectedNamespace);
+            });
+
+        });
+
+        it('should reject an invalid release', async () => {
+            await Commands.version('foobar', [ctoPath]).should.be.rejectedWith(/invalid release "foobar"/);
+        });
+
+        it('should reject an invalid version', async () => {
+            const sourceCtoPath = path.resolve(__dirname, 'models', 'badversion.cto');
+            await Commands.version('patch', [sourceCtoPath]).should.be.rejectedWith(/invalid current version "undefined"/);
         });
     });
 });
