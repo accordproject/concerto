@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
+const semver = require('semver');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -270,6 +271,115 @@ class Commands {
             return;
         }
         return result;
+    }
+
+    /**
+     * Update the version of one or more model files.
+     *
+     * @param {string} release the release, major/minor/patch, or a semantic version
+     * @param {string[]} modelFiles the list of model file paths
+     */
+    static async version(release, modelFiles) {
+        for (const modelFile of modelFiles) {
+            const resolvedModelFile = path.resolve(modelFile);
+            await Commands.versionModelFile(release, resolvedModelFile);
+        }
+    }
+
+    /**
+     * Update the version of a model file.
+     *
+     * @param {string} release the release, major/minor/patch, or a semantic version
+     * @param {string} modelFile the model file path
+     * @private
+     */
+    static async versionModelFile(release, modelFile) {
+        const data = fs.readFileSync(modelFile, 'utf-8');
+        const isMetaModel = Commands.isJSON(data);
+        if (isMetaModel) {
+            await Commands.versionMetaModelFile(release, modelFile, data);
+        } else {
+            await Commands.versionCtoModelFile(release, modelFile, data);
+        }
+    }
+
+    /**
+     * Update the version of a metamodel (JSON) model file.
+     *
+     * @param {string} release the release, major/minor/patch, or a semantic version
+     * @param {string} modelFile the model file path
+     * @param {string} data the model file data
+     * @private
+     */
+    static async versionMetaModelFile(release, modelFile, data) {
+        const metamodel = JSON.parse(data);
+        const currentNamespace = metamodel.namespace;
+        const [namespace, currentVersion] = currentNamespace.split('@');
+        const newVersion = Commands.calculateNewVersion(release, currentVersion);
+        metamodel.namespace = [namespace, newVersion].join('@');
+        const newData = JSON.stringify(metamodel, null, 2);
+        fs.writeFileSync(modelFile, newData, 'utf-8');
+        Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
+    }
+
+    /**
+     * Update the version of a CTO model file.
+     *
+     * @param {string} release the release, major/minor/patch, or a semantic version
+     * @param {string} modelFile the model file path
+     * @param {string} data the model file data
+     * @private
+     */
+    static async versionCtoModelFile(release, modelFile, data) {
+        const metamodel = Parser.parse(data, modelFile);
+        const currentNamespace = metamodel.namespace;
+        const [name, currentVersion] = currentNamespace.split('@');
+        const newVersion = Commands.calculateNewVersion(release, currentVersion);
+        const newNamespace = [name, newVersion].join('@');
+        const newData = data.replace(/(namespace\s+)(\S+)/, (match, keyword) => {
+            return `${keyword}${newNamespace}`;
+        });
+        // Sanity check.
+        Parser.parse(newData, modelFile);
+        fs.writeFileSync(modelFile, newData, 'utf-8');
+        Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
+    }
+
+    /**
+     * Calculate the new version using the specified release.
+     *
+     * @param {string} release the release, major/minor/patch, or a semantic version
+     * @param {string} currentVersion the current version
+     * @returns {string} the new version
+     * @private
+     */
+    static calculateNewVersion(release, currentVersion) {
+        if (semver.valid(release)) {
+            return release;
+        } else if (!semver.valid(currentVersion)) {
+            throw new Error(`invalid current version "${currentVersion}"`);
+        }
+        const newVersion = semver.inc(currentVersion, release);
+        if (!newVersion) {
+            throw new Error(`invalid release "${release}"`);
+        }
+        return newVersion;
+    }
+
+    /**
+     * Determine if data is valid JSON or not.
+     *
+     * @param {string} data the data
+     * @returns {boolean} true if JSON, false if not
+     * @private
+     */
+    static isJSON(data) {
+        try {
+            JSON.parse(data);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 }
 
