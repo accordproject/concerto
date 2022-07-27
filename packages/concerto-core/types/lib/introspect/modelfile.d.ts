@@ -28,7 +28,7 @@ declare class ModelFile {
     importUriMap: {};
     fileName: string;
     concertoVersion: any;
-    version: any;
+    version: string;
     ast: any;
     definitions: string;
     /**

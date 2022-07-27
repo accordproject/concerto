@@ -11,26 +11,47 @@ declare class ModelUtil {
      * Returns everything after the last dot, if present, of the source string
      * @param {string} fqn - the source string
      * @return {string} - the string after the last dot
-     * @private
      */
-    private static getShortName;
+    static getShortName(fqn: string): string;
     /**
      * Returns the namespace for a the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
      * @return {string} - namespace of the type (everything before the last dot)
      * or the empty string if there is no dot
-     * @private
      */
-    private static getNamespace;
+    static getNamespace(fqn: string): string;
+    /**
+     * @typedef ParseNamespaceResult
+     * @property {string} name the name of the namespace
+     * @property {string} escapedNamespace the escaped namespace
+     * @property {string} version the version of the namespace
+     * @property {object} versionParsed the parsed semantic version of the namespace
+     */
     /**
      * Parses a potentially versioned namespace into
      * its name and version parts. The version of the namespace
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
-     * @returns {object} the result of parsing: an object with properties: name,
-     * escapedNamespace, version and versionParsed
+     * @returns {ParseNamespaceResult} the result of parsing
      */
-    static parseNamespace(ns: string): object;
+    static parseNamespace(ns: string): {
+        /**
+         * the name of the namespace
+         */
+        name: string;
+        /**
+         * the escaped namespace
+         */
+        escapedNamespace: string;
+        /**
+         * the version of the namespace
+         */
+        version: string;
+        /**
+         * the parsed semantic version of the namespace
+         */
+        versionParsed: object;
+    };
     /**
      * Return the fully qualified name for an import
      * @param {object} imp - the import
