@@ -280,10 +280,14 @@ class Commands {
      * @param {string[]} modelFiles the list of model file paths
      */
     static async version(release, modelFiles) {
+        const updatedModelFiles = [];
         for (const modelFile of modelFiles) {
             const resolvedModelFile = path.resolve(modelFile);
-            await Commands.versionModelFile(release, resolvedModelFile);
+            const updatedModelFile = await Commands.versionModelFile(release, resolvedModelFile);
+            updatedModelFiles.push(updatedModelFile);
         }
+        Commands.updateImportsForUpdatedModelFiles(updatedModelFiles);
+        Commands.writeUpdatedModelFiles(updatedModelFiles);
     }
 
     /**
@@ -297,11 +301,89 @@ class Commands {
         const data = fs.readFileSync(modelFile, 'utf-8');
         const isMetaModel = Commands.isJSON(data);
         if (isMetaModel) {
-            await Commands.versionMetaModelFile(release, modelFile, data);
+            return Commands.versionMetaModelFile(release, modelFile, data);
+
         } else {
-            await Commands.versionCtoModelFile(release, modelFile, data);
+            return Commands.versionCtoModelFile(release, modelFile, data);
         }
     }
+
+    /**
+     * Update (in-place) the imports of one or more updated model files.
+     * @param {object[]} updatedModelFiles the updated model files
+     * @private
+     */
+    static updateImportsForUpdatedModelFiles(updatedModelFiles) {
+        for (const updatedModelFile of updatedModelFiles) {
+            Commands.updateImportsForUpdatedModelFile(updatedModelFiles, updatedModelFile);
+        }
+    }
+
+    /**
+     * Update (in-place) the imports of an updated model file.
+     * @param {object[]} updatedModelFiles the updated model files
+     * @param {object} updatedModelFile the updated model file to update
+     * @private
+     */
+    static updateImportsForUpdatedModelFile(updatedModelFiles, updatedModelFile) {
+        let { newData, cto } = updatedModelFile;
+        // Go through each of the other updated model files, and do a string search and
+        // replace for the current namespace (old version) with the new namespace (new version).
+        for (const otherUpdatedModelFile of updatedModelFiles) {
+            // Skip this model file if it has the same namespace.
+            if (updatedModelFile.namespace === otherUpdatedModelFile.namespace) {
+                continue;
+            }
+            if (cto) {
+                // Ideally we'd be able to parse the CTO to metamodel, edit that and then
+                // serialize back to CTO, but that process is lossy.
+                newData = newData.split(otherUpdatedModelFile.currentNamespace).join(otherUpdatedModelFile.newNamespace);
+            } else {
+                const metamodel = JSON.parse(newData);
+                for (const imp of metamodel.imports) {
+                    if (imp.namespace === otherUpdatedModelFile.currentNamespace) {
+                        imp.namespace = otherUpdatedModelFile.newNamespace;
+                    }
+                }
+                newData = JSON.stringify(metamodel, null, 2);
+            }
+        }
+        updatedModelFile.newData = newData;
+    }
+
+    /**
+     * Write one or more updated model files to the file system.
+     * @param {object[]} updatedModelFiles the updated model files
+     * @param {object} updatedModelFile the updated model file to update
+     * @private
+     */
+    static writeUpdatedModelFiles(updatedModelFiles) {
+        for (const updatedModelFile of updatedModelFiles) {
+            Commands.writeUpdatedModelFile(updatedModelFile);
+        }
+    }
+
+    /**
+     * Write one or more updated model files to the file system.
+     * @param {object} updatedModelFile the updated model file to update
+     * @private
+     */
+    static writeUpdatedModelFile(updatedModelFile) {
+        const {
+            cto,
+            modelFile,
+            newData,
+            currentVersion,
+            newVersion,
+        } = updatedModelFile;
+        if (cto) {
+            // Sanity check.
+            Parser.parse(newData, modelFile);
+        }
+        fs.writeFileSync(modelFile, newData, 'utf-8');
+        Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
+    }
+
 
     /**
      * Update the version of a metamodel (JSON) model file.
@@ -316,10 +398,19 @@ class Commands {
         const currentNamespace = metamodel.namespace;
         const [namespace, currentVersion] = currentNamespace.split('@');
         const newVersion = Commands.calculateNewVersion(release, currentVersion);
-        metamodel.namespace = [namespace, newVersion].join('@');
+        const newNamespace = [namespace, newVersion].join('@');
+        metamodel.namespace = newNamespace;
         const newData = JSON.stringify(metamodel, null, 2);
-        fs.writeFileSync(modelFile, newData, 'utf-8');
-        Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
+        return {
+            cto: false,        // true === is CTO model file, false === is JSON meta model file
+            modelFile,        // the model file path
+            newData,          // the new file contents (as a string)
+            namespace,        // the namespace, org.acme
+            currentNamespace, // the current versioned namespace, org.acme@1.2.3
+            newNamespace,     // the new versioned namespace, org.acme@2.0.0
+            currentVersion,   // the current version, 1.2.3
+            newVersion,       // the new version, 2.0.0
+        };
     }
 
     /**
@@ -331,18 +422,24 @@ class Commands {
      * @private
      */
     static async versionCtoModelFile(release, modelFile, data) {
-        const metamodel = Parser.parse(data, modelFile);
+        const metamodel = Parser.parse(data);
         const currentNamespace = metamodel.namespace;
-        const [name, currentVersion] = currentNamespace.split('@');
+        const [namespace, currentVersion] = currentNamespace.split('@');
         const newVersion = Commands.calculateNewVersion(release, currentVersion);
-        const newNamespace = [name, newVersion].join('@');
+        const newNamespace = [namespace, newVersion].join('@');
         const newData = data.replace(/(namespace\s+)(\S+)/, (match, keyword) => {
             return `${keyword}${newNamespace}`;
         });
-        // Sanity check.
-        Parser.parse(newData, modelFile);
-        fs.writeFileSync(modelFile, newData, 'utf-8');
-        Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
+        return {
+            cto: true,        // true === is CTO model file, false === is JSON meta model file
+            modelFile,        // the model file path
+            newData,          // the new file contents (as a string)
+            namespace,        // the namespace, org.acme
+            currentNamespace, // the current versioned namespace, org.acme@1.2.3
+            newNamespace,     // the new versioned namespace, org.acme@2.0.0
+            currentVersion,   // the current version, 1.2.3
+            newVersion,       // the new version, 2.0.0
+        };
     }
 
     /**
