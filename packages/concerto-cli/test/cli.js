@@ -272,7 +272,7 @@ describe('cicero-cli', () => {
         });
     });
 
-    describe('#version', async () => {
+    describe('#version (simple)', async () => {
         let ctoPath;
         let metamodelPath;
 
@@ -318,6 +318,125 @@ describe('cicero-cli', () => {
         it('should reject an invalid version', async () => {
             const sourceCtoPath = path.resolve(__dirname, 'models', 'badversion.cto');
             await Commands.version('patch', [sourceCtoPath]).should.be.rejectedWith(/invalid current version "undefined"/);
+        });
+    });
+
+    describe('#version (imports)', async () => {
+        let ctoPaths;
+        let metamodelPaths;
+
+        beforeEach(async () => {
+            ctoPaths = [];
+            metamodelPaths = [];
+            for (const name of ['version-a.cto', 'version-b.cto', 'version-c.cto']) {
+                const sourceCtoPath = path.resolve(__dirname, 'models', name);
+                const sourceCto = fs.readFileSync(sourceCtoPath, 'utf-8');
+                const ctoPath = (await tmp.file({ unsafeCleanup: true })).path;
+                ctoPaths.push(ctoPath);
+                fs.writeFileSync(ctoPath, sourceCto, 'utf-8');
+                const metamodelPath = (await tmp.file({ unsafeCleanup: true })).path;
+                metamodelPaths.push(metamodelPath);
+                const metamodel = Parser.parse(sourceCto);
+                fs.writeFileSync(metamodelPath, JSON.stringify(metamodel, null, 2), 'utf-8');
+            }
+        });
+
+        const tests = [
+            { name: 'patch', release: 'patch', files: [
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.a@1.2.4',
+                    expectedString: 'org.accordproject.concerto.test.b@2.3.5'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.b@2.3.5',
+                    expectedString: 'org.accordproject.concerto.test.c@3.4.6'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.c@3.4.6'
+                }
+            ]},
+            { name: 'minor', release: 'minor', files: [
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.a@1.3.0',
+                    expectedString: 'org.accordproject.concerto.test.b@2.4.0'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.b@2.4.0',
+                    expectedString: 'org.accordproject.concerto.test.c@3.5.0'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.c@3.5.0'
+                }
+            ]},
+            { name: 'major', release: 'major', files: [
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.a@2.0.0',
+                    expectedString: 'org.accordproject.concerto.test.b@3.0.0'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.b@3.0.0',
+                    expectedString: 'org.accordproject.concerto.test.c@4.0.0'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.c@4.0.0'
+                }
+            ]},
+            { name: 'explicit', release: '4.5.6', files: [
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.a@4.5.6',
+                    expectedString: 'org.accordproject.concerto.test.b@4.5.6'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.b@4.5.6',
+                    expectedString: 'org.accordproject.concerto.test.c@4.5.6'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.c@4.5.6'
+                }
+            ]},
+            { name: 'prerelease', release: '5.6.7-pr.3472381', files: [
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.a@5.6.7-pr.3472381',
+                    expectedString: 'org.accordproject.concerto.test.b@5.6.7-pr.3472381'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.b@5.6.7-pr.3472381',
+                    expectedString: 'org.accordproject.concerto.test.c@5.6.7-pr.3472381'
+                },
+                {
+                    expectedNamespace: 'org.accordproject.concerto.test.c@5.6.7-pr.3472381'
+                }
+            ]},
+        ];
+
+        tests.forEach(({ name, release, files }) => {
+
+            it(`should patch bump a cto file [${name}]`, async () => {
+                await Commands.version(release, ctoPaths);
+                for (const [i, file] of files.entries()) {
+                    const { expectedNamespace, expectedString } = file;
+                    const cto = fs.readFileSync(ctoPaths[i], 'utf-8');
+                    if (expectedString) {
+                        cto.should.contain(expectedString);
+                    }
+                    const metamodel = Parser.parse(cto);
+                    metamodel.namespace.should.equal(expectedNamespace);
+                }
+            });
+
+            it(`should patch bump a metamodel file [${name}]`, async () => {
+                await Commands.version(release, metamodelPaths);
+                for (const [i, file] of files.entries()) {
+                    const { expectedNamespace, expectedString } = file;
+                    const data = fs.readFileSync(metamodelPaths[i], 'utf-8');
+                    if (expectedString) {
+                        data.should.contain(expectedString);
+                    }
+                    const metamodel = JSON.parse(data);
+                    metamodel.namespace.should.equal(expectedNamespace);
+                }
+            });
+
         });
     });
 });
