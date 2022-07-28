@@ -30,7 +30,6 @@ class ModelUtil {
      * Returns everything after the last dot, if present, of the source string
      * @param {string} fqn - the source string
      * @return {string} - the string after the last dot
-     * @private
      */
     static getShortName(fqn) {
         //console.log('toShortName ' + name );
@@ -49,7 +48,6 @@ class ModelUtil {
      * @param {string} fqn - the fully qualified identifier of a type
      * @return {string} - namespace of the type (everything before the last dot)
      * or the empty string if there is no dot
-     * @private
      */
     static getNamespace(fqn) {
         if (!fqn) {
@@ -66,12 +64,19 @@ class ModelUtil {
     }
 
     /**
+     * @typedef ParseNamespaceResult
+     * @property {string} name the name of the namespace
+     * @property {string} escapedNamespace the escaped namespace
+     * @property {string} version the version of the namespace
+     * @property {object} versionParsed the parsed semantic version of the namespace
+     */
+
+    /**
      * Parses a potentially versioned namespace into
      * its name and version parts. The version of the namespace
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
-     * @returns {object} the result of parsing: an object with properties: name,
-     * escapedNamespace, version and versionParsed
+     * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns) {
         if(!ns) {
