@@ -194,6 +194,16 @@ concept ImportTypes extends Import {
   o String[] types
 }
 
+abstract concept TypedefDeclaration extends Declaration {
+  o Boolean isArray default=false
+  o Boolean isOptional default=false
+}
+
+concept StringTypedefDeclaration extends TypedefDeclaration {
+  o String defaultValue optional
+  o StringRegexValidator validator optional
+}
+
 concept Model {
   o String namespace
   o String sourceUri optional

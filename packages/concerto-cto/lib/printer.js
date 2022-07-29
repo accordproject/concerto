@@ -168,11 +168,103 @@ function propertyFromMetaModel(mm) {
 }
 
 /**
+ * Create a typedef string from a metamodel
+ * @param {object} mm - the metamodel
+ * @return {string} the string for that property
+ */
+function typedefFromMetaModel(mm) {
+    let result = '';
+    let defaultString = '';
+    let validatorString = '';
+
+    if (mm.decorators) {
+        result += decoratorsFromMetaModel(mm.decorators, '');
+    }
+
+    result += `typedef ${mm.name} =`;
+
+    switch (mm.$class) {
+    case 'concerto.metamodel.BooleanTypedefDeclaration':
+        result += ' Boolean';
+        if (mm.defaultValue === true || mm.defaultValue === false) {
+            if (mm.defaultValue) {
+                defaultString += ' default=true';
+            } else {
+                defaultString += ' default=false';
+            }
+        }
+        break;
+    case 'concerto.metamodel.DateTimeTypedefDeclaration':
+        result += ' DateTime';
+        break;
+    case 'concerto.metamodel.DoubleTypedefDeclaration':
+        result += ' Double';
+        if (mm.defaultValue) {
+            const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
+
+            defaultString += ` default=${doubleString}`;
+        }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
+        break;
+    case 'concerto.metamodel.IntegerTypedefDeclaration':
+        result += ' Integer';
+        if (mm.defaultValue) {
+            defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
+        break;
+    case 'concerto.metamodel.LongTypedefDeclaration':
+        result += ' Long';
+        if (mm.defaultValue) {
+            defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower ? mm.validator.lower : '';
+            const upperString = mm.validator.upper ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
+        break;
+    case 'concerto.metamodel.StringTypedefDeclaration':
+        result += ' String';
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
+        if (mm.validator) {
+            validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
+        }
+        break;
+    default:
+        throw new Error(`unrecognized typedef class ${mm.$class}`);
+    }
+    if (mm.isArray) {
+        result += '[]';
+    }
+    result += defaultString;
+    result += validatorString;
+    if (mm.isOptional) {
+        result += ' optional';
+    }
+    return result;
+}
+
+/**
  * Create a declaration string from a metamodel
  * @param {object} mm - the metamodel
  * @return {string} the string for that declaration
  */
 function declFromMetaModel(mm) {
+    if (mm.$class.endsWith('TypedefDeclaration')) {
+        return typedefFromMetaModel(mm);
+    }
+
     let result = '';
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '');

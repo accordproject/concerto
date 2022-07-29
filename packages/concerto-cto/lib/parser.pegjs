@@ -800,6 +800,7 @@ EventToken        = "event"       !IdentifierPart
 ParticipantToken  = "participant" !IdentifierPart
 FromToken         = "from"        !IdentifierPart
 AllToken          = ".*"          !IdentifierPart
+TypedefToken      = "typedef"     !IdentifierPart
 
 /* Primitive Types */
 IntegerType       = "Integer"     !IdentifierPart {
@@ -1349,6 +1350,30 @@ RelationshipDeclaration
       return result;
     }
 
+StringTypedefDeclaration
+    = decorators:Decorators __ TypedefToken __ id:Identifier __ "=" __ StringType __ array:"[]"? __ d:StringDefault? __ regex:StringRegexValidator? __ optional:Optional? __ {
+    	const result = {
+    		$class: "concerto.metamodel.StringTypedefDeclaration",
+    		name: id.name,
+    		isArray: buildBoolean(array),
+    		isOptional: buildBoolean(optional),
+        location: buildRange(location())
+    	};
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (decorators.length > 0) {
+        result.decorators = decorators;
+      }
+      if (regex) {
+    		result.validator = regex;
+      }
+      return result;
+    }
+
+TypedefDeclaration
+    = StringTypedefDeclaration
+
 QualifiedName
   = first:$Identifier rest:$('.' Identifier)* {
     return first.concat(JSON.stringify(rest).replace(/['"]+/g, ''));
@@ -1465,6 +1490,7 @@ SourceElement
   / ParticipantDeclaration
   / EnumDeclaration
   / ConceptDeclaration
+  / TypedefDeclaration
 
 
 

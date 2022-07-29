@@ -1,0 +1,14 @@
+namespace org.example
+
+typedef StringType = String
+
+typedef StringArrayType = String[]
+
+typedef StringTypeWithDefault = String default="hello, world"
+
+typedef StringTypeWithOptional = String optional
+
+typedef StringTypeWithRegex = String regex=/^\d+$/
+
+@StringDecorator()
+typedef StringWithDecorator = String
