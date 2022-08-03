@@ -21,7 +21,6 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const path = require('path');
 
 const Writer = require('../lib/writer');
@@ -41,7 +40,7 @@ describe('FileWriter', function () {
 
     describe('#constructor', function () {
         it('main code path', function () {
-            let syncStub = sandbox.stub(mkdirp, 'sync');
+            let syncStub = sandbox.stub(fs, 'mkdirSync');
             syncStub.returns();
 
             let fileWriter = new FileWriter('dir');
@@ -142,7 +141,7 @@ describe('FileWriter', function () {
             let fsWriteFileSyncStub = sandbox.stub(fs, 'writeFileSync');
             fsWriteFileSyncStub.returns();
 
-            let syncStub = sandbox.stub(mkdirp, 'sync');
+            let syncStub = sandbox.stub(fs, 'mkdirSync');
             syncStub.returns();
 
             let superClearBuffer = sandbox.stub(Writer.prototype, 'clearBuffer');
@@ -180,7 +179,7 @@ describe('FileWriter', function () {
             let fsWriteFileSyncStub = sandbox.stub(fs, 'writeFileSync');
             fsWriteFileSyncStub.returns();
 
-            let syncStub = sandbox.stub(mkdirp, 'sync');
+            let syncStub = sandbox.stub(fs, 'mkdirSync');
             syncStub.returns();
 
             let superClearBuffer = sandbox.stub(Writer.prototype, 'clearBuffer');

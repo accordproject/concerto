@@ -53,8 +53,7 @@
     "axios": "0.23.0",
     "colors": "1.4.0",
     "debug": "4.3.1",
-    "json-colorizer": "2.2.2",
-    "mkdirp": "1.0.4"
+    "json-colorizer": "2.2.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
@@ -65,7 +64,6 @@
       "api.txt",
       "composer-logs",
       "coverage",
-      "./parser.js",
       "LICENSE",
       "node_modules",
       ".nyc-output",
@@ -109,9 +107,6 @@
     ],
     "include": [
       "lib/**/*.js"
-    ],
-    "exclude": [
-      "lib/parser.js"
     ],
     "all": true,
     "check-coverage": true,
