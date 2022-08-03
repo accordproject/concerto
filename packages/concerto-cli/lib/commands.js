@@ -16,7 +16,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const mkdirp = require('mkdirp');
 const semver = require('semver');
 
 const Logger = require('@accordproject/concerto-util').Logger;
@@ -204,7 +203,7 @@ class Commands {
      */
     static async get(ctoFiles, output) {
         const modelManager = await ModelLoader.loadModelManager(ctoFiles);
-        mkdirp.sync(output);
+        fs.mkdirSync(path.dirname(output), {recursive:true});
         modelManager.writeModelsToFileSystem(output);
         return `Loaded external models in '${output}'.`;
     }

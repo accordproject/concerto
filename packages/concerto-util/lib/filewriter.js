@@ -15,7 +15,6 @@
 'use strict';
 
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const path = require('path');
 
 const Writer = require('./writer');
@@ -44,7 +43,7 @@ class FileWriter extends Writer {
         this.outputDirectory = outputDirectory;
         this.relativeDir = null;
         this.fileName = null;
-        mkdirp.sync(outputDirectory);
+        fs.mkdirSync(outputDirectory, {recursive:true});
     }
 
     /**
@@ -111,7 +110,7 @@ class FileWriter extends Writer {
         filePath = path.resolve(filePath, this.fileName);
 
         //console.log('Writing to ' + filePath );
-        mkdirp.sync(path.dirname(filePath));
+        fs.mkdirSync(path.dirname(filePath), {recursive:true});
         fs.writeFileSync(filePath, this.getBuffer());
 
         this.fileName = null;
