@@ -16,22 +16,19 @@
 
 let path = require('path');
 const webpack = require('webpack');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+
 const packageJson = require('./package.json');
 
 module.exports = {
-    entry: {
-        client: [
-            './index.js'
-        ]
-    },
+    entry: './index.js',
     output: {
-        path: path.join(__dirname, 'umd'),
-        filename: 'concerto.js',
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'concerto-core.js',
         library: {
-            name: 'concerto',
+            name: 'concerto-core',
             type: 'umd',
         },
-        umdNamedDefine: true,
     },
     plugins: [
         new webpack.BannerPlugin(`Concerto v${packageJson.version}
@@ -49,7 +46,13 @@ module.exports = {
                 'NODE_ENV': JSON.stringify('production')
             }
         }),
-    ],
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+        new webpack.ProvidePlugin({
+            process: 'process/browser', // provide a shim for the global `process` variable
+        }),
+        new NodePolyfillPlugin(),],
     module: {
         rules: [
             {
@@ -59,19 +62,25 @@ module.exports = {
             },
             {
                 test: /\.ne$/,
-                use:['raw-loader']
+                use: ['raw-loader']
             }
         ]
     },
     resolve: {
         fallback: {
+            // Webpack 5 no longer polyfills Node.js core modules automatically.
+            // see https://webpack.js.org/configuration/resolve/#resolvefallback
+            // for the list of Node.js core module polyfills.
             'fs': false,
             'tls': false,
             'net': false,
-            'path': false,
-            'os': false,
-            'util': false,
-            'url': false,
+            'child_process': false,
+            'crypto': require.resolve('crypto-browserify'),
+            'stream': require.resolve('stream-browserify'),
+            'http': require.resolve('stream-http'),
+            'https': require.resolve('https-browserify'),
+            'zlib': require.resolve('browserify-zlib'),
+            'vm2': require.resolve('vm-browserify'),
         }
     }
 };
