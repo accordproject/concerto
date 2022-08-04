@@ -16,7 +16,6 @@
 
 let path = require('path');
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const packageJson = require('./package.json');
 
@@ -24,14 +23,14 @@ module.exports = {
     entry: './index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'concerto-core.js',
+        filename: 'concerto-cto.js',
         library: {
-            name: 'concerto-core',
+            name: 'concerto-cto',
             type: 'umd',
         },
     },
     plugins: [
-        new webpack.BannerPlugin(`Concerto v${packageJson.version}
+        new webpack.BannerPlugin(`Concerto CTO v${packageJson.version}
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
         You may obtain a copy of the License at
@@ -46,13 +45,7 @@ module.exports = {
                 'NODE_ENV': JSON.stringify('production')
             }
         }),
-        new webpack.ProvidePlugin({
-            Buffer: ['buffer', 'Buffer'],
-        }),
-        new webpack.ProvidePlugin({
-            process: 'process/browser', // provide a shim for the global `process` variable
-        }),
-        new NodePolyfillPlugin(),],
+    ],
     module: {
         rules: [
             {
@@ -71,18 +64,7 @@ module.exports = {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
             // see https://webpack.js.org/configuration/resolve/#resolvefallback
             // for the list of Node.js core module polyfills.
-            'fs': false,
-            'tls': false,
-            'net': false,
-            'child_process': false,
-            'os': false,
-            'path': false,
-            // 'crypto': require.resolve('crypto-browserify'),
-            // 'stream': require.resolve('stream-browserify'),
-            // 'http': require.resolve('stream-http'),
-            // 'https': require.resolve('https-browserify'),
-            // 'zlib': require.resolve('browserify-zlib'),
-            // 'vm2': require.resolve('vm-browserify'),
+            'path': 'path-browserify'
         }
     }
 };
