@@ -7,9 +7,10 @@
     "node": ">=14",
     "npm": ">=6"
   },
-  "main": "index.js",
+  "main": "dist/concerto-cto.js",
   "typings": "types/index.d.ts",
   "scripts": {
+    "prepublishOnly": "webpack --config webpack.config.js --mode production",
     "parser": "peggy -o lib/parser.js lib/parser.pegjs",
     "pretest": "npm run lint && npm run parser",
     "lint": "eslint .",
@@ -54,7 +55,8 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.0.0-alpha.1",
-    "@accordproject/concerto-util": "3.0.0-alpha.1"
+    "@accordproject/concerto-util": "3.0.0-alpha.1",
+    "path-browserify": "1.0.1"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

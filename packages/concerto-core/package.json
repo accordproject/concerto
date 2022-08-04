@@ -7,8 +7,7 @@
     "node": ">=14",
     "npm": ">=6"
   },
-  "main": "index.js",
-  "browser": "umd/concerto.js",
+  "main": "dist/concerto-core.js",
   "typings": "types/index.d.ts",
   "scripts": {
     "prepublishOnly": "webpack --config webpack.config.js --mode production",
@@ -31,9 +30,9 @@
     "directory": "packages/concerto-cto"
   },
   "keywords": [
-    "blockchain",
-    "hyperledger",
-    "solutions"
+    "schema",
+    "data model",
+    "verification"
   ],
   "author": "accordproject.org",
   "license": "Apache-2.0",
@@ -55,7 +54,9 @@
     "mocha": "8.3.2",
     "mockery": "2.1.0",
     "moxios": "0.4.0",
+    "node-polyfill-webpack-plugin": "2.0.1",
     "nyc": "15.1.0",
+    "process": "0.11.10",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
     "tmp-promise": "3.0.2",
@@ -92,6 +93,7 @@
       "node_modules",
       ".nyc-output",
       "out",
+      "dist",
       ".tern-project"
     ],
     "file_type_method": "EXCLUDE",

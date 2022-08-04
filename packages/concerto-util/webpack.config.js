@@ -24,14 +24,14 @@ module.exports = {
     entry: './index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'concerto-core.js',
+        filename: 'concerto-util.js',
         library: {
-            name: 'concerto-core',
+            name: 'concerto-util',
             type: 'umd',
         },
     },
     plugins: [
-        new webpack.BannerPlugin(`Concerto v${packageJson.version}
+        new webpack.BannerPlugin(`Concerto Util v${packageJson.version}
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
         You may obtain a copy of the License at
