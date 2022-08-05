@@ -58,7 +58,7 @@ test('should detect a change of namespace', async () => {
         const results = new Compare().compare(a, b);
         expect(results.findings).toEqual(expect.arrayContaining([
             expect.objectContaining({
-                key: `${type}-added`,
+                key: 'class-declaration-added',
                 message: `The ${type} "Thing" was added`
             })
         ]));
@@ -70,7 +70,7 @@ test('should detect a change of namespace', async () => {
         const results = new Compare().compare(a, b);
         expect(results.findings).toEqual(expect.arrayContaining([
             expect.objectContaining({
-                key: `${type}-removed`,
+                key: 'class-declaration-removed',
                 message: `The ${type} "Thing" was removed`
             })
         ]));
@@ -124,4 +124,19 @@ test('should detect an optional field being removed', async () => {
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+
+[{ from: 'asset', to: 'concept'}, { from: 'enum', to: 'event' }, { from: 'participant', to: 'transaction'}].forEach(({ from, to }) => {
+    test(`should detect a change of declaration type (${from} to ${to})`, async () => {
+        const [a, b] = await getModelFiles(`${from}-added.cto`, `${to}-added.cto`);
+        const results = new Compare().compare(a, b);
+        expect(results.findings).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                key: 'class-declaration-type-changed',
+                message: `The ${from} "Thing" changed type from ${from} to ${to}`
+            })
+        ]));
+        expect(results.result).toBe(CompareResult.MAJOR);
+    });
 });
