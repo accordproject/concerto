@@ -14,6 +14,7 @@
 
 'use strict';
 
+const c = require('ansi-colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
@@ -32,6 +33,9 @@ const Factory = require('@accordproject/concerto-core').Factory;
 const Serializer = require('@accordproject/concerto-core').Serializer;
 const Concerto = require('@accordproject/concerto-core').Concerto;
 const CodeGen = require('@accordproject/concerto-tools').CodeGen;
+
+const { Compare, compareResultToString } = require('@accordproject/concerto-analysis');
+const { ModelFile, ModelManager } = require('@accordproject/concerto-core');
 
 const GoLangVisitor = CodeGen.GoLangVisitor;
 const JavaVisitor = CodeGen.JavaVisitor;
@@ -290,6 +294,32 @@ class Commands {
     }
 
     /**
+     * Compare two model files and print the results.
+     * @param {string} oldPath The path to the old model file.
+     * @param {string} newPath The path to the new model file.
+     */
+    static async compare(oldPath, newPath) {
+        const oldContents = fs.readFileSync(path.resolve(oldPath), 'utf-8');
+        const newContents = fs.readFileSync(path.resolve(newPath), 'utf-8');
+        const modelManager = new ModelManager({ versionedNamespacesStrict: true });
+        const oldModelFile = this.getModelFile(modelManager, oldContents);
+        const newModelFile = this.getModelFile(modelManager, newContents);
+        const results = new Compare().compare(oldModelFile, newModelFile);
+        for (const finding of results.findings) {
+            const result = compareResultToString(finding.result);
+            const coloredResult = this.colorCompareResult(result);
+            console.log(`[${finding.key}]: ${finding.message} (${coloredResult})`);
+        }
+        const result = compareResultToString(results.result);
+        const coloredResult = this.colorCompareResult(result);
+        console.log('');
+        console.log(`overall result: ${coloredResult}`);
+        if (result === 'error') {
+            process.exit(1);
+        }
+    }
+
+    /**
      * Update the version of a model file.
      *
      * @param {string} release the release, major/minor/patch, or a semantic version
@@ -383,7 +413,6 @@ class Commands {
         Logger.info(`Updated version of "${modelFile}" from "${currentVersion}" to "${newVersion}"`);
     }
 
-
     /**
      * Update the version of a metamodel (JSON) model file.
      *
@@ -476,6 +505,38 @@ class Commands {
         } catch (error) {
             return false;
         }
+    }
+
+    /**
+     * Given the specified file contents, parse them as metamodel or CTO.
+     * @param {ModelManager} modelManager The model manager.
+     * @param {string} contents The file contents.
+     * @private
+     * @returns {ModelFile} The model file.
+     */
+    static getModelFile(modelManager, contents) {
+        let metamodel;
+        try {
+            metamodel = JSON.parse(contents);
+        } catch (error) {
+            metamodel = Parser.parse(contents);
+        }
+        return new ModelFile(modelManager, metamodel);
+    }
+
+    /**
+     * Color a string based on the specified compare result.
+     * @param {string} result The compare result.
+     * @returns {string} The colored string.
+     */
+    static colorCompareResult(result) {
+        const colors = {
+            'patch': c.green,
+            'minor': c.yellow,
+            'major': c.magenta,
+            'error': c.red,
+        };
+        return colors[result] ? colors[result](result) : result;
     }
 }
 

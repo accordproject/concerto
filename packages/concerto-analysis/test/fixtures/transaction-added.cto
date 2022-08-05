@@ -1,0 +1,5 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+transaction Thing {
+
+}

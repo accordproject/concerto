@@ -1,0 +1,101 @@
+{
+    "name": "@accordproject/concerto-analysis",
+    "version": "3.0.0-alpha.1",
+    "description": "Analysis of Concerto model files",
+    "homepage": "https://github.com/accordproject/concerto",
+    "engines": {
+        "node": ">=14",
+        "npm": ">=6"
+    },
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "scripts": {
+        "clean": "rimraf dist",
+        "prebuild": "npm-run-all clean",
+        "build": "tsc -p tsconfig.build.json",
+        "pretest": "npm-run-all licchk lint",
+        "lint": "eslint .",
+        "licchk": "license-check-and-add",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/accordproject/concerto.git",
+        "directory": "packages/concerto-analysis"
+    },
+    "keywords": [
+        "concerto",
+        "tools",
+        "modeling"
+    ],
+    "author": "accordproject.org",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@accordproject/concerto-core": "3.0.0-alpha.1"
+    },
+    "devDependencies": {
+        "@accordproject/concerto-cto": "3.0.0-alpha.1",
+        "@types/jest": "28.1.1",
+        "@typescript-eslint/parser": "5.27.1",
+        "@typescript-eslint/eslint-plugin": "5.27.1",
+        "eslint": "8.2.0",
+        "jest": "28.1.1",
+        "license-check-and-add": "2.3.6",
+        "npm-run-all": "4.1.5",
+        "rimraf": "3.0.2",
+        "ts-jest": "28.0.4",
+        "typescript": "4.6.3"
+    },
+    "license-check-and-add-config": {
+        "folder": "./src",
+        "license": "HEADER",
+        "exact_paths_method": "EXCLUDE",
+        "exact_paths": [
+            "api.txt",
+            "composer-logs",
+            "coverage",
+            "index.d.ts",
+            "./system",
+            "./introspect/parser.js",
+            "LICENSE",
+            "node_modules",
+            ".nyc-output",
+            "out",
+            ".tern-project",
+            "./generated/concerto.ts",
+            "./generated/concerto.metamodel.ts"
+        ],
+        "file_type_method": "EXCLUDE",
+        "file_types": [
+            ".yml",
+            ".yaml",
+            ".zip",
+            ".tgz"
+        ],
+        "insert_license": false,
+        "license_formats": {
+            "js|ts|njk|pegjs|cto|acl|qry": {
+                "prepend": "/*",
+                "append": " */",
+                "eachLine": {
+                    "prepend": " * "
+                }
+            },
+            "npmrc|editorconfig|txt": {
+                "eachLine": {
+                    "prepend": "# "
+                }
+            },
+            "md": {
+                "file": "./HEADER.md"
+            }
+        }
+    },
+    "jest": {
+      "preset": "ts-jest",
+      "testEnvironment": "node",
+      "testPathIgnorePatterns": ["<rootDir>/dist/", "/node_modules/"],
+      "collectCoverage": true,
+      "collectCoverageFrom": ["src/**/*.ts"]
+    }
+}

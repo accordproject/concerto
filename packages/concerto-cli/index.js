@@ -244,7 +244,21 @@ require('yargs')
                 if (result) {
                     Logger.info(result);
                 }
-            })
+            });
+    })
+    .command('compare', 'compare two Concerto model files', yargs => {
+        yargs.demandOption(['old'], 'Please provide the old model');
+        yargs.demandOption(['new'], 'Please provide the new model');
+        yargs.option('old', {
+            describe: 'the old Concerto model file',
+            type: 'string',
+        });
+        yargs.option('new', {
+            describe: 'the new Concerto model file',
+            type: 'string',
+        });
+    }, argv => {
+        return Commands.compare(argv.old, argv.new)
             .catch((err) => {
                 Logger.error(err.message);
             });

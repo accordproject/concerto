@@ -1,0 +1,5 @@
+namespace compare
+
+concept Thing {
+    o String value
+}
