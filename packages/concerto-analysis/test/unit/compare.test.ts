@@ -164,3 +164,51 @@ test('should detect an enum value being removed', async () => {
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a field changing to a relationship', async () => {
+    const [a, b] = await getModelFiles('field-to-relationship-a.cto', 'field-to-relationship-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The field "bar" in the concept "Thing" changed type from field to relationship'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a relationship changing to a field', async () => {
+    const [a, b] = await getModelFiles('field-to-relationship-b.cto', 'field-to-relationship-a.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The relationship "bar" in the concept "Thing" changed type from relationship to field'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a scalar changing to an array', async () => {
+    const [a, b] = await getModelFiles('scalar-to-array-a.cto', 'scalar-to-array-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The scalar field "bar" in the concept "Thing" changed type from a scalar field to an array field'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect an array changing to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-to-array-b.cto', 'scalar-to-array-a.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The array field "bar" in the concept "Thing" changed type from an array field to a scalar field'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
