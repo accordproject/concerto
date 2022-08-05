@@ -13,11 +13,11 @@
  */
 
 import { classDeclarationComparerFactories } from './class-declarations';
-import { fieldComparerFactories } from './fields';
 import { modelFileComparerFactories } from './model-files';
+import { propertyComparerFactories } from './properties';
 
 export const comparerFactories = [
     ...classDeclarationComparerFactories,
-    ...fieldComparerFactories,
+    ...propertyComparerFactories,
     ...modelFileComparerFactories
 ];

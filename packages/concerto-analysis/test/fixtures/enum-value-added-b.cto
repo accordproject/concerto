@@ -1,0 +1,6 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+enum Thing {
+    o FOO
+    o BAR
+}

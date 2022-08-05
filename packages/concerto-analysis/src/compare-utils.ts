@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration } from '@accordproject/concerto-core';
+import { ClassDeclaration, EnumValueDeclaration, Field, Property, RelationshipDeclaration } from '@accordproject/concerto-core';
 
 export function getClassDeclarationType(classDeclaration: ClassDeclaration) {
     if (classDeclaration.isAsset()) {
@@ -29,5 +29,17 @@ export function getClassDeclarationType(classDeclaration: ClassDeclaration) {
         return 'transaction';
     } else {
         throw new Error(`unknown class declaration type "${classDeclaration}"`);
+    }
+}
+
+export function getPropertyType(property: Property) {
+    if (property instanceof Field) {
+        return 'field';
+    } else if (property instanceof RelationshipDeclaration) {
+        return 'relationship';
+    } else if (property instanceof EnumValueDeclaration) {
+        return 'enum value';
+    } else {
+        throw new Error(`unknown property type "${property}"`);
     }
 }

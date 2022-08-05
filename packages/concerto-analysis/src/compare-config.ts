@@ -49,9 +49,12 @@ export const defaultCompareConfig: CompareConfig = {
         'class-declaration-added': CompareResult.MINOR,
         'class-declaration-removed': CompareResult.MAJOR,
         'class-declaration-type-changed': CompareResult.MAJOR,
-        'required-field-added': CompareResult.MAJOR,
-        'optional-field-added': CompareResult.PATCH,
-        'field-removed': CompareResult.MAJOR,
-        'namespace-changed': CompareResult.ERROR
+        'required-property-added': CompareResult.MAJOR,
+        'optional-property-added': CompareResult.PATCH,
+        'required-property-removed': CompareResult.MAJOR,
+        'optional-property-removed': CompareResult.MAJOR,
+        'namespace-changed': CompareResult.ERROR,
+        'enum-value-added': CompareResult.PATCH,
+        'enum-value-removed': CompareResult.MAJOR,
     }
 };
