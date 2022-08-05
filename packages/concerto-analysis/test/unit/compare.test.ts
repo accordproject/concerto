@@ -83,7 +83,7 @@ test('should detect a required field being added', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
-            key: 'required-field-added',
+            key: 'required-property-added',
             message: 'The required field "value" was added to the concept "Thing"'
         })
     ]));
@@ -95,8 +95,8 @@ test('should detect a required field being removed', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
-            key: 'field-removed',
-            message: 'The field "value" was removed from the concept "Thing"'
+            key: 'required-property-removed',
+            message: 'The required field "value" was removed from the concept "Thing"'
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
@@ -107,7 +107,7 @@ test('should detect an optional field being added', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
-            key: 'optional-field-added',
+            key: 'optional-property-added',
             message: 'The optional field "value" was added to the concept "Thing"'
         })
     ]));
@@ -119,8 +119,8 @@ test('should detect an optional field being removed', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
-            key: 'field-removed',
-            message: 'The field "value" was removed from the concept "Thing"'
+            key: 'optional-property-removed',
+            message: 'The optional field "value" was removed from the concept "Thing"'
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
@@ -139,4 +139,28 @@ test('should detect an optional field being removed', async () => {
         ]));
         expect(results.result).toBe(CompareResult.MAJOR);
     });
+});
+
+test('should detect a enum value being added', async () => {
+    const [a, b] = await getModelFiles('enum-value-added-a.cto', 'enum-value-added-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'enum-value-added',
+            message: 'The enum value "BAR" was added to the enum "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect an enum value being removed', async () => {
+    const [a, b] = await getModelFiles('enum-value-added-b.cto', 'enum-value-added-a.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'enum-value-removed',
+            message: 'The enum value "BAR" was removed from the enum "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
 });
