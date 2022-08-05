@@ -212,3 +212,65 @@ test('should detect an array changing to a scalar', async () => {
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a primitive typed field changing to a declaration typed field', async () => {
+    const [a, b] = await getModelFiles('primitive-to-declaration-a.cto', 'primitive-to-declaration-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The field "bar" in the concept "Thing" changed type from "String" to "org.accordproject.concerto.test@1.2.3.Bar" (type name differs)'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a declaration typed field changing to a primitive typed field', async () => {
+    const [a, b] = await getModelFiles('primitive-to-declaration-b.cto', 'primitive-to-declaration-a.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The field "bar" in the concept "Thing" changed type from "org.accordproject.concerto.test@1.2.3.Bar" to "String" (type name differs)'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a declaration typed field namespace change', async () => {
+    const [a, b] = await getModelFiles('field-namespace-changed-a.cto', 'field-namespace-changed-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The field "bar" in the concept "Thing" changed type from "org.accordproject.concerto.test.other@2.3.4.Bar" to "org.accordproject.concerto.test.another@2.3.4.Bar" (type namespace differs)'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not detect a declaration typed field namespace patch version change', async () => {
+    const [a, b] = await getModelFiles('field-namespace-changed-a.cto', 'field-namespace-changed-patch-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toHaveLength(0);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should not detect a declaration typed field namespace minor version change', async () => {
+    const [a, b] = await getModelFiles('field-namespace-changed-a.cto', 'field-namespace-changed-minor-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toHaveLength(0);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a declaration typed field namespace major version change', async () => {
+    const [a, b] = await getModelFiles('field-namespace-changed-a.cto', 'field-namespace-changed-major-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-type-changed',
+            message: 'The field "bar" in the concept "Thing" changed type from "org.accordproject.concerto.test.other@2.3.4.Bar" to "org.accordproject.concerto.test.other@3.0.0.Bar" (type version incompatible)'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});

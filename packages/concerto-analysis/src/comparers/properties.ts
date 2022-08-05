@@ -12,7 +12,8 @@
  * limitations under the License.
  */
 
-import { EnumValueDeclaration, Field } from '@accordproject/concerto-core';
+import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
+import * as semver from 'semver';
 import { getClassDeclarationType, getPropertyType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
@@ -40,12 +41,14 @@ const propertyAdded: ComparerFactory = (context) => ({
                 message: `The required ${type} "${b.getName()}" was added to the ${classDeclarationType} "${b.getParent().getName()}"`,
                 element: b,
             });
+            return;
         } else {
             context.report({
                 key: 'optional-property-added',
                 message: `The optional ${type} "${b.getName()}" was added to the ${classDeclarationType} "${b.getParent().getName()}"`,
                 element: b,
             });
+            return;
         }
     }
 });
@@ -74,12 +77,14 @@ const propertyRemoved: ComparerFactory = (context) => ({
                 message: `The required ${type} "${a.getName()}" was removed from the ${classDeclarationType} "${a.getParent().getName()}"`,
                 element: a
             });
+            return;
         } else {
             context.report({
                 key: 'optional-property-removed',
                 message: `The optional ${type} "${a.getName()}" was removed from the ${classDeclarationType} "${a.getParent().getName()}"`,
                 element: a
             });
+            return;
         }
     }
 });
@@ -110,12 +115,69 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
                 message: `The array ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from an array ${aType} to a scalar ${aType}`,
                 element: a
             });
+            return;
         } else if (!aIsArray && bIsArray) {
             context.report({
                 key: 'property-type-changed',
                 message: `The scalar ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from a scalar ${aType} to an array ${aType}`,
                 element: a
             });
+            return;
+        }
+        const aFQTN = a.getFullyQualifiedTypeName();
+        const bFQTN = b.getFullyQualifiedTypeName();
+        const aTypeName = ModelUtil.getShortName(aFQTN);
+        const bTypeName = ModelUtil.getShortName(bFQTN);
+        if (aTypeName !== bTypeName) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type name differs)`,
+                element: a
+            });
+            return;
+        }
+        const aTypeFullNamespace = ModelUtil.getNamespace(aFQTN);
+        const bTypeFullNamespace = ModelUtil.getNamespace(bFQTN);
+        if (!aTypeFullNamespace && !bTypeFullNamespace) {
+            return;
+        } else if (!aTypeFullNamespace || !bTypeFullNamespace) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type namespace differs)`,
+                element: a
+            });
+            return;
+        }
+        const { name: aTypeNamespace, version: aTypeVersion } = ModelUtil.parseNamespace(aTypeFullNamespace);
+        const { name: bTypeNamespace, version: bTypeVersion } = ModelUtil.parseNamespace(bTypeFullNamespace);
+        if (aTypeNamespace !== bTypeNamespace) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type namespace differs)`,
+                element: a
+            });
+            return;
+        }
+        if (!aTypeVersion && !bTypeVersion) {
+            return;
+        } else if (!aTypeVersion || !bTypeVersion) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type version incompatible)`,
+                element: a
+            });
+            return;
+        }
+        const versionDiff = semver.diff(aTypeVersion, bTypeVersion);
+        if (!versionDiff) {
+            return;
+        } else if (versionDiff === 'major' || versionDiff === 'premajor') {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type version incompatible)`,
+                element: a
+            });
+            return;
         }
     },
 });

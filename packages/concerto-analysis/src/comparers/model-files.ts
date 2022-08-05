@@ -25,6 +25,7 @@ const namespaceChanged: ComparerFactory = (context) => ({
                 message: `The namespace was changed from "${aName}" to "${bName}"`,
                 element: a
             });
+            return;
         }
     }
 });

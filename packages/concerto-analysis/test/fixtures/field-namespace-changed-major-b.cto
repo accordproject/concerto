@@ -1,0 +1,7 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+import { Bar } from org.accordproject.concerto.test.other@3.0.0
+
+concept Thing {
+    o Bar bar
+}

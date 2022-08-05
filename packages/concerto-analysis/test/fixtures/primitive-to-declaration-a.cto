@@ -1,0 +1,9 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+concept Bar {
+
+}
+
+concept Thing {
+    o String bar
+}

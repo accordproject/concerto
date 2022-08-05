@@ -17,27 +17,29 @@ import { ComparerFactory } from '../comparer';
 
 const classDeclarationAdded: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
-        if (!a && b) {
-            const type = getClassDeclarationType(b);
-            context.report({
-                key: 'class-declaration-added',
-                message: `The ${type} "${b.getName()}" was added`,
-                element: b
-            });
+        if (a || !b) {
+            return;
         }
+        const type = getClassDeclarationType(b);
+        context.report({
+            key: 'class-declaration-added',
+            message: `The ${type} "${b.getName()}" was added`,
+            element: b
+        });
     }
 });
 
 const classDeclarationRemoved: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
-        if (a && !b) {
-            const type = getClassDeclarationType(a);
-            context.report({
-                key: 'class-declaration-removed',
-                message: `The ${type} "${a.getName()}" was removed`,
-                element: a
-            });
+        if (!a || b) {
+            return;
         }
+        const type = getClassDeclarationType(a);
+        context.report({
+            key: 'class-declaration-removed',
+            message: `The ${type} "${a.getName()}" was removed`,
+            element: a
+        });
     }
 });
 
