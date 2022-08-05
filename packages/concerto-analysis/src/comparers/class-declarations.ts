@@ -20,7 +20,7 @@ const classDeclarationAdded: ComparerFactory = (context) => ({
         if (!a && b) {
             const type = getClassDeclarationType(b);
             context.report({
-                key: `${type}-added`,
+                key: 'class-declaration-added',
                 message: `The ${type} "${b.getName()}" was added`,
                 element: b
             });
@@ -33,7 +33,7 @@ const classDeclarationRemoved: ComparerFactory = (context) => ({
         if (a && !b) {
             const type = getClassDeclarationType(a);
             context.report({
-                key: `${type}-removed`,
+                key: 'class-declaration-removed',
                 message: `The ${type} "${a.getName()}" was removed`,
                 element: a
             });
@@ -41,4 +41,22 @@ const classDeclarationRemoved: ComparerFactory = (context) => ({
     }
 });
 
-export const classDeclarationComparerFactories = [classDeclarationAdded, classDeclarationRemoved];
+const classDeclarationTypeChanged: ComparerFactory = (context) => ({
+    compareClassDeclaration: (a, b) => {
+        if (!a || !b) {
+            return;
+        }
+        const aType = getClassDeclarationType(a);
+        const bType = getClassDeclarationType(b);
+        if (aType === bType) {
+            return;
+        }
+        context.report({
+            key: 'class-declaration-type-changed',
+            message: `The ${aType} "${a.getName()}" changed type from ${aType} to ${bType}`,
+            element: a
+        });
+    }
+});
+
+export const classDeclarationComparerFactories = [classDeclarationAdded, classDeclarationRemoved, classDeclarationTypeChanged];
