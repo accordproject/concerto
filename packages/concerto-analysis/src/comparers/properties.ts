@@ -84,4 +84,40 @@ const propertyRemoved: ComparerFactory = (context) => ({
     }
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved];
+const propertyTypeChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b) {
+            return;
+        }
+        const aType = getPropertyType(a);
+        const bType = getPropertyType(b);
+        const classDeclarationType = getClassDeclarationType(a.getParent());
+        if (aType !== bType) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from ${aType} to ${bType}`,
+                element: a
+            });
+            return;
+        } else if (a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+            return;
+        }
+        const aIsArray = a.isArray();
+        const bIsArray = b.isArray();
+        if (aIsArray && !bIsArray) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The array ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from an array ${aType} to a scalar ${aType}`,
+                element: a
+            });
+        } else if (!aIsArray && bIsArray) {
+            context.report({
+                key: 'property-type-changed',
+                message: `The scalar ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from a scalar ${aType} to an array ${aType}`,
+                element: a
+            });
+        }
+    },
+});
+
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged];

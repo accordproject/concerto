@@ -56,5 +56,6 @@ export const defaultCompareConfig: CompareConfig = {
         'namespace-changed': CompareResult.ERROR,
         'enum-value-added': CompareResult.PATCH,
         'enum-value-removed': CompareResult.MAJOR,
+        'property-type-changed': CompareResult.MAJOR,
     }
 };
