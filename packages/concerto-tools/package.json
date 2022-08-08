@@ -8,6 +8,7 @@
         "npm": ">=6"
     },
     "main": "index.js",
+    "browser": "dist/concerto-tools.js",
     "typings": "types/index.d.ts",
     "scripts": {
         "prepublishOnly": "webpack --config webpack.config.js --mode production",
