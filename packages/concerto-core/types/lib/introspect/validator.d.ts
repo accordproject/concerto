@@ -44,5 +44,14 @@ declare class Validator {
      * @private
      */
     private validate;
+    /**
+     * Determine if the validator is compatible with another validator. For the
+     * validators to be compatible, all values accepted by this validator must
+     * be accepted by the other validator.
+     * @param {Validator} other the other validator.
+     * @returns {boolean} True if this validator is compatible with the other
+     * validator, false otherwise.
+     */
+    compatibleWith(other: Validator): boolean;
 }
 import Field = require("./field");

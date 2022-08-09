@@ -57,5 +57,8 @@ export const defaultCompareConfig: CompareConfig = {
         'enum-value-added': CompareResult.PATCH,
         'enum-value-removed': CompareResult.MAJOR,
         'property-type-changed': CompareResult.MAJOR,
+        'property-validator-added': CompareResult.MAJOR,
+        'property-validator-removed': CompareResult.PATCH,
+        'property-validator-changed': CompareResult.MAJOR,
     }
 };

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, EnumValueDeclaration, Field, Property, RelationshipDeclaration } from '@accordproject/concerto-core';
+import { ClassDeclaration, EnumValueDeclaration, Field, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
 
 export function getClassDeclarationType(classDeclaration: ClassDeclaration) {
     if (classDeclaration.isAsset()) {
@@ -41,5 +41,15 @@ export function getPropertyType(property: Property) {
         return 'enum value';
     } else {
         throw new Error(`unknown property type "${property}"`);
+    }
+}
+
+export function getValidatorType(validator: Validator) {
+    if (validator instanceof NumberValidator) {
+        return 'number';
+    } else if (validator instanceof StringValidator) {
+        return 'string';
+    } else {
+        throw new Error(`unknown validator type "${validator}"`);
     }
 }

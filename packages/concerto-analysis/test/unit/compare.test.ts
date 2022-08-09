@@ -274,3 +274,101 @@ test('should detect a declaration typed field namespace major version change', a
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a number validator being added to a property', async () => {
+    const [a, b] = await getModelFiles('validators.cto', 'number-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-added',
+            message: 'A number validator was added to the field "number" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a number validator being removed from a property', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-removed',
+            message: 'A number validator was removed from the field "number" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should not detect a number validator being changed on a property (compatible lower bound)', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'number-validator-changed-lowercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a number validator being changed on a property (incompatible lower bound)', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'number-validator-changed-lowerincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-changed',
+            message: 'A number validator for the field "number" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not detect a number validator being changed on a property (compatible upper bound)', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'number-validator-changed-uppercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a number validator being changed on a property (incompatible upper bound)', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'number-validator-changed-upperincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-changed',
+            message: 'A number validator for the field "number" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string validator being added to a property', async () => {
+    const [a, b] = await getModelFiles('validators.cto', 'string-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-added',
+            message: 'A string validator was added to the field "string" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string validator being removed from a property', async () => {
+    const [a, b] = await getModelFiles('string-validator-added.cto', 'validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-removed',
+            message: 'A string validator was removed from the field "string" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a string validator being changed on a property', async () => {
+    const [a, b] = await getModelFiles('string-validator-added.cto', 'string-validator-changed.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-changed',
+            message: 'A string validator for the field "string" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
