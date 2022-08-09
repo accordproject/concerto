@@ -76,6 +76,26 @@ class StringValidator extends Validator{
     getRegex() {
         return this.regex;
     }
+
+    /**
+     * Determine if the validator is compatible with another validator. For the
+     * validators to be compatible, all values accepted by this validator must
+     * be accepted by the other validator.
+     * @param {Validator} other the other validator.
+     * @returns {boolean} True if this validator is compatible with the other
+     * validator, false otherwise.
+     */
+    compatibleWith(other) {
+        if (!(other instanceof StringValidator)) {
+            return false;
+        } else if (this.validator.pattern !== other.validator.pattern) {
+            return false;
+        } else if (this.validator.flags !== other.validator.flags) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }
 
 module.exports = StringValidator;

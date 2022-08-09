@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { isNull } = require('../util');
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.
@@ -106,6 +107,39 @@ class NumberValidator extends Validator{
      */
     toString() {
         return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
+    }
+
+    /**
+     * Determine if the validator is compatible with another validator. For the
+     * validators to be compatible, all values accepted by this validator must
+     * be accepted by the other validator.
+     * @param {Validator} other the other validator.
+     * @returns {boolean} True if this validator is compatible with the other
+     * validator, false otherwise.
+     */
+    compatibleWith(other) {
+        if (!(other instanceof NumberValidator)) {
+            return false;
+        }
+        const thisLowerBound = this.getLowerBound();
+        const otherLowerBound = other.getLowerBound();
+        if (isNull(thisLowerBound) && !isNull(otherLowerBound)) {
+            return false;
+        } else if (!isNull(thisLowerBound) && !isNull(otherLowerBound)) {
+            if (thisLowerBound < otherLowerBound) {
+                return false;
+            }
+        }
+        const thisUpperBound = this.getUpperBound();
+        const otherUpperBound = other.getUpperBound();
+        if (isNull(thisUpperBound) && !isNull(otherUpperBound)) {
+            return false;
+        } else if (!isNull(thisUpperBound) && !isNull(otherUpperBound)) {
+            if (thisUpperBound > otherUpperBound) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

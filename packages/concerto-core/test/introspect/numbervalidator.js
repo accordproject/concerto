@@ -21,6 +21,7 @@ require('chai').should();
 const chai = require('chai'), should = chai.should();
 
 const sinon = require('sinon');
+const StringValidator = require('../../lib/introspect/stringvalidator');
 
 describe('NumberValidator', () => {
 
@@ -127,6 +128,49 @@ describe('NumberValidator', () => {
         it('should return the correct string', () => {
             let v = new NumberValidator(mockField, VALID_UPPER_AND_LOWER_BOUND_AST);
             v.toString().should.equal(`NumberValidator lower: ${VALID_UPPER_AND_LOWER_BOUND_AST.lower} upper: ${VALID_UPPER_AND_LOWER_BOUND_AST.upper}`);
+        });
+    });
+
+    describe('#compatibleWith', () => {
+        it('should return false for a string validator', () => {
+            const other = new StringValidator(mockField, { pattern: 'foo' });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when the bounds are the same', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.true;
+        });
+        it('should return false when a lower bound is added', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            const v = new NumberValidator(mockField, { upper: 1 });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when the lower bound is lower', () => {
+            const other = new NumberValidator(mockField, { lower: -2, upper: 1 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.true;
+        });
+        it('should return false when the lower bound is higher', () => {
+            const other = new NumberValidator(mockField, { lower: 0, upper: 1 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return false when an upper bound is added', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            const v = new NumberValidator(mockField, { lower: -1 });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when the upper bound is higher', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 2 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.true;
+        });
+        it('should return false when the upper bound is lower', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 0 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.false;
         });
     });
 });

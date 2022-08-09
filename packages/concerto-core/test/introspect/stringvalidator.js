@@ -19,6 +19,7 @@ const StringValidator = require('../../lib/introspect/stringvalidator');
 
 require('chai').should();
 const sinon = require('sinon');
+const NumberValidator = require('../../lib/introspect/numbervalidator');
 
 describe('StringValidator', () => {
 
@@ -84,5 +85,33 @@ describe('StringValidator', () => {
             }).should.throw(/Validator error for field id org.acme.myField/);
         });
 
+    });
+
+    describe('#compatibleWith', () => {
+        it('should return false for a number validator', () => {
+            const other = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            const v = new StringValidator(mockField, { pattern: 'foo' });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when the patterns are the same', () => {
+            const other = new StringValidator(mockField, { pattern: 'foo' });
+            const v = new StringValidator(mockField, { pattern: 'foo' });
+            v.compatibleWith(other).should.be.true;
+        });
+        it('should return false when the pattern is changed', () => {
+            const other = new StringValidator(mockField, { pattern: 'bar' });
+            const v = new StringValidator(mockField, { pattern: 'foo' });
+            v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when the patterns and flags are the same', () => {
+            const other = new StringValidator(mockField, { pattern: 'foo', flags: 'i' });
+            const v = new StringValidator(mockField, { pattern: 'foo', flags: 'i' });
+            v.compatibleWith(other).should.be.true;
+        });
+        it('should return false when the flags are changed', () => {
+            const other = new StringValidator(mockField, { pattern: 'foo', flags: 'i' });
+            const v = new StringValidator(mockField, { pattern: 'foo', flags: 'g' });
+            v.compatibleWith(other).should.be.false;
+        });
     });
 });

@@ -46,6 +46,11 @@ const Field = require('./lib/introspect/field');
 const EnumDeclaration = require('./lib/introspect/enumdeclaration');
 const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
 
+// Validators
+const Validator = require('./lib/introspect/validator');
+const NumberValidator = require('./lib/introspect/numbervalidator');
+const StringValidator = require('./lib/introspect/stringvalidator');
+
 // Typed
 const Typed = require('./lib/model/typed');
 
@@ -113,6 +118,9 @@ module.exports = {
     Field,
     EnumDeclaration,
     RelationshipDeclaration,
+    Validator,
+    NumberValidator,
+    StringValidator,
     Typed,
     Identifiable,
     Relationship,

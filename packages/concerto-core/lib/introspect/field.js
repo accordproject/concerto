@@ -23,6 +23,7 @@ const StringValidator = require('./stringvalidator');
 /* istanbul ignore next */
 if (global === undefined) {
     const ClassDeclaration = require('./classdeclaration');
+    const Validator = require('./validator');
 }
 /* eslint-enable no-unused-vars */
 
@@ -81,7 +82,7 @@ class Field extends Property {
 
     /**
      * Returns the validator string for this field
-     * @return {string} the validator for the field or null
+     * @return {Validator} the validator for the field or null
      */
     getValidator() {
         return this.validator;

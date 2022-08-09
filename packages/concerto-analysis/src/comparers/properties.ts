@@ -14,7 +14,7 @@
 
 import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
 import * as semver from 'semver';
-import { getClassDeclarationType, getPropertyType } from '../compare-utils';
+import { getClassDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
 const propertyAdded: ComparerFactory = (context) => ({
@@ -182,4 +182,46 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
     },
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged];
+const propertyValidatorChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b) {
+            return;
+        } else if (!(a instanceof Field)) {
+            return;
+        } else if (!(b instanceof Field)) {
+            return;
+        }
+        const aValidator = a.getValidator();
+        const bValidator = b.getValidator();
+        const classDeclarationType = getClassDeclarationType(a.getParent());
+        if (!aValidator && !bValidator) {
+            return;
+        } else if (!aValidator && bValidator) {
+            const bValidatorType = getValidatorType(bValidator);
+            context.report({
+                key: 'property-validator-added',
+                message: `A ${bValidatorType} validator was added to the field "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+            return;
+        } else if (aValidator && !bValidator) {
+            const aValidatorType = getValidatorType(aValidator);
+            context.report({
+                key: 'property-validator-removed',
+                message: `A ${aValidatorType} validator was removed from the field "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+            return;
+        } else if (!aValidator.compatibleWith(bValidator)) {
+            const aValidatorType = getValidatorType(aValidator);
+            context.report({
+                key: 'property-validator-changed',
+                message: `A ${aValidatorType} validator for the field "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was changed and is no longer compatible`,
+                element: a
+            });
+            return;
+        }
+    }
+});
+
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged];
