@@ -59,4 +59,12 @@ describe('Validator', () => {
         });
 
     });
+
+    describe('#compatibleWith', () => {
+        it('should always return false', () => {
+            const v = new Validator(mockField, 'dummy');
+            const other = new Validator(mockField, 'other');
+            v.compatibleWith(other).should.be.false;
+        });
+    });
 });

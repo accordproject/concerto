@@ -147,6 +147,11 @@ describe('NumberValidator', () => {
             const v = new NumberValidator(mockField, { upper: 1 });
             v.compatibleWith(other).should.be.false;
         });
+        it('should return true when a lower bound is removed', () => {
+            const other = new NumberValidator(mockField, { upper: 1 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.true;
+        });
         it('should return true when the lower bound is lower', () => {
             const other = new NumberValidator(mockField, { lower: -2, upper: 1 });
             const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
@@ -161,6 +166,11 @@ describe('NumberValidator', () => {
             const other = new NumberValidator(mockField, { lower: -1, upper: 1 });
             const v = new NumberValidator(mockField, { lower: -1 });
             v.compatibleWith(other).should.be.false;
+        });
+        it('should return true when an upper bound is removed', () => {
+            const other = new NumberValidator(mockField, { lower: -1 });
+            const v = new NumberValidator(mockField, { lower: -1, upper: 1 });
+            v.compatibleWith(other).should.be.true;
         });
         it('should return true when the upper bound is higher', () => {
             const other = new NumberValidator(mockField, { lower: -1, upper: 2 });
