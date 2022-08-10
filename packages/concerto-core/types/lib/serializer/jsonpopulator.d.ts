@@ -60,9 +60,10 @@ declare class JSONPopulator {
      *
      * @param {Field} field - the field declaration of the object
      * @param {Object} json - the JSON object to convert to a Concerto Object
+     * @param {Object} parameters - the parameters
      * @return {string} the text representation
      */
-    convertToObject(field: Field, json: any): string;
+    convertToObject(field: Field, json: any, parameters?: any): string;
     /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited

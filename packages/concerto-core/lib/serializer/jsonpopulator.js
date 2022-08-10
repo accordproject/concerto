@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { TypedStack } = require('@accordproject/concerto-util');
 const Relationship = require('../model/relationship');
 const Util = require('../util');
 const ModelUtil = require('../modelutil');
@@ -100,7 +101,9 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing, parameters) {
+    visit(thing, parameters = {}) {
+        parameters.path ?? (parameters.path = new TypedStack('$'));
+
         if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -122,6 +125,7 @@ class JSONPopulator {
     visitClassDeclaration(classDeclaration, parameters) {
         const jsonObj = parameters.jsonStack.pop();
         const resourceObj = parameters.resourceStack.pop();
+        parameters.path ?? (parameters.path = new TypedStack('$'));
 
         const properties = getAssignableProperties(jsonObj);
         validateProperties(properties, classDeclaration);
@@ -136,12 +140,13 @@ class JSONPopulator {
                 }
             }
             if (value !== null) {
+                parameters.path.push(`.${property}`);
                 parameters.jsonStack.push(value);
                 const classProperty = classDeclaration.getProperty(property);
                 resourceObj[property] = classProperty.accept(this,parameters);
+                parameters.path.pop();
             }
         });
-
         return resourceObj;
     }
 
@@ -153,6 +158,7 @@ class JSONPopulator {
      * @private
      */
     visitField(field, parameters) {
+        parameters.path ?? (parameters.path = new TypedStack('$'));
         let jsonObj = parameters.jsonStack.pop();
         let result = null;
 
@@ -164,8 +170,10 @@ class JSONPopulator {
             }
             result = [];
             for(let n=0; n < jsonObj.length; n++) {
+                parameters.path.push(`[${n}]`);
                 const jsonItem = jsonObj[n];
                 result.push(this.convertItem(field,jsonItem, parameters));
+                parameters.path.pop();
             }
         }
         else {
@@ -222,7 +230,7 @@ class JSONPopulator {
             classDeclaration.accept(this, parameters);
         }
         else {
-            result = this.convertToObject(field,jsonItem);
+            result = this.convertToObject(field, jsonItem, parameters);
         }
 
         return result;
@@ -233,22 +241,25 @@ class JSONPopulator {
      *
      * @param {Field} field - the field declaration of the object
      * @param {Object} json - the JSON object to convert to a Concerto Object
+     * @param {Object} parameters - the parameters
      * @return {string} the text representation
      */
-    convertToObject(field, json) {
+    convertToObject(field, json, parameters = {}) {
         let result = null;
+        parameters.path ?? (parameters.path = new TypedStack('$'));
+        const path = parameters.path.stack.join('');
 
         switch(field.getType()) {
         case 'DateTime': {
             if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
                 result = json;
             } else if (typeof json !== 'string') {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             } else {
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
             }
             if (!result.isValid()) {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }
             break;
@@ -257,12 +268,12 @@ class JSONPopulator {
             const num = this.ergo ? json.$nat : json;
             if (typeof num === 'number') {
                 if (Math.trunc(num) !== num) {
-                    throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
                 } else {
                     result = num;
                 }
             } else {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }
             break;
@@ -270,7 +281,7 @@ class JSONPopulator {
             if (typeof json === 'number') {
                 result = parseFloat(json);
             } else {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }
             break;
@@ -278,7 +289,7 @@ class JSONPopulator {
             if (typeof json === 'boolean') {
                 result = json;
             } else {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }
             break;
@@ -286,7 +297,7 @@ class JSONPopulator {
             if (typeof json === 'string') {
                 result = json;
             } else {
-                throw new ValidationException(`Expected value ${JSON.stringify(json)} to be of type ${field.getType()}`);
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
             break;
         default: {
@@ -314,6 +325,7 @@ class JSONPopulator {
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration, parameters) {
+        parameters.path ?? (parameters.path = new TypedStack('$'));
         let jsonObj = parameters.jsonStack.pop();
         let result = null;
 

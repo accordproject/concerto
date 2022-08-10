@@ -123,7 +123,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, 'foo');
-            }).should.throw(ValidationException, /Expected value "foo" to be of type DateTime/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
         it('should not convert to dates from null', () => {
@@ -131,7 +131,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type DateTime/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
         it('should not convert to dates from undefined', () => {
@@ -139,7 +139,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type DateTime/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
         it('should not convert to dates when not in ISO 8601 format', () => {
@@ -147,7 +147,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('DateTime');
             (() => {
                 jsonPopulator.convertToObject(field, 'abc');
-            }).should.throw(ValidationException, /Expected value "abc" to be of type DateTime/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
         it('should not convert to integers from strings', () => {
@@ -155,7 +155,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             (() => {
                 jsonPopulator.convertToObject(field, '32768');
-            }).should.throw(ValidationException, /Expected value "32768" to be of type Integer/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
         it('should not convert to integer from null', () => {
@@ -163,7 +163,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type Integer/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
         it('should not convert to integer from undefined', () => {
@@ -171,7 +171,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Integer');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type Integer/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
         it('should convert to integers from numbers', () => {
@@ -188,7 +188,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             (() => {
                 jsonPopulator.convertToObject(field, '32768');
-            }).should.throw(ValidationException, /Expected value "32768" to be of type Long/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
         it('should not convert to long from null', () => {
@@ -196,7 +196,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type Long/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
         it('should not convert to long from undefined', () => {
@@ -204,7 +204,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type Long/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
         it('should convert to longs from numbers', () => {
@@ -221,7 +221,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Long');
             (() => {
                 jsonPopulator.convertToObject(field, 32.768);
-            }).should.throw(ValidationException, /Expected value 32.768 to be of type Long/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
         it('should not convert to doubles from strings', () => {
@@ -229,7 +229,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Double');
             (() => {
                 jsonPopulator.convertToObject(field, '32.768');
-            }).should.throw(ValidationException, /Expected value "32.768" to be of type Double/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
         it('should not convert to double from null', () => {
@@ -237,7 +237,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Double');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type Double/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
         it('should not convert to double from undefined', () => {
@@ -245,7 +245,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Double');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type Double/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
         it('should convert to doubles from numbers', () => {
@@ -267,7 +267,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Boolean');
             (() => {
                 jsonPopulator.convertToObject(field, 'true');
-            }).should.throw(ValidationException, /Expected value "true" to be of type Boolean/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
         it('should not convert to booleans from numbers', () => {
@@ -275,7 +275,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Boolean');
             (() => {
                 jsonPopulator.convertToObject(field, 32.768);
-            }).should.throw(ValidationException, /Expected value 32.768 to be of type Boolean/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
         it('should not convert to boolean from null', () => {
@@ -283,7 +283,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Boolean');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type Boolean/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
         it('should not convert to boolean from undefined', () => {
@@ -291,7 +291,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('Boolean');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type Boolean/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
         it('should convert to strings from strings', () => {
@@ -306,7 +306,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('String');
             (() => {
                 jsonPopulator.convertToObject(field, 32.768);
-            }).should.throw(ValidationException, /Expected value 32.768 to be of type String/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
         it('should not convert to string from null', () => {
@@ -314,7 +314,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('String');
             (() => {
                 jsonPopulator.convertToObject(field, null);
-            }).should.throw(ValidationException, /Expected value null to be of type String/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
         it('should not convert to string from undefined', () => {
@@ -322,7 +322,7 @@ describe('JSONPopulator', () => {
             field.getType.returns('String');
             (() => {
                 jsonPopulator.convertToObject(field, undefined);
-            }).should.throw(ValidationException, /Expected value undefined to be of type String/);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
     });
@@ -472,6 +472,124 @@ describe('JSONPopulator', () => {
 
     });
 
+    describe('#visit', () => {
+        it('should throw if the type of a nested field is invalid', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyContainerAsset2',
+                    assetId: 'assetContainer1',
+                    myAssets: [{
+                        $class: 'org.acme.MyAsset1',
+                        assetId: 'asset1',
+                        assetValue: 'string' // this is invalid
+                    }]
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            let mockResource2 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
+            }).should.throw(/Expected value at path `\$.myAssets\[0\].assetValue` to be of type `Integer`/);
+        });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyContainerAsset2',
+                    assetId: 'assetContainer1',
+                    myAssets: [{
+                        $class: 'org.acme.MyAsset1',
+                        assetId: 'asset1',
+                        assetValue: 'string' // this is invalid
+                    }]
+                }),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            let mockResource2 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
+            }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
+        });
+    });
+
+    describe('#visitField', () => {
+        it('should visit a Field resource', () => {
+            let options = {
+                jsonStack: new TypedStack('field'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let field = sinon.createStubInstance(Field);
+            field.isPrimitive.returns('String');
+            field.isField.returns(true);
+            field.getType.returns('String');
+            let value = jsonPopulator.visitField(field, options);
+            value.should.equal('field');
+        });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack('field'),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let field = sinon.createStubInstance(Field);
+            field.isPrimitive.returns('String');
+            field.isField.returns(true);
+            field.getType.returns('String');
+            let value = jsonPopulator.visitField(field, options);
+            value.should.equal('field');
+        });
+    });
+
+    describe('#visitClassDeclaration', () => {
+        it('should visit a ClassDeclaration resource', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyAsset1',
+                    assetId: 'asset1'
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+        });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyAsset1',
+                    assetId: 'asset1'
+                }),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+        });
+    });
+
+
     describe('#visitRelationshipDeclaration', () => {
 
         it('should create a new relationship from a string', () => {
@@ -604,7 +722,7 @@ describe('JSONPopulator', () => {
             let mockRelationship2 = sinon.createStubInstance(Relationship);
             mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockRelationship2);
             let relationships = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
-            relationships.should.have.length.of(2);
+            relationships.should.have.lengthOf(2);
             relationships[0].should.be.an.instanceOf(Relationship);
             relationships[1].should.be.an.instanceOf(Relationship);
         });
@@ -650,7 +768,7 @@ describe('JSONPopulator', () => {
             let mockResource2 = sinon.createStubInstance(Resource);
             mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
             let subResources = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
-            subResources.should.have.length.of(2);
+            subResources.should.have.lengthOf(2);
             subResources[0].should.be.an.instanceOf(Resource);
             subResources[1].should.be.an.instanceOf(Resource);
         });
