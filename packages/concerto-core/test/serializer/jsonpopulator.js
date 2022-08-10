@@ -497,6 +497,67 @@ describe('JSONPopulator', () => {
                 jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
             }).should.throw(/Expected value at path `\$.myAssets\[0\].assetValue` to be of type `Integer`/);
         });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyContainerAsset2',
+                    assetId: 'assetContainer1',
+                    myAssets: [{
+                        $class: 'org.acme.MyAsset1',
+                        assetId: 'asset1',
+                        assetValue: 'string' // this is invalid
+                    }]
+                }),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            let mockResource2 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
+            }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
+        });
+    });
+
+    describe('#visitField', () => {
+        it('should visit a Field resource', () => {
+            let options = {
+                jsonStack: new TypedStack('field'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let field = sinon.createStubInstance(Field);
+            field.isPrimitive.returns('String');
+            field.isField.returns(true);
+            field.getType.returns('String');
+            let value = jsonPopulator.visitField(field, options);
+            value.should.equal('field');
+        });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack('field'),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let field = sinon.createStubInstance(Field);
+            field.isPrimitive.returns('String');
+            field.isField.returns(true);
+            field.getType.returns('String');
+            let value = jsonPopulator.visitField(field, options);
+            value.should.equal('field');
+        });
     });
 
     describe('#visitRelationshipDeclaration', () => {
