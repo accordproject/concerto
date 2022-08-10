@@ -560,6 +560,36 @@ describe('JSONPopulator', () => {
         });
     });
 
+    describe('#visitClassDeclaration', () => {
+        it('should visit a ClassDeclaration resource', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyAsset1',
+                    assetId: 'asset1'
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+        });
+
+        it('should allow injection of a root object path', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.MyAsset1',
+                    assetId: 'asset1'
+                }),
+                path: new TypedStack('$.rootObj'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+        });
+    });
+
+
     describe('#visitRelationshipDeclaration', () => {
 
         it('should create a new relationship from a string', () => {
