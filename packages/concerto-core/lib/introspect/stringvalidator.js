@@ -14,6 +14,7 @@
 
 'use strict';
 
+const RE2 = require('re2');
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.
@@ -44,13 +45,13 @@ class StringValidator extends Validator{
         super(field, validator);
         try {
             if (validator.flags) {
-                this.regex = new RegExp(validator.pattern, validator.flags);
+                this.regex = new RE2(validator.pattern, validator.flags);
             } else {
-                this.regex = new RegExp(validator.pattern);
+                this.regex = new RE2(validator.pattern);
             }
         }
         catch(exception) {
-            this.reportError(exception.message);
+            this.reportError(field.getName(), exception.message);
         }
     }
 

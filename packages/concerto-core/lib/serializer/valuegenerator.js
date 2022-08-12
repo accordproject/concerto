@@ -170,7 +170,7 @@ class EmptyValueGenerator {
      * @return {string} a String value.
      */
     getRegex(regex) {
-        return regex ? new RandExp(regex).gen() : '';
+        return regex ? new RandExp(regex.source, regex.flags).gen() : '';
     }
 
     /**
@@ -270,7 +270,7 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @return {string} a String value.
      */
     getRegex(regex) {
-        return regex ? new RandExp(regex).gen() : '';
+        return regex ? new RandExp(regex.source, regex.flags).gen() : '';
     }
 
     /**

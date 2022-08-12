@@ -295,7 +295,8 @@ class JSONSchemaVisitor {
             case 'String':
                 jsonSchema.type = 'string';
                 if(validator) {
-                    jsonSchema.pattern = `^${validator.getRegex().toString().slice(1,-1)}$`;
+                    // Note that regex flags are lost in this transformation
+                    jsonSchema.pattern = validator.getRegex().source;
                 }
                 break;
             case 'Double':

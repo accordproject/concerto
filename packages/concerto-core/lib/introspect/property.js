@@ -27,6 +27,9 @@ if (global === undefined) {
 }
 /* eslint-enable no-unused-vars */
 
+
+const RESERVED_PROPERTY_NAMES = ['null', 'true', 'false'];
+
 /**
  * Property representing an attribute of a class declaration,
  * either a Field or a Relationship.
@@ -62,6 +65,10 @@ class Property extends Decorated {
      */
     process() {
         super.process();
+
+        if (RESERVED_PROPERTY_NAMES.includes(this.ast.name)){
+            throw new Error(`Validator error for field 'name'. '${this.ast.name}' is a reserved name.`);
+        }
 
         this.name = this.ast.name;
         this.decorator = null;

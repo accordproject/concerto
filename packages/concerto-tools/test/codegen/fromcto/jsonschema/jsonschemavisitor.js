@@ -215,7 +215,7 @@ describe('JSONSchema (samples)', function () {
             modelManager.addCTOModel( MODEL_BOUNDS );
             const visitor = new JSONSchemaVisitor();
             const schema = modelManager.accept(visitor, { rootType: 'test.Test'});
-            expect(schema.properties.myString.pattern).equal('^abc.*$');
+            expect(schema.properties.myString.pattern).equal('abc.*');
         });
 
         it('should inline types for simple model', () => {
