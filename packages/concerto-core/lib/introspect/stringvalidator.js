@@ -14,7 +14,7 @@
 
 'use strict';
 
-const RE2 = require('re2');
+const RE2 = require('re2-wasm');
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.

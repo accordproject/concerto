@@ -6,7 +6,7 @@ export = StringValidator;
  * @memberof module:concerto-core
  */
 declare class StringValidator extends Validator {
-    regex: RE2;
+    regex: any;
     /**
      * Returns the RegExp object associated with the string validator
      * @returns {RegExp} the RegExp object
@@ -14,4 +14,3 @@ declare class StringValidator extends Validator {
     getRegex(): RegExp;
 }
 import Validator = require("./validator");
-import RE2 = require("re2");
