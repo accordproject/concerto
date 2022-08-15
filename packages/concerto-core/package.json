@@ -52,7 +52,7 @@
     "jsdoc": "^3.6.7",
     "klaw": "3.0.0",
     "license-check-and-add": "2.3.6",
-    "mocha": "8.3.2",
+    "mocha": "10.0.0",
     "mockery": "2.1.0",
     "moxios": "0.4.0",
     "node-polyfill-webpack-plugin": "2.0.1",
