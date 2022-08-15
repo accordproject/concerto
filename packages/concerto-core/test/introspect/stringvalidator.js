@@ -44,7 +44,7 @@ describe('StringValidator', () => {
 
         it('should ignore a null string', () => {
             let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
-            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/');
+            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/u');
             v.validate('id', null);
         });
 
@@ -58,7 +58,7 @@ describe('StringValidator', () => {
 
             (() => {
                 v.validate('id', 'xyz');
-            }).should.throw(/Validator error for field id org.acme.myField/);
+            }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
         it('should validate a string with escaped chacters', () => {
@@ -70,19 +70,19 @@ describe('StringValidator', () => {
             let v = new StringValidator(mockField, { pattern: '^[\\\\]*\\n$' });
             (() => {
                 v.validate('id', '\\hi!\n');
-            }).should.throw(/Validator error for field id org.acme.myField/);
+            }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
         it('should validate a unicode string', () => {
-            let v = new StringValidator(mockField, { pattern: '^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
+            let v = new StringValidator(mockField, { pattern: '^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
             v.validate('id', 'AB1234567');
         });
 
         it('should not validate a unicode string', () => {
-            let v = new StringValidator(mockField, { pattern: '^(?!null|true|false)(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
+            let v = new StringValidator(mockField, { pattern: '^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$', flags: 'u' });
             (() => {
                 v.validate('id', '1FOO');
-            }).should.throw(/Validator error for field id org.acme.myField/);
+            }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
     });

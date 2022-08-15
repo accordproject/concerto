@@ -121,4 +121,26 @@ describe('importFullyQualifiedNames', () => {
         });
     });
 
+    it('should throw for unrecognized import', async () => {
+        const ast = {
+            $class: 'concerto.metamodel@1.0.0.MyImportType',
+            namespace: 'test',
+            types: ['Foo', 'Bar']
+        };
+        (() => {MetaModelUtil.importFullyQualifiedNames(ast);}).should.throw('Unrecognized imports concerto.metamodel@1.0.0.MyImportType');
+    });
+});
+
+describe('getExternalImports', () => {
+    it('should get external imports', () => {
+        const ast = {
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                namespace: 'test',
+                uri: 'https://dummyURI'
+            }]
+        };
+        const result = MetaModelUtil.getExternalImports(ast);
+        result.should.eql({'test.*':'https://dummyURI'});
+    });
 });

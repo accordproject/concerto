@@ -52,7 +52,9 @@ module.exports = {
         new webpack.ProvidePlugin({
             process: 'process/browser', // provide a shim for the global `process` variable
         }),
-        new NodePolyfillPlugin(),],
+        new NodePolyfillPlugin(),
+    ],
+
     module: {
         rules: [
             {
@@ -67,6 +69,9 @@ module.exports = {
         ]
     },
     resolve: {
+        alias: {
+            're2-wasm': path.resolve(__dirname, 're2.js'),
+        },
         fallback: {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
             // see https://webpack.js.org/configuration/resolve/#resolvefallback

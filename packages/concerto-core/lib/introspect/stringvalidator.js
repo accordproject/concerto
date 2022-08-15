@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { RE2 } = require('re2-wasm');
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.
@@ -43,14 +44,12 @@ class StringValidator extends Validator{
     constructor(field, validator) {
         super(field, validator);
         try {
-            if (validator.flags) {
-                this.regex = new RegExp(validator.pattern, validator.flags);
-            } else {
-                this.regex = new RegExp(validator.pattern);
-            }
+            // RE2 must always be run in unicode mode, it's safe to add 'u' even if it already exists
+            const flags = validator.flags ? validator.flags + 'u' : 'u';
+            this.regex = new RE2(validator.pattern, flags);
         }
         catch(exception) {
-            this.reportError(exception.message);
+            this.reportError(field.getName(), exception.message);
         }
     }
 

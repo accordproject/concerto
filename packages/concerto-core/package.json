@@ -74,6 +74,7 @@
     "debug": "4.3.1",
     "lorem-ipsum": "2.0.3",
     "randexp": "0.5.3",
+    "re2-wasm": "1.0.2",
     "semver": "7.3.5",
     "slash": "3.0.0",
     "urijs": "1.19.11",
