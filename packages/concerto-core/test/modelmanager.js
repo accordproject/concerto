@@ -15,6 +15,7 @@
 'use strict';
 
 const fs = require('fs');
+const XRegExp = require('xregexp');
 
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
@@ -27,6 +28,7 @@ const ModelFile = require('../lib/introspect/modelfile');
 const ModelManager = require('../lib/modelmanager');
 const ParticipantDeclaration = require('../lib/introspect/participantdeclaration');
 const Serializer = require('../lib/serializer');
+const Concerto = require('../lib/concerto');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
@@ -184,6 +186,25 @@ describe('ModelManager', () => {
 
             const ast = modelManagerWithOptions.modelFiles['org.acme'].ast;
             JSON.stringify(ast).should.not.contain('location');
+        });
+
+        it('should add a model file with alternative RegExp option', () => {
+            XRegExp.install('astral');
+            const regExp = XRegExp;
+            const modelManagerWithOptions = new ModelManager({ regExp });
+            Util.addComposerModel(modelManagerWithOptions);
+
+            modelManagerWithOptions.addCTOModel(`namespace org.acme
+        concept Bar {
+            o String foo regex=/\\p{S}/
+        }`, 'internal.cto', true);
+
+            const bar = {
+                $class : 'org.acme.Bar',
+                foo : '😊'
+            };
+            const concerto = new Concerto(modelManagerWithOptions);
+            concerto.validate(bar);
         });
 
         it('should return error for duplicate namespaces for a string', () => {

@@ -20,10 +20,12 @@ declare class BaseModelManager {
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
+     * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
         versionedNamespacesStrict?: boolean;
+        regExp?: any;
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
@@ -31,6 +33,10 @@ declare class BaseModelManager {
     serializer: any;
     decoratorFactories: any[];
     versionedNamespacesStrict: boolean;
+    options: {
+        versionedNamespacesStrict?: boolean;
+        regExp?: any;
+    };
     /**
      * Returns true
      * @returns {boolean} true
