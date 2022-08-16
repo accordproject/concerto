@@ -38,6 +38,7 @@ const HTTPFileLoader = require('./lib/loaders/httpfileloader');
 const Writer = require('./lib/writer');
 const FileWriter = require('./lib/filewriter');
 const ModelWriter = require('./lib/modelwriter');
+const InMemoryWriter = require('./lib/inmemorywriter');
 
 // Logger
 const Logger = require('./lib/logger');
@@ -58,6 +59,7 @@ module.exports = {
     HTTPFileLoader,
     Writer,
     FileWriter,
+    InMemoryWriter,
     ModelWriter,
     Logger,
     TypedStack,
