@@ -75,6 +75,7 @@ class BaseModelManager {
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.versionedNamespacesStrict] - require versioned namespaces and imports
+     * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -84,6 +85,7 @@ class BaseModelManager {
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
         this.versionedNamespacesStrict = !!options?.versionedNamespacesStrict;
+        this.options = options;
         this.addRootModel();
     }
 

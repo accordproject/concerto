@@ -64,6 +64,7 @@
     "typescript": "4.6.3",
     "webpack": "5.64.2",
     "webpack-cli": "4.9.1",
+    "xregexp": "5.1.1",
     "yargs": "17.3.1"
   },
   "dependencies": {
@@ -74,7 +75,6 @@
     "debug": "4.3.1",
     "lorem-ipsum": "2.0.3",
     "randexp": "0.5.3",
-    "re2-wasm": "1.0.2",
     "semver": "7.3.5",
     "slash": "3.0.0",
     "urijs": "1.19.11",

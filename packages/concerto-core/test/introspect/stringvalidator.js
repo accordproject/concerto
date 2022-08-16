@@ -21,6 +21,8 @@ require('chai').should();
 const sinon = require('sinon');
 const NumberValidator = require('../../lib/introspect/numbervalidator');
 
+const XRegExp = require('xregexp');
+
 describe('StringValidator', () => {
 
     let mockField;
@@ -44,7 +46,7 @@ describe('StringValidator', () => {
 
         it('should ignore a null string', () => {
             let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' });
-            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/u');
+            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/');
             v.validate('id', null);
         });
 
@@ -85,6 +87,22 @@ describe('StringValidator', () => {
             }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
+    });
+
+    describe('#validate with custom RegEx engine', () => {
+        const options = {
+            regExp: XRegExp
+        };
+        it('should ignore a null string', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}' }, options);
+            v.getRegex().toString().should.equal('/^[A-z][A-z][0-9]{7}/');
+            v.validate('id', null);
+        });
+
+        it('should validate a string', () => {
+            let v = new StringValidator(mockField, { pattern: '^[\\p{Letter}\\p{Number}]{7}' }, options);
+            v.validate('id', 'AB1234567');
+        });
     });
 
     describe('#compatibleWith', () => {
