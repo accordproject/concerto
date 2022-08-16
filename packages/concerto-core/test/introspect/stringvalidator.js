@@ -100,7 +100,7 @@ describe('StringValidator', () => {
         });
 
         it('should validate a string', () => {
-            let v = new StringValidator(mockField, { pattern: '^[\\p{Letter}\\p{Number}]{7}' }, options);
+            let v = new StringValidator(mockField, { pattern: '^[\\p{Letter}\\p{Number}]{7}', flags: 'u' }, options);
             v.validate('id', 'AB1234567');
         });
     });

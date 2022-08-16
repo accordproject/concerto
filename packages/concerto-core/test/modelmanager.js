@@ -189,6 +189,7 @@ describe('ModelManager', () => {
         });
 
         it('should add a model file with alternative RegExp option', () => {
+            XRegExp.install('astral');
             const regExp = XRegExp;
             const modelManagerWithOptions = new ModelManager({ regExp });
             Util.addComposerModel(modelManagerWithOptions);
