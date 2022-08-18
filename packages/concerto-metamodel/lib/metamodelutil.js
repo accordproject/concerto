@@ -200,6 +200,7 @@ concept Model {
   o String concertoVersion optional
   o Import[] imports optional
   o Declaration[] declarations optional
+  o Decorator[] decorators optional
 }
 
 concept Models {

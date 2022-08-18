@@ -1435,9 +1435,10 @@ Version
      }
 
 Model
-  = version:Version? ns:Namespace imports:Imports? body:SourceElements? {
+  = version:Version? decorators:Decorators? ns:Namespace imports:Imports? body:SourceElements? {
       const result = {
         $class: "concerto.metamodel@1.0.0.Model",
+        decorators: optionalList(decorators),
         namespace: ns,
         imports: optionalList(imports),
         declarations: optionalList(body)

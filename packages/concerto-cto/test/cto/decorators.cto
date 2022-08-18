@@ -1,3 +1,5 @@
+@noargs
+@parens()
 namespace org.acme
 
 @noargs

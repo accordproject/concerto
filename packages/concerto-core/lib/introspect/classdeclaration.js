@@ -60,6 +60,15 @@ class ClassDeclaration extends Decorated {
     }
 
     /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @return {ModelFile} the owning ModelFile
+     */
+    getModelFile() {
+        return super.getModelFile();
+    }
+
+    /**
      * Process the AST and build the model
      *
      * @throws {IllegalModelException}

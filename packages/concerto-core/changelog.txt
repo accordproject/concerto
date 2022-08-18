@@ -24,8 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.0.0 {b0c9b0951c58e3deeed8fbccf2dfd052} 2022-08-16
+Version 3.0.0 {f7bc9bfdabe1ce6c45cdca76d4da2d4c} 2022-08-18
 - Allow client-provided RegExp engine to ModelManager
+- Allow decorators to be attached to model files/namespaces
 
 Version 2.3.0 {774980a857090905fe276b6e94f1dbb1} 2022-07-21
 - Versioned namespaces

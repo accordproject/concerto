@@ -1,5 +1,6 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
     "namespace": "test.person@1.0.0-alpha.0+build1",
     "imports": [],
     "declarations": [

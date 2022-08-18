@@ -73,6 +73,7 @@ class AssetDeclaration extends IdentifiedDeclaration {
 }
 class ClassDeclaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
+   + ModelFile getModelFile() 
    + ClassDeclaration _resolveSuperType() 
    ~ void validate() throws IllegalModelException
    + boolean isAbstract() 
@@ -143,7 +144,7 @@ class Introspector {
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
    + ModelManager modelManagerFromMetaModel() 
-class ModelFile {
+class ModelFile extends Decorated {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    + boolean isModelFile() 
    + string getVersion() 
@@ -151,6 +152,7 @@ class ModelFile {
    + boolean isExternal() 
    + ModelManager getModelManager() 
    + string[] getImports() 
+   ~ void validate() throws IllegalModelException
    + boolean isDefined(string) 
    + ClassDeclaration getLocalType(string) 
    + AssetDeclaration getAssetDeclaration(string) 
@@ -179,6 +181,7 @@ class ParticipantDeclaration extends IdentifiedDeclaration {
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
+   + ModelFile getModelFile() 
    + ClassDeclaration getParent() 
    ~ void validate(ClassDeclaration) throws IllegalModelException
    + string getName() 
