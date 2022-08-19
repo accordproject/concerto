@@ -281,12 +281,13 @@ class Commands {
      *
      * @param {string} release the release, major/minor/patch, or a semantic version
      * @param {string[]} modelFiles the list of model file paths
+     * @param {string} [prerelease] the pre-release version to set
      */
-    static async version(release, modelFiles) {
+    static async version(release, modelFiles, prerelease) {
         const updatedModelFiles = [];
         for (const modelFile of modelFiles) {
             const resolvedModelFile = path.resolve(modelFile);
-            const updatedModelFile = await Commands.versionModelFile(release, resolvedModelFile);
+            const updatedModelFile = await Commands.versionModelFile(release, resolvedModelFile, prerelease);
             updatedModelFiles.push(updatedModelFile);
         }
         Commands.updateImportsForUpdatedModelFiles(updatedModelFiles);
@@ -324,16 +325,17 @@ class Commands {
      *
      * @param {string} release the release, major/minor/patch, or a semantic version
      * @param {string} modelFile the model file path
+     * @param {string} [prerelease] the pre-release version to set
      * @private
      */
-    static async versionModelFile(release, modelFile) {
+    static async versionModelFile(release, modelFile, prerelease) {
         const data = fs.readFileSync(modelFile, 'utf-8');
         const isMetaModel = Commands.isJSON(data);
         if (isMetaModel) {
-            return Commands.versionMetaModelFile(release, modelFile, data);
+            return Commands.versionMetaModelFile(release, modelFile, data, prerelease);
 
         } else {
-            return Commands.versionCtoModelFile(release, modelFile, data);
+            return Commands.versionCtoModelFile(release, modelFile, data, prerelease);
         }
     }
 
@@ -419,13 +421,14 @@ class Commands {
      * @param {string} release the release, major/minor/patch, or a semantic version
      * @param {string} modelFile the model file path
      * @param {string} data the model file data
+     * @param {string} [prerelease] the pre-release version to set
      * @private
      */
-    static async versionMetaModelFile(release, modelFile, data) {
+    static async versionMetaModelFile(release, modelFile, data, prerelease) {
         const metamodel = JSON.parse(data);
         const currentNamespace = metamodel.namespace;
         const [namespace, currentVersion] = currentNamespace.split('@');
-        const newVersion = Commands.calculateNewVersion(release, currentVersion);
+        const newVersion = Commands.calculateNewVersion(release, currentVersion, prerelease);
         const newNamespace = [namespace, newVersion].join('@');
         metamodel.namespace = newNamespace;
         const newData = JSON.stringify(metamodel, null, 2);
@@ -447,13 +450,14 @@ class Commands {
      * @param {string} release the release, major/minor/patch, or a semantic version
      * @param {string} modelFile the model file path
      * @param {string} data the model file data
+     * @param {string} [prerelease] the pre-release version to set
      * @private
      */
-    static async versionCtoModelFile(release, modelFile, data) {
+    static async versionCtoModelFile(release, modelFile, data, prerelease) {
         const metamodel = Parser.parse(data);
         const currentNamespace = metamodel.namespace;
         const [namespace, currentVersion] = currentNamespace.split('@');
-        const newVersion = Commands.calculateNewVersion(release, currentVersion);
+        const newVersion = Commands.calculateNewVersion(release, currentVersion, prerelease);
         const newNamespace = [namespace, newVersion].join('@');
         const newData = data.replace(/(namespace\s+)(\S+)/, (match, keyword) => {
             return `${keyword}${newNamespace}`;
@@ -475,20 +479,30 @@ class Commands {
      *
      * @param {string} release the release, major/minor/patch, or a semantic version
      * @param {string} currentVersion the current version
+     * @param {string} [prerelease] the pre-release version to set
      * @returns {string} the new version
      * @private
      */
-    static calculateNewVersion(release, currentVersion) {
+    static calculateNewVersion(release, currentVersion, prerelease) {
         if (semver.valid(release)) {
             return release;
         } else if (!semver.valid(currentVersion)) {
             throw new Error(`invalid current version "${currentVersion}"`);
         }
-        const newVersion = semver.inc(currentVersion, release);
-        if (!newVersion) {
-            throw new Error(`invalid release "${release}"`);
+        const result = semver.parse(currentVersion);
+        if (release !== 'keep') {
+            try {
+                result.inc(release);
+            } catch (error) {
+                throw new Error(`invalid release "${release}"`);
+            }
         }
-        return newVersion;
+        if (prerelease) {
+            result.prerelease = prerelease.split('.');
+            return result.format();
+        } else {
+            return result.toString();
+        }
     }
 
     /**

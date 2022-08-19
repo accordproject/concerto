@@ -297,20 +297,21 @@ describe('concerto-cli', () => {
             { name: 'minor', release: 'minor', expectedNamespace: 'org.accordproject.concerto.test@1.3.0' },
             { name: 'major', release: 'major', expectedNamespace: 'org.accordproject.concerto.test@2.0.0' },
             { name: 'explicit', release: '4.5.6', expectedNamespace: 'org.accordproject.concerto.test@4.5.6' },
-            { name: 'prerelease', release: '5.6.7-pr.3472381', expectedNamespace: 'org.accordproject.concerto.test@5.6.7-pr.3472381' }
+            { name: 'prerelease', release: '5.6.7-pr.3472381', expectedNamespace: 'org.accordproject.concerto.test@5.6.7-pr.3472381' },
+            { name: 'keep-and-set-prerelease', release: 'keep', prerelease: 'pr.1234567', expectedNamespace: 'org.accordproject.concerto.test@1.2.3-pr.1234567' }
         ];
 
-        tests.forEach(({ name, release, expectedNamespace }) => {
+        tests.forEach(({ name, release, prerelease, expectedNamespace }) => {
 
             it(`should patch bump a cto file [${name}]`, async () => {
-                await Commands.version(release, [ctoPath]);
+                await Commands.version(release, [ctoPath], prerelease);
                 const cto = fs.readFileSync(ctoPath, 'utf-8');
                 const metamodel = Parser.parse(cto);
                 metamodel.namespace.should.equal(expectedNamespace);
             });
 
             it(`should patch bump a metamodel file [${name}]`, async () => {
-                await Commands.version(release, [metamodelPath]);
+                await Commands.version(release, [metamodelPath], prerelease);
                 const metamodel = JSON.parse(fs.readFileSync(metamodelPath, 'utf-8'));
                 metamodel.namespace.should.equal(expectedNamespace);
             });
