@@ -226,11 +226,29 @@ require('yargs')
     })
     .command('version <release>', 'modify the version of one or more model files', yargs => {
         yargs.demandOption(['model'], 'Please provide Concerto model(s)');
+        yargs.positional('release', {
+            describe: 'the new version, or a release to use when incrementing the existing version',
+            type: 'string',
+            choices: [
+                'keep',
+                'major',
+                'minor',
+                'patch',
+                'premajor',
+                'preminor',
+                'prepatch',
+                'prerelease'
+            ]
+        });
         yargs.option('model', {
             alias: 'models',
             describe: 'array of concerto model files',
             type: 'string',
             array: true
+        });
+        yargs.option('prerelease', {
+            describe: 'set the specified pre-release version',
+            type: 'string'
         });
     }, argv => {
         const modelFiles = argv.model.flatMap(model => {
@@ -239,7 +257,7 @@ require('yargs')
             }
             return model;
         });
-        return Commands.version(argv.release, modelFiles)
+        return Commands.version(argv.release, modelFiles, argv.prerelease)
             .then((result) => {
                 if (result) {
                     Logger.info(result);
