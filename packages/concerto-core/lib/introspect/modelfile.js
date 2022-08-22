@@ -27,6 +27,7 @@ const EventDeclaration = require('./eventdeclaration');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
+const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -44,7 +45,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class ModelFile {
+class ModelFile extends Decorated {
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -56,6 +57,7 @@ class ModelFile {
      * @throws {IllegalModelException}
      */
     constructor(modelManager, ast, definitions, fileName) {
+        super(ast);
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -88,6 +90,9 @@ class ModelFile {
             this.external = fileName.startsWith('@');
         }
 
+        // Set up the decorators.
+        this.process();
+
         // Populate from the AST
         this.fromAst(this.ast);
         // Check version compatibility
@@ -99,6 +104,16 @@ class ModelFile {
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @protected
+     * @return {ModelFile} the owning ModelFile
+     */
+    getModelFile() {
+        return this;
     }
 
     /**
@@ -196,9 +211,10 @@ class ModelFile {
      * Validates the ModelFile.
      *
      * @throws {IllegalModelException} if the model is invalid
-     * @private
+     * @protected
      */
     validate() {
+        super.validate();
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         this.getImports().forEach((importFqn) => {

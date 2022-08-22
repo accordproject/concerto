@@ -231,6 +231,9 @@ function toCTO(metaModel) {
         result += '\n';
         result += '\n';
     }
+    if (metaModel.decorators && metaModel.decorators.length > 0) {
+        result += decoratorsFromMetaModel(metaModel.decorators, '');
+    }
     result += `namespace ${metaModel.namespace}`;
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';

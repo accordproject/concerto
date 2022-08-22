@@ -1,1 +1,2425 @@
-{"$class":"concerto.metamodel@1.0.0.Model","namespace":"org.acme","imports":[],"declarations":[{"$class":"concerto.metamodel@1.0.0.AssetDeclaration","name":"Car","isAbstract":false,"properties":[{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"id","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":248,"line":14,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":262,"line":15,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.RelationshipProperty","name":"owner","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"Driver"},"isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":262,"line":15,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":279,"line":16,"column":1,"$class":"concerto.metamodel@1.0.0.Position"}}}],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":20,"line":3,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":280,"line":16,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"identified":{"$class":"concerto.metamodel@1.0.0.IdentifiedBy","name":"id"},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"noargs","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":20,"line":3,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":27,"line":3,"column":8,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"parens","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":28,"line":4,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":37,"line":4,"column":10,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":38,"line":5,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":51,"line":5,"column":14,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"asset","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":43,"line":5,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":50,"line":5,"column":13,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"positiveInteger","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":52,"line":6,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":71,"line":6,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":69,"line":6,"column":18,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":70,"line":6,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"negativeInteger","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":72,"line":7,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":92,"line":7,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":89,"line":7,"column":18,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":91,"line":7,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"positiveDouble","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":93,"line":8,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":114,"line":8,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":109,"line":8,"column":17,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":113,"line":8,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"negativeDouble","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":115,"line":9,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":137,"line":9,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":131,"line":9,"column":17,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":136,"line":9,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"booleanFalse","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":138,"line":10,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":158,"line":10,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":152,"line":10,"column":15,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":157,"line":10,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"booleanTrue","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":159,"line":11,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":177,"line":11,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":172,"line":11,"column":14,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":176,"line":11,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"all","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":178,"line":12,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":216,"line":12,"column":39,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"foo","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":183,"line":12,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":188,"line":12,"column":11,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":189,"line":12,"column":12,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":190,"line":12,"column":13,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":191,"line":12,"column":14,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":193,"line":12,"column":16,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":194,"line":12,"column":17,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":198,"line":12,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":199,"line":12,"column":22,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":204,"line":12,"column":27,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":205,"line":12,"column":28,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":210,"line":12,"column":33,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":211,"line":12,"column":34,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":215,"line":12,"column":38,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.ParticipantDeclaration","name":"Driver","isAbstract":false,"properties":[{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"email","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":345,"line":20,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":580,"line":31,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"noargs","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":345,"line":20,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":352,"line":20,"column":10,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"parens","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":355,"line":21,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":364,"line":21,"column":12,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":367,"line":22,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":381,"line":22,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"string","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":372,"line":22,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":380,"line":22,"column":16,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"positiveInteger","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":384,"line":23,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":403,"line":23,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":401,"line":23,"column":20,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":402,"line":23,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"negativeInteger","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":406,"line":24,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":426,"line":24,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":423,"line":24,"column":20,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":425,"line":24,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"positiveDouble","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":429,"line":25,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":450,"line":25,"column":24,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":445,"line":25,"column":19,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":449,"line":25,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"negativeDouble","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":453,"line":26,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":475,"line":26,"column":25,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":469,"line":26,"column":19,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":474,"line":26,"column":24,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"booleanFalse","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":478,"line":27,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":498,"line":27,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":492,"line":27,"column":17,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":497,"line":27,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"booleanTrue","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":501,"line":28,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":519,"line":28,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":514,"line":28,"column":16,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":518,"line":28,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}}}]},{"$class":"concerto.metamodel@1.0.0.Decorator","name":"all","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":522,"line":29,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":560,"line":29,"column":41,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"foo","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":527,"line":29,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":532,"line":29,"column":13,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":533,"line":29,"column":14,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":534,"line":29,"column":15,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-1,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":535,"line":29,"column":16,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":537,"line":29,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":538,"line":29,"column":19,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":542,"line":29,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorNumber","value":-10.2,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":543,"line":29,"column":24,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":548,"line":29,"column":29,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":549,"line":29,"column":30,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":554,"line":29,"column":35,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":555,"line":29,"column":36,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":559,"line":29,"column":40,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"firstName","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":580,"line":31,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":601,"line":32,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"lastName","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":601,"line":32,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":621,"line":33,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.DoubleProperty","name":"myDouble","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":621,"line":33,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":658,"line":35,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":621,"line":33,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":635,"line":33,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"double","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":626,"line":33,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":634,"line":33,"column":16,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.IntegerProperty","name":"myInt","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":658,"line":35,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":694,"line":37,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":658,"line":35,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":673,"line":35,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"integer","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":663,"line":35,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":672,"line":35,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.LongProperty","name":"myLong","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":694,"line":37,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":725,"line":39,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":694,"line":37,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":706,"line":37,"column":15,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"long","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":699,"line":37,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":705,"line":37,"column":14,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.DateTimeProperty","name":"myDateTime","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":725,"line":39,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":768,"line":41,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":725,"line":39,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":741,"line":39,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"dateTime","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":730,"line":39,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":740,"line":39,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.BooleanProperty","name":"myBoolean","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":768,"line":41,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":808,"line":43,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":768,"line":41,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":783,"line":41,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"boolean","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":773,"line":41,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":782,"line":41,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.ObjectProperty","name":"myConcept","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"MyConcept"},"isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":808,"line":43,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":850,"line":45,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":808,"line":43,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":823,"line":43,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"concept","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":813,"line":43,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":822,"line":43,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.RelationshipProperty","name":"myRegulator","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"Regulator"},"isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":850,"line":45,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":899,"line":47,"column":1,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":850,"line":45,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":870,"line":45,"column":23,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"relationship","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":855,"line":45,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":869,"line":45,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]}],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":282,"line":18,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":900,"line":47,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"identified":{"$class":"concerto.metamodel@1.0.0.IdentifiedBy","name":"email"},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":282,"line":18,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":301,"line":18,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"participant","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":287,"line":18,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":300,"line":18,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.ParticipantDeclaration","name":"Regulator","isAbstract":false,"properties":[{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"email","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":968,"line":51,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":985,"line":52,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"firstName","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":985,"line":52,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1006,"line":53,"column":3,"$class":"concerto.metamodel@1.0.0.Position"}}},{"$class":"concerto.metamodel@1.0.0.StringProperty","name":"lastName","isArray":false,"isOptional":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1006,"line":53,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1024,"line":54,"column":1,"$class":"concerto.metamodel@1.0.0.Position"}}}],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":902,"line":49,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1025,"line":54,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"identified":{"$class":"concerto.metamodel@1.0.0.IdentifiedBy","name":"email"},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":902,"line":49,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":921,"line":49,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"participant","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":907,"line":49,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":920,"line":49,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransaction","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1027,"line":56,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1076,"line":58,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1027,"line":56,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1046,"line":56,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"transaction","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1032,"line":56,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1045,"line":56,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyEvent","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1078,"line":60,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1115,"line":62,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1078,"line":60,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1091,"line":60,"column":14,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"event","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1083,"line":60,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1090,"line":60,"column":13,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.ConceptDeclaration","name":"MyConcept","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1117,"line":64,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1154,"line":66,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1117,"line":64,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1132,"line":64,"column":16,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"concept","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1122,"line":64,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1131,"line":64,"column":15,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.EnumDeclaration","name":"MyEnum","properties":[{"$class":"concerto.metamodel@1.0.0.EnumProperty","name":"VALUE","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1185,"line":70,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1213,"line":72,"column":1,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1185,"line":70,"column":3,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1202,"line":70,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"enumValue","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1190,"line":70,"column":8,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1201,"line":70,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]}],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1156,"line":68,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1214,"line":72,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"bar","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1156,"line":68,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1168,"line":68,"column":13,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorString","value":"enum","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1161,"line":68,"column":6,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1167,"line":68,"column":12,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransactionIdentifier1","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1216,"line":74,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1276,"line":76,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"returns","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1216,"line":74,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1235,"line":74,"column":20,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorTypeReference","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"MyConcept"},"isArray":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1225,"line":74,"column":10,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1234,"line":74,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransactionIdentifier2","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1278,"line":78,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1340,"line":80,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"returns","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1278,"line":78,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1299,"line":78,"column":22,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorTypeReference","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"MyConcept"},"isArray":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1287,"line":78,"column":10,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1298,"line":78,"column":21,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransactionIdentifier3","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1342,"line":82,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1399,"line":84,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"returns","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1342,"line":82,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1358,"line":82,"column":17,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorTypeReference","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"String"},"isArray":false,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1351,"line":82,"column":10,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1357,"line":82,"column":16,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransactionIdentifier4","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1401,"line":86,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1460,"line":88,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"returns","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1401,"line":86,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1419,"line":86,"column":19,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorTypeReference","type":{"$class":"concerto.metamodel@1.0.0.TypeIdentifier","name":"String"},"isArray":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1410,"line":86,"column":10,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1418,"line":86,"column":18,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]},{"$class":"concerto.metamodel@1.0.0.TransactionDeclaration","name":"MyTransactionIdentifier5","isAbstract":false,"properties":[],"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1462,"line":90,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1517,"line":92,"column":2,"$class":"concerto.metamodel@1.0.0.Position"}},"decorators":[{"$class":"concerto.metamodel@1.0.0.Decorator","name":"returns","location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1462,"line":90,"column":1,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1476,"line":90,"column":15,"$class":"concerto.metamodel@1.0.0.Position"}},"arguments":[{"$class":"concerto.metamodel@1.0.0.DecoratorBoolean","value":true,"location":{"$class":"concerto.metamodel@1.0.0.Range","start":{"offset":1471,"line":90,"column":10,"$class":"concerto.metamodel@1.0.0.Position"},"end":{"offset":1475,"line":90,"column":14,"$class":"concerto.metamodel@1.0.0.Position"}}}]}]}]}
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "noargs",
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 0,
+          "line": 1,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 7,
+          "line": 1,
+          "column": 8,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "parens",
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 8,
+          "line": 2,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 17,
+          "line": 2,
+          "column": 10,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "arguments": []
+    }
+  ],
+  "namespace": "org.acme",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "Car",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "id",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 266,
+              "line": 16,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 280,
+              "line": 17,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "owner",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Driver"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 280,
+              "line": 17,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 297,
+              "line": 18,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 38,
+          "line": 5,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 298,
+          "line": 18,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "id"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "noargs",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 38,
+              "line": 5,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 45,
+              "line": 5,
+              "column": 8,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "parens",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 46,
+              "line": 6,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 55,
+              "line": 6,
+              "column": 10,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": []
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 56,
+              "line": 7,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 69,
+              "line": 7,
+              "column": 14,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "asset",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 61,
+                  "line": 7,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 68,
+                  "line": 7,
+                  "column": 13,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "positiveInteger",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 70,
+              "line": 8,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 89,
+              "line": 8,
+              "column": 20,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 1,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 87,
+                  "line": 8,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 88,
+                  "line": 8,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "negativeInteger",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 90,
+              "line": 9,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 110,
+              "line": 9,
+              "column": 21,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": -1,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 107,
+                  "line": 9,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 109,
+                  "line": 9,
+                  "column": 20,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "positiveDouble",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 111,
+              "line": 10,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 132,
+              "line": 10,
+              "column": 22,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 10.2,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 127,
+                  "line": 10,
+                  "column": 17,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 131,
+                  "line": 10,
+                  "column": 21,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "negativeDouble",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 133,
+              "line": 11,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 155,
+              "line": 11,
+              "column": 23,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": -10.2,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 149,
+                  "line": 11,
+                  "column": 17,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 154,
+                  "line": 11,
+                  "column": 22,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "booleanFalse",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 156,
+              "line": 12,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 176,
+              "line": 12,
+              "column": 21,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": false,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 170,
+                  "line": 12,
+                  "column": 15,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 175,
+                  "line": 12,
+                  "column": 20,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "booleanTrue",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 177,
+              "line": 13,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 195,
+              "line": 13,
+              "column": 19,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": true,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 190,
+                  "line": 13,
+                  "column": 14,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 194,
+                  "line": 13,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "all",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 196,
+              "line": 14,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 234,
+              "line": 14,
+              "column": 39,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "foo",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 201,
+                  "line": 14,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 206,
+                  "line": 14,
+                  "column": 11,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 1,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 207,
+                  "line": 14,
+                  "column": 12,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 208,
+                  "line": 14,
+                  "column": 13,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": -1,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 209,
+                  "line": 14,
+                  "column": 14,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 211,
+                  "line": 14,
+                  "column": 16,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 10.2,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 212,
+                  "line": 14,
+                  "column": 17,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 216,
+                  "line": 14,
+                  "column": 21,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": -10.2,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 217,
+                  "line": 14,
+                  "column": 22,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 222,
+                  "line": 14,
+                  "column": 27,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": false,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 223,
+                  "line": 14,
+                  "column": 28,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 228,
+                  "line": 14,
+                  "column": 33,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": true,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 229,
+                  "line": 14,
+                  "column": 34,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 233,
+                  "line": 14,
+                  "column": 38,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Driver",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "email",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 363,
+              "line": 22,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 598,
+              "line": 33,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "noargs",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 363,
+                  "line": 22,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 370,
+                  "line": 22,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "parens",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 373,
+                  "line": 23,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 382,
+                  "line": 23,
+                  "column": 12,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 385,
+                  "line": 24,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 399,
+                  "line": 24,
+                  "column": 17,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "string",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 390,
+                      "line": 24,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 398,
+                      "line": 24,
+                      "column": 16,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "positiveInteger",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 402,
+                  "line": 25,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 421,
+                  "line": 25,
+                  "column": 22,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 1,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 419,
+                      "line": 25,
+                      "column": 20,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 420,
+                      "line": 25,
+                      "column": 21,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "negativeInteger",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 424,
+                  "line": 26,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 444,
+                  "line": 26,
+                  "column": 23,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": -1,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 441,
+                      "line": 26,
+                      "column": 20,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 443,
+                      "line": 26,
+                      "column": 22,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "positiveDouble",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 447,
+                  "line": 27,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 468,
+                  "line": 27,
+                  "column": 24,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 10.2,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 463,
+                      "line": 27,
+                      "column": 19,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 467,
+                      "line": 27,
+                      "column": 23,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "negativeDouble",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 471,
+                  "line": 28,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 493,
+                  "line": 28,
+                  "column": 25,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": -10.2,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 487,
+                      "line": 28,
+                      "column": 19,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 492,
+                      "line": 28,
+                      "column": 24,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "booleanFalse",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 496,
+                  "line": 29,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 516,
+                  "line": 29,
+                  "column": 23,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": false,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 510,
+                      "line": 29,
+                      "column": 17,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 515,
+                      "line": 29,
+                      "column": 22,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "booleanTrue",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 519,
+                  "line": 30,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 537,
+                  "line": 30,
+                  "column": 21,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": true,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 532,
+                      "line": 30,
+                      "column": 16,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 536,
+                      "line": 30,
+                      "column": 20,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "all",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 540,
+                  "line": 31,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 578,
+                  "line": 31,
+                  "column": 41,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "foo",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 545,
+                      "line": 31,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 550,
+                      "line": 31,
+                      "column": 13,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 1,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 551,
+                      "line": 31,
+                      "column": 14,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 552,
+                      "line": 31,
+                      "column": 15,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": -1,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 553,
+                      "line": 31,
+                      "column": 16,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 555,
+                      "line": 31,
+                      "column": 18,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 10.2,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 556,
+                      "line": 31,
+                      "column": 19,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 560,
+                      "line": 31,
+                      "column": 23,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": -10.2,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 561,
+                      "line": 31,
+                      "column": 24,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 566,
+                      "line": 31,
+                      "column": 29,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": false,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 567,
+                      "line": 31,
+                      "column": 30,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 572,
+                      "line": 31,
+                      "column": 35,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": true,
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 573,
+                      "line": 31,
+                      "column": 36,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 577,
+                      "line": 31,
+                      "column": 40,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "firstName",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 598,
+              "line": 33,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 619,
+              "line": 34,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "lastName",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 619,
+              "line": 34,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 639,
+              "line": 35,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "myDouble",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 639,
+              "line": 35,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 676,
+              "line": 37,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 639,
+                  "line": 35,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 653,
+                  "line": 35,
+                  "column": 17,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "double",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 644,
+                      "line": 35,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 652,
+                      "line": 35,
+                      "column": 16,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "myInt",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 676,
+              "line": 37,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 712,
+              "line": 39,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 676,
+                  "line": 37,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 691,
+                  "line": 37,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "integer",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 681,
+                      "line": 37,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 690,
+                      "line": 37,
+                      "column": 17,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "myLong",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 712,
+              "line": 39,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 743,
+              "line": 41,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 712,
+                  "line": 39,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 724,
+                  "line": 39,
+                  "column": 15,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "long",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 717,
+                      "line": 39,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 723,
+                      "line": 39,
+                      "column": 14,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "myDateTime",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 743,
+              "line": 41,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 786,
+              "line": 43,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 743,
+                  "line": 41,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 759,
+                  "line": 41,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "dateTime",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 748,
+                      "line": 41,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 758,
+                      "line": 41,
+                      "column": 18,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "myBoolean",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 786,
+              "line": 43,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 826,
+              "line": 45,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 786,
+                  "line": 43,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 801,
+                  "line": 43,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "boolean",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 791,
+                      "line": 43,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 800,
+                      "line": 43,
+                      "column": 17,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "myConcept",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "MyConcept"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 826,
+              "line": 45,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 868,
+              "line": 47,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 826,
+                  "line": 45,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 841,
+                  "line": 45,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "concept",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 831,
+                      "line": 45,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 840,
+                      "line": 45,
+                      "column": 17,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "myRegulator",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Regulator"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 868,
+              "line": 47,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 917,
+              "line": 49,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 868,
+                  "line": 47,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 888,
+                  "line": 47,
+                  "column": 23,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "relationship",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 873,
+                      "line": 47,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 887,
+                      "line": 47,
+                      "column": 22,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 300,
+          "line": 20,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 918,
+          "line": 49,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "email"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 300,
+              "line": 20,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 319,
+              "line": 20,
+              "column": 20,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "participant",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 305,
+                  "line": 20,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 318,
+                  "line": 20,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Regulator",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "email",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 986,
+              "line": 53,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1003,
+              "line": 54,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "firstName",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1003,
+              "line": 54,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1024,
+              "line": 55,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "lastName",
+          "isArray": false,
+          "isOptional": false,
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1024,
+              "line": 55,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1042,
+              "line": 56,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          }
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 920,
+          "line": 51,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1043,
+          "line": 56,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "email"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 920,
+              "line": 51,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 939,
+              "line": 51,
+              "column": 20,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "participant",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 925,
+                  "line": 51,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 938,
+                  "line": 51,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransaction",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1045,
+          "line": 58,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1094,
+          "line": 60,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1045,
+              "line": 58,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1064,
+              "line": 58,
+              "column": 20,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "transaction",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1050,
+                  "line": 58,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1063,
+                  "line": 58,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyEvent",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1096,
+          "line": 62,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1133,
+          "line": 64,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1096,
+              "line": 62,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1109,
+              "line": 62,
+              "column": 14,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "event",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1101,
+                  "line": 62,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1108,
+                  "line": 62,
+                  "column": 13,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "MyConcept",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1135,
+          "line": 66,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1172,
+          "line": 68,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1135,
+              "line": 66,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1150,
+              "line": 66,
+              "column": 16,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "concept",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1140,
+                  "line": 66,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1149,
+                  "line": 66,
+                  "column": 15,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "MyEnum",
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "VALUE",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1203,
+              "line": 72,
+              "column": 3,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1231,
+              "line": 74,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "bar",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1203,
+                  "line": 72,
+                  "column": 3,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1220,
+                  "line": 72,
+                  "column": 20,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              },
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "enumValue",
+                  "location": {
+                    "$class": "concerto.metamodel@1.0.0.Range",
+                    "start": {
+                      "offset": 1208,
+                      "line": 72,
+                      "column": 8,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    },
+                    "end": {
+                      "offset": 1219,
+                      "line": 72,
+                      "column": 19,
+                      "$class": "concerto.metamodel@1.0.0.Position"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1174,
+          "line": 70,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1232,
+          "line": 74,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "bar",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1174,
+              "line": 70,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1186,
+              "line": 70,
+              "column": 13,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "enum",
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1179,
+                  "line": 70,
+                  "column": 6,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1185,
+                  "line": 70,
+                  "column": 12,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionIdentifier1",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1234,
+          "line": 76,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1294,
+          "line": 78,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "returns",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1234,
+              "line": 76,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1253,
+              "line": 76,
+              "column": 20,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "MyConcept"
+              },
+              "isArray": false,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1243,
+                  "line": 76,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1252,
+                  "line": 76,
+                  "column": 19,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionIdentifier2",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1296,
+          "line": 80,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1358,
+          "line": 82,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "returns",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1296,
+              "line": 80,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1317,
+              "line": 80,
+              "column": 22,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "MyConcept"
+              },
+              "isArray": true,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1305,
+                  "line": 80,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1316,
+                  "line": 80,
+                  "column": 21,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionIdentifier3",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1360,
+          "line": 84,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1417,
+          "line": 86,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "returns",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1360,
+              "line": 84,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1376,
+              "line": 84,
+              "column": 17,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "String"
+              },
+              "isArray": false,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1369,
+                  "line": 84,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1375,
+                  "line": 84,
+                  "column": 16,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionIdentifier4",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1419,
+          "line": 88,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1478,
+          "line": 90,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "returns",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1419,
+              "line": 88,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1437,
+              "line": 88,
+              "column": 19,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "String"
+              },
+              "isArray": true,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1428,
+                  "line": 88,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1436,
+                  "line": 88,
+                  "column": 18,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "MyTransactionIdentifier5",
+      "isAbstract": false,
+      "properties": [],
+      "location": {
+        "$class": "concerto.metamodel@1.0.0.Range",
+        "start": {
+          "offset": 1480,
+          "line": 92,
+          "column": 1,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        },
+        "end": {
+          "offset": 1535,
+          "line": 94,
+          "column": 2,
+          "$class": "concerto.metamodel@1.0.0.Position"
+        }
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "returns",
+          "location": {
+            "$class": "concerto.metamodel@1.0.0.Range",
+            "start": {
+              "offset": 1480,
+              "line": 92,
+              "column": 1,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            },
+            "end": {
+              "offset": 1494,
+              "line": 92,
+              "column": 15,
+              "$class": "concerto.metamodel@1.0.0.Position"
+            }
+          },
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": true,
+              "location": {
+                "$class": "concerto.metamodel@1.0.0.Range",
+                "start": {
+                  "offset": 1489,
+                  "line": 92,
+                  "column": 10,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                },
+                "end": {
+                  "offset": 1493,
+                  "line": 92,
+                  "column": 14,
+                  "$class": "concerto.metamodel@1.0.0.Position"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

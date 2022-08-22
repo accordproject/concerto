@@ -38,27 +38,25 @@ class Decorated {
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
      *
-     * @param {ModelFile} modelFile - the model file
      * @param {string} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile, ast) {
-        if(!modelFile) {
-            throw new Error('modelFile not specified');
-        } else if(!ast) {
+    constructor(ast) {
+        if(!ast) {
             throw new Error('ast not specified');
         }
-        this.modelFile = modelFile;
         this.ast = ast;
     }
 
     /**
      * Returns the ModelFile that defines this class.
      *
+     * @abstract
+     * @protected
      * @return {ModelFile} the owning ModelFile
      */
     getModelFile() {
-        return this.modelFile;
+        throw new Error('not implemented');
     }
 
     /**
@@ -120,7 +118,8 @@ class Decorated {
             for(let i=n+1; i < this.decorators.length; i++) {
                 let otherDecorator = this.decorators[i];
                 if(decorator.getName() === otherDecorator.getName()) {
-                    throw new IllegalModelException(`Duplicate decorator ${decorator.getName()}`,this.modelFile, this.ast.location);
+                    let modelFile = this.getModelFile();
+                    throw new IllegalModelException(`Duplicate decorator ${decorator.getName()}`,modelFile, this.ast.location);
                 }
             }
         }

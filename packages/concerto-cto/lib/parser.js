@@ -987,9 +987,10 @@ function peg$parse(input, options) {
   var peg$f90 = function(version) {
        return version.value;
      };
-  var peg$f91 = function(version, ns, imports, body) {
+  var peg$f91 = function(version, decorators, ns, imports, body) {
       const result = {
         $class: "concerto.metamodel@1.0.0.Model",
+        decorators: optionalList(decorators),
         namespace: ns,
         imports: optionalList(imports),
         declarations: optionalList(body)
@@ -9941,25 +9942,26 @@ function peg$parse(input, options) {
   }
 
   function peg$parseModel() {
-    var s0, s1, s2, s3, s4;
+    var s0, s1, s2, s3, s4, s5;
 
     s0 = peg$currPos;
     s1 = peg$parseVersion();
     if (s1 === peg$FAILED) {
       s1 = null;
     }
-    s2 = peg$parseNamespace();
-    if (s2 !== peg$FAILED) {
-      s3 = peg$parseImports();
-      if (s3 === peg$FAILED) {
-        s3 = null;
-      }
-      s4 = peg$parseSourceElements();
+    s2 = peg$parseDecorators();
+    s3 = peg$parseNamespace();
+    if (s3 !== peg$FAILED) {
+      s4 = peg$parseImports();
       if (s4 === peg$FAILED) {
         s4 = null;
       }
+      s5 = peg$parseSourceElements();
+      if (s5 === peg$FAILED) {
+        s5 = null;
+      }
       peg$savedPos = s0;
-      s0 = peg$f91(s1, s2, s3, s4);
+      s0 = peg$f91(s1, s2, s3, s4, s5);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;

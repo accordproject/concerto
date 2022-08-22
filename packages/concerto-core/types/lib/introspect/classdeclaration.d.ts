@@ -20,6 +20,7 @@ declare class ClassDeclaration extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelFile: ModelFile, ast: any);
+    modelFile: ModelFile;
     name: any;
     properties: any[];
     superType: any;
@@ -212,5 +213,5 @@ declare class ClassDeclaration extends Decorated {
     isClassDeclaration(): boolean;
 }
 import Decorated = require("./decorated");
-import Property = require("./property");
 import ModelFile = require("./modelfile");
+import Property = require("./property");

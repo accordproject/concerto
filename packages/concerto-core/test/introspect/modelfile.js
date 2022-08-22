@@ -58,7 +58,7 @@ describe('ModelFile', () => {
         it('should throw when non object ast provided', () => {
             (() => {
                 new ModelFile(modelManager, null);
-            }).should.throw(/model AST as input/);
+            }).should.throw(/ast not specified/);
         });
 
         it('should throw when invalid definitions provided', () => {

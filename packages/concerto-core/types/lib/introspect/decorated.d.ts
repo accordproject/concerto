@@ -12,19 +12,19 @@ declare class Decorated {
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
      *
-     * @param {ModelFile} modelFile - the model file
      * @param {string} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile: ModelFile, ast: string);
-    modelFile: ModelFile;
+    constructor(ast: string);
     ast: string;
     /**
      * Returns the ModelFile that defines this class.
      *
+     * @abstract
+     * @protected
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile(): ModelFile;
+    protected getModelFile(): ModelFile;
     /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor

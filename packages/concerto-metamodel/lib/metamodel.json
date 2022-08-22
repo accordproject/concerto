@@ -1,5 +1,6 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
     "namespace": "concerto.metamodel@1.0.0",
     "imports": [],
     "declarations": [
@@ -830,6 +831,16 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Declaration"
+                    },
+                    "isArray": true,
+                    "isOptional": true
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "decorators",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "Decorator"
                     },
                     "isArray": true,
                     "isOptional": true

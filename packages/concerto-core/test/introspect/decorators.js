@@ -83,8 +83,14 @@ describe('Decorators', () => {
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             let modelDefinitions = fs.readFileSync('test/data/decorators/model.cto', 'utf8');
-            modelManager.addCTOModel(modelDefinitions);
+            const modelFile = modelManager.addCTOModel(modelDefinitions);
             const introspector = new Introspector(modelManager);
+
+            modelFile.getDecorators().length.should.equal(2);
+            modelFile.getDecorator('noargs').should.not.be.null;
+            modelFile.getDecorator('noargs').getArguments().length.should.equal(0);
+            modelFile.getDecorator('parens').should.not.be.null;
+            modelFile.getDecorator('parens').getArguments().length.should.equal(0);
 
             const car = introspector.getClassDeclaration('org.acme.Car');
             checkAll(car, 'asset');

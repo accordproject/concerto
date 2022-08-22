@@ -24,6 +24,7 @@ const Decorated = require('./decorated');
 /* istanbul ignore next */
 if (global === undefined) {
     const ClassDeclaration = require('./classdeclaration');
+    const ModelFile = require('./modelfile');
 }
 /* eslint-enable no-unused-vars */
 
@@ -45,9 +46,19 @@ class Property extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {
-        super(parent.getModelFile(), ast);
+        super(ast);
         this.parent = parent;
         this.process();
+    }
+
+    /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @public
+     * @return {ModelFile} the owning ModelFile
+     */
+    getModelFile() {
+        return this.parent.getModelFile();
     }
 
     /**
