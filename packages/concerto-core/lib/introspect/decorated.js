@@ -38,39 +38,25 @@ class Decorated {
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
      *
-     * @param {ModelFile|undefined} modelFile - the model file
      * @param {string} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile, ast) {
-        if(!modelFile) {
-            // This is deferred to process.
-            // throw new Error('modelFile not specified');
-        } else if(!ast) {
+    constructor(ast) {
+        if(!ast) {
             throw new Error('ast not specified');
         }
-        this.modelFile = modelFile;
         this.ast = ast;
     }
 
     /**
      * Returns the ModelFile that defines this class.
      *
+     * @abstract
      * @protected
      * @return {ModelFile} the owning ModelFile
      */
     getModelFile() {
-        return this.modelFile;
-    }
-
-    /**
-     * Set the ModelFile that defines this class.
-     *
-     * @protected
-     * @param {ModelFile} modelFile the owning ModelFile
-     */
-    setModelFile(modelFile) {
-        this.modelFile = modelFile;
+        throw new Error('not implemented');
     }
 
     /**
@@ -91,10 +77,6 @@ class Decorated {
      * @private
      */
     process() {
-        if (!this.modelFile) {
-            throw new Error('modelFile not specified');
-        }
-
         this.decorators = [];
 
         if(this.ast.decorators) {
@@ -136,7 +118,8 @@ class Decorated {
             for(let i=n+1; i < this.decorators.length; i++) {
                 let otherDecorator = this.decorators[i];
                 if(decorator.getName() === otherDecorator.getName()) {
-                    throw new IllegalModelException(`Duplicate decorator ${decorator.getName()}`,this.modelFile, this.ast.location);
+                    let modelFile = this.getModelFile();
+                    throw new IllegalModelException(`Duplicate decorator ${decorator.getName()}`,modelFile, this.ast.location);
                 }
             }
         }

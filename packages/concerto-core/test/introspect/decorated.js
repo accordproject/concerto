@@ -34,7 +34,7 @@ describe('Decorated', () => {
 
         it('should throw if ast not specified', () => {
             (() => {
-                new Decorated(modelFile, null);
+                new Decorated(null);
             }).should.throw(/ast not specified/);
         });
 
@@ -42,18 +42,10 @@ describe('Decorated', () => {
 
     describe('#getModelFile', () => {
 
-        it('should return the model file', () => {
-            decorated.getModelFile().should.equal(modelFile);
-        });
-
-    });
-
-    describe('#process', () => {
-
-        it('should throw if modelFile not specified', () => {
+        it('should throw as abstract', () => {
             (() => {
-                new Decorated(null, { ast: true }).process();
-            }).should.throw(/modelFile not specified/);
+                decorated.getModelFile();
+            }).should.throw(/not implemented/);
         });
 
     });

@@ -146,6 +146,7 @@ class Introspector {
    + ModelManager modelManagerFromMetaModel() 
 class ModelFile extends Decorated {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
+   ~ ModelFile getModelFile() 
    + boolean isModelFile() 
    + string getVersion() 
    + Boolean isSystemModelFile() 

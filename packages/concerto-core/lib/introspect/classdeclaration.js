@@ -55,17 +55,19 @@ class ClassDeclaration extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
-        super(modelFile, ast);
+        super(ast);
+        this.modelFile = modelFile;
         this.process();
     }
 
     /**
      * Returns the ModelFile that defines this class.
      *
+     * @public
      * @return {ModelFile} the owning ModelFile
      */
     getModelFile() {
-        return super.getModelFile();
+        return this.modelFile;
     }
 
     /**

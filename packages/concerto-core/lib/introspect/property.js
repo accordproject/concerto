@@ -46,7 +46,7 @@ class Property extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {
-        super(parent.getModelFile(), ast);
+        super(ast);
         this.parent = parent;
         this.process();
     }
@@ -54,10 +54,11 @@ class Property extends Decorated {
     /**
      * Returns the ModelFile that defines this class.
      *
+     * @public
      * @return {ModelFile} the owning ModelFile
      */
     getModelFile() {
-        return super.getModelFile();
+        return this.parent.getModelFile();
     }
 
     /**

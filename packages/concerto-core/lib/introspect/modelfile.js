@@ -57,7 +57,7 @@ class ModelFile extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelManager, ast, definitions, fileName) {
-        super(undefined, ast); // We can't set the model file here, so set it below.
+        super(ast);
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -91,7 +91,6 @@ class ModelFile extends Decorated {
         }
 
         // Set up the decorators.
-        this.setModelFile(this);
         this.process();
 
         // Populate from the AST
@@ -105,6 +104,16 @@ class ModelFile extends Decorated {
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @protected
+     * @return {ModelFile} the owning ModelFile
+     */
+    getModelFile() {
+        return this;
     }
 
     /**
