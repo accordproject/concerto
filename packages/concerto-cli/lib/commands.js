@@ -143,6 +143,7 @@ class Commands {
      * @param {string} output the output directory
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
+     * @param {boolean} [options.metamodel] - include the Concerto Metamodel
      * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
      * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
      */
@@ -155,6 +156,9 @@ class Commands {
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);
+        if (options && options.metamodel) {
+            modelManager.addCTOModel(MetaModelUtil.metaModelCto);
+        }
 
         let visitor = null;
 
