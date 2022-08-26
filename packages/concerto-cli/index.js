@@ -85,11 +85,11 @@ require('yargs')
         }
     })
     .command('compile', 'generate code for a target platform', (yargs) => {
-        yargs.demandOption(['model'], 'Please provide models');
         yargs.option('model', {
             describe: 'array of concerto model files',
             type: 'string',
-            array: true
+            array: true,
+            default: [],
         });
         yargs.option('offline', {
             describe: 'do not resolve external models',
@@ -106,6 +106,11 @@ require('yargs')
             type: 'string',
             default: './output/'
         });
+        yargs.option('metamodel', {
+            describe: 'Include the Concerto Metamodel in the output',
+            type: 'boolean',
+            default: false,
+        });
         yargs.option('useSystemTextJson', {
             describe: 'Compile for System.Text.Json library (`csharp` target only)',
             type: 'boolean',
@@ -120,6 +125,13 @@ require('yargs')
             describe: 'A prefix to add to all namespaces (`csharp` target only)',
             type: 'string',
         });
+        yargs.check(({ model, metamodel }) => {
+            if (model.length > 0 || metamodel) {
+                return true;
+            } else {
+                throw new Error('Please provide models, or specify metamodel');
+            }
+        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`generate code for target ${argv.target} from models ${argv.model} into directory: ${argv.output}`);
@@ -127,6 +139,7 @@ require('yargs')
 
         const options = {};
         options.offline = argv.offline;
+        options.metamodel = argv.metamodel;
         options.useSystemTextJson = argv.useSystemTextJson;
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
