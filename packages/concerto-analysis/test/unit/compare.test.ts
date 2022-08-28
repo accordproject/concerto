@@ -15,7 +15,7 @@ async function getModelFiles(
     aFileName: string,
     bFileName: string
 ): Promise<[a: ModelFile, b: ModelFile]> {
-    const modelManager = new ModelManager({ versionedNamespacesStrict: true });
+    const modelManager = new ModelManager({ strict: true });
     const a = await getModelFile(modelManager, aFileName);
     const b = await getModelFile(modelManager, bFileName);
     return [a, b];

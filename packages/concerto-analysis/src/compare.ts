@@ -26,9 +26,9 @@ export class Compare {
     }
 
     public compare(a: ModelFile, b: ModelFile): CompareResults {
-        if (!a.getModelManager().isVersionedNamespacesStrict()) {
+        if (!a.getModelManager().isStrict()) {
             throw new Error(`model file "${a.getNamespace()}" does not have strict versioned namespaces`);
-        } else if (!b.getModelManager().isVersionedNamespacesStrict()) {
+        } else if (!b.getModelManager().isStrict()) {
             throw new Error(`model file "${b.getNamespace()}" does not have strict versioned namespaces`);
         }
         const comparerFactories = this.config.comparerFactories;

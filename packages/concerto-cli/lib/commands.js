@@ -306,7 +306,7 @@ class Commands {
     static async compare(oldPath, newPath) {
         const oldContents = fs.readFileSync(path.resolve(oldPath), 'utf-8');
         const newContents = fs.readFileSync(path.resolve(newPath), 'utf-8');
-        const modelManager = new ModelManager({ versionedNamespacesStrict: true });
+        const modelManager = new ModelManager({ strict: true });
         const oldModelFile = this.getModelFile(modelManager, oldContents);
         const newModelFile = this.getModelFile(modelManager, newContents);
         const results = new Compare().compare(oldModelFile, newModelFile);

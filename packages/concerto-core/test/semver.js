@@ -42,7 +42,7 @@ describe('Semantic Versioning', () => {
         sandbox.restore();
     });
 
-    describe('#namespace versioning - versionedNamespacesStrict:false', () => {
+    describe('#namespace versioning - strict:false', () => {
         it('should support versioned namespaces', () => {
             modelManager = new ModelManager();
             modelManager.addCTOModel(personCto, 'person.cto');
@@ -94,9 +94,9 @@ import {Event} from concerto@1.0.0`, 'test.cto');
         });
     });
 
-    describe('#namespace versioning - versionedNamespacesStrict:true', () => {
+    describe('#namespace versioning - strict:true', () => {
         it('should support versioned namespaces', () => {
-            modelManager = new ModelManager({ versionedNamespacesStrict: true });
+            modelManager = new ModelManager({ strict: true });
             modelManager.addCTOModel(personCto, 'person.cto');
             modelManager.addCTOModel(employeeCto, 'employee.cto');
             modelManager.getModelFile('person@1.0.0').should.be.not.null;
@@ -106,21 +106,21 @@ import {Event} from concerto@1.0.0`, 'test.cto');
 
         it('should not support unversioned namespaces', () => {
             (() => {
-                modelManager = new ModelManager({ versionedNamespacesStrict: true });
+                modelManager = new ModelManager({ strict: true });
                 modelManager.addCTOModel('namespace test', 'test.cto');
             }).should.throw(/Cannot add an unversioned namespace/);
         });
 
         it('should not support unversioned imports', () => {
             (() => {
-                modelManager = new ModelManager({ versionedNamespacesStrict: true });
+                modelManager = new ModelManager({ strict: true });
                 modelManager.addCTOModel(`namespace test@1.0.0
 import concerto.Event`, 'test.cto');
             }).should.throw(/Cannot use an unversioned import/);
         });
 
         it('should not deserialize unversioned declarations', () => {
-            modelManager = new ModelManager({ versionedNamespacesStrict: true });
+            modelManager = new ModelManager({ strict: true });
             modelManager.addCTOModel(personCto, 'person.cto');
             modelManager.addCTOModel(employeeCto, 'employee.cto');
             const factory = new Factory(modelManager);
