@@ -27,7 +27,8 @@ const MetaModelNamespace = 'concerto.metamodel@1.0.0';
 /**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = `namespace ${MetaModelNamespace}
+const metaModelCto = `@DotNetNamespace("AccordProject.Concerto.Metamodel")
+namespace ${MetaModelNamespace}
 
 concept Position {
   o Integer line

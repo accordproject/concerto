@@ -1,6 +1,17 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
-    "decorators": [],
+    "decorators": [
+        {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "DotNetNamespace",
+            "arguments": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                    "value": "AccordProject.Concerto.Metamodel"
+                }
+            ]
+        }
+    ],
     "namespace": "concerto.metamodel@1.0.0",
     "imports": [],
     "declarations": [

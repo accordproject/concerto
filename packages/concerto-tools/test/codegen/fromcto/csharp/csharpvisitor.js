@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { InMemoryWriter } = require('@accordproject/concerto-util');
 const chai = require('chai');
 chai.should();
 const sinon = require('sinon');
@@ -35,6 +36,93 @@ describe('CSharpVisitor', function () {
     beforeEach(() => {
         csharpVisitor = new CSharpVisitor();
         mockFileWriter = sinon.createStubInstance(FileWriter);
+    });
+
+    describe('visit improved', () => {
+        let fileWriter;
+
+        beforeEach(() => {
+            fileWriter = new InMemoryWriter();
+        });
+
+        it('should default namespaces using just the name portion of the namespace', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            concept Thing {}
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file = files.get('org.acme@1.2.3.cs');
+            file.should.match(/namespace org.acme {/);
+        });
+
+        it('should default imported namespaces using just the name portion of the namespace', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme.other@2.3.4
+
+            concept OtherThing {}
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            import { OtherThing } from org.acme.other@2.3.4
+
+            concept Thing {
+                o OtherThing otherThing
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme {/);
+            file1.should.match(/using org.acme.other;/);
+            const file2 = files.get('org.acme.other@2.3.4.cs');
+            file2.should.match(/namespace org.acme.other {/);
+        });
+
+        it('should use the @DotNetNamespace decorator if present', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            @DotNetNamespace("Org.Acme.Models")
+            namespace org.acme@1.2.3
+
+            concept Thing {}
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file = files.get('org.acme@1.2.3.cs');
+            file.should.match(/namespace Org.Acme.Models {/);
+        });
+
+        it('should use the imported @DotNetNamespace decorator if present', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            @DotNetNamespace("Org.Acme.OtherModels")
+            namespace org.acme.other@2.3.4
+
+            concept OtherThing {}
+            `);
+            modelManager.addCTOModel(`
+            @DotNetNamespace("Org.Acme.Models")
+            namespace org.acme@1.2.3
+
+            import { OtherThing } from org.acme.other@2.3.4
+
+            concept Thing {
+                o OtherThing otherThing
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace Org.Acme.Models {/);
+            file1.should.match(/using Org.Acme.OtherModels;/);
+            const file2 = files.get('org.acme.other@2.3.4.cs');
+            file2.should.match(/namespace Org.Acme.OtherModels {/);
+        });
     });
 
     describe('visit', () => {
