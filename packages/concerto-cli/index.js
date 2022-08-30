@@ -306,6 +306,36 @@ require('yargs')
                 Logger.error(err.message);
             });
     })
+    .command('infer', 'generate a concerto model from a source schema', (yargs) => {
+        yargs.demandOption(['input', 'format', 'namespace', 'output']);
+        yargs.option('input', {
+            describe: 'path to the input file',
+            type: 'string',
+        });
+        yargs.option('output', {
+            describe: 'path to the output file',
+            type: 'string'
+        });
+        yargs.option('format', {
+            describe: 'either `openapi` or `jsonSchema',
+            type: 'string'
+        });
+        yargs.option('namespace', {
+            describe: 'The namepspace for the output model',
+            type: 'string',
+        });
+    }, (argv) => {
+        if (argv.verbose) {
+            Logger.info(`Infer Concerto model from ${argv.input} in the ${argv.format} format`);
+        }
+
+        try {
+            return Commands.inferConcertoSchema(argv.input, argv.output, argv.format, argv.namespace);
+        } catch (err){
+            Logger.error(err);
+            return;
+        }
+    })
     .command('generate <mode>', 'generate a sample JSON object for a concept', yargs => {
         yargs.demandOption(['model'], 'Please provide a model');
         yargs.demandOption(['concept'], 'Please provide the concept name');

@@ -21,7 +21,6 @@ const Ajv2020 = require('ajv/dist/2020');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
 const draft7MetaSchema = require('ajv/dist/refs/json-schema-draft-07.json');
 const addFormats = require('ajv-formats');
-// const fs = require('fs');
 
 /**
  * Capitalize the first letter of a string
@@ -40,7 +39,13 @@ function capitalizeFirstLetter(string) {
  * @private
  */
 function normalizeType(type) {
-    return capitalizeFirstLetter(type.replace(/[\s\\.-]/g, '_'));
+    return capitalizeFirstLetter(
+        type
+            // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
+            .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
+            // Replace delimiters with underscore
+            .replace(/[\s\\.-]/g, '_')
+    );
 }
 
 /**
@@ -77,6 +82,10 @@ function inferTypeName(definition, context) {
     const name = context.parents.peek();
     const { type } = parseIdUri(definition.$id) ||
         { type: definition.title || name };
+
+    // TODO Resolve $ref definitions
+    // if (definition.$ref) {}
+
     return normalizeType(type);
 }
 
@@ -98,7 +107,7 @@ function inferType(definition, context) {
             return parent;
         }
 
-        return normalizeType(definition.$ref.replace(/^#\/(definitions|\$defs)\//, ''));
+        return inferTypeName(definition, context);
     }
 
     // TODO Also add local sub-schema definition
@@ -112,6 +121,8 @@ function inferType(definition, context) {
             if (definition.format) {
                 if (definition.format === 'date-time' || definition.format === 'date') {
                     return 'DateTime';
+                } else if (definition.format === 'decimal') {
+                    return 'Double';
                 } else {
                     throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
                 }
@@ -131,6 +142,14 @@ function inferType(definition, context) {
             throw new Error(`Type keyword '${definition.type}' in '${name}' is not supported`);
         }
     }
+
+    // Hack until we support union types.
+    // https://github.com/accordproject/concerto/issues/292
+    if (definition.anyOf){
+        // Just choose the first item
+        return inferType(definition.anyOf[0], context);
+    }
+
     throw new Error(`Unsupported definition: ${JSON.stringify(definition)}`);
 }
 
@@ -239,8 +258,11 @@ function inferDeclaration(definition, context) {
         }
     } else {
         // Find all keys that are not supported
-        const badKeys = Object.keys(definition).filter(key => !['enum', 'type'].includes(key));
-        throw new Error(
+        const badKeys = Object.keys(definition).filter(key =>
+            !['enum', 'type'].includes(key) &&
+            !key.startsWith('x-') // Ignore custom extensions
+        );
+        console.warn(
             `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' not supported.`
         );
     }
@@ -256,12 +278,12 @@ function inferDeclaration(definition, context) {
 function inferModelFile(defaultNamespace, defaultType, schema) {
     const schemaVersion = schema.$schema;
 
-    let ajv = new Ajv2019({ strict: true })
+    let ajv = new Ajv2019({ strict: false })
         .addMetaSchema(draft6MetaSchema)
         .addMetaSchema(draft7MetaSchema);
 
     if (schemaVersion && schemaVersion.startsWith('https://json-schema.org/draft/2020-12/schema')) {
-        ajv = new Ajv2020({ strict: true });
+        ajv = new Ajv2020({ strict: false });
     }
 
     const { namespace, type } = parseIdUri(schema.$id) ||
@@ -287,7 +309,7 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     context.writer.writeLine(0, '');
 
     // Create definitions
-    const defs = schema.definitions || schema.$defs || [];
+    const defs = schema.definitions || schema.$defs || schema?.components?.schemas ||[];
     Object.keys(defs).forEach((key) => {
         context.parents.push(key);
         const definition = defs[key];
@@ -302,12 +324,5 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
 
     return context.writer.getBuffer();
 }
-
-// Prototype CLI tool
-// usage: node lib/codegen/fromJsonSchema/cto/inferModel.js MyJsonSchema.json namespace RootType
-// if (!module.parent) {
-//     const schema = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-//     console.log(inferModelFile(process.argv[3], process.argv[4], schema));
-// }
 
 module.exports = inferModelFile;

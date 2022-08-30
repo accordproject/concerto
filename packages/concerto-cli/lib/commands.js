@@ -18,6 +18,7 @@ const c = require('ansi-colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
+const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -566,6 +567,26 @@ class Commands {
             'error': c.red,
         };
         return colors[result] ? colors[result](result) : result;
+    }
+
+    /**
+     * Generate a Concerto model from another schema format
+     * @param {string} input The source file.
+     * @param {string} output The target file.
+     * @param {string} format The source format
+     * @param {string} namespace The namepspace for the output model
+     */
+    static inferConcertoSchema(input, output, format, namespace) {
+        let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
+
+        if (format.toLowerCase() === 'openapi'){
+            schema = toJsonSchema(schema);
+            fs.writeFileSync(`${output}.jsonschema.json`, JSON.stringify(schema, null, 2));
+        }
+        const outputPath = output || `${input}.cto`;
+        const cto = CodeGen.InferFromJsonSchema(namespace, 'Model', schema);
+        Logger.info('Creating file: ' + outputPath);
+        fs.writeFileSync(outputPath, cto);
     }
 }
 
