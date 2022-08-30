@@ -532,6 +532,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
@@ -553,6 +554,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getAssignableClassDeclarations.returns([mockClassDeclaration, mockClassDeclaration2]);
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useNewtonsoftJson: true});
 
@@ -574,6 +576,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.isAbstract.returns(true);
             mockClassDeclaration.getSuperType.returns('org.acme.Person');
 
@@ -596,6 +599,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.isAbstract.returns(true);
             mockClassDeclaration.getSuperType.returns('org.acme.Person');
 
@@ -618,6 +622,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.isAbstract.returns(true);
             mockClassDeclaration.getSuperType.returns('org.acme.Person');
 
@@ -640,6 +645,7 @@ describe('CSharpVisitor', function () {
                 accept: acceptSpy
             }]);
             mockClassDeclaration.getName.returns('Concept');
+            mockClassDeclaration.getNamespace.returns('concerto');
             mockClassDeclaration.getFullyQualifiedName.returns('concerto.Concept');
             mockClassDeclaration.isAbstract.returns(true);
 
@@ -648,6 +654,29 @@ describe('CSharpVisitor', function () {
             param.fileWriter.writeLine.callCount.should.deep.equal(3);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Concept {']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get;} = "concerto.Concept";']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
+        });
+        it('should write the class opening and close with virtual modifier for base versioned class', () => {
+            let acceptSpy = sinon.spy();
+
+            let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
+            mockClassDeclaration.isClassDeclaration.returns(true);
+            mockClassDeclaration.getOwnProperties.returns([{
+                accept: acceptSpy
+            },
+            {
+                accept: acceptSpy
+            }]);
+            mockClassDeclaration.getName.returns('Concept');
+            mockClassDeclaration.getNamespace.returns('concerto@1.0.0');
+            mockClassDeclaration.getFullyQualifiedName.returns('concerto@1.0.0.Concept');
+            mockClassDeclaration.isAbstract.returns(true);
+
+            csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, 'public abstract class Concept {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get;} = "concerto@1.0.0.Concept";']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '}']);
         });
     });
