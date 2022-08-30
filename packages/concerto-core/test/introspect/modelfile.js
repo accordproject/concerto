@@ -128,6 +128,27 @@ describe('ModelFile', () => {
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
+        it('should throw for a wildcard import when strict is true', () => {
+            const strictModelManager = new ModelManager({ strict: true });
+
+            const imports = [{
+                $class: `${MetaModelNamespace}.ImportAll`,
+                namespace: 'org.freddos@1.0.0',
+                uri: 'https://freddos.org/model.cto'
+            }];
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme',
+                imports: imports,
+                declarations: [ ]
+            };
+            sandbox.stub(Parser, 'parse').returns(ast);
+
+            (() => {
+                ParserUtil.newModelFile(strictModelManager, 'fake definitions');
+            }).should.throw(/Wilcard Imports are not permitted in strict mode./);
+        });
+
         it('should throw for an unrecognized body element', () => {
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,

@@ -10,7 +10,7 @@ const path = require('path');
  * Generate TypeScript files from the metamodel.
  */
 async function main() {
-    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([metaModelCto], {versionedNamespacesStrict: true});
+    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([metaModelCto], {strict: true});
     const visitor = new TypescriptVisitor();
     const fileWriter = new FileWriter(path.resolve(__dirname, '..', 'src', 'generated'));
     const parameters = { fileWriter };

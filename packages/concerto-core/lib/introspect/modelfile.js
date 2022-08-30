@@ -618,15 +618,15 @@ class ModelFile extends Decorated {
     }
 
     /**
-     * Verifies that an import is versioned if the versionedNamespacesStrict
+     * Verifies that an import is versioned if the strict
      * option has been set on the Model Manager
      * @param {*} imp - the import to validate
      */
     enforceImportVersioning(imp) {
-        if(this.getModelManager().isVersionedNamespacesStrict()) {
+        if(this.getModelManager().isStrict()) {
             const nsInfo = ModelUtil.parseNamespace(imp.namespace);
             if(!nsInfo.version) {
-                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'versionedNamespacesStrict' option on Model Manager is set.`);
+                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`);
             }
         }
     }
@@ -659,6 +659,10 @@ class ModelFile extends Decorated {
             this.enforceImportVersioning(imp);
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
+                if (this.getModelManager().isStrict()){
+                    throw new Error('Wilcard Imports are not permitted in strict mode.');
+                }
+                console.warn('DEPRECATED: Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.');
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
             case `${MetaModelNamespace}.ImportTypes`:

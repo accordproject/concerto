@@ -242,7 +242,7 @@ declare class ModelFile extends Decorated {
      */
     isCompatibleVersion(): void;
     /**
-     * Verifies that an import is versioned if the versionedNamespacesStrict
+     * Verifies that an import is versioned if the strict
      * option has been set on the Model Manager
      * @param {*} imp - the import to validate
      */
