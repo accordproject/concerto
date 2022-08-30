@@ -111,6 +111,11 @@ require('yargs')
             type: 'boolean',
             default: false,
         });
+        yargs.option('strict', {
+            describe: 'Require versioned namespaces and imports',
+            type: 'boolean',
+            default: false,
+        });
         yargs.option('useSystemTextJson', {
             describe: 'Compile for System.Text.Json library (`csharp` target only)',
             type: 'boolean',
@@ -139,6 +144,7 @@ require('yargs')
 
         const options = {};
         options.offline = argv.offline;
+        options.strict = argv.strict;
         options.metamodel = argv.metamodel;
         options.useSystemTextJson = argv.useSystemTextJson;
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
