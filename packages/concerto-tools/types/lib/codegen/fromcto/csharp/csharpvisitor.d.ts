@@ -91,4 +91,12 @@ declare class CSharpVisitor {
      * @private
      */
     private toCSharpType;
+    /**
+     * Get the .NET namespace for a given model file.
+     * @private
+     * @param {ModelFile} modelFile the model file
+     * @param {string} [namespacePrefix] the optional namespace prefix
+     * @return {string} the .NET namespace for the model file
+     */
+    private getDotNetNamespace;
 }

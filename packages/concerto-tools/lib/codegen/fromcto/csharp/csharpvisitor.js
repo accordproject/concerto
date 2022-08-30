@@ -191,7 +191,9 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]');
         }
         parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
-        const override = classDeclaration.getFullyQualifiedName() === 'concerto.Concept' ? 'virtual' : 'override';
+        const { name: namespace } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
+        const name = classDeclaration.getName();
+        const override = namespace === 'concerto' && name === 'Concept' ? 'virtual' : 'override';
         parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
