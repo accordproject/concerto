@@ -14,8 +14,15 @@
 
 'use strict';
 
-const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
+const { ModelUtil } = require('@accordproject/concerto-core');
 const util = require('util');
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ModelFile } = require('@accordproject/concerto-core');
+}
 
 /**
  * Convert the contents of a ModelManager to C# code. Set a
@@ -90,7 +97,7 @@ class CSharpVisitor {
             namespacePrefix += '.';
         }
 
-        const { escapedNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+        const dotNetNamespace = this.getDotNetNamespace(modelFile, namespacePrefix);
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
         parameters.fileWriter.writeLine(0, 'using System;');
 
@@ -104,12 +111,21 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;');
         }
 
-        parameters.fileWriter.writeLine(0, `namespace ${namespacePrefix}${escapedNamespace} {`);
+        parameters.fileWriter.writeLine(0, `namespace ${dotNetNamespace} {`);
 
-        modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
+        modelFile.getImports()
+            .map(importString => ModelUtil.getNamespace(importString))
+            .filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
             .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
             .forEach(namespace => {
-                parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
+                const otherModelFile = modelFile.getModelManager()?.getModelFile(namespace);
+                if (!otherModelFile) {
+                    // Couldn't resolve the other model file.
+                    parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
+                    return;
+                }
+                const otherDotNetNamespace = this.getDotNetNamespace(otherModelFile, namespacePrefix);
+                parameters.fileWriter.writeLine(1, `using ${otherDotNetNamespace};`);
             });
 
         modelFile.getAllDeclarations().forEach((decl) => {
@@ -319,6 +335,30 @@ class CSharpVisitor {
         default:
             return type;
         }
+    }
+
+    /**
+     * Get the .NET namespace for a given model file.
+     * @private
+     * @param {ModelFile} modelFile the model file
+     * @param {string} [namespacePrefix] the optional namespace prefix
+     * @return {string} the .NET namespace for the model file
+     */
+    getDotNetNamespace(modelFile, namespacePrefix) {
+        const decorator = modelFile.getDecorator('DotNetNamespace');
+        if (!decorator) {
+            const { name } = ModelUtil.parseNamespace(modelFile.getNamespace());
+            if (namespacePrefix) {
+                return `${namespacePrefix}${name}`;
+            } else {
+                return name;
+            }
+        }
+        const args = decorator.getArguments();
+        if (args.length !== 1) {
+            throw new Error('Malformed @DotNetNamespace decorator');
+        }
+        return args[0];
     }
 }
 

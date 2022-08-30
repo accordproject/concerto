@@ -25,7 +25,8 @@ const rootModelAst = require('./rootmodel.json');
 function getRootModel(versioned) {
     const rootModelFile = versioned ? 'concerto_1.0.0.cto' : 'concerto.cto';
     const ns = versioned ? 'concerto@1.0.0' : 'concerto';
-    const rootModelCto = `namespace ${ns}
+    const rootModelCto = `@DotNetNamespace("AccordProject.Concerto")
+    namespace ${ns}
     abstract concept Concept {}
     abstract concept Asset identified {}
     abstract concept Participant identified {}
