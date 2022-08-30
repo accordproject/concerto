@@ -202,6 +202,20 @@ describe('concerto-cli', () => {
             fs.readdirSync(dir.path).should.contain('concerto.metamodel@1.0.0.cs');
             dir.cleanup();
         });
+        it('should compile to a TypeScript model in strict mode', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true });
+            await Commands.compile('Typescript', [], dir.path, {metamodel: true, offline:false, strict: true});
+            fs.readdirSync(dir.path).should.not.contain('concerto.ts');
+            fs.readdirSync(dir.path).should.contain('concerto@1.0.0.ts');
+            dir.cleanup();
+        });
+        it('should compile to a CSharp model in strict mode', async () => {
+            const dir = await tmp.dir({ unsafeCleanup: true });
+            await Commands.compile('CSharp', [], dir.path, {metamodel: true, offline:false, strict: true});
+            fs.readdirSync(dir.path).should.not.contain('concerto.cs');
+            fs.readdirSync(dir.path).should.contain('concerto@1.0.0.cs');
+            dir.cleanup();
+        });
     });
 
     describe('#get', () => {

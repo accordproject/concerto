@@ -143,12 +143,13 @@ class Commands {
      * @param {string} output the output directory
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
+     * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {boolean} [options.metamodel] - include the Concerto Metamodel
      * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
      * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
      */
     static async compile(target, ctoFiles, output, options) {
-        const modelManagerOptions = { offline: options && options.offline };
+        const modelManagerOptions = { offline: options && options.offline, strict: options && options.strict };
         const visitorOptions = {
             useSystemTextJson: options && options.useSystemTextJson,
             useNewtonsoftJson: options && options.useNewtonsoftJson,
