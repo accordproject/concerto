@@ -186,15 +186,17 @@ class CSharpVisitor {
             abstract = 'abstract ';
         }
 
+        const { name: namespace, version } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
+        const name = classDeclaration.getName();
+        parameters.fileWriter.writeLine(1, `[AccordProject.Concerto.Type(Namespace = "${namespace}", Version = ${version ? `"${version}"` : 'null'}, Name = "${name}")]`);
+
         // classDeclaration has any other subtypes
         if (classDeclaration.getAssignableClassDeclarations()?.length > 1 && parameters.useNewtonsoftJson){
             parameters.fileWriter.writeLine(1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]');
         }
         parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
-        const { name: namespace } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
-        const name = classDeclaration.getName();
         const override = namespace === 'concerto' && name === 'Concept' ? 'virtual' : 'override';
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get;} = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
+        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get; } = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
