@@ -49,6 +49,7 @@
         "modelmanager-resolvetype-notypeinnsforcontext": "No type \"{type}\" in namespace \"{namespace}\" for \"{context}\".",
 
         "modelmanager-gettype-noregisteredns": "Namespace is not defined for type \"{type}\".",
+        "modelmanager-gettype-duplicatensimport": "Importing types from different versions (\"{version1}\", \"{version2}\") of the same namespace \"{namespace}\" is not permitted.",
         "modelmanager-gettype-notypeinns": "Type \"{type}\" is not defined in namespace \"{namespace}\".",
 
         "serializer-constructor-factorynull": "\"Factory\" cannot be \"null\".",
