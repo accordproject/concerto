@@ -47,8 +47,12 @@ describe('#resolveExternal', () => {
     getModelFiles().forEach(({ file, model, resolved }) => {
         it(`Should resolve external models in ${file}`, async () => {
             const result = await resolveExternal(model, {}, null);
-            // console.log(model);
             result.should.deep.equal(resolved);
         });
+    });
+
+    it('Should reject external model with non-cto extension', async () => {
+        const model = JSON.parse(fs.readFileSync('./test/external/importJson', 'utf8'));
+        await resolveExternal(model, {}, null).should.be.rejectedWith(/External model file references are expected to have a .cto extension/);
     });
 });

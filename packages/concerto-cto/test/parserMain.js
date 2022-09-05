@@ -55,6 +55,16 @@ describe('parser', () => {
         });
     });
 
+    it('Should parse multiple files', () => {
+        const mm = Parser.parseModels(getCTOFiles().map(({ content }) => content));
+        mm.should.deep.equal(
+            {
+                $class: 'concerto.metamodel@1.0.0.Models',
+                models: getCTOFiles().map(({ ast }) => JSON.parse(ast)),
+            }
+        );
+    });
+
     it('Should parse person.cto without location information', () => {
         const mm = Parser.parse(fs.readFileSync('./test/cto/person.cto', 'utf8'), null, { skipLocationNodes: true });
         mm.should.deep.equal(JSON.parse(fs.readFileSync('./test/cto/person.no-location.json', 'utf8')));

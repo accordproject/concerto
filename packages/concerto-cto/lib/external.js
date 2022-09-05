@@ -72,7 +72,7 @@ async function resolveExternal(models, options, fileDownloader) {
             if (path.extname(name) === '.cto') {
                 return Parser.parse(data);
             }
-            return data;
+            throw new Error('External model file references are expected to have a .cto extension');
         };
         fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), MetaModelUtil.getExternalImports);
     }
