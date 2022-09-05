@@ -46,12 +46,11 @@ if (global === undefined) {
 const debug = require('debug')('concerto:BaseModelManager');
 
 // How to create a modelfile from the external content
-const defaultProcessFile = (name, data, requestedFqn) => {
+const defaultProcessFile = (name, data) => {
     return {
         ast: data, // AST is input
         definitions: null, // No CTO file
         fileName: name,
-        requestedFqn,
     };
 };
 
