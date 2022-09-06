@@ -215,18 +215,45 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
+
+        // A dictionary of imports to versions to track unique namespaces
+        const importsMap = new Map();
+
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
             const modelFile = this.getModelManager().getModelFile(importNamespace);
+            const { name, version: importVersion } = ModelUtil.parseNamespace(importNamespace);
+
             if (!modelFile) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
                 throw new IllegalModelException(formatter({
                     type: importFqn
                 }), this);
             }
+
+            const existingNamespaceVersion = importsMap.get(name);
+            // undefined means we haven't seen this namespace before,
+            // null means we have seen it before but it didn't have a version
+            const unseenNamespace = existingNamespaceVersion === undefined;
+
+            // This check is needed because we automatically add both versioned and unversioned versions of
+            // the root namespace for backwards compatibillity unless we're running in strict mode
+            const isGlobalModel = name === 'concerto';
+
+            const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
+            if (!isGlobalModel && differentVersionsOfSameNamespace){
+                let formatter = Globalize.messageFormatter('modelmanager-gettype-duplicatensimport');
+                throw new IllegalModelException(formatter({
+                    namespace: importNamespace,
+                    version1: existingNamespaceVersion,
+                    version2: importVersion
+                }), this);
+            }
+            importsMap.set(name, importVersion);
+
             if (importFqn.endsWith('*')) {
                 // This is a wildcard import, org.acme.*
                 // Doesn't matter if 0 or 100 types in the namespace.

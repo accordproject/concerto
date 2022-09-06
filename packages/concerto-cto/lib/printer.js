@@ -248,7 +248,7 @@ function toCTO(metaModel) {
                 result += `\nimport ${imp.namespace}.*`;
                 break;
             case `${MetaModelNamespace}.ImportTypes`:
-                result += `\nimport {${imp.types.join(',')}} from ${imp.namespace}`;
+                result += `\nimport ${imp.namespace}.{${imp.types.join(',')}}`;
                 break;
             default:
                 throw new Error('Unrecognized import');

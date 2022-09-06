@@ -90,7 +90,7 @@ concept Person identified by email {
         it('should support versioned system imports', () => {
             modelManager = new ModelManager();
             modelManager.addCTOModel(`namespace test@1.0.0
-import {Event} from concerto@1.0.0`, 'test.cto');
+import concerto@1.0.0.{Event}`, 'test.cto');
         });
     });
 

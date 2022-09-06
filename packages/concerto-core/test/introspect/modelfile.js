@@ -263,6 +263,59 @@ describe('ModelFile', () => {
             (() => modelFile2.validate()).should.not.throw();
         });
 
+        it('should throw when attempting to import types from different versions of the same namespace', () => {
+            const myModelManager = new ModelManager();
+
+            const freddo1 = `namespace org.freddos@1.0.0
+            concept Chocolate {}`;
+
+            const freddo2 = `namespace org.freddos@2.0.0
+            concept Chocolate {}`;
+
+            const acme = `namespace org.acme@1.0.0
+            import org.freddos@1.0.0.{ Chocolate }
+            import org.freddos@2.0.0.{ Chocolate }
+            `;
+
+            let modelFile1 = ParserUtil.newModelFile(myModelManager, freddo1);
+            myModelManager.addModelFile(modelFile1);
+
+            let modelFile2 = ParserUtil.newModelFile(myModelManager, freddo2);
+            myModelManager.addModelFile(modelFile2);
+
+            let modelFile3 = ParserUtil.newModelFile(myModelManager, acme);
+
+            (() => {
+                modelFile3.validate();
+            }).should.throw('Importing types from different versions ("1.0.0", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
+        });
+
+        it('should throw when attempting to import types from unversioned and versioned versions of the same namespace', () => {
+            const myModelManager = new ModelManager();
+
+            const freddo1 = `namespace org.freddos
+            concept Chocolate {}`;
+
+            const freddo2 = `namespace org.freddos@2.0.0
+            concept Chocolate {}`;
+
+            const acme = `namespace org.acme@1.0.0
+            import org.freddos.{ Chocolate }
+            import org.freddos@2.0.0.{ Chocolate }
+            `;
+
+            let modelFile1 = ParserUtil.newModelFile(myModelManager, freddo1);
+            myModelManager.addModelFile(modelFile1);
+
+            let modelFile2 = ParserUtil.newModelFile(myModelManager, freddo2);
+            myModelManager.addModelFile(modelFile2);
+
+            let modelFile3 = ParserUtil.newModelFile(myModelManager, acme);
+
+            (() => {
+                modelFile3.validate();
+            }).should.throw('Importing types from different versions ("null", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
+        });
     });
 
     describe('#getDefinitions', () => {

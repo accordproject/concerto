@@ -44,7 +44,7 @@ class ModelUtil {
     }
 
     /**
-     * Returns the namespace for a the fully qualified name of a type
+     * Returns the namespace for the fully qualified name of a type
      * @param {string} fqn - the fully qualified identifier of a type
      * @return {string} - namespace of the type (everything before the last dot)
      * or the empty string if there is no dot

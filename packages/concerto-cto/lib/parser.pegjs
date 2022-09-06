@@ -799,7 +799,7 @@ TransactionToken  = "transaction" !IdentifierPart
 EventToken        = "event"       !IdentifierPart
 ParticipantToken  = "participant" !IdentifierPart
 FromToken         = "from"        !IdentifierPart
-AllToken          = ".*"          !IdentifierPart
+AllToken          = "*"          !IdentifierPart
 
 /* Primitive Types */
 IntegerType       = "Integer"     !IdentifierPart {
@@ -1354,58 +1354,57 @@ QualifiedName
     return first.concat(JSON.stringify(rest).replace(/['"]+/g, ''));
   }
 
-VersionedQualifiedName
+VersionedQualifiedNamespace
   = ns:QualifiedName '@' version:$semver {
   	return `${ns}@${version}`;
   }
 
-
-QualifiedNameDeclaration
-  = VersionedQualifiedName
+QualifiedNamespaceDeclaration
+  = VersionedQualifiedNamespace
   / QualifiedName
 
 Namespace
-  = NamespaceToken __ ns:QualifiedNameDeclaration __ {
+  = NamespaceToken __ ns:QualifiedNamespaceDeclaration __ {
   	return ns;
   }
 
- ImportAllFrom
-    = ImportToken __ ns:QualifiedNameDeclaration AllToken __ FromToken __ u:$URI __ {
-    	return {
-                $class: "concerto.metamodel@1.0.0.ImportAll",
-        		    namespace: ns,
-                uri: u
-        }
-  }
-
- ImportTypeFrom
-    = ImportToken __ ns:QualifiedNameDeclaration !AllToken __ FromToken __ u:$URI __ {
-      const { namespace, name } = fullyQualifiedName(ns);
-    	return {
-          $class: "concerto.metamodel@1.0.0.ImportType",
-          name: name,
-          namespace: namespace,
-          uri: u
-        }
+FromUri
+  = FromToken __ u:$URI __ {
+    return u;
   }
 
 ImportAll
-    = ImportToken __ ns:QualifiedNameDeclaration AllToken __ !FromToken {
-    	return {
-          $class: "concerto.metamodel@1.0.0.ImportAll",
-        	namespace: ns
-        }
-  }
+    = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
+    	const result = {
+            $class: "concerto.metamodel@1.0.0.ImportAll",
+            namespace: ns,
+        };
+        u && (result.uri = u);
+        return result;
+    }
 
 ImportType
-    = ImportToken __ ns:QualifiedNameDeclaration !AllToken __ !FromToken {
-      const { namespace, name } = fullyQualifiedName(ns);
-    	return {
-          $class: 'concerto.metamodel@1.0.0.ImportType',
-          name: name,
-          namespace: namespace
-        }
+    = ImportToken __ ns:QualifiedNamespaceDeclaration __ u:FromUri? {
+        const { namespace, name } = fullyQualifiedName(ns);
+    	const result = {
+            $class: 'concerto.metamodel@1.0.0.ImportType',
+            name,
+            namespace,
+        };
+        u && (result.uri = u);
+        return result;
   }
+
+ImportTypes
+    = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedIdentifiers _ "}" __ u:FromUri? {
+    	const result = {
+            $class: "concerto.metamodel@1.0.0.ImportTypes",
+            namespace: ns,
+            types,
+        };
+        u && (result.uri = u);
+        return result;
+    }
 
 commaSeparatedIdentifiers
   = head:$Identifier _ tail:(',' _ @$Identifier _ )*
@@ -1413,21 +1412,10 @@ commaSeparatedIdentifiers
     return [head, ...tail];
   }
 
- ImportTypesFrom
-    = ImportToken __ "{" _ types:commaSeparatedIdentifiers _ "}" __ FromToken __ namespace:$QualifiedNameDeclaration __ {
-    	return {
-          $class: "concerto.metamodel@1.0.0.ImportTypes",
-          types,
-          namespace
-        }
-  }
-
 Import
-   = ImportAllFrom /
-     ImportTypeFrom /
-     ImportTypesFrom /
-     ImportAll /
-     ImportType
+    =  ImportTypes /
+       ImportAll /
+       ImportType
 
 Version
    = ConcertoToken __ VersionToken __ version:StringLiteral __ {

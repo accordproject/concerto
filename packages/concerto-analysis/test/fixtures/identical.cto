@@ -1,6 +1,6 @@
 namespace org.accordproject.concerto.test@1.2.3
 
-import { OtherThing } from org.accordproject.concerto.test.other@2.3.4
+import org.accordproject.concerto.test.other@2.3.4.{ OtherThing }
 
 concept Thing {
     o String value
