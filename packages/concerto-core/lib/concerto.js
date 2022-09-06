@@ -84,13 +84,7 @@ class Concerto {
             throw new Error('Input object does not have a $class attribute.');
         }
 
-        const typeDeclaration = this.modelManager.getType(obj.$class);
-
-        if (!typeDeclaration) {
-            throw new Error(`Type ${obj.$class} is not declared in the model manager`);
-        }
-
-        return typeDeclaration;
+        return this.modelManager.getType(obj.$class);
     }
 
     /**

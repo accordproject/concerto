@@ -88,6 +88,18 @@ describe('concerto', () => {
             }).should.throw(/Object does not have an identifier/);
         });
 
+        it('should throw for undeclared type', () => {
+            const obj = {
+                $class : 'org.accordproject.test.BadProduct',
+                sku: '001',
+                description: 'Widgets'
+            };
+
+            (() => {
+                concerto.getIdentifier(obj);
+            }).should.throw(/Type "BadProduct" is not defined in namespace "org.accordproject.test"/);
+        });
+
     });
 
     describe('#setIdentifier', () => {
@@ -145,6 +157,24 @@ describe('concerto', () => {
             const result = concerto.fromURI(uri);
             result.typeDeclaration.getName().should.equal('Person');
             result.id.should.equal('123456789');
+        });
+
+        it('should throw for invalid URI', () => {
+            (() =>
+                concerto.fromURI(1)
+            ).should.throw('Invalid URI: 1');
+        });
+
+        it('should throw for invalid URI scheme', () => {
+            (() =>
+                concerto.fromURI('bad://uri')
+            ).should.throw('Invalid URI scheme: bad://uri');
+        });
+
+        it('should throw for invalid URI scheme', () => {
+            (() =>
+                concerto.fromURI('resource://uri?query')
+            ).should.throw('Invalid resource URI format: resource://uri?query');
         });
     });
 

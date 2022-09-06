@@ -137,6 +137,19 @@ describe('ObjectValidator', function () {
             }).should.throw('Model violation in the "undefined" instance. The field "stringProperty" has a value of "1" (type of value: "number"). Expected type of value: "String".');
         });
 
+        it('should fail if item is symbol', () => {
+            const data = {
+                $class : 'test.Vehicle',
+                wheels: [Symbol('wheel')],
+            };
+            const parameters = {};
+            parameters.stack = new TypedStack(data);
+
+            (function () {
+                objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
+            }).should.throw('Model violation in the "undefined" instance. The field "wheels" has a value of "undefined" (type of value: "symbol"). Expected type of value: "Wheel[]"');
+        });
+
         it('should fail if property type is symbol', () => {
             const data = {
                 $class : 'test.Vehicle',
@@ -305,8 +318,29 @@ describe('ObjectValidator', function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
             }).should.throw('Instance "undefined" has a property "lastOwner" with type "undefined" that is not derived from "test.Person".');
         });
-
-
     });
 
+    describe('#reportFieldTypeViolation', () => {
+        it('should report violation for identifiable concerto object', () => {
+            const data = {
+                $class: 'test.Person',
+                email: 'matt@example',
+            };
+            const field = concerto.getTypeDeclaration(data).getProperties()[1];
+            (function () {
+                ObjectValidator.reportFieldTypeViolation('123', 'name', data, field, concerto);
+            }).should.throw('Model violation in the "123" instance. The field "name" has a value of "matt@example" (type of value: "Person"). Expected type of value: "String"');
+        });
+
+        it('should report violation for field value for cyclical object', () => {
+            const data = {
+                $class: 'test.Manager',
+            };
+            data.name = data;
+            const field = concerto.getTypeDeclaration(data).getProperties()[1];
+            (function () {
+                ObjectValidator.reportFieldTypeViolation('123', 'name', data, field, concerto);
+            }).should.throw('Model violation in the "123" instance. The field "name" has a value of "[object Object]" (type of value: "object"). Expected type of value: "String"');
+        });
+    });
 });

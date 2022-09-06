@@ -410,8 +410,8 @@ class ObjectValidator {
         let typeOfValue = typeof value;
 
         if( concerto.isObject(value) && concerto.isIdentifiable(value)) {
-            typeOfValue = value.getFullyQualifiedType();
-            value = value.getFullyQualifiedIdentifier();
+            typeOfValue = concerto.getType(value);
+            value = concerto.getIdentifier(value);
         }
         else {
             if(value) {
