@@ -51,4 +51,15 @@ describe('parser', () => {
             cto.should.equal(content);
         });
     });
+
+    it('Should throw error for invalid import', () => {
+        (() => Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'foo'
+            }],
+            declarations: [],
+        })).should.throw(Error, 'Unrecognized import');
+    });
 });

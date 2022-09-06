@@ -54,6 +54,16 @@ describe('parser', () => {
             mm.should.deep.equal(JSON.parse(ast));
         });
     });
+
+    it('Should parse multiple files', () => {
+        const mm = Parser.parseModels(getCTOFiles().map(({ content }) => content), { skipLocationNodes: true });
+        mm.should.deep.equal(
+            {
+                $class: 'concerto.metamodel@1.0.0.Models',
+                models: getCTOFiles().map(({ ast }) => JSON.parse(ast)),
+            }
+        );
+    });
 });
 
 describe('parser-exception', () => {

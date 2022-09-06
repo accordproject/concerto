@@ -1,0 +1,18 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Models",
+    "models": [
+        {
+            "$class": "concerto.metamodel@1.0.0.Model",
+            "decorators": [],
+            "namespace": "test.person",
+            "imports": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.ImportAll",
+                    "namespace": "org.accordproject.time",
+                    "uri": "github://accordproject/concerto/master/packages/concerto-cto/test/external/person.json"
+                }
+                           ],
+            "declarations": []
+        }
+    ]
+}
