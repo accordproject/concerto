@@ -56,7 +56,7 @@ describe('parser', () => {
     });
 
     it('Should parse multiple files', () => {
-        const mm = Parser.parseModels(getCTOFiles().map(({ content }) => content));
+        const mm = Parser.parseModels(getCTOFiles().map(({ content }) => content), { skipLocationNodes: true });
         mm.should.deep.equal(
             {
                 $class: 'concerto.metamodel@1.0.0.Models',
