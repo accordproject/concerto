@@ -31,6 +31,7 @@ describe('MetaModel (Person)', () => {
     describe('#toMetaModel', () => {
         it('should convert a CTO model to its metamodel with name resolution', async () => {
             const mm1r = MetaModelUtil.resolveLocalNames(personModel, personModel.models[1]);
+            // fs.writeFileSync(path.resolve(__dirname, './cto/personResolved.json'), JSON.stringify(mm1r, null, 2));
             mm1r.should.deep.equal(personMetaModelResolved);
         });
     });

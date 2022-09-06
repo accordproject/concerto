@@ -17,6 +17,7 @@ participant Person extends Individual {
   o String lastName
   o Address address
   o Address address2 default="USAddress"
+  @description("Work Address")
   --> Address address3
   --> Address[] address4
   --> Address address5 optional
@@ -69,4 +70,12 @@ transaction T identified by id {
   o TemporalUnit tu
   o Month month
   o Participant p
+}
+
+@description('DFA states')
+enum State {
+    @label('live')
+    o RUNNING
+
+    o STOPPED
 }

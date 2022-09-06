@@ -16,7 +16,8 @@
         "pretest": "npm-run-all licchk lint",
         "lint": "eslint .",
         "licchk": "license-check-and-add",
-        "test": "jest"
+        "test": "jest",
+        "test:watch": "jest --watchAll"
     },
     "repository": {
         "type": "git",

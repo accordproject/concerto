@@ -85,7 +85,7 @@ describe('JSONPopulator', () => {
         sandbox = sinon.createSandbox();
         mockFactory = sinon.createStubInstance(Factory);
         jsonPopulator = new JSONPopulator();
-        ergoJsonPopulator = new JSONPopulator(null,true);
+        ergoJsonPopulator = new JSONPopulator(true,true);
     });
 
     afterEach(() => {
@@ -725,6 +725,54 @@ describe('JSONPopulator', () => {
             relationships.should.have.lengthOf(2);
             relationships[0].should.be.an.instanceOf(Relationship);
             relationships[1].should.be.an.instanceOf(Relationship);
+        });
+
+        it('should create a new relationship from an array of resources (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack([{
+                    $class: { $coll: ['org.acme.MyAsset1'], $length: 1 },
+                    $data: {
+                        assetId: 'asset1',
+                        assetValue: { '$left' : { '$nat' : 1 } }
+                    }
+                }]),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let mockRelationship1 = sinon.createStubInstance(Relationship);
+            mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockRelationship1);
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+
+            let relationships = ergoJsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
+            relationships.should.have.lengthOf(1);
+            relationships[0].should.be.an.instanceOf(Resource);
+        });
+
+        it('should create a new relationship from a resource (Ergo)', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: { $coll: ['org.acme.MyAsset1'], $length: 1 },
+                    $data: {
+                        assetId: 'asset1',
+                        assetValue: { '$left' : { '$nat' : 1 } }
+                    }
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let mockRelationship1 = sinon.createStubInstance(Relationship);
+            mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockRelationship1);
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+
+            let relationship = ergoJsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
+            relationship.should.be.an.instanceOf(Resource);
         });
 
         it('should not create a new relationship from an array of objects if not permitted', () => {

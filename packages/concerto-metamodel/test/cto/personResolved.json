@@ -1,1460 +1,550 @@
 {
-    "$class": "concerto.metamodel@1.0.0.Model",
-    "decorators": [],
-    "namespace": "test.person",
-    "imports": [
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "test.person",
+  "imports": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ImportAll",
+      "namespace": "org.accordproject.time"
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ImportType",
+      "name": "TemporalUnit",
+      "namespace": "org.accordproject.time"
+    }
+  ],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "Gender",
+      "properties": [
         {
-            "$class": "concerto.metamodel@1.0.0.ImportAll",
-            "namespace": "org.accordproject.time"
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "MALE"
         },
         {
-            "$class": "concerto.metamodel@1.0.0.ImportType",
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "FEMALE"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "OTHER"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Individual",
+      "isAbstract": true,
+      "properties": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Person",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "firstName",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+            "pattern": "[a-zA-Z]*",
+            "flags": "u"
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "lastName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "address",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Address",
+            "namespace": "test.person"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "address2",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Address",
+            "namespace": "test.person"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "USAddress"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "address3",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Address",
+            "namespace": "test.person"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "description",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "Work Address"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "address4",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Address",
+            "namespace": "test.person"
+          },
+          "isArray": true,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "name": "address5",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Address",
+            "namespace": "test.person"
+          },
+          "isArray": false,
+          "isOptional": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "gender",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Gender",
+            "namespace": "test.person"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "name": "dob",
+          "isArray": false,
+          "isOptional": true
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Individual",
+        "namespace": "test.person"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "name": "Employee",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "company",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "onLeave",
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Person",
+        "namespace": "test.person"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Address",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "zip",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": 10001
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "zip2",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": 10001
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "zip3",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": 10001
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "city",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "NYC"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "country",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": "USA"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "street",
+          "isArray": true,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "isResidential",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": true
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "name": "isPrivate",
+          "isArray": false,
+          "isOptional": false,
+          "defaultValue": false
+        }
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.Identified"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "USAddress",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "zip4",
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Zip",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "x"
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "value": 1
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "y"
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "foo"
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "z"
+                },
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Zip2",
+              "arguments": []
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "Zip3"
+            }
+          ],
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+            "lower": -365,
+            "upper": 365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "zip41",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+            "upper": 365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "name": "zip42",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+            "lower": -365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "zip5",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+            "lower": -365,
+            "upper": 365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "zip51",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+            "upper": 365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "name": "zip52",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+            "lower": -365
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "zip6",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+            "lower": -3.14,
+            "upper": 3.14
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "zip61",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+            "lower": -3.14
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "name": "zip62",
+          "isArray": false,
+          "isOptional": false,
+          "validator": {
+            "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+            "upper": 3.14
+          }
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Address",
+        "namespace": "test.person"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Address",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "x"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "value": 1
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "y"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "foo"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "z"
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "value": true
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Gender",
+                "namespace": "test.person"
+              },
+              "isArray": false
+            },
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "TemporalUnit",
+                "namespace": "org.accordproject.time"
+              },
+              "isArray": true
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Address2",
+          "arguments": []
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "Address3"
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "name": "A",
+      "isAbstract": false,
+      "properties": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EventDeclaration",
+      "name": "E",
+      "isAbstract": false,
+      "properties": []
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "name": "T",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "id",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "tu",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
             "name": "TemporalUnit",
             "namespace": "org.accordproject.time"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "month",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Month",
+            "namespace": "org.accordproject.time"
+          },
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "p",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Participant",
+            "namespace": "concerto@1.0.0"
+          },
+          "isArray": false,
+          "isOptional": false
         }
-    ],
-    "declarations": [
+      ],
+      "identified": {
+        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "name": "id"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "name": "State",
+      "properties": [
         {
-            "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
-            "properties": [
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "RUNNING",
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "label",
+              "arguments": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.EnumProperty",
-                    "name": "MALE",
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 7,
-                            "column": 3,
-                            "offset": 115
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 8,
-                            "column": 3,
-                            "offset": 124
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.EnumProperty",
-                    "name": "FEMALE",
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 8,
-                            "column": 3,
-                            "offset": 124
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 9,
-                            "column": 3,
-                            "offset": 135
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.EnumProperty",
-                    "name": "OTHER",
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 9,
-                            "column": 3,
-                            "offset": 135
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 10,
-                            "column": 1,
-                            "offset": 143
-                        }
-                    }
+                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "value": "live"
                 }
-            ],
-            "name": "Gender",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 6,
-                    "column": 1,
-                    "offset": 99
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 10,
-                    "column": 2,
-                    "offset": 144
-                }
+              ]
             }
+          ]
         },
         {
-            "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
-            "isAbstract": true,
-            "properties": [],
-            "name": "Individual",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 12,
-                    "column": 1,
-                    "offset": 146
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 13,
-                    "column": 2,
-                    "offset": 181
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
-            "isAbstract": false,
-            "superType": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                "name": "Individual",
-                "namespace": "test.person"
-            },
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                        "pattern": "[a-zA-Z]*",
-                        "flags": "u"
-                    },
-                    "name": "firstName",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 16,
-                            "column": 3,
-                            "offset": 225
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 17,
-                            "column": 3,
-                            "offset": 265
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "lastName",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 17,
-                            "column": 3,
-                            "offset": 265
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 18,
-                            "column": 3,
-                            "offset": 285
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Address",
-                        "namespace": "test.person"
-                    },
-                    "name": "address",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 18,
-                            "column": 3,
-                            "offset": 285
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 19,
-                            "column": 3,
-                            "offset": 305
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "defaultValue": "USAddress",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Address",
-                        "namespace": "test.person"
-                    },
-                    "name": "address2",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 19,
-                            "column": 3,
-                            "offset": 305
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 20,
-                            "column": 3,
-                            "offset": 346
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Address",
-                        "namespace": "test.person"
-                    },
-                    "name": "address3",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 20,
-                            "column": 3,
-                            "offset": 346
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 21,
-                            "column": 3,
-                            "offset": 369
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Address",
-                        "namespace": "test.person"
-                    },
-                    "name": "address4",
-                    "isArray": true,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 21,
-                            "column": 3,
-                            "offset": 369
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 22,
-                            "column": 3,
-                            "offset": 394
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Address",
-                        "namespace": "test.person"
-                    },
-                    "name": "address5",
-                    "isArray": false,
-                    "isOptional": true,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 22,
-                            "column": 3,
-                            "offset": 394
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 23,
-                            "column": 3,
-                            "offset": 426
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Gender",
-                        "namespace": "test.person"
-                    },
-                    "name": "gender",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 23,
-                            "column": 3,
-                            "offset": 426
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 24,
-                            "column": 3,
-                            "offset": 444
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
-                    "name": "dob",
-                    "isArray": false,
-                    "isOptional": true,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 24,
-                            "column": 3,
-                            "offset": 444
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 25,
-                            "column": 1,
-                            "offset": 468
-                        }
-                    }
-                }
-            ],
-            "name": "Person",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 15,
-                    "column": 1,
-                    "offset": 183
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 25,
-                    "column": 2,
-                    "offset": 469
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
-            "isAbstract": false,
-            "superType": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                "name": "Person",
-                "namespace": "test.person"
-            },
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "company",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 28,
-                            "column": 3,
-                            "offset": 511
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 29,
-                            "column": 3,
-                            "offset": 530
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
-                    "name": "onLeave",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 29,
-                            "column": 3,
-                            "offset": 530
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 30,
-                            "column": 1,
-                            "offset": 548
-                        }
-                    }
-                }
-            ],
-            "name": "Employee",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 27,
-                    "column": 1,
-                    "offset": 471
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 30,
-                    "column": 2,
-                    "offset": 549
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-            "isAbstract": false,
-            "identified": {
-                "$class": "concerto.metamodel@1.0.0.Identified"
-            },
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.IntegerProperty",
-                    "defaultValue": 10001,
-                    "name": "zip",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 33,
-                            "column": 3,
-                            "offset": 582
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 34,
-                            "column": 3,
-                            "offset": 612
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.LongProperty",
-                    "defaultValue": 10001,
-                    "name": "zip2",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 34,
-                            "column": 3,
-                            "offset": 612
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 35,
-                            "column": 3,
-                            "offset": 640
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.DoubleProperty",
-                    "defaultValue": 10001,
-                    "name": "zip3",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 35,
-                            "column": 3,
-                            "offset": 640
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 36,
-                            "column": 3,
-                            "offset": 672
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "defaultValue": "NYC",
-                    "name": "city",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 36,
-                            "column": 3,
-                            "offset": 672
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 37,
-                            "column": 3,
-                            "offset": 702
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "defaultValue": "USA",
-                    "name": "country",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 37,
-                            "column": 3,
-                            "offset": 702
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 38,
-                            "column": 3,
-                            "offset": 735
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "street",
-                    "isArray": true,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 38,
-                            "column": 3,
-                            "offset": 735
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 39,
-                            "column": 3,
-                            "offset": 755
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
-                    "defaultValue": true,
-                    "name": "isResidential",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 39,
-                            "column": 3,
-                            "offset": 755
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 40,
-                            "column": 3,
-                            "offset": 794
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
-                    "defaultValue": false,
-                    "name": "isPrivate",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 40,
-                            "column": 3,
-                            "offset": 794
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 41,
-                            "column": 1,
-                            "offset": 828
-                        }
-                    }
-                }
-            ],
-            "name": "Address",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 32,
-                    "column": 1,
-                    "offset": 551
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 41,
-                    "column": 2,
-                    "offset": 829
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-            "isAbstract": false,
-            "superType": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                "name": "Address",
-                "namespace": "test.person"
-            },
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.IntegerProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
-                        "lower": -365,
-                        "upper": 365
-                    },
-                    "name": "zip4",
-                    "isArray": false,
-                    "isOptional": false,
-                    "decorators": [
-                        {
-                            "$class": "concerto.metamodel@1.0.0.Decorator",
-                            "name": "Zip",
-                            "arguments": [
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                                    "value": "x",
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 8,
-                                            "offset": 953
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 11,
-                                            "offset": 956
-                                        }
-                                    }
-                                },
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
-                                    "value": 1,
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 12,
-                                            "offset": 957
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 13,
-                                            "offset": 958
-                                        }
-                                    }
-                                },
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                                    "value": "y",
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 14,
-                                            "offset": 959
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 17,
-                                            "offset": 962
-                                        }
-                                    }
-                                },
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                                    "value": "foo",
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 18,
-                                            "offset": 963
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 23,
-                                            "offset": 968
-                                        }
-                                    }
-                                },
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                                    "value": "z",
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 24,
-                                            "offset": 969
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 27,
-                                            "offset": 972
-                                        }
-                                    }
-                                },
-                                {
-                                    "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
-                                    "value": true,
-                                    "location": {
-                                        "$class": "concerto.metamodel@1.0.0.Range",
-                                        "start": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 28,
-                                            "offset": 973
-                                        },
-                                        "end": {
-                                            "$class": "concerto.metamodel@1.0.0.Position",
-                                            "line": 47,
-                                            "column": 32,
-                                            "offset": 977
-                                        }
-                                    }
-                                }
-                            ],
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 47,
-                                    "column": 3,
-                                    "offset": 948
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 47,
-                                    "column": 33,
-                                    "offset": 978
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.Decorator",
-                            "name": "Zip2",
-                            "arguments": [],
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 48,
-                                    "column": 3,
-                                    "offset": 981
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 48,
-                                    "column": 10,
-                                    "offset": 988
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.Decorator",
-                            "name": "Zip3",
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 49,
-                                    "column": 3,
-                                    "offset": 991
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 49,
-                                    "column": 8,
-                                    "offset": 996
-                                }
-                            }
-                        }
-                    ],
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 47,
-                            "column": 3,
-                            "offset": 948
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 51,
-                            "column": 3,
-                            "offset": 1033
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.IntegerProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
-                        "upper": 365
-                    },
-                    "name": "zip41",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 51,
-                            "column": 3,
-                            "offset": 1033
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 52,
-                            "column": 3,
-                            "offset": 1064
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.IntegerProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
-                        "lower": -365
-                    },
-                    "name": "zip42",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 52,
-                            "column": 3,
-                            "offset": 1064
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 53,
-                            "column": 3,
-                            "offset": 1096
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.LongProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
-                        "lower": -365,
-                        "upper": 365
-                    },
-                    "name": "zip5",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 53,
-                            "column": 3,
-                            "offset": 1096
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 54,
-                            "column": 3,
-                            "offset": 1127
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.LongProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
-                        "upper": 365
-                    },
-                    "name": "zip51",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 54,
-                            "column": 3,
-                            "offset": 1127
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 55,
-                            "column": 3,
-                            "offset": 1155
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.LongProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
-                        "lower": -365
-                    },
-                    "name": "zip52",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 55,
-                            "column": 3,
-                            "offset": 1155
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 56,
-                            "column": 3,
-                            "offset": 1184
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.DoubleProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
-                        "lower": -3.14,
-                        "upper": 3.14
-                    },
-                    "name": "zip6",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 56,
-                            "column": 3,
-                            "offset": 1184
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 57,
-                            "column": 3,
-                            "offset": 1219
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.DoubleProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
-                        "lower": -3.14
-                    },
-                    "name": "zip61",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 57,
-                            "column": 3,
-                            "offset": 1219
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 58,
-                            "column": 3,
-                            "offset": 1251
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.DoubleProperty",
-                    "validator": {
-                        "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
-                        "upper": 3.14
-                    },
-                    "name": "zip62",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 58,
-                            "column": 3,
-                            "offset": 1251
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 59,
-                            "column": 1,
-                            "offset": 1280
-                        }
-                    }
-                }
-            ],
-            "name": "USAddress",
-            "decorators": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.Decorator",
-                    "name": "Address",
-                    "arguments": [
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                            "value": "x",
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 10,
-                                    "offset": 840
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 13,
-                                    "offset": 843
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
-                            "value": 1,
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 14,
-                                    "offset": 844
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 15,
-                                    "offset": 845
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                            "value": "y",
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 16,
-                                    "offset": 846
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 19,
-                                    "offset": 849
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                            "value": "foo",
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 20,
-                                    "offset": 850
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 25,
-                                    "offset": 855
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                            "value": "z",
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 26,
-                                    "offset": 856
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 29,
-                                    "offset": 859
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
-                            "value": true,
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 30,
-                                    "offset": 860
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 34,
-                                    "offset": 864
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
-                            "type": {
-                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Gender",
-                                "namespace": "test.person"
-                            },
-                            "isArray": false,
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 35,
-                                    "offset": 865
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 41,
-                                    "offset": 871
-                                }
-                            }
-                        },
-                        {
-                            "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
-                            "type": {
-                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "TemporalUnit",
-                                "namespace": "org.accordproject.time"
-                            },
-                            "isArray": true,
-                            "location": {
-                                "$class": "concerto.metamodel@1.0.0.Range",
-                                "start": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 42,
-                                    "offset": 872
-                                },
-                                "end": {
-                                    "$class": "concerto.metamodel@1.0.0.Position",
-                                    "line": 43,
-                                    "column": 56,
-                                    "offset": 886
-                                }
-                            }
-                        }
-                    ],
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 43,
-                            "column": 1,
-                            "offset": 831
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 43,
-                            "column": 57,
-                            "offset": 887
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.Decorator",
-                    "name": "Address2",
-                    "arguments": [],
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 44,
-                            "column": 1,
-                            "offset": 888
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 44,
-                            "column": 12,
-                            "offset": 899
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.Decorator",
-                    "name": "Address3",
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 45,
-                            "column": 1,
-                            "offset": 900
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 45,
-                            "column": 10,
-                            "offset": 909
-                        }
-                    }
-                }
-            ],
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 43,
-                    "column": 1,
-                    "offset": 831
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 59,
-                    "column": 2,
-                    "offset": 1281
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
-            "isAbstract": false,
-            "properties": [],
-            "name": "A",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 61,
-                    "column": 1,
-                    "offset": 1283
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 62,
-                    "column": 2,
-                    "offset": 1294
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.EventDeclaration",
-            "isAbstract": false,
-            "properties": [],
-            "name": "E",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 64,
-                    "column": 1,
-                    "offset": 1296
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 65,
-                    "column": 2,
-                    "offset": 1307
-                }
-            }
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
-            "isAbstract": false,
-            "identified": {
-                "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
-                "name": "id"
-            },
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "id",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 68,
-                            "column": 3,
-                            "offset": 1344
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 69,
-                            "column": 3,
-                            "offset": 1358
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "TemporalUnit",
-                        "namespace": "org.accordproject.time"
-                    },
-                    "name": "tu",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 69,
-                            "column": 3,
-                            "offset": 1358
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 70,
-                            "column": 3,
-                            "offset": 1378
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Month",
-                        "namespace": "org.accordproject.time"
-                    },
-                    "name": "month",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 70,
-                            "column": 3,
-                            "offset": 1378
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 71,
-                            "column": 3,
-                            "offset": 1394
-                        }
-                    }
-                },
-                {
-                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-                    "type": {
-                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                        "name": "Participant",
-                        "namespace": "concerto@1.0.0"
-                    },
-                    "name": "p",
-                    "isArray": false,
-                    "isOptional": false,
-                    "location": {
-                        "$class": "concerto.metamodel@1.0.0.Range",
-                        "start": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 71,
-                            "column": 3,
-                            "offset": 1394
-                        },
-                        "end": {
-                            "$class": "concerto.metamodel@1.0.0.Position",
-                            "line": 72,
-                            "column": 1,
-                            "offset": 1410
-                        }
-                    }
-                }
-            ],
-            "name": "T",
-            "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 67,
-                    "column": 1,
-                    "offset": 1309
-                },
-                "end": {
-                    "$class": "concerto.metamodel@1.0.0.Position",
-                    "line": 72,
-                    "column": 2,
-                    "offset": 1411
-                }
-            }
+          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "name": "STOPPED"
         }
-    ]
+      ],
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "description",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "value": "DFA states"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
