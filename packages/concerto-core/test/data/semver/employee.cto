@@ -1,6 +1,6 @@
 namespace employee@2.0.0
 
-import { Person, Phone} from person@1.0.0
+import person@1.0.0.{ Person, Phone}
 
 concept Employee extends Person {
     o String name

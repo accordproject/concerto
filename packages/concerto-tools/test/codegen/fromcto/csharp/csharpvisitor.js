@@ -68,7 +68,7 @@ describe('CSharpVisitor', function () {
             modelManager.addCTOModel(`
             namespace org.acme@1.2.3
 
-            import { OtherThing } from org.acme.other@2.3.4
+            import org.acme.other@2.3.4.{ OtherThing }
 
             concept Thing {
                 o OtherThing otherThing
@@ -109,7 +109,7 @@ describe('CSharpVisitor', function () {
             @DotNetNamespace("Org.Acme.Models")
             namespace org.acme@1.2.3
 
-            import { OtherThing } from org.acme.other@2.3.4
+            import org.acme.other@2.3.4.{ OtherThing }
 
             concept Thing {
                 o OtherThing otherThing

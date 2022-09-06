@@ -273,8 +273,8 @@ describe('ModelFile', () => {
             concept Chocolate {}`;
 
             const acme = `namespace org.acme@1.0.0
-            import { Chocolate } from org.freddos@1.0.0
-            import { Chocolate } from org.freddos@2.0.0
+            import org.freddos@1.0.0.{ Chocolate }
+            import org.freddos@2.0.0.{ Chocolate }
             `;
 
             let modelFile1 = ParserUtil.newModelFile(myModelManager, freddo1);
@@ -300,8 +300,8 @@ describe('ModelFile', () => {
             concept Chocolate {}`;
 
             const acme = `namespace org.acme@1.0.0
-            import { Chocolate } from org.freddos
-            import { Chocolate } from org.freddos@2.0.0
+            import org.freddos.{ Chocolate }
+            import org.freddos@2.0.0.{ Chocolate }
             `;
 
             let modelFile1 = ParserUtil.newModelFile(myModelManager, freddo1);
