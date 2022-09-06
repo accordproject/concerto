@@ -140,14 +140,17 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
         const bTypeFullNamespace = ModelUtil.getNamespace(bFQTN);
         if (!aTypeFullNamespace && !bTypeFullNamespace) {
             return;
-        } else if (!aTypeFullNamespace || !bTypeFullNamespace) {
-            context.report({
-                key: 'property-type-changed',
-                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type namespace differs)`,
-                element: a
-            });
-            return;
         }
+        // Removing until we support type aliasing. Until then it's not possible to have an empty namespace
+        // (i.e. a primitive type) and to have the namespace change between versions
+        // else if (!aTypeFullNamespace || !bTypeFullNamespace) {
+        //     context.report({
+        //         key: 'property-type-changed',
+        //         message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type namespace differs)`,
+        //         element: a
+        //     });
+        //     return;
+        // }
         const { name: aTypeNamespace, version: aTypeVersion } = ModelUtil.parseNamespace(aTypeFullNamespace);
         const { name: bTypeNamespace, version: bTypeVersion } = ModelUtil.parseNamespace(bTypeFullNamespace);
         if (aTypeNamespace !== bTypeNamespace) {
@@ -158,16 +161,17 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
             });
             return;
         }
-        if (!aTypeVersion && !bTypeVersion) {
-            return;
-        } else if (!aTypeVersion || !bTypeVersion) {
-            context.report({
-                key: 'property-type-changed',
-                message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type version incompatible)`,
-                element: a
-            });
-            return;
-        }
+        // Removing until the Compare.compare function supports a non-strict modelManager
+        // if (!aTypeVersion && !bTypeVersion) {
+        //     return;
+        // } else if (!aTypeVersion || !bTypeVersion) {
+        //     context.report({
+        //         key: 'property-type-changed',
+        //         message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type version incompatible)`,
+        //         element: a
+        //     });
+        //     return;
+        // }
         const versionDiff = semver.diff(aTypeVersion, bTypeVersion);
         if (!versionDiff) {
             return;
