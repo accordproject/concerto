@@ -14,7 +14,7 @@
 
 namespace org.accordproject.concerto.test.b@2.3.4
 
-import { Boo } from org.accordproject.concerto.test.c@3.4.5
+import org.accordproject.concerto.test.c@3.4.5.{ Boo }
 
 concept Zoo {
     o String bar

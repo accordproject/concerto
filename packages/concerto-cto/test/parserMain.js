@@ -50,14 +50,9 @@ function getCTOFiles() {
 describe('parser', () => {
     getCTOFiles().forEach(({ file, content, ast }) => {
         it(`Should parse ${file}`, () => {
-            const mm = Parser.parse(content);
+            const mm = Parser.parse(content, undefined, { skipLocationNodes: true });
             mm.should.deep.equal(JSON.parse(ast));
         });
-    });
-
-    it('Should parse person.cto without location information', () => {
-        const mm = Parser.parse(fs.readFileSync('./test/cto/person.cto', 'utf8'), null, { skipLocationNodes: true });
-        mm.should.deep.equal(JSON.parse(fs.readFileSync('./test/cto/person.no-location.json', 'utf8')));
     });
 });
 

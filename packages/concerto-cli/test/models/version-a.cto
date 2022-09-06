@@ -14,7 +14,7 @@
 
 namespace org.accordproject.concerto.test.a@1.2.3
 
-import { Zoo } from org.accordproject.concerto.test.b@2.3.4
+import org.accordproject.concerto.test.b@2.3.4.{ Zoo }
 
 concept Foo {
     o Zoo zoo
