@@ -315,15 +315,12 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitModelFile(mockModelFile, myParams);
 
             param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.equal(8);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using System.Text.Json.Serialization;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using Concerto.Serialization;']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, 'using Concerto.Models.super;']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.equal(5);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'using Concerto.Models.super;']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '}']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(csharpVisitor, myParams).calledThrice.should.be.ok;
         });
@@ -396,15 +393,12 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitModelFile(mockModelFile, newtonsoftParams);
 
             param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.equal(8);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using NewtonsoftJson = Newtonsoft.Json;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, 'using Concerto.Models.super;']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.equal(5);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'using Concerto.Models.super;']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '}']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(csharpVisitor, newtonsoftParams).calledThrice.should.be.ok;
         });
@@ -472,14 +466,11 @@ describe('CSharpVisitor', function () {
             csharpVisitor.visitModelFile(mockModelFile, myParams);
 
             param.fileWriter.openFile.withArgs('org.acme.cs').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.equal(7);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'using System;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'using System.Text.Json.Serialization;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'using Concerto.Serialization;']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'namespace Concerto.Models.org.acme {']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'using Concerto.Models.org.org1;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'using Concerto.Models.org.org2;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(csharpVisitor, myParams).calledTwice.should.be.ok;
         });
@@ -505,7 +496,8 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(2);
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
+            param.fileWriter.writeLine.withArgs(1, '[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]').calledOnce.should.be.ok;
             param.fileWriter.writeLine.withArgs(1, 'public enum Bob {').calledOnce.should.be.ok;
             param.fileWriter.writeLine.withArgs(1, '}\n').calledOnce.should.be.ok;
 
@@ -536,11 +528,12 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "org.acme", Version = null, Name = "Bob")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public class Bob {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public class Bob {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with Newtonsoft.Json', () => {
             let acceptSpy = sinon.spy();
@@ -561,9 +554,9 @@ describe('CSharpVisitor', function () {
 
             param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "org.acme", Version = null, Name = "Bob")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[Newtonsoft.Json.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterNewtonsoft))]']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public class Bob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[NewtonsoftJson.JsonProperty("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[Newtonsoft.Json.JsonProperty("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
             param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with abstract and super type', () => {
@@ -584,11 +577,12 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "org.acme", Version = null, Name = "Bob")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with abstract and super type, with explicit System.Text.Json flag', () => {
             let acceptSpy = sinon.spy();
@@ -608,11 +602,12 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useSystemTextJson: true });
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "org.acme", Version = null, Name = "Bob")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with abstract and super type, with both serializer flags', () => {
             let acceptSpy = sinon.spy();
@@ -632,11 +627,13 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, { ...param, useSystemTextJson: true, useNewtonsoftJson: true });
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "org.acme", Version = null, Name = "Bob")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\t[NewtonsoftJson.JsonProperty("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '[Newtonsoft.Json.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterNewtonsoft))]']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, 'public abstract class Bob : Person {']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\t[Newtonsoft.Json.JsonProperty("$class")]\n\t\tpublic override string _class { get; } = "undefined";']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with virtual modifier for base class', () => {
             let acceptSpy = sinon.spy();
@@ -656,11 +653,12 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Concept")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public abstract class Concept {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get; } = "concerto.Concept";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public abstract class Concept {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get; } = "concerto.Concept";']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
         it('should write the class opening and close with virtual modifier for base versioned class', () => {
             let acceptSpy = sinon.spy();
@@ -680,11 +678,12 @@ describe('CSharpVisitor', function () {
 
             csharpVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(5);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([1, '[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Concept")]']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'public abstract class Concept {']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([2, '[JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get; } = "concerto@1.0.0.Concept";']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, '}']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, 'public abstract class Concept {']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([2, '[System.Text.Json.Serialization.JsonPropertyName("$class")]\n\t\tpublic virtual string _class { get; } = "concerto@1.0.0.Concept";']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([1, '}']);
         });
     });
 
@@ -712,7 +711,7 @@ describe('CSharpVisitor', function () {
             mockField.getType.returns('String');
             mockField.isPrimitive.returns(true);
             csharpVisitor.visitField(mockField, param);
-            param.fileWriter.writeLine.withArgs(2, '[JsonPropertyName("bool")]\n\t\tpublic string _bool { get; set; }').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(2, '[System.Text.Json.Serialization.JsonPropertyName("bool")]\n\t\tpublic string _bool { get; set; }').calledOnce.should.be.ok;
         });
 
         it('should write a line for an optional enum field name and type', () => {
@@ -792,8 +791,8 @@ describe('CSharpVisitor', function () {
     });
 
     describe('toCSharpType', () => {
-        it('should return Date for DateTime', () => {
-            csharpVisitor.toCSharpType('DateTime').should.deep.equal('DateTime');
+        it('should return System.DateTime for DateTime', () => {
+            csharpVisitor.toCSharpType('DateTime').should.deep.equal('System.DateTime');
         });
         it('should return boolean for Boolean', () => {
             csharpVisitor.toCSharpType('Boolean').should.deep.equal('bool');
