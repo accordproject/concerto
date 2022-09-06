@@ -99,17 +99,6 @@ class CSharpVisitor {
 
         const dotNetNamespace = this.getDotNetNamespace(modelFile, namespacePrefix);
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
-        parameters.fileWriter.writeLine(0, 'using System;');
-
-        if (parameters.useSystemTextJson){
-            parameters.fileWriter.writeLine(0, 'using System.Text.Json.Serialization;');
-            parameters.fileWriter.writeLine(0, 'using Concerto.Serialization;');
-        }
-
-        if (parameters.useNewtonsoftJson){
-            parameters.fileWriter.writeLine(0, 'using NewtonsoftJson = Newtonsoft.Json;');
-            parameters.fileWriter.writeLine(0, 'using NewtonsoftConcerto = Concerto.Serialization.Newtonsoft;');
-        }
 
         parameters.fileWriter.writeLine(0, `namespace ${dotNetNamespace} {`);
 
@@ -152,6 +141,12 @@ class CSharpVisitor {
             parameters.useSystemTextJson = true;
         }
 
+        if (parameters.useSystemTextJson) {
+            parameters.fileWriter.writeLine(1, '[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]');
+        }
+        if (parameters.useNewtonsoftJson) {
+            parameters.fileWriter.writeLine(1, '[Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]');
+        }
         parameters.fileWriter.writeLine(1, 'public enum ' + enumDeclaration.getName() + ' {');
 
         enumDeclaration.getOwnProperties().forEach((property) => {
@@ -191,8 +186,11 @@ class CSharpVisitor {
         parameters.fileWriter.writeLine(1, `[AccordProject.Concerto.Type(Namespace = "${namespace}", Version = ${version ? `"${version}"` : 'null'}, Name = "${name}")]`);
 
         // classDeclaration has any other subtypes
-        if (classDeclaration.getAssignableClassDeclarations()?.length > 1 && parameters.useNewtonsoftJson){
-            parameters.fileWriter.writeLine(1, '[NewtonsoftJson.JsonConverter(typeof(NewtonsoftConcerto.ConcertoConverter))]');
+        if (parameters.useSystemTextJson) {
+            parameters.fileWriter.writeLine(1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]');
+        }
+        if (parameters.useNewtonsoftJson) {
+            parameters.fileWriter.writeLine(1, '[Newtonsoft.Json.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterNewtonsoft))]');
         }
         parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
         const override = namespace === 'concerto' && name === 'Concept' ? 'virtual' : 'override';
@@ -305,10 +303,10 @@ class CSharpVisitor {
 
         if (modifiedPropertyName !== propertyName){
             if (parameters?.useSystemTextJson){
-                annotations += `[JsonPropertyName("${propertyName}")]\n\t\t`;
+                annotations += `[System.Text.Json.Serialization.JsonPropertyName("${propertyName}")]\n\t\t`;
             }
             if (parameters?.useNewtonsoftJson){
-                annotations += `[NewtonsoftJson.JsonProperty("${propertyName}")]\n\t\t`;
+                annotations += `[Newtonsoft.Json.JsonProperty("${propertyName}")]\n\t\t`;
             }
         }
 
@@ -325,7 +323,7 @@ class CSharpVisitor {
     toCSharpType(type) {
         switch (type) {
         case 'DateTime':
-            return 'DateTime';
+            return 'System.DateTime';
         case 'Boolean':
             return 'bool';
         case 'String':
