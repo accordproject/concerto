@@ -55,10 +55,16 @@ describe('ModelFile', () => {
 
     describe('#constructor', () => {
 
-        it('should throw when non object ast provided', () => {
+        it('should throw when null ast provided', () => {
             (() => {
                 new ModelFile(modelManager, null);
             }).should.throw(/ast not specified/);
+        });
+
+        it('should throw when non object ast provided', () => {
+            (() => {
+                new ModelFile(modelManager, true);
+            }).should.throw(/ModelFile expects a Concerto model AST as input./);
         });
 
         it('should throw when invalid definitions provided', () => {
@@ -335,6 +341,26 @@ describe('ModelFile', () => {
         });
 
     });
+
+    describe('#isModelFile', () => {
+        it('should return true if this is a ModelFile', () => {
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel, 'car lease');
+            modelFile.isModelFile().should.equal(true);
+        });
+    });
+
+    describe('#isExternal', () => {
+        it('should return true if this ModelFile was downloaded from an external URI.', () => {
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel, '@carlease');
+            modelFile.isExternal().should.equal(true);
+        });
+
+        it('should return false if this ModelFile was not downloaded from an external URI.', () => {
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel, 'carlease');
+            modelFile.isExternal().should.equal(false);
+        });
+    });
+
 
     describe('#isImportedType', () => {
 
