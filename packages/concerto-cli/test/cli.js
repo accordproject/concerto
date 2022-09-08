@@ -553,5 +553,16 @@ describe('concerto-cli', () => {
             (typeof obj.currencyCode).should.equal('string');
             (typeof obj.doubleValue).should.equal('number');
         });
+
+        it('should generate an identified object', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'org.accordproject.cicero.dom.ContractTemplate',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            obj.$class.should.equal('org.accordproject.cicero.dom.ContractTemplate');
+            Object.keys(obj).should.eql(['$class', 'metadata', 'content', 'id', '$identifier']);
+        });
     });
 });
