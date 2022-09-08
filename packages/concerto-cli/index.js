@@ -72,7 +72,7 @@ require('yargs')
                 .then((result) => {
                     Logger.info('Input is valid');
                     if (!options.functional) {
-                        Logger.info(result);
+                        console.log(result);
                     }
                 })
                 .catch((err) => {
@@ -215,7 +215,7 @@ require('yargs')
         return Commands.parse(argv.model, argv.resolve, argv.all, argv.output, options)
             .then((result) => {
                 if (result) {
-                    Logger.info(result);
+                    console.log(result);
                 }
             })
             .catch((err) => {
@@ -296,6 +296,54 @@ require('yargs')
         });
     }, argv => {
         return Commands.compare(argv.old, argv.new)
+            .catch((err) => {
+                Logger.error(err.message);
+            });
+    })
+    .command('generate <mode>', 'generate a sample JSON object for a concept', yargs => {
+        yargs.demandOption(['model'], 'Please provide a model');
+        yargs.demandOption(['concept'], 'Please provide the concept name');
+        yargs.option('model', {
+            describe: 'The file location of the source models',
+            type: 'string',
+            array: true,
+        });
+        yargs.option('concept', {
+            describe: 'The fully qualified name of the Concept type to generate',
+            type: 'string',
+        });
+        yargs.positional('mode', {
+            describe: 'Generation mode. `empty` will generate a minimal example, `sample` will generate defaul',
+            type: 'string',
+            choices: [
+                'sample',
+                'empty',
+            ]
+        });
+        yargs.option('includeOptionalFields', {
+            describe: 'Include optional fields will be included in the output',
+            type: 'boolean',
+            default: false
+        });
+        yargs.option('metamodel', {
+            describe: 'Include the Concerto Metamodel in the output',
+            type: 'boolean',
+            default: false,
+        });
+        yargs.option('strict', {
+            describe: 'Require versioned namespaces and imports',
+            type: 'boolean',
+            default: false,
+        });
+    }, argv => {
+        return Commands.generate(argv.model, argv.concept, argv.mode, {
+            optionalFields: argv.includeOptionalFields,
+            metamodel: argv.metamodel,
+            strict: argv.strict,
+        })
+            .then(obj => {
+                console.log(JSON.stringify(obj, null, 2));
+            })
             .catch((err) => {
                 Logger.error(err.message);
             });
