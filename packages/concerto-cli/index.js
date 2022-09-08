@@ -313,7 +313,7 @@ require('yargs')
             type: 'string',
         });
         yargs.positional('mode', {
-            describe: 'Generation mode. `empty` will generate a minimal example, `sample` will generate defaul',
+            describe: 'Generation mode. `empty` will generate a minimal example, `sample` will generate random values',
             type: 'string',
             choices: [
                 'sample',
