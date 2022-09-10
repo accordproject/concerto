@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
+//const { option } = require('yargs');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -141,13 +142,16 @@ class Commands {
      * @param {boolean} [options.offline] - do not resolve external models
      * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
      * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
+     *
+     *
      */
     static async compile(target, ctoFiles, output, options) {
         const modelManagerOptions = { offline: options && options.offline };
         const visitorOptions = {
             useSystemTextJson: options && options.useSystemTextJson,
             useNewtonsoftJson: options && options.useNewtonsoftJson,
-            namespacePrefix: options && options.namespacePrefix
+            namespacePrefix: options && options.namespacePrefix,
+            rootType: options && options.rootType
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);
@@ -217,6 +221,7 @@ class Commands {
      * @param {string} outputPath to an output file
      * @param {object} options - optional parameters
      * @param {boolean} [options.excludeLineLocations] - Exclude line location metadata in the metamodel instance
+     *
      * @return {string} the metamodel
      */
     static async parse(ctoFiles, resolve = false, all = false, outputPath, options) {

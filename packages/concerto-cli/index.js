@@ -119,6 +119,10 @@ require('yargs')
             describe: 'A prefix to add to all namespaces (`csharp` target only)',
             type: 'string',
         });
+        yargs.option('rootType', {
+            describe: 'A prefix to add rootType (`jsonSchema` target only)',
+            type: 'string',
+        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`generate code for target ${argv.target} from models ${argv.model} into directory: ${argv.output}`);
@@ -129,6 +133,7 @@ require('yargs')
         options.useSystemTextJson = argv.useSystemTextJson;
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
+        options.rootType = argv.rootType;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);
@@ -169,6 +174,7 @@ require('yargs')
             type: 'string',
             array: true
         });
+
         yargs.option('resolve', {
             describe: 'resolve names to fully qualified names',
             type: 'boolean',
@@ -183,6 +189,7 @@ require('yargs')
             describe: 'path to the output file',
             type: 'string'
         });
+
         yargs.option('excludeLineLocations', {
             describe: 'Exclude file line location metadata from metamodel instance',
             type: 'boolean',
@@ -191,6 +198,7 @@ require('yargs')
     }, (argv) => {
         const options = {};
         options.excludeLineLocations = argv.excludeLineLocations;
+        //options.rootType=argv.rootType;
 
         return Commands.parse(argv.model, argv.resolve, argv.all, argv.output, options)
             .then((result) => {

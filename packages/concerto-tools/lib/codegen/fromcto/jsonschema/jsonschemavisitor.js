@@ -15,6 +15,7 @@
 'use strict';
 
 const debug = require('debug')('concerto-core:jsonschemavisitor');
+const { Console } = require('console');
 const util = require('util');
 const RecursionDetectionVisitor = require('./recursionvisitor');
 
@@ -54,6 +55,7 @@ class JSONSchemaVisitor {
             : null;
     }
 
+
     /**
      * Returns true if the class declaration contains recursive references.
      *
@@ -78,28 +80,36 @@ class JSONSchemaVisitor {
      * @public
      */
     visit(thing, parameters) {
-        if (thing.isModelManager?.()) {
-            return this.visitModelManager(thing, parameters);
-        } else if (thing.isModelFile?.()) {
-            return this.visitModelFile(thing, parameters);
-        } else if (thing.isAsset?.()) {
-            return this.visitAssetDeclaration(thing, parameters);
-        } else if (thing.isTransaction?.()) {
-            return this.visitTransactionDeclaration(thing, parameters);
-        } else if (thing.isEnum?.()) {
-            return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing.isConcept?.()) {
-            return this.visitConceptDeclaration(thing, parameters);
-        } else if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing.isEnumValue?.()) {
-            return this.visitEnumValueDeclaration(thing, parameters);
-        } else {
-            throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
+        try{
+            if (thing.isModelManager?.()) {
+                return this.visitModelManager(thing, parameters);
+            } else if (thing.isModelFile?.()) {
+                return this.visitModelFile(thing, parameters);
+            } else if (thing.isAsset?.()) {
+                return this.visitAssetDeclaration(thing, parameters);
+            } else if (thing.isTransaction?.()) {
+                return this.visitTransactionDeclaration(thing, parameters);
+            } else if (thing.isEnum?.()) {
+                return this.visitEnumDeclaration(thing, parameters);
+            } else if (thing.isConcept?.()) {
+                return this.visitConceptDeclaration(thing, parameters);
+            } else if (thing.isClassDeclaration?.()) {
+                return this.visitClassDeclaration(thing, parameters);
+            } else if (thing.isField?.()) {
+                return this.visitField(thing, parameters);
+            } else if (thing.isRelationship?.()) {
+                return this.visitRelationshipDeclaration(thing, parameters);
+            } else if (thing.isEnumValue?.()) {
+                return this.visitEnumValueDeclaration(thing, parameters);
+            }
+
+            else {
+                throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
+            }
+        }
+        catch  (err)
+        {
+            console.log(err);
         }
     }
 
@@ -121,21 +131,25 @@ class JSONSchemaVisitor {
         modelManager.getModelFiles().forEach((modelFile) => {
             const schema = modelFile.accept(this, parameters);
             result.definitions = { ... result.definitions, ... schema.definitions };
+            if (schema.uiSchema ) {
+                console.warn('found uiSchema, modelManager');
+
+                result.uiSchema = schema.uiSchema;
+            }
         });
 
         if(parameters.rootType) {
             const classDecl = modelManager.getType(parameters.rootType);
             const schema = classDecl.accept(this, parameters);
-            result = { ... result, ... schema.schema };
-        }
+            result = { ... result, ... schema.schema};
 
+        }
         if(parameters.fileWriter) {
             const fileName = parameters.rootType ? `${parameters.rootType}.json` : 'schema.json';
             parameters.fileWriter.openFile(fileName);
             parameters.fileWriter.writeLine(0, JSON.stringify(result, null, 2));
             parameters.fileWriter.closeFile();
         }
-
         return result;
     }
 
@@ -157,6 +171,10 @@ class JSONSchemaVisitor {
             .forEach((declaration) => {
                 const type = declaration.accept(this, parameters);
                 result.definitions[type.$id] = type.schema;
+                if (type.uiSchema) {
+                    console.warn('found uiSchema, modelFile');
+                    result.uiSchema = type.uiSchema;
+                }
             });
 
         return result;
@@ -258,12 +276,43 @@ class JSONSchemaVisitor {
             }
         });
 
-        // add the decorators
+        // add the decorators 
         const decorators = this.getDecorators(classDeclaration);
         if(decorators) {
             result.schema.$decorators = decorators;
         }
 
+        //for ui schema generation 
+        const propertyDecorators = classDeclaration.getProperties()
+            .map(
+                (property) => {
+                    const decorators = this.getDecorators(property);
+                    const res = Object.fromEntries(
+                        Object
+                            .entries(decorators)
+                            .map(([key, value] )=> [key.replace(/^ui_/,'ui:'), value[0]])
+                    );
+
+                    return {[property.getName()] :  res};
+                }
+            )
+            .flat();
+
+        if(propertyDecorators.length > 0 && parameters.rootType) {
+            //result.schema.$decorators = decorators;
+            const Uischema1 = Object.assign({},...propertyDecorators);
+            result.uiSchema = Uischema1;
+            const fileName = `${parameters.rootType}.ui.json`;
+            if(parameters.fileWriter) {
+                parameters.fileWriter.openFile(fileName);
+                parameters.fileWriter.writeLine(0, JSON.stringify(Uischema1
+                    , null, 2));
+                parameters.fileWriter.closeFile();
+            }
+
+        }
+
+        // console.warn(decorators);
         // Return the created schema.
         return result;
     }
@@ -271,12 +320,14 @@ class JSONSchemaVisitor {
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
+     *
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
      */
     visitField(field, parameters) {
         debug('entering visitField', field.getName());
+
 
         // Is this a primitive typed property?
         let jsonSchema;
@@ -359,21 +410,22 @@ class JSONSchemaVisitor {
                 items: jsonSchema
             };
         }
-
-        // add the decorators
+        // add the decorators in Uischema
         const decorators = this.getDecorators(field);
-        if(decorators) {
+        if(decorators)
+        {
             jsonSchema.$decorators = decorators;
         }
-
         // Return the schema.
         return jsonSchema;
     }
 
     /**
      * Visitor design pattern
+     *
      * @param {EnumDeclaration} enumDeclaration - the object being visited
      * @param {Object} parameters - the parameter
+     *
      * @return {Object} the result of visiting or null
      * @private
      */
@@ -397,6 +449,7 @@ class JSONSchemaVisitor {
         const decorators = this.getDecorators(enumDeclaration);
         if(decorators) {
             result.schema.$decorators = decorators;
+
         }
 
         // Return the schema.
