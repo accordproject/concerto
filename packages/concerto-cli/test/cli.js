@@ -528,4 +528,41 @@ describe('concerto-cli', () => {
             processExitStub.should.have.been.calledWith(1);
         });
     });
+
+    describe('#generate', async () => {
+        it('should generate an object, including metamodel', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'org.accordproject.money.MonetaryAmount',
+                'sample',
+                { offline: true, optionalFields: true, metamodel: true }
+            );
+            obj.$class.should.equal('org.accordproject.money.MonetaryAmount');
+            (typeof obj.currencyCode).should.equal('string');
+            (typeof obj.doubleValue).should.equal('number');
+        });
+
+        it('should generate an object', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'org.accordproject.money.MonetaryAmount',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            obj.$class.should.equal('org.accordproject.money.MonetaryAmount');
+            (typeof obj.currencyCode).should.equal('string');
+            (typeof obj.doubleValue).should.equal('number');
+        });
+
+        it('should generate an identified object', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'org.accordproject.cicero.dom.ContractTemplate',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            obj.$class.should.equal('org.accordproject.cicero.dom.ContractTemplate');
+            Object.keys(obj).should.eql(['$class', 'metadata', 'content', 'id', '$identifier']);
+        });
+    });
 });

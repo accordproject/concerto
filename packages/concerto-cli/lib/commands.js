@@ -325,6 +325,44 @@ class Commands {
         }
     }
 
+
+    /**
+     * Generate a sample JSON instance of a Concept
+     * @param {string[]} ctoFiles The path to the model file(s).
+     * @param {string} concept The fully qualified name of the Concept to generate
+     * @param {string} mode Either 'empty' or 'sample'
+     * @param {object} options - optional parameters
+     * @param {boolean} [options.offline] - do not resolve external models
+     * @param {string}  [options.optionalFields] if true, optional fields will be included in the output
+     * @param {boolean} [options.strict] - require versioned namespaces and imports
+     * @param {boolean} [options.metamodel] - include the Concerto Metamodel
+     */
+    static async generate(ctoFiles, concept, mode, options) {
+        const modelManagerOptions = { offline: options && options.offline, strict: options && options.strict };
+
+        const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);
+        if (options && options.metamodel) {
+            modelManager.addCTOModel(MetaModelUtil.metaModelCto);
+        }
+        const factory = new Factory(modelManager);
+
+        const factoryOptions = {
+            includeOptionalFields: options.optionalFields,
+            generate: mode,
+        };
+
+        const classDeclaration = modelManager.getType(concept);
+        const resource = factory.newResource(
+            classDeclaration.getNamespace(),
+            classDeclaration.getName(),
+            classDeclaration.isIdentified() ? 'resource1' : null,
+            factoryOptions
+        );
+        const serializer = new Serializer(factory, modelManager);
+
+        return Promise.resolve(serializer.toJSON(resource));
+    }
+
     /**
      * Update the version of a model file.
      *
