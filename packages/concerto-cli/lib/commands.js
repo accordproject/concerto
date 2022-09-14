@@ -147,13 +147,15 @@ class Commands {
      * @param {boolean} [options.metamodel] - include the Concerto Metamodel
      * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
      * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
+     * @param {boolean} [options.pascalCase] - use PascalCase in generated names
      */
     static async compile(target, ctoFiles, output, options) {
         const modelManagerOptions = { offline: options && options.offline, strict: options && options.strict };
         const visitorOptions = {
             useSystemTextJson: options && options.useSystemTextJson,
             useNewtonsoftJson: options && options.useNewtonsoftJson,
-            namespacePrefix: options && options.namespacePrefix
+            namespacePrefix: options && options.namespacePrefix,
+            pascalCase: options && options.pascalCase,
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);

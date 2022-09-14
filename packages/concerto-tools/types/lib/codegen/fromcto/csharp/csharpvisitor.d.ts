@@ -75,6 +75,7 @@ declare class CSharpVisitor {
     /**
      * Ensures that a concerto property name is valid in CSharp
      * @param {string} access the CSharp field access
+     * @param {string|undefined} parentName the Concerto parent name
      * @param {string} propertyName the Concerto property name
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
@@ -82,11 +83,37 @@ declare class CSharpVisitor {
      * @param {Object} [parameters]  - the parameter
      * @returns {string} the property declaration
      */
-    toCSharpProperty(access: string, propertyName: string, propertyType: string, array: string, getset: string, parameters?: any): string;
+    toCSharpProperty(access: string, parentName: string | undefined, propertyName: string, propertyType: string, array: string, getset: string, parameters?: any): string;
+    /**
+     * Converts a Concerto namespace to a CSharp namespace. If pascal casing is enabled,
+     * each component of the namespace is pascal cased - for example org.example will
+     * become Org.Example, not OrgExample.
+     * @param {string} ns the Concerto namespace
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
+     * @return {string} the CSharp identifier
+     * @private
+     */
+    private toCSharpNamespace;
+    /**
+     * Converts a Concerto name to a CSharp identifier. Internal names such
+     * as $class, $identifier are prefixed with "_". Names matching C# keywords
+     * such as class, namespace are prefixed with "_". If pascal casing is enabled,
+     * the name is pascal cased.
+     * @param {string|undefined} parentName the Concerto name of the parent type
+     * @param {string} name the Concerto name
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
+     * @return {string} the CSharp identifier
+     * @private
+     */
+    private toCSharpIdentifier;
     /**
      * Converts a Concerto type to a CSharp type. Primitive types are converted
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
      * @return {string} the corresponding type in CSharp
      * @private
      */
@@ -95,7 +122,9 @@ declare class CSharpVisitor {
      * Get the .NET namespace for a given model file.
      * @private
      * @param {ModelFile} modelFile the model file
-     * @param {string} [namespacePrefix] the optional namespace prefix
+     * @param {object} [parameters] the parameters
+     * @param {string} [parameters.namespacePrefix] the optional namespace prefix
+     * @param {boolean} [parameters.pascalCase] the optional namespace prefix
      * @return {string} the .NET namespace for the model file
      */
     private getDotNetNamespace;
