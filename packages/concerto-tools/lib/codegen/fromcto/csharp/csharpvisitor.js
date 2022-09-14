@@ -15,6 +15,7 @@
 'use strict';
 
 const { ModelUtil } = require('@accordproject/concerto-core');
+const camelCase = require('camelcase');
 const util = require('util');
 
 // Types needed for TypeScript generation.
@@ -23,6 +24,14 @@ const util = require('util');
 if (global === undefined) {
     const { ModelFile } = require('@accordproject/concerto-core');
 }
+const reservedKeywords = ['abstract','as','base','bool','break','byte','case','catch','char','checked',
+    'class','const','continue','decimal','default','delegate','do','double','else',
+    'enum','event','explicit','extern','false','finally','fixed','float','for','foreach',
+    'goto','if','implicit','in','int','interface','internal','is','lock','long','namespace',
+    'new','null','object','operator','out','override','params','private','protected','public',
+    'readonly','ref','return','sbyte','sealed','short','sizeof','stackalloc','static',
+    'string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked',
+    'unsafe','ushort','using','virtual','void','volatile','while'];
 
 /**
  * Convert the contents of a ModelManager to C# code. Set a
@@ -97,10 +106,10 @@ class CSharpVisitor {
             namespacePrefix += '.';
         }
 
-        const dotNetNamespace = this.getDotNetNamespace(modelFile, namespacePrefix);
+        const dotNetNamespace = this.getDotNetNamespace(modelFile, { ...parameters, namespacePrefix });
         parameters.fileWriter.openFile(modelFile.getNamespace() + '.cs');
 
-        parameters.fileWriter.writeLine(0, `namespace ${dotNetNamespace} {`);
+        parameters.fileWriter.writeLine(0, `namespace ${dotNetNamespace};`);
 
         modelFile.getImports()
             .map(importString => ModelUtil.getNamespace(importString))
@@ -110,18 +119,17 @@ class CSharpVisitor {
                 const otherModelFile = modelFile.getModelManager()?.getModelFile(namespace);
                 if (!otherModelFile) {
                     // Couldn't resolve the other model file.
-                    parameters.fileWriter.writeLine(1, `using ${namespacePrefix}${namespace};`);
+                    parameters.fileWriter.writeLine(0, `using ${namespacePrefix}${namespace};`);
                     return;
                 }
-                const otherDotNetNamespace = this.getDotNetNamespace(otherModelFile, namespacePrefix);
-                parameters.fileWriter.writeLine(1, `using ${otherDotNetNamespace};`);
+                const otherDotNetNamespace = this.getDotNetNamespace(otherModelFile, { ...parameters, namespacePrefix });
+                parameters.fileWriter.writeLine(0, `using ${otherDotNetNamespace};`);
             });
 
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
 
-        parameters.fileWriter.writeLine(0, '}');
         parameters.fileWriter.closeFile();
 
         return null;
@@ -142,18 +150,20 @@ class CSharpVisitor {
         }
 
         if (parameters.useSystemTextJson) {
-            parameters.fileWriter.writeLine(1, '[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]');
+            parameters.fileWriter.writeLine(0, '[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]');
         }
         if (parameters.useNewtonsoftJson) {
-            parameters.fileWriter.writeLine(1, '[Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]');
+            parameters.fileWriter.writeLine(0, '[Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]');
         }
-        parameters.fileWriter.writeLine(1, 'public enum ' + enumDeclaration.getName() + ' {');
+        const name = enumDeclaration.getName();
+        const identifier = this.toCSharpIdentifier(undefined, name, parameters);
+        parameters.fileWriter.writeLine(0, 'public enum ' + identifier + ' {');
 
         enumDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
 
-        parameters.fileWriter.writeLine(1, '}\n');
+        parameters.fileWriter.writeLine(0, '}');
         return null;
     }
 
@@ -173,7 +183,9 @@ class CSharpVisitor {
 
         let superType = ' ';
         if (classDeclaration.getSuperType()) {
-            superType = ` : ${ModelUtil.getShortName(classDeclaration.getSuperType())} `;
+            const superTypeName = ModelUtil.getShortName(classDeclaration.getSuperType());
+            const superTypeIdentifier = this.toCSharpIdentifier(undefined, superTypeName, parameters);
+            superType = ` : ${superTypeIdentifier} `;
         }
 
         let abstract = '';
@@ -183,22 +195,32 @@ class CSharpVisitor {
 
         const { name: namespace, version } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
         const name = classDeclaration.getName();
-        parameters.fileWriter.writeLine(1, `[AccordProject.Concerto.Type(Namespace = "${namespace}", Version = ${version ? `"${version}"` : 'null'}, Name = "${name}")]`);
+        const identifier = this.toCSharpIdentifier(undefined, name, parameters);
+        parameters.fileWriter.writeLine(0, `[AccordProject.Concerto.Type(Namespace = "${namespace}", Version = ${version ? `"${version}"` : 'null'}, Name = "${name}")]`);
 
         // classDeclaration has any other subtypes
         if (parameters.useSystemTextJson) {
-            parameters.fileWriter.writeLine(1, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]');
+            parameters.fileWriter.writeLine(0, '[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]');
         }
         if (parameters.useNewtonsoftJson) {
-            parameters.fileWriter.writeLine(1, '[Newtonsoft.Json.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterNewtonsoft))]');
+            parameters.fileWriter.writeLine(0, '[Newtonsoft.Json.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterNewtonsoft))]');
         }
-        parameters.fileWriter.writeLine(1, `public ${abstract}class ${classDeclaration.getName()}${superType}{`);
+        parameters.fileWriter.writeLine(0, `public ${abstract}class ${identifier}${superType}{`);
         const override = namespace === 'concerto' && name === 'Concept' ? 'virtual' : 'override';
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public '+ override, '$class', 'String','', `{ get; } = "${classDeclaration.getFullyQualifiedName()}";`, parameters));
+        const lines = this.toCSharpProperty(
+            'public '+ override,
+            name,
+            '$class',
+            'String',
+            '',
+            `{ get; } = "${classDeclaration.getFullyQualifiedName()}";`,
+            parameters
+        );
+        lines.forEach(line => parameters.fileWriter.writeLine(1, line));
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
         });
-        parameters.fileWriter.writeLine(1, '}');
+        parameters.fileWriter.writeLine(0, '}');
         return null;
     }
 
@@ -227,7 +249,16 @@ class CSharpVisitor {
             nullableType = '?';
         }
 
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', field.getName(),field.getType()+nullableType,array, '{ get; set; }', parameters));
+        const lines = this.toCSharpProperty(
+            'public',
+            field.getParent()?.getName(),
+            field.getName(),
+            field.getType()+nullableType,
+            array,
+            '{ get; set; }',
+            parameters
+        );
+        lines.forEach(line => parameters.fileWriter.writeLine(1, line));
         return null;
     }
 
@@ -264,13 +295,23 @@ class CSharpVisitor {
         }
 
         // we export all relationships
-        parameters.fileWriter.writeLine(2, this.toCSharpProperty('public', relationship.getName(),relationship.getType(),array, '{ get; set; }', parameters));
+        const lines = this.toCSharpProperty(
+            'public',
+            relationship.getParent()?.getName(),
+            relationship.getName(),
+            relationship.getType(),
+            array,
+            '{ get; set; }',
+            parameters
+        );
+        lines.forEach(line => parameters.fileWriter.writeLine(1, line));
         return null;
     }
 
     /**
      * Ensures that a concerto property name is valid in CSharp
      * @param {string} access the CSharp field access
+     * @param {string|undefined} parentName the Concerto parent name
      * @param {string} propertyName the Concerto property name
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
@@ -278,49 +319,99 @@ class CSharpVisitor {
      * @param {Object} [parameters]  - the parameter
      * @returns {string} the property declaration
      */
-    toCSharpProperty(access, propertyName, propertyType, array, getset, parameters) {
-        const type = this.toCSharpType(propertyType);
+    toCSharpProperty(access, parentName, propertyName, propertyType, array, getset, parameters) {
+        const identifier = this.toCSharpIdentifier(parentName, propertyName, parameters);
+        const type = this.toCSharpType(propertyType, parameters);
 
-        const reservedKeywords = ['abstract','as','base','bool','break','byte','case','catch','char','checked',
-            'class','const','continue','decimal','default','delegate','do','double','else',
-            'enum','event','explicit','extern','false','finally','fixed','float','for','foreach',
-            'goto','if','implicit','in','int','interface','internal','is','lock','long','namespace',
-            'new','null','object','operator','out','override','params','private','protected','public',
-            'readonly','ref','return','sbyte','sealed','short','sizeof','stackalloc','static',
-            'string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked',
-            'unsafe','ushort','using','virtual','void','volatile','while'];
+        let lines = [];
 
-        let modifiedPropertyName = propertyName;
-        let annotations = '';
-
-        if(propertyName.startsWith('$')) {
-            modifiedPropertyName = '_' + propertyName.substring(1);
-        }
-
-        if(reservedKeywords.includes(propertyName)) {
-            modifiedPropertyName = '_' + propertyName;
-        }
-
-        if (modifiedPropertyName !== propertyName){
+        if (identifier !== propertyName){
             if (parameters?.useSystemTextJson){
-                annotations += `[System.Text.Json.Serialization.JsonPropertyName("${propertyName}")]\n\t\t`;
+                lines.push(`[System.Text.Json.Serialization.JsonPropertyName("${propertyName}")]`);
             }
             if (parameters?.useNewtonsoftJson){
-                annotations += `[Newtonsoft.Json.JsonProperty("${propertyName}")]\n\t\t`;
+                lines.push(`[Newtonsoft.Json.JsonProperty("${propertyName}")]`);
             }
         }
 
-        return `${annotations}${access} ${type}${array} ${modifiedPropertyName} ${getset}`;
+        lines.push(`${access} ${type}${array} ${identifier} ${getset}`);
+        return lines;
+    }
+
+    /**
+     * Converts a Concerto namespace to a CSharp namespace. If pascal casing is enabled,
+     * each component of the namespace is pascal cased - for example org.example will
+     * become Org.Example, not OrgExample.
+     * @param {string} ns the Concerto namespace
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
+     * @return {string} the CSharp identifier
+     * @private
+     */
+    toCSharpNamespace(ns, parameters) {
+        const components = ns.split('.');
+        return components.map(component => {
+            if (parameters?.pascalCase) {
+                return camelCase(component, { pascalCase: true });
+            } else {
+                return component;
+            }
+        }).join('.');
+    }
+
+    /**
+     * Converts a Concerto name to a CSharp identifier. Internal names such
+     * as $class, $identifier are prefixed with "_". Names matching C# keywords
+     * such as class, namespace are prefixed with "_". If pascal casing is enabled,
+     * the name is pascal cased.
+     * @param {string|undefined} parentName the Concerto name of the parent type
+     * @param {string} name the Concerto name
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
+     * @return {string} the CSharp identifier
+     * @private
+     */
+    toCSharpIdentifier(parentName, name, parameters) {
+        // Replace the $ in internal names with an underscore.
+        let underscore = false;
+        if(name.startsWith('$')) {
+            name = name.substring(1);
+            underscore = true;
+        }
+
+        // Apply pascal casing.
+        if(parameters?.pascalCase) {
+            name = camelCase(name, { pascalCase: true });
+        // Ensure name isn't a reserved keyword.
+        } else if(reservedKeywords.includes(name)) {
+            underscore = true;
+        }
+
+        // Ensure it is not the same as the parent name.
+        if (parentName) {
+            const parentIdentifier = this.toCSharpIdentifier(undefined, parentName, parameters);
+            if (name === parentIdentifier) {
+                underscore = true;
+            }
+        }
+
+        if (underscore) {
+            return '_' + name;
+        } else {
+            return name;
+        }
     }
 
     /**
      * Converts a Concerto type to a CSharp type. Primitive types are converted
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
+     * @param {object} [parameters] true to enable pascal casing
+     * @param {boolean} [parameters.pascalCase] true to enable pascal casing
      * @return {string} the corresponding type in CSharp
      * @private
      */
-    toCSharpType(type) {
+    toCSharpType(type, parameters) {
         switch (type) {
         case 'DateTime':
             return 'System.DateTime';
@@ -335,7 +426,7 @@ class CSharpVisitor {
         case 'Integer':
             return 'int';
         default:
-            return type;
+            return this.toCSharpIdentifier(undefined, type, parameters);
         }
     }
 
@@ -343,17 +434,21 @@ class CSharpVisitor {
      * Get the .NET namespace for a given model file.
      * @private
      * @param {ModelFile} modelFile the model file
-     * @param {string} [namespacePrefix] the optional namespace prefix
+     * @param {object} [parameters] the parameters
+     * @param {string} [parameters.namespacePrefix] the optional namespace prefix
+     * @param {boolean} [parameters.pascalCase] the optional namespace prefix
      * @return {string} the .NET namespace for the model file
      */
-    getDotNetNamespace(modelFile, namespacePrefix) {
+    getDotNetNamespace(modelFile, parameters) {
         const decorator = modelFile.getDecorator('DotNetNamespace');
         if (!decorator) {
-            const { name } = ModelUtil.parseNamespace(modelFile.getNamespace());
+            const { name: namespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+            const result = this.toCSharpNamespace(namespace, parameters);
+            const { namespacePrefix } = parameters;
             if (namespacePrefix) {
-                return `${namespacePrefix}${name}`;
+                return `${namespacePrefix}${result}`;
             } else {
-                return name;
+                return result;
             }
         }
         const args = decorator.getArguments();

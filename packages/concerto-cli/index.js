@@ -130,6 +130,11 @@ require('yargs')
             describe: 'A prefix to add to all namespaces (`csharp` target only)',
             type: 'string',
         });
+        yargs.option('pascalCase', {
+            describe: 'Use PascalCase for generated identifier names',
+            type: 'boolean',
+            default: true
+        });
         yargs.check(({ model, metamodel }) => {
             if (model.length > 0 || metamodel) {
                 return true;
@@ -149,6 +154,7 @@ require('yargs')
         options.useSystemTextJson = argv.useSystemTextJson;
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
+        options.pascalCase = argv.pascalCase;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);
