@@ -90,7 +90,7 @@ class Field extends Property {
 
     /**
      * Returns the default value for the field or null
-     * @return {string} the default value for the field or null
+     * @return {string | number} the default value for the field or null
      */
     getDefaultValue() {
         if(this.defaultValue) {

@@ -11,6 +11,12 @@ export = PlantUMLVisitor;
  */
 declare class PlantUMLVisitor {
     /**
+     * Converts a fully qualified type name to a valid PlantUML name
+     * @param {string} fqn fully qualified name of a type
+     * @returns {string} the name for use with PlantUML
+     */
+    static toPlantUmlName(fqn: string): string;
+    /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited
      * @param {Object} parameters  - the parameter
@@ -74,6 +80,14 @@ declare class PlantUMLVisitor {
      * @private
      */
     private visitClassDeclaration;
+    /**
+     * Write a class declaration
+     * @param {ClassDeclaration} classDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {string} [style] - the style for the prototype (optional)
+     * @private
+     */
+    private writeDeclaration;
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
