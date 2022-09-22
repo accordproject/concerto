@@ -75,6 +75,13 @@ declare class XmlSchemaVisitor {
      */
     private visitRelationship;
     /**
+     * The names of elements in XSD must conform to https://www.w3.org/TR/REC-xml/#NT-Name
+     * For example, you cannot use a $ in an NCName.
+     * @param {string} name the name to convert to a valid NCName
+     * @returns {string} a valid XSD NCName
+     */
+    toXsName(name: string): string;
+    /**
      * Converts a Concerto type to a XML Schema type. Primitive types are converted
      * everything else is passed through unchanged.
      * @param {string} type  - the fully qualified concerto type name

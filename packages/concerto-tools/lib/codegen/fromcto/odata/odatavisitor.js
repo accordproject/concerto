@@ -129,17 +129,16 @@ class ODataVisitor {
         }
 
         parameters.fileWriter.writeLine(0, '<edmx:DataServices>');
-        parameters.fileWriter.writeLine(1, `<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="${modelFile.getNamespace()}">`);
+        parameters.fileWriter.writeLine(1, `<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="${namespace}">`);
 
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
 
-        const { name: ns } = ModelUtil.parseNamespace(modelFile.getNamespace());
-        parameters.fileWriter.writeLine(1, `<EntityContainer Name="${ns}Service">`);
+        parameters.fileWriter.writeLine(1, `<EntityContainer Name="${namespace}Service">`);
         modelFile.getAllDeclarations().forEach((decl) => {
             if (!decl.isAbstract() && decl.isIdentified()) {
-                parameters.fileWriter.writeLine(2, `<EntitySet Name="${decl.getName()}" EntityType="${decl.getFullyQualifiedName()}"/>`);
+                parameters.fileWriter.writeLine(2, `<EntitySet Name="${decl.getName()}" EntityType="${ModelUtil.removeNamespaceVersionFromFullyQualifiedName(decl.getFullyQualifiedName())}"/>`);
             }
         });
         parameters.fileWriter.writeLine(1, '</EntityContainer>');
@@ -181,7 +180,7 @@ class ODataVisitor {
         let superType = '';
 
         if (classDeclaration.getSuperType()) {
-            superType = `BaseType="${classDeclaration.getSuperType()}"`;
+            superType = `BaseType="${ModelUtil.removeNamespaceVersionFromFullyQualifiedName(classDeclaration.getSuperType())}"`;
         }
         parameters.fileWriter.writeLine(2, `<${stereoType} Name="${classDeclaration.getName()}" ${abstract} ${superType}>`);
 
@@ -246,7 +245,7 @@ class ODataVisitor {
     visitField(field, parameters) {
         let defaultValue = field.getDefaultValue() ? `DefaultValue="${escapeXml(field.getDefaultValue().toString())}"` : '';
         const optional = field.isOptional() ? 'Nullable="true"' : '';
-        const oDataType = this.toODataType(field.getFullyQualifiedTypeName());
+        const oDataType = this.toODataType(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName()));
         const type = field.isArray() ? `Collection(${oDataType})` : oDataType;
         parameters.fileWriter.writeLine(3, `<Property Name="${field.getName()}" Type="${type}" ${optional} ${defaultValue}>`);
 
@@ -281,7 +280,7 @@ class ODataVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
-        const typeName = this.toODataType(relationship.getFullyQualifiedTypeName());
+        const typeName = this.toODataType(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(relationship.getFullyQualifiedTypeName()));
         const type = relationship.isArray()
             ? `Collection(${typeName})` : typeName;
         const optional = relationship.isOptional() ? 'Nullable="true"' : '';

@@ -234,10 +234,7 @@ class PlantUMLVisitor {
      * @returns {string} the name for use with PlantUML
      */
     static toPlantUmlName(fqn) {
-        const ns = ModelUtil.getNamespace(fqn);
-        const { name: namespace } = ModelUtil.parseNamespace(ns);
-        const typeName = ModelUtil.getShortName(fqn);
-        return `${namespace}.${typeName}`;
+        return ModelUtil.removeNamespaceVersionFromFullyQualifiedName(fqn);
     }
 }
 

@@ -185,6 +185,22 @@ class ModelUtil {
             return type;
         }
     }
+
+    /**
+     * Converts a fully qualified type name to a FQN without a namespace version.
+     * If the FQN is a primitive type it is returned unchanged.
+     * @param {string} fqn fully qualified name of a type
+     * @returns {string} the fully qualified name minus the namespace version
+     */
+    static removeNamespaceVersionFromFullyQualifiedName(fqn) {
+        if(ModelUtil.isPrimitiveType(fqn)) {
+            return fqn;
+        }
+        const ns = ModelUtil.getNamespace(fqn);
+        const { name: namespace } = ModelUtil.parseNamespace(ns);
+        const typeName = ModelUtil.getShortName(fqn);
+        return ModelUtil.getFullyQualifiedName(namespace, typeName);
+    }
 }
 
 module.exports = ModelUtil;
