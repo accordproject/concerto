@@ -70,6 +70,7 @@ describe('JavaVisitor', function () {
         it('should call visitModelFile for a ModelFile', () => {
             let thing = sinon.createStubInstance(ModelFile);
             thing.isModelFile.returns(true);
+            thing.getNamespace.returns('animal');
             let mockSpecialVisit = sinon.stub(javaVisit, 'visitModelFile');
             mockSpecialVisit.returns('Duck');
 
@@ -142,30 +143,6 @@ describe('JavaVisitor', function () {
         });
     });
 
-    describe('visitModelManager', () => {
-        it('should write to the org/hyperledger/composer/system/Resource.java file and call accept for each model file', () => {
-            let param = {
-                fileWriter: mockFileWriter
-            };
-
-            let acceptSpy = sinon.spy();
-            let mockModelManagerDefinition = sinon.createStubInstance(ModelManager);
-            mockModelManagerDefinition.isModelManager.returns(true);
-            mockModelManagerDefinition.getModelFiles.returns([{
-                accept: acceptSpy
-            },
-            {
-                accept: acceptSpy
-            }]);
-
-            javaVisit.visitModelManager(mockModelManagerDefinition, param);
-            param.fileWriter.openFile.withArgs('org/hyperledger/composer/system/Resource.java').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.closeFile.calledOnce.should.be.ok;
-            acceptSpy.withArgs(javaVisit, param).calledTwice.should.be.ok;
-        });
-    });
-
     describe('visitModelFile', () => {
         it('should call accept for each declaration', () => {
             let param = {
@@ -196,6 +173,7 @@ describe('JavaVisitor', function () {
 
             let mockClass = sinon.createStubInstance(ClassDeclaration);
             mockClass.isClassDeclaration.returns(true);
+            mockClass.getNamespace.returns('org.acme.people');
             mockClass.getModelFile.returns({
                 getNamespace: () => {
                     return 'org.acme.people';
@@ -208,11 +186,10 @@ describe('JavaVisitor', function () {
             javaVisit.startClassFile(mockClass, param);
 
             param.fileWriter.openFile.withArgs('org/acme/people/bob.java');
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.callCount.should.deep.equal(3);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// this code is generated and should not be modified']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org.acme.people;']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, 'import org.hyperledger.composer.system.*;']);
         });
     });
 
@@ -256,7 +233,7 @@ describe('JavaVisitor', function () {
 
             mockStartClassFile.withArgs(mockEnumDeclaration, param).calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.JsonIgnoreProperties;']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, '@JsonIgnoreProperties({"$class"})']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public enum Bob {']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
@@ -280,9 +257,10 @@ describe('JavaVisitor', function () {
             mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('people');
             mockClassDeclaration.getModelFile.returns({
                 getImports: () => {
-                    return ['oranges', 'apples'];
+                    return ['fruit.oranges', 'fruit.apples'];
                 }
             });
             mockClassDeclaration.getOwnProperties.returns([{
@@ -304,11 +282,13 @@ describe('JavaVisitor', function () {
             javaVisit.visitClassDeclaration(mockClassDeclaration, param);
 
             mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import fruit.oranges;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import fruit.apples;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'public class Bob {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'setter'})).calledTwice.should.be.ok;
@@ -322,11 +302,11 @@ describe('JavaVisitor', function () {
 
             mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
             param.fileWriter.writeLine.callCount.should.deep.equal(7);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.JsonIgnoreProperties;']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import fruit.oranges;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import fruit.apples;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
             param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '@JsonIgnoreProperties({"$class"})']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")']);
             param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, 'public class Bob {']);
             param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
@@ -341,27 +321,13 @@ describe('JavaVisitor', function () {
             javaVisit.visitClassDeclaration(mockClassDeclaration, param);
 
             mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public abstract class Bob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
-            acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
-            acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;
-            acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'setter'})).calledTwice.should.be.ok;
-            mockEndClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-        });
-
-        it('should write a system core type class declaration and call accept on each property', () => {
-
-            javaVisit.visitClassDeclaration(mockClassDeclaration, param);
-
-            mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import fruit.oranges;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import fruit.apples;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'public abstract class Bob {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'setter'})).calledTwice.should.be.ok;
@@ -369,16 +335,18 @@ describe('JavaVisitor', function () {
         });
 
         it('should write a super type class declaration and call accept on each property', () => {
-            mockClassDeclaration.getSuperType.returns('org.acme.person');
+            mockClassDeclaration.getSuperType.returns('org.acme.Person');
 
             javaVisit.visitClassDeclaration(mockClassDeclaration, param);
 
             mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(4);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob extends person {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.callCount.should.deep.equal(6);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import fruit.oranges;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import fruit.apples;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'public class Bob extends Person {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'setter'})).calledTwice.should.be.ok;
@@ -390,17 +358,19 @@ describe('JavaVisitor', function () {
             javaVisit.visitClassDeclaration(mockClassDeclaration, param);
 
             mockStartClassFile.withArgs(mockClassDeclaration, param).calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(5);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import oranges;']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import apples;']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'public class Bob {']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([1, `
+            param.fileWriter.writeLine.callCount.should.deep.equal(7);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'import fruit.oranges;']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import fruit.apples;']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import com.fasterxml.jackson.annotation.*;']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
+            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, 'public class Bob {']);
+            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, `
    // the accessor for the identifying field
    public String getID() {
       return this.getEmployeeID();
    }
 `]);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '}']);
+            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'field'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'getter'})).calledTwice.should.be.ok;
             acceptSpy.withArgs(javaVisit, Object.assign({},param,{mode:'setter'})).calledTwice.should.be.ok;

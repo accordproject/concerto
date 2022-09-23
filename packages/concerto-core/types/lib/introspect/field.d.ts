@@ -19,9 +19,9 @@ declare class Field extends Property {
     getValidator(): Validator;
     /**
      * Returns the default value for the field or null
-     * @return {string} the default value for the field or null
+     * @return {string | number} the default value for the field or null
      */
-    getDefaultValue(): string;
+    getDefaultValue(): string | number;
     /**
      * Returns true if this class is the definition of a field.
      *

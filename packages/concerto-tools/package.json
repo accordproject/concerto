@@ -46,7 +46,7 @@
         "eslint": "8.2.0",
         "jsdoc": "^3.6.7",
         "license-check-and-add": "2.3.6",
-        "mocha": "8.3.2",
+        "mocha": "10.0.0",
         "mockery": "2.1.0",
         "moxios": "0.4.0",
         "nunjucks": "3.2.3",

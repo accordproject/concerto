@@ -167,7 +167,7 @@ class PlantUMLVisitor {
      * @private
      */
     writeDeclaration(classDeclaration, parameters, style) {
-        parameters.fileWriter.writeLine(0, 'class ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + (style ? `<< ${style} >>` : '') + '{' );
+        parameters.fileWriter.writeLine(0, 'class ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + (style ? ` << ${style} >> ` : ' ') + '{' );
 
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);

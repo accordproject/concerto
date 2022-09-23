@@ -98,4 +98,11 @@ declare class ModelUtil {
      * @returns {string} the fully qualified type name.
      */
     static getFullyQualifiedName(namespace: string, type: string): string;
+    /**
+     * Converts a fully qualified type name to a FQN without a namespace version.
+     * If the FQN is a primitive type it is returned unchanged.
+     * @param {string} fqn fully qualified name of a type
+     * @returns {string} the fully qualified name minus the namespace version
+     */
+    static removeNamespaceVersionFromFullyQualifiedName(fqn: string): string;
 }

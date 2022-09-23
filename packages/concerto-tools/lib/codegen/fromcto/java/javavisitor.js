@@ -127,7 +127,7 @@ public abstract class Resource extends Concept
      * @private
      */
     startClassFile(clazz, parameters) {
-        const { name: namespace } = ModelUtil.parseNamespace(clazz.getModelFile().getNamespace());
+        const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
         parameters.fileWriter.openFile( namespace.replace(/\./g, '/') + '/' + clazz.getName() + '.java');
         parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
         parameters.fileWriter.writeLine(0, 'package ' + namespace + ';');
@@ -187,7 +187,7 @@ public abstract class Resource extends Concept
         classDeclaration.getModelFile().getImports().forEach((imported) => {
             const { name: namespace } = ModelUtil.parseNamespace(ModelUtil.getNamespace(imported));
             const typeName = ModelUtil.getShortName(imported);
-            parameters.fileWriter.writeLine(0, `import  ${namespace}.${typeName};` );
+            parameters.fileWriter.writeLine(0, `import ${namespace}.${typeName};` );
         });
 
         parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.*;');

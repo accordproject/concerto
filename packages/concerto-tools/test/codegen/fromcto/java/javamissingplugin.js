@@ -42,6 +42,7 @@ describe('JavaMissingPlugin', function () {
 
             let mockClass = sinon.createStubInstance(ClassDeclaration);
             mockClass.isClassDeclaration.returns(true);
+            mockClass.getNamespace.returns('org.acme.people');
             mockClass.getModelFile.returns({
                 getNamespace: () => {
                     return 'org.acme.people';
@@ -95,9 +96,10 @@ describe('JavaMissingPlugin', function () {
             mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getNamespace.returns('acme@1.0.0');
             mockClassDeclaration.getModelFile.returns({
                 getImports: () => {
-                    return ['oranges', 'apples'];
+                    return ['fruit.oranges', 'fruit.apples'];
                 }
             });
             mockClassDeclaration.getOwnProperties.returns([{

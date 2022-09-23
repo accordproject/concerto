@@ -24,7 +24,7 @@ chai.should();
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 
-describe.only('codegen', function () {
+describe('codegen', function () {
 
     let modelManager = null;
 

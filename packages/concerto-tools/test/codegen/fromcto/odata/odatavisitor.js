@@ -486,11 +486,11 @@ describe('ODataVisitor', function () {
             const mockField = sinon.createStubInstance(Field);
             mockField.isPrimitive.returns(false);
             mockField.getName.returns('Bob');
-            mockField.getFullyQualifiedTypeName.returns('Person');
+            mockField.getFullyQualifiedTypeName.returns('org.acme.Person');
             mockField.isArray.returns(true);
             mockField.getDecorators.returns([]);
             oDataVisitor.visitField(mockField, param);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<Property Name="Bob" Type="Collection(Person)"  >']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([3, '<Property Name="Bob" Type="Collection(org.acme.Person)"  >']);
         });
     });
 

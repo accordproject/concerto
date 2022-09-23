@@ -273,6 +273,7 @@ describe('XmlSchemaVisitor', function () {
             let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
             mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getName.returns('Person');
+            mockEnumDeclaration.getNamespace.returns('org.acme');
             mockEnumDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -297,54 +298,7 @@ describe('XmlSchemaVisitor', function () {
 
             acceptSpy.withArgs(xmlSchemaVisitor, param).calledTwice.should.be.ok;
         });
-
-        it('should write the class declaration for an enum with a super type', () => {
-            let acceptSpy = sinon.spy();
-
-            let param = {
-                fileWriter: mockFileWriter
-            };
-
-            let mockSuperType = sinon.createStubInstance(EnumDeclaration);
-            mockSuperType.isEnum.returns(true);
-            mockSuperType.getName.returns('Human');
-            mockSuperType.getNamespace.returns('org.acme');
-            let mockEnumDeclaration = sinon.createStubInstance(EnumDeclaration);
-            mockEnumDeclaration.isEnum.returns(true);
-            let mockModelManager = sinon.createStubInstance(ModelManager);
-            mockModelManager.isModelManager.returns(true);
-            mockModelManager.getType.returns(mockSuperType);
-            let mockModelFile = sinon.createStubInstance(ModelFile);
-            mockModelFile.isModelFile.returns(true);
-            mockModelFile.getModelManager.returns(mockModelManager);
-            mockEnumDeclaration.getModelFile.returns(mockModelFile);
-
-            mockEnumDeclaration.getName.returns('Person');
-            mockEnumDeclaration.getNamespace.returns('org.acme');
-            mockEnumDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
-            },
-            {
-                accept: acceptSpy
-            }]);
-            mockEnumDeclaration.getSuperType.returns('org.acme.Human');
-
-            xmlSchemaVisitor.visitEnumDeclaration(mockEnumDeclaration, param);
-
-            param.fileWriter.writeLine.callCount.should.deep.equal(9);
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '<xs:simpleType name="Person_Own">']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, '<xs:restriction base="xs:string">']);
-            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([1, '</xs:restriction>']);
-            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '</xs:simpleType>']);
-            param.fileWriter.writeLine.getCall(4).args.should.deep.equal([0, '<xs:simpleType name="Person" type="org.acme:Person_Own">']);
-            param.fileWriter.writeLine.getCall(5).args.should.deep.equal([1, '<xs:union memberTypes="org.acme:Person_Own  org.acme:Human">']);
-            param.fileWriter.writeLine.getCall(6).args.should.deep.equal([1, '</xs:union>']);
-            param.fileWriter.writeLine.getCall(7).args.should.deep.equal([0, '</xs:simpleType>']);
-
-            acceptSpy.withArgs(xmlSchemaVisitor, param).calledTwice.should.be.ok;
-        });
     });
-
 
     describe('visitClassDeclaration', () => {
         it('should write the class declaration for a class', () => {
@@ -357,6 +311,7 @@ describe('XmlSchemaVisitor', function () {
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
+            mockClassDeclaration.getNamespace.returns('org.acme');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -562,6 +517,7 @@ describe('XmlSchemaVisitor', function () {
             let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
             mockRelationship.isRelationship.returns(true);
             mockRelationship.getFullyQualifiedTypeName.returns('String');
+            mockRelationship.getName.returns('Bob');
 
             xmlSchemaVisitor.visitRelationship(mockRelationship, param);
 
