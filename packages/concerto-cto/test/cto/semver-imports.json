@@ -1,34 +1,56 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Model",
-  "decorators": [],
-  "namespace": "test.person@1.0.0-alpha.0+build1",
-  "imports": [
-    {
-      "$class": "concerto.metamodel@1.0.0.ImportTypes",
-      "namespace": "test",
-      "types": [
-        "Foo",
-        "Bar"
-      ]
-    }
-  ],
-  "declarations": [
-    {
-      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
-      "name": "Person",
-      "isAbstract": false,
-      "properties": [
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "test.person@1.0.0-alpha.0+build1",
+    "imports": [
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
-          "name": "name",
-          "isArray": false,
-          "isOptional": false
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "test",
+            "types": ["Foo", "Bar"]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "Foo",
+            "namespace": "test"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportAll",
+            "namespace": "test",
+            "uri": "github://foo"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "test@1.0.0",
+            "types": ["Foo", "Bar"]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "Foo",
+            "namespace": "test@1.0.0"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportAll",
+            "namespace": "test@1.0.0",
+            "uri": "github://foo"
         }
-      ],
-      "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
-        "name": "name"
-      }
-    }
-  ]
+    ],
+    "declarations": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+            "name": "Person",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "name",
+                    "isArray": false,
+                    "isOptional": false
+                }
+            ],
+            "identified": {
+                "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+                "name": "name"
+            }
+        }
+    ]
 }

@@ -1354,10 +1354,19 @@ QualifiedName
     return first.concat(JSON.stringify(rest).replace(/['"]+/g, ''));
   }
 
+VersionedQualifiedName
+  = ns:QualifiedName '@' version:$semver '.' name:$Identifier {
+  	return `${ns}@${version}.${name}`;
+  }
+
 VersionedQualifiedNamespace
   = ns:QualifiedName '@' version:$semver {
   	return `${ns}@${version}`;
   }
+
+QualifiedNameDeclaration
+  = VersionedQualifiedName
+  / QualifiedName
 
 QualifiedNamespaceDeclaration
   = VersionedQualifiedNamespace
@@ -1384,7 +1393,7 @@ ImportAll
     }
 
 ImportType
-    = ImportToken __ ns:QualifiedNamespaceDeclaration __ u:FromUri? {
+    = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
         const { namespace, name } = fullyQualifiedName(ns);
     	const result = {
             $class: 'concerto.metamodel@1.0.0.ImportType',
