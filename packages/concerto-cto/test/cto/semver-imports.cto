@@ -1,6 +1,11 @@
 namespace test.person@1.0.0-alpha.0+build1
 
 import test.{Foo,Bar}
+import test.Foo
+import test.* from github://foo
+import test@1.0.0.{Foo,Bar}
+import test@1.0.0.Foo
+import test@1.0.0.* from github://foo
 
 participant Person identified by name {
   o String name
