@@ -70,36 +70,9 @@ class JavaVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-
         modelManager.getModelFiles(true).forEach((modelFile) => {
             modelFile.accept(this, parameters);
         });
-
-        /*
-        parameters.fileWriter.openFile( 'concerto/Resource.java');
-        parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
-        parameters.fileWriter.writeLine(0, 'package concerto;');
-        parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.*;');
-
-        parameters.fileWriter.writeLine(0, `
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "$id")
-public abstract class Resource extends Concept
-{
-    public abstract String getID();
-    private String $id;
-
-    @JsonProperty("$id")
-    public String get$id() {
-        return $id;
-    }
-    @JsonProperty("$id")
-    public void set$id(String i) {
-        $id = i;
-    }
-
-}`);
-        parameters.fileWriter.closeFile();*/
         return null;
     }
 
