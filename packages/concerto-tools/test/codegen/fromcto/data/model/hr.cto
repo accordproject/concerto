@@ -1,0 +1,70 @@
+namespace org.acme.hr@1.0.0
+
+enum State {
+    o MA
+    o NY
+    o CO
+    o WA
+    o IL
+    o CA
+}
+
+concept Address {
+    o String street
+    o String city
+    o State state optional
+    o String zipCode
+    o String country
+}
+
+concept Company {
+    o String name
+    o Address headquarters
+}
+
+enum Department {
+    o Sales
+    o Marketing
+    o Finance
+    o HR
+    o Engineering
+    o Design
+}
+
+abstract asset Equipment identified by serialNumber {
+    o String serialNumber
+}
+
+enum LaptopMake {
+    o Apple
+    o Microsoft
+}
+
+asset Laptop extends Equipment {
+    o LaptopMake make
+}
+
+abstract participant Person identified by email {
+    o String email
+    o String firstName
+    o String lastName
+    o String middleNames optional
+    o Address homeAddress
+}
+
+participant Employee extends Person {
+    o String employeeId
+    o Department department
+    o Address officeAddress
+    o Equipment[] companyAssets
+    --> Manager manager optional
+}
+
+participant Contractor extends Person {
+    o Company company
+    --> Manager manager optional
+}
+
+participant Manager extends Employee {
+    --> Person[] reports optional
+}

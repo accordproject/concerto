@@ -37,16 +37,6 @@ const CodeGen = require('@accordproject/concerto-tools').CodeGen;
 const { Compare, compareResultToString } = require('@accordproject/concerto-analysis');
 const { ModelFile, ModelManager } = require('@accordproject/concerto-core');
 
-const GoLangVisitor = CodeGen.GoLangVisitor;
-const JavaVisitor = CodeGen.JavaVisitor;
-const JSONSchemaVisitor = CodeGen.JSONSchemaVisitor;
-const PlantUMLVisitor = CodeGen.PlantUMLVisitor;
-const TypescriptVisitor = CodeGen.TypescriptVisitor;
-const XmlSchemaVisitor = CodeGen.XmlSchemaVisitor;
-const GraphQLVisitor = CodeGen.GraphQLVisitor;
-const CSharpVisitor = CodeGen.CSharpVisitor;
-const ODataVisitor = CodeGen.ODataVisitor;
-
 /**
  * Utility class that implements the commands exposed by the CLI.
  * @class
@@ -163,45 +153,16 @@ class Commands {
             modelManager.addCTOModel(MetaModelUtil.metaModelCto);
         }
 
-        let visitor = null;
-
-        switch(target.toLowerCase()) {
-        case 'go':
-            visitor = new GoLangVisitor();
-            break;
-        case 'plantuml':
-            visitor = new PlantUMLVisitor();
-            break;
-        case 'typescript':
-            visitor = new TypescriptVisitor();
-            break;
-        case 'java':
-            visitor = new JavaVisitor();
-            break;
-        case 'jsonschema':
-            visitor = new JSONSchemaVisitor();
-            break;
-        case 'xmlschema':
-            visitor = new XmlSchemaVisitor();
-            break;
-        case 'graphql':
-            visitor = new GraphQLVisitor();
-            break;
-        case 'csharp':
-            visitor = new CSharpVisitor();
-            break;
-        case 'odata':
-            visitor = new ODataVisitor();
-            break;
-        }
-
-        if(visitor) {
+        const visitorClass = CodeGen.formats[target.toLowerCase()];
+        if(visitorClass) {
+            const visitor = new visitorClass;
             let parameters = visitorOptions;
             parameters.fileWriter = new FileWriter(output);
             modelManager.accept(visitor, parameters);
             return `Compiled to ${target} in '${output}'.`;
-        } else {
-            return 'Unrecognized target: ' + target;
+        }
+        else {
+            return `Unrecognized target: ${target}. Supported targets are: ${Object.keys(CodeGen.formats)}`;
         }
     }
 

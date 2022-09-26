@@ -5,7 +5,7 @@
     "dayjs": "1.10.8",
     "eslint": "8.2.0",
     "jsdoc": "^3.6.7",
-    "glob": "^7.1.7",
+    "glob": "^7.2.0",
     "lerna": "^4.0.0",
     "license-check-and-add": "2.3.6",
     "nyc": "15.1.0",

@@ -36,5 +36,16 @@ module.exports = {
     JavaVisitor,
     GraphQLVisitor,
     CSharpVisitor,
-    ODataVisitor
+    ODataVisitor,
+    formats: {
+        golang: GoLangVisitor,
+        jsonschema: JSONSchemaVisitor,
+        xmlschema: XmlSchemaVisitor,
+        plantuml: PlantUMLVisitor,
+        typescript: TypescriptVisitor,
+        java: JavaVisitor,
+        graphql: GraphQLVisitor,
+        csharp: CSharpVisitor,
+        odata: ODataVisitor
+    }
 };

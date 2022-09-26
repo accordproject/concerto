@@ -62,7 +62,7 @@ class XmlSchemaVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-        modelManager.getModelFiles().forEach((decl) => {
+        modelManager.getModelFiles(true).forEach((decl) => {
             decl.accept(this, parameters);
         });
         return null;
@@ -76,16 +76,19 @@ class XmlSchemaVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
+        const { name: namespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+
         parameters.fileWriter.openFile(`${modelFile.getNamespace()}.xsd`);
         parameters.fileWriter.writeLine(0, '<?xml version="1.0"?>');
-        parameters.fileWriter.writeLine(0, `<xs:schema xmlns:${modelFile.getNamespace()}="${modelFile.getNamespace()}" targetNamespace="${modelFile.getNamespace()}" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" `);
+        parameters.fileWriter.writeLine(0, `<xs:schema xmlns:${namespace}="${namespace}" targetNamespace="${namespace}" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" `);
 
         const importedNamespaces = [];
         for(let importedType of modelFile.getImports()) {
             const clazz = modelFile.getModelManager().getType(importedType);
-            if(importedNamespaces.indexOf(clazz.getNamespace()) === -1){
-                importedNamespaces.push(clazz.getNamespace());
-                parameters.fileWriter.writeLine(0, `xmlns:${clazz.getNamespace()}="${clazz.getNamespace()}"`);
+            const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
+            if(importedNamespaces.indexOf(namespace) === -1){
+                importedNamespaces.push(namespace);
+                parameters.fileWriter.writeLine(0, `xmlns:${namespace}="${namespace}"`);
             }
         }
         parameters.fileWriter.writeLine(0, '>');
@@ -95,9 +98,10 @@ class XmlSchemaVisitor {
         // prevent namespaces being imported multiple times
         for(let importedType of modelFile.getImports()) {
             const clazz = modelFile.getModelManager().getType(importedType);
-            if(importedNamespaces2.indexOf(clazz.getNamespace()) === -1){
-                importedNamespaces2.push(clazz.getNamespace());
-                parameters.fileWriter.writeLine(0, `<xs:import namespace="${clazz.getNamespace()}" schemaLocation="${clazz.getNamespace()}.xsd"/>`);
+            const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
+            if(importedNamespaces2.indexOf(namespace) === -1){
+                importedNamespaces2.push(namespace);
+                parameters.fileWriter.writeLine(0, `<xs:import namespace="${namespace}" schemaLocation="${clazz.getNamespace()}.xsd"/>`);
             }
         }
 
@@ -126,10 +130,6 @@ class XmlSchemaVisitor {
         // https://www.ibm.com/developerworks/library/x-extenum/index.html
         let typeName = classDeclaration.getName();
 
-        if(classDeclaration.getSuperType()) {
-            typeName = typeName + '_Own'; // create a synthetic type for our own properties
-        }
-
         parameters.fileWriter.writeLine(0, `<xs:simpleType name="${typeName}">` );
         parameters.fileWriter.writeLine(1, '<xs:restriction base="xs:string">' );
 
@@ -140,17 +140,9 @@ class XmlSchemaVisitor {
         parameters.fileWriter.writeLine(1, '</xs:restriction>' );
         parameters.fileWriter.writeLine(0, '</xs:simpleType>' );
 
-        // if we have a super type we now need to create the union type
-        if(classDeclaration.getSuperType()) {
-            const superClass = classDeclaration.getModelFile().getModelManager().getType(classDeclaration.getSuperType());
-            parameters.fileWriter.writeLine(0, `<xs:simpleType name="${classDeclaration.getName()}" type="${classDeclaration.getNamespace()}:${typeName}">` );
-            parameters.fileWriter.writeLine(1, `<xs:union memberTypes="${classDeclaration.getNamespace()}:${typeName}  ${superClass.getNamespace()}:${superClass.getName()}">` );
-            parameters.fileWriter.writeLine(1, '</xs:union>' );
-            parameters.fileWriter.writeLine(0, '</xs:simpleType>' );
-        }
-
         // declare the element
-        parameters.fileWriter.writeLine(0, `<xs:element name="${classDeclaration.getName()}" type="${classDeclaration.getNamespace()}:${classDeclaration.getName()}"/>` );
+        const { name: namespace } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
+        parameters.fileWriter.writeLine(0, `<xs:element name="${classDeclaration.getName()}" type="${namespace}:${classDeclaration.getName()}"/>` );
 
         return null;
     }
@@ -168,8 +160,9 @@ class XmlSchemaVisitor {
 
         if(classDeclaration.getSuperType()) {
             const superClass = classDeclaration.getModelFile().getModelManager().getType(classDeclaration.getSuperType());
+            const { name: namespace } = ModelUtil.parseNamespace(superClass.getNamespace());
             parameters.fileWriter.writeLine(1, '<xs:complexContent>');
-            parameters.fileWriter.writeLine(1, `<xs:extension base="${superClass.getNamespace()}:${superClass.getName()}">` );
+            parameters.fileWriter.writeLine(1, `<xs:extension base="${namespace}:${superClass.getName()}">` );
         }
 
         parameters.fileWriter.writeLine(1, '<xs:sequence>');
@@ -188,7 +181,8 @@ class XmlSchemaVisitor {
         parameters.fileWriter.writeLine(0, '</xs:complexType>' );
 
         // declare the element
-        parameters.fileWriter.writeLine(0, `<xs:element name="${classDeclaration.getName()}" type="${classDeclaration.getNamespace()}:${classDeclaration.getName()}"/>` );
+        const { name: namespace } = ModelUtil.parseNamespace(classDeclaration.getNamespace());
+        parameters.fileWriter.writeLine(0, `<xs:element name="${classDeclaration.getName()}" type="${namespace}:${classDeclaration.getName()}"/>` );
 
         return null;
     }
@@ -207,7 +201,7 @@ class XmlSchemaVisitor {
             array = ' minOccurs="0" maxOccurs="unbounded"';
         }
 
-        parameters.fileWriter.writeLine(2, `<xs:element name="${field.getName()}" type="${this.toXsType(field.getFullyQualifiedTypeName())}"${array}/>`);
+        parameters.fileWriter.writeLine(2, `<xs:element name="${this.toXsName(field.getName())}" type="${this.toXsType(field.getFullyQualifiedTypeName())}"${array}/>`);
 
         return null;
     }
@@ -220,7 +214,7 @@ class XmlSchemaVisitor {
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        parameters.fileWriter.writeLine(2, `<xs:enumeration value="${enumValueDeclaration.getName()}"/>`);
+        parameters.fileWriter.writeLine(2, `<xs:enumeration value="${this.toXsName(enumValueDeclaration.getName())}"/>`);
         return null;
     }
 
@@ -238,8 +232,18 @@ class XmlSchemaVisitor {
             array = ' minOccurs="0" maxOccurs="unbounded"';
         }
 
-        parameters.fileWriter.writeLine(2, `<xs:element name="${relationship.getName()}" type="${this.toXsType(relationship.getFullyQualifiedTypeName())}"${array}/>`);
+        parameters.fileWriter.writeLine(2, `<xs:element name="${this.toXsName(relationship.getName())}" type="${this.toXsType(relationship.getFullyQualifiedTypeName())}"${array}/>`);
         return null;
+    }
+
+    /**
+     * The names of elements in XSD must conform to https://www.w3.org/TR/REC-xml/#NT-Name
+     * For example, you cannot use a $ in an NCName.
+     * @param {string} name the name to convert to a valid NCName
+     * @returns {string} a valid XSD NCName
+     */
+    toXsName(name) {
+        return name.replace('$', '_');
     }
 
     /**
@@ -264,7 +268,7 @@ class XmlSchemaVisitor {
         case 'Integer':
             return 'xs:integer';
         default:
-            return `${ModelUtil.getNamespace(type)}:${ModelUtil.getShortName(type)}`;
+            return `${ModelUtil.parseNamespace(ModelUtil.getNamespace(type)).name}:${ModelUtil.getShortName(type)}`;
         }
     }
 }

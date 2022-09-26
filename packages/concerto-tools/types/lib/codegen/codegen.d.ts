@@ -8,4 +8,15 @@ import JavaVisitor = require("./fromcto/java/javavisitor");
 import GraphQLVisitor = require("./fromcto/graphql/graphqlvisitor");
 import CSharpVisitor = require("./fromcto/csharp/csharpvisitor");
 import ODataVisitor = require("./fromcto/odata/odatavisitor");
+export declare namespace formats {
+    export { GoLangVisitor as golang };
+    export { JSONSchemaVisitor as jsonschema };
+    export { XmlSchemaVisitor as xmlschema };
+    export { PlantUMLVisitor as plantuml };
+    export { TypescriptVisitor as typescript };
+    export { JavaVisitor as java };
+    export { GraphQLVisitor as graphql };
+    export { CSharpVisitor as csharp };
+    export { ODataVisitor as odata };
+}
 export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor };

@@ -132,7 +132,7 @@ describe('concerto-cli', () => {
 
         it('should compile to a Go model', async () => {
             const dir = await tmp.dir({ unsafeCleanup: true });
-            await Commands.compile('Go', models, dir.path, {offline:false});
+            await Commands.compile('GoLang', models, dir.path, {offline:false});
             fs.readdirSync(dir.path).length.should.be.above(0);
             dir.cleanup();
         });

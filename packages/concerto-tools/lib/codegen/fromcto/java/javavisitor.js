@@ -70,34 +70,7 @@ class JavaVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-
-        parameters.fileWriter.openFile( 'org/hyperledger/composer/system/Resource.java');
-        parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
-        parameters.fileWriter.writeLine(0, 'package org.hyperledger.composer.system;');
-        parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.*;');
-
-        parameters.fileWriter.writeLine(0, `
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "$id")
-public abstract class Resource
-{
-    public abstract String getID();
-    private String $id;
-
-    @JsonProperty("$id")
-    public String get$id() {
-        return $id;
-    }
-    @JsonProperty("$id")
-    public void set$id(String i) {
-        $id = i;
-    }
-
-}
-        `);
-        parameters.fileWriter.closeFile();
-
-        modelManager.getModelFiles().forEach((modelFile) => {
+        modelManager.getModelFiles(true).forEach((modelFile) => {
             modelFile.accept(this, parameters);
         });
         return null;
@@ -127,12 +100,11 @@ public abstract class Resource
      * @private
      */
     startClassFile(clazz, parameters) {
-        const { escapedNamespace } = ModelUtil.parseNamespace(clazz.getModelFile().getNamespace());
-        parameters.fileWriter.openFile( clazz.getModelFile().getNamespace().replace(/\./g, '/') + '/' + clazz.getName() + '.java');
+        const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
+        parameters.fileWriter.openFile( namespace.replace(/\./g, '/') + '/' + clazz.getName() + '.java');
         parameters.fileWriter.writeLine(0, '// this code is generated and should not be modified');
-        parameters.fileWriter.writeLine(0, 'package ' + escapedNamespace + ';');
+        parameters.fileWriter.writeLine(0, 'package ' + namespace + ';');
         parameters.fileWriter.writeLine(0, '');
-        parameters.fileWriter.writeLine(0, 'import org.hyperledger.composer.system.*;');
         this.plugin.addClassImports(clazz, parameters);
     }
 
@@ -158,7 +130,7 @@ public abstract class Resource
 
         this.startClassFile(enumDeclaration, parameters);
 
-        parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.JsonIgnoreProperties;');
+        parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.*;');
         parameters.fileWriter.writeLine(0, '@JsonIgnoreProperties({"$class"})');
         this.plugin.addEnumAnnotations(enumDeclaration, parameters);
         parameters.fileWriter.writeLine(0, 'public enum ' + enumDeclaration.getName() + ' {' );
@@ -186,13 +158,21 @@ public abstract class Resource
         this.startClassFile(classDeclaration, parameters);
 
         classDeclaration.getModelFile().getImports().forEach((imported) => {
-            parameters.fileWriter.writeLine(0, 'import ' + imported + ';' );
+            const { name: namespace } = ModelUtil.parseNamespace(ModelUtil.getNamespace(imported));
+            const typeName = ModelUtil.getShortName(imported);
+            parameters.fileWriter.writeLine(0, `import ${namespace}.${typeName};` );
         });
 
+        parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.*;');
+        parameters.fileWriter.writeLine(0, '');
+
         if(classDeclaration.isConcept()) {
-            parameters.fileWriter.writeLine(0, 'import com.fasterxml.jackson.annotation.JsonIgnoreProperties;');
-            parameters.fileWriter.writeLine(0, '');
-            parameters.fileWriter.writeLine(0, '@JsonIgnoreProperties({"$class"})');
+            parameters.fileWriter.writeLine(0, '@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")');
+        }
+
+        if(classDeclaration.isIdentified()) {
+            parameters.fileWriter.writeLine(0, '@JsonIgnoreProperties({"id"})');
+            parameters.fileWriter.writeLine(0, `@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "${classDeclaration.getIdentifierFieldName()}")`);
         }
 
         let isAbstract = '';
@@ -212,6 +192,17 @@ public abstract class Resource
         this.plugin.addClassAnnotations(classDeclaration, parameters);
         parameters.fileWriter.writeLine(0, 'public ' + isAbstract + 'class ' + classDeclaration.getName() + superType + ' {' );
 
+        if(classDeclaration.isSystemIdentified()) {
+            parameters.fileWriter.writeLine(1, `private String $id;
+            @JsonProperty("$id")
+            public String get$id() {
+                return $id;
+            }
+            @JsonProperty("$id")
+            public void set$id(String i) {
+                $id = i;
+            }`);
+        }
         // add the getID abstract type
         if(classDeclaration.getIdentifierFieldName()) {
             const getterName = 'get' + this.capitalizeFirstLetter(classDeclaration.getIdentifierFieldName());

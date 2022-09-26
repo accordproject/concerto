@@ -14,6 +14,8 @@
 
 'use strict';
 
+const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
+
 /**
  * Convert the contents of a ModelManager
  * to PlantUML format files.
@@ -104,18 +106,7 @@ class PlantUMLVisitor {
      * @private
      */
     visitAssetDeclaration(classDeclaration, parameters) {
-        parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getFullyQualifiedName() + ' << (A,green) >> {' );
-
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
-
-        parameters.fileWriter.writeLine(0, '}' );
-
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getFullyQualifiedName() + ' --|> ' + classDeclaration.getSuperType());
-        }
-
+        this.writeDeclaration(classDeclaration, parameters, '(A,green)' );
         return null;
     }
 
@@ -127,18 +118,7 @@ class PlantUMLVisitor {
      * @private
      */
     visitEnumDeclaration(classDeclaration, parameters) {
-        parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getFullyQualifiedName() + ' << (E,grey) >> {' );
-
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
-
-        parameters.fileWriter.writeLine(0, '}' );
-
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getFullyQualifiedName() + ' --|> ' + classDeclaration.getSuperType());
-        }
-
+        this.writeDeclaration(classDeclaration, parameters, '(E,grey)' );
         return null;
     }
 
@@ -150,18 +130,7 @@ class PlantUMLVisitor {
      * @private
      */
     visitParticipantDeclaration(classDeclaration, parameters) {
-        parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getFullyQualifiedName() + ' << (P,lightblue) >> {' );
-
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
-
-        parameters.fileWriter.writeLine(0, '}' );
-
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getFullyQualifiedName() + ' --|> ' + classDeclaration.getSuperType());
-        }
-
+        this.writeDeclaration(classDeclaration, parameters, '(P,lightblue)' );
         return null;
     }
 
@@ -173,18 +142,7 @@ class PlantUMLVisitor {
      * @private
      */
     visitTransactionDeclaration(classDeclaration, parameters) {
-        parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getFullyQualifiedName() + ' << (T,yellow) >> {' );
-
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
-
-        parameters.fileWriter.writeLine(0, '}' );
-
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getFullyQualifiedName() + ' --|> ' + classDeclaration.getSuperType());
-        }
-
+        this.writeDeclaration(classDeclaration, parameters, '(T,yellow)' );
         return null;
     }
 
@@ -197,7 +155,19 @@ class PlantUMLVisitor {
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
-        parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getFullyQualifiedName() + ' {' );
+        this.writeDeclaration(classDeclaration, parameters );
+        return null;
+    }
+
+    /**
+     * Write a class declaration
+     * @param {ClassDeclaration} classDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {string} [style] - the style for the prototype (optional)
+     * @private
+     */
+    writeDeclaration(classDeclaration, parameters, style) {
+        parameters.fileWriter.writeLine(0, 'class ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + (style ? ` << ${style} >> ` : ' ') + '{' );
 
         classDeclaration.getOwnProperties().forEach((property) => {
             property.accept(this, parameters);
@@ -206,10 +176,8 @@ class PlantUMLVisitor {
         parameters.fileWriter.writeLine(0, '}' );
 
         if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getFullyQualifiedName() + ' --|> ' + classDeclaration.getSuperType());
+            parameters.fileWriter.writeLine(0, PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + ' --|> ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getSuperType()));
         }
-
-        return null;
     }
 
     /**
@@ -256,9 +224,17 @@ class PlantUMLVisitor {
             array = '[]';
         }
 
-        // we export all relationships by capitalizing them
         parameters.fileWriter.writeLine(1, '+ ' + relationship.getType() + array + ' ' + relationship.getName());
         return null;
+    }
+
+    /**
+     * Converts a fully qualified type name to a valid PlantUML name
+     * @param {string} fqn fully qualified name of a type
+     * @returns {string} the name for use with PlantUML
+     */
+    static toPlantUmlName(fqn) {
+        return ModelUtil.removeNamespaceVersionFromFullyQualifiedName(fqn);
     }
 }
 

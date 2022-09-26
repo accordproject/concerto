@@ -14,6 +14,8 @@
 
 'use strict';
 
+const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
+
 /**
  * Escapes a string so that it can be enclosed within
  * an XML attribute
@@ -95,7 +97,8 @@ class ODataVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
-        parameters.fileWriter.openFile(`${modelFile.getNamespace()}.csdl`);
+        const { name: namespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
+        parameters.fileWriter.openFile(`${namespace}.csdl`);
         parameters.fileWriter.writeLine(0, '<?xml version="1.0"?>');
         parameters.fileWriter.writeLine(0, '<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">');
         parameters.fileWriter.writeLine(0, '<edmx:Reference Uri="http://docs.oasis-open.org/odata/odata/v4.0/cs01/vocabularies/Org.OData.Core.V1.xml">');
@@ -105,8 +108,9 @@ class ODataVisitor {
         const importedNamespaces = [];
         for (let importedType of modelFile.getImports()) {
             const clazz = modelFile.getModelManager().getType(importedType);
-            if (importedNamespaces.indexOf(clazz.getNamespace()) === -1) {
-                importedNamespaces.push(clazz.getNamespace());
+            const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
+            if (importedNamespaces.indexOf(namespace) === -1) {
+                importedNamespaces.push(namespace);
             }
         }
 
@@ -115,25 +119,26 @@ class ODataVisitor {
         // prevent namespaces being imported multiple times
         for (let importedType of modelFile.getImports()) {
             const clazz = modelFile.getModelManager().getType(importedType);
-            if (importedNamespaces2.indexOf(clazz.getNamespace()) === -1) {
-                importedNamespaces2.push(clazz.getNamespace());
-                parameters.fileWriter.writeLine(0, `<edmx:Reference Uri="./${clazz.getNamespace()}.csdl">`);
-                parameters.fileWriter.writeLine(1, `<edmx:Include Namespace="${clazz.getNamespace()}" />`);
+            const { name: namespace } = ModelUtil.parseNamespace(clazz.getNamespace());
+            if (importedNamespaces2.indexOf(namespace) === -1) {
+                importedNamespaces2.push(namespace);
+                parameters.fileWriter.writeLine(0, `<edmx:Reference Uri="./${namespace}.csdl">`);
+                parameters.fileWriter.writeLine(1, `<edmx:Include Namespace="${namespace}" />`);
                 parameters.fileWriter.writeLine(0, '</edmx:Reference>');
             }
         }
 
         parameters.fileWriter.writeLine(0, '<edmx:DataServices>');
-        parameters.fileWriter.writeLine(1, `<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="${modelFile.getNamespace()}">`);
+        parameters.fileWriter.writeLine(1, `<Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="${namespace}">`);
 
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
 
-        parameters.fileWriter.writeLine(1, `<EntityContainer Name="${modelFile.getNamespace()}Service">`);
+        parameters.fileWriter.writeLine(1, `<EntityContainer Name="${namespace}Service">`);
         modelFile.getAllDeclarations().forEach((decl) => {
             if (!decl.isAbstract() && decl.isIdentified()) {
-                parameters.fileWriter.writeLine(2, `<EntitySet Name="${decl.getName()}" EntityType="${decl.getFullyQualifiedName()}"/>`);
+                parameters.fileWriter.writeLine(2, `<EntitySet Name="${decl.getName()}" EntityType="${ModelUtil.removeNamespaceVersionFromFullyQualifiedName(decl.getFullyQualifiedName())}"/>`);
             }
         });
         parameters.fileWriter.writeLine(1, '</EntityContainer>');
@@ -175,7 +180,7 @@ class ODataVisitor {
         let superType = '';
 
         if (classDeclaration.getSuperType()) {
-            superType = `BaseType="${classDeclaration.getSuperType()}"`;
+            superType = `BaseType="${ModelUtil.removeNamespaceVersionFromFullyQualifiedName(classDeclaration.getSuperType())}"`;
         }
         parameters.fileWriter.writeLine(2, `<${stereoType} Name="${classDeclaration.getName()}" ${abstract} ${superType}>`);
 
@@ -238,9 +243,9 @@ class ODataVisitor {
      * @private
      */
     visitField(field, parameters) {
-        let defaultValue = field.getDefaultValue() ? `DefaultValue="${escapeXml(field.getDefaultValue())}"` : '';
+        let defaultValue = field.getDefaultValue() ? `DefaultValue="${escapeXml(field.getDefaultValue().toString())}"` : '';
         const optional = field.isOptional() ? 'Nullable="true"' : '';
-        const oDataType = this.toODataType(field.getFullyQualifiedTypeName());
+        const oDataType = this.toODataType(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName()));
         const type = field.isArray() ? `Collection(${oDataType})` : oDataType;
         parameters.fileWriter.writeLine(3, `<Property Name="${field.getName()}" Type="${type}" ${optional} ${defaultValue}>`);
 
@@ -275,7 +280,7 @@ class ODataVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
-        const typeName = this.toODataType(relationship.getFullyQualifiedTypeName());
+        const typeName = this.toODataType(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(relationship.getFullyQualifiedTypeName()));
         const type = relationship.isArray()
             ? `Collection(${typeName})` : typeName;
         const optional = relationship.isOptional() ? 'Nullable="true"' : '';

@@ -149,6 +149,19 @@ describe('ModelUtil', function () {
 
     });
 
+    describe('#removeNamespaceVersionFromFullyQualifiedName', function() {
+        it('valid inputs', function() {
+            const result = ModelUtil.removeNamespaceVersionFromFullyQualifiedName('org.acme@1.0.0.Person');
+            result.should.equal('org.acme.Person');
+        });
+
+        it('primtive type', function() {
+            const result = ModelUtil.removeNamespaceVersionFromFullyQualifiedName('String');
+            result.should.equal('String');
+        });
+
+    });
+
     describe('#parseNamespace', function() {
         it('valid, no version', function() {
             const nsInfo = ModelUtil.parseNamespace('org.acme');
