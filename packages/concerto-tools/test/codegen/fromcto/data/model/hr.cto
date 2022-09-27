@@ -68,3 +68,15 @@ participant Contractor extends Person {
 participant Manager extends Employee {
     --> Person[] reports optional
 }
+
+event CompanyEvent {
+}
+
+event Onboarded extends CompanyEvent {
+    --> Employee employee
+}
+
+transaction ChangeOfAddress {
+    --> Person Person
+    o Address newAddress
+}
