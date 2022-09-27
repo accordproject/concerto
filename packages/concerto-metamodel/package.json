@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-metamodel",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "description": "Concerto metamodel utilities",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -50,7 +50,7 @@
     "typescript": "4.6.3"
   },
   "dependencies": {
-    "@accordproject/concerto-util": "3.0.0-beta.3"
+    "@accordproject/concerto-util": "3.0.0-beta.4"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
