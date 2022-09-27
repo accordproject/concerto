@@ -40,6 +40,8 @@ class MermaidVisitor {
             return this.visitParticipantDeclaration(thing, parameters);
         } else if (thing.isTransaction?.()) {
             return this.visitTransactionDeclaration(thing, parameters);
+        } else if (thing.isEvent?.()) {
+            return this.visitEventDeclaration(thing, parameters);
         } else if (thing.isAsset?.()) {
             return this.visitAssetDeclaration(thing, parameters);
         } else if (thing.isEnum?.()) {
