@@ -8,6 +8,7 @@ import JavaVisitor = require("./fromcto/java/javavisitor");
 import GraphQLVisitor = require("./fromcto/graphql/graphqlvisitor");
 import CSharpVisitor = require("./fromcto/csharp/csharpvisitor");
 import ODataVisitor = require("./fromcto/odata/odatavisitor");
+import MermaidVisitor = require("./fromcto/mermaid/mermaidvisitor");
 export declare namespace formats {
     export { GoLangVisitor as golang };
     export { JSONSchemaVisitor as jsonschema };
@@ -18,5 +19,6 @@ export declare namespace formats {
     export { GraphQLVisitor as graphql };
     export { CSharpVisitor as csharp };
     export { ODataVisitor as odata };
+    export { MermaidVisitor as mermaid };
 }
-export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor };
+export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor, MermaidVisitor };

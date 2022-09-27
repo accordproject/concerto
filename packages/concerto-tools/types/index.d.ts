@@ -9,6 +9,7 @@ export var CodeGen: {
     GraphQLVisitor: typeof import("./lib/codegen/fromcto/graphql/graphqlvisitor");
     CSharpVisitor: typeof import("./lib/codegen/fromcto/csharp/csharpvisitor");
     ODataVisitor: typeof import("./lib/codegen/fromcto/odata/odatavisitor");
+    MermaidVisitor: typeof import("./lib/codegen/fromcto/mermaid/mermaidvisitor");
     formats: {
         golang: typeof import("./lib/codegen/fromcto/golang/golangvisitor");
         jsonschema: typeof import("./lib/codegen/fromcto/jsonschema/jsonschemavisitor");
@@ -19,6 +20,7 @@ export var CodeGen: {
         graphql: typeof import("./lib/codegen/fromcto/graphql/graphqlvisitor");
         csharp: typeof import("./lib/codegen/fromcto/csharp/csharpvisitor");
         odata: typeof import("./lib/codegen/fromcto/odata/odatavisitor");
+        mermaid: typeof import("./lib/codegen/fromcto/mermaid/mermaidvisitor");
     };
 };
 export var version: any;
