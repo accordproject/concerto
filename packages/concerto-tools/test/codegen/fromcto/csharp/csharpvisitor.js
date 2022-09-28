@@ -212,6 +212,41 @@ describe('CSharpVisitor', function () {
             file1.should.match(/class Model/);
             file1.should.match(/public string _Model/);
         });
+
+        it('should add identifier attributes for concepts with identified', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            concept Thing identified {
+                o String value
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter, pascalCase: true });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/class Thing/);
+            file1.should.match(/AccordProject.Concerto.Identifier\(\)/);
+            file1.should.match(/public string _Identifier/);
+        });
+
+        it('should add identifier attributes for concepts with identified by', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            concept Thing identified by thingId {
+                o String thingId
+                o String value
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter, pascalCase: true });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/class Thing/);
+            file1.should.match(/AccordProject.Concerto.Identifier\(\)/);
+            file1.should.match(/public string ThingId/);
+        });
     });
 
     describe('visit', () => {
