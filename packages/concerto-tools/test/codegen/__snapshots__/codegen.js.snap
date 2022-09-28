@@ -1,0 +1,2441 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`codegen #formats check we can convert all formats to CTO 1`] = `
+{
+  "key": "main.go",
+  "value": "package main
+import "fmt"
+type Relationship struct {
+   Namespace string \`json:"namespace"\`
+   Type string \`json:"type"\`
+   Identifier string \`json:"identifier"\`
+}
+func main() {
+   fmt.Printf("Hello, world.")
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 2`] = `
+{
+  "key": "orgacme.hr_1.0.0.go",
+  "value": "package main
+import "time"
+type State int
+const (
+   MA State = 1 + iota
+   NY
+   CO
+   WA
+   IL
+   CA
+)
+type Department int
+const (
+   Sales Department = 1 + iota
+   Marketing
+   Finance
+   HR
+   Engineering
+   Design
+)
+type Equipment struct {
+   Asset
+   SerialNumber string \`json:"serialNumber"\`
+}
+type LaptopMake int
+const (
+   Apple LaptopMake = 1 + iota
+   Microsoft
+)
+type Laptop struct {
+   Equipment
+   Make LaptopMake \`json:"make"\`
+}
+type Person struct {
+   Participant
+   Email string \`json:"email"\`
+   FirstName string \`json:"firstName"\`
+   LastName string \`json:"lastName"\`
+   MiddleNames string \`json:"middleNames"\`
+   HomeAddress Address \`json:"homeAddress"\`
+}
+type Employee struct {
+   Person
+   EmployeeId string \`json:"employeeId"\`
+   Department Department \`json:"department"\`
+   OfficeAddress Address \`json:"officeAddress"\`
+   CompanyAssets []Equipment \`json:"companyAssets"\`
+}
+type Contractor struct {
+   Person
+   Company Company \`json:"company"\`
+}
+type Manager struct {
+   Employee
+}
+type CompanyEvent struct {
+   Event
+}
+type Onboarded struct {
+   CompanyEvent
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 3`] = `
+{
+  "key": "schema.json",
+  "value": "{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "org.acme.hr@1.0.0.State": {
+      "title": "State",
+      "description": "An instance of org.acme.hr@1.0.0.State",
+      "enum": [
+        "MA",
+        "NY",
+        "CO",
+        "WA",
+        "IL",
+        "CA"
+      ]
+    },
+    "org.acme.hr@1.0.0.Address": {
+      "title": "Address",
+      "description": "An instance of org.acme.hr@1.0.0.Address",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Address",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Address$",
+          "description": "The class identifier for this type"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.State"
+        },
+        "zipCode": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "$class",
+        "street",
+        "city",
+        "zipCode",
+        "country"
+      ]
+    },
+    "org.acme.hr@1.0.0.Company": {
+      "title": "Company",
+      "description": "An instance of org.acme.hr@1.0.0.Company",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Company",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Company$",
+          "description": "The class identifier for this type"
+        },
+        "name": {
+          "type": "string"
+        },
+        "headquarters": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "name",
+        "headquarters"
+      ]
+    },
+    "org.acme.hr@1.0.0.Department": {
+      "title": "Department",
+      "description": "An instance of org.acme.hr@1.0.0.Department",
+      "enum": [
+        "Sales",
+        "Marketing",
+        "Finance",
+        "HR",
+        "Engineering",
+        "Design"
+      ]
+    },
+    "org.acme.hr@1.0.0.Equipment": {
+      "title": "Equipment",
+      "description": "An instance of org.acme.hr@1.0.0.Equipment",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Equipment",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Equipment$",
+          "description": "The class identifier for this type"
+        },
+        "serialNumber": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        }
+      },
+      "required": [
+        "$class",
+        "serialNumber"
+      ]
+    },
+    "org.acme.hr@1.0.0.LaptopMake": {
+      "title": "LaptopMake",
+      "description": "An instance of org.acme.hr@1.0.0.LaptopMake",
+      "enum": [
+        "Apple",
+        "Microsoft"
+      ]
+    },
+    "org.acme.hr@1.0.0.Laptop": {
+      "title": "Laptop",
+      "description": "An instance of org.acme.hr@1.0.0.Laptop",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Laptop",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Laptop$",
+          "description": "The class identifier for this type"
+        },
+        "make": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.LaptopMake"
+        },
+        "serialNumber": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        }
+      },
+      "required": [
+        "$class",
+        "make",
+        "serialNumber"
+      ]
+    },
+    "org.acme.hr@1.0.0.Person": {
+      "title": "Person",
+      "description": "An instance of org.acme.hr@1.0.0.Person",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Person",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Person$",
+          "description": "The class identifier for this type"
+        },
+        "email": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "middleNames": {
+          "type": "string"
+        },
+        "homeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "email",
+        "firstName",
+        "lastName",
+        "homeAddress"
+      ]
+    },
+    "org.acme.hr@1.0.0.Employee": {
+      "title": "Employee",
+      "description": "An instance of org.acme.hr@1.0.0.Employee",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Employee",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Employee$",
+          "description": "The class identifier for this type"
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "department": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Department"
+        },
+        "officeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "companyAssets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+          }
+        },
+        "manager": {
+          "type": "string",
+          "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+        },
+        "email": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "middleNames": {
+          "type": "string"
+        },
+        "homeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "employeeId",
+        "department",
+        "officeAddress",
+        "companyAssets",
+        "email",
+        "firstName",
+        "lastName",
+        "homeAddress"
+      ]
+    },
+    "org.acme.hr@1.0.0.Contractor": {
+      "title": "Contractor",
+      "description": "An instance of org.acme.hr@1.0.0.Contractor",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Contractor",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Contractor$",
+          "description": "The class identifier for this type"
+        },
+        "company": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Company"
+        },
+        "manager": {
+          "type": "string",
+          "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+        },
+        "email": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "middleNames": {
+          "type": "string"
+        },
+        "homeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "company",
+        "email",
+        "firstName",
+        "lastName",
+        "homeAddress"
+      ]
+    },
+    "org.acme.hr@1.0.0.Manager": {
+      "title": "Manager",
+      "description": "An instance of org.acme.hr@1.0.0.Manager",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Manager",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Manager$",
+          "description": "The class identifier for this type"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Person"
+          }
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "department": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Department"
+        },
+        "officeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "companyAssets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+          }
+        },
+        "manager": {
+          "type": "string",
+          "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+        },
+        "email": {
+          "type": "string",
+          "description": "The instance identifier for this type"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "middleNames": {
+          "type": "string"
+        },
+        "homeAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "employeeId",
+        "department",
+        "officeAddress",
+        "companyAssets",
+        "email",
+        "firstName",
+        "lastName",
+        "homeAddress"
+      ]
+    },
+    "org.acme.hr@1.0.0.CompanyEvent": {
+      "title": "CompanyEvent",
+      "description": "An instance of org.acme.hr@1.0.0.CompanyEvent",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.CompanyEvent",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.CompanyEvent$",
+          "description": "The class identifier for this type"
+        }
+      },
+      "required": [
+        "$class"
+      ]
+    },
+    "org.acme.hr@1.0.0.Onboarded": {
+      "title": "Onboarded",
+      "description": "An instance of org.acme.hr@1.0.0.Onboarded",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.Onboarded",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Onboarded$",
+          "description": "The class identifier for this type"
+        },
+        "employee": {
+          "type": "string",
+          "description": "The identifier of an instance of org.acme.hr@1.0.0.Employee"
+        }
+      },
+      "required": [
+        "$class",
+        "employee"
+      ]
+    },
+    "org.acme.hr@1.0.0.ChangeOfAddress": {
+      "title": "ChangeOfAddress",
+      "description": "An instance of org.acme.hr@1.0.0.ChangeOfAddress",
+      "type": "object",
+      "properties": {
+        "$class": {
+          "type": "string",
+          "default": "org.acme.hr@1.0.0.ChangeOfAddress",
+          "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.ChangeOfAddress$",
+          "description": "The class identifier for this type"
+        },
+        "Person": {
+          "type": "string",
+          "description": "The identifier of an instance of org.acme.hr@1.0.0.Person"
+        },
+        "newAddress": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        }
+      },
+      "required": [
+        "$class",
+        "Person",
+        "newAddress"
+      ]
+    }
+  }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 4`] = `
+{
+  "key": "concerto@1.0.0.xsd",
+  "value": "<?xml version="1.0"?>
+<xs:schema xmlns:concerto="concerto" targetNamespace="concerto" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+>
+<xs:complexType name="Concept">
+   <xs:sequence>
+   </xs:sequence>
+</xs:complexType>
+<xs:element name="Concept" type="concerto:Concept"/>
+<xs:complexType name="Asset">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_identifier" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Asset" type="concerto:Asset"/>
+<xs:complexType name="Participant">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_identifier" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Participant" type="concerto:Participant"/>
+<xs:complexType name="Transaction">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_timestamp" type="xs:dateTime"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Transaction" type="concerto:Transaction"/>
+<xs:complexType name="Event">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_timestamp" type="xs:dateTime"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Event" type="concerto:Event"/>
+</xs:schema>
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 5`] = `
+{
+  "key": "concerto.xsd",
+  "value": "<?xml version="1.0"?>
+<xs:schema xmlns:concerto="concerto" targetNamespace="concerto" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+>
+<xs:complexType name="Concept">
+   <xs:sequence>
+   </xs:sequence>
+</xs:complexType>
+<xs:element name="Concept" type="concerto:Concept"/>
+<xs:complexType name="Asset">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_identifier" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Asset" type="concerto:Asset"/>
+<xs:complexType name="Participant">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="_identifier" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Participant" type="concerto:Participant"/>
+<xs:complexType name="Transaction">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Transaction" type="concerto:Transaction"/>
+<xs:complexType name="Event">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Event" type="concerto:Event"/>
+</xs:schema>
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 6`] = `
+{
+  "key": "org.acme.hr@1.0.0.xsd",
+  "value": "<?xml version="1.0"?>
+<xs:schema xmlns:org.acme.hr="org.acme.hr" targetNamespace="org.acme.hr" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+xmlns:concerto="concerto"
+>
+<xs:import namespace="concerto" schemaLocation="concerto@1.0.0.xsd"/>
+<xs:simpleType name="State">
+   <xs:restriction base="xs:string">
+      <xs:enumeration value="MA"/>
+      <xs:enumeration value="NY"/>
+      <xs:enumeration value="CO"/>
+      <xs:enumeration value="WA"/>
+      <xs:enumeration value="IL"/>
+      <xs:enumeration value="CA"/>
+   </xs:restriction>
+</xs:simpleType>
+<xs:element name="State" type="org.acme.hr:State"/>
+<xs:complexType name="Address">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="street" type="xs:string"/>
+      <xs:element name="city" type="xs:string"/>
+      <xs:element name="state" type="org.acme.hr:State"/>
+      <xs:element name="zipCode" type="xs:string"/>
+      <xs:element name="country" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Address" type="org.acme.hr:Address"/>
+<xs:complexType name="Company">
+   <xs:complexContent>
+   <xs:extension base="concerto:Concept">
+   <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="headquarters" type="org.acme.hr:Address"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Company" type="org.acme.hr:Company"/>
+<xs:simpleType name="Department">
+   <xs:restriction base="xs:string">
+      <xs:enumeration value="Sales"/>
+      <xs:enumeration value="Marketing"/>
+      <xs:enumeration value="Finance"/>
+      <xs:enumeration value="HR"/>
+      <xs:enumeration value="Engineering"/>
+      <xs:enumeration value="Design"/>
+   </xs:restriction>
+</xs:simpleType>
+<xs:element name="Department" type="org.acme.hr:Department"/>
+<xs:complexType name="Equipment">
+   <xs:complexContent>
+   <xs:extension base="concerto:Asset">
+   <xs:sequence>
+      <xs:element name="serialNumber" type="xs:string"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Equipment" type="org.acme.hr:Equipment"/>
+<xs:simpleType name="LaptopMake">
+   <xs:restriction base="xs:string">
+      <xs:enumeration value="Apple"/>
+      <xs:enumeration value="Microsoft"/>
+   </xs:restriction>
+</xs:simpleType>
+<xs:element name="LaptopMake" type="org.acme.hr:LaptopMake"/>
+<xs:complexType name="Laptop">
+   <xs:complexContent>
+   <xs:extension base="org.acme.hr:Equipment">
+   <xs:sequence>
+      <xs:element name="make" type="org.acme.hr:LaptopMake"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Laptop" type="org.acme.hr:Laptop"/>
+<xs:complexType name="Person">
+   <xs:complexContent>
+   <xs:extension base="concerto:Participant">
+   <xs:sequence>
+      <xs:element name="email" type="xs:string"/>
+      <xs:element name="firstName" type="xs:string"/>
+      <xs:element name="lastName" type="xs:string"/>
+      <xs:element name="middleNames" type="xs:string"/>
+      <xs:element name="homeAddress" type="org.acme.hr:Address"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Person" type="org.acme.hr:Person"/>
+<xs:complexType name="Employee">
+   <xs:complexContent>
+   <xs:extension base="org.acme.hr:Person">
+   <xs:sequence>
+      <xs:element name="employeeId" type="xs:string"/>
+      <xs:element name="department" type="org.acme.hr:Department"/>
+      <xs:element name="officeAddress" type="org.acme.hr:Address"/>
+      <xs:element name="companyAssets" type="org.acme.hr:Equipment" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="manager" type="org.acme.hr:Manager"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Employee" type="org.acme.hr:Employee"/>
+<xs:complexType name="Contractor">
+   <xs:complexContent>
+   <xs:extension base="org.acme.hr:Person">
+   <xs:sequence>
+      <xs:element name="company" type="org.acme.hr:Company"/>
+      <xs:element name="manager" type="org.acme.hr:Manager"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Contractor" type="org.acme.hr:Contractor"/>
+<xs:complexType name="Manager">
+   <xs:complexContent>
+   <xs:extension base="org.acme.hr:Employee">
+   <xs:sequence>
+      <xs:element name="reports" type="org.acme.hr:Person" minOccurs="0" maxOccurs="unbounded"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Manager" type="org.acme.hr:Manager"/>
+<xs:complexType name="CompanyEvent">
+   <xs:complexContent>
+   <xs:extension base="concerto:Event">
+   <xs:sequence>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="CompanyEvent" type="org.acme.hr:CompanyEvent"/>
+<xs:complexType name="Onboarded">
+   <xs:complexContent>
+   <xs:extension base="org.acme.hr:CompanyEvent">
+   <xs:sequence>
+      <xs:element name="employee" type="org.acme.hr:Employee"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="Onboarded" type="org.acme.hr:Onboarded"/>
+<xs:complexType name="ChangeOfAddress">
+   <xs:complexContent>
+   <xs:extension base="concerto:Transaction">
+   <xs:sequence>
+      <xs:element name="Person" type="org.acme.hr:Person"/>
+      <xs:element name="newAddress" type="org.acme.hr:Address"/>
+   </xs:sequence>
+   </xs:extension>
+   </xs:complexContent>
+</xs:complexType>
+<xs:element name="ChangeOfAddress" type="org.acme.hr:ChangeOfAddress"/>
+</xs:schema>
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 7`] = `
+{
+  "key": "model.puml",
+  "value": "@startuml
+title
+Model
+endtitle
+class org.acme.hr.State << (E,grey) >> {
+   + MA
+   + NY
+   + CO
+   + WA
+   + IL
+   + CA
+}
+org.acme.hr.State --|> concerto.Concept
+class org.acme.hr.Address {
+   + String street
+   + String city
+   + State state
+   + String zipCode
+   + String country
+}
+org.acme.hr.Address --|> concerto.Concept
+class org.acme.hr.Company {
+   + String name
+   + Address headquarters
+}
+org.acme.hr.Company --|> concerto.Concept
+class org.acme.hr.Department << (E,grey) >> {
+   + Sales
+   + Marketing
+   + Finance
+   + HR
+   + Engineering
+   + Design
+}
+org.acme.hr.Department --|> concerto.Concept
+class org.acme.hr.Equipment << (A,green) >> {
+   + String serialNumber
+}
+org.acme.hr.Equipment --|> concerto.Asset
+class org.acme.hr.LaptopMake << (E,grey) >> {
+   + Apple
+   + Microsoft
+}
+org.acme.hr.LaptopMake --|> concerto.Concept
+class org.acme.hr.Laptop << (A,green) >> {
+   + LaptopMake make
+}
+org.acme.hr.Laptop --|> org.acme.hr.Equipment
+class org.acme.hr.Person << (P,lightblue) >> {
+   + String email
+   + String firstName
+   + String lastName
+   + String middleNames
+   + Address homeAddress
+}
+org.acme.hr.Person --|> concerto.Participant
+class org.acme.hr.Employee << (P,lightblue) >> {
+   + String employeeId
+   + Department department
+   + Address officeAddress
+   + Equipment[] companyAssets
+   + Manager manager
+}
+org.acme.hr.Employee --|> org.acme.hr.Person
+class org.acme.hr.Contractor << (P,lightblue) >> {
+   + Company company
+   + Manager manager
+}
+org.acme.hr.Contractor --|> org.acme.hr.Person
+class org.acme.hr.Manager << (P,lightblue) >> {
+   + Person[] reports
+}
+org.acme.hr.Manager --|> org.acme.hr.Employee
+class org.acme.hr.CompanyEvent {
+}
+org.acme.hr.CompanyEvent --|> concerto.Event
+class org.acme.hr.Onboarded {
+   + Employee employee
+}
+org.acme.hr.Onboarded --|> org.acme.hr.CompanyEvent
+class org.acme.hr.ChangeOfAddress << (T,yellow) >> {
+   + Person Person
+   + Address newAddress
+}
+org.acme.hr.ChangeOfAddress --|> concerto.Transaction
+@enduml
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 8`] = `
+{
+  "key": "concerto@1.0.0.ts",
+  "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
+// Generated code for namespace: concerto@1.0.0
+
+// imports
+
+// Warning: Beware of circular dependencies when modifying these imports
+import type {
+	IState,
+	IAddress,
+	ICompany,
+	IDepartment,
+	ILaptopMake
+} from './org.acme.hr@1.0.0';
+
+// Warning: Beware of circular dependencies when modifying these imports
+import type {
+	IEquipment
+} from './org.acme.hr@1.0.0';
+
+// Warning: Beware of circular dependencies when modifying these imports
+import type {
+	IPerson
+} from './org.acme.hr@1.0.0';
+
+// Warning: Beware of circular dependencies when modifying these imports
+import type {
+	IChangeOfAddress
+} from './org.acme.hr@1.0.0';
+
+// Warning: Beware of circular dependencies when modifying these imports
+import type {
+	ICompanyEvent
+} from './org.acme.hr@1.0.0';
+
+// interfaces
+export interface IConcept {
+   $class: string;
+}
+
+export type ConceptUnion = IState | 
+IAddress | 
+ICompany | 
+IDepartment | 
+ILaptopMake;
+
+export interface IAsset extends IConcept {
+   $identifier: string;
+}
+
+export type AssetUnion = IEquipment;
+
+export interface IParticipant extends IConcept {
+   $identifier: string;
+}
+
+export type ParticipantUnion = IPerson;
+
+export interface ITransaction extends IConcept {
+   $timestamp: Date;
+}
+
+export type TransactionUnion = IChangeOfAddress;
+
+export interface IEvent extends IConcept {
+   $timestamp: Date;
+}
+
+export type EventUnion = ICompanyEvent;
+
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 9`] = `
+{
+  "key": "concerto.ts",
+  "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
+// Generated code for namespace: concerto
+
+// imports
+
+// interfaces
+export interface IConcept {
+   $class: string;
+}
+
+export interface IAsset extends IConcept {
+   $identifier: string;
+}
+
+export interface IParticipant extends IConcept {
+   $identifier: string;
+}
+
+export interface ITransaction extends IConcept {
+}
+
+export interface IEvent extends IConcept {
+}
+
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 10`] = `
+{
+  "key": "org.acme.hr@1.0.0.ts",
+  "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
+// Generated code for namespace: org.acme.hr@1.0.0
+
+// imports
+
+// Warning: Beware of circular dependencies when modifying these imports
+
+// Warning: Beware of circular dependencies when modifying these imports
+
+// Warning: Beware of circular dependencies when modifying these imports
+
+// Warning: Beware of circular dependencies when modifying these imports
+import {IConcept,IAsset,IParticipant,IEvent,ITransaction} from './concerto@1.0.0';
+
+// interfaces
+export enum State {
+   MA = 'MA',
+   NY = 'NY',
+   CO = 'CO',
+   WA = 'WA',
+   IL = 'IL',
+   CA = 'CA',
+}
+
+export interface IAddress extends IConcept {
+   street: string;
+   city: string;
+   state?: State;
+   zipCode: string;
+   country: string;
+}
+
+export interface ICompany extends IConcept {
+   name: string;
+   headquarters: IAddress;
+}
+
+export enum Department {
+   Sales = 'Sales',
+   Marketing = 'Marketing',
+   Finance = 'Finance',
+   HR = 'HR',
+   Engineering = 'Engineering',
+   Design = 'Design',
+}
+
+export interface IEquipment extends IAsset {
+   serialNumber: string;
+}
+
+export type EquipmentUnion = ILaptop;
+
+export enum LaptopMake {
+   Apple = 'Apple',
+   Microsoft = 'Microsoft',
+}
+
+export interface ILaptop extends IEquipment {
+   make: LaptopMake;
+}
+
+export interface IPerson extends IParticipant {
+   email: string;
+   firstName: string;
+   lastName: string;
+   middleNames?: string;
+   homeAddress: IAddress;
+}
+
+export type PersonUnion = IEmployee | 
+IContractor;
+
+export interface IEmployee extends IPerson {
+   employeeId: string;
+   department: Department;
+   officeAddress: IAddress;
+   companyAssets: IEquipment[];
+   manager?: IManager;
+}
+
+export type EmployeeUnion = IManager;
+
+export interface IContractor extends IPerson {
+   company: ICompany;
+   manager?: IManager;
+}
+
+export interface IManager extends IEmployee {
+   reports?: IPerson[];
+}
+
+export interface ICompanyEvent extends IEvent {
+}
+
+export type CompanyEventUnion = IOnboarded;
+
+export interface IOnboarded extends ICompanyEvent {
+   employee: IEmployee;
+}
+
+export interface IChangeOfAddress extends ITransaction {
+   Person: IPerson;
+   newAddress: IAddress;
+}
+
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 11`] = `
+{
+  "key": "concerto/Concept.java",
+  "value": "// this code is generated and should not be modified
+package concerto;
+
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+public abstract class Concept {
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 12`] = `
+{
+  "key": "concerto/Asset.java",
+  "value": "// this code is generated and should not be modified
+package concerto;
+
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "$identifier")
+public abstract class Asset extends Concept {
+   private String $id;
+            @JsonProperty("$id")
+            public String get$id() {
+                return $id;
+            }
+            @JsonProperty("$id")
+            public void set$id(String i) {
+                $id = i;
+            }
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.get$identifier();
+   }
+
+   private String $identifier;
+   public String get$identifier() {
+      return this.$identifier;
+   }
+   public void set$identifier(String $identifier) {
+      this.$identifier = $identifier;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 13`] = `
+{
+  "key": "concerto/Participant.java",
+  "value": "// this code is generated and should not be modified
+package concerto;
+
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "$identifier")
+public abstract class Participant extends Concept {
+   private String $id;
+            @JsonProperty("$id")
+            public String get$id() {
+                return $id;
+            }
+            @JsonProperty("$id")
+            public void set$id(String i) {
+                $id = i;
+            }
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.get$identifier();
+   }
+
+   private String $identifier;
+   public String get$identifier() {
+      return this.$identifier;
+   }
+   public void set$identifier(String $identifier) {
+      this.$identifier = $identifier;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 14`] = `
+{
+  "key": "concerto/Transaction.java",
+  "value": "// this code is generated and should not be modified
+package concerto;
+
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+public abstract class Transaction extends Concept {
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 15`] = `
+{
+  "key": "concerto/Event.java",
+  "value": "// this code is generated and should not be modified
+package concerto;
+
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+public abstract class Event extends Concept {
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 16`] = `
+{
+  "key": "org/acme/hr/State.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import com.fasterxml.jackson.annotation.*;
+@JsonIgnoreProperties({"$class"})
+public enum State {
+   MA,
+   NY,
+   CO,
+   WA,
+   IL,
+   CA,
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 17`] = `
+{
+  "key": "org/acme/hr/Address.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+public class Address extends Concept {
+   private String street;
+   private String city;
+   private State state;
+   private String zipCode;
+   private String country;
+   public String getStreet() {
+      return this.street;
+   }
+   public String getCity() {
+      return this.city;
+   }
+   public State getState() {
+      return this.state;
+   }
+   public String getZipCode() {
+      return this.zipCode;
+   }
+   public String getCountry() {
+      return this.country;
+   }
+   public void setStreet(String street) {
+      this.street = street;
+   }
+   public void setCity(String city) {
+      this.city = city;
+   }
+   public void setState(State state) {
+      this.state = state;
+   }
+   public void setZipCode(String zipCode) {
+      this.zipCode = zipCode;
+   }
+   public void setCountry(String country) {
+      this.country = country;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 18`] = `
+{
+  "key": "org/acme/hr/Company.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "$class")
+public class Company extends Concept {
+   private String name;
+   private Address headquarters;
+   public String getName() {
+      return this.name;
+   }
+   public Address getHeadquarters() {
+      return this.headquarters;
+   }
+   public void setName(String name) {
+      this.name = name;
+   }
+   public void setHeadquarters(Address headquarters) {
+      this.headquarters = headquarters;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 19`] = `
+{
+  "key": "org/acme/hr/Department.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import com.fasterxml.jackson.annotation.*;
+@JsonIgnoreProperties({"$class"})
+public enum Department {
+   Sales,
+   Marketing,
+   Finance,
+   HR,
+   Engineering,
+   Design,
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 20`] = `
+{
+  "key": "org/acme/hr/Equipment.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "serialNumber")
+public abstract class Equipment extends Asset {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getSerialNumber();
+   }
+
+   private String serialNumber;
+   public String getSerialNumber() {
+      return this.serialNumber;
+   }
+   public void setSerialNumber(String serialNumber) {
+      this.serialNumber = serialNumber;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 21`] = `
+{
+  "key": "org/acme/hr/LaptopMake.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import com.fasterxml.jackson.annotation.*;
+@JsonIgnoreProperties({"$class"})
+public enum LaptopMake {
+   Apple,
+   Microsoft,
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 22`] = `
+{
+  "key": "org/acme/hr/Laptop.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "serialNumber")
+public class Laptop extends Equipment {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getSerialNumber();
+   }
+
+   private LaptopMake make;
+   public LaptopMake getMake() {
+      return this.make;
+   }
+   public void setMake(LaptopMake make) {
+      this.make = make;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 23`] = `
+{
+  "key": "org/acme/hr/Person.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "email")
+public abstract class Person extends Participant {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getEmail();
+   }
+
+   private String email;
+   private String firstName;
+   private String lastName;
+   private String middleNames;
+   private Address homeAddress;
+   public String getEmail() {
+      return this.email;
+   }
+   public String getFirstName() {
+      return this.firstName;
+   }
+   public String getLastName() {
+      return this.lastName;
+   }
+   public String getMiddleNames() {
+      return this.middleNames;
+   }
+   public Address getHomeAddress() {
+      return this.homeAddress;
+   }
+   public void setEmail(String email) {
+      this.email = email;
+   }
+   public void setFirstName(String firstName) {
+      this.firstName = firstName;
+   }
+   public void setLastName(String lastName) {
+      this.lastName = lastName;
+   }
+   public void setMiddleNames(String middleNames) {
+      this.middleNames = middleNames;
+   }
+   public void setHomeAddress(Address homeAddress) {
+      this.homeAddress = homeAddress;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 24`] = `
+{
+  "key": "org/acme/hr/Employee.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "email")
+public class Employee extends Person {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getEmail();
+   }
+
+   private String employeeId;
+   private Department department;
+   private Address officeAddress;
+   private Equipment[] companyAssets;
+   private Manager manager;
+   public String getEmployeeId() {
+      return this.employeeId;
+   }
+   public Department getDepartment() {
+      return this.department;
+   }
+   public Address getOfficeAddress() {
+      return this.officeAddress;
+   }
+   public Equipment[] getCompanyAssets() {
+      return this.companyAssets;
+   }
+   public Manager getManager() {
+      return this.manager;
+   }
+   public void setEmployeeId(String employeeId) {
+      this.employeeId = employeeId;
+   }
+   public void setDepartment(Department department) {
+      this.department = department;
+   }
+   public void setOfficeAddress(Address officeAddress) {
+      this.officeAddress = officeAddress;
+   }
+   public void setCompanyAssets(Equipment[] companyAssets) {
+      this.companyAssets = companyAssets;
+   }
+   public void setManager(Manager manager) {
+      this.manager = manager;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 25`] = `
+{
+  "key": "org/acme/hr/Contractor.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "email")
+public class Contractor extends Person {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getEmail();
+   }
+
+   private Company company;
+   private Manager manager;
+   public Company getCompany() {
+      return this.company;
+   }
+   public Manager getManager() {
+      return this.manager;
+   }
+   public void setCompany(Company company) {
+      this.company = company;
+   }
+   public void setManager(Manager manager) {
+      this.manager = manager;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 26`] = `
+{
+  "key": "org/acme/hr/Manager.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+@JsonIgnoreProperties({"id"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "email")
+public class Manager extends Employee {
+   
+   // the accessor for the identifying field
+   public String getID() {
+      return this.getEmail();
+   }
+
+   private Person[] reports;
+   public Person[] getReports() {
+      return this.reports;
+   }
+   public void setReports(Person[] reports) {
+      this.reports = reports;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 27`] = `
+{
+  "key": "org/acme/hr/CompanyEvent.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+public class CompanyEvent extends Event {
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 28`] = `
+{
+  "key": "org/acme/hr/Onboarded.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+public class Onboarded extends CompanyEvent {
+   private Employee employee;
+   public Employee getEmployee() {
+      return this.employee;
+   }
+   public void setEmployee(Employee employee) {
+      this.employee = employee;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 29`] = `
+{
+  "key": "org/acme/hr/ChangeOfAddress.java",
+  "value": "// this code is generated and should not be modified
+package org.acme.hr;
+
+import concerto.Concept;
+import concerto.Asset;
+import concerto.Transaction;
+import concerto.Participant;
+import concerto.Event;
+import com.fasterxml.jackson.annotation.*;
+
+public class ChangeOfAddress extends Transaction {
+   private Person Person;
+   private Address newAddress;
+   public Person getPerson() {
+      return this.Person;
+   }
+   public Address getNewAddress() {
+      return this.newAddress;
+   }
+   public void setPerson(Person Person) {
+      this.Person = Person;
+   }
+   public void setNewAddress(Address newAddress) {
+      this.newAddress = newAddress;
+   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 30`] = `
+{
+  "key": "model.gql",
+  "value": "scalar DateTime
+# namespace org.acme.hr@1.0.0
+enum State {
+   MA
+   NY
+   CO
+   WA
+   IL
+   CA
+}
+type Address {
+   street: String!
+   city: String!
+   state: State
+   zipCode: String!
+   country: String!
+}
+type Company {
+   name: String!
+   headquarters: Address!
+}
+enum Department {
+   Sales
+   Marketing
+   Finance
+   HR
+   Engineering
+   Design
+}
+type Equipment {
+   serialNumber: String!
+   _identifier: String!
+}
+enum LaptopMake {
+   Apple
+   Microsoft
+}
+type Laptop {
+   make: LaptopMake!
+   serialNumber: String!
+   _identifier: String!
+}
+type Person {
+   email: String!
+   firstName: String!
+   lastName: String!
+   middleNames: String
+   homeAddress: Address!
+   _identifier: String!
+}
+type Employee {
+   employeeId: String!
+   department: Department!
+   officeAddress: Address!
+   companyAssets: [Equipment]!
+   manager: ID # Manager
+   email: String!
+   firstName: String!
+   lastName: String!
+   middleNames: String
+   homeAddress: Address!
+   _identifier: String!
+}
+type Contractor {
+   company: Company!
+   manager: ID # Manager
+   email: String!
+   firstName: String!
+   lastName: String!
+   middleNames: String
+   homeAddress: Address!
+   _identifier: String!
+}
+type Manager {
+   reports: [ID] # Person
+   employeeId: String!
+   department: Department!
+   officeAddress: Address!
+   companyAssets: [Equipment]!
+   manager: ID # Manager
+   email: String!
+   firstName: String!
+   lastName: String!
+   middleNames: String
+   homeAddress: Address!
+   _identifier: String!
+}
+type CompanyEvent {
+   _timestamp: DateTime!
+}
+type Onboarded {
+   employee: ID! # Employee
+   _timestamp: DateTime!
+}
+type ChangeOfAddress {
+   Person: ID! # Person
+   newAddress: Address!
+   _timestamp: DateTime!
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 31`] = `
+{
+  "key": "concerto@1.0.0.cs",
+  "value": "namespace AccordProject.Concerto;
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Concept")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public virtual string _class { get; } = "concerto@1.0.0.Concept";
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Asset")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Asset : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto@1.0.0.Asset";
+   [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
+   public string _identifier { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Participant")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Participant : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto@1.0.0.Participant";
+   [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
+   public string _identifier { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Transaction")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Transaction : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto@1.0.0.Transaction";
+   [System.Text.Json.Serialization.JsonPropertyName("$timestamp")]
+   public System.DateTime _timestamp { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = "1.0.0", Name = "Event")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Event : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto@1.0.0.Event";
+   [System.Text.Json.Serialization.JsonPropertyName("$timestamp")]
+   public System.DateTime _timestamp { get; set; }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 32`] = `
+{
+  "key": "concerto.cs",
+  "value": "namespace AccordProject.Concerto;
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Concept")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public virtual string _class { get; } = "concerto.Concept";
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Asset")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Asset : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto.Asset";
+   [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
+   public string _identifier { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Participant")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Participant : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto.Participant";
+   [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
+   public string _identifier { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Transaction")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Transaction : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto.Transaction";
+}
+[AccordProject.Concerto.Type(Namespace = "concerto", Version = null, Name = "Event")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Event : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "concerto.Event";
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 33`] = `
+{
+  "key": "org.acme.hr@1.0.0.cs",
+  "value": "namespace org.acme.hr;
+using AccordProject.Concerto;
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum State {
+      MA,
+      NY,
+      CO,
+      WA,
+      IL,
+      CA,
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Address")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Address : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Address";
+   public string street { get; set; }
+   public string city { get; set; }
+   public State? state { get; set; }
+   public string zipCode { get; set; }
+   public string country { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Company")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Company : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Company";
+   public string name { get; set; }
+   public Address headquarters { get; set; }
+}
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum Department {
+      Sales,
+      Marketing,
+      Finance,
+      HR,
+      Engineering,
+      Design,
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Equipment")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Equipment : Asset {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Equipment";
+   public string serialNumber { get; set; }
+}
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum LaptopMake {
+      Apple,
+      Microsoft,
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Laptop")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Laptop : Equipment {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Laptop";
+   public LaptopMake make { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Person")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public abstract class Person : Participant {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Person";
+   public string email { get; set; }
+   public string firstName { get; set; }
+   public string lastName { get; set; }
+   public string middleNames { get; set; }
+   public Address homeAddress { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Employee")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Employee : Person {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Employee";
+   public string employeeId { get; set; }
+   public Department department { get; set; }
+   public Address officeAddress { get; set; }
+   public Equipment[] companyAssets { get; set; }
+   public Manager manager { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Contractor")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Contractor : Person {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Contractor";
+   public Company company { get; set; }
+   public Manager manager { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Manager")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Manager : Employee {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Manager";
+   public Person[] reports { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "CompanyEvent")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class CompanyEvent : Event {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.CompanyEvent";
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Onboarded")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class Onboarded : CompanyEvent {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.Onboarded";
+   public Employee employee { get; set; }
+}
+[AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "ChangeOfAddress")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class ChangeOfAddress : Transaction {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme.hr@1.0.0.ChangeOfAddress";
+   public Person Person { get; set; }
+   public Address newAddress { get; set; }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 34`] = `
+{
+  "key": "concerto.csdl",
+  "value": "<?xml version="1.0"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+<edmx:Reference Uri="http://docs.oasis-open.org/odata/odata/v4.0/cs01/vocabularies/Org.OData.Core.V1.xml">
+   <edmx:Include Namespace="Org.OData.Core.V1" Alias="Core" />
+</edmx:Reference>
+<edmx:DataServices>
+   <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="concerto">
+      <ComplexType Name="Concept" Abstract="true" >
+      </ComplexType>
+      <EntityType Name="Asset" Abstract="true" BaseType="concerto.Concept">
+         <Property Name="$identifier" Type="Edm.String"  >
+         </Property>
+      </EntityType>
+      <EntityType Name="Participant" Abstract="true" BaseType="concerto.Concept">
+         <Property Name="$identifier" Type="Edm.String"  >
+         </Property>
+      </EntityType>
+      <ComplexType Name="Transaction" Abstract="true" BaseType="concerto.Concept">
+      </ComplexType>
+      <ComplexType Name="Event" Abstract="true" BaseType="concerto.Concept">
+      </ComplexType>
+   <EntityContainer Name="concertoService">
+   </EntityContainer>
+   </Schema>
+</edmx:DataServices>
+</edmx:Edmx>
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 35`] = `
+{
+  "key": "org.acme.hr.csdl",
+  "value": "<?xml version="1.0"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+<edmx:Reference Uri="http://docs.oasis-open.org/odata/odata/v4.0/cs01/vocabularies/Org.OData.Core.V1.xml">
+   <edmx:Include Namespace="Org.OData.Core.V1" Alias="Core" />
+</edmx:Reference>
+<edmx:Reference Uri="./concerto.csdl">
+   <edmx:Include Namespace="concerto" />
+</edmx:Reference>
+<edmx:DataServices>
+   <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="org.acme.hr">
+      <EnumType Name="State">
+         <Member Name="MA">
+         </Member>
+         <Member Name="NY">
+         </Member>
+         <Member Name="CO">
+         </Member>
+         <Member Name="WA">
+         </Member>
+         <Member Name="IL">
+         </Member>
+         <Member Name="CA">
+         </Member>
+      </EnumType>
+      <ComplexType Name="Address"  BaseType="concerto.Concept">
+         <Property Name="street" Type="Edm.String"  >
+         </Property>
+         <Property Name="city" Type="Edm.String"  >
+         </Property>
+         <Property Name="state" Type="org.acme.hr.State" Nullable="true" >
+         </Property>
+         <Property Name="zipCode" Type="Edm.String"  >
+         </Property>
+         <Property Name="country" Type="Edm.String"  >
+         </Property>
+      </ComplexType>
+      <ComplexType Name="Company"  BaseType="concerto.Concept">
+         <Property Name="name" Type="Edm.String"  >
+         </Property>
+         <Property Name="headquarters" Type="org.acme.hr.Address"  >
+         </Property>
+      </ComplexType>
+      <EnumType Name="Department">
+         <Member Name="Sales">
+         </Member>
+         <Member Name="Marketing">
+         </Member>
+         <Member Name="Finance">
+         </Member>
+         <Member Name="HR">
+         </Member>
+         <Member Name="Engineering">
+         </Member>
+         <Member Name="Design">
+         </Member>
+      </EnumType>
+      <EntityType Name="Equipment" Abstract="true" BaseType="concerto.Asset">
+         <Key><PropertyRef Name="serialNumber"/></Key>
+         <Property Name="serialNumber" Type="Edm.String"  >
+         </Property>
+      </EntityType>
+      <EnumType Name="LaptopMake">
+         <Member Name="Apple">
+         </Member>
+         <Member Name="Microsoft">
+         </Member>
+      </EnumType>
+      <EntityType Name="Laptop"  BaseType="org.acme.hr.Equipment">
+         <Property Name="make" Type="org.acme.hr.LaptopMake"  >
+         </Property>
+      </EntityType>
+      <EntityType Name="Person" Abstract="true" BaseType="concerto.Participant">
+         <Key><PropertyRef Name="email"/></Key>
+         <Property Name="email" Type="Edm.String"  >
+         </Property>
+         <Property Name="firstName" Type="Edm.String"  >
+         </Property>
+         <Property Name="lastName" Type="Edm.String"  >
+         </Property>
+         <Property Name="middleNames" Type="Edm.String" Nullable="true" >
+         </Property>
+         <Property Name="homeAddress" Type="org.acme.hr.Address"  >
+         </Property>
+      </EntityType>
+      <EntityType Name="Employee"  BaseType="org.acme.hr.Person">
+         <Property Name="employeeId" Type="Edm.String"  >
+         </Property>
+         <Property Name="department" Type="org.acme.hr.Department"  >
+         </Property>
+         <Property Name="officeAddress" Type="org.acme.hr.Address"  >
+         </Property>
+         <Property Name="companyAssets" Type="Collection(org.acme.hr.Equipment)"  >
+         </Property>
+         <NavigationProperty Name="manager" Type="org.acme.hr.Manager" Nullable="true">
+         </NavigationProperty>
+      </EntityType>
+      <EntityType Name="Contractor"  BaseType="org.acme.hr.Person">
+         <Property Name="company" Type="org.acme.hr.Company"  >
+         </Property>
+         <NavigationProperty Name="manager" Type="org.acme.hr.Manager" Nullable="true">
+         </NavigationProperty>
+      </EntityType>
+      <EntityType Name="Manager"  BaseType="org.acme.hr.Employee">
+         <NavigationProperty Name="reports" Type="Collection(org.acme.hr.Person)" Nullable="true">
+         </NavigationProperty>
+      </EntityType>
+      <ComplexType Name="CompanyEvent"  BaseType="concerto.Event">
+      </ComplexType>
+      <ComplexType Name="Onboarded"  BaseType="org.acme.hr.CompanyEvent">
+         <NavigationProperty Name="employee" Type="org.acme.hr.Employee" >
+         </NavigationProperty>
+      </ComplexType>
+      <ComplexType Name="ChangeOfAddress"  BaseType="concerto.Transaction">
+         <NavigationProperty Name="Person" Type="org.acme.hr.Person" >
+         </NavigationProperty>
+         <Property Name="newAddress" Type="org.acme.hr.Address"  >
+         </Property>
+      </ComplexType>
+   <EntityContainer Name="org.acme.hrService">
+      <EntitySet Name="Laptop" EntityType="org.acme.hr.Laptop"/>
+      <EntitySet Name="Employee" EntityType="org.acme.hr.Employee"/>
+      <EntitySet Name="Contractor" EntityType="org.acme.hr.Contractor"/>
+      <EntitySet Name="Manager" EntityType="org.acme.hr.Manager"/>
+   </EntityContainer>
+   </Schema>
+</edmx:DataServices>
+</edmx:Edmx>
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 36`] = `
+{
+  "key": "model.mmd",
+  "value": "classDiagram
+class State {
+<< enumeration>>
+   MA
+   NY
+   CO
+   WA
+   IL
+   CA
+}
+
+State --|> Concept
+class Address {
+<< concept>>
+    +String street
+    +String city
+    +State state
+    +String zipCode
+    +String country
+}
+
+Address --|> Concept
+class Company {
+<< concept>>
+    +String name
+    +Address headquarters
+}
+
+Company --|> Concept
+class Department {
+<< enumeration>>
+   Sales
+   Marketing
+   Finance
+   HR
+   Engineering
+   Design
+}
+
+Department --|> Concept
+class Equipment {
+<< asset>>
+    +String serialNumber
+}
+
+Equipment --|> Asset
+class LaptopMake {
+<< enumeration>>
+   Apple
+   Microsoft
+}
+
+LaptopMake --|> Concept
+class Laptop {
+<< asset>>
+    +LaptopMake make
+}
+
+Laptop --|> Equipment
+class Person {
+<< participant>>
+    +String email
+    +String firstName
+    +String lastName
+    +String middleNames
+    +Address homeAddress
+}
+
+Person --|> Participant
+class Employee {
+<< participant>>
+    +String employeeId
+    +Department department
+    +Address officeAddress
+    +Equipment[] companyAssets
+}
+
+Employee "1" o-- "1" Manager : manager
+Employee --|> Person
+class Contractor {
+<< participant>>
+    +Company company
+}
+
+Contractor "1" o-- "1" Manager : manager
+Contractor --|> Person
+class Manager {
+<< participant>>
+}
+
+Manager "1" o-- "*" Person : reports
+Manager --|> Employee
+class CompanyEvent
+<< event>> CompanyEvent
+
+CompanyEvent --|> Event
+class Onboarded {
+<< event>>
+}
+
+Onboarded "1" o-- "1" Employee : employee
+Onboarded --|> CompanyEvent
+class ChangeOfAddress {
+<< transaction>>
+    +Address newAddress
+}
+
+ChangeOfAddress "1" o-- "1" Person : Person
+ChangeOfAddress --|> Transaction
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 37`] = `
+{
+  "key": "models.md",
+  "value": "# Namespace org.acme.hr@1.0.0
+
+## Overview
+- 2 concepts
+- 3 enumerations
+- 2 assets
+- 4 participants
+- 1 transactions
+- 2 events
+- 14 total declarations
+
+## Imports
+- concerto@1.0.0.Concept
+- concerto@1.0.0.Asset
+- concerto@1.0.0.Transaction
+- concerto@1.0.0.Participant
+- concerto@1.0.0.Event
+
+## Diagram
+\`\`\`mermaid
+classDiagram
+class State {
+<< enumeration>>
+   MA
+   NY
+   CO
+   WA
+   IL
+   CA
+}
+
+State --|> Concept
+class Address {
+<< concept>>
+    +String street
+    +String city
+    +State state
+    +String zipCode
+    +String country
+}
+
+Address --|> Concept
+class Company {
+<< concept>>
+    +String name
+    +Address headquarters
+}
+
+Company --|> Concept
+class Department {
+<< enumeration>>
+   Sales
+   Marketing
+   Finance
+   HR
+   Engineering
+   Design
+}
+
+Department --|> Concept
+class Equipment {
+<< asset>>
+    +String serialNumber
+}
+
+Equipment --|> Asset
+class LaptopMake {
+<< enumeration>>
+   Apple
+   Microsoft
+}
+
+LaptopMake --|> Concept
+class Laptop {
+<< asset>>
+    +LaptopMake make
+}
+
+Laptop --|> Equipment
+class Person {
+<< participant>>
+    +String email
+    +String firstName
+    +String lastName
+    +String middleNames
+    +Address homeAddress
+}
+
+Person --|> Participant
+class Employee {
+<< participant>>
+    +String employeeId
+    +Department department
+    +Address officeAddress
+    +Equipment[] companyAssets
+}
+
+Employee "1" o-- "1" Manager : manager
+Employee --|> Person
+class Contractor {
+<< participant>>
+    +Company company
+}
+
+Contractor "1" o-- "1" Manager : manager
+Contractor --|> Person
+class Manager {
+<< participant>>
+}
+
+Manager "1" o-- "*" Person : reports
+Manager --|> Employee
+class CompanyEvent
+<< event>> CompanyEvent
+
+CompanyEvent --|> Event
+class Onboarded {
+<< event>>
+}
+
+Onboarded "1" o-- "1" Employee : employee
+Onboarded --|> CompanyEvent
+class ChangeOfAddress {
+<< transaction>>
+    +Address newAddress
+}
+
+ChangeOfAddress "1" o-- "1" Person : Person
+ChangeOfAddress --|> Transaction
+\`\`\`
+
+",
+}
+`;
