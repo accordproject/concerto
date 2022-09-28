@@ -249,6 +249,11 @@ class CSharpVisitor {
             nullableType = '?';
         }
 
+        let isIdentifier = field.getName() === field.getParent()?.getIdentifierFieldName();
+        if (isIdentifier) {
+            parameters.fileWriter.writeLine(1, '[AccordProject.Concerto.Identifier()]');
+        }
+
         const lines = this.toCSharpProperty(
             'public',
             field.getParent()?.getName(),
