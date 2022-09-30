@@ -17,35 +17,40 @@
 const formats = require('../../lib/codegen/codegen.js').formats;
 const { ModelManager } = require('@accordproject/concerto-core');
 const fs = require('fs');
+const { expect } = require('expect');
 
 const chai = require('chai');
-const { FileWriter } = require('@accordproject/concerto-util');
+const { InMemoryWriter } = require('@accordproject/concerto-util');
 chai.should();
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 
 describe('codegen', function () {
-
     let modelManager = null;
 
-    beforeEach(() => {
+    beforeEach(function() {
         modelManager = new ModelManager();
-        const cto = fs.readFileSync( './test/codegen/fromcto/data/model/hr.cto', 'utf-8');
+        const cto = fs.readFileSync('./test/codegen/fromcto/data/model/hr.cto', 'utf-8');
         modelManager.addCTOModel(cto, 'hr.cto');
     });
 
-    afterEach(() => {
+    afterEach(function() {
     });
 
-    describe('#formats', function() {
-        it('check we can convert all formats to CTO', function() {
-            Object.keys(formats).forEach( format => {
+    describe('#formats', function () {
+        it('check we can convert all formats to CTO', function () {
+            Object.keys(formats).forEach(function(format){
                 const visitor = new formats[format];
                 visitor.should.not.be.null;
+                const writer = new InMemoryWriter();
                 const parameters = {
-                    fileWriter: new FileWriter(`./output/${format}`)
+                    fileWriter: writer
                 };
                 modelManager.accept(visitor, parameters);
+                const files = writer.getFilesInMemory();
+                files.forEach(function(value,key){
+                    expect({value,key}).toMatchSnapshot();
+                });
             });
         });
     });
