@@ -1823,6 +1823,7 @@ public abstract class Concept {
 public abstract class Asset : Concept {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "concerto@1.0.0.Asset";
+   [AccordProject.Concerto.Identifier()]
    [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
    public string _identifier { get; set; }
 }
@@ -1831,6 +1832,7 @@ public abstract class Asset : Concept {
 public abstract class Participant : Concept {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "concerto@1.0.0.Participant";
+   [AccordProject.Concerto.Identifier()]
    [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
    public string _identifier { get; set; }
 }
@@ -1869,6 +1871,7 @@ public abstract class Concept {
 public abstract class Asset : Concept {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "concerto.Asset";
+   [AccordProject.Concerto.Identifier()]
    [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
    public string _identifier { get; set; }
 }
@@ -1877,6 +1880,7 @@ public abstract class Asset : Concept {
 public abstract class Participant : Concept {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "concerto.Participant";
+   [AccordProject.Concerto.Identifier()]
    [System.Text.Json.Serialization.JsonPropertyName("$identifier")]
    public string _identifier { get; set; }
 }
@@ -1943,6 +1947,7 @@ public enum Department {
 public abstract class Equipment : Asset {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "org.acme.hr@1.0.0.Equipment";
+   [AccordProject.Concerto.Identifier()]
    public string serialNumber { get; set; }
 }
 [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
@@ -1962,6 +1967,7 @@ public class Laptop : Equipment {
 public abstract class Person : Participant {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "org.acme.hr@1.0.0.Person";
+   [AccordProject.Concerto.Identifier()]
    public string email { get; set; }
    public string firstName { get; set; }
    public string lastName { get; set; }
