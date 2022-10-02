@@ -1,39 +1,72 @@
-<h1 align="center">
-  <a href="https://www.accordproject.org/projects/concerto">
-    Concerto
-  <a/>
+<h1>
+<a href="https://www.accordproject.org/projects/concerto">
+Concerto
+</a>
 </h1>
 
-<p align="center">
-  <a href="https://github.com/accordproject/concerto/workflows/build/badge.svg"><img src="https://github.com/accordproject/concerto/workflows/build/badge.svg" alt="Build Status"></a>
-  <a href="https://coveralls.io/github/accordproject/concerto?branch=master"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/accordproject/concerto?color=bright-green" alt="GitHub license"></a>
-  <a href="https://www.npmjs.com/package/@accordproject/concerto-cli"><img src="https://img.shields.io/npm/dm/@accordproject/concerto-cli" alt="downloads"></a>
-  <a href="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli"><img src="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli.svg" alt="npm version"></a>
-  <a href="https://discord.gg/Zm99SKhhtA">
-    <img src="https://img.shields.io/badge/Accord%20Project-Join%20Discord-blue" alt="Join the Accord Project Discord"/>
-  </a>
-</p>
+<a href="https://github.com/accordproject/concerto/workflows/build/badge.svg"><img src="https://github.com/accordproject/concerto/workflows/build/badge.svg" alt="Build Status"></a>
+<a href="https://coveralls.io/github/accordproject/concerto?branch=master"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
+<a href="./LICENSE"><img src="https://img.shields.io/github/license/accordproject/concerto?color=bright-green" alt="GitHub license"></a>
+<a href="https://www.npmjs.com/package/@accordproject/concerto-cli"><img src="https://img.shields.io/npm/dm/@accordproject/concerto-cli" alt="downloads"></a>
+<a href="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli"><img src="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli.svg" alt="npm version"></a>
+<a href="https://discord.gg/Zm99SKhhtA">
+<img src="https://img.shields.io/badge/Accord%20Project-Join%20Discord-blue" alt="Join the Accord Project Discord"/>
+</a>
 
-## Introduction
+A lightweight schema language and runtime for business concepts.
 
-Concerto is a lightweight 100% JavaScript schema language and runtime. It works in both a Node.js process and in your browser.
+```cs
+concept Person idenitified by name  {
+  o String name
+  o Address address optional
+  @description("Height (cm)")
+  o Double height range=[0,]
+  o DateTime dateOfBirth 
+}
+```
 
-This is why you should care: https://www.accordproject.org/news/strongly-typed-data-for-javascript-and-beyond/
+🏢 Concerto gives you “just enough” expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
 
-Things you can do using Concerto:
-- Define an object-oriented model using a domain-specific language that is much easier to read and write than JSON/XML Schema, XMI or equivalents. The metamodel gives you "just enough" expressivity to capture real-world business models, while remaining easy to map to most runtime environments.
-- Optionally edit your models using a powerful [VS Code add-on](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension) with syntax highlighting and validation
-- Create runtime instances of your model
-- Serialize your instances to JSON
-- Deserialize (and optionally validate) instances from JSON
-- Instances are JS objects so they are easy to pass around your application
-- Introspect the model using a powerful set of APIs
-- Convert the model to other formats: JSON Schema, XML Schema, Java, Go, Typescript, Loopback, PlantUML using [concerto-tools](https://github.com/accordproject/concerto/tree/master/packages/concerto-tools).
-- Import models from URLs
-- Publish your reusable models to any website, including the Accord Project Open Source model repository, hosted at: https://models.accordproject.org
+⛳ An object-oriented language that is much easier to read and write than JSON/XML Schema, XMI or equivalents.
 
-## Structure of the Code Repository
+📄 Serialize your instances to JSON
+
+🍪 Deserialize (and validate) instances from JSON
+
+🔎 Introspect the model using a [powerful set of APIs](https://docs.accordproject.org/docs/model-api.html)
+
+🎛 Convert the model to other formats:
+- JSON Schema
+- XML Schema
+- OData CDSL
+- GraphQL Schema
+- Java Classes
+- Go Types
+- C# Classes
+- TypeScript Classes
+- PlantUML Diagrams
+- Mermaid UML Diagrams
+
+🕸 Publish your reusable models to any website, including the Accord Project [model repository](https://models.accordproject.org)
+
+## Getting Started
+
+- Install the [Command Line Tool](https://docs.accordproject.org/docs/ref-concerto-cli.html)
+
+```console
+$ npm i -g @accordproject/concerto-cli
+$ concerto compare --old model.cto --new model-with-changes.cto 
+[required-field-added]: The required field "weight" was added to the concept "Person" (major) 
+```
+
+- Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
+
+![VSCode Editor](https://accordproject.org/wp-content/uploads/2022/10/af57b31d0eb66154bce4e0ffec780027.png)
+
+- Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
+- Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
+
+## Structure of the Code
 
 Top level repository (concerto), with sub packages. Each sub-package is published as an independent npm module using `lerna`:
 * [concerto-cli](https://github.com/accordproject/concerto/tree/master/packages/concerto-cli) : command-line interface for Concerto
@@ -42,21 +75,10 @@ Top level repository (concerto), with sub packages. Each sub-package is publishe
 * [concerto-util](https://github.com/accordproject/concerto/tree/master/packages/concerto-util) : contains utility functions used in other parts of the code and fundamentally independent from Concerto as a modeling language
 * [concerto-metamodel](https://github.com/accordproject/concerto/tree/master/packages/concerto-metamodel) : contains utility functions for accessing and manipulating the new Concerto metamodel
 * [concerto-cto](https://github.com/accordproject/concerto/tree/master/packages/concerto-cto) : contains the parser for the .cto syntax for Concerto. The parser now outputs a proper Concerto object, instance of the metamodel rather than a custom JSON object.
-* [concerto-vocabulary](https://github.com/accordproject/concerto/tree/master/packages/concerto-vocabulary) : contains new functionality to handle model vocabularies
-
-# Installation
-
-To install the command-line interface:
-
-```
-npm install -g @accordproject/concerto-cli
-```
-
-You may also set a custom folder to keep the log files by setting the following environment variable:
-
-```
-export CONCERTO_LOG_FOLDER_PATH="/tmp"
-```
+* [concerto-vocabulary](https://github.com/accordproject/concerto/tree/master/packages/concerto-vocabulary) : functionality to handle model vocabularies and localization
+* [concerto-analysis](https://github.com/accordproject/concerto/tree/master/packages/concerto-analysis) : tools for comparing model files
+* [concerto-types](https://github.com/accordproject/concerto/tree/master/packages/concerto-types) : TypeScript type definitions for Concerto
+* [concerto-dotnet](https://github.com/accordproject/concerto-dotnet) : .NET type definitions for Concerto, and serialization tools
 
 ---
 
