@@ -16,7 +16,7 @@ Concerto
 A lightweight schema language and runtime for business concepts.
 
 ```cs
-concept Person idenitified by name  {
+concept Person identified by name  {
   o String name
   o Address address optional
   @description("Height (cm)")
