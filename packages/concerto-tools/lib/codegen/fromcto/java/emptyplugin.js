@@ -16,6 +16,13 @@
 
 const AbstractPlugin = require('../../abstractplugin');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ClassDeclaration, EnumDeclaration } = require('@accordproject/concerto-core');
+}
+
 /**
  * Simple plug-in class for code-generation. This lists functions that can be passed to extend the default code-generation behavior.
  */
