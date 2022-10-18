@@ -32,3 +32,7 @@ declare class AbstractPlugin {
      */
     addEnumAnnotations(enumDecl: EnumDeclaration, parameters: any, options: any): void;
 }
+import ClassDeclaration_1 = require("@accordproject/concerto-core/types/lib/introspect/classdeclaration");
+import ClassDeclaration = ClassDeclaration_1.ClassDeclaration;
+import EnumDeclaration_1 = require("@accordproject/concerto-core/types/lib/introspect/enumdeclaration");
+import EnumDeclaration = EnumDeclaration_1.EnumDeclaration;
