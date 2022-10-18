@@ -29,3 +29,5 @@ declare class EmptyPlugin extends AbstractPlugin {
     addEnumAnnotations(enumDecl: EnumDeclaration, parameters: any): void;
 }
 import AbstractPlugin = require("../../abstractplugin");
+import { ClassDeclaration } from "@accordproject/concerto-core";
+import { EnumDeclaration } from "@accordproject/concerto-core";
