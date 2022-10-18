@@ -18,8 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
-    const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
+    const { ClassDeclaration, EnumDeclaration } = require('@accordproject/concerto-core');
 }
 /* eslint-enable no-unused-vars */
 
