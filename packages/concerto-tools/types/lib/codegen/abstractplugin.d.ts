@@ -32,3 +32,5 @@ declare class AbstractPlugin {
      */
     addEnumAnnotations(enumDecl: EnumDeclaration, parameters: any, options: any): void;
 }
+import { ClassDeclaration } from "@accordproject/concerto-core";
+import { EnumDeclaration } from "@accordproject/concerto-core";

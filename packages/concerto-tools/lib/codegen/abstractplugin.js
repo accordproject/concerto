@@ -14,6 +14,14 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ClassDeclaration, EnumDeclaration } = require('@accordproject/concerto-core');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Simple plug-in class for code-generation. This lists functions that can be passed to extend the default code-generation behavior.
  */
