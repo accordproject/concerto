@@ -2445,3 +2445,110 @@ ChangeOfAddress --|> Transaction
 ",
 }
 `;
+
+exports[`codegen #formats check we can convert all formats to CTO 38`] = `
+{
+  "key": "org.acme.hr.v1_0_0.proto",
+  "value": "syntax = "proto3";
+
+package org.acme.hr.v1_0_0;
+
+import "google/protobuf/timestamp.proto";
+
+enum State {
+  State_MA = 0;
+  State_NY = 1;
+  State_CO = 2;
+  State_WA = 3;
+  State_IL = 4;
+  State_CA = 5;
+}
+
+message Address {
+  string street = 1;
+  string city = 2;
+  optional State state = 3;
+  string zipCode = 4;
+  string country = 5;
+}
+
+message Company {
+  string name = 1;
+  Address headquarters = 2;
+}
+
+enum Department {
+  Department_Sales = 0;
+  Department_Marketing = 1;
+  Department_Finance = 2;
+  Department_HR = 3;
+  Department_Engineering = 4;
+  Department_Design = 5;
+}
+
+enum LaptopMake {
+  LaptopMake_Apple = 0;
+  LaptopMake_Microsoft = 1;
+}
+
+message Laptop {
+  LaptopMake make = 1;
+  string serialNumber = 2;
+  string _identifier = 3;
+}
+
+message Employee {
+  string employeeId = 1;
+  Department department = 2;
+  Address officeAddress = 3;
+  repeated Equipment companyAssets = 4;
+  optional string manager = 5;
+  string email = 6;
+  string firstName = 7;
+  string lastName = 8;
+  optional string middleNames = 9;
+  Address homeAddress = 10;
+  string _identifier = 11;
+}
+
+message Contractor {
+  Company company = 1;
+  optional string manager = 2;
+  string email = 3;
+  string firstName = 4;
+  string lastName = 5;
+  optional string middleNames = 6;
+  Address homeAddress = 7;
+  string _identifier = 8;
+}
+
+message Manager {
+  repeated string reports = 1;
+  string employeeId = 2;
+  Department department = 3;
+  Address officeAddress = 4;
+  repeated Equipment companyAssets = 5;
+  optional string manager = 6;
+  string email = 7;
+  string firstName = 8;
+  string lastName = 9;
+  optional string middleNames = 10;
+  Address homeAddress = 11;
+  string _identifier = 12;
+}
+
+message CompanyEvent {
+}
+
+message Onboarded {
+  string employee = 1;
+}
+
+message ChangeOfAddress {
+  string Person = 1;
+  Address newAddress = 2;
+}
+
+",
+}
+`;

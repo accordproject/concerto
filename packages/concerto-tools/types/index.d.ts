@@ -11,6 +11,7 @@ export var CodeGen: {
     ODataVisitor: typeof import("./lib/codegen/fromcto/odata/odatavisitor");
     MermaidVisitor: typeof import("./lib/codegen/fromcto/mermaid/mermaidvisitor");
     MarkdownVisitor: typeof import("./lib/codegen/fromcto/markdown/markdownvisitor");
+    ProtobufVisitor: typeof import("./lib/codegen/fromcto/protobuf/protobufvisitor");
     formats: {
         golang: typeof import("./lib/codegen/fromcto/golang/golangvisitor");
         jsonschema: typeof import("./lib/codegen/fromcto/jsonschema/jsonschemavisitor");
@@ -23,6 +24,7 @@ export var CodeGen: {
         odata: typeof import("./lib/codegen/fromcto/odata/odatavisitor");
         mermaid: typeof import("./lib/codegen/fromcto/mermaid/mermaidvisitor");
         markdown: typeof import("./lib/codegen/fromcto/markdown/markdownvisitor");
+        protobuf: typeof import("./lib/codegen/fromcto/protobuf/protobufvisitor");
     };
 };
 export var version: any;
