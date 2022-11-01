@@ -259,8 +259,7 @@ class ProtobufVisitor {
                                 // Or if property is an $identifier, but there already is another identifier defined.
                                 (
                                     property.getName() === '$identifier' &&
-                                    classDeclaration.ast.identified?.name &&
-                                    property.getName() !== classDeclaration.ast.identified?.name
+                                    typeof classDeclaration.getIdentifierFieldName() === 'string'
                                 )
                             ) {
                                 // Then don't include this property.

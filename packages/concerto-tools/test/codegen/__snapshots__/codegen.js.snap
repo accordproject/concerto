@@ -2494,7 +2494,6 @@ enum LaptopMake {
 message Laptop {
   LaptopMake make = 1;
   string serialNumber = 2;
-  string _identifier = 3;
 }
 
 message Employee {
@@ -2508,7 +2507,6 @@ message Employee {
   string lastName = 8;
   optional string middleNames = 9;
   Address homeAddress = 10;
-  string _identifier = 11;
 }
 
 message Contractor {
@@ -2519,7 +2517,6 @@ message Contractor {
   string lastName = 5;
   optional string middleNames = 6;
   Address homeAddress = 7;
-  string _identifier = 8;
 }
 
 message Manager {
@@ -2534,7 +2531,6 @@ message Manager {
   string lastName = 9;
   optional string middleNames = 10;
   Address homeAddress = 11;
-  string _identifier = 12;
 }
 
 message CompanyEvent {
