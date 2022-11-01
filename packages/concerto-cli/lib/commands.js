@@ -465,9 +465,18 @@ class Commands {
         const [namespace, currentVersion] = currentNamespace.split('@');
         const newVersion = Commands.calculateNewVersion(release, currentVersion, prerelease);
         const newNamespace = [namespace, newVersion].join('@');
-        const newData = data.replace(/(namespace\s+)(\S+)/, (match, keyword) => {
+        const regex = new RegExp(`^(\\s*namespace\\s+)${currentNamespace}`, 'gm');
+        const newData = data.replace(regex, (match, keyword) => {
             return `${keyword}${newNamespace}`;
         });
+        // Sanity check that the replace resulted in a valid CTO model file, and that the namespace
+        // change actually took effect. I can't think of a valid test case for this code path, but
+        // it will hopefully avoid any silent errors in the future.
+        const newMetamodel = Parser.parse(newData);
+        /* istanbul ignore next */
+        if (newMetamodel.namespace !== newNamespace) {
+            throw new Error(`failed to update namespace from "${currentNamespace}" to "${newNamespace}"`);
+        }
         return {
             cto: true,        // true === is CTO model file, false === is JSON meta model file
             modelFile,        // the model file path
