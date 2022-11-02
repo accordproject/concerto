@@ -29,12 +29,35 @@ declare class ProtobufVisitor {
      */
     public concertoToProto3PrimitiveType(field: any): any;
     /**
+     * Transform a Concerto class or enum type into a Proto3 message or enum one.
+     * @param {Object} field - the Concerto class or enum type
+     * @return {Object} the Proto3 message or enum type
+     * @public
+     */
+    public concertoToProto3MessageOrEnumType(field: any): any;
+    /**
      * Transform Concerto class imports to Proto3 import line strings.
      * @param {Object[]} imports - the imports of a Concerto class
      * @return {string[]} an array of import line strings
      * @public
      */
     public createImportLineStrings(imports: any[]): string[];
+    /**
+     * Get the names of the children of a class.
+     * @param {string} className - the name of the class
+     * @param {Object[]} declarations - the declarations in scope
+     * @return {string[]} an array of the names of the children of the classes
+     * @public
+     */
+    public getChildrenOfClass(className: string, declarations: any[]): string[];
+    /**
+     * Check if a class has children.
+     * @param {string} className - the name of the class
+     * @param {Object[]} declarations - the declarations in scope
+     * @return {boolean} whether or not the class has children
+     * @public
+     */
+    public doesClassHaveChildren(className: string, declarations: any[]): boolean;
     /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited
@@ -100,7 +123,6 @@ declare class ProtobufVisitor {
      * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     private visitField;
@@ -115,7 +137,6 @@ declare class ProtobufVisitor {
      * Visitor design pattern
      * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     private visitEnumValueDeclaration;
@@ -123,7 +144,6 @@ declare class ProtobufVisitor {
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     private visitRelationshipDeclaration;

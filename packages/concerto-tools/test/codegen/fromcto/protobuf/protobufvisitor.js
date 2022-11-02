@@ -134,6 +134,7 @@ describe('ProtobufVisitor', function () {
             let mockAssetDeclaration = sinon.createStubInstance(AssetDeclaration);
             mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getName.returns('Person');
+            mockAssetDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitAssetDeclaration(mockAssetDeclaration, param);
 
@@ -150,6 +151,7 @@ describe('ProtobufVisitor', function () {
             mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getName.returns('Person');
             mockAssetDeclaration.getSuperType.returns('org.acme.Human');
+            mockAssetDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitAssetDeclaration(mockAssetDeclaration, param);
 
@@ -183,8 +185,9 @@ describe('ProtobufVisitor', function () {
 
             let mockTransDeclaration = sinon.createStubInstance(TransactionDeclaration);
             mockTransDeclaration.isTransaction.returns(true);
-            // mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
+            mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockTransDeclaration.getName.returns('Person');
+            mockTransDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitTransactionDeclaration(mockTransDeclaration, param);
 
@@ -201,6 +204,7 @@ describe('ProtobufVisitor', function () {
             mockTransDeclaration.isTransaction.returns(true);
             mockTransDeclaration.getName.returns('Person');
             mockTransDeclaration.getSuperType.returns('org.acme.Human');
+            mockTransDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitTransactionDeclaration(mockTransDeclaration, param);
 
@@ -218,6 +222,7 @@ describe('ProtobufVisitor', function () {
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
+            mockClassDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
@@ -234,6 +239,7 @@ describe('ProtobufVisitor', function () {
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Person');
             mockClassDeclaration.getSuperType.returns('org.acme.Human');
+            mockClassDeclaration.modelFile = { declarations: [] };
 
             protobufVisitor.visitClassDeclaration(mockClassDeclaration, param);
 
@@ -254,9 +260,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('String');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'string', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  string Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field coming from a Concerto Double', () => {
@@ -270,9 +277,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('Double');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'double', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  double Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field coming from a Concerto Integer', () => {
@@ -286,9 +294,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('Integer');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'sint64', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  sint64 Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field coming from a Concerto Long', () => {
@@ -302,9 +311,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('Long');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'sint64', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  sint64 Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field coming from a Concerto DateTime', () => {
@@ -318,9 +328,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('DateTime');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'google.protobuf.Timestamp', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  google.protobuf.Timestamp Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field coming from a Concerto Boolean', () => {
@@ -334,9 +345,10 @@ describe('ProtobufVisitor', function () {
             mockField.getType.returns('Boolean');
             mockField.getName.returns('Bob');
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: null, type: 'bool', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  bool Bob = 0;']);
         });
 
         it('should return an object representing a Proto3 field that is an array', () => {
@@ -351,9 +363,10 @@ describe('ProtobufVisitor', function () {
             mockField.getName.returns('Bob');
             mockField.isArray.returns(true);
 
-            protobufVisitor.visitField(mockField, param).should.eql(
-                { preposition: 'repeated', type: 'string', fieldName: 'Bob' }
-            );
+            protobufVisitor.visitField(mockField, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(1);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  repeated string Bob = 0;']);
         });
     });
 });

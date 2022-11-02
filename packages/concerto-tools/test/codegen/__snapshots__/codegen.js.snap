@@ -2486,6 +2486,12 @@ enum Department {
   Department_Design = 5;
 }
 
+message _Children_of_class_Equipment {
+  oneof _class_oneof_Equipment {
+    Laptop _child_of_class_Equipment_Laptop = 1;
+  }
+}
+
 enum LaptopMake {
   LaptopMake_Apple = 0;
   LaptopMake_Microsoft = 1;
@@ -2496,17 +2502,31 @@ message Laptop {
   string serialNumber = 2;
 }
 
+message _Children_of_class_Person {
+  oneof _class_oneof_Person {
+    Employee _child_of_class_Person_Employee = 1;
+    Contractor _child_of_class_Person_Contractor = 2;
+  }
+}
+
 message Employee {
   string employeeId = 1;
   Department department = 2;
   Address officeAddress = 3;
-  repeated Equipment companyAssets = 4;
+  repeated _Children_of_class_Equipment companyAssets = 4;
   optional string manager = 5;
   string email = 6;
   string firstName = 7;
   string lastName = 8;
   optional string middleNames = 9;
   Address homeAddress = 10;
+}
+
+message _Children_of_class_Employee {
+  oneof _class_oneof_Employee {
+    Employee _child_of_class_Employee_Employee = 1;
+    Manager _child_of_class_Employee_Manager = 2;
+  }
 }
 
 message Contractor {
@@ -2524,7 +2544,7 @@ message Manager {
   string employeeId = 2;
   Department department = 3;
   Address officeAddress = 4;
-  repeated Equipment companyAssets = 5;
+  repeated _Children_of_class_Equipment companyAssets = 5;
   optional string manager = 6;
   string email = 7;
   string firstName = 8;
@@ -2534,6 +2554,13 @@ message Manager {
 }
 
 message CompanyEvent {
+}
+
+message _Children_of_class_CompanyEvent {
+  oneof _class_oneof_CompanyEvent {
+    CompanyEvent _child_of_class_CompanyEvent_CompanyEvent = 1;
+    Onboarded _child_of_class_CompanyEvent_Onboarded = 2;
+  }
 }
 
 message Onboarded {

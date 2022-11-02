@@ -77,6 +77,20 @@ class ProtobufVisitor {
     }
 
     /**
+     * Transform a Concerto class or enum type into a Proto3 message or enum one.
+     * @param {Object} field - the Concerto class or enum type
+     * @return {Object} the Proto3 message or enum type
+     * @public
+     */
+    concertoToProto3MessageOrEnumType(field) {
+        return this.doesClassHaveChildren(
+            field.getType(), field.parent.modelFile.declarations
+        )
+            ?  `_Children_of_class_${field.getType()}`
+            : field.getType();
+    }
+
+    /**
      * Transform Concerto class imports to Proto3 import line strings.
      * @param {Object[]} imports - the imports of a Concerto class
      * @return {string[]} an array of import line strings
@@ -86,6 +100,32 @@ class ProtobufVisitor {
         return imports
             .filter(importObject => importObject.namespace.split('@')[0] !== 'concerto')
             .map(importObject => `${this.concertoNamespaceToProto3SafePackageName(importObject.namespace)}.proto`);
+    }
+
+    /**
+     * Get the names of the children of a class.
+     * @param {string} className - the name of the class
+     * @param {Object[]} declarations - the declarations in scope
+     * @return {string[]} an array of the names of the children of the classes
+     * @public
+     */
+    getChildrenOfClass(className, declarations) {
+        return declarations
+            .filter(
+                declaration => declaration.superType === className
+            )
+            .map(declaration => declaration.getName());
+    }
+
+    /**
+     * Check if a class has children.
+     * @param {string} className - the name of the class
+     * @param {Object[]} declarations - the declarations in scope
+     * @return {boolean} whether or not the class has children
+     * @public
+     */
+    doesClassHaveChildren(className, declarations) {
+        return this.getChildrenOfClass(className, declarations)?.length > 0;
     }
 
     /**
@@ -238,8 +278,8 @@ class ProtobufVisitor {
     visitClassDeclarationCommon(classDeclaration, parameters) {
         debug('entering visitClassDeclarationCommon', classDeclaration.getName());
 
-        // Don't write abstract classes.
-        if (!classDeclaration.ast?.isAbstract) {
+        // Don't write abstract classes as average messages.
+        if (!classDeclaration.isAbstract()) {
             // Check if the class contains properties.
             const classContainsProperties = classDeclaration.getProperties()?.length > 0;
 
@@ -248,41 +288,54 @@ class ProtobufVisitor {
 
             if (classContainsProperties) {
                 classDeclaration.getProperties()
-                    .map(
-                        (property) => {
-                            if (
-                                // If property starts with a $ and is not a $identifier.
-                                (
-                                    property.getName().charAt(0) === '$' &&
-                                    property.getName() !== '$identifier'
-                                ) ||
-                                // Or if property is an $identifier, but there already is another identifier defined.
-                                (
-                                    property.getName() === '$identifier' &&
-                                    typeof classDeclaration.getIdentifierFieldName() === 'string'
-                                )
-                            ) {
-                                // Then don't include this property.
-                                return;
-                            }
-                            // All the other properties should be added to the list of properties to be written in the file.
-                            return property.accept(this, parameters);
-                        }
+                    // Remove property if it starts with a $ and is not a $identifier.
+                    .filter(
+                        (property) => !(
+                            property.getName().charAt(0) === '$' &&
+                            property.getName() !== '$identifier'
+                        )
                     )
-                    // Make sure that we don't have any unidentified fields.
-                    .filter(proto3FieldObject => proto3FieldObject !== undefined)
-                    // Write the fields, adding a Proto3 index to them.
+                    // Remove property if it is an $identifier, but there already is another identifier defined.
+                    .filter(
+                        (property) => !(
+                            property.getName() === '$identifier' &&
+                            typeof classDeclaration.getIdentifierFieldName() === 'string'
+                        )
+                    )
                     .forEach(
-                        ({ preposition, type, fieldName }, i) => {
-                            parameters.fileWriter.writeLine(
-                                0,
-                                `  ${preposition ? `${preposition} ` : ''}${type} ${fieldName} = ${i + 1};`
-                            );
+                        (property, i) => {
+                            property.accept(this, { ...parameters, fieldIndex: i + 1 });
                         }
                     );
                 // Write the closing bracket.
                 parameters.fileWriter.writeLine(0, '}\n');
             }
+        }
+
+        // Find the children of a class
+        const childrenOfAbstractClass = this.getChildrenOfClass(classDeclaration.getName(), classDeclaration.modelFile.declarations);
+
+        // if the class has children, then an auxiliary oneof message should be written. This is used to immitate aspects of Concerto inheritance.
+        if (childrenOfAbstractClass?.length > 0) {
+            // Write the beginning of the message and the opening bracket.
+            parameters.fileWriter.writeLine(0, `message _Children_of_class_${classDeclaration.getName()} {`);
+            // Write the beginning of the oneof statement.
+            parameters.fileWriter.writeLine(0, `  oneof _class_oneof_${classDeclaration.getName()} {`);
+            // Write the oneof options.
+            (
+                // If the extended class is not abstract, then included it as child of the utility message.
+                !classDeclaration.isAbstract()
+                    ? [classDeclaration.getName(), ...childrenOfAbstractClass]
+                    : childrenOfAbstractClass
+            ).forEach(
+                (childClassName, i) => {
+                    parameters.fileWriter.writeLine(0, `    ${childClassName} _child_of_class_${classDeclaration.getName()}_${childClassName} = ${i + 1};`);
+                }
+            );
+            // Write the oneof closing bracket.
+            parameters.fileWriter.writeLine(0, '  }');
+            // Write the message closing bracket.
+            parameters.fileWriter.writeLine(0, '}\n');
         }
 
         return;
@@ -292,22 +345,27 @@ class ProtobufVisitor {
      * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitField(field, parameters) {
         debug('entering visitField', field.getName());
 
-        return {
-            preposition: this.concertoToProto3FieldRule(field),
-            type: field.isPrimitive()
-                // Primitive Concerto types are mapped to specific Proto3 types.
-                ? this.concertoToProto3PrimitiveType(field)
-                // The rest are references to classes and enums.
-                : field.getType(),
-            // Proto3 is not happy with the "$" sign, so we are replacing it with an "_".
-            fieldName: field.getName().replace(/\$/g, '_'),
-        };
+        const preposition = this.concertoToProto3FieldRule(field);
+        const type = field.isPrimitive()
+            // Primitive Concerto types are mapped to specific Proto3 types.
+            ? this.concertoToProto3PrimitiveType(field)
+            // The rest are references to classes and enums.
+            : this.concertoToProto3MessageOrEnumType(field);
+        // Proto3 is not happy with the "$" sign, so we are replacing it with an "_".
+        const fieldName = field.getName().replace(/\$/g, '_');
+
+        // Write the fields, adding a Proto3 index to them.
+        parameters.fileWriter.writeLine(
+            0,
+            `  ${preposition ? `${preposition} ` : ''}${type} ${fieldName} = ${parameters.fieldIndex ?? '0'};`
+        );
+
+        return;
     }
 
     /**
@@ -325,9 +383,17 @@ class ProtobufVisitor {
 
         if (enumContainsOptions) {
             // Walk over all of the properties which should just be enum value declarations.
-            enumDeclaration.getProperties().forEach((property, i) => {
-                parameters.fileWriter.writeLine(0, `  ${enumDeclaration.name}_${property.accept(this, parameters)} = ${i};`);
-            });
+            enumDeclaration.getProperties()
+                .forEach((property, i) => {
+                    property.accept(
+                        this,
+                        {
+                            ...parameters,
+                            valueDeclarationName: enumDeclaration.name,
+                            valueIndex: i
+                        }
+                    );
+                });
             parameters.fileWriter.writeLine(0, '}\n');
         }
 
@@ -338,30 +404,36 @@ class ProtobufVisitor {
      * Visitor design pattern
      * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
         debug('entering visitEnumValueDeclaration', enumValueDeclaration.getName());
 
-        return enumValueDeclaration.getName();
+        parameters.fileWriter.writeLine(
+            0,
+            `  ${parameters.valueDeclarationName}_${enumValueDeclaration.getName()} = ${parameters.valueIndex ?? '0'};`
+        );
+
+        return;
     }
 
     /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
      * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration, parameters) {
         debug('entering visitRelationship', relationshipDeclaration.getName());
 
-        return {
-            preposition: this.concertoToProto3FieldRule(relationshipDeclaration),
-            type: 'string',
-            fieldName: relationshipDeclaration.getName(),
-        };
+        const preposition = this.concertoToProto3FieldRule(relationshipDeclaration);
+        const fieldName = relationshipDeclaration.getName();
+
+        // Write the fields, adding a Proto3 index to them.
+        parameters.fileWriter.writeLine(
+            0,
+            `  ${preposition ? `${preposition} ` : ''}string ${fieldName} = ${parameters.fieldIndex ?? '0'};`
+        );
     }
 }
 
