@@ -2486,9 +2486,9 @@ enum Department {
   Department_Design = 5;
 }
 
-message _Children_of_class_Equipment {
+message _Subclasses_of_class_Equipment {
   oneof _class_oneof_Equipment {
-    Laptop _child_of_class_Equipment_Laptop = 1;
+    Laptop _subclass_of_class_Equipment_Laptop = 1;
   }
 }
 
@@ -2502,10 +2502,11 @@ message Laptop {
   string serialNumber = 2;
 }
 
-message _Children_of_class_Person {
+message _Subclasses_of_class_Person {
   oneof _class_oneof_Person {
-    Employee _child_of_class_Person_Employee = 1;
-    Contractor _child_of_class_Person_Contractor = 2;
+    Employee _subclass_of_class_Person_Employee = 1;
+    Manager _subclass_of_class_Person_Manager = 2;
+    Contractor _subclass_of_class_Person_Contractor = 3;
   }
 }
 
@@ -2513,7 +2514,7 @@ message Employee {
   string employeeId = 1;
   Department department = 2;
   Address officeAddress = 3;
-  repeated _Children_of_class_Equipment companyAssets = 4;
+  repeated _Subclasses_of_class_Equipment companyAssets = 4;
   optional string manager = 5;
   string email = 6;
   string firstName = 7;
@@ -2522,10 +2523,10 @@ message Employee {
   Address homeAddress = 10;
 }
 
-message _Children_of_class_Employee {
+message _Subclasses_of_class_Employee {
   oneof _class_oneof_Employee {
-    Employee _child_of_class_Employee_Employee = 1;
-    Manager _child_of_class_Employee_Manager = 2;
+    Employee _subclass_of_class_Employee_Employee = 1;
+    Manager _subclass_of_class_Employee_Manager = 2;
   }
 }
 
@@ -2544,7 +2545,7 @@ message Manager {
   string employeeId = 2;
   Department department = 3;
   Address officeAddress = 4;
-  repeated _Children_of_class_Equipment companyAssets = 5;
+  repeated _Subclasses_of_class_Equipment companyAssets = 5;
   optional string manager = 6;
   string email = 7;
   string firstName = 8;
@@ -2556,10 +2557,10 @@ message Manager {
 message CompanyEvent {
 }
 
-message _Children_of_class_CompanyEvent {
+message _Subclasses_of_class_CompanyEvent {
   oneof _class_oneof_CompanyEvent {
-    CompanyEvent _child_of_class_CompanyEvent_CompanyEvent = 1;
-    Onboarded _child_of_class_CompanyEvent_Onboarded = 2;
+    CompanyEvent _subclass_of_class_CompanyEvent_CompanyEvent = 1;
+    Onboarded _subclass_of_class_CompanyEvent_Onboarded = 2;
   }
 }
 

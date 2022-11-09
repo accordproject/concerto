@@ -83,10 +83,13 @@ class ProtobufVisitor {
      * @public
      */
     concertoToProto3MessageOrEnumType(field) {
-        return this.doesClassHaveChildren(
-            field.getType(), field.parent.modelFile.declarations
+        return this.doesClassHaveSubclassesRecursively(
+            field.parent.modelFile.declarations
+                .find(
+                    classDeclaration => classDeclaration.getName() === field.getType()
+                )
         )
-            ?  `_Children_of_class_${field.getType()}`
+            ?  `_Subclasses_of_class_${field.getType()}`
             : field.getType();
     }
 
@@ -103,29 +106,49 @@ class ProtobufVisitor {
     }
 
     /**
-     * Get the names of the children of a class.
-     * @param {string} className - the name of the class
-     * @param {Object[]} declarations - the declarations in scope
-     * @return {string[]} an array of the names of the children of the classes
+     * Recursively get the names of the subclasses of a class.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {String[]} an array of the names of the subclasses of the class
      * @public
      */
-    getChildrenOfClass(className, declarations) {
-        return declarations
-            .filter(
-                declaration => declaration.superType === className
-            )
-            .map(declaration => declaration.getName());
+    getNamesOfSubclassesOfClassRecursively(classDeclaration) {
+        return typeof classDeclaration.getAssignableClassDeclarations === 'function'
+            ? classDeclaration.getAssignableClassDeclarations()
+                ?.filter(
+                    assignableClass => assignableClass.getName() !== classDeclaration.getName()
+                )
+                .map(assignableClass => assignableClass.getName())
+            : [];
     }
 
     /**
-     * Check if a class has children.
-     * @param {string} className - the name of the class
-     * @param {Object[]} declarations - the declarations in scope
-     * @return {boolean} whether or not the class has children
+     * Recursively get the names of the subclasses of a class that are not abstract.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {String[]} an array of the names of the nonabstract subclasses of the class
      * @public
      */
-    doesClassHaveChildren(className, declarations) {
-        return this.getChildrenOfClass(className, declarations)?.length > 0;
+    getNamesOfNonabstractSubclassesOfClassRecursively(classDeclaration) {
+        return typeof classDeclaration.getAssignableClassDeclarations === 'function'
+            ? classDeclaration.getAssignableClassDeclarations()
+                ?.filter(
+                    assignableClass => assignableClass.getName() !== classDeclaration.getName()
+                )
+                .filter(
+                    assignableClass => !assignableClass.isAbstract()
+                )
+                .map(assignableClass => assignableClass.getName())
+            : [];
+    }
+
+    /**
+     * Recursively check if a class has subclasses.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {Boolean} whether or not the class has subclasses
+     * @public
+     */
+    doesClassHaveSubclassesRecursively(classDeclaration) {
+        return this.getNamesOfSubclassesOfClassRecursively(classDeclaration)
+            ?.length > 0;
     }
 
     /**
@@ -163,7 +186,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
+     * @param {Object} modelManager - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
@@ -180,7 +203,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
+     * @param {Object} modelFile - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
@@ -223,7 +246,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {AssetDeclaration} assetDeclaration - the object being visited
+     * @param {Object} assetDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -235,7 +258,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {TransactionDeclaration} transactionDeclaration - the object being visited
+     * @param {Object} transactionDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -247,7 +270,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {ConceptDeclaration} conceptDeclaration - the object being visited
+     * @param {Object} conceptDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -259,7 +282,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
+     * @param {Object} classDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -271,7 +294,7 @@ class ProtobufVisitor {
 
     /**
      * Visit a Concerto class
-     * @param {ClassDeclaration} classDeclaration - the Concerto class being visited
+     * @param {Object} classDeclaration - the Concerto class being visited
      * @param {Object} parameters - the parameters
      * @private
      */
@@ -304,7 +327,14 @@ class ProtobufVisitor {
                     )
                     .forEach(
                         (property, i) => {
-                            property.accept(this, { ...parameters, fieldIndex: i + 1 });
+                            property.accept(
+                                this,
+                                {
+                                    ...parameters,
+                                    fieldIndex: i + 1,
+
+                                },
+                            );
                         }
                     );
                 // Write the closing bracket.
@@ -312,24 +342,24 @@ class ProtobufVisitor {
             }
         }
 
-        // Find the children of a class
-        const childrenOfAbstractClass = this.getChildrenOfClass(classDeclaration.getName(), classDeclaration.modelFile.declarations);
+        // Find the subclasses of a class
+        const nonabstractSubclassesOfClass = this.getNamesOfNonabstractSubclassesOfClassRecursively(classDeclaration);
 
-        // if the class has children, then an auxiliary oneof message should be written. This is used to immitate aspects of Concerto inheritance.
-        if (childrenOfAbstractClass?.length > 0) {
+        // if the class has subclasses that aren't abstract, then an auxiliary oneof message should be written. This is used to immitate aspects of Concerto inheritance.
+        if (nonabstractSubclassesOfClass?.length > 0) {
             // Write the beginning of the message and the opening bracket.
-            parameters.fileWriter.writeLine(0, `message _Children_of_class_${classDeclaration.getName()} {`);
+            parameters.fileWriter.writeLine(0, `message _Subclasses_of_class_${classDeclaration.getName()} {`);
             // Write the beginning of the oneof statement.
             parameters.fileWriter.writeLine(0, `  oneof _class_oneof_${classDeclaration.getName()} {`);
             // Write the oneof options.
             (
-                // If the extended class is not abstract, then included it as child of the utility message.
+                // If the extended class is not abstract, then included it as a subclass of the utility message.
                 !classDeclaration.isAbstract()
-                    ? [classDeclaration.getName(), ...childrenOfAbstractClass]
-                    : childrenOfAbstractClass
+                    ? [classDeclaration.getName(), ...nonabstractSubclassesOfClass]
+                    : nonabstractSubclassesOfClass
             ).forEach(
-                (childClassName, i) => {
-                    parameters.fileWriter.writeLine(0, `    ${childClassName} _child_of_class_${classDeclaration.getName()}_${childClassName} = ${i + 1};`);
+                (subclassName, i) => {
+                    parameters.fileWriter.writeLine(0, `    ${subclassName} _subclass_of_class_${classDeclaration.getName()}_${subclassName} = ${i + 1};`);
                 }
             );
             // Write the oneof closing bracket.
@@ -343,7 +373,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {Field} field - the object being visited
+     * @param {Object} field - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
@@ -370,7 +400,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {EnumDeclaration} enumDeclaration - the object being visited
+     * @param {Object} enumDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
@@ -402,7 +432,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
+     * @param {Object} enumValueDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
@@ -419,7 +449,7 @@ class ProtobufVisitor {
 
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {Object} relationshipDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
