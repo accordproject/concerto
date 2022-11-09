@@ -2456,34 +2456,34 @@ package org.acme.hr.v1_0_0;
 import "google/protobuf/timestamp.proto";
 
 enum State {
-  State_MA = 0;
-  State_NY = 1;
-  State_CO = 2;
-  State_WA = 3;
-  State_IL = 4;
-  State_CA = 5;
+  State_CA = 0;
+  State_CO = 1;
+  State_IL = 2;
+  State_MA = 3;
+  State_NY = 4;
+  State_WA = 5;
 }
 
 message Address {
-  string street = 1;
-  string city = 2;
+  string city = 1;
+  string country = 2;
   optional State state = 3;
-  string zipCode = 4;
-  string country = 5;
+  string street = 4;
+  string zipCode = 5;
 }
 
 message Company {
-  string name = 1;
-  Address headquarters = 2;
+  Address headquarters = 1;
+  string name = 2;
 }
 
 enum Department {
-  Department_Sales = 0;
-  Department_Marketing = 1;
+  Department_Design = 0;
+  Department_Engineering = 1;
   Department_Finance = 2;
   Department_HR = 3;
-  Department_Engineering = 4;
-  Department_Design = 5;
+  Department_Marketing = 4;
+  Department_Sales = 5;
 }
 
 message _Subclasses_of_class_Equipment {
@@ -2504,23 +2504,23 @@ message Laptop {
 
 message _Subclasses_of_class_Person {
   oneof _class_oneof_Person {
-    Employee _subclass_of_class_Person_Employee = 1;
-    Manager _subclass_of_class_Person_Manager = 2;
-    Contractor _subclass_of_class_Person_Contractor = 3;
+    Contractor _subclass_of_class_Person_Contractor = 1;
+    Employee _subclass_of_class_Person_Employee = 2;
+    Manager _subclass_of_class_Person_Manager = 3;
   }
 }
 
 message Employee {
-  string employeeId = 1;
+  repeated _Subclasses_of_class_Equipment companyAssets = 1;
   Department department = 2;
-  Address officeAddress = 3;
-  repeated _Subclasses_of_class_Equipment companyAssets = 4;
-  optional string manager = 5;
-  string email = 6;
-  string firstName = 7;
-  string lastName = 8;
+  string email = 3;
+  string employeeId = 4;
+  string firstName = 5;
+  Address homeAddress = 6;
+  string lastName = 7;
+  optional string manager = 8;
   optional string middleNames = 9;
-  Address homeAddress = 10;
+  Address officeAddress = 10;
 }
 
 message _Subclasses_of_class_Employee {
@@ -2532,26 +2532,26 @@ message _Subclasses_of_class_Employee {
 
 message Contractor {
   Company company = 1;
-  optional string manager = 2;
-  string email = 3;
-  string firstName = 4;
+  string email = 2;
+  string firstName = 3;
+  Address homeAddress = 4;
   string lastName = 5;
-  optional string middleNames = 6;
-  Address homeAddress = 7;
+  optional string manager = 6;
+  optional string middleNames = 7;
 }
 
 message Manager {
-  repeated string reports = 1;
-  string employeeId = 2;
-  Department department = 3;
-  Address officeAddress = 4;
-  repeated _Subclasses_of_class_Equipment companyAssets = 5;
-  optional string manager = 6;
-  string email = 7;
-  string firstName = 8;
-  string lastName = 9;
-  optional string middleNames = 10;
-  Address homeAddress = 11;
+  repeated _Subclasses_of_class_Equipment companyAssets = 1;
+  Department department = 2;
+  string email = 3;
+  string employeeId = 4;
+  string firstName = 5;
+  Address homeAddress = 6;
+  string lastName = 7;
+  optional string manager = 8;
+  optional string middleNames = 9;
+  Address officeAddress = 10;
+  repeated string reports = 11;
 }
 
 message CompanyEvent {
@@ -2569,8 +2569,8 @@ message Onboarded {
 }
 
 message ChangeOfAddress {
-  string Person = 1;
-  Address newAddress = 2;
+  Address newAddress = 1;
+  string Person = 2;
 }
 
 ",

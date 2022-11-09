@@ -325,6 +325,8 @@ class ProtobufVisitor {
                             typeof classDeclaration.getIdentifierFieldName() === 'string'
                         )
                     )
+                    // Sort properties alpabetically in order to avoid the Proto3 index changes that would occur when Concerto properties are rearranged.
+                    .sort((propertyA, propertyB) => propertyA.getName().localeCompare(propertyB.getName()))
                     .forEach(
                         (property, i) => {
                             property.accept(
@@ -332,7 +334,6 @@ class ProtobufVisitor {
                                 {
                                     ...parameters,
                                     fieldIndex: i + 1,
-
                                 },
                             );
                         }
@@ -357,11 +358,15 @@ class ProtobufVisitor {
                 !classDeclaration.isAbstract()
                     ? [classDeclaration.getName(), ...nonabstractSubclassesOfClass]
                     : nonabstractSubclassesOfClass
-            ).forEach(
-                (subclassName, i) => {
-                    parameters.fileWriter.writeLine(0, `    ${subclassName} _subclass_of_class_${classDeclaration.getName()}_${subclassName} = ${i + 1};`);
-                }
-            );
+            )
+                // Sort properties derived from subclasses alphabetically in order to avoid the Proto3 index changes that would occur when Concerto classes are rearranged.
+                .sort((subclassNameA, subclassNameB) => subclassNameA.localeCompare(subclassNameB))
+                // Write properties.
+                .forEach(
+                    (subclassName, i) => {
+                        parameters.fileWriter.writeLine(0, `    ${subclassName} _subclass_of_class_${classDeclaration.getName()}_${subclassName} = ${i + 1};`);
+                    }
+                );
             // Write the oneof closing bracket.
             parameters.fileWriter.writeLine(0, '  }');
             // Write the message closing bracket.
@@ -414,6 +419,8 @@ class ProtobufVisitor {
         if (enumContainsOptions) {
             // Walk over all of the properties which should just be enum value declarations.
             enumDeclaration.getProperties()
+                // Sort enum value declarations alpabetically in order to avoid the Proto3 index changes that would occur when Concerto enum value declarations are rearranged.
+                .sort((enumValueDeclarationA, benumValueDeclarationB) => enumValueDeclarationA.getName().localeCompare(benumValueDeclarationB.getName()))
                 .forEach((property, i) => {
                     property.accept(
                         this,
