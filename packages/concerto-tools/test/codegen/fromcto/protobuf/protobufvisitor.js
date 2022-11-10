@@ -125,6 +125,27 @@ describe('ProtobufVisitor', function () {
         });
     });
 
+    describe.only('visitModelFile', () => {
+        it('should write an empty model file', () => {
+            let param = {
+                fileWriter: mockFileWriter
+            };
+
+            let mockModelFile = sinon.createStubInstance(ModelFile);
+            mockModelFile.getNamespace.returns('org.accordproject.address@1.0.0');
+            mockModelFile.imports = [];
+            mockModelFile.getAllDeclarations.returns([]);
+
+            protobufVisitor.visitModelFile(mockModelFile, param);
+
+            param.fileWriter.writeLine.callCount.should.deep.equal(4);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'syntax = "proto3";\n']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org.accordproject.address.v1_0_0;\n']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import "google/protobuf/timestamp.proto";']);
+            param.fileWriter.writeLine.getCall(3).args.should.deep.equal([0, '']);
+        });
+    });
+
     describe('visitAssetDeclaration', () => {
         it('should write the class declaration for an asset', () => {
             let param = {
