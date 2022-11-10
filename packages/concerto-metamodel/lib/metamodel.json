@@ -874,6 +874,166 @@
                     "isOptional": false
                 }
             ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "ScalarDeclaration",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+                    "name": "isArray",
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+                    "name": "isOptional",
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": false
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Declaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "BooleanScalarDeclaration",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+                    "name": "defaultValue",
+                    "isArray": false,
+                    "isOptional": true
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "DateTimeScalarDeclaration",
+            "isAbstract": false,
+            "properties": [],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "StringScalarDeclaration",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "defaultValue",
+                    "isArray": false,
+                    "isOptional": true
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "validator",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "StringRegexValidator"
+                    },
+                    "isArray": false,
+                    "isOptional": true
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "DoubleScalarDeclaration",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+                    "name": "defaultValue",
+                    "isArray": false,
+                    "isOptional": true
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "validator",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "DoubleDomainValidator"
+                    },
+                    "isArray": false,
+                    "isOptional": true
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "IntegerScalarDeclaration",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+                    "name": "defaultValue",
+                    "isArray": false,
+                    "isOptional": true
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "validator",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "IntegerDomainValidator"
+                    },
+                    "isArray": false,
+                    "isOptional": true
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "LongProperty",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.LongProperty",
+                    "name": "defaultValue",
+                    "isArray": false,
+                    "isOptional": true
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "validator",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "LongDomainValidator"
+                    },
+                    "isArray": false,
+                    "isOptional": true
+                }
+            ],
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "ScalarDeclaration"
+            }
         }
     ]
 }
