@@ -125,7 +125,7 @@ describe('ProtobufVisitor', function () {
         });
     });
 
-    describe.only('visitModelFile', () => {
+    describe('visitModelFile', () => {
         it('should write an empty model file', () => {
             let param = {
                 fileWriter: mockFileWriter
