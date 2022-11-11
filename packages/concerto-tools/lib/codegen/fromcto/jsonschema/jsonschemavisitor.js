@@ -55,6 +55,59 @@ class JSONSchemaVisitor {
     }
 
     /**
+     * Get the validators for a field or a scalar definition in JSON schema form.
+     * @param {Object} fieldOrScalarDeclaration - the scalar declaration being visited
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    getFieldOrScalarDeclarationValidatorsForSchema(fieldOrScalarDeclaration) {
+        const validator = fieldOrScalarDeclaration.getValidator();
+        let jsonSchema = {};
+
+        switch (fieldOrScalarDeclaration.getType()) {
+        case 'String':
+            jsonSchema.type = 'string';
+            if(validator) {
+                // Note that regex flags are lost in this transformation
+                jsonSchema.pattern = validator.getRegex().source;
+            }
+            break;
+        case 'Double':
+            jsonSchema.type = 'number';
+            if(validator) {
+                if(validator.getLowerBound() !== null) {
+                    jsonSchema.minimum = validator.getLowerBound();
+                }
+                if(validator.getUpperBound() !== null) {
+                    jsonSchema.maximum = validator.getUpperBound();
+                }
+            }
+            break;
+        case 'Integer':
+        case 'Long':
+            jsonSchema.type = 'integer';
+            if(validator) {
+                if(validator.getLowerBound() !== null) {
+                    jsonSchema.minimum = Math.trunc(validator.getLowerBound());
+                }
+                if(validator.getUpperBound() !== null) {
+                    jsonSchema.maximum = Math.trunc(validator.getUpperBound());
+                }
+            }
+            break;
+        case 'DateTime':
+            jsonSchema.format = 'date-time';
+            jsonSchema.type = 'string';
+            break;
+        case 'Boolean':
+            jsonSchema.type = 'boolean';
+            break;
+        }
+
+        return jsonSchema;
+    }
+
+    /**
      * Returns true if the class declaration contains recursive references.
      *
      * Basic example:
@@ -98,6 +151,8 @@ class JSONSchemaVisitor {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return this.visitScalarDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
         }
@@ -291,45 +346,10 @@ class JSONSchemaVisitor {
                 jsonSchema.default = field.getDefaultValue();
             }
 
-            switch (field.getType()) {
-            case 'String':
-                jsonSchema.type = 'string';
-                if(validator) {
-                    // Note that regex flags are lost in this transformation
-                    jsonSchema.pattern = validator.getRegex().source;
-                }
-                break;
-            case 'Double':
-                jsonSchema.type = 'number';
-                if(validator) {
-                    if(validator.getLowerBound() !== null) {
-                        jsonSchema.minimum = validator.getLowerBound();
-                    }
-                    if(validator.getUpperBound() !== null) {
-                        jsonSchema.maximum = validator.getUpperBound();
-                    }
-                }
-                break;
-            case 'Integer':
-            case 'Long':
-                jsonSchema.type = 'integer';
-                if(validator) {
-                    if(validator.getLowerBound() !== null) {
-                        jsonSchema.minimum = Math.trunc(validator.getLowerBound());
-                    }
-                    if(validator.getUpperBound() !== null) {
-                        jsonSchema.maximum = Math.trunc(validator.getUpperBound());
-                    }
-                }
-                break;
-            case 'DateTime':
-                jsonSchema.format = 'date-time';
-                jsonSchema.type = 'string';
-                break;
-            case 'Boolean':
-                jsonSchema.type = 'boolean';
-                break;
-            }
+            jsonSchema = {
+                ...jsonSchema,
+                ...this.getFieldOrScalarDeclarationValidatorsForSchema(field)
+            };
 
             // If this field has a default value, add it.
             if (field.getDefaultValue()) {
@@ -453,6 +473,41 @@ class JSONSchemaVisitor {
         return jsonSchema;
     }
 
+    /**
+     * Visitor a scalar declaration
+     * @param {ScalarDeclaration} scalarDeclaration - the scalar declaration being visited
+     * @param {Object} parameters - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitScalarDeclaration(scalarDeclaration, parameters) {
+        debug('entering visitScalarDeclaration', scalarDeclaration.getName());
+
+        const result = {
+            $id: scalarDeclaration.getFullyQualifiedName(),
+            schema: {
+                title: scalarDeclaration.getName(),
+                description : `An instance of ${scalarDeclaration.getFullyQualifiedName()}`,
+                type: scalarDeclaration.getType(),
+                // If this field has a default value, add it.
+                ...(
+                    scalarDeclaration.getDefaultValue()
+                        ? { default: scalarDeclaration.getDefaultValue() }
+                        : {}
+                ),
+                ...this.getFieldOrScalarDeclarationValidatorsForSchema(scalarDeclaration)
+            }
+        };
+
+        // add the decorators
+        const decorators = this.getDecorators(scalarDeclaration);
+        if(decorators) {
+            result.schema.$decorators = decorators;
+        }
+
+        // Return the schema.
+        return result;
+    }
 }
 
 module.exports = JSONSchemaVisitor;

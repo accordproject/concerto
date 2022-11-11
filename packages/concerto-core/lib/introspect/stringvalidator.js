@@ -20,7 +20,8 @@ const Validator = require('./validator');
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const Field = require('./field');
+    const Field = require('./fieldOrScalarDeclaration');
+    const ScalarDeclaration = require('./scalardeclaration');
 }
 /* eslint-enable no-unused-vars */
 
@@ -34,19 +35,19 @@ class StringValidator extends Validator{
 
     /**
      * Create a StringValidator.
-     * @param {Field} field - the field this validator is attached to
+     * @param {Field | ScalarDeclaration} fieldOrScalarDeclaration - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string. This must be a regex
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, validator) {
-        super(field, validator);
+    constructor(fieldOrScalarDeclaration, validator) {
+        super(fieldOrScalarDeclaration, validator);
         try {
-            const CustomRegExp = field?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
+            const CustomRegExp = fieldOrScalarDeclaration?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
             this.regex = new CustomRegExp(validator.pattern, validator.flags);
         }
         catch(exception) {
-            this.reportError(field.getName(), exception.message);
+            this.reportError(fieldOrScalarDeclaration.getName(), exception.message);
         }
     }
 

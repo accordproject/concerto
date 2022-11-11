@@ -70,6 +70,38 @@ class Property extends Decorated {
     }
 
     /**
+     * Returns true if the declalaration named is a scalar declaration.
+     * @param {string} declarationName - The name of the declaration
+     * @return {boolean} is the named declaration a scalar or not
+     */
+    isScalar(declarationName) {
+        return !!this.getModelFile()
+            .getScalarDeclarations()
+            .find(
+                scalarDeclaration => scalarDeclaration.name === declarationName
+            );
+    }
+
+    /**
+     * Returns the Concerto primitive type of the scalar declaration.
+     * @param {string} scalarName - The name of the scalar declaration
+     * @return {string} the Concerto primitive type of the scalar declaration
+     */
+    getScalarPrimitiveType(scalarName) {
+        const scalarPrimitiveType = this.getModelFile()
+            .getScalarDeclarations()
+            .find(
+                scalarDeclaration => scalarDeclaration.name === scalarName
+            )
+            ?.type;
+        if (typeof scalarPrimitiveType !== 'string') {
+            throw new Error(`Cannot get primitive type of ${scalarName}. Possibly not a scalar declaration.`);
+        }
+
+        return scalarPrimitiveType;
+    }
+
+    /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
      * @private
@@ -101,7 +133,18 @@ class Property extends Decorated {
         } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
             this.type = 'DateTime';
         } else if (this.ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
-            this.type = this.ast.type ? this.ast.type.name : null;
+            if (
+                typeof this.ast?.type?.name === 'string' &&
+              this.isScalar(this.ast?.type?.name)
+            ) {
+                // If the property is a scalar, then assign it its scalar primitive type.
+                this.type = this.getScalarPrimitiveType(
+                    this.ast?.type?.name
+                );
+            } else {
+                // If the property is not a scalar, then assign its custom type name as a type.
+                this.type = this.ast.type ? this.ast.type.name : null;
+            }
         } else if (this.ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
             this.type = this.ast.type.name;
         } else {

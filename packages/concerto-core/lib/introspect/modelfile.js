@@ -21,6 +21,13 @@ const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
+const BooleanScalar = require('./booleanscalar');
+const IntegerScalar = require('./integerscalar');
+const LongScalar = require('./longscalar');
+const DoubleScalar = require('./doublescalar');
+const StringScalar = require('./stringscalar');
+const DateTimeScalar = require('./datetimescalar');
+const ScalarDeclaration = require('./scalardeclaration');
 const ParticipantDeclaration = require('./participantdeclaration');
 const TransactionDeclaration = require('./transactiondeclaration');
 const EventDeclaration = require('./eventdeclaration');
@@ -92,7 +99,6 @@ class ModelFile extends Decorated {
 
         // Set up the decorators.
         this.process();
-
         // Populate from the AST
         this.fromAst(this.ast);
         // Check version compatibility
@@ -584,18 +590,27 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Get the ScalarDeclaration defined in this ModelFile
+     * @return {ScalarDeclaration[]} the ScalarDeclaration defined in the model file
+     */
+    getScalarDeclarations() {
+        return this.getDeclarations(ScalarDeclaration);
+    }
+
+    /**
      * Get the instances of a given type in this ModelFile
      * @param {Function} type - the type of the declaration
-     * @return {ClassDeclaration[]} the ClassDeclaration defined in the model file
+     * @return {(ClassDeclaration | ScalarDeclaration)[]} the ClassDeclaration defined in the model file
      */
     getDeclarations(type) {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
-            let classDeclaration = this.declarations[n];
-            if(classDeclaration instanceof type) {
-                result.push(classDeclaration);
+            let declaration = this.declarations[n];
+            if(declaration instanceof type && !Object.is(declaration, {})) {
+                result.push(declaration);
             }
         }
+
         return result;
     }
 
@@ -759,6 +774,27 @@ class ModelFile extends Decorated {
             }
             else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.BooleanScalar`) {
+                this.declarations.push( new BooleanScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.IntegerScalar`) {
+                this.declarations.push( new IntegerScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.LongScalar`) {
+                this.declarations.push( new LongScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.DoubleScalar`) {
+                this.declarations.push( new DoubleScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.StringScalar`) {
+                this.declarations.push( new StringScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.DateTimeScalar`) {
+                this.declarations.push( new DateTimeScalar(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.ScalarDeclaration`) {
+                this.declarations.push( new ScalarDeclaration(this, thing) );
             }
             else {
                 let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');

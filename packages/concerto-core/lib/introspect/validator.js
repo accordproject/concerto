@@ -19,11 +19,12 @@
 /* istanbul ignore next */
 if (global === undefined) {
     const Field = require('./field');
+    const ScalarDeclaration = require('./scalardeclaration');
 }
 /* eslint-enable no-unused-vars */
 
 /**
- * An Abstract field validator. Extend this class and override the
+ * An Abstract fieldOrScalarDeclaration validator. Extend this class and override the
  * validate method.
  * @private
  * @class
@@ -31,16 +32,15 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Validator {
-
     /**
      * Create a Property.
-     * @param {Field} field - the field this validator is attached to
+     * @param {Field | ScalarDeclaration} fieldOrScalarDeclaration - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
-    constructor(field, validator) {
+    constructor(fieldOrScalarDeclaration, validator) {
         this.validator = validator;
-        this.field = field;
+        this.fieldOrScalarDeclaration = fieldOrScalarDeclaration;
     }
 
     /**
@@ -49,7 +49,7 @@ class Validator {
      * @throws {Error} throws an error to report the message
      */
     reportError(id, msg) {
-        throw new Error( 'Validator error for field `' + id + '`. ' + this.getField().getFullyQualifiedName() + ': ' + msg );
+        throw new Error( 'Validator error for fieldOrScalarDeclaration `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg );
     }
 
     /**
@@ -64,11 +64,11 @@ class Validator {
     }
 
     /**
-     * Returns the field that this validator applies to
-     * @return {Field} the field
+     * Returns the field or scalar declaration that this validator applies to
+     * @return {Field | ScalarDeclaration} the fieldOrScalarDeclaration
      */
-    getField() {
-        return this.field;
+    getFieldOrScalarDeclaration() {
+        return this.fieldOrScalarDeclaration;
     }
 
     /**

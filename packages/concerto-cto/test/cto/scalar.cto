@@ -1,0 +1,55 @@
+namespace org.acme
+
+scalar BooleanScalar extends Boolean
+scalar BooleanScalarWithDefault extends Boolean default=true
+
+scalar IntegerScalar extends Integer
+scalar IntegerScalarWithDefault extends Integer default=42
+scalar IntegerScalarWithDefaultAndRange extends Integer default=42 range=[1,]
+
+scalar LongScalar extends Long
+scalar LongScalarWithDefault extends Long default=42
+scalar LongScalarWithDefaultAndRange extends Long default=42 range=[1,]
+
+scalar DoubleScalar extends Double
+scalar DoubleScalarWithDefault extends Double default=42.5
+scalar DoubleScalarWithDefaultAndRange extends Double default=42.5 range=[1.0,]
+
+scalar StringScalar extends String
+scalar StringScalarWithDefault extends String default="something"
+scalar StringScalarWithDefaultAndRegex extends String default="something" regex=/.*/
+
+scalar DateTimeScalar extends DateTime
+scalar DateTimeScalarWithDefault extends DateTime default="2022-11-18"
+
+concept Scalars {
+    o BooleanScalar booleanScalar
+    o BooleanScalarWithDefault booleanScalarWithDefault
+    o IntegerScalar integerScalar
+    o IntegerScalarWithDefault integerScalarWithDefault
+    o IntegerScalarWithDefaultAndRange integerScalarWithDefaultAndRange
+    o LongScalar longScalar
+    o LongScalarWithDefault longScalarWithDefault
+    o LongScalarWithDefaultAndRange longScalarWithDefaultAndRange
+    o DoubleScalar doubleScalar
+    o DoubleScalarWithDefault doubleScalarWithDefault
+    o DoubleScalarWithDefaultAndRange doubleScalarWithDefaultAndRange
+    o StringScalar stringScalar
+    o StringScalarWithDefault stringScalarWithDefault
+    o StringScalarWithDefaultAndRegex stringScalarWithDefaultAndRegex
+    o DateTimeScalar dateTimeScalar
+    o DateTimeScalarWithDefault dateTimeScalarWithDefault
+}
+
+concept ScalarsWithFieldMetaProperties {
+    o StringScalarWithDefaultAndRegex[] stringScalarWithDefaultAndRegexArray
+    o StringScalarWithDefaultAndRegex stringScalarWithDefaultAndRegexOptional optional
+    o StringScalarWithDefaultAndRegex[] stringScalarWithDefaultAndRegexOptionalArray optional
+}
+
+scalar SSN extends String default="000-00-0000" regex=/\d{3}-\d{2}-\{4}+/
+
+concept Person identified by ssn {
+    o SSN ssn
+    o String givenName
+}

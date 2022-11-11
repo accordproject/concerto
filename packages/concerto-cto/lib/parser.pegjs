@@ -798,6 +798,7 @@ AssetToken        = "asset"       !IdentifierPart
 TransactionToken  = "transaction" !IdentifierPart
 EventToken        = "event"       !IdentifierPart
 ParticipantToken  = "participant" !IdentifierPart
+ScalarToken       = "scalar"      !IdentifierPart
 FromToken         = "from"        !IdentifierPart
 AllToken          = "*"          !IdentifierPart
 
@@ -1058,6 +1059,104 @@ ConceptDeclaration
       if (idField) {
         result.identified = idField;
       }
+      if (decorators.length > 0) {
+        result.decorators = decorators;
+      }
+      return result;
+    }
+
+BooleanScalar
+   = BooleanType __ d:BooleanDefault? __ {
+      return {
+        $class: "concerto.metamodel@1.0.0.BooleanScalar",
+        defaultValue: (d === 'true' ? true : false)
+      };
+  }
+
+IntegerScalar
+   = IntegerType __ d:IntegerDefault? __ range:IntegerDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.IntegerScalar",
+      };
+      // TODO: Enforce that the supertype either has a default or a validator value
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+LongScalar
+   = LongType __ d:IntegerDefault? __ range:LongDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.LongScalar",
+      };
+      // TODO: Enforce that the supertype either has a default or a validator value
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+RealScalar
+   = RealNumberType __ d:RealDefault? __ range:RealDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.DoubleScalar",
+      };
+      // TODO: Enforce that the supertype either has a default or a validator value
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+StringScalar
+   = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.StringScalar",
+      };
+      // TODO: Enforce that the supertype either has a default or a validator value
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (regex) {
+    		result.validator = regex;
+      }
+      return result;
+  }
+
+DateTimeScalar
+   = DateTimeType __ d:StringDefault? __ {
+      return {
+        $class: "concerto.metamodel@1.0.0.DateTimeScalar",
+        defaultValue: d
+      };
+  }
+
+ScalarType
+   = BooleanScalar /
+     IntegerScalar /
+     LongScalar /
+     RealScalar /
+     StringScalar /
+     DateTimeScalar
+
+ScalarDeclaration
+      = decorators:Decorators __ ScalarToken __ id:Identifier __ "extends" __ scalarType:ScalarType __
+    {
+      const result = {
+        ...scalarType,
+        name: id.name,
+        ...buildRange(location())
+      };
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
@@ -1463,6 +1562,7 @@ SourceElement
   / ParticipantDeclaration
   / EnumDeclaration
   / ConceptDeclaration
+  / ScalarDeclaration
 
 
 
