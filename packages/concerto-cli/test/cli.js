@@ -352,6 +352,32 @@ describe('concerto-cli', () => {
             const sourceCtoPath = path.resolve(__dirname, 'models', 'badversion.cto');
             await Commands.version('patch', [sourceCtoPath]).should.be.rejectedWith(/invalid current version "undefined"/);
         });
+
+        it('should ignore namespaces in comments if possible #1', async () => {
+            const release = 'keep';
+            const prerelease = 'pr.1234567';
+            const sourceCtoPath = path.resolve(__dirname, 'models', 'version-in-comment.cto');
+            const sourceCto = fs.readFileSync(sourceCtoPath, 'utf-8');
+            const ctoPath = (await tmp.file({ unsafeCleanup: true })).path;
+            fs.writeFileSync(ctoPath, sourceCto, 'utf-8');
+            await Commands.version(release, [ctoPath], prerelease);
+            const cto = fs.readFileSync(ctoPath, 'utf-8');
+            const metamodel = Parser.parse(cto);
+            metamodel.namespace.should.equal('org.accordproject.concerto.test@1.2.3-pr.1234567');
+        });
+
+        it('should ignore namespaces in comments if possible #2', async () => {
+            const release = 'keep';
+            const prerelease = 'pr.1234567';
+            const sourceCtoPath = path.resolve(__dirname, 'models', 'version-in-comment2.cto');
+            const sourceCto = fs.readFileSync(sourceCtoPath, 'utf-8');
+            const ctoPath = (await tmp.file({ unsafeCleanup: true })).path;
+            fs.writeFileSync(ctoPath, sourceCto, 'utf-8');
+            await Commands.version(release, [ctoPath], prerelease);
+            const cto = fs.readFileSync(ctoPath, 'utf-8');
+            const metamodel = Parser.parse(cto);
+            metamodel.namespace.should.equal('org.accordproject.concerto.test@1.2.3-pr.1234567');
+        });
     });
 
     describe('#version (imports)', async () => {

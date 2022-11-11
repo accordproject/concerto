@@ -27,6 +27,7 @@ const CSharpVisitor = require('./fromcto/csharp/csharpvisitor');
 const ODataVisitor = require('./fromcto/odata/odatavisitor');
 const MermaidVisitor = require('./fromcto/mermaid/mermaidvisitor');
 const MarkdownVisitor = require('./fromcto/markdown/markdownvisitor');
+const ProtobufVisitor = require('./fromcto/protobuf/protobufvisitor');
 
 module.exports = {
     AbstractPlugin,
@@ -41,6 +42,7 @@ module.exports = {
     ODataVisitor,
     MermaidVisitor,
     MarkdownVisitor,
+    ProtobufVisitor,
     formats: {
         golang: GoLangVisitor,
         jsonschema: JSONSchemaVisitor,
@@ -52,6 +54,7 @@ module.exports = {
         csharp: CSharpVisitor,
         odata: ODataVisitor,
         mermaid: MermaidVisitor,
-        markdown: MarkdownVisitor
+        markdown: MarkdownVisitor,
+        protobuf: ProtobufVisitor
     }
 };
