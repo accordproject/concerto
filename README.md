@@ -5,7 +5,7 @@ Concerto
 </h1>
 
 <a href="https://github.com/accordproject/concerto/workflows/build/badge.svg"><img src="https://github.com/accordproject/concerto/workflows/build/badge.svg" alt="Build Status"></a>
-<a href="https://coveralls.io/github/accordproject/concerto?branch=master"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
+<a href="https://coveralls.io/github/accordproject/concerto?branch=main"><img src="https://coveralls.io/repos/github/accordproject/concerto/badge.svg?branch=master" alt="Coverage Status"></a>
 <a href="./LICENSE"><img src="https://img.shields.io/github/license/accordproject/concerto?color=bright-green" alt="GitHub license"></a>
 <a href="https://www.npmjs.com/package/@accordproject/concerto-core"><img src="https://img.shields.io/npm/dm/@accordproject/concerto-core" alt="downloads"></a>
 <a href="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli"><img src="https://badge.fury.io/js/%40accordproject%2Fconcerto-cli.svg" alt="npm version"></a>
