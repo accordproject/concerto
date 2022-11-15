@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
+const migrate = require('json-schema-migrate');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -572,21 +573,22 @@ class Commands {
     /**
      * Generate a Concerto model from another schema format
      * @param {string} input The source file.
-     * @param {string} output The target file.
-     * @param {string} format The source format
      * @param {string} namespace The namepspace for the output model
+     * @param {string} [typeName] The name of the root concept
+     * @param {string} [format] The source format
+     * @param {string} [output] The target file.
+     *
+     * @returns {string} a CTO string
      */
-    static inferConcertoSchema(input, output, format, namespace) {
+    static inferConcertoSchema(input, namespace, typeName = 'Root', format = 'jsonSchema', output) {
         let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
 
         if (format.toLowerCase() === 'openapi'){
-            schema = toJsonSchema(schema);
-            fs.writeFileSync(`${output}.jsonschema.json`, JSON.stringify(schema, null, 2));
+            const jsonSchema = toJsonSchema(schema);
+            migrate.draft2020(jsonSchema);
+            return CodeGen.InferFromJsonSchema(namespace, typeName, jsonSchema);
         }
-        const outputPath = output || `${input}.cto`;
-        const cto = CodeGen.InferFromJsonSchema(namespace, 'Model', schema);
-        Logger.info('Creating file: ' + outputPath);
-        fs.writeFileSync(outputPath, cto);
+        return CodeGen.InferFromJsonSchema(namespace, typeName, schema);
     }
 }
 

@@ -121,8 +121,6 @@ function inferType(definition, context) {
             if (definition.format) {
                 if (definition.format === 'date-time' || definition.format === 'date') {
                     return 'DateTime';
-                } else if (definition.format === 'decimal') {
-                    return 'Double';
                 } else {
                     throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
                 }
@@ -146,6 +144,10 @@ function inferType(definition, context) {
     // Hack until we support union types.
     // https://github.com/accordproject/concerto/issues/292
     if (definition.anyOf){
+        console.warn(
+            `Keyword 'anyOf' in definition '${name}' is not fully supported. Defaulting to first alternative.`
+        );
+
         // Just choose the first item
         return inferType(definition.anyOf[0], context);
     }
@@ -281,6 +283,10 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     let ajv = new Ajv2019({ strict: false })
         .addMetaSchema(draft6MetaSchema)
         .addMetaSchema(draft7MetaSchema);
+
+    if (schemaVersion && schemaVersion.startsWith('https://json-schema.org/draft/2020-12/schema')) {
+        ajv = new Ajv2020({ strict: false });
+    }
 
     if (schemaVersion && schemaVersion.startsWith('https://json-schema.org/draft/2020-12/schema')) {
         ajv = new Ajv2020({ strict: false });

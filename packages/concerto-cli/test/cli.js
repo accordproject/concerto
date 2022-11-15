@@ -555,6 +555,54 @@ describe('concerto-cli', () => {
         });
     });
 
+    describe('#infer', async () => {
+        it('should infer a Concerto model from a JSON Schema', async () => {
+            const obj = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/jsonschema.json'),
+                'concerto.test.jsonSchema',
+            );
+            obj.should.equal(`namespace concerto.test.jsonSchema
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Root {
+   o String name optional
+   o Root[] children optional
+}
+
+`);
+        });
+
+        it('should infer a Concerto model from an Open API Spec', async () => {
+            const obj = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/petstore.json'),
+                'petstore',
+                'Root',
+                'openapi'
+            );
+            obj.should.equal(`namespace petstore
+
+import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
+
+concept Pet {
+   o NewPet pet optional
+}
+
+concept NewPet {
+   o String name
+   o String tag optional
+}
+
+concept ErrorModel {
+   o Integer code
+   o String message
+}
+
+`);
+        });
+    });
+
+
     describe('#generate', async () => {
         it('should generate an object, including metamodel', async () => {
             const obj = await Commands.generate(

@@ -41,10 +41,10 @@ module.exports = {
     GraphQLVisitor,
     CSharpVisitor,
     ODataVisitor,
-    InferFromJsonSchema
     MermaidVisitor,
     MarkdownVisitor,
     ProtobufVisitor,
+    InferFromJsonSchema,
     formats: {
         golang: GoLangVisitor,
         jsonschema: JSONSchemaVisitor,
