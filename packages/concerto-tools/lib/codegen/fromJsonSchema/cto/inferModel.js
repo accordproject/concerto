@@ -79,13 +79,13 @@ function parseIdUri(id) {
  * @private
  */
 function inferTypeName(definition, context) {
+    if (definition.$ref) {
+        return normalizeType(definition.$ref);
+    }
+
     const name = context.parents.peek();
     const { type } = parseIdUri(definition.$id) ||
         { type: definition.title || name };
-
-    // TODO Resolve $ref definitions
-    // if (definition.$ref) {}
-
     return normalizeType(type);
 }
 
@@ -263,7 +263,7 @@ function inferDeclaration(definition, context) {
             !key.startsWith('x-') // Ignore custom extensions
         );
         console.warn(
-            `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' not supported.`
+            `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' is not supported.`
         );
     }
 }
