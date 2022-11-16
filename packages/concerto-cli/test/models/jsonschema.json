@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "name": { "type": "string" },
+        "children": {
+            "type": "array",
+            "items": { "$ref": "#" }
+        }
+    }
+}

@@ -448,6 +448,12 @@
                             },
                             "required": ["$class", "sku", "price", "product"]
                         }
+                    },
+                    "alternative": {
+                        "anyOf": [
+                            { "type": "string", "maxLength": 5 },
+                            { "type": "number", "minimum": 0 }
+                        ]
                     }
                 },
                 "required": [
@@ -503,6 +509,12 @@
                 }
             },
             "required": ["$class", "name", "employees"]
+        },
+        "alternative": {
+            "anyOf": [
+                { "type": "string", "maxLength": 5 },
+                { "type": "number", "minimum": 0 }
+            ]
         }
     },
     "required": [

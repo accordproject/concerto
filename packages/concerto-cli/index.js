@@ -16,6 +16,7 @@
 'use strict';
 
 const Logger = require('@accordproject/concerto-util').Logger;
+const fs = require('fs');
 const { glob } = require('glob');
 const Commands = require('./lib/commands');
 
@@ -305,6 +306,47 @@ require('yargs')
             .catch((err) => {
                 Logger.error(err.message);
             });
+    })
+    .command('infer', 'generate a concerto model from a source schema', (yargs) => {
+        yargs.demandOption(['input', 'namespace']);
+        yargs.option('input', {
+            describe: 'path to the input file',
+            type: 'string',
+        });
+        yargs.option('output', {
+            describe: 'path to the output file',
+            type: 'string',
+        });
+        yargs.option('format', {
+            describe: 'either `openapi` or `jsonSchema`',
+            default: 'jsonSchema',
+            type: 'string'
+        });
+        yargs.option('namespace', {
+            describe: 'The namepspace for the output model',
+            type: 'string',
+        });
+        yargs.option('typeName', {
+            describe: 'The name of the root type',
+            type: 'string',
+            default: 'Root'
+        });
+    }, (argv) => {
+        if (argv.verbose) {
+            Logger.info(`Infer Concerto model from ${argv.input} in the ${argv.format} format`);
+        }
+
+        try {
+            const cto = Commands.inferConcertoSchema(argv.input, argv.namespace, argv.typeName, argv.format, argv.output);
+            if (argv.output){
+                fs.writeFileSync(argv.output, cto);
+            } else {
+                console.log(cto);
+            }
+        } catch (err){
+            Logger.error(err);
+            return;
+        }
     })
     .command('generate <mode>', 'generate a sample JSON object for a concept', yargs => {
         yargs.demandOption(['model'], 'Please provide a model');

@@ -240,13 +240,11 @@ concept Geographical_location {
         }).should.throw('Type keyword \'null\' in \'email\' is not supported');
     });
 
-    it('should not generate when unsupported definitions', async () => {
-        (function () {
-            inferModel('org.acme', 'Root', {
-                'allOf': [
-                    { 'type': 'string' }
-                ]
-            });
-        }).should.throw('Keyword(s) \'allOf\' in definition \'Root\' not supported.');
+    it('should not fail for unsupported keywords', async () => {
+        inferModel('org.acme', 'Root', {
+            'allOf': [
+                { 'type': 'string' }
+            ]
+        });
     });
 });

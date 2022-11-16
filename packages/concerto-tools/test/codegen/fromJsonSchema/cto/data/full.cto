@@ -54,5 +54,6 @@ concept Root {
    o Double height
    o Children[] children
    o Company company
+   o String alternative optional
 }
 

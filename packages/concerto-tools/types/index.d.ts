@@ -12,6 +12,7 @@ export var CodeGen: {
     MermaidVisitor: typeof import("./lib/codegen/fromcto/mermaid/mermaidvisitor");
     MarkdownVisitor: typeof import("./lib/codegen/fromcto/markdown/markdownvisitor");
     ProtobufVisitor: typeof import("./lib/codegen/fromcto/protobuf/protobufvisitor");
+    InferFromJsonSchema: typeof import("./lib/codegen/fromJsonSchema/cto/inferModel");
     formats: {
         golang: typeof import("./lib/codegen/fromcto/golang/golangvisitor");
         jsonschema: typeof import("./lib/codegen/fromcto/jsonschema/jsonschemavisitor");

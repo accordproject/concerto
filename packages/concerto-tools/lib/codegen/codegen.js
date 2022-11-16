@@ -28,6 +28,7 @@ const ODataVisitor = require('./fromcto/odata/odatavisitor');
 const MermaidVisitor = require('./fromcto/mermaid/mermaidvisitor');
 const MarkdownVisitor = require('./fromcto/markdown/markdownvisitor');
 const ProtobufVisitor = require('./fromcto/protobuf/protobufvisitor');
+const InferFromJsonSchema = require('./fromJsonSchema/cto/inferModel');
 
 module.exports = {
     AbstractPlugin,
@@ -43,6 +44,7 @@ module.exports = {
     MermaidVisitor,
     MarkdownVisitor,
     ProtobufVisitor,
+    InferFromJsonSchema,
     formats: {
         golang: GoLangVisitor,
         jsonschema: JSONSchemaVisitor,
