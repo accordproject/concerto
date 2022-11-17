@@ -563,8 +563,6 @@ describe('concerto-cli', () => {
             );
             obj.should.equal(`namespace concerto.test.jsonSchema
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-
 concept Root {
    o String name optional
    o Root[] children optional
@@ -581,8 +579,6 @@ concept Root {
                 'openapi'
             );
             obj.should.equal(`namespace petstore
-
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
 
 concept Pet {
    o NewPet pet optional

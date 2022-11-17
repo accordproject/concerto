@@ -63,8 +63,6 @@ describe('inferModel', function () {
         });
         cto.should.equal(`namespace org.acme
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-
 enum Root {
    o one
    o two
@@ -86,13 +84,11 @@ enum Root {
                 }
             }
         });
-        // TODO This is not a valid CTO model, because we don't generate definitions for inline sub-schemas.
+        // TODO Generate definitions for inline sub-schemas.
         cto.should.equal(`namespace org.acme
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-
 concept Root {
-   o Xs[] xs optional
+   o String[] xs optional
 }
 
 `);
@@ -112,8 +108,6 @@ concept Root {
         );
         cto.should.equal(`namespace org.acme
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-
 concept Root {
    o String name optional
    o Root[] children optional
@@ -126,8 +120,6 @@ concept Root {
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/2020-schema.json'), 'utf8'));
         const cto = inferModel('org.acme', 'Root', schema);
         cto.should.equal(`namespace com.example
-
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
 
 concept Veggie {
    o String veggieName
@@ -146,8 +138,6 @@ concept Arrays {
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/modifiers-schema.json'), 'utf8'));
         const cto = inferModel('org.acme', 'Root', schema);
         cto.should.equal(`namespace com.example
-
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
 
 concept Geographical_location {
    o String name default="home" regex=/[\\w\\s]+/ optional
@@ -190,23 +180,28 @@ concept Geographical_location {
         }).should.throw('\'additionalProperties\' are not supported in Concerto');
     });
 
-    it('should not generate when unsupported formats are used', async () => {
-        (function () {
-            inferModel('org.acme', 'Root', {
-                $schema: 'http://json-schema.org/draft-07/schema#',
-                definitions: {
-                    Foo: {
-                        type: 'object',
-                        properties: {
-                            email: {
-                                type: 'string',
-                                format: 'email'
-                            }
+    it('should quietly accept unsupported formats', async () => {
+        const cto = inferModel('org.acme', 'Root', {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            definitions: {
+                Foo: {
+                    type: 'object',
+                    properties: {
+                        email: {
+                            type: 'string',
+                            format: 'email'
                         }
                     }
                 }
-            });
-        }).should.throw('Format \'email\' in \'email\' is not supported');
+            }
+        });
+        cto.should.equal(`namespace org.acme
+
+concept Foo {
+   o String email optional
+}
+
+`);
     });
 
     it('should not generate when unsupported type keywords are used', async () => {
@@ -219,7 +214,7 @@ concept Geographical_location {
                     }
                 }
             });
-        }).should.throw('Type keyword \'null\' in definition \'Foo\' not supported.');
+        }).should.throw('Type keyword \'null\' in definition \'Foo\' is not supported.');
     });
 
     it('should not generate when unsupported type keywords are used in an object', async () => {
@@ -240,11 +235,36 @@ concept Geographical_location {
         }).should.throw('Type keyword \'null\' in \'email\' is not supported');
     });
 
-    it('should not fail for unsupported keywords', async () => {
-        inferModel('org.acme', 'Root', {
+    it('should not generate when duplicate definitions are found', async () => {
+        (function () {
+            inferModel('org.acme', 'Foo', {
+                $schema: 'http://json-schema.org/draft-07/schema#',
+                definitions: {
+                    'Foo': {
+                        'type': 'object',
+                    },
+                }
+            });
+        }).should.throw('Duplicate definition found for type \'Foo\'');
+    });
+
+    it('should quietly accept array definitions', async () => {
+        const cto = inferModel('org.acme', 'Root', {
+            type: 'array'
+        });
+        cto.should.equal(`namespace org.acme
+
+`);
+    });
+
+    it('should quietly accept unsupported definitions', async () => {
+        const cto = inferModel('org.acme', 'Root', {
             'allOf': [
                 { 'type': 'string' }
             ]
         });
+        cto.should.equal(`namespace org.acme
+
+`);
     });
 });

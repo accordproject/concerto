@@ -73,12 +73,13 @@ function parseIdUri(id) {
 
 /**
  * Infer a type name for a definition. Examines $id, title and parent declaration
- * @param {*} definition the input object
- * @param {*} context the processing context
+ * @param {object} definition - the input object
+ * @param {*} context - the processing context
+ * @param {boolean} [skipDictionary] - if true, this function will not use the dictionary help inference
  * @returns {string} A name for the definition
  * @private
  */
-function inferTypeName(definition, context) {
+function inferTypeName(definition, context, skipDictionary) {
     if (definition.$ref) {
         return normalizeType(definition.$ref);
     }
@@ -86,7 +87,12 @@ function inferTypeName(definition, context) {
     const name = context.parents.peek();
     const { type } = parseIdUri(definition.$id) ||
         { type: definition.title || name };
-    return normalizeType(type);
+
+    if (skipDictionary || context.dictionary.has(normalizeType(type))){
+        return normalizeType(type);
+    }
+    // We fallback to a stringified object representation. This is "untyped".
+    return 'String';
 }
 
 /**
@@ -122,7 +128,8 @@ function inferType(definition, context) {
                 if (definition.format === 'date-time' || definition.format === 'date') {
                     return 'DateTime';
                 } else {
-                    throw new Error(`Format '${definition.format}' in '${name}' is not supported`);
+                    console.warn(`Format '${definition.format}' in '${name}' is not supported. It has been ignored.`);
+                    return 'String';
                 }
             }
             return 'String';
@@ -143,13 +150,15 @@ function inferType(definition, context) {
 
     // Hack until we support union types.
     // https://github.com/accordproject/concerto/issues/292
-    if (definition.anyOf){
+    const alternative = definition.anyOf || definition.oneOf;
+    if (alternative){
+        const keyword = definition.anyOf ? 'anyOf' : 'oneOf';
         console.warn(
-            `Keyword 'anyOf' in definition '${name}' is not fully supported. Defaulting to first alternative.`
+            `Keyword '${keyword}' in definition '${name}' is not fully supported. Defaulting to first alternative.`
         );
 
         // Just choose the first item
-        return inferType(definition.anyOf[0], context);
+        return inferType(alternative[0], context);
     }
 
     throw new Error(`Unsupported definition: ${JSON.stringify(definition)}`);
@@ -253,9 +262,13 @@ function inferDeclaration(definition, context) {
     } else if (definition.type) {
         if (definition.type === 'object') {
             inferConcept(definition, context);
+        } else if (definition.type === 'array') {
+            console.warn(
+                `Type keyword 'array' in definition '${name}' is not supported. It has been ignored.`
+            );
         } else {
             throw new Error(
-                `Type keyword '${definition.type}' in definition '${name}' not supported.`
+                `Type keyword '${definition.type}' in definition '${name}' is not supported.`
             );
         }
     } else {
@@ -265,7 +278,7 @@ function inferDeclaration(definition, context) {
             !key.startsWith('x-') // Ignore custom extensions
         );
         console.warn(
-            `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' is not supported.`
+            `Keyword(s) '${badKeys.join('\', \'')}' in definition '${name}' are not supported.`
         );
     }
 }
@@ -304,18 +317,32 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     const context = {
         parents: new TypedStack(),
         writer: new Writer(),
+        dictionary: new Set(),
     };
 
     context.writer.writeLine(0, `namespace ${namespace}`);
     context.writer.writeLine(0, '');
 
-    // Add imports
-    // TODO we need some heuristic or metadata to identify Concerto dependencies rather than making assumptions
-    context.writer.writeLine(0, 'import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto');
-    context.writer.writeLine(0, '');
-
     // Create definitions
     const defs = schema.definitions || schema.$defs || schema?.components?.schemas ||[];
+
+    // Build a dictionary
+    context.dictionary.add(defaultType);
+    if (schema.$id) {
+        context.dictionary.add(normalizeType(parseIdUri(schema.$id).type));
+    }
+    Object.keys(defs).forEach((key) => {
+        context.parents.push(key);
+        const definition = defs[key];
+        const typeName = inferTypeName(definition, context, true);
+        if (context.dictionary.has(typeName)){
+            throw new Error(`Duplicate definition found for type '${typeName}'.`);
+        }
+        context.dictionary.add(typeName);
+        context.parents.pop();
+    });
+
+    // Visit each declaration
     Object.keys(defs).forEach((key) => {
         context.parents.push(key);
         const definition = defs[key];

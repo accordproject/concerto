@@ -323,7 +323,7 @@ require('yargs')
             type: 'string'
         });
         yargs.option('namespace', {
-            describe: 'The namepspace for the output model',
+            describe: 'The namespace for the output model',
             type: 'string',
         });
         yargs.option('typeName', {
