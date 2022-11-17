@@ -44,8 +44,10 @@ concept Person identified by name  {
 - Go Types
 - C# Classes
 - TypeScript Classes
+- Protobuf Messages
 - PlantUML Diagrams
 - Mermaid UML Diagrams
+- Markdown (with embedded Mermaid)
 
 🕸 Publish your reusable models to any website, including the Accord Project [model repository](https://models.accordproject.org)
 
