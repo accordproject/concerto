@@ -142,6 +142,16 @@
                         },
                         "required": ["$class", "sku", "price", "product"]
                     }
+                },
+                "json": {
+                    "type": "object"
+                },
+                "alternation": {
+                    "oneOf": [
+                        { "type": "number" },
+                        { "type": "string" }
+                    ]
+
                 }
             },
             "required": [

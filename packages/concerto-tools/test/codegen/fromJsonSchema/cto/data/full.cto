@@ -1,7 +1,5 @@
 namespace org.acme
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-
 concept Children {
    o String name
    o Integer age
@@ -16,6 +14,8 @@ concept Children {
    o String[] emptyArray
    o Pet[] favoritePets
    o Stuff[] stuff
+   o String json optional
+   o Double alternation optional
 }
 
 enum Color {
