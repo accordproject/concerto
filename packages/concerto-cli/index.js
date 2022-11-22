@@ -136,6 +136,15 @@ require('yargs')
             type: 'boolean',
             default: true
         });
+        yargs.option('rootType', {
+            describe: 'The root type to use',
+            type: 'string',
+        });
+        yargs.option('sample', {
+            describe: 'Generate sample data',
+            type: 'boolean',
+            default: false,
+        });
         yargs.check(({ model, metamodel }) => {
             if (model.length > 0 || metamodel) {
                 return true;
@@ -156,12 +165,15 @@ require('yargs')
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
         options.pascalCase = argv.pascalCase;
+        options.rootType = argv.rootType;
+        options.sample = argv.sample;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);
             })
             .catch((err) => {
                 Logger.error(err.message);
+                process.exit(1);
             });
     })
     .command('get', 'save local copies of external model dependencies', (yargs) => {

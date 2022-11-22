@@ -140,6 +140,8 @@ class Commands {
      * @param {boolean} [options.useSystemTextJson] - compile for System.Text.Json library
      * @param {boolean} [options.useNewtonsoftJson] - compile for Newtonsoft.Json library
      * @param {boolean} [options.pascalCase] - use PascalCase in generated names
+     * @param {boolean} [options.rootType] - the root type to use
+     * @param {boolean} [options.sample] - generate sample data
      */
     static async compile(target, ctoFiles, output, options) {
         const modelManagerOptions = { offline: options && options.offline, strict: options && options.strict };
@@ -148,6 +150,8 @@ class Commands {
             useNewtonsoftJson: options && options.useNewtonsoftJson,
             namespacePrefix: options && options.namespacePrefix,
             pascalCase: options && options.pascalCase,
+            rootType: options && options.rootType,
+            sample: options && options.sample,
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);

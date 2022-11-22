@@ -70,7 +70,8 @@
         "ajv": "8.10.0",
         "ajv-formats": "2.1.1",
         "camelcase": "6.3.0",
-        "debug": "4.3.1"
+        "debug": "4.3.1",
+        "lorem-ipsum": "2.0.3"
     },
     "license-check-and-add-config": {
         "folder": "./lib",

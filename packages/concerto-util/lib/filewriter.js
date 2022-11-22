@@ -58,6 +58,14 @@ class FileWriter extends Writer {
     }
 
     /**
+     * Determine whether or not a file is open for writing.
+     * @returns {boolean} true if a file is open for writing, false otherwise.
+     */
+    isFileOpen() {
+        return !!this.fileName;
+    }
+
+    /**
      * Opens a file for writing, with a location relative to the
      * root directory of this FileWriter.
      *
