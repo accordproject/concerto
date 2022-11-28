@@ -65,6 +65,10 @@ describe('Serializer', () => {
             o Double elevation
         }
 
+        concept DateTimeTest {
+            o DateTime date
+        }
+
         event SampleEvent identified by eventId {
         o String eventId
         --> SampleAsset asset
@@ -406,6 +410,82 @@ describe('Serializer', () => {
             };
             const result = serializer.fromJSON(json);
             result.should.be.an.instanceOf(Resource);
+        });
+         
+        const json = {
+            $class : 'org.acme.sample.DateTimeTest',
+        };
+
+        // See the visualization at https://ijmacd.github.io/rfc3339-iso8601/
+        const dateTests = [
+            // Intersection RFC 3339 & ISO 8601
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:MM:SSZ', '2022-11-28T01:02:03.000Z'],
+            ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:MM:SS.MZ', '2022-11-28T01:02:03.900Z'],
+            ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:MM:SS.MMZ', '2022-11-28T01:02:03.980Z'],
+            ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:MM:SS.MMMZ'],
+            ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:MM:SS.MMMMM'],
+            ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:MM:SS+zz:zz', '2022-11-27T17:02:03.000Z'],
+            ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:MM:SS.MMM+zz:zz', '2022-11-27T17:02:03.987Z'],
+            ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:MM:SS.MMMMM+zz:zz', '2022-11-27T17:02:03.987Z'],
+            ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:MM:SS+zz:zz', '2022-11-28T09:02:03.000Z'],
+            ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:MM:SS.MMM+zz:zz', '2022-11-28T09:02:03.987Z'],
+            ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:MM:SS.MMMMM+zz:zz', '2022-11-28T09:02:03.987Z'],
+ 
+            // Tests below this line are accepted but fall outside the specification for Concerto
+            // Future failures of these tests are not considered breaking changes.
+ 
+            // RFC 3339 && HTML Living Standard
+            ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:MM:SS.MMMZ'],
+            
+            // RFC 3339
+            ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
+            ['2022-11-28T01:02:03.987z', 'Lowercase z'],
+
+            // ISO 8601
+            ['2022', 'YYYY', '2022-01-01T00:00:00.000Z'],
+            ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],         
+ 
+            // ISO 8601 & HTML Living Standard
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:MM:SS'],
+            ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
+
+            // HTML Living Standard
+            ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
+            ['--11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
+            ['11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
+
+        ];
+
+        dateTests.forEach(([dateValue, message, expected]) => {
+            it.only(`should accept dates and dateTime values in the intersection of RFC 3339 and ISO 8601, ${message}`, () => {
+                json.date = dateValue;
+                const result = serializer.toJSON(serializer.fromJSON(json, {}), {});
+                result.date.should.equal(expected || '2022-11-28T01:02:03.987Z');
+            });
+        });
+
+        const negativeDateTests =[
+            // ISO 8601
+            ['2022‐11‐28T01:02:03.987Z', 'U+2010 HYPHEN'],
+            ['2022−11−28T01:02:03.987Z', 'U+2212 MINUS'],
+            ['2022-11-28T11,7', 'YYYY-MM-DDTHH,1h'],
+            ['2022-W48', 'YYYY-Ww'],
+            ['2022-W48-1', 'YYYY-Ww-z'],
+            ['20', 'YYY'],
+            ['+0020221128T115723Z', '+YYYYYYMMDDTHHMMSSZ'],
+
+            // RFC 3339
+            ['2022-11-28_01:02:03.987Z', 'Underscore separator'],
+        ];
+
+        negativeDateTests.forEach(([dateValue, message]) => {
+            it.only(`should not accept invalid dates or dateTime values, ${message}`, () => {
+                json.date = dateValue;
+                (() => 
+                    serializer.toJSON(serializer.fromJSON(json, {}), {})
+                ).should.throw('Expected value at path `$.date` to be of type `DateTime`')
+            });
         });
     });
 
