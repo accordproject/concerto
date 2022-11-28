@@ -1,12 +1,12 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Model",
+  "$class": "concerto.metamodel@1.1.0.Model",
   "decorators": [
     {
-      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "$class": "concerto.metamodel@1.1.0.Decorator",
       "name": "noargs"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "$class": "concerto.metamodel@1.1.0.Decorator",
       "name": "parens",
       "arguments": []
     }
@@ -15,21 +15,21 @@
   "imports": [],
   "declarations": [
     {
-      "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+      "$class": "concerto.metamodel@1.1.0.AssetDeclaration",
       "name": "Car",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "id",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "$class": "concerto.metamodel@1.1.0.RelationshipProperty",
           "name": "owner",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "Driver"
           },
           "isArray": false,
@@ -37,119 +37,119 @@
         }
       ],
       "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
         "name": "id"
       },
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "noargs"
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "parens",
           "arguments": []
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "asset"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "positiveInteger",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": 1
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "negativeInteger",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": -1
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "positiveDouble",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": 10.2
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "negativeDouble",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": -10.2
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "booleanFalse",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
               "value": false
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "booleanTrue",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
               "value": true
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "all",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "foo"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": 1
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": -1
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": 10.2
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+              "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
               "value": -10.2
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
               "value": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
               "value": true
             }
           ]
@@ -157,125 +157,125 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
       "name": "Driver",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "email",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "noargs"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "parens",
               "arguments": []
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "string"
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "positiveInteger",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": 1
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "negativeInteger",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": -1
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "positiveDouble",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": 10.2
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "negativeDouble",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": -10.2
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "booleanFalse",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                   "value": false
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "booleanTrue",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                   "value": true
                 }
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "all",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "foo"
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": 1
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": -1
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": 10.2
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": -10.2
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                   "value": false
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                   "value": true
                 }
               ]
@@ -283,29 +283,29 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "firstName",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "lastName",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+          "$class": "concerto.metamodel@1.1.0.DoubleProperty",
           "name": "myDouble",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "double"
                 }
               ]
@@ -313,17 +313,17 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+          "$class": "concerto.metamodel@1.1.0.IntegerProperty",
           "name": "myInt",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "integer"
                 }
               ]
@@ -331,17 +331,17 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.LongProperty",
+          "$class": "concerto.metamodel@1.1.0.LongProperty",
           "name": "myLong",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "long"
                 }
               ]
@@ -349,17 +349,17 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+          "$class": "concerto.metamodel@1.1.0.DateTimeProperty",
           "name": "myDateTime",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "dateTime"
                 }
               ]
@@ -367,17 +367,17 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+          "$class": "concerto.metamodel@1.1.0.BooleanProperty",
           "name": "myBoolean",
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "boolean"
                 }
               ]
@@ -385,21 +385,21 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "myConcept",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "MyConcept"
           },
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "concept"
                 }
               ]
@@ -407,21 +407,21 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+          "$class": "concerto.metamodel@1.1.0.RelationshipProperty",
           "name": "myRegulator",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "Regulator"
           },
           "isArray": false,
           "isOptional": false,
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "relationship"
                 }
               ]
@@ -430,16 +430,16 @@
         }
       ],
       "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
         "name": "email"
       },
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "participant"
             }
           ]
@@ -447,40 +447,40 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
       "name": "Regulator",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "email",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "firstName",
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "lastName",
           "isArray": false,
           "isOptional": false
         }
       ],
       "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
         "name": "email"
       },
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "participant"
             }
           ]
@@ -488,17 +488,17 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransaction",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "transaction"
             }
           ]
@@ -506,17 +506,17 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyEvent",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "event"
             }
           ]
@@ -524,17 +524,17 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
       "name": "MyConcept",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "concept"
             }
           ]
@@ -542,19 +542,19 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+      "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
       "name": "MyEnum",
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.EnumProperty",
+          "$class": "concerto.metamodel@1.1.0.EnumProperty",
           "name": "VALUE",
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "bar",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "enumValue"
                 }
               ]
@@ -564,11 +564,11 @@
       ],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "bar",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorString",
+              "$class": "concerto.metamodel@1.1.0.DecoratorString",
               "value": "enum"
             }
           ]
@@ -576,19 +576,19 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransactionIdentifier1",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "returns",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "MyConcept"
               },
               "isArray": false
@@ -598,19 +598,19 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransactionIdentifier2",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "returns",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "MyConcept"
               },
               "isArray": true
@@ -620,19 +620,19 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransactionIdentifier3",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "returns",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "String"
               },
               "isArray": false
@@ -642,19 +642,19 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransactionIdentifier4",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "returns",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "String"
               },
               "isArray": true
@@ -664,17 +664,17 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+      "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
       "name": "MyTransactionIdentifier5",
       "isAbstract": false,
       "properties": [],
       "decorators": [
         {
-          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "$class": "concerto.metamodel@1.1.0.Decorator",
           "name": "returns",
           "arguments": [
             {
-              "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+              "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
               "value": true
             }
           ]

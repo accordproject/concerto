@@ -1,142 +1,142 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Models",
+  "$class": "concerto.metamodel@1.1.0.Models",
   "models": [
     {
-      "$class": "concerto.metamodel@1.0.0.Model",
+      "$class": "concerto.metamodel@1.1.0.Model",
       "decorators": [],
       "namespace": "org.accordproject.time",
       "imports": [],
       "declarations": [
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "Month",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "January"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "February"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "March"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "April"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "May"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "June"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "July"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "August"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "September"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "October"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "November"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "December"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "Day",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Monday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Tuesday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Wednesday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Thursday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Friday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Saturday"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "Sunday"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "TemporalUnit",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "seconds"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "minutes"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "hours"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "days"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "weeks"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
           "name": "Duration",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "amount",
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "unit",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "TemporalUnit"
               },
               "isArray": false,
@@ -145,47 +145,47 @@
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "PeriodUnit",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "days"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "weeks"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "months"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "quarters"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "years"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
           "name": "Period",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "amount",
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "unit",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "PeriodUnit"
               },
               "isArray": false,
@@ -196,82 +196,82 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.Model",
+      "$class": "concerto.metamodel@1.1.0.Model",
       "decorators": [],
       "namespace": "test.person",
       "imports": [
         {
-          "$class": "concerto.metamodel@1.0.0.ImportAll",
+          "$class": "concerto.metamodel@1.1.0.ImportAll",
           "namespace": "org.accordproject.time"
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ImportType",
+          "$class": "concerto.metamodel@1.1.0.ImportType",
           "name": "TemporalUnit",
           "namespace": "org.accordproject.time"
         }
       ],
       "declarations": [
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "Gender",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "MALE"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "FEMALE"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "OTHER"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
           "name": "Individual",
           "isAbstract": true,
           "properties": []
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
           "name": "Person",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "firstName",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+                "$class": "concerto.metamodel@1.1.0.StringRegexValidator",
                 "pattern": "[a-zA-Z]*",
                 "flags": "u"
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "lastName",
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "address",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Address"
               },
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "address2",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Address"
               },
               "isArray": false,
@@ -279,21 +279,21 @@
               "defaultValue": "USAddress"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+              "$class": "concerto.metamodel@1.1.0.RelationshipProperty",
               "name": "address3",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Address"
               },
               "isArray": false,
               "isOptional": false,
               "decorators": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.Decorator",
+                  "$class": "concerto.metamodel@1.1.0.Decorator",
                   "name": "description",
                   "arguments": [
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "Work Address"
                     }
                   ]
@@ -301,125 +301,125 @@
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+              "$class": "concerto.metamodel@1.1.0.RelationshipProperty",
               "name": "address4",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Address"
               },
               "isArray": true,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+              "$class": "concerto.metamodel@1.1.0.RelationshipProperty",
               "name": "address5",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Address"
               },
               "isArray": false,
               "isOptional": true
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "gender",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Gender"
               },
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DateTimeProperty",
+              "$class": "concerto.metamodel@1.1.0.DateTimeProperty",
               "name": "dob",
               "isArray": false,
               "isOptional": true
             }
           ],
           "superType": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "Individual"
           }
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
           "name": "Employee",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "company",
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+              "$class": "concerto.metamodel@1.1.0.BooleanProperty",
               "name": "onLeave",
               "isArray": false,
               "isOptional": false
             }
           ],
           "superType": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "Person"
           }
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
           "name": "Address",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+              "$class": "concerto.metamodel@1.1.0.IntegerProperty",
               "name": "zip",
               "isArray": false,
               "isOptional": false,
               "defaultValue": 10001
             },
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "zip2",
               "isArray": false,
               "isOptional": false,
               "defaultValue": 10001
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+              "$class": "concerto.metamodel@1.1.0.DoubleProperty",
               "name": "zip3",
               "isArray": false,
               "isOptional": false,
               "defaultValue": 10001
             },
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "city",
               "isArray": false,
               "isOptional": false,
               "defaultValue": "NYC"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "country",
               "isArray": false,
               "isOptional": false,
               "defaultValue": "USA"
             },
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "street",
               "isArray": true,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+              "$class": "concerto.metamodel@1.1.0.BooleanProperty",
               "name": "isResidential",
               "isArray": false,
               "isOptional": false,
               "defaultValue": true
             },
             {
-              "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+              "$class": "concerto.metamodel@1.1.0.BooleanProperty",
               "name": "isPrivate",
               "isArray": false,
               "isOptional": false,
@@ -427,194 +427,194 @@
             }
           ],
           "identified": {
-            "$class": "concerto.metamodel@1.0.0.Identified"
+            "$class": "concerto.metamodel@1.1.0.Identified"
           }
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+          "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
           "name": "USAddress",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+              "$class": "concerto.metamodel@1.1.0.IntegerProperty",
               "name": "zip4",
               "isArray": false,
               "isOptional": false,
               "decorators": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.Decorator",
+                  "$class": "concerto.metamodel@1.1.0.Decorator",
                   "name": "Zip",
                   "arguments": [
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "x"
                     },
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                       "value": 1
                     },
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "y"
                     },
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "foo"
                     },
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "z"
                     },
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                       "value": true
                     }
                   ]
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.Decorator",
+                  "$class": "concerto.metamodel@1.1.0.Decorator",
                   "name": "Zip2",
                   "arguments": []
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.Decorator",
+                  "$class": "concerto.metamodel@1.1.0.Decorator",
                   "name": "Zip3"
                 }
               ],
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.IntegerDomainValidator",
                 "lower": -365,
                 "upper": 365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+              "$class": "concerto.metamodel@1.1.0.IntegerProperty",
               "name": "zip41",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.IntegerDomainValidator",
                 "upper": 365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+              "$class": "concerto.metamodel@1.1.0.IntegerProperty",
               "name": "zip42",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.IntegerDomainValidator",
                 "lower": -365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "zip5",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.LongDomainValidator",
                 "lower": -365,
                 "upper": 365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "zip51",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.LongDomainValidator",
                 "upper": 365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.LongProperty",
+              "$class": "concerto.metamodel@1.1.0.LongProperty",
               "name": "zip52",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.LongDomainValidator",
                 "lower": -365
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+              "$class": "concerto.metamodel@1.1.0.DoubleProperty",
               "name": "zip6",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.DoubleDomainValidator",
                 "lower": -3.14,
                 "upper": 3.14
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+              "$class": "concerto.metamodel@1.1.0.DoubleProperty",
               "name": "zip61",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.DoubleDomainValidator",
                 "lower": -3.14
               }
             },
             {
-              "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+              "$class": "concerto.metamodel@1.1.0.DoubleProperty",
               "name": "zip62",
               "isArray": false,
               "isOptional": false,
               "validator": {
-                "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+                "$class": "concerto.metamodel@1.1.0.DoubleDomainValidator",
                 "upper": 3.14
               }
             }
           ],
           "superType": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "Address"
           },
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "Address",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "x"
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorNumber",
                   "value": 1
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "y"
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "foo"
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "z"
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorBoolean",
                   "value": true
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
                   "type": {
-                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                     "name": "Gender"
                   },
                   "isArray": false
                 },
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorTypeReference",
                   "type": {
-                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                     "name": "TemporalUnit"
                   },
                   "isArray": true
@@ -622,64 +622,64 @@
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "Address2",
               "arguments": []
             },
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "Address3"
             }
           ]
         },
         {
-          "$class": "concerto.metamodel@1.0.0.AssetDeclaration",
+          "$class": "concerto.metamodel@1.1.0.AssetDeclaration",
           "name": "A",
           "isAbstract": false,
           "properties": []
         },
         {
-          "$class": "concerto.metamodel@1.0.0.EventDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EventDeclaration",
           "name": "E",
           "isAbstract": false,
           "properties": []
         },
         {
-          "$class": "concerto.metamodel@1.0.0.TransactionDeclaration",
+          "$class": "concerto.metamodel@1.1.0.TransactionDeclaration",
           "name": "T",
           "isAbstract": false,
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.StringProperty",
+              "$class": "concerto.metamodel@1.1.0.StringProperty",
               "name": "id",
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "tu",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "TemporalUnit"
               },
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "month",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Month"
               },
               "isArray": false,
               "isOptional": false
             },
             {
-              "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+              "$class": "concerto.metamodel@1.1.0.ObjectProperty",
               "name": "p",
               "type": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                 "name": "Participant"
               },
               "isArray": false,
@@ -687,24 +687,24 @@
             }
           ],
           "identified": {
-            "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+            "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
             "name": "id"
           }
         },
         {
-          "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+          "$class": "concerto.metamodel@1.1.0.EnumDeclaration",
           "name": "State",
           "properties": [
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "RUNNING",
               "decorators": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.Decorator",
+                  "$class": "concerto.metamodel@1.1.0.Decorator",
                   "name": "label",
                   "arguments": [
                     {
-                      "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                      "$class": "concerto.metamodel@1.1.0.DecoratorString",
                       "value": "live"
                     }
                   ]
@@ -712,17 +712,17 @@
               ]
             },
             {
-              "$class": "concerto.metamodel@1.0.0.EnumProperty",
+              "$class": "concerto.metamodel@1.1.0.EnumProperty",
               "name": "STOPPED"
             }
           ],
           "decorators": [
             {
-              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "$class": "concerto.metamodel@1.1.0.Decorator",
               "name": "description",
               "arguments": [
                 {
-                  "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                  "$class": "concerto.metamodel@1.1.0.DecoratorString",
                   "value": "DFA states"
                 }
               ]

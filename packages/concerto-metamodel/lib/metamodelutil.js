@@ -23,7 +23,7 @@ const metaModelAst = require('./metamodel.json');
 /**
  * The namespace for the metamodel
  */
-const MetaModelNamespace = 'concerto.metamodel@1.0.0';
+const MetaModelNamespace = 'concerto.metamodel@1.1.0';
 /**
  * The metamodel itself, as a CTO string
  */

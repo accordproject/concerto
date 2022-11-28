@@ -1,262 +1,262 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Model",
+  "$class": "concerto.metamodel@1.1.0.Model",
   "decorators": [],
   "namespace": "org.acme",
   "imports": [],
   "declarations": [
     {
-      "$class": "concerto.metamodel@1.0.0.BooleanScalar",
+      "$class": "concerto.metamodel@1.1.0.BooleanScalar",
       "defaultValue": false,
       "name": "BooleanScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.BooleanScalar",
+      "$class": "concerto.metamodel@1.1.0.BooleanScalar",
       "defaultValue": true,
       "name": "BooleanScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.IntegerScalar",
+      "$class": "concerto.metamodel@1.1.0.IntegerScalar",
       "name": "IntegerScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.IntegerScalar",
+      "$class": "concerto.metamodel@1.1.0.IntegerScalar",
       "defaultValue": "42",
       "name": "IntegerScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.IntegerScalar",
+      "$class": "concerto.metamodel@1.1.0.IntegerScalar",
       "defaultValue": "42",
       "validator": {
-        "$class": "concerto.metamodel@1.0.0.IntegerDomainValidator",
+        "$class": "concerto.metamodel@1.1.0.IntegerDomainValidator",
         "lower": 1
       },
       "name": "IntegerScalarWithDefaultAndRange"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.LongScalar",
+      "$class": "concerto.metamodel@1.1.0.LongScalar",
       "name": "LongScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.LongScalar",
+      "$class": "concerto.metamodel@1.1.0.LongScalar",
       "defaultValue": "42",
       "name": "LongScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.LongScalar",
+      "$class": "concerto.metamodel@1.1.0.LongScalar",
       "defaultValue": "42",
       "validator": {
-        "$class": "concerto.metamodel@1.0.0.LongDomainValidator",
+        "$class": "concerto.metamodel@1.1.0.LongDomainValidator",
         "lower": 1
       },
       "name": "LongScalarWithDefaultAndRange"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.DoubleScalar",
+      "$class": "concerto.metamodel@1.1.0.DoubleScalar",
       "name": "DoubleScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.DoubleScalar",
+      "$class": "concerto.metamodel@1.1.0.DoubleScalar",
       "defaultValue": "42.5",
       "name": "DoubleScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.DoubleScalar",
+      "$class": "concerto.metamodel@1.1.0.DoubleScalar",
       "defaultValue": "42.5",
       "validator": {
-        "$class": "concerto.metamodel@1.0.0.DoubleDomainValidator",
+        "$class": "concerto.metamodel@1.1.0.DoubleDomainValidator",
         "lower": 1
       },
       "name": "DoubleScalarWithDefaultAndRange"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.StringScalar",
+      "$class": "concerto.metamodel@1.1.0.StringScalar",
       "name": "StringScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.StringScalar",
+      "$class": "concerto.metamodel@1.1.0.StringScalar",
       "defaultValue": "something",
       "name": "StringScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.StringScalar",
+      "$class": "concerto.metamodel@1.1.0.StringScalar",
       "defaultValue": "something",
       "validator": {
-        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+        "$class": "concerto.metamodel@1.1.0.StringRegexValidator",
         "pattern": ".*",
         "flags": ""
       },
       "name": "StringScalarWithDefaultAndRegex"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.DateTimeScalar",
+      "$class": "concerto.metamodel@1.1.0.DateTimeScalar",
       "defaultValue": null,
       "name": "DateTimeScalar"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.DateTimeScalar",
+      "$class": "concerto.metamodel@1.1.0.DateTimeScalar",
       "defaultValue": "2022-11-18",
       "name": "DateTimeScalarWithDefault"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
       "name": "Scalars",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "booleanScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "BooleanScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "booleanScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "BooleanScalarWithDefault"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "integerScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "IntegerScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "integerScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "IntegerScalarWithDefault"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "integerScalarWithDefaultAndRange",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "IntegerScalarWithDefaultAndRange"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "longScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "LongScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "longScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "LongScalarWithDefault"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "longScalarWithDefaultAndRange",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "LongScalarWithDefaultAndRange"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "doubleScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "DoubleScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "doubleScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "DoubleScalarWithDefault"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "doubleScalarWithDefaultAndRange",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "DoubleScalarWithDefaultAndRange"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalarWithDefault"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalarWithDefaultAndRegex",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalarWithDefaultAndRegex"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "dateTimeScalar",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "DateTimeScalar"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "dateTimeScalarWithDefault",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "DateTimeScalarWithDefault"
           },
           "isArray": false,
@@ -265,35 +265,35 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
       "name": "ScalarsWithFieldMetaProperties",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalarWithDefaultAndRegexArray",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalarWithDefaultAndRegex"
           },
           "isArray": true,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalarWithDefaultAndRegexOptional",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalarWithDefaultAndRegex"
           },
           "isArray": false,
           "isOptional": true
         },
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "stringScalarWithDefaultAndRegexOptionalArray",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "StringScalarWithDefaultAndRegex"
           },
           "isArray": true,
@@ -302,39 +302,39 @@
       ]
     },
     {
-      "$class": "concerto.metamodel@1.0.0.StringScalar",
+      "$class": "concerto.metamodel@1.1.0.StringScalar",
       "defaultValue": "000-00-0000",
       "validator": {
-        "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+        "$class": "concerto.metamodel@1.1.0.StringRegexValidator",
         "pattern": "\\d{3}-\\d{2}-\\{4}+",
         "flags": ""
       },
       "name": "SSN"
     },
     {
-      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
       "name": "Person",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.1.0.ObjectProperty",
           "name": "ssn",
           "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
             "name": "SSN"
           },
           "isArray": false,
           "isOptional": false
         },
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "givenName",
           "isArray": false,
           "isOptional": false
         }
       ],
       "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
         "name": "ssn"
       }
     }

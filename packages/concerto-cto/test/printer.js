@@ -54,7 +54,7 @@ describe('parser', () => {
 
     it('Should throw error for invalid import', () => {
         (() => Printer.toCTO({
-            $class: 'concerto.metamodel@1.0.0.Model',
+            $class: 'concerto.metamodel@1.1.0.Model',
             namespace: 'org.acme@1.0.0',
             imports: [{
                 $class: 'foo'

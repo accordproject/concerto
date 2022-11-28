@@ -90,7 +90,7 @@ describe('importFullyQualifiedNames', () => {
     describe('#ImportAll', () => {
         it('should return imports', async () => {
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                $class: 'concerto.metamodel@1.1.0.ImportAll',
                 namespace: 'test'
             };
             const result = MetaModelUtil.importFullyQualifiedNames(ast);
@@ -101,7 +101,7 @@ describe('importFullyQualifiedNames', () => {
     describe('#ImportType', () => {
         it('should return imports', async () => {
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.ImportType',
+                $class: 'concerto.metamodel@1.1.0.ImportType',
                 namespace: 'test',
                 name: 'Foo'
             };
@@ -113,7 +113,7 @@ describe('importFullyQualifiedNames', () => {
     describe('#ImportTypes', () => {
         it('should return imports', async () => {
             const ast = {
-                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                $class: 'concerto.metamodel@1.1.0.ImportTypes',
                 namespace: 'test',
                 types: ['Foo', 'Bar']
             };
@@ -124,11 +124,11 @@ describe('importFullyQualifiedNames', () => {
 
     it('should throw for unrecognized import', async () => {
         const ast = {
-            $class: 'concerto.metamodel@1.0.0.MyImportType',
+            $class: 'concerto.metamodel@1.1.0.MyImportType',
             namespace: 'test',
             types: ['Foo', 'Bar']
         };
-        (() => {MetaModelUtil.importFullyQualifiedNames(ast);}).should.throw('Unrecognized imports concerto.metamodel@1.0.0.MyImportType');
+        (() => {MetaModelUtil.importFullyQualifiedNames(ast);}).should.throw('Unrecognized imports concerto.metamodel@1.1.0.MyImportType');
     });
 });
 
@@ -136,7 +136,7 @@ describe('getExternalImports', () => {
     it('should get external imports', () => {
         const ast = {
             imports: [{
-                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                $class: 'concerto.metamodel@1.1.0.ImportAll',
                 namespace: 'test',
                 uri: 'https://dummyURI'
             }]

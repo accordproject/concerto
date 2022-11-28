@@ -1,23 +1,23 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Model",
+  "$class": "concerto.metamodel@1.1.0.Model",
   "decorators": [],
   "namespace": "test.person@1.0.0-alpha.0+build1",
   "imports": [],
   "declarations": [
     {
-      "$class": "concerto.metamodel@1.0.0.ParticipantDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ParticipantDeclaration",
       "name": "Person",
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "$class": "concerto.metamodel@1.1.0.StringProperty",
           "name": "name",
           "isArray": false,
           "isOptional": false
         }
       ],
       "identified": {
-        "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+        "$class": "concerto.metamodel@1.1.0.IdentifiedBy",
         "name": "name"
       }
     }

@@ -1,11 +1,11 @@
 {
-  "$class": "concerto.metamodel@1.0.0.Model",
+  "$class": "concerto.metamodel@1.1.0.Model",
   "decorators": [],
   "namespace": "test.version",
   "imports": [],
   "declarations": [
     {
-      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
       "name": "Foo",
       "isAbstract": false,
       "properties": []
