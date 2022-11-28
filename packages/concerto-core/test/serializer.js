@@ -420,7 +420,7 @@ describe('Serializer', () => {
         const dateTests = [
             // Intersection RFC 3339 & ISO 8601
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z'],
             ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
             ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
             ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:mm:ss.SSSZ'],
