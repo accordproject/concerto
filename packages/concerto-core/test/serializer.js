@@ -420,23 +420,24 @@ describe('Serializer', () => {
         const dateTests = [
             // Intersection RFC 3339 & ISO 8601
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:MM:SSZ', '2022-11-28T01:02:03.000Z'],
-            ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:MM:SS.MZ', '2022-11-28T01:02:03.900Z'],
-            ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:MM:SS.MMZ', '2022-11-28T01:02:03.980Z'],
-            ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:MM:SS.MMMZ'],
-            ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:MM:SS.MMMMM'],
-            ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:MM:SS+zz:zz', '2022-11-27T17:02:03.000Z'],
-            ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:MM:SS.MMM+zz:zz', '2022-11-27T17:02:03.987Z'],
-            ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:MM:SS.MMMMM+zz:zz', '2022-11-27T17:02:03.987Z'],
-            ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:MM:SS+zz:zz', '2022-11-28T09:02:03.000Z'],
-            ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:MM:SS.MMM+zz:zz', '2022-11-28T09:02:03.987Z'],
-            ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:MM:SS.MMMMM+zz:zz', '2022-11-28T09:02:03.987Z'],
- 
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+            ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
+            ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
+            ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:mm:ss.SSSZ'],
+            ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:mm:ss+HH:mm', '2022-11-27T17:02:03.000Z'],
+            ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:mm:ss.SSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+            ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+            ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
+            ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:mm:ss.SSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+            ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+            
             // Tests below this line are accepted but fall outside the specification for Concerto
             // Future failures of these tests are not considered breaking changes.
- 
+            
+            ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
+            
             // RFC 3339 && HTML Living Standard
-            ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:MM:SS.MMMZ'],
+            ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ'],
             
             // RFC 3339
             ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
@@ -447,7 +448,7 @@ describe('Serializer', () => {
             ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],         
  
             // ISO 8601 & HTML Living Standard
-            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:MM:SS'],
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss'],
             ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
 
             // HTML Living Standard
