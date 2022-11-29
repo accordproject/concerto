@@ -91,7 +91,15 @@ class JSONPopulator {
     constructor(acceptResourcesForRelationships, ergo, utcOffset) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.ergo = ergo;
-        this.utcOffset = utcOffset || 0; // Defaults to UTC
+
+        // 0 is a valid offset, but is falsy in JS
+        if (utcOffset !== undefined){
+            const normalizedUtcOffset = dayjs.utc().utcOffset(utcOffset).utcOffset();
+            this.utcOffset =  normalizedUtcOffset;
+        } else {
+            const localMachineUtcOffset = dayjs().utcOffset();
+            this.utcOffset = localMachineUtcOffset;
+        }
     }
 
     /**
@@ -256,8 +264,20 @@ class JSONPopulator {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+            // Yearless dates from the HTML Living Standard are supported by DayJS and JS Date
+            // however, their behaviour is not stable in a distributed system with different
+            // offsets. Specifically, parsing does not respect the local offset.
+            } else if (json.match(/^(--)?\d{2}-\d{2}$/)) {
+                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
+            // The date is an unqualified "local-time" so use the
+            // local UTC Offset if an offset wasn't specified as a parameter
+            // https://en.wikipedia.org/wiki/ISO_8601#Local_time_(unqualified)
+            } else if (!json.match(/(Z|(\+|-)\d{2}:\d{2}?)$/i)) {
+                // setting true keeps the time the same when changing the offset
+                result = dayjs.utc(json).utcOffset(this.utcOffset, true);
+            // Otherwise, all of the offset information is in the string.
             } else {
-                result = dayjs.utc(json).utcOffset(this.utcOffset);
+                result = dayjs.utc(json);
             }
             if (!result.isValid()) {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);

@@ -418,9 +418,16 @@ describe('Serializer', () => {
 
         // See the visualization at https://ijmacd.github.io/rfc3339-iso8601/
         const dateTests = [
-            // Intersection RFC 3339 & ISO 8601
-            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z'],
+            // Test Structure
+            // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
+
+            // RFC 3339 & ISO 8601
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000-05:00', '-05:00'],
+            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-27T20:02:03.000-05:00', '-05:00'],
+            ['2022-11-28T01:02:03-05:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T01:02:03.000-05:00', '-05:00'],
             ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
             ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
             ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
@@ -435,6 +442,7 @@ describe('Serializer', () => {
             // Tests below this line are accepted but fall outside the specification for Concerto
             // Future failures of these tests are not considered breaking changes.
 
+            // Truncated nanoseconds
             ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
 
             // RFC 3339 && HTML Living Standard
@@ -450,19 +458,20 @@ describe('Serializer', () => {
 
             // ISO 8601 & HTML Living Standard
             ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss'],
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.987-05:00' ,'-05:00'],
             ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
+            ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000-05:00', '-05:00'],
 
             // HTML Living Standard
             ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
-            ['--11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
-            ['11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
-
+            ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-28T01:02:03.987-05:00', '-05:00'],
         ];
-
-        dateTests.forEach(([dateValue, message, expected]) => {
-            it(`should accept dates and dateTime values in the intersection of RFC 3339 and ISO 8601, ${message}`, () => {
+        const defaultUtcOffset = 'Z';
+        dateTests.forEach(([dateValue, message, expected, utcOffset = defaultUtcOffset]) => {
+            it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
                 json.date = dateValue;
-                const result = serializer.toJSON(serializer.fromJSON(json, {}), {});
+                const options = { utcOffset };
+                const result = serializer.toJSON(serializer.fromJSON(json, options), options);
                 result.date.should.equal(expected || '2022-11-28T01:02:03.987Z');
             });
         });
@@ -479,14 +488,20 @@ describe('Serializer', () => {
 
             // RFC 3339
             ['2022-11-28_01:02:03.987Z', 'Underscore separator'],
+
+            // HTML Living Standard
+            // These formats do not repect the local offset, and so cannot be relied upon in a distributed system.
+            ['--11-28', '--MM-DD'],
+            ['11-28', 'MM-DD'],
         ];
 
-        negativeDateTests.forEach(([dateValue, message]) => {
+        negativeDateTests.forEach(([dateValue, message, utcOffset = 0]) => {
             it(`should not accept invalid dates or dateTime values, ${message}`, () => {
                 json.date = dateValue;
-                (() =>
-                    serializer.toJSON(serializer.fromJSON(json, {}), {})
-                ).should.throw('Expected value at path `$.date` to be of type `DateTime`');
+                (() => {
+                    const options = { utcOffset };
+                    serializer.toJSON(serializer.fromJSON(json, options), options);
+                }).should.throw('Expected value at path `$.date` to be of type `DateTime`');
             });
         });
     });

@@ -111,7 +111,7 @@ describe('JSONGenerator', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        jsonGenerator = new JSONGenerator();
+        jsonGenerator = new JSONGenerator(null, null, null, null, null, 'Z');
         ergoJsonGenerator = new JSONGenerator(null,null,null,null,true);
         ergoJsonGeneratorId = new JSONGenerator(null,null,null,true,true);
     });
