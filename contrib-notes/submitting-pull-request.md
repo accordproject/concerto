@@ -8,7 +8,7 @@
 
 *Before* submitting a pull request, please search carefully for any open or closed pull requests that relate to the issue you are targeting.
 
-- Fork the repo and create your branch from `master`.
+- Fork the repo and create your branch from `main`.
 - Follow our [coding guidelines](./coding-guidelines.md) when making your coding changes.
 - Ensure that all test suites pass locally (`npm test`).
 - Commit any changes using a descriptive commit message.
