@@ -10,13 +10,13 @@ export = Validator;
 declare class Validator {
     /**
      * Create a Property.
-     * @param {Field} field - the field this validator is attached to
+     * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
-    constructor(field: Field, validator: any);
+    constructor(field: any, validator: any);
     validator: any;
-    field: Field;
+    field: any;
     /**
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
@@ -32,10 +32,10 @@ declare class Validator {
      */
     private accept;
     /**
-     * Returns the field that this validator applies to
-     * @return {Field} the field
+     * Returns the field or scalar declaration that this validator applies to
+     * @return {Object} the field
      */
-    getField(): Field;
+    getFieldOrScalarDeclaration(): any;
     /**
      * Validate the property against a value
      * @param {string} identifier the identifier of the instance being validated
@@ -54,4 +54,3 @@ declare class Validator {
      */
     compatibleWith(other: Validator): boolean;
 }
-import Field = require("./field");

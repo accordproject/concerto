@@ -24,7 +24,7 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 /**
- * An Abstract fieldOrScalarDeclaration validator. Extend this class and override the
+ * An Abstract field validator. Extend this class and override the
  * validate method.
  * @private
  * @class
@@ -34,13 +34,13 @@ if (global === undefined) {
 class Validator {
     /**
      * Create a Property.
-     * @param {Field | ScalarDeclaration} fieldOrScalarDeclaration - the field or scalar declaration this validator is attached to
+     * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
-    constructor(fieldOrScalarDeclaration, validator) {
+    constructor(field, validator) {
         this.validator = validator;
-        this.fieldOrScalarDeclaration = fieldOrScalarDeclaration;
+        this.field = field;
     }
 
     /**
@@ -49,7 +49,7 @@ class Validator {
      * @throws {Error} throws an error to report the message
      */
     reportError(id, msg) {
-        throw new Error( 'Validator error for fieldOrScalarDeclaration `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg );
+        throw new Error( 'Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg );
     }
 
     /**
@@ -65,10 +65,10 @@ class Validator {
 
     /**
      * Returns the field or scalar declaration that this validator applies to
-     * @return {Field | ScalarDeclaration} the fieldOrScalarDeclaration
+     * @return {Object} the field
      */
     getFieldOrScalarDeclaration() {
-        return this.fieldOrScalarDeclaration;
+        return this.field;
     }
 
     /**

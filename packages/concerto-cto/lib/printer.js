@@ -174,48 +174,133 @@ function propertyFromMetaModel(mm) {
  */
 function declFromMetaModel(mm) {
     let result = '';
+
+    const booleanScalar$class = `${MetaModelNamespace}.BooleanScalar`;
+    const integerScalar$class = `${MetaModelNamespace}.IntegerScalar`;
+    const longScalar$class = `${MetaModelNamespace}.LongScalar`;
+    const doubleScalar$class = `${MetaModelNamespace}.DoubleScalar`;
+    const stringScalar$class = `${MetaModelNamespace}.StringScalar`;
+    const dateTimeScalar$class = `${MetaModelNamespace}.DateTimeScalar`;
+    const scalar$classes = [
+        booleanScalar$class,
+        integerScalar$class,
+        longScalar$class,
+        doubleScalar$class,
+        stringScalar$class,
+        dateTimeScalar$class,
+    ];
+    const isScalar = scalar$classes.includes(mm.$class);
+
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '');
     }
 
-    if (mm.isAbstract) {
-        result += 'abstract ';
-    }
-    switch (mm.$class) {
-    case `${MetaModelNamespace}.AssetDeclaration`:
-        result += `asset ${mm.name} `;
-        break;
-    case `${MetaModelNamespace}.ConceptDeclaration`:
-        result += `concept ${mm.name} `;
-        break;
-    case `${MetaModelNamespace}.EventDeclaration`:
-        result += `event ${mm.name} `;
-        break;
-    case `${MetaModelNamespace}.ParticipantDeclaration`:
-        result += `participant ${mm.name} `;
-        break;
-    case `${MetaModelNamespace}.TransactionDeclaration`:
-        result += `transaction ${mm.name} `;
-        break;
-    case `${MetaModelNamespace}.EnumDeclaration`:
-        result += `enum ${mm.name} `;
-        break;
-    }
-    if (mm.identified) {
-        if (mm.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
-            result += `identified by ${mm.identified.name} `;
-        } else {
-            result += 'identified ';
+    if (isScalar) {
+        result += `scalar ${mm.name} extends`;
+
+        switch (mm.$class) {
+        case booleanScalar$class:
+            result += ' Boolean';
+            if (mm.defaultValue === true || mm.defaultValue === false) {
+                if (mm.defaultValue) {
+                    result += ' default=true';
+                } else {
+                    result += ' default=false';
+                }
+            }
+            break;
+        case integerScalar$class:
+            result += ' Integer';
+            if (mm.defaultValue) {
+                result += ` default=${mm.defaultValue.toString()}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower ? mm.validator.lower : '';
+                const upperString = mm.validator.upper ? mm.validator.upper : '';
+                result += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case longScalar$class:
+            result += ' Long';
+            if (mm.defaultValue) {
+                result += ` default=${mm.defaultValue.toString()}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower ? mm.validator.lower : '';
+                const upperString = mm.validator.upper ? mm.validator.upper : '';
+                result += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case doubleScalar$class:
+            result += ' Double';
+            if (mm.defaultValue) {
+                const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
+
+                result += ` default=${doubleString}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower ? mm.validator.lower : '';
+                const upperString = mm.validator.upper ? mm.validator.upper : '';
+                result += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case stringScalar$class:
+            result += ' String';
+            if (mm.defaultValue) {
+                result += ` default="${mm.defaultValue}"`;
+            }
+            if (mm.validator) {
+                result += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
+            }
+            break;
+        case dateTimeScalar$class:
+            result += ' DateTime';
+            if (mm.defaultValue) {
+                result += ` default="${mm.defaultValue}"`;
+            }
+            break;
         }
+    } else {
+        if (mm.isAbstract) {
+            result += 'abstract ';
+        }
+        switch (mm.$class) {
+        case `${MetaModelNamespace}.AssetDeclaration`:
+            result += `asset ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.ConceptDeclaration`:
+            result += `concept ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.EventDeclaration`:
+            result += `event ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.ParticipantDeclaration`:
+            result += `participant ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.TransactionDeclaration`:
+            result += `transaction ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.EnumDeclaration`:
+            result += `enum ${mm.name} `;
+            break;
+        }
+        if (mm.identified) {
+            if (mm.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
+                result += `identified by ${mm.identified.name} `;
+            } else {
+                result += 'identified ';
+            }
+        }
+        if (mm.superType) {
+            result += `extends ${mm.superType.name} `;
+        }
+        result += '{';
+        mm.properties.forEach((property) => {
+            result += `\n  ${propertyFromMetaModel(property)}`;
+        });
+        result += '\n}';
     }
-    if (mm.superType) {
-        result += `extends ${mm.superType.name} `;
-    }
-    result += '{';
-    mm.properties.forEach((property) => {
-        result += `\n  ${propertyFromMetaModel(property)}`;
-    });
-    result += '\n}';
+
     return result;
 }
 

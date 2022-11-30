@@ -43,21 +43,26 @@ declare class ProtobufVisitor {
      */
     public createImportLineStrings(imports: any[]): string[];
     /**
-     * Get the names of the children of a class.
-     * @param {string} className - the name of the class
-     * @param {Object[]} declarations - the declarations in scope
-     * @return {string[]} an array of the names of the children of the classes
+     * Recursively get the names of the subclasses of a class.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {String[]} an array of the names of the subclasses of the class
      * @public
      */
-    public getChildrenOfClass(className: string, declarations: any[]): string[];
+    public getNamesOfSubclassesOfClassRecursively(classDeclaration: any): string[];
     /**
-     * Check if a class has children.
-     * @param {string} className - the name of the class
-     * @param {Object[]} declarations - the declarations in scope
-     * @return {boolean} whether or not the class has children
+     * Recursively get the names of the subclasses of a class that are not abstract.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {String[]} an array of the names of the nonabstract subclasses of the class
      * @public
      */
-    public doesClassHaveChildren(className: string, declarations: any[]): boolean;
+    public getNamesOfNonabstractSubclassesOfClassRecursively(classDeclaration: any): string[];
+    /**
+     * Recursively check if a class has subclasses.
+     * @param {Object} classDeclaration - the class declaration object
+     * @return {Boolean} whether or not the class has subclasses
+     * @public
+     */
+    public doesClassHaveSubclassesRecursively(classDeclaration: any): boolean;
     /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited
@@ -68,21 +73,21 @@ declare class ProtobufVisitor {
     public visit(thing: any, parameters: any): any;
     /**
      * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
+     * @param {Object} modelManager - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
     private visitModelManager;
     /**
      * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
+     * @param {Object} modelFile - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
     private visitModelFile;
     /**
      * Visitor design pattern
-     * @param {AssetDeclaration} assetDeclaration - the object being visited
+     * @param {Object} assetDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -90,7 +95,7 @@ declare class ProtobufVisitor {
     private visitAssetDeclaration;
     /**
      * Visitor design pattern
-     * @param {TransactionDeclaration} transactionDeclaration - the object being visited
+     * @param {Object} transactionDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -98,7 +103,7 @@ declare class ProtobufVisitor {
     private visitTransactionDeclaration;
     /**
      * Visitor design pattern
-     * @param {ConceptDeclaration} conceptDeclaration - the object being visited
+     * @param {Object} conceptDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -106,7 +111,7 @@ declare class ProtobufVisitor {
     private visitConceptDeclaration;
     /**
      * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
+     * @param {Object} classDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -114,35 +119,35 @@ declare class ProtobufVisitor {
     private visitClassDeclaration;
     /**
      * Visit a Concerto class
-     * @param {ClassDeclaration} classDeclaration - the Concerto class being visited
+     * @param {Object} classDeclaration - the Concerto class being visited
      * @param {Object} parameters - the parameters
      * @private
      */
     private visitClassDeclarationCommon;
     /**
      * Visitor design pattern
-     * @param {Field} field - the object being visited
+     * @param {Object} field - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
     private visitField;
     /**
      * Visitor design pattern
-     * @param {EnumDeclaration} enumDeclaration - the object being visited
+     * @param {Object} enumDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
     private visitEnumDeclaration;
     /**
      * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
+     * @param {Object} enumValueDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */
     private visitEnumValueDeclaration;
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {Object} relationshipDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @private
      */

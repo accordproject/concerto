@@ -376,13 +376,14 @@ describe('Test Model', function(){
             let modelFile = modelManager.getModelFile('stdlib.business');
             modelFile.isLocalType('Business').should.equal(true);
             modelFile.isImportedType('Person').should.equal(true);
+            modelFile.isImportedType('SSN').should.equal(true);
             let imprts = modelFile.getImports().filter( (element) => {
                 const split = element.split('.');
                 split.pop();
                 const importNamespace = split.join('.');
                 return modelManager.getModelFile(importNamespace);
             });
-            imprts.length.should.equal(7); // XXX Now includes all concerto.* classes
+            imprts.length.should.equal(8); // XXX Now includes all concerto.* classes
         });
     });
 });

@@ -67,3 +67,5 @@ concept Address {
   o String postalCode optional
   o String postOfficeBoxNumber optional
 }
+
+scalar SSN extends String default="000-00-0000" regex=/\d{3}-\d{2}-\{4}+/
