@@ -60,9 +60,6 @@ class JSONGenerator {
         if (utcOffset !== undefined){
             const normalizedUtcOffset = dayjs.utc().utcOffset(utcOffset).utcOffset();
             this.utcOffset =  normalizedUtcOffset;
-        } else {
-            const localMachineUtcOffset = dayjs().utcOffset();
-            this.utcOffset = localMachineUtcOffset;
         }
     }
 
@@ -229,10 +226,12 @@ class JSONGenerator {
             if (this.ergo) {
                 return obj;
             } else {
-                const inZ = this.utcOffset === 0;
-                if (this.utcOffset !== obj.utcOffset()) {
+                // Render the date using the explicitly provided offset
+                if (this.utcOffset !== undefined && this.utcOffset !== obj.utcOffset()) {
+                    const inZ = this.utcOffset === 0;
                     return obj.utcOffset(this.utcOffset).format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
                 }
+                const inZ = obj.utcOffset() === 0;
                 return obj.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
             }
         }

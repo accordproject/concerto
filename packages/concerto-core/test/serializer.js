@@ -422,10 +422,13 @@ describe('Serializer', () => {
             // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
 
             // RFC 3339 & ISO 8601
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000-05:00', '-05:00'],
             ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 'Z'],
+            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 0],
             ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-27T20:02:03.000-05:00', '-05:00'],
             ['2022-11-28T01:02:03-05:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T01:02:03.000-05:00', '-05:00'],
             ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
@@ -466,8 +469,7 @@ describe('Serializer', () => {
             ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
             ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-28T01:02:03.987-05:00', '-05:00'],
         ];
-        const defaultUtcOffset = 'Z';
-        dateTests.forEach(([dateValue, message, expected, utcOffset = defaultUtcOffset]) => {
+        dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
             it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
                 json.date = dateValue;
                 const options = { utcOffset };

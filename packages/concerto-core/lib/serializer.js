@@ -15,18 +15,15 @@
 'use strict';
 
 const { TypedStack } = require('@accordproject/concerto-util');
-const DateTimeUtil = require('./datetimeutil');
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
 const JSONPopulator = require('./serializer/jsonpopulator');
 const Typed = require('./model/typed');
 const ResourceValidator = require('./serializer/resourcevalidator');
 
-const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
     validate: true,
     ergo: false,
-    utcOffset: defaultUtcOffset,
 };
 
 // Types needed for TypeScript generation.
