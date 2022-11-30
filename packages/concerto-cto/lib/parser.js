@@ -497,7 +497,7 @@ function peg$parse(input, options) {
     };
   var peg$f31 = function(pattern, flags) {
       return {
-        $class: 'concerto.metamodel@1.1.0.StringRegexValidator',
+        $class: `${metamodelNamespace}.StringRegexValidator`,
         pattern,
         flags
       };
@@ -707,18 +707,20 @@ function peg$parse(input, options) {
       return result;
     };
   var peg$f60 = function(d) {
-      return {
-        $class: "concerto.metamodel@1.1.0.BooleanScalar",
-        defaultValue: (d === 'true' ? true : false)
+      const result = {
+        $class: "concerto.metamodel@1.1.0.BooleanScalar"
       };
+      if (d) {
+        result.defaultValue = (d === 'true' ? true : false);
+      }
+      return result;
   };
   var peg$f61 = function(d, range) {
       const result = {
         $class: "concerto.metamodel@1.1.0.IntegerScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseInt(d);
       }
       if (range) {
     		result.validator = range;
@@ -729,9 +731,8 @@ function peg$parse(input, options) {
       const result = {
         $class: "concerto.metamodel@1.1.0.LongScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseInt(d);
       }
       if (range) {
     		result.validator = range;
@@ -742,9 +743,8 @@ function peg$parse(input, options) {
       const result = {
         $class: "concerto.metamodel@1.1.0.DoubleScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseFloat(d);
       }
       if (range) {
     		result.validator = range;
@@ -755,7 +755,6 @@ function peg$parse(input, options) {
       const result = {
         $class: "concerto.metamodel@1.1.0.StringScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
         result.defaultValue = d;
       }
@@ -878,7 +877,7 @@ function peg$parse(input, options) {
   };
   var peg$f78 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.DoubleDomainValidator'
+      $class: `${metamodelNamespace}.DoubleDomainValidator`
     };
     if (lower) {
       result.lower = parseFloat(lower);
@@ -890,7 +889,7 @@ function peg$parse(input, options) {
   };
   var peg$f79 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.IntegerDomainValidator'
+      $class: `${metamodelNamespace}.IntegerDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -902,7 +901,7 @@ function peg$parse(input, options) {
   };
   var peg$f80 = function(lower, upper) {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.LongDomainValidator'
+      $class: `${metamodelNamespace}.LongDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -1038,7 +1037,7 @@ function peg$parse(input, options) {
   var peg$f94 = function(ns, u) {
         const { namespace, name } = fullyQualifiedName(ns);
     	const result = {
-            $class: 'concerto.metamodel@1.1.0.ImportType',
+            $class: `${metamodelNamespace}.ImportType`,
             name,
             namespace,
         };
@@ -10363,6 +10362,9 @@ function peg$parse(input, options) {
   }
 
 
+  const metamodelVersion = '1.1.0';
+  const metamodelNamespace = `concerto.metamodel@${metamodelVersion}`;
+
   function extractList(list, index) {
     var result = new Array(list.length), i;
 
@@ -10423,10 +10425,10 @@ function peg$parse(input, options) {
     }
     const start = value.start;
     const end = value.end;
-    start.$class = 'concerto.metamodel@1.1.0.Position';
-    end.$class = 'concerto.metamodel@1.1.0.Position';
+    start.$class = `${metamodelNamespace}.Position`;
+    end.$class = `${metamodelNamespace}.Position`;
     const result = {
-      $class: 'concerto.metamodel@1.1.0.Range',
+      $class: `${metamodelNamespace}.Range`,
       start: start,
       end: end,
     };

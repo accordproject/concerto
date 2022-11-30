@@ -26,6 +26,13 @@ declare class JSONSchemaVisitor {
      */
     getDecorators(decorated: object): object;
     /**
+     * Get the validators for a field or a scalar definition in JSON schema form.
+     * @param {Object} field - the scalar declaration being visited
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    private getFieldOrScalarDeclarationValidatorsForSchema;
+    /**
      * Returns true if the class declaration contains recursive references.
      *
      * Basic example:

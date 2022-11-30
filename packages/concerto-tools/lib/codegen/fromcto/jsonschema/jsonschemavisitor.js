@@ -56,15 +56,15 @@ class JSONSchemaVisitor {
 
     /**
      * Get the validators for a field or a scalar definition in JSON schema form.
-     * @param {Object} fieldOrScalarDeclaration - the scalar declaration being visited
+     * @param {Object} field - the scalar declaration being visited
      * @return {Object} the result of visiting or null
      * @private
      */
-    getFieldOrScalarDeclarationValidatorsForSchema(fieldOrScalarDeclaration) {
-        const validator = fieldOrScalarDeclaration.getValidator();
+    getFieldOrScalarDeclarationValidatorsForSchema(field) {
+        const validator = field.getValidator();
         let jsonSchema = {};
 
-        switch (fieldOrScalarDeclaration.getType()) {
+        switch (field.getType()) {
         case 'String':
             jsonSchema.type = 'string';
             if(validator) {
@@ -151,8 +151,6 @@ class JSONSchemaVisitor {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
-        } else if (thing.isScalarDeclaration?.()) {
-            return this.visitScalarDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
         }
@@ -336,9 +334,6 @@ class JSONSchemaVisitor {
         // Is this a primitive typed property?
         let jsonSchema;
         if (field.isPrimitive()) {
-
-            const validator = field.getValidator();
-
             // Render the type as JSON Schema.
             jsonSchema = {};
 
@@ -471,42 +466,6 @@ class JSONSchemaVisitor {
 
         // Return the schema.
         return jsonSchema;
-    }
-
-    /**
-     * Visitor a scalar declaration
-     * @param {ScalarDeclaration} scalarDeclaration - the scalar declaration being visited
-     * @param {Object} parameters - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitScalarDeclaration(scalarDeclaration, parameters) {
-        debug('entering visitScalarDeclaration', scalarDeclaration.getName());
-
-        const result = {
-            $id: scalarDeclaration.getFullyQualifiedName(),
-            schema: {
-                title: scalarDeclaration.getName(),
-                description : `An instance of ${scalarDeclaration.getFullyQualifiedName()}`,
-                type: scalarDeclaration.getType(),
-                // If this field has a default value, add it.
-                ...(
-                    scalarDeclaration.getDefaultValue()
-                        ? { default: scalarDeclaration.getDefaultValue() }
-                        : {}
-                ),
-                ...this.getFieldOrScalarDeclarationValidatorsForSchema(scalarDeclaration)
-            }
-        };
-
-        // add the decorators
-        const decorators = this.getDecorators(scalarDeclaration);
-        if(decorators) {
-            result.schema.$decorators = decorators;
-        }
-
-        // Return the schema.
-        return result;
     }
 }
 

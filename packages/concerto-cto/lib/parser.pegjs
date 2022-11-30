@@ -13,6 +13,9 @@
  */
 
 {
+  const metamodelVersion = '1.1.0';
+  const metamodelNamespace = `concerto.metamodel@${metamodelVersion}`;
+
   function extractList(list, index) {
     var result = new Array(list.length), i;
 
@@ -73,10 +76,10 @@
     }
     const start = value.start;
     const end = value.end;
-    start.$class = 'concerto.metamodel@1.1.0.Position';
-    end.$class = 'concerto.metamodel@1.1.0.Position';
+    start.$class = `${metamodelNamespace}.Position`;
+    end.$class = `${metamodelNamespace}.Position`;
     const result = {
-      $class: 'concerto.metamodel@1.1.0.Range',
+      $class: `${metamodelNamespace}.Range`,
       start: start,
       end: end,
     };
@@ -315,7 +318,7 @@ UnicodeEscapeSequence
 RegularExpressionLiteral "regular expression"
   = "/" pattern:$RegularExpressionBody "/" flags:$RegularExpressionFlags {
       return {
-        $class: 'concerto.metamodel@1.1.0.StringRegexValidator',
+        $class: `${metamodelNamespace}.StringRegexValidator`,
         pattern,
         flags
       };
@@ -1067,10 +1070,13 @@ ConceptDeclaration
 
 BooleanScalar
    = BooleanType __ d:BooleanDefault? __ {
-      return {
-        $class: "concerto.metamodel@1.1.0.BooleanScalar",
-        defaultValue: (d === 'true' ? true : false)
+      const result = {
+        $class: "concerto.metamodel@1.1.0.BooleanScalar"
       };
+      if (d) {
+        result.defaultValue = (d === 'true' ? true : false);
+      }
+      return result;
   }
 
 IntegerScalar
@@ -1078,9 +1084,8 @@ IntegerScalar
       const result = {
         $class: "concerto.metamodel@1.1.0.IntegerScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseInt(d);
       }
       if (range) {
     		result.validator = range;
@@ -1093,9 +1098,8 @@ LongScalar
       const result = {
         $class: "concerto.metamodel@1.1.0.LongScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseInt(d);
       }
       if (range) {
     		result.validator = range;
@@ -1108,9 +1112,8 @@ RealScalar
       const result = {
         $class: "concerto.metamodel@1.1.0.DoubleScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
-        result.defaultValue = d;
+        result.defaultValue = parseFloat(d);
       }
       if (range) {
     		result.validator = range;
@@ -1123,7 +1126,6 @@ StringScalar
       const result = {
         $class: "concerto.metamodel@1.1.0.StringScalar",
       };
-      // TODO: Enforce that the supertype either has a default or a validator value
       if (d) {
         result.defaultValue = d;
       }
@@ -1293,7 +1295,7 @@ StringRegexValidator
 RealDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedRealLiteral? __ "," __ upper:$SignedRealLiteral? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.DoubleDomainValidator'
+      $class: `${metamodelNamespace}.DoubleDomainValidator`
     };
     if (lower) {
       result.lower = parseFloat(lower);
@@ -1307,7 +1309,7 @@ RealDomainValidator
 IntegerDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedInteger? __ "," __ upper:$SignedInteger? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.IntegerDomainValidator'
+      $class: `${metamodelNamespace}.IntegerDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -1321,7 +1323,7 @@ IntegerDomainValidator
 LongDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedInteger? __ "," __ upper:$SignedInteger? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.1.0.LongDomainValidator'
+      $class: `${metamodelNamespace}.LongDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -1495,7 +1497,7 @@ ImportType
     = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
         const { namespace, name } = fullyQualifiedName(ns);
     	const result = {
-            $class: 'concerto.metamodel@1.1.0.ImportType',
+            $class: `${metamodelNamespace}.ImportType`,
             name,
             namespace,
         };

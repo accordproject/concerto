@@ -70,38 +70,6 @@ class Property extends Decorated {
     }
 
     /**
-     * Returns true if the declalaration named is a scalar declaration.
-     * @param {string} declarationName - The name of the declaration
-     * @return {boolean} is the named declaration a scalar or not
-     */
-    isScalar(declarationName) {
-        return !!this.getModelFile()
-            .getScalarDeclarations()
-            .find(
-                scalarDeclaration => scalarDeclaration.name === declarationName
-            );
-    }
-
-    /**
-     * Returns the Concerto primitive type of the scalar declaration.
-     * @param {string} scalarName - The name of the scalar declaration
-     * @return {string} the Concerto primitive type of the scalar declaration
-     */
-    getScalarPrimitiveType(scalarName) {
-        const scalarPrimitiveType = this.getModelFile()
-            .getScalarDeclarations()
-            .find(
-                scalarDeclaration => scalarDeclaration.name === scalarName
-            )
-            ?.type;
-        if (typeof scalarPrimitiveType !== 'string') {
-            throw new Error(`Cannot get primitive type of ${scalarName}. Possibly not a scalar declaration.`);
-        }
-
-        return scalarPrimitiveType;
-    }
-
-    /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
      * @private
@@ -120,43 +88,48 @@ class Property extends Decorated {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        if (this.ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
-            this.type = 'Boolean';
-        } else if (this.ast.$class === `${MetaModelNamespace}.StringProperty`) {
-            this.type = 'String';
-        } else if (this.ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
-            this.type = 'Integer';
-        } else if (this.ast.$class === `${MetaModelNamespace}.LongProperty`) {
-            this.type = 'Long';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
-            this.type = 'Double';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
-            this.type = 'DateTime';
-        } else if (this.ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
-            if (
-                typeof this.ast?.type?.name === 'string' &&
-              this.isScalar(this.ast?.type?.name)
-            ) {
-                // If the property is a scalar, then assign it its scalar primitive type.
-                this.type = this.getScalarPrimitiveType(
-                    this.ast?.type?.name
-                );
-            } else {
-                // If the property is not a scalar, then assign its custom type name as a type.
-                this.type = this.ast.type ? this.ast.type.name : null;
+        // if this object property references a scalar
+        // then replace the scalar with an equivalent property
+        // i.e. we unbox the scalar here.
+        let ast = this.ast;
+        if(
+            ast?.type &&
+          ast.$class === `${MetaModelNamespace}.ObjectProperty`
+        ) {
+            const type = this.getModelFile().getType(ast.type.name);
+            if(type) {
+                if(type?.isScalarDeclaration?.()) {
+                    ast = type.ast;
+                }
             }
-        } else if (this.ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
-            this.type = this.ast.type.name;
+        }
+
+        if (ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
+            this.type = 'Boolean';
+        } else if (ast.$class === `${MetaModelNamespace}.StringProperty`) {
+            this.type = 'String';
+        } else if (ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
+            this.type = 'Integer';
+        } else if (ast.$class === `${MetaModelNamespace}.LongProperty`) {
+            this.type = 'Long';
+        } else if (ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
+            this.type = 'Double';
+        } else if (ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
+            this.type = 'DateTime';
+        } else if (ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
+            this.type = ast.type ? ast.type.name : null;
+        } else if (ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
+            this.type = ast.type.name;
         } else {
             this.type = null;
         }
         this.array = false;
 
-        if(this.ast.isArray) {
+        if(ast.isArray) {
             this.array = true;
         }
 
-        if(this.ast.isOptional) {
+        if(ast.isOptional) {
             this.optional = true;
         }
         else {

@@ -212,11 +212,16 @@ declare class ModelFile extends Decorated {
      */
     getEnumDeclarations(): EnumDeclaration[];
     /**
+     * Get the ScalarDeclaration defined in this ModelFile
+     * @return {ScalarDeclaration[]} the ScalarDeclaration defined in the model file
+     */
+    getScalarDeclarations(): ScalarDeclaration[];
+    /**
      * Get the instances of a given type in this ModelFile
      * @param {Function} type - the type of the declaration
-     * @return {ClassDeclaration[]} the ClassDeclaration defined in the model file
+     * @return {Object[]} the ClassDeclaration defined in the model file
      */
-    getDeclarations(type: Function): ClassDeclaration[];
+    getDeclarations(type: Function): any[];
     /**
      * Get all declarations in this ModelFile
      * @return {ClassDeclaration[]} the ClassDeclarations defined in the model file
@@ -264,3 +269,4 @@ import EventDeclaration = require("./eventdeclaration");
 import ParticipantDeclaration = require("./participantdeclaration");
 import ConceptDeclaration = require("./conceptdeclaration");
 import EnumDeclaration = require("./enumdeclaration");
+import ScalarDeclaration = require("./scalardeclaration");

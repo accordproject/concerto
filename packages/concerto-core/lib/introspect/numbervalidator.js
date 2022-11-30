@@ -36,13 +36,13 @@ class NumberValidator extends Validator{
 
     /**
      * Create a NumberValidator.
-     * @param {Field | ScalarDeclaration} fieldOrScalarDeclaration - the field or scalar declaration this validator is attached to
+     * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} ast - The ast for the range defined as [lower,upper] (inclusive).
      *
      * @throws {IllegalModelException}
      */
-    constructor(fieldOrScalarDeclaration, ast) {
-        super(fieldOrScalarDeclaration, ast);
+    constructor(field, ast) {
+        super(field, ast);
 
         this.lowerBound = null;
         this.upperBound = null;

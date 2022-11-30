@@ -168,7 +168,8 @@ class ModelFile extends Decorated {
    + ParticipantDeclaration[] getParticipantDeclarations() 
    + ConceptDeclaration[] getConceptDeclarations() 
    + EnumDeclaration[] getEnumDeclarations() 
-   + ClassDeclaration[] getDeclarations(Function) 
+   + ScalarDeclaration[] getScalarDeclarations() 
+   + Object[] getDeclarations(Function) 
    + ClassDeclaration[] getAllDeclarations() 
    + string getDefinitions() 
    + object getAst() 
@@ -200,6 +201,32 @@ class RelationshipDeclaration extends Property {
    ~ void validate(ClassDeclaration) throws IllegalModelException
    + String toString() 
    + boolean isRelationship() 
+}
+class ScalarDeclaration extends Decorated {
+   + void constructor(ModelFile,Object) throws IllegalModelException
+   + ModelFile getModelFile() 
+   ~ void validate() throws IllegalModelException
+   + string getName() 
+   + string getNamespace() 
+   + string getFullyQualifiedName() 
+   + Boolean isIdentified() 
+   + Boolean isSystemIdentified() 
+   + void getIdentifierFieldName() 
+   + string getType() 
+   + void getSuperType() 
+   + void getSuperTypeDeclaration() 
+   + Validator getValidator() 
+   + void getDefaultValue() 
+   + String toString() 
+   + boolean isAbstract() 
+   + boolean isAsset() 
+   + boolean isParticipant() 
+   + boolean isTransaction() 
+   + boolean isEvent() 
+   + boolean isConcept() 
+   + boolean isEnum() 
+   + boolean isClassDeclaration() 
+   + boolean isScalarDeclaration() 
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException

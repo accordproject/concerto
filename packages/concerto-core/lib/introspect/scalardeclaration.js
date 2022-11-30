@@ -18,7 +18,6 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Decorated = require('./decorated');
 const IllegalModelException = require('./illegalmodelexception');
-const Introspector = require('./introspector');
 const ModelUtil = require('../modelutil');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
@@ -214,13 +213,10 @@ class ScalarDeclaration extends Decorated {
     }
 
     /**
-     * Returns the primitive type of the scalar.
-     *
-     * @return {string | null} the primitive type of the scalar
+     * Throws an error as scalars do not have supertypes.
      */
     getSuperType() {
-        // TODO: Throw exception
-        return null;
+        throw new Error('Scalars do not have super types.');
     }
 
     /**
@@ -229,87 +225,6 @@ class ScalarDeclaration extends Decorated {
      */
     getSuperTypeDeclaration() {
         return null;
-    }
-
-    /**
-     * Get the class declarations for all subclasses of this class, including this class.
-     * @return {ScalarDeclaration[]} subclass declarations.
-     */
-    getAssignableClassDeclarations() {
-        const results = new Set();
-        const modelManager = this.getModelFile().getModelManager();
-        const introspector = new Introspector(modelManager);
-        const allClassDeclarations = introspector.getClassDeclarations();
-        const subclassMap = new Map();
-
-        // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
-            const superType = declaration.getSuperType();
-            if (superType) {
-                const subclasses = subclassMap.get(superType) || new Set();
-                subclasses.add(declaration);
-                subclassMap.set(superType, subclasses);
-            }
-        });
-
-        // Recursive function to collect all direct and indirect subclasses of a given (set) of base classes.
-        const collectSubclasses = (superclasses) => {
-            superclasses.forEach((declaration) => {
-                results.add(declaration);
-                const superType = declaration.getFullyQualifiedName();
-                const subclasses = subclassMap.get(superType);
-                if (subclasses) {
-                    collectSubclasses(subclasses);
-                }
-            });
-        };
-
-        collectSubclasses([this]);
-
-        return Array.from(results);
-    }
-
-    /**
-     * Get the class declarations for just the direct subclasses of this class, excluding this class.
-     * @return {ScalarDeclaration[]} direct subclass declarations.
-     */
-    getDirectSubclasses() {
-        const modelManager = this.getModelFile().getModelManager();
-        const introspector = new Introspector(modelManager);
-        const allClassDeclarations = introspector.getClassDeclarations();
-        const subclassMap = new Map();
-
-        // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
-            const superType = declaration.getSuperType();
-            if (superType) {
-                const subclasses = subclassMap.get(superType) || new Set();
-                subclasses.add(declaration);
-                subclassMap.set(superType, subclasses);
-            }
-        });
-
-        const superType = this.getFullyQualifiedName();
-        const subclasses = subclassMap.get(superType);
-
-        if (subclasses) {
-            return Array.from(subclasses);
-        }
-        return [];
-    }
-
-    /**
-     * Get all the super-type declarations for this type.
-     * @return {ScalarDeclaration[]} super-type declarations.
-     */
-    getAllSuperTypeDeclarations() {
-        const results = [];
-        for (let type = this;
-            (type = type.getSuperTypeDeclaration());) {
-            results.push(type);
-        }
-
-        return results;
     }
 
     /**
@@ -338,11 +253,7 @@ class ScalarDeclaration extends Decorated {
      * @return {String} the string representation of the class
      */
     toString() {
-        let superType = '';
-        if (this.superType) {
-            superType = ' super=' + this.superType;
-        }
-        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + superType + ' enum=' + this.isEnum() + ' abstract=' + this.isAbstract() + '}';
+        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
     /**

@@ -21,12 +21,6 @@ const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
-const BooleanScalar = require('./booleanscalar');
-const IntegerScalar = require('./integerscalar');
-const LongScalar = require('./longscalar');
-const DoubleScalar = require('./doublescalar');
-const StringScalar = require('./stringscalar');
-const DateTimeScalar = require('./datetimescalar');
 const ScalarDeclaration = require('./scalardeclaration');
 const ParticipantDeclaration = require('./participantdeclaration');
 const TransactionDeclaration = require('./transactiondeclaration');
@@ -600,7 +594,7 @@ class ModelFile extends Decorated {
     /**
      * Get the instances of a given type in this ModelFile
      * @param {Function} type - the type of the declaration
-     * @return {(ClassDeclaration | ScalarDeclaration)[]} the ClassDeclaration defined in the model file
+     * @return {Object[]} the ClassDeclaration defined in the model file
      */
     getDeclarations(type) {
         let result = [];
@@ -775,25 +769,14 @@ class ModelFile extends Decorated {
             else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
             }
-            else if(thing.$class === `${MetaModelNamespace}.BooleanScalar`) {
-                this.declarations.push( new BooleanScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.IntegerScalar`) {
-                this.declarations.push( new IntegerScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.LongScalar`) {
-                this.declarations.push( new LongScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.DoubleScalar`) {
-                this.declarations.push( new DoubleScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.StringScalar`) {
-                this.declarations.push( new StringScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.DateTimeScalar`) {
-                this.declarations.push( new DateTimeScalar(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.ScalarDeclaration`) {
+            else if([
+                `${MetaModelNamespace}.BooleanScalar`,
+                `${MetaModelNamespace}.IntegerScalar`,
+                `${MetaModelNamespace}.LongScalar`,
+                `${MetaModelNamespace}.DoubleScalar`,
+                `${MetaModelNamespace}.StringScalar`,
+                `${MetaModelNamespace}.DateTimeScalar`,
+            ].includes(thing.$class)) {
                 this.declarations.push( new ScalarDeclaration(this, thing) );
             }
             else {
