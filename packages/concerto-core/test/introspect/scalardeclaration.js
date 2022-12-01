@@ -14,9 +14,6 @@
 
 'use strict';
 
-// const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-// const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
