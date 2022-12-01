@@ -149,6 +149,8 @@ class JSONSchemaVisitor {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else {
@@ -207,6 +209,7 @@ class JSONSchemaVisitor {
             definitions : {}
         };
         modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.())
             .forEach((declaration) => {
                 const type = declaration.accept(this, parameters);
                 result.definitions[type.$id] = type.schema;

@@ -55,6 +55,8 @@ class GoLangVisitor {
             //  return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
         }
@@ -228,7 +230,8 @@ class GoLangVisitor {
      * @private
      */
     containsDateTimeField(modelFile) {
-        let classDeclarations = modelFile.getAllDeclarations();
+        let classDeclarations = modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.());
         for(let n=0; n < classDeclarations.length; n++) {
             let classDecl = classDeclarations[n];
             let fields = classDecl.getProperties();

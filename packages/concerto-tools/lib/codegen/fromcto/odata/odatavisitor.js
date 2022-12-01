@@ -70,6 +70,8 @@ class ODataVisitor {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else if (thing.isDecorator?.()) {
             return this.visitDecorator(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing));
         }

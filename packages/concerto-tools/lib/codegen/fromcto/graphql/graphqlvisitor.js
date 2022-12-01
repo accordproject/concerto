@@ -55,6 +55,8 @@ class GraphQLVisitor {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         }
         else {
             throw new Error('Unrecognised ' + util.inspect(thing, {showHidden: false, depth: 1}) );

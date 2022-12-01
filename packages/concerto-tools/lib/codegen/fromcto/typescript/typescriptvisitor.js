@@ -50,6 +50,8 @@ class TypescriptVisitor {
             return this.visitRelationship(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, {
                 showHidden: true,
@@ -90,6 +92,7 @@ class TypescriptVisitor {
         parameters.fileWriter.writeLine(0, '\n// imports');
         const properties = new Map();
         modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.())
             .filter(v => !v.isEnum())
             .forEach(classDeclaration => {
                 if (classDeclaration.getSuperType()) {
@@ -146,9 +149,10 @@ class TypescriptVisitor {
             });
 
         parameters.fileWriter.writeLine(0, '\n// interfaces');
-        modelFile.getAllDeclarations().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
+        modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.()).forEach((decl) => {
+                decl.accept(this, parameters);
+            });
 
         parameters.fileWriter.closeFile();
 

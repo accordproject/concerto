@@ -54,6 +54,8 @@ class MermaidVisitor {
             return this.visitRelationship(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing) );
         }

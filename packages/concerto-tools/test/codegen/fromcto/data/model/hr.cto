@@ -44,12 +44,15 @@ asset Laptop extends Equipment {
     o LaptopMake make
 }
 
+scalar SSN extends String default="000-00-0000" regex=/\d{3}-\d{2}-\{4}+/
+
 abstract participant Person identified by email {
     o String email
     o String firstName
     o String lastName
     o String middleNames optional
     o Address homeAddress
+    o SSN ssn
 }
 
 participant Employee extends Person {
