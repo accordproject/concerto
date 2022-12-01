@@ -32,6 +32,8 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
+
 /**
  * Remove whitespace and periods from a Type identifier
  * @param {string} type the input string
@@ -39,12 +41,16 @@ function capitalizeFirstLetter(string) {
  * @private
  */
 function normalizeType(type) {
+    if (typeof type !== 'string'){
+        return type;
+    }
+
     return capitalizeFirstLetter(
         type
             // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
             .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
             // Replace delimiters with underscore
-            .replace(/[\s\\.-]/g, '_')
+            .replaceAll(REGEX_ESCAPED_CHARS, '_')
     );
 }
 
@@ -85,12 +91,26 @@ function inferTypeName(definition, context, skipDictionary) {
     }
 
     const name = context.parents.peek();
-    const { type } = parseIdUri(definition.$id) ||
-        { type: definition.title || name };
+    const { type } = parseIdUri(definition.$id) || { type: name };
 
     if (skipDictionary || context.dictionary.has(normalizeType(type))){
         return normalizeType(type);
     }
+
+
+
+    // We've found an inline sub-schema
+    if (definition.properties || definition.enum){
+        const subSchemaName = context.parents.stack
+            .filter(Boolean) // ignore nulls
+            .map(normalizeType)
+            .join('_');
+
+        // Come back to this later
+        context.jobs.push({ name: subSchemaName, definition });
+        return subSchemaName;
+    }
+
     // We fallback to a stringified object representation. This is "untyped".
     return 'String';
 }
@@ -116,7 +136,6 @@ function inferType(definition, context) {
         return inferTypeName(definition, context);
     }
 
-    // TODO Also add local sub-schema definition
     if (definition.enum) {
         return inferTypeName(definition, context);
     }
@@ -175,9 +194,14 @@ function inferEnum(definition, context) {
 
     writer.writeLine(0, `enum ${inferTypeName(definition, context)} {`);
     definition.enum.forEach((value) => {
+        let normalizedValue = value;
+        if (typeof normalizedValue !== 'string' || normalizedValue.match(/^\d/)){
+            normalizedValue = `_${normalizedValue}`;
+        }
+        normalizedValue = normalizedValue.replaceAll(REGEX_ESCAPED_CHARS, '_');
         writer.writeLine(
             1,
-            `o ${value}`
+            `o ${normalizedValue}`
         );
     });
     writer.writeLine(0, '}');
@@ -227,7 +251,7 @@ function inferConcept(definition, context) {
                 validator = ` range=[${min},${exclusiveMax}]`;
             }
         } else if (type === 'String' && propertyDefinition.pattern) {
-            validator = ` regex=/${propertyDefinition.pattern}/`;
+            validator = ` regex=/${propertyDefinition.pattern.replaceAll('/', '\\/')}/`;
         }
 
         // Warning: The semantics of this default property differs between JSON Schema and Concerto
@@ -315,9 +339,10 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     ajv.validate(type);
 
     const context = {
-        parents: new TypedStack(),
+        parents: new TypedStack(), // Track ancestors in the tree
         writer: new Writer(),
-        dictionary: new Set(),
+        dictionary: new Set(),     // Track types that we've seen before
+        jobs: new TypedStack(),    // Queue of inline definitions to come-back to
     };
 
     context.writer.writeLine(0, `namespace ${namespace}`);
@@ -349,6 +374,15 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
         inferDeclaration(definition, context);
         context.parents.pop();
     });
+
+    // Generate models for all inline sub-schemas
+    while(context.jobs.stack.length > 1){
+        const job = context.jobs.pop();
+        context.parents.push(job.name);
+        context.dictionary.add(job.name);
+        inferDeclaration(job.definition, context);
+        context.parents.pop();
+    }
 
     // Create root type
     context.parents.push(type);
