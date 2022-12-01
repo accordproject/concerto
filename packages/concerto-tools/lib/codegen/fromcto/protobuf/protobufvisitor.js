@@ -111,7 +111,7 @@ class ProtobufVisitor {
      * @return {String[]} an array of the names of the subclasses of the class
      * @public
      */
-    getChildrenOfClass(classDeclaration) {
+    getNamesOfSubclassesOfClassRecursively(classDeclaration) {
         return typeof classDeclaration.getAssignableClassDeclarations === 'function'
             ? classDeclaration.getAssignableClassDeclarations()
                 ?.filter(
@@ -147,7 +147,7 @@ class ProtobufVisitor {
      * @public
      */
     doesClassHaveSubclassesRecursively(classDeclaration) {
-        return this.getChildrenOfClass(classDeclaration)
+        return this.getNamesOfSubclassesOfClassRecursively(classDeclaration)
             ?.length > 0;
     }
 
