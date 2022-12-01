@@ -45,7 +45,7 @@ function normalizeType(type) {
             // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
             .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
             // Replace delimiters with underscore
-            .replaceAll(REGEX_ESCAPED_CHARS, '_')
+            .replace(REGEX_ESCAPED_CHARS, '_')
     );
 }
 
@@ -192,7 +192,7 @@ function inferEnum(definition, context) {
         if (typeof normalizedValue !== 'string' || normalizedValue.match(/^\d/)){
             normalizedValue = `_${normalizedValue}`;
         }
-        normalizedValue = normalizedValue.replaceAll(REGEX_ESCAPED_CHARS, '_');
+        normalizedValue = normalizedValue.replace(REGEX_ESCAPED_CHARS, '_');
         writer.writeLine(
             1,
             `o ${normalizedValue}`
@@ -245,7 +245,7 @@ function inferConcept(definition, context) {
                 validator = ` range=[${min},${exclusiveMax}]`;
             }
         } else if (type === 'String' && propertyDefinition.pattern) {
-            validator = ` regex=/${propertyDefinition.pattern.replaceAll('/', '\\/')}/`;
+            validator = ` regex=/${propertyDefinition.pattern.replace(/\//g, '\\/')}/`;
         }
 
         // Warning: The semantics of this default property differs between JSON Schema and Concerto
