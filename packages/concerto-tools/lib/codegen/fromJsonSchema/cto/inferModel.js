@@ -15,7 +15,6 @@
 'use strict';
 
 const Writer = require('@accordproject/concerto-util').Writer;
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Ajv2019 = require('ajv/dist/2019');
 const Ajv2020 = require('ajv/dist/2020');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
@@ -41,10 +40,6 @@ const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
  * @private
  */
 function normalizeType(type) {
-    if (typeof type !== 'string'){
-        return type;
-    }
-
     return capitalizeFirstLetter(
         type
             // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
@@ -90,19 +85,16 @@ function inferTypeName(definition, context, skipDictionary) {
         return normalizeType(definition.$ref);
     }
 
-    const name = context.parents.peek();
+    const name = context.parents.slice(-1).pop();
     const { type } = parseIdUri(definition.$id) || { type: name };
 
     if (skipDictionary || context.dictionary.has(normalizeType(type))){
         return normalizeType(type);
     }
 
-
-
     // We've found an inline sub-schema
     if (definition.properties || definition.enum){
-        const subSchemaName = context.parents.stack
-            .filter(Boolean) // ignore nulls
+        const subSchemaName = context.parents
             .map(normalizeType)
             .join('_');
 
@@ -123,12 +115,12 @@ function inferTypeName(definition, context, skipDictionary) {
  * @private
  */
 function inferType(definition, context) {
-    const name = context.parents.peek();
+    const name = context.parents.slice(-1).pop();
     if (definition.$ref) {
         // Recursive defintion
         if (definition.$ref === '#') {
             const top = context.parents.pop();
-            const parent = context.parents.peek();
+            const parent = context.parents.slice(-1).pop();
             context.parents.push(top);
             return parent;
         }
@@ -195,6 +187,8 @@ function inferEnum(definition, context) {
     writer.writeLine(0, `enum ${inferTypeName(definition, context)} {`);
     definition.enum.forEach((value) => {
         let normalizedValue = value;
+        // Concerto does not allow enum values to start with numbers or values such as `true`
+        // If we can relax the parser rules, this branch could be removed
         if (typeof normalizedValue !== 'string' || normalizedValue.match(/^\d/)){
             normalizedValue = `_${normalizedValue}`;
         }
@@ -279,7 +273,7 @@ function inferConcept(definition, context) {
  * @private
  */
 function inferDeclaration(definition, context) {
-    const name = context.parents.peek();
+    const name = context.parents.slice(-1).pop();
 
     if (definition.enum) {
         inferEnum(definition, context);
@@ -339,10 +333,10 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     ajv.validate(type);
 
     const context = {
-        parents: new TypedStack(), // Track ancestors in the tree
+        parents: new Array(), // Track ancestors in the tree
         writer: new Writer(),
         dictionary: new Set(),     // Track types that we've seen before
-        jobs: new TypedStack(),    // Queue of inline definitions to come-back to
+        jobs: new Array(),    // Queue of inline definitions to come-back to
     };
 
     context.writer.writeLine(0, `namespace ${namespace}`);
@@ -375,19 +369,19 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
         context.parents.pop();
     });
 
-    // Generate models for all inline sub-schemas
-    while(context.jobs.stack.length > 1){
+    // Create root type
+    context.parents.push(type);
+    inferDeclaration(schema, context);
+    context.parents.pop();
+
+    // Generate declarations for all inline sub-schemas
+    while(context.jobs.length > 0){
         const job = context.jobs.pop();
         context.parents.push(job.name);
         context.dictionary.add(job.name);
         inferDeclaration(job.definition, context);
         context.parents.pop();
     }
-
-    // Create root type
-    context.parents.push(type);
-    inferDeclaration(schema, context);
-    context.parents.pop();
 
     return context.writer.getBuffer();
 }

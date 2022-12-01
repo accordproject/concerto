@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "org.acme.Children": {
+        "Children": {
             "title": "Children",
             "description": "An instance of org.acme.Children",
             "type": "object",
@@ -31,21 +31,7 @@
                     "title": "Pet",
                     "description": "An instance of org.acme.Pet",
                     "type": "object",
-                    "properties": {
-                        "$class": {
-                            "type": "string",
-                            "default": "org.acme.Pet",
-                            "pattern": "^org\\.acme\\.Pet$",
-                            "description": "The class identifier for this type"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "breed": {
-                            "type": "string"
-                        }
-                    },
-                    "required": ["$class", "name", "breed"]
+                    "$ref": "#/definitions/Pet"
                 },
                 "favoriteColors": {
                     "type": "array",
@@ -83,21 +69,7 @@
                         "title": "Pet",
                         "description": "An instance of org.acme.Pet",
                         "type": "object",
-                        "properties": {
-                            "$class": {
-                                "type": "string",
-                                "default": "org.acme.Pet",
-                                "pattern": "^org\\.acme\\.Pet$",
-                                "description": "The class identifier for this type"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "breed": {
-                                "type": "string"
-                            }
-                        },
-                        "required": ["$class", "name", "breed"]
+                        "$ref": "#/definitions/Pet"
                     }
                 },
                 "stuff": {
@@ -123,21 +95,7 @@
                                 "title": "Pet",
                                 "description": "An instance of org.acme.Pet",
                                 "type": "object",
-                                "properties": {
-                                    "$class": {
-                                        "type": "string",
-                                        "default": "org.acme.Pet",
-                                        "pattern": "^org\\.acme\\.Pet$",
-                                        "description": "The class identifier for this type"
-                                    },
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "breed": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["$class", "name", "breed"]
+                                "$ref": "#/definitions/Pet"
                             }
                         },
                         "required": ["$class", "sku", "price", "product"]
@@ -174,7 +132,7 @@
             "title": "Color",
             "enum": ["blue", "green", "red", "yellow", "orange"]
         },
-        "org.acme.Pet": {
+        "Pet": {
             "title": "Pet",
             "description": "An instance of org.acme.Pet",
             "type": "object",
@@ -194,7 +152,7 @@
             },
             "required": ["$class", "name", "breed"]
         },
-        "org.acme.Stuff": {
+        "Stuff": {
             "title": "Stuff",
             "description": "An instance of org.acme.Stuff",
             "type": "object",
@@ -215,26 +173,12 @@
                     "title": "Pet",
                     "description": "An instance of org.acme.Pet",
                     "type": "object",
-                    "properties": {
-                        "$class": {
-                            "type": "string",
-                            "default": "org.acme.Pet",
-                            "pattern": "^org\\.acme\\.Pet$",
-                            "description": "The class identifier for this type"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "breed": {
-                            "type": "string"
-                        }
-                    },
-                    "required": ["$class", "name", "breed"]
+                    "$ref": "#/definitions/Pet"
                 }
             },
             "required": ["$class", "sku", "price", "product"]
         },
-        "org.acme.Company": {
+        "Company": {
             "title": "Company",
             "description": "An instance of org.acme.Company",
             "type": "object",
@@ -271,7 +215,7 @@
             },
             "required": ["$class", "name", "employees"]
         },
-        "org.acme.Employees": {
+        "Employees": {
             "title": "Employees",
             "description": "An instance of org.acme.Employees",
             "type": "object",
@@ -439,21 +383,7 @@
                                     "title": "Pet",
                                     "description": "An instance of org.acme.Pet",
                                     "type": "object",
-                                    "properties": {
-                                        "$class": {
-                                            "type": "string",
-                                            "default": "org.acme.Pet",
-                                            "pattern": "^org\\.acme\\.Pet$",
-                                            "description": "The class identifier for this type"
-                                        },
-                                        "name": {
-                                            "type": "string"
-                                        },
-                                        "breed": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": ["$class", "name", "breed"]
+                                    "$ref": "#/definitions/Pet"
                                 }
                             },
                             "required": ["$class", "sku", "price", "product"]
