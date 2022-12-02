@@ -14,6 +14,9 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 /**
  * The metamodel itself, as an AST.
  * @type unknown
@@ -24,190 +27,13 @@ const metaModelAst = require('./metamodel.json');
  * The namespace for the metamodel
  */
 const MetaModelNamespace = 'concerto.metamodel@1.0.0';
+
+const metaModelCtoPath = path.resolve(__dirname, 'metamodel.cto');
+
 /**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = `@DotNetNamespace("AccordProject.Concerto.Metamodel")
-namespace ${MetaModelNamespace}
-
-concept Position {
-  o Integer line
-  o Integer column
-  o Integer offset
-}
-concept Range {
-  o Position start
-  o Position end
-  o String source optional
-}
-
-concept TypeIdentifier {
-  o String name
-  o String namespace optional
-}
-
-abstract concept DecoratorLiteral {
-  o Range location optional
-}
-
-concept DecoratorString extends DecoratorLiteral {
-  o String value
-}
-
-concept DecoratorNumber extends DecoratorLiteral {
-  o Double value
-}
-
-concept DecoratorBoolean extends DecoratorLiteral {
-  o Boolean value
-}
-
-concept DecoratorTypeReference extends DecoratorLiteral {
-  o TypeIdentifier type
-  o Boolean isArray default=false
-}
-
-concept Decorator {
-  o String name
-  o DecoratorLiteral[] arguments optional
-  o Range location optional
-}
-
-concept Identified {
-}
-
-concept IdentifiedBy extends Identified {
-  o String name
-}
-
-abstract concept Declaration {
-  o String name regex=/^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  o Decorator[] decorators optional
-  o Range location optional
-}
-
-concept EnumDeclaration extends Declaration {
-  o EnumProperty[] properties
-}
-
-concept EnumProperty {
-  o String name regex=/^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  o Decorator[] decorators optional
-  o Range location optional
-}
-
-concept ConceptDeclaration extends Declaration {
-  o Boolean isAbstract default=false
-  o Identified identified optional
-  o TypeIdentifier superType optional
-  o Property[] properties
-}
-
-concept AssetDeclaration extends ConceptDeclaration {
-}
-
-concept ParticipantDeclaration extends ConceptDeclaration {
-}
-
-concept TransactionDeclaration extends ConceptDeclaration {
-}
-
-concept EventDeclaration extends ConceptDeclaration {
-}
-
-abstract concept Property {
-  o String name regex=/^(\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|_|\\\\u[0-9A-Fa-f]{4})(?:\\p{Lu}|\\p{Ll}|\\p{Lt}|\\p{Lm}|\\p{Lo}|\\p{Nl}|\\$|\\\\u[0-9A-Fa-f]{4}|\\p{Mn}|\\p{Mc}|\\p{Nd}|\\p{Pc}|\\u200C|\\u200D)*$/u
-  o Boolean isArray default=false
-  o Boolean isOptional default=false
-  o Decorator[] decorators optional
-  o Range location optional
-}
-
-concept RelationshipProperty extends Property {
-  o TypeIdentifier type
-}
-
-concept ObjectProperty extends Property {
-  o String defaultValue optional
-  o TypeIdentifier type
-}
-
-concept BooleanProperty extends Property {
-  o Boolean defaultValue optional
-}
-
-concept DateTimeProperty extends Property {
-}
-
-concept StringProperty extends Property {
-  o String defaultValue optional
-  o StringRegexValidator validator optional
-}
-
-concept StringRegexValidator {
-  o String pattern
-  o String flags
-}
-
-concept DoubleProperty extends Property {
-  o Double defaultValue optional
-  o DoubleDomainValidator validator optional
-}
-
-concept DoubleDomainValidator {
-  o Double lower optional
-  o Double upper optional
-}
-
-concept IntegerProperty extends Property {
-  o Integer defaultValue optional
-  o IntegerDomainValidator validator optional
-}
-
-concept IntegerDomainValidator {
-  o Integer lower optional
-  o Integer upper optional
-}
-
-concept LongProperty extends Property {
-  o Long defaultValue optional
-  o LongDomainValidator validator optional
-}
-
-concept LongDomainValidator {
-  o Long lower optional
-  o Long upper optional
-}
-
-abstract concept Import {
-  o String namespace
-  o String uri optional
-}
-
-concept ImportAll extends Import {
-}
-
-concept ImportType extends Import {
-  o String name
-}
-
-concept ImportTypes extends Import {
-  o String[] types
-}
-
-concept Model {
-  o String namespace
-  o String sourceUri optional
-  o String concertoVersion optional
-  o Import[] imports optional
-  o Declaration[] declarations optional
-  o Decorator[] decorators optional
-}
-
-concept Models {
-  o Model[] models
-}
-`;
+const metaModelCto = fs.readFileSync(metaModelCtoPath, 'utf-8');
 
 /**
  * Find the model for a given namespace
