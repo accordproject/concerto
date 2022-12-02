@@ -145,7 +145,7 @@ Identifier
 IdentifierName "identifier"
   = first:IdentifierStart rest:IdentifierPart* {
       return {
-        $class: "concerto.metamodel@1.1.0.TypeIdentifier",
+        $class: "concerto.metamodel@1.0.0.TypeIdentifier",
         name: first + rest.join("")
       };
     }
@@ -846,7 +846,7 @@ PrimitiveType
 ObjectType
  = !PrimitiveType type:Identifier !IdentifierPart {
     return {
-      $class: "concerto.metamodel@1.1.0.TypeIdentifier",
+      $class: "concerto.metamodel@1.0.0.TypeIdentifier",
       name: type.name
     }
  }
@@ -859,7 +859,7 @@ ObjectType
 IdentifiedByField
     = "identified by" __ idField:Identifier {
         return {
-          $class: "concerto.metamodel@1.1.0.IdentifiedBy",
+          $class: "concerto.metamodel@1.0.0.IdentifiedBy",
           name: idField.name
         }
     }
@@ -867,7 +867,7 @@ IdentifiedByField
 Identified
     = "identified" {
         return {
-          $class: "concerto.metamodel@1.1.0.Identified"
+          $class: "concerto.metamodel@1.0.0.Identified"
         }
     }
 
@@ -878,7 +878,7 @@ IdentifierDeclaration
 DecoratorString =
   s:StringLiteral {
       return {
-      	$class: "concerto.metamodel@1.1.0.DecoratorString",
+      	$class: "concerto.metamodel@1.0.0.DecoratorString",
         value: s.value,
         ...buildRange(location())
       }
@@ -887,7 +887,7 @@ DecoratorString =
 DecoratorNumber =
   n:SignedNumber {
       return {
-      	$class: "concerto.metamodel@1.1.0.DecoratorNumber",
+      	$class: "concerto.metamodel@1.0.0.DecoratorNumber",
         value: +n,
         ...buildRange(location())
       }
@@ -896,7 +896,7 @@ DecoratorNumber =
 DecoratorBoolean =
   b:$BooleanLiteral {
       return {
-      	$class: "concerto.metamodel@1.1.0.DecoratorBoolean",
+      	$class: "concerto.metamodel@1.0.0.DecoratorBoolean",
         value: (b == "true"),
         ...buildRange(location())
       }
@@ -905,7 +905,7 @@ DecoratorBoolean =
 DecoratorIdentifier =
   value:Identifier __ array:"[]"? {
       return {
-          $class: "concerto.metamodel@1.1.0.DecoratorTypeReference",
+          $class: "concerto.metamodel@1.0.0.DecoratorTypeReference",
           type: value,
           isArray: !!array,
           ...buildRange(location())
@@ -931,7 +931,7 @@ Decorator
   = "@" name:$Identifier decoratorArgs:DecoratorArguments?
   {
     const result = {
-      $class: "concerto.metamodel@1.1.0.Decorator",
+      $class: "concerto.metamodel@1.0.0.Decorator",
       name: name,
       ...buildRange(location())
     };
@@ -948,7 +948,7 @@ ClassExtension
   = "extends" __ ex:Identifier
     {
       return {
-        $class:   "concerto.metamodel@1.1.0.TypeIdentifier",
+        $class:   "concerto.metamodel@1.0.0.TypeIdentifier",
         name:     ex.name
       };
     }
@@ -958,7 +958,7 @@ AssetDeclaration
     "{" __ body:ClassDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.AssetDeclaration",
+        $class: "concerto.metamodel@1.0.0.AssetDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -981,7 +981,7 @@ ParticipantDeclaration
         "{" __ body:ClassDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.ParticipantDeclaration",
+        $class: "concerto.metamodel@1.0.0.ParticipantDeclaration",
         name:  id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -1004,7 +1004,7 @@ TransactionDeclaration
     "{" __ body:ClassDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.TransactionDeclaration",
+        $class: "concerto.metamodel@1.0.0.TransactionDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -1027,7 +1027,7 @@ EventDeclaration
     "{" __ body:ClassDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.EventDeclaration",
+        $class: "concerto.metamodel@1.0.0.EventDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -1050,7 +1050,7 @@ ConceptDeclaration
         "{" __ body:ClassDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.ConceptDeclaration",
+        $class: "concerto.metamodel@1.0.0.ConceptDeclaration",
         name: id.name,
         isAbstract: buildBoolean(abstract),
         properties: body.declarations,
@@ -1071,7 +1071,7 @@ ConceptDeclaration
 BooleanScalar
    = BooleanType __ d:BooleanDefault? __ {
       const result = {
-        $class: "concerto.metamodel@1.1.0.BooleanScalar"
+        $class: "concerto.metamodel@1.0.0.BooleanScalar"
       };
       if (d) {
         result.defaultValue = (d === 'true' ? true : false);
@@ -1082,7 +1082,7 @@ BooleanScalar
 IntegerScalar
    = IntegerType __ d:IntegerDefault? __ range:IntegerDomainValidator? __ {
       const result = {
-        $class: "concerto.metamodel@1.1.0.IntegerScalar",
+        $class: "concerto.metamodel@1.0.0.IntegerScalar",
       };
       if (d) {
         result.defaultValue = parseInt(d);
@@ -1096,7 +1096,7 @@ IntegerScalar
 LongScalar
    = LongType __ d:IntegerDefault? __ range:LongDomainValidator? __ {
       const result = {
-        $class: "concerto.metamodel@1.1.0.LongScalar",
+        $class: "concerto.metamodel@1.0.0.LongScalar",
       };
       if (d) {
         result.defaultValue = parseInt(d);
@@ -1110,7 +1110,7 @@ LongScalar
 RealScalar
    = RealNumberType __ d:RealDefault? __ range:RealDomainValidator? __ {
       const result = {
-        $class: "concerto.metamodel@1.1.0.DoubleScalar",
+        $class: "concerto.metamodel@1.0.0.DoubleScalar",
       };
       if (d) {
         result.defaultValue = parseFloat(d);
@@ -1124,7 +1124,7 @@ RealScalar
 StringScalar
    = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ {
       const result = {
-        $class: "concerto.metamodel@1.1.0.StringScalar",
+        $class: "concerto.metamodel@1.0.0.StringScalar",
       };
       if (d) {
         result.defaultValue = d;
@@ -1138,7 +1138,7 @@ StringScalar
 DateTimeScalar
    = DateTimeType __ d:StringDefault? __ {
       return {
-        $class: "concerto.metamodel@1.1.0.DateTimeScalar",
+        $class: "concerto.metamodel@1.0.0.DateTimeScalar",
         defaultValue: d
       };
   }
@@ -1214,7 +1214,7 @@ ClassDeclarationBody
 ObjectFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:ObjectType __ array:"[]"? __ id:Identifier __ d:StringDefault? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.ObjectProperty",
+    		$class: "concerto.metamodel@1.0.0.ObjectProperty",
     		name: id.name,
     		type: propertyType,
     		isArray: buildBoolean(array),
@@ -1233,7 +1233,7 @@ ObjectFieldDeclaration
 BooleanFieldDeclaration
     = decorators:Decorators __ "o" __ BooleanType __ array:"[]"? __ id:Identifier __  d:BooleanDefault? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.BooleanProperty",
+    		$class: "concerto.metamodel@1.0.0.BooleanProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1251,7 +1251,7 @@ BooleanFieldDeclaration
 DateTimeFieldDeclaration
     = decorators:Decorators __ "o" __ DateTimeType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.DateTimeProperty",
+    		$class: "concerto.metamodel@1.0.0.DateTimeProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1269,7 +1269,7 @@ DateTimeFieldDeclaration
 StringFieldDeclaration
     = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.StringProperty",
+    		$class: "concerto.metamodel@1.0.0.StringProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1337,7 +1337,7 @@ LongDomainValidator
 RealFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? __ range:RealDomainValidator? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.DoubleProperty",
+    		$class: "concerto.metamodel@1.0.0.DoubleProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1358,7 +1358,7 @@ RealFieldDeclaration
 IntegerFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:IntegerDomainValidator? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.IntegerProperty",
+    		$class: "concerto.metamodel@1.0.0.IntegerProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1379,7 +1379,7 @@ IntegerFieldDeclaration
 LongFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:LongDomainValidator? __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.LongProperty",
+    		$class: "concerto.metamodel@1.0.0.LongProperty",
     		name: id.name,
     		isArray: buildBoolean(array),
     		isOptional: buildBoolean(optional),
@@ -1402,7 +1402,7 @@ EnumDeclaration
     "{" __ body:EnumDeclarationBody __ "}"
     {
       const result = {
-        $class: "concerto.metamodel@1.1.0.EnumDeclaration",
+        $class: "concerto.metamodel@1.0.0.EnumDeclaration",
         name:   id.name,
         properties:  body.declarations,
         ...buildRange(location())
@@ -1424,7 +1424,7 @@ EnumDeclarationBody
 EnumPropertyDeclaration
     = decorators:Decorators __ "o"__ id:Identifier __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.EnumProperty",
+    		$class: "concerto.metamodel@1.0.0.EnumProperty",
     		name: id.name,
             ...buildRange(location())
     	};
@@ -1437,7 +1437,7 @@ EnumPropertyDeclaration
 RelationshipDeclaration
     = decorators:Decorators __ "-->" __ propertyType:Identifier __ array:"[]"? __ id:Identifier __ optional:Optional? __ {
     	const result = {
-    		$class: "concerto.metamodel@1.1.0.RelationshipProperty",
+    		$class: "concerto.metamodel@1.0.0.RelationshipProperty",
     		name: id.name,
     		type: propertyType,
     		isArray: buildBoolean(array),
@@ -1486,7 +1486,7 @@ FromUri
 ImportAll
     = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
     	const result = {
-            $class: "concerto.metamodel@1.1.0.ImportAll",
+            $class: "concerto.metamodel@1.0.0.ImportAll",
             namespace: ns,
         };
         u && (result.uri = u);
@@ -1508,7 +1508,7 @@ ImportType
 ImportTypes
     = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedIdentifiers _ "}" __ u:FromUri? {
     	const result = {
-            $class: "concerto.metamodel@1.1.0.ImportTypes",
+            $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
             types,
         };
@@ -1535,7 +1535,7 @@ Version
 Model
   = version:Version? decorators:Decorators? ns:Namespace imports:Imports? body:SourceElements? {
       const result = {
-        $class: "concerto.metamodel@1.1.0.Model",
+        $class: "concerto.metamodel@1.0.0.Model",
         decorators: optionalList(decorators),
         namespace: ns,
         imports: optionalList(imports),

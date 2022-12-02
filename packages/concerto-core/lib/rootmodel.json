@@ -1,12 +1,12 @@
 {
-    "$class": "concerto.metamodel@1.1.0.Model",
+    "$class": "concerto.metamodel@1.0.0.Model",
     "decorators": [
         {
-            "$class": "concerto.metamodel@1.1.0.Decorator",
+            "$class": "concerto.metamodel@1.0.0.Decorator",
             "name": "DotNetNamespace",
             "arguments": [
                 {
-                    "$class": "concerto.metamodel@1.1.0.DecoratorString",
+                    "$class": "concerto.metamodel@1.0.0.DecoratorString",
                     "value": "AccordProject.Concerto"
                 }
             ]
@@ -16,37 +16,37 @@
     "imports": [],
     "declarations": [
         {
-            "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Concept",
             "isAbstract": true,
             "properties": []
         },
         {
-            "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Asset",
             "isAbstract": true,
             "properties": [],
             "identified": {
-                "$class": "concerto.metamodel@1.1.0.Identified"
+                "$class": "concerto.metamodel@1.0.0.Identified"
             }
         },
         {
-            "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Participant",
             "isAbstract": true,
             "properties": [],
             "identified": {
-                "$class": "concerto.metamodel@1.1.0.Identified"
+                "$class": "concerto.metamodel@1.0.0.Identified"
             }
         },
         {
-            "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Transaction",
             "isAbstract": true,
             "properties": []
         },
         {
-            "$class": "concerto.metamodel@1.1.0.ConceptDeclaration",
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Event",
             "isAbstract": true,
             "properties": []

@@ -8,18 +8,18 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands.CommandTarget",
-                "type" : "concerto.metamodel@1.1.0.StringProperty"
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
-                "$class" : "concerto.metamodel@1.1.0.Decorator",
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
                 "name" : "Form",
                 "arguments" : [
                     {
-                        "$class" : "concerto.metamodel@1.1.0.DecoratorString",
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorString",
                         "value" : "inputType"
                     },
                     {
-                        "$class" : "concerto.metamodel@1.1.0.DecoratorString",
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorString",
                         "value" : "text"
                     }
                 ]
@@ -30,10 +30,10 @@
             "type" : "APPEND",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands.CommandTarget",
-                "type" : "concerto.metamodel@1.1.0.StringProperty"
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
-                "$class" : "concerto.metamodel@1.1.0.Decorator",
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
                 "name" : "New",
                 "arguments" : []
             }
@@ -48,15 +48,15 @@
                 "property" : "bio"
             },
             "decorator" : {
-                "$class" : "concerto.metamodel@1.1.0.Decorator",
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
                 "name" : "Form",
                 "arguments" : [
                     {
-                        "$class" : "concerto.metamodel@1.1.0.DecoratorString",
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorString",
                         "value" : "inputType"
                     },
                     {
-                        "$class" : "concerto.metamodel@1.1.0.DecoratorString",
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorString",
                         "value" : "textArea"
                     }
                 ]

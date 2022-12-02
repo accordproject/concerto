@@ -13,4 +13,4 @@
  */
 
 export * from './generated/concerto@1.0.0';
-export * from './generated/concerto.metamodel@1.1.0';
+export * from './generated/concerto.metamodel@1.0.0';
