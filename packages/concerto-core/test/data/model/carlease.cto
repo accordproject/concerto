@@ -62,6 +62,11 @@ abstract asset Base identified by vin {
 }
 
 /**
+ * This is a reusable primitive definition
+ */
+scalar V5cID extends String regex=/^[A-z][A-z][0-9]{7}/
+
+/**
  * Vehicle is the definition of an asset that we will be tracking
  * Vehicle extends (augments) the Base asset. The identifying field has already
  * been declared, so we do not redeclare it here.
@@ -77,7 +82,7 @@ asset Vehicle extends Base {
   o State state
   o Double value
   o String colour
-  o String V5cID regex=/^[A-z][A-z][0-9]{7}/
+  o V5cID V5cID
   o String LeaseContractID
   o Boolean scrapped default=false
   o DateTime lastUpdate optional

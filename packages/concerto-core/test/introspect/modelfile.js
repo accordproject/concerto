@@ -36,6 +36,7 @@ const chai = require('chai');
 const should = chai.should();
 chai.use(require('chai-things'));
 const sinon = require('sinon');
+const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
 
 describe('ModelFile', () => {
 
@@ -696,6 +697,15 @@ describe('ModelFile', () => {
 
     });
 
+    describe('#getScalarDeclarations', () => {
+        it('should return the expected number of Scalar declarations', () => {
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
+            let decls = modelFile.getScalarDeclarations();
+            decls.should.all.be.an.instanceOf(ScalarDeclaration);
+            decls.length.should.equal(1);
+        });
+    });
+
     describe('#getFullyQualifiedTypeName', () => {
         it('should return null if not prmative, imported or local type', () => {
             const ast = {
@@ -720,4 +730,5 @@ describe('ModelFile', () => {
             modelFile.getFullyQualifiedTypeName('String').should.equal('String');
         });
     });
+
 });

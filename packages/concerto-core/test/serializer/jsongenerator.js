@@ -556,7 +556,25 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
-                'getType':function(){return 'String';}
+                'getType':function(){return 'String';},
+                'getParent':function(){
+                    return {
+                        'getModelFile':function(){
+                            return {
+                                'getType':function(){
+                                    return {
+                                        'getFullyQualifiedName':function(){return 'MyEnum';},
+                                        'getProperties':function(){return [
+                                            {'getName':function(){ return 'FOO'; }},
+                                            {'getName':function(){ return 'BAR'; }},
+                                            {'getName':function(){ return 'WONGA-1'; }},
+                                        ];}
+                                    };
+                                }
+                            };
+                        }
+                    };
+                }
             };
             isEnumStub.returns(true);
 
@@ -620,7 +638,24 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
-                'getParent':function(){return 'vehicle';},
+                'getParent':function(){
+                    return {
+                        'getModelFile':function(){
+                            return {
+                                'getType':function(){
+                                    return {
+                                        'getFullyQualifiedName':function(){return 'MyEnum';},
+                                        'getProperties':function(){return [
+                                            {'getName':function(){ return 'FOO'; }},
+                                            {'getName':function(){ return 'BAR'; }},
+                                            {'getName':function(){ return 'WONGA-1'; }},
+                                        ];}
+                                    };
+                                }
+                            };
+                        }
+                    };
+                },
                 'getType':function(){return 'String';}
             };
             isEnumStub.returns(false);
@@ -653,7 +688,24 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
-                'getParent':function(){return 'vehicle';},
+                'getParent':function(){
+                    return {
+                        'getModelFile':function(){
+                            return {
+                                'getType':function(){
+                                    return {
+                                        'getFullyQualifiedName':function(){return 'MyEnum';},
+                                        'getProperties':function(){return [
+                                            {'getName':function(){ return 'FOO'; }},
+                                            {'getName':function(){ return 'BAR'; }},
+                                            {'getName':function(){ return 'WONGA-1'; }},
+                                        ];}
+                                    };
+                                }
+                            };
+                        }
+                    };
+                },
                 'getType':function(){return 'String';}
             };
             isEnumStub.returns(false);

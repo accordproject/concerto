@@ -163,7 +163,7 @@ class JSONGenerator {
             } else {
                 result = array;
             }
-        } else if (field.isPrimitive()) {
+        } else if (field.isPrimitive() || ModelUtil.isScalar(field)) {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
             if (this.ergo) {

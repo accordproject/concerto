@@ -45,6 +45,8 @@ class RecursionDetectionVisitor {
         }
         else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return false;
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {

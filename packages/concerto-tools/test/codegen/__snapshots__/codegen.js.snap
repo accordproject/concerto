@@ -229,6 +229,10 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "serialNumber"
       ]
     },
+    "org.acme.hr@1.0.0.SSN": {
+      "type": "string",
+      "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+    },
     "org.acme.hr@1.0.0.Person": {
       "title": "Person",
       "description": "An instance of org.acme.hr@1.0.0.Person",

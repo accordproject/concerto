@@ -150,7 +150,7 @@ class JSONSchemaVisitor {
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isScalarDeclaration?.()) {
-            return;
+            return this.visitScalarDeclaration(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else {
@@ -209,7 +209,6 @@ class JSONSchemaVisitor {
             definitions : {}
         };
         modelFile.getAllDeclarations()
-            .filter(declaration => !declaration.isScalarDeclaration?.())
             .forEach((declaration) => {
                 const type = declaration.accept(this, parameters);
                 result.definitions[type.$id] = type.schema;
@@ -322,6 +321,21 @@ class JSONSchemaVisitor {
 
         // Return the created schema.
         return result;
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {ScalarDeclaration} scalarDeclaration - the object being visited
+     * @param {Object} parameters - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitScalarDeclaration(scalarDeclaration, parameters) {
+        debug('entering visitScalarDeclaration', scalarDeclaration.getName());
+        return {
+            $id: scalarDeclaration.getFullyQualifiedName(),
+            schema: this.getFieldOrScalarDeclarationValidatorsForSchema(scalarDeclaration)
+        };
     }
 
     /**

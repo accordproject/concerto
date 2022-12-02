@@ -14,6 +14,11 @@
             "name": "BooleanScalarWithDefault"
         },
         {
+            "$class": "concerto.metamodel@1.1.0.BooleanScalar",
+            "defaultValue": false,
+            "name": "BooleanScalarWithDefaultFalse"
+        },
+        {
             "$class": "concerto.metamodel@1.1.0.IntegerScalar",
             "name": "IntegerScalar"
         },
@@ -117,6 +122,16 @@
                     "type": {
                         "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
                         "name": "BooleanScalarWithDefault"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.1.0.ObjectProperty",
+                    "name": "booleanScalarWithDefaultFalse",
+                    "type": {
+                        "$class": "concerto.metamodel@1.1.0.TypeIdentifier",
+                        "name": "BooleanScalarWithDefaultFalse"
                     },
                     "isArray": false,
                     "isOptional": false

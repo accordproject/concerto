@@ -4,6 +4,8 @@ scalar BooleanScalar extends Boolean
 
 scalar BooleanScalarWithDefault extends Boolean default=true
 
+scalar BooleanScalarWithDefaultFalse extends Boolean default=false
+
 scalar IntegerScalar extends Integer
 
 scalar IntegerScalarWithDefault extends Integer default=42
@@ -35,6 +37,7 @@ scalar DateTimeScalarWithDefault extends DateTime default="2022-11-18"
 concept Scalars {
   o BooleanScalar booleanScalar
   o BooleanScalarWithDefault booleanScalarWithDefault
+  o BooleanScalarWithDefaultFalse booleanScalarWithDefaultFalse
   o IntegerScalar integerScalar
   o IntegerScalarWithDefault integerScalarWithDefault
   o IntegerScalarWithDefaultAndRange integerScalarWithDefaultAndRange
