@@ -13,7 +13,7 @@
  */
 
 {
-  const metamodelVersion = '1.1.0';
+  const metamodelVersion = '1.0.0';
   const metamodelNamespace = `concerto.metamodel@${metamodelVersion}`;
 
   function extractList(list, index) {
