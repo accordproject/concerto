@@ -600,7 +600,7 @@ class ModelFile extends Decorated {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
             let declaration = this.declarations[n];
-            if(declaration instanceof type && !Object.is(declaration, {})) {
+            if(declaration instanceof type) {
                 result.push(declaration);
             }
         }

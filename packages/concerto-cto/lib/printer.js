@@ -67,29 +67,66 @@ function decoratorsFromMetaModel(mm, prefix) {
 }
 
 /**
- * Create a property string from a metamodel
+ * Create type string from a metamodel
+ *
  * @param {object} mm - the metamodel
- * @return {string} the string for that property
+ * @return {string} the string for the type
  */
-function propertyFromMetaModel(mm) {
+function typeFromMetaModel(mm){
+    let result = '';
+    switch (mm.$class) {
+    case `${MetaModelNamespace}.EnumProperty`:
+        break;
+    case `${MetaModelNamespace}.BooleanScalar`:
+    case `${MetaModelNamespace}.BooleanProperty`:
+        result += ' Boolean';
+        break;
+    case `${MetaModelNamespace}.DateTimeProperty`:
+    case `${MetaModelNamespace}.DateTimeScalar`:
+        result += ' DateTime';
+        break;
+    case `${MetaModelNamespace}.DoubleProperty`:
+    case `${MetaModelNamespace}.DoubleScalar`:
+        result += ' Double';
+        break;
+    case `${MetaModelNamespace}.IntegerProperty`:
+    case `${MetaModelNamespace}.IntegerScalar`:
+        result += ' Integer';
+        break;
+    case `${MetaModelNamespace}.LongProperty`:
+    case `${MetaModelNamespace}.LongScalar`:
+        result += ' Long';
+        break;
+    case `${MetaModelNamespace}.StringProperty`:
+    case `${MetaModelNamespace}.StringScalar`:
+        result += ' String';
+        break;
+    case `${MetaModelNamespace}.ObjectProperty`:
+        result += ` ${mm.type.name}`;
+        break;
+    case `${MetaModelNamespace}.RelationshipProperty`:
+        result += ` ${mm.type.name}`;
+        break;
+    }
+    return result;
+}
+
+/**
+ * Create modifiers string from a metamodel
+ *
+ * @param {object} mm - the metamodel
+ * @return {string} the string for the modifiers
+ */
+function modifiersFromMetaModel(mm){
     let result = '';
     let defaultString = '';
     let validatorString = '';
-
-    if (mm.decorators) {
-        result += decoratorsFromMetaModel(mm.decorators, '  ');
-    }
-    if (mm.$class === `${MetaModelNamespace}.RelationshipProperty`) {
-        result += '-->';
-    } else {
-        result += 'o';
-    }
 
     switch (mm.$class) {
     case `${MetaModelNamespace}.EnumProperty`:
         break;
     case `${MetaModelNamespace}.BooleanProperty`:
-        result += ' Boolean';
+    case `${MetaModelNamespace}.BooleanScalar`:
         if (mm.defaultValue === true || mm.defaultValue === false) {
             if (mm.defaultValue) {
                 defaultString += ' default=true';
@@ -99,10 +136,13 @@ function propertyFromMetaModel(mm) {
         }
         break;
     case `${MetaModelNamespace}.DateTimeProperty`:
-        result += ' DateTime';
+    case `${MetaModelNamespace}.DateTimeScalar`:
+        if (mm.defaultValue) {
+            result += ` default="${mm.defaultValue}"`;
+        }
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
-        result += ' Double';
+    case `${MetaModelNamespace}.DoubleScalar`:
         if (mm.defaultValue) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
 
@@ -115,7 +155,7 @@ function propertyFromMetaModel(mm) {
         }
         break;
     case `${MetaModelNamespace}.IntegerProperty`:
-        result += ' Integer';
+    case `${MetaModelNamespace}.IntegerScalar`:
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
@@ -126,7 +166,7 @@ function propertyFromMetaModel(mm) {
         }
         break;
     case `${MetaModelNamespace}.LongProperty`:
-        result += ' Long';
+    case `${MetaModelNamespace}.LongScalar`:
         if (mm.defaultValue) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
@@ -137,7 +177,7 @@ function propertyFromMetaModel(mm) {
         }
         break;
     case `${MetaModelNamespace}.StringProperty`:
-        result += ' String';
+    case `${MetaModelNamespace}.StringScalar`:
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }
@@ -146,21 +186,38 @@ function propertyFromMetaModel(mm) {
         }
         break;
     case `${MetaModelNamespace}.ObjectProperty`:
-        result += ` ${mm.type.name}`;
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }
         break;
-    case `${MetaModelNamespace}.RelationshipProperty`:
-        result += ` ${mm.type.name}`;
-        break;
     }
+    result += defaultString;
+    result += validatorString;
+    return result;
+}
+
+/**
+ * Create a property string from a metamodel
+ * @param {object} mm - the metamodel
+ * @return {string} the string for that property
+ */
+function propertyFromMetaModel(mm) {
+    let result = '';
+
+    if (mm.decorators) {
+        result += decoratorsFromMetaModel(mm.decorators, '  ');
+    }
+    if (mm.$class === `${MetaModelNamespace}.RelationshipProperty`) {
+        result += '-->';
+    } else {
+        result += 'o';
+    }
+    result += typeFromMetaModel(mm);
     if (mm.isArray) {
         result += '[]';
     }
     result += ` ${mm.name}`;
-    result += defaultString;
-    result += validatorString;
+    result += modifiersFromMetaModel(mm);
     if (mm.isOptional) {
         result += ' optional';
     }
@@ -198,68 +255,8 @@ function declFromMetaModel(mm) {
     if (isScalar) {
         result += `scalar ${mm.name} extends`;
 
-        switch (mm.$class) {
-        case booleanScalar$class:
-            result += ' Boolean';
-            if (mm.defaultValue === true || mm.defaultValue === false) {
-                if (mm.defaultValue) {
-                    result += ' default=true';
-                } else {
-                    result += ' default=false';
-                }
-            }
-            break;
-        case integerScalar$class:
-            result += ' Integer';
-            if (mm.defaultValue) {
-                result += ` default=${mm.defaultValue.toString()}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                result += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case longScalar$class:
-            result += ' Long';
-            if (mm.defaultValue) {
-                result += ` default=${mm.defaultValue.toString()}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                result += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case doubleScalar$class:
-            result += ' Double';
-            if (mm.defaultValue) {
-                const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
-
-                result += ` default=${doubleString}`;
-            }
-            if (mm.validator) {
-                const lowerString = mm.validator.lower ? mm.validator.lower : '';
-                const upperString = mm.validator.upper ? mm.validator.upper : '';
-                result += ` range=[${lowerString},${upperString}]`;
-            }
-            break;
-        case stringScalar$class:
-            result += ' String';
-            if (mm.defaultValue) {
-                result += ` default="${mm.defaultValue}"`;
-            }
-            if (mm.validator) {
-                result += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
-            }
-            break;
-        case dateTimeScalar$class:
-            result += ' DateTime';
-            if (mm.defaultValue) {
-                result += ` default="${mm.defaultValue}"`;
-            }
-            break;
-        }
+        result += typeFromMetaModel(mm);
+        result += modifiersFromMetaModel(mm);
     } else {
         if (mm.isAbstract) {
             result += 'abstract ';
