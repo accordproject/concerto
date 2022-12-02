@@ -20,6 +20,7 @@ namespace stdlib.business
 
 import stdlib.base.Person
 import stdlib.base.Address
+import stdlib.base.SSN
 
 /**
  * An abstract participant type in this business network
@@ -38,6 +39,7 @@ abstract participant Employee extends Person {
   o String employmentStatus optional
   o String department optional
   o String jobRole optional
+  o SSN ssn optional
 }
 
 abstract participant Manager extends Employee {

@@ -57,6 +57,8 @@ class JavaVisitor {
             return this.visitRelationship(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
+        } else if (thing.isScalarDeclaration?.()) {
+            return;
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: 2 }));
         }

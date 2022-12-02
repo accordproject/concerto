@@ -88,32 +88,48 @@ class Property extends Decorated {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        if (this.ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
+        // if this object property references a scalar
+        // then replace the scalar with an equivalent property
+        // i.e. we unbox the scalar here.
+        let ast = this.ast;
+        if(
+            ast?.type &&
+          ast.$class === `${MetaModelNamespace}.ObjectProperty`
+        ) {
+            const type = this.getModelFile().getType(ast.type.name);
+            if(type) {
+                if(type?.isScalarDeclaration?.()) {
+                    ast = type.ast;
+                }
+            }
+        }
+
+        if (ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
             this.type = 'Boolean';
-        } else if (this.ast.$class === `${MetaModelNamespace}.StringProperty`) {
+        } else if (ast.$class === `${MetaModelNamespace}.StringProperty`) {
             this.type = 'String';
-        } else if (this.ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
+        } else if (ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
             this.type = 'Integer';
-        } else if (this.ast.$class === `${MetaModelNamespace}.LongProperty`) {
+        } else if (ast.$class === `${MetaModelNamespace}.LongProperty`) {
             this.type = 'Long';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
+        } else if (ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
             this.type = 'Double';
-        } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
+        } else if (ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
             this.type = 'DateTime';
-        } else if (this.ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
-            this.type = this.ast.type ? this.ast.type.name : null;
-        } else if (this.ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
-            this.type = this.ast.type.name;
+        } else if (ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
+            this.type = ast.type ? ast.type.name : null;
+        } else if (ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
+            this.type = ast.type.name;
         } else {
             this.type = null;
         }
         this.array = false;
 
-        if(this.ast.isArray) {
+        if(ast.isArray) {
             this.array = true;
         }
 
-        if(this.ast.isOptional) {
+        if(ast.isOptional) {
             this.optional = true;
         }
         else {

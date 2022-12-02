@@ -52,6 +52,8 @@ enum Color {
   o BLUE
 }
 
+scalar Email extends String
+
 abstract transaction Base identified by id {
   o String id
 }
@@ -67,6 +69,7 @@ transaction MyRequest extends Base {
   o Integer age
   o Money money
   o Color color
+  o Email email
 }
 `;
 
@@ -315,6 +318,7 @@ describe('JSONSchema (samples)', function () {
                   value: 100.5,
                   currencyCode: 'GBP'
               },
+              email: 'hello@example.com',
               date: new Date().toISOString(),
           };
 

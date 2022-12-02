@@ -92,6 +92,13 @@ declare class ModelUtil {
      */
     private static isEnum;
     /**
+     * Returns the true if the given field is a Scalar type
+     * @param {Scalar} scalar - the string
+     * @return {boolean} true if the field is declared as an scalar
+     * @private
+     */
+    private static isScalar;
+    /**
      * Get the fully qualified name of a type.
      * @param {string} namespace - namespace of the type.
      * @param {string} type - short name of the type.

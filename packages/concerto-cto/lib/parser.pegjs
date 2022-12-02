@@ -13,6 +13,9 @@
  */
 
 {
+  const metamodelVersion = '1.0.0';
+  const metamodelNamespace = `concerto.metamodel@${metamodelVersion}`;
+
   function extractList(list, index) {
     var result = new Array(list.length), i;
 
@@ -73,10 +76,10 @@
     }
     const start = value.start;
     const end = value.end;
-    start.$class = 'concerto.metamodel@1.0.0.Position';
-    end.$class = 'concerto.metamodel@1.0.0.Position';
+    start.$class = `${metamodelNamespace}.Position`;
+    end.$class = `${metamodelNamespace}.Position`;
     const result = {
-      $class: 'concerto.metamodel@1.0.0.Range',
+      $class: `${metamodelNamespace}.Range`,
       start: start,
       end: end,
     };
@@ -315,7 +318,7 @@ UnicodeEscapeSequence
 RegularExpressionLiteral "regular expression"
   = "/" pattern:$RegularExpressionBody "/" flags:$RegularExpressionFlags {
       return {
-        $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+        $class: `${metamodelNamespace}.StringRegexValidator`,
         pattern,
         flags
       };
@@ -798,6 +801,7 @@ AssetToken        = "asset"       !IdentifierPart
 TransactionToken  = "transaction" !IdentifierPart
 EventToken        = "event"       !IdentifierPart
 ParticipantToken  = "participant" !IdentifierPart
+ScalarToken       = "scalar"      !IdentifierPart
 FromToken         = "from"        !IdentifierPart
 AllToken          = "*"          !IdentifierPart
 
@@ -1064,6 +1068,103 @@ ConceptDeclaration
       return result;
     }
 
+BooleanScalar
+   = BooleanType __ d:BooleanDefault? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.BooleanScalar"
+      };
+      if (d) {
+        result.defaultValue = (d === 'true' ? true : false);
+      }
+      return result;
+  }
+
+IntegerScalar
+   = IntegerType __ d:IntegerDefault? __ range:IntegerDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.IntegerScalar",
+      };
+      if (d) {
+        result.defaultValue = parseInt(d);
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+LongScalar
+   = LongType __ d:IntegerDefault? __ range:LongDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.LongScalar",
+      };
+      if (d) {
+        result.defaultValue = parseInt(d);
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+RealScalar
+   = RealNumberType __ d:RealDefault? __ range:RealDomainValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.DoubleScalar",
+      };
+      if (d) {
+        result.defaultValue = parseFloat(d);
+      }
+      if (range) {
+    		result.validator = range;
+      }
+      return result;
+  }
+
+StringScalar
+   = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ {
+      const result = {
+        $class: "concerto.metamodel@1.0.0.StringScalar",
+      };
+      if (d) {
+        result.defaultValue = d;
+      }
+      if (regex) {
+    		result.validator = regex;
+      }
+      return result;
+  }
+
+DateTimeScalar
+   = DateTimeType __ d:StringDefault? __ {
+      return {
+        $class: "concerto.metamodel@1.0.0.DateTimeScalar",
+        defaultValue: d
+      };
+  }
+
+ScalarType
+   = BooleanScalar /
+     IntegerScalar /
+     LongScalar /
+     RealScalar /
+     StringScalar /
+     DateTimeScalar
+
+ScalarDeclaration
+      = decorators:Decorators __ ScalarToken __ id:Identifier __ "extends" __ scalarType:ScalarType __
+    {
+      const result = {
+        ...scalarType,
+        name: id.name,
+        ...buildRange(location())
+      };
+      if (decorators.length > 0) {
+        result.decorators = decorators;
+      }
+      return result;
+    }
+
 Optional
    = "optional"{
       return {
@@ -1194,7 +1295,7 @@ StringRegexValidator
 RealDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedRealLiteral? __ "," __ upper:$SignedRealLiteral? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator'
+      $class: `${metamodelNamespace}.DoubleDomainValidator`
     };
     if (lower) {
       result.lower = parseFloat(lower);
@@ -1208,7 +1309,7 @@ RealDomainValidator
 IntegerDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedInteger? __ "," __ upper:$SignedInteger? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.0.0.IntegerDomainValidator'
+      $class: `${metamodelNamespace}.IntegerDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -1222,7 +1323,7 @@ IntegerDomainValidator
 LongDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedInteger? __ "," __ upper:$SignedInteger? __ "]" {
     const result = {
-      $class: 'concerto.metamodel@1.0.0.LongDomainValidator'
+      $class: `${metamodelNamespace}.LongDomainValidator`
     };
     if (lower) {
       result.lower = parseInt(lower);
@@ -1396,7 +1497,7 @@ ImportType
     = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
         const { namespace, name } = fullyQualifiedName(ns);
     	const result = {
-            $class: 'concerto.metamodel@1.0.0.ImportType',
+            $class: `${metamodelNamespace}.ImportType`,
             name,
             namespace,
         };
@@ -1463,6 +1564,7 @@ SourceElement
   / ParticipantDeclaration
   / EnumDeclaration
   / ConceptDeclaration
+  / ScalarDeclaration
 
 
 

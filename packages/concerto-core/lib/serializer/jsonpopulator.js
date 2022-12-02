@@ -175,8 +175,7 @@ class JSONPopulator {
                 result.push(this.convertItem(field,jsonItem, parameters));
                 parameters.path.pop();
             }
-        }
-        else {
+        } else {
             result = this.convertItem(field,jsonObj, parameters);
         }
 
@@ -193,7 +192,7 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if(!field.isPrimitive() && !field.isTypeEnum()) {
+        if(!field.isPrimitive() && !field.isTypeEnum() && !ModelUtil.isScalar(field)) {
             if (this.ergo) {
                 const theClass = jsonItem.$class.$coll[0];
                 jsonItem = jsonItem.$data;

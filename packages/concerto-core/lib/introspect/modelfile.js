@@ -21,6 +21,7 @@ const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
+const ScalarDeclaration = require('./scalardeclaration');
 const ParticipantDeclaration = require('./participantdeclaration');
 const TransactionDeclaration = require('./transactiondeclaration');
 const EventDeclaration = require('./eventdeclaration');
@@ -92,7 +93,6 @@ class ModelFile extends Decorated {
 
         // Set up the decorators.
         this.process();
-
         // Populate from the AST
         this.fromAst(this.ast);
         // Check version compatibility
@@ -584,18 +584,27 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Get the ScalarDeclaration defined in this ModelFile
+     * @return {ScalarDeclaration[]} the ScalarDeclaration defined in the model file
+     */
+    getScalarDeclarations() {
+        return this.getDeclarations(ScalarDeclaration);
+    }
+
+    /**
      * Get the instances of a given type in this ModelFile
      * @param {Function} type - the type of the declaration
-     * @return {ClassDeclaration[]} the ClassDeclaration defined in the model file
+     * @return {Object[]} the ClassDeclaration defined in the model file
      */
     getDeclarations(type) {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
-            let classDeclaration = this.declarations[n];
-            if(classDeclaration instanceof type) {
-                result.push(classDeclaration);
+            let declaration = this.declarations[n];
+            if(declaration instanceof type) {
+                result.push(declaration);
             }
         }
+
         return result;
     }
 
@@ -759,6 +768,16 @@ class ModelFile extends Decorated {
             }
             else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
+            }
+            else if([
+                `${MetaModelNamespace}.BooleanScalar`,
+                `${MetaModelNamespace}.IntegerScalar`,
+                `${MetaModelNamespace}.LongScalar`,
+                `${MetaModelNamespace}.DoubleScalar`,
+                `${MetaModelNamespace}.StringScalar`,
+                `${MetaModelNamespace}.DateTimeScalar`,
+            ].includes(thing.$class)) {
+                this.declarations.push( new ScalarDeclaration(this, thing) );
             }
             else {
                 let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');

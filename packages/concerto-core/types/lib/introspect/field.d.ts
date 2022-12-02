@@ -10,7 +10,7 @@ export = Field;
  * @memberof module:concerto-core
  */
 declare class Field extends Property {
-    validator: NumberValidator | StringValidator;
+    validator: StringValidator | NumberValidator;
     defaultValue: any;
     /**
      * Returns the validator string for this field
@@ -30,6 +30,6 @@ declare class Field extends Property {
     isField(): boolean;
 }
 import Property = require("./property");
-import NumberValidator = require("./numbervalidator");
 import StringValidator = require("./stringvalidator");
+import NumberValidator = require("./numbervalidator");
 import Validator = require("./validator");

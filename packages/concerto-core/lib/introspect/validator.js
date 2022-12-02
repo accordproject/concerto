@@ -19,6 +19,7 @@
 /* istanbul ignore next */
 if (global === undefined) {
     const Field = require('./field');
+    const ScalarDeclaration = require('./scalardeclaration');
 }
 /* eslint-enable no-unused-vars */
 
@@ -31,10 +32,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Validator {
-
     /**
      * Create a Property.
-     * @param {Field} field - the field this validator is attached to
+     * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
@@ -49,7 +49,7 @@ class Validator {
      * @throws {Error} throws an error to report the message
      */
     reportError(id, msg) {
-        throw new Error( 'Validator error for field `' + id + '`. ' + this.getField().getFullyQualifiedName() + ': ' + msg );
+        throw new Error( 'Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg );
     }
 
     /**
@@ -64,10 +64,10 @@ class Validator {
     }
 
     /**
-     * Returns the field that this validator applies to
-     * @return {Field} the field
+     * Returns the field or scalar declaration that this validator applies to
+     * @return {Object} the field
      */
-    getField() {
+    getFieldOrScalarDeclaration() {
         return this.field;
     }
 

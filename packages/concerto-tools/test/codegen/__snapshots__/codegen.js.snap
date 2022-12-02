@@ -60,6 +60,7 @@ type Person struct {
    LastName string \`json:"lastName"\`
    MiddleNames string \`json:"middleNames"\`
    HomeAddress Address \`json:"homeAddress"\`
+   Ssn SSN \`json:"ssn"\`
 }
 type Employee struct {
    Person
@@ -228,6 +229,10 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "serialNumber"
       ]
     },
+    "org.acme.hr@1.0.0.SSN": {
+      "type": "string",
+      "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+    },
     "org.acme.hr@1.0.0.Person": {
       "title": "Person",
       "description": "An instance of org.acme.hr@1.0.0.Person",
@@ -254,6 +259,9 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         },
         "homeAddress": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "ssn": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
         }
       },
       "required": [
@@ -261,7 +269,8 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "email",
         "firstName",
         "lastName",
-        "homeAddress"
+        "homeAddress",
+        "ssn"
       ]
     },
     "org.acme.hr@1.0.0.Employee": {
@@ -309,6 +318,9 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         },
         "homeAddress": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "ssn": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
         }
       },
       "required": [
@@ -320,7 +332,8 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "email",
         "firstName",
         "lastName",
-        "homeAddress"
+        "homeAddress",
+        "ssn"
       ]
     },
     "org.acme.hr@1.0.0.Contractor": {
@@ -356,6 +369,9 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         },
         "homeAddress": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "ssn": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
         }
       },
       "required": [
@@ -364,7 +380,8 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "email",
         "firstName",
         "lastName",
-        "homeAddress"
+        "homeAddress",
+        "ssn"
       ]
     },
     "org.acme.hr@1.0.0.Manager": {
@@ -419,6 +436,9 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         },
         "homeAddress": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
+        },
+        "ssn": {
+          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
         }
       },
       "required": [
@@ -430,7 +450,8 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "email",
         "firstName",
         "lastName",
-        "homeAddress"
+        "homeAddress",
+        "ssn"
       ]
     },
     "org.acme.hr@1.0.0.CompanyEvent": {
@@ -702,6 +723,7 @@ xmlns:concerto="concerto"
       <xs:element name="lastName" type="xs:string"/>
       <xs:element name="middleNames" type="xs:string"/>
       <xs:element name="homeAddress" type="org.acme.hr:Address"/>
+      <xs:element name="ssn" type="org.acme.hr:SSN"/>
    </xs:sequence>
    </xs:extension>
    </xs:complexContent>
@@ -834,6 +856,7 @@ class org.acme.hr.Person << (P,lightblue) >> {
    + String lastName
    + String middleNames
    + Address homeAddress
+   + SSN ssn
 }
 org.acme.hr.Person --|> concerto.Participant
 class org.acme.hr.Employee << (P,lightblue) >> {
@@ -1047,6 +1070,7 @@ export interface IPerson extends IParticipant {
    lastName: string;
    middleNames?: string;
    homeAddress: IAddress;
+   ssn: ISSN;
 }
 
 export type PersonUnion = IEmployee | 
@@ -1452,6 +1476,7 @@ public abstract class Person extends Participant {
    private String lastName;
    private String middleNames;
    private Address homeAddress;
+   private SSN ssn;
    public String getEmail() {
       return this.email;
    }
@@ -1467,6 +1492,9 @@ public abstract class Person extends Participant {
    public Address getHomeAddress() {
       return this.homeAddress;
    }
+   public SSN getSsn() {
+      return this.ssn;
+   }
    public void setEmail(String email) {
       this.email = email;
    }
@@ -1481,6 +1509,9 @@ public abstract class Person extends Participant {
    }
    public void setHomeAddress(Address homeAddress) {
       this.homeAddress = homeAddress;
+   }
+   public void setSsn(SSN ssn) {
+      this.ssn = ssn;
    }
 }
 ",
@@ -1753,6 +1784,7 @@ type Person {
    lastName: String!
    middleNames: String
    homeAddress: Address!
+   ssn: SSN!
    _identifier: String!
 }
 type Employee {
@@ -1766,6 +1798,7 @@ type Employee {
    lastName: String!
    middleNames: String
    homeAddress: Address!
+   ssn: SSN!
    _identifier: String!
 }
 type Contractor {
@@ -1776,6 +1809,7 @@ type Contractor {
    lastName: String!
    middleNames: String
    homeAddress: Address!
+   ssn: SSN!
    _identifier: String!
 }
 type Manager {
@@ -1790,6 +1824,7 @@ type Manager {
    lastName: String!
    middleNames: String
    homeAddress: Address!
+   ssn: SSN!
    _identifier: String!
 }
 type CompanyEvent {
@@ -1973,6 +2008,7 @@ public abstract class Person : Participant {
    public string lastName { get; set; }
    public string middleNames { get; set; }
    public Address homeAddress { get; set; }
+   public SSN ssn { get; set; }
 }
 [AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Employee")]
 [System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
@@ -2144,6 +2180,8 @@ exports[`codegen #formats check we can convert all formats to CTO 35`] = `
          </Property>
          <Property Name="homeAddress" Type="org.acme.hr.Address"  >
          </Property>
+         <Property Name="ssn" Type="org.acme.hr.SSN"  >
+         </Property>
       </EntityType>
       <EntityType Name="Employee"  BaseType="org.acme.hr.Person">
          <Property Name="employeeId" Type="Edm.String"  >
@@ -2261,6 +2299,7 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
+    +SSN ssn
 }
 
 Person --|> Participant
@@ -2320,7 +2359,7 @@ exports[`codegen #formats check we can convert all formats to CTO 37`] = `
 - 4 participants
 - 1 transactions
 - 2 events
-- 14 total declarations
+- 15 total declarations
 
 ## Imports
 - concerto@1.0.0.Concept
@@ -2397,6 +2436,7 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
+    +SSN ssn
 }
 
 Person --|> Participant
@@ -2521,6 +2561,7 @@ message Employee {
   optional string manager = 8;
   optional string middleNames = 9;
   Address officeAddress = 10;
+  SSN ssn = 11;
 }
 
 message _Subclasses_of_class_Employee {
@@ -2538,6 +2579,7 @@ message Contractor {
   string lastName = 5;
   optional string manager = 6;
   optional string middleNames = 7;
+  SSN ssn = 8;
 }
 
 message Manager {
@@ -2552,6 +2594,7 @@ message Manager {
   optional string middleNames = 9;
   Address officeAddress = 10;
   repeated string reports = 11;
+  SSN ssn = 12;
 }
 
 message CompanyEvent {

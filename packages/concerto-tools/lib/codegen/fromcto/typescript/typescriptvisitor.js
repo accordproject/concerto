@@ -90,6 +90,7 @@ class TypescriptVisitor {
         parameters.fileWriter.writeLine(0, '\n// imports');
         const properties = new Map();
         modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.())
             .filter(v => !v.isEnum())
             .forEach(classDeclaration => {
                 if (classDeclaration.getSuperType()) {
@@ -146,9 +147,10 @@ class TypescriptVisitor {
             });
 
         parameters.fileWriter.writeLine(0, '\n// interfaces');
-        modelFile.getAllDeclarations().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
+        modelFile.getAllDeclarations()
+            .filter(declaration => !declaration.isScalarDeclaration?.()).forEach((decl) => {
+                decl.accept(this, parameters);
+            });
 
         parameters.fileWriter.closeFile();
 

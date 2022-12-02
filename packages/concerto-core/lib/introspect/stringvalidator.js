@@ -21,6 +21,7 @@ const Validator = require('./validator');
 /* istanbul ignore next */
 if (global === undefined) {
     const Field = require('./field');
+    const ScalarDeclaration = require('./scalardeclaration');
 }
 /* eslint-enable no-unused-vars */
 
@@ -34,7 +35,7 @@ class StringValidator extends Validator{
 
     /**
      * Create a StringValidator.
-     * @param {Field} field - the field this validator is attached to
+     * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string. This must be a regex
      *
      * @throws {IllegalModelException}

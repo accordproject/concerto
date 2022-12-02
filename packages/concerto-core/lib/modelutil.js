@@ -173,6 +173,18 @@ class ModelUtil {
     }
 
     /**
+     * Returns the true if the given field is a Scalar type
+     * @param {Scalar} scalar - the string
+     * @return {boolean} true if the field is declared as an scalar
+     * @private
+     */
+    static isScalar(scalar) {
+        const modelFile = scalar.getParent().getModelFile();
+        const declaration = modelFile.getType(scalar.getType());
+        return (declaration !== null && declaration.isScalarDeclaration?.());
+    }
+
+    /**
      * Get the fully qualified name of a type.
      * @param {string} namespace - namespace of the type.
      * @param {string} type - short name of the type.
