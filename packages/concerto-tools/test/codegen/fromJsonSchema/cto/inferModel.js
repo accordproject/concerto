@@ -79,16 +79,21 @@ enum Root {
                 xs: {
                     type: 'array',
                     items: {
-                        enum: ['one', 'two']
+                        enum: ['one', 'two', 3]
                     }
                 }
             }
         });
-        // TODO Generate definitions for inline sub-schemas.
         cto.should.equal(`namespace org.acme
 
 concept Root {
-   o String[] xs optional
+   o Root_Xs[] xs optional
+}
+
+enum Root_Xs {
+   o one
+   o two
+   o _3
 }
 
 `);

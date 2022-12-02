@@ -15,7 +15,6 @@
 'use strict';
 
 const Writer = require('@accordproject/concerto-util').Writer;
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Ajv2019 = require('ajv/dist/2019');
 const Ajv2020 = require('ajv/dist/2020');
 const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
@@ -32,6 +31,8 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
+
 /**
  * Remove whitespace and periods from a Type identifier
  * @param {string} type the input string
@@ -44,7 +45,7 @@ function normalizeType(type) {
             // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
             .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
             // Replace delimiters with underscore
-            .replace(/[\s\\.-]/g, '_')
+            .replace(REGEX_ESCAPED_CHARS, '_')
     );
 }
 
@@ -84,13 +85,24 @@ function inferTypeName(definition, context, skipDictionary) {
         return normalizeType(definition.$ref);
     }
 
-    const name = context.parents.peek();
-    const { type } = parseIdUri(definition.$id) ||
-        { type: definition.title || name };
+    const name = context.parents.slice(-1).pop();
+    const { type } = parseIdUri(definition.$id) || { type: name };
 
     if (skipDictionary || context.dictionary.has(normalizeType(type))){
         return normalizeType(type);
     }
+
+    // We've found an inline sub-schema
+    if (definition.properties || definition.enum){
+        const subSchemaName = context.parents
+            .map(normalizeType)
+            .join('_');
+
+        // Come back to this later
+        context.jobs.push({ name: subSchemaName, definition });
+        return subSchemaName;
+    }
+
     // We fallback to a stringified object representation. This is "untyped".
     return 'String';
 }
@@ -103,12 +115,12 @@ function inferTypeName(definition, context, skipDictionary) {
  * @private
  */
 function inferType(definition, context) {
-    const name = context.parents.peek();
+    const name = context.parents.slice(-1).pop();
     if (definition.$ref) {
         // Recursive defintion
         if (definition.$ref === '#') {
             const top = context.parents.pop();
-            const parent = context.parents.peek();
+            const parent = context.parents.slice(-1).pop();
             context.parents.push(top);
             return parent;
         }
@@ -116,7 +128,6 @@ function inferType(definition, context) {
         return inferTypeName(definition, context);
     }
 
-    // TODO Also add local sub-schema definition
     if (definition.enum) {
         return inferTypeName(definition, context);
     }
@@ -175,9 +186,16 @@ function inferEnum(definition, context) {
 
     writer.writeLine(0, `enum ${inferTypeName(definition, context)} {`);
     definition.enum.forEach((value) => {
+        let normalizedValue = value;
+        // Concerto does not allow enum values to start with numbers or values such as `true`
+        // If we can relax the parser rules, this branch could be removed
+        if (typeof normalizedValue !== 'string' || normalizedValue.match(/^\d/)){
+            normalizedValue = `_${normalizedValue}`;
+        }
+        normalizedValue = normalizedValue.replace(REGEX_ESCAPED_CHARS, '_');
         writer.writeLine(
             1,
-            `o ${value}`
+            `o ${normalizedValue}`
         );
     });
     writer.writeLine(0, '}');
@@ -227,7 +245,7 @@ function inferConcept(definition, context) {
                 validator = ` range=[${min},${exclusiveMax}]`;
             }
         } else if (type === 'String' && propertyDefinition.pattern) {
-            validator = ` regex=/${propertyDefinition.pattern}/`;
+            validator = ` regex=/${propertyDefinition.pattern.replace(/\//g, '\\/')}/`;
         }
 
         // Warning: The semantics of this default property differs between JSON Schema and Concerto
@@ -255,7 +273,7 @@ function inferConcept(definition, context) {
  * @private
  */
 function inferDeclaration(definition, context) {
-    const name = context.parents.peek();
+    const name = context.parents.slice(-1).pop();
 
     if (definition.enum) {
         inferEnum(definition, context);
@@ -315,9 +333,10 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     ajv.validate(type);
 
     const context = {
-        parents: new TypedStack(),
+        parents: new Array(), // Track ancestors in the tree
         writer: new Writer(),
-        dictionary: new Set(),
+        dictionary: new Set(),     // Track types that we've seen before
+        jobs: new Array(),    // Queue of inline definitions to come-back to
     };
 
     context.writer.writeLine(0, `namespace ${namespace}`);
@@ -354,6 +373,15 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     context.parents.push(type);
     inferDeclaration(schema, context);
     context.parents.pop();
+
+    // Generate declarations for all inline sub-schemas
+    while(context.jobs.length > 0){
+        const job = context.jobs.pop();
+        context.parents.push(job.name);
+        context.dictionary.add(job.name);
+        inferDeclaration(job.definition, context);
+        context.parents.pop();
+    }
 
     return context.writer.getBuffer();
 }
