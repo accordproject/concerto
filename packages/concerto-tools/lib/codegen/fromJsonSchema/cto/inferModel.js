@@ -21,29 +21,47 @@ const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
 const draft7MetaSchema = require('ajv/dist/refs/json-schema-draft-07.json');
 const addFormats = require('ajv-formats');
 
+/**
+ * Capitalize the first letter of a string
+ * @param {string} string the input string
+ * @returns {string} input with first letter capitalized
+ * @private
+ */
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
 
 /**
  * Remove whitespace and periods from a Type identifier
  * @param {string} type the input string
+ * @param {object} options processing options for inference
  * @returns {string} the normalized type name
  * @private
  */
-function normalizeType(type) {
-    return type
+function normalizeType(type, options) {
+    const typeName = type
+    // TODO This could cause naming collisions
     // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
         .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
     // Replace delimiters with underscore
         .replace(REGEX_ESCAPED_CHARS, '_');
+
+    if (options?.capitalizeFirstLetterOfTypeName){
+        return capitalizeFirstLetter(typeName);
+    }
+    return typeName;
 }
 
 /**
  * Parse a $id URL to use it as a namespace and root type
  * @param {string} id - the $id value from a JSON schema
+ * @param {object} options processing options for inference
  * @returns {object} A namespace and type pair
  * @private
  */
-function parseIdUri(id) {
+function parseIdUri(id, options) {
     if (!id) { return; }
 
     // TODO (MCR) - support non-URL URI $id values
@@ -53,7 +71,7 @@ function parseIdUri(id) {
     const path = url.pathname.split('/');
     const type = normalizeType(path.pop()
         .replace(/\.json$/, '') // Convention is to add .schema.json to $id
-        .replace(/\.schema$/, ''));
+        .replace(/\.schema$/, ''), options);
 
     namespace += path.length > 0 ? path.join('.') : '';
 
@@ -70,20 +88,20 @@ function parseIdUri(id) {
  */
 function inferTypeName(definition, context, skipDictionary) {
     if (definition.$ref) {
-        return normalizeType(definition.$ref);
+        return normalizeType(definition.$ref, context.options);
     }
 
     const name = context.parents.slice(-1).pop();
-    const { type } = parseIdUri(definition.$id) || { type: name };
+    const { type } = parseIdUri(definition.$id, context.options) || { type: name };
 
-    if (skipDictionary || context.dictionary.has(normalizeType(type))){
-        return normalizeType(type);
+    if (skipDictionary || context.dictionary.has(normalizeType(type, context.options))){
+        return normalizeType(type, context.options);
     }
 
     // We've found an inline sub-schema
     if (definition.properties || definition.enum){
         const subSchemaName = context.parents
-            .map(normalizeType)
+            .map(p => normalizeType(p, context.options))
             .join('_');
 
         // Come back to this later
@@ -294,9 +312,10 @@ function inferDeclaration(definition, context) {
  * @param {string} defaultNamespace a fallback namespace to use for the model if it can't be infered
  * @param {string} defaultType a fallback name for the root concept if it can't be infered
  * @param {object} schema the input json object
+ * @param {object} options processing options for inference
  * @returns {string} the Concerto model
  */
-function inferModelFile(defaultNamespace, defaultType, schema) {
+function inferModelFile(defaultNamespace, defaultType, schema, options = {}) {
     const schemaVersion = schema.$schema;
 
     let ajv = new Ajv2019({ strict: false })
@@ -318,13 +337,14 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     addFormats(ajv);
 
     // Will throw an error for bad schemas
-    ajv.validate(type);
+    ajv.compile(schema);
 
     const context = {
         parents: new Array(), // Track ancestors in the tree
         writer: new Writer(),
         dictionary: new Set(),     // Track types that we've seen before
         jobs: new Array(),    // Queue of inline definitions to come-back to
+        options,
     };
 
     context.writer.writeLine(0, `namespace ${namespace}`);
@@ -336,7 +356,7 @@ function inferModelFile(defaultNamespace, defaultType, schema) {
     // Build a dictionary
     context.dictionary.add(defaultType);
     if (schema.$id) {
-        context.dictionary.add(normalizeType(parseIdUri(schema.$id).type));
+        context.dictionary.add(normalizeType(parseIdUri(schema.$id).type, options));
     }
     Object.keys(defs).forEach((key) => {
         context.parents.push(key);

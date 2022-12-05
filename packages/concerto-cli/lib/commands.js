@@ -576,19 +576,19 @@ class Commands {
      * @param {string} namespace The namepspace for the output model
      * @param {string} [typeName] The name of the root concept
      * @param {string} [format] The source format
-     * @param {string} [output] The target file.
+     * @param {string} [options] Processing options for inference
      *
      * @returns {string} a CTO string
      */
-    static inferConcertoSchema(input, namespace, typeName = 'Root', format = 'jsonSchema', output) {
+    static inferConcertoSchema(input, namespace, typeName = 'Root', format = 'jsonSchema', options) {
         let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
 
         if (format.toLowerCase() === 'openapi'){
             const jsonSchema = toJsonSchema(schema);
             migrate.draft2020(jsonSchema);
-            return CodeGen.InferFromJsonSchema(namespace, typeName, jsonSchema);
+            return CodeGen.InferFromJsonSchema(namespace, typeName, jsonSchema, options);
         }
-        return CodeGen.InferFromJsonSchema(namespace, typeName, schema);
+        return CodeGen.InferFromJsonSchema(namespace, typeName, schema, options);
     }
 }
 
