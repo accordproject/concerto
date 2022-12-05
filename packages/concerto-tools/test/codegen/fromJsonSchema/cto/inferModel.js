@@ -26,6 +26,8 @@ const Concerto = require('@accordproject/concerto-core').Concerto;
 
 const inferModel = require('../../../../lib/codegen/fromJsonSchema/cto/inferModel.js');
 
+const options = { capitalizeFirstLetterOfTypeName: true };
+
 describe('inferModel', function () {
     beforeEach(() => {
     });
@@ -34,7 +36,7 @@ describe('inferModel', function () {
         const example = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/example.json'), 'utf8'));
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/schema.json'), 'utf8'));
         const expectedCto = fs.readFileSync(path.resolve(__dirname, '../cto/data/full.cto'), 'utf8');
-        const cto = inferModel('org.acme', 'Root', schema);
+        const cto = inferModel('org.acme', 'Root', schema, options);
         cto.should.equal(expectedCto);
 
         const ajv = new Ajv({ strict: true })
@@ -60,7 +62,7 @@ describe('inferModel', function () {
         const cto = inferModel('org.acme', 'Root', {
             $schema: 'http://json-schema.org/draft-07/schema#',
             enum: ['one', 'two']
-        });
+        }, options);
         cto.should.equal(`namespace org.acme
 
 enum Root {
@@ -83,7 +85,7 @@ enum Root {
                     }
                 }
             }
-        });
+        }, options);
         cto.should.equal(`namespace org.acme
 
 concept Root {
@@ -109,8 +111,8 @@ enum Root_Xs {
                     'items': { '$ref': '#' }
                 }
             }
-        }
-        );
+        },
+        options);
         cto.should.equal(`namespace org.acme
 
 concept Root {
@@ -123,7 +125,7 @@ concept Root {
 
     it('should generate Concerto for for a schema that uses the 2020 draft', async () => {
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/2020-schema.json'), 'utf8'));
-        const cto = inferModel('org.acme', 'Root', schema);
+        const cto = inferModel('org.acme', 'Root', schema, options);
         cto.should.equal(`namespace com.example
 
 concept Veggie {
@@ -141,7 +143,7 @@ concept Arrays {
 
     it('should generate Concerto for for a schema that property modifiers', async () => {
         const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../cto/data/modifiers-schema.json'), 'utf8'));
-        const cto = inferModel('org.acme', 'Root', schema);
+        const cto = inferModel('org.acme', 'Root', schema, options);
         cto.should.equal(`namespace com.example
 
 concept Geographical_location {
@@ -166,7 +168,7 @@ concept Geographical_location {
                         const: 'value'
                     }
                 }
-            });
+            }, options);
         }).should.throw('Unsupported definition: {"const":"value"}');
     });
 
@@ -181,7 +183,7 @@ concept Geographical_location {
                         additionalProperties: true,
                     }
                 }
-            });
+            }, options);
         }).should.throw('\'additionalProperties\' are not supported in Concerto');
     });
 
@@ -199,7 +201,7 @@ concept Geographical_location {
                     }
                 }
             }
-        });
+        }, options);
         cto.should.equal(`namespace org.acme
 
 concept Foo {
