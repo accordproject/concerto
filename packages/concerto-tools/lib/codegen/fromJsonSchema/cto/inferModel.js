@@ -21,16 +21,6 @@ const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
 const draft7MetaSchema = require('ajv/dist/refs/json-schema-draft-07.json');
 const addFormats = require('ajv-formats');
 
-/**
- * Capitalize the first letter of a string
- * @param {string} string the input string
- * @returns {string} input with first letter capitalized
- * @private
- */
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
 
 /**
@@ -40,13 +30,11 @@ const REGEX_ESCAPED_CHARS = /[\s\\.-]/g;
  * @private
  */
 function normalizeType(type) {
-    return capitalizeFirstLetter(
-        type
-            // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
-            .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
-            // Replace delimiters with underscore
-            .replace(REGEX_ESCAPED_CHARS, '_')
-    );
+    return type
+    // In CTO we only have one place to store definitions, so we flatten the storage structure from JSON Schema
+        .replace(/^#\/(definitions|\$defs|components\/schemas)\//, '')
+    // Replace delimiters with underscore
+        .replace(REGEX_ESCAPED_CHARS, '_');
 }
 
 /**
