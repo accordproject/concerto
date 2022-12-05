@@ -30,6 +30,9 @@ const RecursionDetectionVisitor = require('./recursionvisitor');
  * the `inlineTypes` parameter is set, in which case types are expanded inline,
  * UNLESS they contain recursive references, in which case $ref is used.
  *
+ * The default value for refRoot is '#/definitions'. Set the refRoot parameter
+ * to override.
+ *
  * The meta schema used is http://json-schema.org/draft-07/schema#
  *
  * @private
@@ -378,7 +381,8 @@ class JSONSchemaVisitor {
             // Look up the type of the property.
             let type = field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName());
             if(!parameters.inlineTypes) {
-                jsonSchema = { $ref: `#/definitions/${type.getFullyQualifiedName()}` };
+                const refRoot = parameters.refRoot ? parameters.refRoot : '#/definitions';
+                jsonSchema = { $ref: `${refRoot}/${type.getFullyQualifiedName()}` };
             } else {
                 // inline the schema
                 jsonSchema = this.visit( type, parameters ).schema;

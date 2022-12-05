@@ -194,7 +194,10 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
       "required": [
         "$class",
         "serialNumber"
-      ]
+      ],
+      "$decorators": {
+        "resource": []
+      }
     },
     "org.acme.hr@1.0.0.LaptopMake": {
       "title": "LaptopMake",
@@ -271,7 +274,10 @@ exports[`codegen #formats check we can convert all formats to CTO 3`] = `
         "lastName",
         "homeAddress",
         "ssn"
-      ]
+      ],
+      "$decorators": {
+        "resource": []
+      }
     },
     "org.acme.hr@1.0.0.Employee": {
       "title": "Employee",
@@ -1736,7 +1742,8 @@ public class ChangeOfAddress extends Transaction {
 exports[`codegen #formats check we can convert all formats to CTO 30`] = `
 {
   "key": "model.gql",
-  "value": "scalar DateTime
+  "value": "directive @resource on OBJECT | FIELD_DEFINITION
+scalar DateTime
 # namespace org.acme.hr@1.0.0
 enum State {
    MA
@@ -1765,7 +1772,7 @@ enum Department {
    Engineering
    Design
 }
-type Equipment {
+type Equipment @resource {
    serialNumber: String!
    _identifier: String!
 }
@@ -1778,7 +1785,7 @@ type Laptop {
    serialNumber: String!
    _identifier: String!
 }
-type Person {
+type Person @resource {
    email: String!
    firstName: String!
    lastName: String!
@@ -2154,6 +2161,7 @@ exports[`codegen #formats check we can convert all formats to CTO 35`] = `
          </Member>
       </EnumType>
       <EntityType Name="Equipment" Abstract="true" BaseType="concerto.Asset">
+            <Annotation Term="resource" Bool="true"/>
          <Key><PropertyRef Name="serialNumber"/></Key>
          <Property Name="serialNumber" Type="Edm.String"  >
          </Property>
@@ -2169,6 +2177,7 @@ exports[`codegen #formats check we can convert all formats to CTO 35`] = `
          </Property>
       </EntityType>
       <EntityType Name="Person" Abstract="true" BaseType="concerto.Participant">
+            <Annotation Term="resource" Bool="true"/>
          <Key><PropertyRef Name="email"/></Key>
          <Property Name="email" Type="Edm.String"  >
          </Property>
@@ -2616,6 +2625,672 @@ message ChangeOfAddress {
   string Person = 2;
 }
 
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats to CTO 39`] = `
+{
+  "key": "openapi.json",
+  "value": "{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Generated Open API from Concerto Models",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "org.acme.hr@1.0.0.State": {
+        "title": "State",
+        "description": "An instance of org.acme.hr@1.0.0.State",
+        "enum": [
+          "MA",
+          "NY",
+          "CO",
+          "WA",
+          "IL",
+          "CA"
+        ]
+      },
+      "org.acme.hr@1.0.0.Address": {
+        "title": "Address",
+        "description": "An instance of org.acme.hr@1.0.0.Address",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Address",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Address$",
+            "description": "The class identifier for this type"
+          },
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.State"
+          },
+          "zipCode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "$class",
+          "street",
+          "city",
+          "zipCode",
+          "country"
+        ]
+      },
+      "org.acme.hr@1.0.0.Company": {
+        "title": "Company",
+        "description": "An instance of org.acme.hr@1.0.0.Company",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Company",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Company$",
+            "description": "The class identifier for this type"
+          },
+          "name": {
+            "type": "string"
+          },
+          "headquarters": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          }
+        },
+        "required": [
+          "$class",
+          "name",
+          "headquarters"
+        ]
+      },
+      "org.acme.hr@1.0.0.Department": {
+        "title": "Department",
+        "description": "An instance of org.acme.hr@1.0.0.Department",
+        "enum": [
+          "Sales",
+          "Marketing",
+          "Finance",
+          "HR",
+          "Engineering",
+          "Design"
+        ]
+      },
+      "org.acme.hr@1.0.0.Equipment": {
+        "title": "Equipment",
+        "description": "An instance of org.acme.hr@1.0.0.Equipment",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Equipment",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Equipment$",
+            "description": "The class identifier for this type"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          }
+        },
+        "required": [
+          "$class",
+          "serialNumber"
+        ],
+        "$decorators": {
+          "resource": []
+        }
+      },
+      "org.acme.hr@1.0.0.LaptopMake": {
+        "title": "LaptopMake",
+        "description": "An instance of org.acme.hr@1.0.0.LaptopMake",
+        "enum": [
+          "Apple",
+          "Microsoft"
+        ]
+      },
+      "org.acme.hr@1.0.0.Laptop": {
+        "title": "Laptop",
+        "description": "An instance of org.acme.hr@1.0.0.Laptop",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Laptop",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Laptop$",
+            "description": "The class identifier for this type"
+          },
+          "make": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.LaptopMake"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          }
+        },
+        "required": [
+          "$class",
+          "make",
+          "serialNumber"
+        ]
+      },
+      "org.acme.hr@1.0.0.SSN": {
+        "type": "string",
+        "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+      },
+      "org.acme.hr@1.0.0.Person": {
+        "title": "Person",
+        "description": "An instance of org.acme.hr@1.0.0.Person",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Person",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Person$",
+            "description": "The class identifier for this type"
+          },
+          "email": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "middleNames": {
+            "type": "string"
+          },
+          "homeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "ssn": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+          }
+        },
+        "required": [
+          "$class",
+          "email",
+          "firstName",
+          "lastName",
+          "homeAddress",
+          "ssn"
+        ],
+        "$decorators": {
+          "resource": []
+        }
+      },
+      "org.acme.hr@1.0.0.Employee": {
+        "title": "Employee",
+        "description": "An instance of org.acme.hr@1.0.0.Employee",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Employee",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Employee$",
+            "description": "The class identifier for this type"
+          },
+          "employeeId": {
+            "type": "string"
+          },
+          "department": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Department"
+          },
+          "officeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "companyAssets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+            }
+          },
+          "manager": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+          },
+          "email": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "middleNames": {
+            "type": "string"
+          },
+          "homeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "ssn": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+          }
+        },
+        "required": [
+          "$class",
+          "employeeId",
+          "department",
+          "officeAddress",
+          "companyAssets",
+          "email",
+          "firstName",
+          "lastName",
+          "homeAddress",
+          "ssn"
+        ]
+      },
+      "org.acme.hr@1.0.0.Contractor": {
+        "title": "Contractor",
+        "description": "An instance of org.acme.hr@1.0.0.Contractor",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Contractor",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Contractor$",
+            "description": "The class identifier for this type"
+          },
+          "company": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Company"
+          },
+          "manager": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+          },
+          "email": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "middleNames": {
+            "type": "string"
+          },
+          "homeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "ssn": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+          }
+        },
+        "required": [
+          "$class",
+          "company",
+          "email",
+          "firstName",
+          "lastName",
+          "homeAddress",
+          "ssn"
+        ]
+      },
+      "org.acme.hr@1.0.0.Manager": {
+        "title": "Manager",
+        "description": "An instance of org.acme.hr@1.0.0.Manager",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Manager",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Manager$",
+            "description": "The class identifier for this type"
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The identifier of an instance of org.acme.hr@1.0.0.Person"
+            }
+          },
+          "employeeId": {
+            "type": "string"
+          },
+          "department": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Department"
+          },
+          "officeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "companyAssets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+            }
+          },
+          "manager": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Manager"
+          },
+          "email": {
+            "type": "string",
+            "description": "The instance identifier for this type"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "middleNames": {
+            "type": "string"
+          },
+          "homeAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          },
+          "ssn": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+          }
+        },
+        "required": [
+          "$class",
+          "employeeId",
+          "department",
+          "officeAddress",
+          "companyAssets",
+          "email",
+          "firstName",
+          "lastName",
+          "homeAddress",
+          "ssn"
+        ]
+      },
+      "org.acme.hr@1.0.0.CompanyEvent": {
+        "title": "CompanyEvent",
+        "description": "An instance of org.acme.hr@1.0.0.CompanyEvent",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.CompanyEvent",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.CompanyEvent$",
+            "description": "The class identifier for this type"
+          }
+        },
+        "required": [
+          "$class"
+        ]
+      },
+      "org.acme.hr@1.0.0.Onboarded": {
+        "title": "Onboarded",
+        "description": "An instance of org.acme.hr@1.0.0.Onboarded",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.Onboarded",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Onboarded$",
+            "description": "The class identifier for this type"
+          },
+          "employee": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Employee"
+          }
+        },
+        "required": [
+          "$class",
+          "employee"
+        ]
+      },
+      "org.acme.hr@1.0.0.ChangeOfAddress": {
+        "title": "ChangeOfAddress",
+        "description": "An instance of org.acme.hr@1.0.0.ChangeOfAddress",
+        "type": "object",
+        "properties": {
+          "$class": {
+            "type": "string",
+            "default": "org.acme.hr@1.0.0.ChangeOfAddress",
+            "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.ChangeOfAddress$",
+            "description": "The class identifier for this type"
+          },
+          "Person": {
+            "type": "string",
+            "description": "The identifier of an instance of org.acme.hr@1.0.0.Person"
+          },
+          "newAddress": {
+            "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
+          }
+        },
+        "required": [
+          "$class",
+          "Person",
+          "newAddress"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/Equipment": {
+      "summary": "Path used to manage the list of Equipment.",
+      "description": "The REST endpoint/path used to list and create zero or more \`Equipment\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+                  }
+                }
+              }
+            },
+            "description": "Successful response - returns an array of \`Equipment\` entities."
+          }
+        },
+        "operationId": "getEquipments",
+        "summary": "List All Equipments",
+        "description": "Gets a list of all \`Equipment\` entities."
+      },
+      "post": {
+        "requestBody": {
+          "description": "A new \`Equipment\` to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "createEquipment",
+        "summary": "Create a Equipment",
+        "description": "Creates a new instance of a \`Equipment\`."
+      }
+    },
+    "/Equipment/{serialNumber}": {
+      "summary": "Path used to manage a single Equipment.",
+      "description": "The REST endpoint/path used to get, update, and delete single instances of an \`Equipment\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+                }
+              }
+            },
+            "description": "Successful response - returns a single \`Equipment\`."
+          }
+        },
+        "operationId": "getEquipment",
+        "summary": "Get a Equipment",
+        "description": "Gets the details of a single instance of a \`Equipment\`."
+      },
+      "put": {
+        "requestBody": {
+          "description": "Updated \`Equipment\` information.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "updateEquipment",
+        "summary": "Update a Equipment",
+        "description": "Updates an existing \`Equipment\`."
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "deleteEquipment",
+        "summary": "Delete a Equipment",
+        "description": "Deletes an existing \`Equipment\`."
+      },
+      "parameters": [
+        {
+          "name": "serialNumber",
+          "description": "A unique identifier for a \`Equipment\`.",
+          "schema": {
+            "type": "string"
+          },
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/Person": {
+      "summary": "Path used to manage the list of Person.",
+      "description": "The REST endpoint/path used to list and create zero or more \`Person\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/org.acme.hr@1.0.0.Person"
+                  }
+                }
+              }
+            },
+            "description": "Successful response - returns an array of \`Person\` entities."
+          }
+        },
+        "operationId": "getPersons",
+        "summary": "List All Persons",
+        "description": "Gets a list of all \`Person\` entities."
+      },
+      "post": {
+        "requestBody": {
+          "description": "A new \`Person\` to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/org.acme.hr@1.0.0.Person"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "createPerson",
+        "summary": "Create a Person",
+        "description": "Creates a new instance of a \`Person\`."
+      }
+    },
+    "/Person/{email}": {
+      "summary": "Path used to manage a single Person.",
+      "description": "The REST endpoint/path used to get, update, and delete single instances of an \`Person\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Person"
+                }
+              }
+            },
+            "description": "Successful response - returns a single \`Person\`."
+          }
+        },
+        "operationId": "getPerson",
+        "summary": "Get a Person",
+        "description": "Gets the details of a single instance of a \`Person\`."
+      },
+      "put": {
+        "requestBody": {
+          "description": "Updated \`Person\` information.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/org.acme.hr@1.0.0.Person"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "updatePerson",
+        "summary": "Update a Person",
+        "description": "Updates an existing \`Person\`."
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          }
+        },
+        "operationId": "deletePerson",
+        "summary": "Delete a Person",
+        "description": "Deletes an existing \`Person\`."
+      },
+      "parameters": [
+        {
+          "name": "email",
+          "description": "A unique identifier for a \`Person\`.",
+          "schema": {
+            "type": "string"
+          },
+          "in": "path",
+          "required": true
+        }
+      ]
+    }
+  }
+}
 ",
 }
 `;

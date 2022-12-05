@@ -11,6 +11,9 @@ export = JSONSchemaVisitor;
  * the `inlineTypes` parameter is set, in which case types are expanded inline,
  * UNLESS they contain recursive references, in which case $ref is used.
  *
+ * The default value for refRoot is '#/definitions'. Set the refRoot parameter
+ * to override.
+ *
  * The meta schema used is http://json-schema.org/draft-07/schema#
  *
  * @private
