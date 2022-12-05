@@ -14,9 +14,6 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
 /**
  * The metamodel itself, as an AST.
  * @type unknown
@@ -28,12 +25,10 @@ const metaModelAst = require('./metamodel.json');
  */
 const MetaModelNamespace = 'concerto.metamodel@1.0.0';
 
-const metaModelCtoPath = path.resolve(__dirname, 'metamodel.cto');
-
 /**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = fs.readFileSync(metaModelCtoPath, 'utf-8');
+const metaModelCto = require('./metamodel.js');
 
 /**
  * Find the model for a given namespace
