@@ -17,6 +17,7 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
+const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
 const Field = require('../../lib/introspect/field');
 const ModelFile = require('../../lib/introspect/modelfile');
 
@@ -27,11 +28,20 @@ describe('Field', () => {
 
     let mockClassDeclaration;
     let mockModelFile;
+    let mockScalarDeclaration;
 
     beforeEach(() => {
         mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
         mockModelFile = sinon.createStubInstance(ModelFile);
+        mockScalarDeclaration = sinon.createStubInstance(ScalarDeclaration);
         mockClassDeclaration.getModelFile.returns(mockModelFile);
+        mockModelFile.getType.returns(mockScalarDeclaration);
+        mockScalarDeclaration.isScalarDeclaration.returns(true);
+        mockScalarDeclaration.ast = {
+            $class: `${MetaModelNamespace}.StringScalar`,
+            name: 'MyScalar',
+            defaultValue: 'abc'
+        };
     });
 
     describe('#constructor', () => {
@@ -102,6 +112,18 @@ describe('Field', () => {
                 isOptional: true
             });
             f.optional.should.equal(true);
+        });
+
+        it('should unbox a Scalar Property', () => {
+            let p = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'property',
+                type: {
+                    name: 'MyScalar',
+                }
+            });
+            p.type.should.equal('String');
+            p.ast.defaultValue.should.equal('abc');
         });
 
     });

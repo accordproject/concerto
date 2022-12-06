@@ -91,45 +91,56 @@ class Property extends Decorated {
         // if this object property references a scalar
         // then replace the scalar with an equivalent property
         // i.e. we unbox the scalar here.
-        let ast = this.ast;
         if(
-            ast?.type &&
-          ast.$class === `${MetaModelNamespace}.ObjectProperty`
+            this.ast?.type &&
+            this.ast.$class === `${MetaModelNamespace}.ObjectProperty`
         ) {
-            const type = this.getModelFile().getType(ast.type.name);
-            if(type) {
-                if(type?.isScalarDeclaration?.()) {
-                    ast = type.ast;
-                }
+            const type = this.getModelFile().getType(this.ast.type.name);
+            if(type && type?.isScalarDeclaration?.()) {
+                this.ast = type.ast;
             }
         }
-
-        if (ast.$class === `${MetaModelNamespace}.BooleanProperty`) {
+        switch (this.ast.$class) {
+        case `${MetaModelNamespace}.EnumProperty`:
+            break;
+        case `${MetaModelNamespace}.BooleanScalar`:
+        case `${MetaModelNamespace}.BooleanProperty`:
             this.type = 'Boolean';
-        } else if (ast.$class === `${MetaModelNamespace}.StringProperty`) {
-            this.type = 'String';
-        } else if (ast.$class === `${MetaModelNamespace}.IntegerProperty`) {
-            this.type = 'Integer';
-        } else if (ast.$class === `${MetaModelNamespace}.LongProperty`) {
-            this.type = 'Long';
-        } else if (ast.$class === `${MetaModelNamespace}.DoubleProperty`) {
-            this.type = 'Double';
-        } else if (ast.$class === `${MetaModelNamespace}.DateTimeProperty`) {
+            break;
+        case `${MetaModelNamespace}.DateTimeProperty`:
+        case `${MetaModelNamespace}.DateTimeScalar`:
             this.type = 'DateTime';
-        } else if (ast.$class === `${MetaModelNamespace}.ObjectProperty`) {
-            this.type = ast.type ? ast.type.name : null;
-        } else if (ast.$class === `${MetaModelNamespace}.RelationshipProperty`) {
-            this.type = ast.type.name;
-        } else {
-            this.type = null;
+            break;
+        case `${MetaModelNamespace}.DoubleProperty`:
+        case `${MetaModelNamespace}.DoubleScalar`:
+            this.type = 'Double';
+            break;
+        case `${MetaModelNamespace}.IntegerProperty`:
+        case `${MetaModelNamespace}.IntegerScalar`:
+            this.type = 'Integer';
+            break;
+        case `${MetaModelNamespace}.LongProperty`:
+        case `${MetaModelNamespace}.LongScalar`:
+            this.type = 'Long';
+            break;
+        case `${MetaModelNamespace}.StringProperty`:
+        case `${MetaModelNamespace}.StringScalar`:
+            this.type = 'String';
+            break;
+        case `${MetaModelNamespace}.ObjectProperty`:
+            this.type = this.ast.type ? this.ast.type.name : null;
+            break;
+        case `${MetaModelNamespace}.RelationshipProperty`:
+            this.type = this.ast.type.name;
+            break;
         }
         this.array = false;
 
-        if(ast.isArray) {
+        if(this.ast.isArray) {
             this.array = true;
         }
 
-        if(ast.isOptional) {
+        if(this.ast.isOptional) {
             this.optional = true;
         }
         else {
@@ -192,7 +203,6 @@ class Property extends Decorated {
         if(!modelFile) {
             throw new Error('Parent of property ' + this.name + ' does not have a ModelFile!');
         }
-
         const result = modelFile.getFullyQualifiedTypeName(this.type);
         if(!result) {
             throw new Error('Failed to find fully qualified type name for property ' + this.name + ' with type ' + this.type );
