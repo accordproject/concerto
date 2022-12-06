@@ -16,6 +16,7 @@
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
+const ModelUtil = require('../modelutil');
 dayjs.extend(utc);
 
 // Types needed for TypeScript generation.
@@ -143,27 +144,36 @@ class Typed {
 
         for (let n = 0; n < fields.length; n++) {
             let field = fields[n];
+            let defaultValue;
+            let type;
             if (field.isField?.()) {
-                let defaultValue = field.getDefaultValue();
+                defaultValue = field.getDefaultValue();
+                type = field.getType();
+            }
+            if (ModelUtil.isScalar(field)){
+                const modelFile = field.getParent().getModelFile();
+                const scalarDeclaration = modelFile.getType(field.getType());
+                defaultValue = scalarDeclaration.getDefaultValue();
+                type = scalarDeclaration.getType();
+            }
 
-                if (defaultValue) {
-                    if (field.getType() === 'String') {
-                        this.setPropertyValue(field.getName(), defaultValue);
-                    } else if (field.getType() === 'Integer') {
-                        this.setPropertyValue(field.getName(), parseInt(defaultValue));
-                    } else if (field.getType() === 'Long') {
-                        this.setPropertyValue(field.getName(), parseInt(defaultValue));
-                    } else if (field.getType() === 'Double') {
-                        this.setPropertyValue(field.getName(), parseFloat(defaultValue));
-                    } else if (field.getType() === 'Boolean') {
-                        this.setPropertyValue(field.getName(), (defaultValue === true));
-                    } else if (field.getType() === 'DateTime') {
-                        const dateTime = dayjs.utc(defaultValue);
-                        this.setPropertyValue(field.getName(), dateTime);
-                    } else {
-                        // following precident set in jsonpopulator.js - if we get this far the field should be an enum
-                        this.setPropertyValue(field.getName(), defaultValue);
-                    }
+            if (defaultValue) {
+                if (type === 'String') {
+                    this.setPropertyValue(field.getName(), defaultValue);
+                } else if (type === 'Integer') {
+                    this.setPropertyValue(field.getName(), parseInt(defaultValue));
+                } else if (type === 'Long') {
+                    this.setPropertyValue(field.getName(), parseInt(defaultValue));
+                } else if (type === 'Double') {
+                    this.setPropertyValue(field.getName(), parseFloat(defaultValue));
+                } else if (type === 'Boolean') {
+                    this.setPropertyValue(field.getName(), (defaultValue === true));
+                } else if (type === 'DateTime') {
+                    const dateTime = dayjs.utc(defaultValue);
+                    this.setPropertyValue(field.getName(), dateTime);
+                } else {
+                    // following precident set in jsonpopulator.js - if we get this far the field should be an enum
+                    this.setPropertyValue(field.getName(), defaultValue);
                 }
             }
         }
