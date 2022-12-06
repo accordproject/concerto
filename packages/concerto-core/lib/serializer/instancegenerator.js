@@ -114,36 +114,37 @@ class InstanceGenerator {
      * @return {*} A value for the specified field.
      */
     getFieldValue(field, parameters) {
+        let fieldOrScalarDeclaration = field;
         let type = field.getFullyQualifiedTypeName();
         if (ModelUtil.isScalar(field)){
             const modelFile = field.getParent().getModelFile();
-            const declaration = modelFile.getType(field.getType());
-            type = declaration.getType();
+            fieldOrScalarDeclaration =  modelFile.getType(field.getType());
+            type = fieldOrScalarDeclaration.getType();
         }
         if (ModelUtil.isPrimitiveType(type)) {
             switch(type) {
             case 'DateTime':
                 return parameters.valueGenerator.getDateTime();
             case 'Integer':
-                if(field.validator){
-                    return parameters.valueGenerator.getRange(field.validator.lowerBound, field.validator.upperBound, type);
+                if(fieldOrScalarDeclaration.validator){
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getInteger();
             case 'Long':
-                if(field.validator){
-                    return parameters.valueGenerator.getRange(field.validator.lowerBound, field.validator.upperBound, type);
+                if(fieldOrScalarDeclaration.validator){
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getLong();
             case 'Double':
-                if(field.validator){
-                    return parameters.valueGenerator.getRange(field.validator.lowerBound, field.validator.upperBound, type);
+                if(fieldOrScalarDeclaration.validator){
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getDouble();
             case 'Boolean':
                 return parameters.valueGenerator.getBoolean();
             default:
-                if(field.validator){
-                    return parameters.valueGenerator.getRegex(field.validator.regex);
+                if(fieldOrScalarDeclaration.validator){
+                    return parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
                 }
                 return parameters.valueGenerator.getString();
             }

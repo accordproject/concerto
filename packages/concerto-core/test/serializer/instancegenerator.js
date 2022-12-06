@@ -430,13 +430,14 @@ describe('InstanceGenerator', () => {
         it('should generate default value for a Scalar field', function () {
             let resource = test(`namespace org.acme.test
 
-            scalar SSN extends String
+            scalar SSN extends String regex=/^(?!(000|666|9))\\d{3}-(?!00)\\d{2}-(?!0000)\\d{4}$/
 
             asset MyAsset identified by id {
                 o String id
                 o SSN ssn
             }`);
             resource.ssn.should.be.a('String');
+            resource.ssn.should.match(/^(?!(000|666|9))\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/);
         });
     });
 
