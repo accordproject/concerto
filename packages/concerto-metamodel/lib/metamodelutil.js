@@ -76,6 +76,13 @@ function createNameTable(priorModels, metaModel) {
                 throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
             }
             table[imp.name] = namespace;
+        } else if (imp.$class === `${MetaModelNamespace}.ImportTypes`) {
+            for (const type of imp.types) {
+                if (!findDeclaration(modelFile, type)) {
+                    throw new Error(`Declaration ${type} in namespace ${namespace} not found`);
+                }
+                table[type] = namespace;
+            }
         } else {
             const decls = modelFile.declarations;
             decls.forEach((decl) => {
