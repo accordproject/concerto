@@ -97,7 +97,7 @@ describe('Property', () => {
     describe('#hasInstance', () => {
         it('should return true for a valid Property', () => {
             let p = new Property(mockClassDeclaration, {
-                $class: `${MetaModelNamespace}.StringProperty`,
+                $class: `${MetaModelNamespace}.StringScalar`,
                 name: 'property',
             });
             (p instanceof Property).should.be.true;
