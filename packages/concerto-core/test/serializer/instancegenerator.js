@@ -427,6 +427,22 @@ describe('InstanceGenerator', () => {
             resource.theValue.getType().should.equal('MyEvent');
         });
 
+        it('should generate default value for a Scalar field', function () {
+            let resource = test(`namespace org.acme.test
+
+            scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
+            scalar ScalarWithDefault extends String default="000-00-0000"
+
+            asset MyAsset identified by id {
+                o String id
+                o SSN ssn
+                o ScalarWithDefault ssn2
+            }`);
+            resource.ssn.should.be.a('String');
+            resource.ssn2.should.be.a('String');
+            resource.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
+            resource.ssn2.should.equal('000-00-0000');
+        });
     });
 
     describe('#findConcreteSubclass', () => {
