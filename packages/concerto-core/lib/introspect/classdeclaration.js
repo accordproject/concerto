@@ -239,7 +239,12 @@ class ClassDeclaration extends Decorated {
                 }), this.modelFile, this.ast.location);
             } else {
                 // check that identifiers are strings
-                if (idField.getType() !== 'String') {
+                const isPrimitiveString = idField.getType() === 'String';
+                const modelFile = idField.getParent().getModelFile();
+                const declaration = modelFile.getType(idField.getType());
+                const isScalarString = declaration !== null && declaration.isScalarDeclaration?.() && declaration.getType?.() === 'String';
+
+                if (!isPrimitiveString && !isScalarString) {
                     let formatter = Globalize('en').messageFormatter('classdeclaration-validate-identifiernotstring');
                     throw new IllegalModelException(formatter({
                         'class': this.name,

@@ -77,7 +77,7 @@ class InstanceGenerator {
      * @private
      */
     visitField(field, parameters) {
-        if(!field.isPrimitive()){
+        if(!field.isPrimitive() && !ModelUtil.isScalar(field)){
             let type = field.getFullyQualifiedTypeName();
             let classDeclaration = parameters.modelManager.getType(type);
             classDeclaration = this.findConcreteSubclass(classDeclaration);
@@ -115,7 +115,11 @@ class InstanceGenerator {
      */
     getFieldValue(field, parameters) {
         let type = field.getFullyQualifiedTypeName();
-
+        if (ModelUtil.isScalar(field)){
+            const modelFile = field.getParent().getModelFile();
+            const declaration = modelFile.getType(field.getType());
+            type = declaration.getType();
+        }
         if (ModelUtil.isPrimitiveType(type)) {
             switch(type) {
             case 'DateTime':
