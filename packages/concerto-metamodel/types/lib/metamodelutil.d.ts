@@ -3,10 +3,7 @@
  * @type unknown
  */
 export const metaModelAst: unknown;
-/**
- * The metamodel itself, as a CTO string
- */
-export const metaModelCto: string;
+import metaModelCto = require("./metamodel.js");
 /**
  * Resolve the namespace for names in the metamodel
  * @param {*} priorModels - known models
@@ -34,3 +31,4 @@ export function importFullyQualifiedNames(imp: object): string[];
  * @private
  */
 export function getExternalImports(ast: any): any;
+export { metaModelCto };

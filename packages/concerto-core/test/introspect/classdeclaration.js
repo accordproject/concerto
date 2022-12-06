@@ -122,6 +122,11 @@ describe('ClassDeclaration', () => {
                 err.message.should.match(/Class someAsset is not declared as abstract. It must define an identifying field./);
             }
         });
+
+        it('should not throw when a scalar is used as an identifier', () => {
+            const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalaridentifier.cto', ConceptDeclaration);
+            clazz.validate();
+        });
     });
 
     describe('#accept', () => {

@@ -11,18 +11,20 @@
   "browser": "dist/concerto-util.js",
   "typings": "types/index.d.ts",
   "scripts": {
-    "prepublishOnly": "webpack --config webpack.config.js --mode production",
+    "prepublishOnly": "npm run webpack",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "postdoc": "npm run build:types",
     "test": "nyc mocha --recursive -t 10000",
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
+    "build": "npm run build:types",
+    "postbuild": "npm run webpack",
+    "webpack": "webpack --config webpack.config.js --mode production",
     "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {

@@ -63,6 +63,19 @@ describe('MetaModel (Car)', () => {
     });
 });
 
+describe('MetaModel (Car - with import types)', () => {
+    const carModelPath = path.resolve(__dirname, './cto/carImportTypes.json');
+    const carModel = JSON.parse(fs.readFileSync(carModelPath, 'utf8'));
+    const carMetaModelResolved = JSON.parse(fs.readFileSync(path.resolve(__dirname, './cto/carImportTypesResolved.json'), 'utf8'));
+
+    describe('#toMetaModel', () => {
+        it('should convert a CTO model to its metamodel with name resolution', async () => {
+            const mm1r = MetaModelUtil.resolveLocalNamesForAll(carModel);
+            mm1r.should.deep.equal(carMetaModelResolved);
+        });
+    });
+});
+
 describe('MetaModel (Car - wrong import)', () => {
     const carModelPath = path.resolve(__dirname, './cto/carWrongImport.json');
     const carModel = JSON.parse(fs.readFileSync(carModelPath, 'utf8'));

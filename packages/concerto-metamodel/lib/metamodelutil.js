@@ -14,9 +14,6 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
 /**
  * The metamodel itself, as an AST.
  * @type unknown
@@ -28,12 +25,10 @@ const metaModelAst = require('./metamodel.json');
  */
 const MetaModelNamespace = 'concerto.metamodel@1.0.0';
 
-const metaModelCtoPath = path.resolve(__dirname, 'metamodel.cto');
-
 /**
  * The metamodel itself, as a CTO string
  */
-const metaModelCto = fs.readFileSync(metaModelCtoPath, 'utf-8');
+const metaModelCto = require('./metamodel.js');
 
 /**
  * Find the model for a given namespace
@@ -81,6 +76,13 @@ function createNameTable(priorModels, metaModel) {
                 throw new Error(`Declaration ${imp.name} in namespace ${namespace} not found`);
             }
             table[imp.name] = namespace;
+        } else if (imp.$class === `${MetaModelNamespace}.ImportTypes`) {
+            for (const type of imp.types) {
+                if (!findDeclaration(modelFile, type)) {
+                    throw new Error(`Declaration ${type} in namespace ${namespace} not found`);
+                }
+                table[type] = namespace;
+            }
         } else {
             const decls = modelFile.declarations;
             decls.forEach((decl) => {
