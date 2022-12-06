@@ -14,6 +14,8 @@
 
 'use strict';
 
+const pluralize = require('pluralize');
+
 const JSONSchemaVisitor = require('../jsonschema/jsonschemavisitor');
 
 /**
@@ -61,34 +63,37 @@ class OpenApiVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-
         // get all the types
         const visitor = new JSONSchemaVisitor();
         const childParameters = {
-            refRoot: '#/components/schemas'
+            refRoot: '#/components/schemas',
         };
         const jsonSchema = modelManager.accept(visitor, childParameters);
 
         // Visit all of the files in the model manager.
-        const title = parameters.openApiTitle ? parameters.openApiTitle : 'Generated Open API from Concerto Models';
-        const version = parameters.openApiVersion ? parameters.openApiVersion : '1.0.0';
+        const title = parameters?.openApiTitle
+            ? parameters.openApiTitle
+            : 'Generated Open API from Concerto Models';
+        const version = parameters?.openApiVersion
+            ? parameters.openApiVersion
+            : '1.0.0';
 
         let result = {
             openapi: '3.0.2',
             info: {
                 title,
-                version
+                version,
             },
             components: {
-                schemas: jsonSchema.definitions
-            }
+                schemas: jsonSchema.definitions,
+            },
         };
         modelManager.getModelFiles().forEach((modelFile) => {
             const schema = modelFile.accept(this, parameters);
             result.paths = { ...result.paths, ...schema.paths };
         });
 
-        if (parameters.fileWriter) {
+        if (parameters?.fileWriter) {
             parameters.fileWriter.openFile('openapi.json');
             parameters.fileWriter.writeLine(0, JSON.stringify(result, null, 2));
             parameters.fileWriter.closeFile();
@@ -105,7 +110,6 @@ class OpenApiVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
-
         let result = {
             paths: [],
         };
@@ -122,7 +126,7 @@ class OpenApiVisitor {
             .filter(isResource)
             .forEach((declaration) => {
                 const type = declaration.accept(this, parameters);
-                Object.keys(type).forEach( path => {
+                Object.keys(type).forEach((path) => {
                     result.paths[path] = type[path];
                 });
             });
@@ -138,115 +142,142 @@ class OpenApiVisitor {
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
-        const name = classDeclaration.getName();
-        const result = {};
-        result[`/${name}`] = {
-            'summary': `Path used to manage the list of ${name}.`,
-            'description': `The REST endpoint/path used to list and create zero or more \`${name}\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.`,
-            'get': {
-                'responses': {
-                    '200': {
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    'type': 'array',
-                                    'items': {
-                                        '$ref': `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`
-                                    }
-                                }
-                            }
-                        },
-                        'description': `Successful response - returns an array of \`${name}\` entities.`
-                    }
-                },
-                'operationId': `get${name}s`,
-                'summary': `List All ${name}s`,
-                'description': `Gets a list of all \`${name}\` entities.`
-            },
-            'post': {
-                'requestBody': {
-                    'description': `A new \`${name}\` to be created.`,
-                    'content': {
-                        'application/json': {
-                            'schema': {
-                                '$ref': `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`
-                            }
-                        }
-                    },
-                    'required': true
-                },
-                'responses': {
-                    '201': {
-                        'description': 'Successful response.'
-                    }
-                },
-                'operationId': `create${name}`,
-                'summary': `Create a ${name}`,
-                'description': `Creates a new instance of a \`${name}\`.`
-            }
+        const capitalizeFirstLetter = (string) => {
+            return string.charAt(0).toUpperCase() + string.slice(1);
         };
-        result[`/${name}/{${classDeclaration.getIdentifierFieldName()}}`] = {
-            'summary': `Path used to manage a single ${name}.`,
-            'description': `The REST endpoint/path used to get, update, and delete single instances of an \`${name}\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.`,
-            'get': {
-                'responses': {
-                    '200': {
-                        'content': {
+
+        const getDescription = (decl) => {
+            const desc = decl
+                .getDecorators()
+                ?.find((decorator) => decorator.getName() === 'resource');
+
+            const name =
+                desc && desc.getArguments().length > 0
+                    ? desc.getArguments()[0]
+                    : classDeclaration.getName().toLowerCase();
+
+            const plural =
+                desc && desc.getArguments().length > 1
+                    ? desc.getArguments()[1]
+                    : pluralize(classDeclaration.getName().toLowerCase());
+
+            return {
+                name,
+                capitalName: capitalizeFirstLetter(name),
+                plural,
+                capitalPlural: capitalizeFirstLetter(plural),
+            };
+        };
+
+        const { name, capitalName, plural, capitalPlural } = getDescription(classDeclaration);
+        const result = {};
+        result[`/${plural}`] = {
+            summary: `Path used to manage the list of ${plural}.`,
+            description: `The REST endpoint/path used to list and create zero or more \`${name}\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.`,
+            get: {
+                responses: {
+                    200: {
+                        content: {
                             'application/json': {
-                                'schema': {
-                                    '$ref': `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`
-                                }
-                            }
+                                schema: {
+                                    type: 'array',
+                                    items: {
+                                        $ref: `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`,
+                                    },
+                                },
+                            },
                         },
-                        'description': `Successful response - returns a single \`${name}\`.`
-                    }
+                        description: `Successful response - returns an array of \`${name}\` entities.`,
+                    },
                 },
-                'operationId': `get${name}`,
-                'summary': `Get a ${name}`,
-                'description': `Gets the details of a single instance of a \`${name}\`.`
+                operationId: `get${capitalPlural}`,
+                summary: `List All ${capitalPlural}`,
+                description: `Gets a list of all \`${name}\` entities.`,
             },
-            'put': {
-                'requestBody': {
-                    'description': `Updated \`${name}\` information.`,
-                    'content': {
+            post: {
+                requestBody: {
+                    description: `A new \`${name}\` to be created.`,
+                    content: {
                         'application/json': {
-                            'schema': {
-                                '$ref': `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`
-                            }
-                        }
+                            schema: {
+                                $ref: `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`,
+                            },
+                        },
                     },
-                    'required': true
+                    required: true,
                 },
-                'responses': {
-                    '202': {
-                        'description': 'Successful response.'
-                    }
+                responses: {
+                    201: {
+                        description: 'Successful response.',
+                    },
                 },
-                'operationId': `update${name}`,
-                'summary': `Update a ${name}`,
-                'description': `Updates an existing \`${name}\`.`
+                operationId: `create${capitalName}`,
+                summary: `Create a ${capitalName}`,
+                description: `Creates a new instance of a \`${name}\`.`,
             },
-            'delete': {
-                'responses': {
-                    '204': {
-                        'description': 'Successful response.'
-                    }
+        };
+        result[`/${plural}/{${classDeclaration.getIdentifierFieldName()}}`] = {
+            summary: `Path used to manage a single ${name}.`,
+            description: `The REST endpoint/path used to get, update, and delete single instances of a \`${name}\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.`,
+            get: {
+                responses: {
+                    200: {
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`,
+                                },
+                            },
+                        },
+                        description: `Successful response - returns a single \`${name}\`.`,
+                    },
                 },
-                'operationId': `delete${name}`,
-                'summary': `Delete a ${name}`,
-                'description': `Deletes an existing \`${name}\`.`
+                operationId: `get${capitalName}`,
+                summary: `Get a ${name}`,
+                description: `Gets the details of a single instance of a \`${name}\`.`,
             },
-            'parameters': [
+            put: {
+                requestBody: {
+                    description: `Updated \`${name}\` information.`,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: `#/components/schemas/${classDeclaration.getFullyQualifiedName()}`,
+                            },
+                        },
+                    },
+                    required: true,
+                },
+                responses: {
+                    202: {
+                        description: 'Successful response.',
+                    },
+                },
+                operationId: `update${capitalName}`,
+                summary: `Update a ${name}`,
+                description: `Updates an existing \`${name}\`.`,
+            },
+            delete: {
+                responses: {
+                    204: {
+                        description: 'Successful response.',
+                    },
+                },
+                operationId: `delete${capitalName}`,
+                summary: `Delete a ${name}`,
+                description: `Deletes an existing \`${name}\`.`,
+            },
+            parameters: [
                 {
-                    'name': classDeclaration.getIdentifierFieldName(),
-                    'description': `A unique identifier for a \`${classDeclaration.getName()}\`.`,
-                    'schema': {
-                        'type': 'string'
+                    name: classDeclaration.getIdentifierFieldName(),
+                    description: `A unique identifier for a \`${classDeclaration.getName()}\`.`,
+                    schema: {
+                        type: 'string',
                     },
-                    'in': 'path',
-                    'required': true
-                }
-            ]
+                    in: 'path',
+                    required: true,
+                },
+            ],
         };
         return result;
     }

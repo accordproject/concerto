@@ -3073,9 +3073,9 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
     }
   },
   "paths": {
-    "/Equipment": {
-      "summary": "Path used to manage the list of Equipment.",
-      "description": "The REST endpoint/path used to list and create zero or more \`Equipment\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
+    "/equipment": {
+      "summary": "Path used to manage the list of equipment.",
+      "description": "The REST endpoint/path used to list and create zero or more \`equipment\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
       "get": {
         "responses": {
           "200": {
@@ -3089,16 +3089,16 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
                 }
               }
             },
-            "description": "Successful response - returns an array of \`Equipment\` entities."
+            "description": "Successful response - returns an array of \`equipment\` entities."
           }
         },
-        "operationId": "getEquipments",
-        "summary": "List All Equipments",
-        "description": "Gets a list of all \`Equipment\` entities."
+        "operationId": "getEquipment",
+        "summary": "List All Equipment",
+        "description": "Gets a list of all \`equipment\` entities."
       },
       "post": {
         "requestBody": {
-          "description": "A new \`Equipment\` to be created.",
+          "description": "A new \`equipment\` to be created.",
           "content": {
             "application/json": {
               "schema": {
@@ -3115,12 +3115,12 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
         },
         "operationId": "createEquipment",
         "summary": "Create a Equipment",
-        "description": "Creates a new instance of a \`Equipment\`."
+        "description": "Creates a new instance of a \`equipment\`."
       }
     },
-    "/Equipment/{serialNumber}": {
-      "summary": "Path used to manage a single Equipment.",
-      "description": "The REST endpoint/path used to get, update, and delete single instances of an \`Equipment\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
+    "/equipment/{serialNumber}": {
+      "summary": "Path used to manage a single equipment.",
+      "description": "The REST endpoint/path used to get, update, and delete single instances of a \`equipment\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
       "get": {
         "responses": {
           "200": {
@@ -3131,16 +3131,16 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
                 }
               }
             },
-            "description": "Successful response - returns a single \`Equipment\`."
+            "description": "Successful response - returns a single \`equipment\`."
           }
         },
         "operationId": "getEquipment",
-        "summary": "Get a Equipment",
-        "description": "Gets the details of a single instance of a \`Equipment\`."
+        "summary": "Get a equipment",
+        "description": "Gets the details of a single instance of a \`equipment\`."
       },
       "put": {
         "requestBody": {
-          "description": "Updated \`Equipment\` information.",
+          "description": "Updated \`equipment\` information.",
           "content": {
             "application/json": {
               "schema": {
@@ -3156,8 +3156,8 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
           }
         },
         "operationId": "updateEquipment",
-        "summary": "Update a Equipment",
-        "description": "Updates an existing \`Equipment\`."
+        "summary": "Update a equipment",
+        "description": "Updates an existing \`equipment\`."
       },
       "delete": {
         "responses": {
@@ -3166,8 +3166,8 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
           }
         },
         "operationId": "deleteEquipment",
-        "summary": "Delete a Equipment",
-        "description": "Deletes an existing \`Equipment\`."
+        "summary": "Delete a equipment",
+        "description": "Deletes an existing \`equipment\`."
       },
       "parameters": [
         {
@@ -3181,9 +3181,9 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
         }
       ]
     },
-    "/Person": {
-      "summary": "Path used to manage the list of Person.",
-      "description": "The REST endpoint/path used to list and create zero or more \`Person\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
+    "/people": {
+      "summary": "Path used to manage the list of people.",
+      "description": "The REST endpoint/path used to list and create zero or more \`person\` entities.  This path contains a \`GET\` and \`POST\` operation to perform the list and create tasks, respectively.",
       "get": {
         "responses": {
           "200": {
@@ -3197,16 +3197,16 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
                 }
               }
             },
-            "description": "Successful response - returns an array of \`Person\` entities."
+            "description": "Successful response - returns an array of \`person\` entities."
           }
         },
-        "operationId": "getPersons",
-        "summary": "List All Persons",
-        "description": "Gets a list of all \`Person\` entities."
+        "operationId": "getPeople",
+        "summary": "List All People",
+        "description": "Gets a list of all \`person\` entities."
       },
       "post": {
         "requestBody": {
-          "description": "A new \`Person\` to be created.",
+          "description": "A new \`person\` to be created.",
           "content": {
             "application/json": {
               "schema": {
@@ -3223,12 +3223,12 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
         },
         "operationId": "createPerson",
         "summary": "Create a Person",
-        "description": "Creates a new instance of a \`Person\`."
+        "description": "Creates a new instance of a \`person\`."
       }
     },
-    "/Person/{email}": {
-      "summary": "Path used to manage a single Person.",
-      "description": "The REST endpoint/path used to get, update, and delete single instances of an \`Person\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
+    "/people/{email}": {
+      "summary": "Path used to manage a single person.",
+      "description": "The REST endpoint/path used to get, update, and delete single instances of a \`person\`.  This path contains \`GET\`, \`PUT\`, and \`DELETE\` operations used to perform the get, update, and delete tasks, respectively.",
       "get": {
         "responses": {
           "200": {
@@ -3239,16 +3239,16 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
                 }
               }
             },
-            "description": "Successful response - returns a single \`Person\`."
+            "description": "Successful response - returns a single \`person\`."
           }
         },
         "operationId": "getPerson",
-        "summary": "Get a Person",
-        "description": "Gets the details of a single instance of a \`Person\`."
+        "summary": "Get a person",
+        "description": "Gets the details of a single instance of a \`person\`."
       },
       "put": {
         "requestBody": {
-          "description": "Updated \`Person\` information.",
+          "description": "Updated \`person\` information.",
           "content": {
             "application/json": {
               "schema": {
@@ -3264,8 +3264,8 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
           }
         },
         "operationId": "updatePerson",
-        "summary": "Update a Person",
-        "description": "Updates an existing \`Person\`."
+        "summary": "Update a person",
+        "description": "Updates an existing \`person\`."
       },
       "delete": {
         "responses": {
@@ -3274,8 +3274,8 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
           }
         },
         "operationId": "deletePerson",
-        "summary": "Delete a Person",
-        "description": "Deletes an existing \`Person\`."
+        "summary": "Delete a person",
+        "description": "Deletes an existing \`person\`."
       },
       "parameters": [
         {
