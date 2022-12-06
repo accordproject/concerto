@@ -60,14 +60,22 @@ concept Person identified by email {
 describe('OpenApi (samples)', function () {
 
     describe('samples', () => {
-        it('should use custom title and version and default resource paths', () => {
+        it('should use custom properties default resource paths', () => {
             const modelManager = new ModelManager();
             modelManager.addCTOModel( MODEL_SIMPLE );
             const visitor = new OpenApiVisitor();
-            const spec = modelManager.accept(visitor, { openApiTitle: 'My Fancy API', openApiVersion: '0.0.1'});
+            const spec = modelManager.accept(visitor, {
+                openApiTitle: 'My Fancy API',
+                openApiVersion: '0.0.1',
+                openApiServers: [ {
+                    url: 'https://org.acme/v1/rest'
+                }
+                ]
+            });
             expect(spec.info.title).equal('My Fancy API');
             expect(spec.info.version).equal('0.0.1');
             spec.paths.should.have.property('/people');
+            spec.servers.length.should.equal(1);
         });
         it('should use custom resource paths', () => {
             const modelManager = new ModelManager();

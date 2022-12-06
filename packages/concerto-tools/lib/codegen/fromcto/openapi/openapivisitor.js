@@ -80,6 +80,7 @@ class OpenApiVisitor {
 
         let result = {
             openapi: '3.0.2',
+            servers: parameters?.openApiServers ? parameters.openApiServers : [],
             info: {
                 title,
                 version,
@@ -190,7 +191,7 @@ class OpenApiVisitor {
                         description: `Successful response - returns an array of \`${name}\` entities.`,
                     },
                 },
-                operationId: `get${capitalPlural}`,
+                operationId: `list${capitalPlural}`,
                 summary: `List All ${capitalPlural}`,
                 description: `Gets a list of all \`${name}\` entities.`,
             },
@@ -253,7 +254,7 @@ class OpenApiVisitor {
                         description: 'Successful response.',
                     },
                 },
-                operationId: `update${capitalName}`,
+                operationId: `replace${capitalName}`,
                 summary: `Update a ${name}`,
                 description: `Updates an existing \`${name}\`.`,
             },

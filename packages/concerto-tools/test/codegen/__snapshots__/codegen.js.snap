@@ -2634,6 +2634,7 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
   "key": "openapi.json",
   "value": "{
   "openapi": "3.0.2",
+  "servers": [],
   "info": {
     "title": "Generated Open API from Concerto Models",
     "version": "1.0.0"
@@ -3092,7 +3093,7 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
             "description": "Successful response - returns an array of \`equipment\` entities."
           }
         },
-        "operationId": "getEquipment",
+        "operationId": "listEquipment",
         "summary": "List All Equipment",
         "description": "Gets a list of all \`equipment\` entities."
       },
@@ -3155,7 +3156,7 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
             "description": "Successful response."
           }
         },
-        "operationId": "updateEquipment",
+        "operationId": "replaceEquipment",
         "summary": "Update a equipment",
         "description": "Updates an existing \`equipment\`."
       },
@@ -3200,7 +3201,7 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
             "description": "Successful response - returns an array of \`person\` entities."
           }
         },
-        "operationId": "getPeople",
+        "operationId": "listPeople",
         "summary": "List All People",
         "description": "Gets a list of all \`person\` entities."
       },
@@ -3263,7 +3264,7 @@ exports[`codegen #formats check we can convert all formats to CTO 39`] = `
             "description": "Successful response."
           }
         },
-        "operationId": "updatePerson",
+        "operationId": "replacePerson",
         "summary": "Update a person",
         "description": "Updates an existing \`person\`."
       },
