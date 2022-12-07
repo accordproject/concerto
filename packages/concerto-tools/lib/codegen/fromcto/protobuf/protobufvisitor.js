@@ -16,6 +16,7 @@
 
 const debug = require('debug')('concerto-core:jsonschemavisitor');
 const util = require('util');
+const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
 
 /**
  * Convert the contents of a {@link ModelManager} to Proto3 files.
@@ -33,7 +34,8 @@ class ProtobufVisitor {
      */
     concertoNamespaceToProto3SafePackageName(concertoNamespace) {
         // Proto3 needs the namespace to have a standard Java-like format, so the "@" and the dots in the version need to be replaces with underscores.
-        return `${concertoNamespace.split('@')[0]}.v${concertoNamespace.split('@')[1].replace(/\./ig, '_')}`;
+        const {name,version} = ModelUtil.parseNamespace(concertoNamespace);
+        return `${name}.v${version ? version.replace(/\./g,'_') : ''}`;
     }
 
     /**
@@ -101,7 +103,7 @@ class ProtobufVisitor {
      */
     createImportLineStrings(imports) {
         return imports
-            .filter(importObject => importObject.namespace.split('@')[0] !== 'concerto')
+            .filter(importObject => ModelUtil.parseNamespace(importObject.namespace).name !== 'concerto')
             .map(importObject => `${this.concertoNamespaceToProto3SafePackageName(importObject.namespace)}.proto`);
     }
 
