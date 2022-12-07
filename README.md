@@ -48,6 +48,7 @@ concept Person identified by name  {
 - PlantUML Diagrams
 - Mermaid UML Diagrams
 - Markdown (with embedded Mermaid)
+- OpenAPI v3 specification document
 
 🕸 Publish your reusable models to any website, including the Accord Project [model repository](https://models.accordproject.org)
 
