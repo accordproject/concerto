@@ -71,16 +71,12 @@ class OpenApiVisitor {
         const jsonSchema = modelManager.accept(visitor, childParameters);
 
         // Visit all of the files in the model manager.
-        const title = parameters?.openApiTitle
-            ? parameters.openApiTitle
-            : 'Generated Open API from Concerto Models';
-        const version = parameters?.openApiVersion
-            ? parameters.openApiVersion
-            : '1.0.0';
+        const title = parameters?.openApiTitle ?? 'Generated Open API from Concerto Models';
+        const version = parameters?.openApiVersion ?? '1.0.0';
 
         let result = {
             openapi: '3.0.2',
-            servers: parameters?.openApiServers ? parameters.openApiServers : [],
+            servers: parameters?.openApiServers ?? [],
             info: {
                 title,
                 version,
