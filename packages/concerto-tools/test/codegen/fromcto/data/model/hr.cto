@@ -31,6 +31,7 @@ enum Department {
     o Design
 }
 
+@resource
 abstract asset Equipment identified by serialNumber {
     o String serialNumber
 }
@@ -46,6 +47,7 @@ asset Laptop extends Equipment {
 
 scalar SSN extends String default="000-00-0000" regex=/\d{3}-\d{2}-\{4}+/
 
+@resource
 abstract participant Person identified by email {
     o String email
     o String firstName
