@@ -26,19 +26,25 @@ chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 
 describe('codegen', function () {
-    let modelManager = null;
+    let versionedModelManager = null;
+    let unversionedModelManager = null;
 
     beforeEach(function() {
-        modelManager = new ModelManager();
+        versionedModelManager = new ModelManager();
+        unversionedModelManager = new ModelManager();
+
         const cto = fs.readFileSync('./test/codegen/fromcto/data/model/hr.cto', 'utf-8');
-        modelManager.addCTOModel(cto, 'hr.cto');
+        versionedModelManager.addCTOModel(cto, 'hr.cto');
+
+        const unversionedCto = cto.replace('namespace org.acme.hr@1.0.0', 'namespace org.acme.hr');
+        unversionedModelManager.addCTOModel(unversionedCto, 'hr.cto');
     });
 
     afterEach(function() {
     });
 
     describe('#formats', function () {
-        it('check we can convert all formats to CTO', function () {
+        it('check we can convert all formats from namespace versioned CTO', function () {
             Object.keys(formats).forEach(function(format){
                 const visitor = new formats[format];
                 visitor.should.not.be.null;
@@ -46,7 +52,22 @@ describe('codegen', function () {
                 const parameters = {
                     fileWriter: writer
                 };
-                modelManager.accept(visitor, parameters);
+                versionedModelManager.accept(visitor, parameters);
+                const files = writer.getFilesInMemory();
+                files.forEach(function(value,key){
+                    expect({value,key}).toMatchSnapshot();
+                });
+            });
+        });
+        it('check we can convert all formats from namespace unversioned CTO', function () {
+            Object.keys(formats).forEach(function(format){
+                const visitor = new formats[format];
+                visitor.should.not.be.null;
+                const writer = new InMemoryWriter();
+                const parameters = {
+                    fileWriter: writer
+                };
+                unversionedModelManager.accept(visitor, parameters);
                 const files = writer.getFilesInMemory();
                 files.forEach(function(value,key){
                     expect({value,key}).toMatchSnapshot();
