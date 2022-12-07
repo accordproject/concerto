@@ -35,7 +35,7 @@ class ProtobufVisitor {
     concertoNamespaceToProto3SafePackageName(concertoNamespace) {
         // Proto3 needs the namespace to have a standard Java-like format, so the "@" and the dots in the version need to be replaces with underscores.
         const {name,version} = ModelUtil.parseNamespace(concertoNamespace);
-        return `${name}.v${version ? version.replaceAll('.','_') : ''}`;
+        return `${name}.v${version ? version.replace(/\./g,'_') : ''}`;
     }
 
     /**
