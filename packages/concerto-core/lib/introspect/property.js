@@ -88,43 +88,25 @@ class Property extends Decorated {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
         }
 
-        // if this object property references a scalar
-        // then replace the scalar with an equivalent property
-        // i.e. we unbox the scalar here.
-        if(
-            this.ast?.type &&
-            this.ast.$class === `${MetaModelNamespace}.ObjectProperty`
-        ) {
-            const type = this.getModelFile().getType(this.ast.type.name);
-            if(type && type?.isScalarDeclaration?.()) {
-                this.ast = type.ast;
-            }
-        }
         switch (this.ast.$class) {
         case `${MetaModelNamespace}.EnumProperty`:
             break;
-        case `${MetaModelNamespace}.BooleanScalar`:
         case `${MetaModelNamespace}.BooleanProperty`:
             this.type = 'Boolean';
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
-        case `${MetaModelNamespace}.DateTimeScalar`:
             this.type = 'DateTime';
             break;
         case `${MetaModelNamespace}.DoubleProperty`:
-        case `${MetaModelNamespace}.DoubleScalar`:
             this.type = 'Double';
             break;
         case `${MetaModelNamespace}.IntegerProperty`:
-        case `${MetaModelNamespace}.IntegerScalar`:
             this.type = 'Integer';
             break;
         case `${MetaModelNamespace}.LongProperty`:
-        case `${MetaModelNamespace}.LongScalar`:
             this.type = 'Long';
             break;
         case `${MetaModelNamespace}.StringProperty`:
-        case `${MetaModelNamespace}.StringScalar`:
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectProperty`:

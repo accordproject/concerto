@@ -62,7 +62,7 @@ class ModelFile extends Decorated {
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
-        this.localTypes = new Map();
+        this.localTypes = null;
         this.imports = [];
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
@@ -99,6 +99,7 @@ class ModelFile extends Decorated {
         this.isCompatibleVersion();
 
         // Now build local types from Declarations
+        this.localTypes = new Map();
         for(let index in this.declarations) {
             let classDeclaration = this.declarations[index];
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
@@ -451,6 +452,10 @@ class ModelFile extends Decorated {
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
     getLocalType(type) {
+        if(!this.localTypes) {
+            throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
+        }
+
         if(!type.startsWith(this.getNamespace())) {
             type = this.getNamespace() + '.' + type;
         }

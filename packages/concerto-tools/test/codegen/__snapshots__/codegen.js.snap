@@ -3296,6 +3296,198 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 40`] = `
+{
+  "key": "concerto@1.0.0.avdl",
+  "value": "@namespace("concerto@1.0.0")
+protocol MyProtocol {
+
+   
+   record Concept {
+   }
+
+   record Asset {
+      string $identifier;
+   }
+
+   record Participant {
+      string $identifier;
+   }
+
+   record Transaction {
+      string $timestamp;
+   }
+
+   record Event {
+      string $timestamp;
+   }
+
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 41`] = `
+{
+  "key": "concerto.avdl",
+  "value": "@namespace("concerto")
+protocol MyProtocol {
+
+   
+   record Concept {
+   }
+
+   record Asset {
+      string $identifier;
+   }
+
+   record Participant {
+      string $identifier;
+   }
+
+   record Transaction {
+   }
+
+   record Event {
+   }
+
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 42`] = `
+{
+  "key": "org.acme.hr.avdl",
+  "value": "@namespace("org.acme.hr")
+protocol MyProtocol {
+
+   import idl concerto@1.0.0.Concept.avdl
+   import idl concerto@1.0.0.Asset.avdl
+   import idl concerto@1.0.0.Transaction.avdl
+   import idl concerto@1.0.0.Participant.avdl
+   import idl concerto@1.0.0.Event.avdl
+   
+   enum State {
+      MA
+      NY
+      CO
+      WA
+      IL
+      CA
+   }
+
+   record Address {
+      string street;
+      string city;
+      union { null, State } state;
+      string zipCode;
+      string country;
+   }
+
+   record Company {
+      string name;
+      Address headquarters;
+   }
+
+   enum Department {
+      Sales
+      Marketing
+      Finance
+      HR
+      Engineering
+      Design
+   }
+
+   record Equipment {
+      string serialNumber;
+      string $identifier;
+   }
+
+   enum LaptopMake {
+      Apple
+      Microsoft
+   }
+
+   record Laptop {
+      LaptopMake make;
+      string serialNumber;
+      string $identifier;
+   }
+
+   record Person {
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Employee {
+      string employeeId;
+      Department department;
+      Address officeAddress;
+      array<Equipment> companyAssets;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Contractor {
+      Company company;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Manager {
+      union { null, array<string> } reports;
+      string employeeId;
+      Department department;
+      Address officeAddress;
+      array<Equipment> companyAssets;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record CompanyEvent {
+      string $timestamp;
+   }
+
+   record Onboarded {
+      string employee;
+      string $timestamp;
+   }
+
+   record ChangeOfAddress {
+      string Person;
+      Address newAddress;
+      string $timestamp;
+   }
+
+}
+",
+}
+`;
+
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 1`] = `
 {
   "key": "main.go",
@@ -6587,6 +6779,198 @@ exports[`codegen #formats check we can convert all formats from namespace versio
       ]
     }
   }
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 40`] = `
+{
+  "key": "concerto@1.0.0.avdl",
+  "value": "@namespace("concerto@1.0.0")
+protocol MyProtocol {
+
+   
+   record Concept {
+   }
+
+   record Asset {
+      string $identifier;
+   }
+
+   record Participant {
+      string $identifier;
+   }
+
+   record Transaction {
+      string $timestamp;
+   }
+
+   record Event {
+      string $timestamp;
+   }
+
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 41`] = `
+{
+  "key": "concerto.avdl",
+  "value": "@namespace("concerto")
+protocol MyProtocol {
+
+   
+   record Concept {
+   }
+
+   record Asset {
+      string $identifier;
+   }
+
+   record Participant {
+      string $identifier;
+   }
+
+   record Transaction {
+   }
+
+   record Event {
+   }
+
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 42`] = `
+{
+  "key": "org.acme.hr@1.0.0.avdl",
+  "value": "@namespace("org.acme.hr@1.0.0")
+protocol MyProtocol {
+
+   import idl concerto@1.0.0.Concept.avdl
+   import idl concerto@1.0.0.Asset.avdl
+   import idl concerto@1.0.0.Transaction.avdl
+   import idl concerto@1.0.0.Participant.avdl
+   import idl concerto@1.0.0.Event.avdl
+   
+   enum State {
+      MA
+      NY
+      CO
+      WA
+      IL
+      CA
+   }
+
+   record Address {
+      string street;
+      string city;
+      union { null, State } state;
+      string zipCode;
+      string country;
+   }
+
+   record Company {
+      string name;
+      Address headquarters;
+   }
+
+   enum Department {
+      Sales
+      Marketing
+      Finance
+      HR
+      Engineering
+      Design
+   }
+
+   record Equipment {
+      string serialNumber;
+      string $identifier;
+   }
+
+   enum LaptopMake {
+      Apple
+      Microsoft
+   }
+
+   record Laptop {
+      LaptopMake make;
+      string serialNumber;
+      string $identifier;
+   }
+
+   record Person {
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Employee {
+      string employeeId;
+      Department department;
+      Address officeAddress;
+      array<Equipment> companyAssets;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Contractor {
+      Company company;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record Manager {
+      union { null, array<string> } reports;
+      string employeeId;
+      Department department;
+      Address officeAddress;
+      array<Equipment> companyAssets;
+      union { null, string } manager;
+      string email;
+      string firstName;
+      string lastName;
+      union { null, string } middleNames;
+      Address homeAddress;
+      string ssn;
+      string $identifier;
+   }
+
+   record CompanyEvent {
+      string $timestamp;
+   }
+
+   record Onboarded {
+      string employee;
+      string $timestamp;
+   }
+
+   record ChangeOfAddress {
+      string Person;
+      Address newAddress;
+      string $timestamp;
+   }
+
 }
 ",
 }

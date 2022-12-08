@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const Property = require('./property');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
@@ -46,6 +48,7 @@ class Field extends Property {
      */
     constructor(parent, ast) {
         super(parent, ast);
+        this.scalarField = null; // cache scalar field
     }
 
     /**
@@ -58,22 +61,28 @@ class Field extends Property {
 
         this.validator = null;
 
-        switch(this.getType()) {
+        switch (this.getType()) {
         case 'Integer':
         case 'Double':
         case 'Long':
-            if(this.ast.validator) {
-                this.validator = new NumberValidator(this, this.ast.validator);
+            if (this.ast.validator) {
+                this.validator = new NumberValidator(
+                    this,
+                    this.ast.validator
+                );
             }
             break;
         case 'String':
-            if(this.ast.validator) {
-                this.validator = new StringValidator(this, this.ast.validator);
+            if (this.ast.validator) {
+                this.validator = new StringValidator(
+                    this,
+                    this.ast.validator
+                );
             }
             break;
         }
 
-        if(this.ast.defaultValue) {
+        if (this.ast.defaultValue) {
             this.defaultValue = this.ast.defaultValue;
         } else {
             this.defaultValue = null;
@@ -93,10 +102,9 @@ class Field extends Property {
      * @return {string | number} the default value for the field or null
      */
     getDefaultValue() {
-        if(this.defaultValue) {
+        if (this.defaultValue) {
             return this.defaultValue;
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -106,7 +114,17 @@ class Field extends Property {
      * @return {String} the string version of the property.
      */
     toString() {
-        return 'Field {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() + ', array=' + this.array + ', optional=' + this.optional +'}';
+        return (
+            'Field {name=' +
+            this.name +
+            ', type=' +
+            this.getFullyQualifiedTypeName() +
+            ', array=' +
+            this.array +
+            ', optional=' +
+            this.optional +
+            '}'
+        );
     }
 
     /**
@@ -116,6 +134,69 @@ class Field extends Property {
      */
     isField() {
         return true;
+    }
+
+    /**
+     * Returns true if the field's type is a scalar
+     * @returns {boolean} true if the field is a scalar type
+     */
+    isTypeScalar() {
+        if (this.isPrimitive()) {
+            return false;
+        } else {
+            const type = this.getParent()
+                .getModelFile()
+                .getType(this.getType());
+            return type.isScalarDeclaration?.();
+        }
+    }
+
+    /**
+     * Unboxes a field that references a scalar type to an
+     * underlying Field definition.
+     * @throws {Error} throws an error if this field is not a scalar type.
+     * @returns {Field} the primitive field for this scalar
+     */
+    getScalarField() {
+        if(this.scalarField) {
+            return this.scalarField;
+        }
+        if (!this.isTypeScalar()) {
+            throw new Error(`Field ${this.name} is not a scalar property.`);
+        }
+        const type = this.getParent().getModelFile().getType(this.getType());
+        const fieldAst = JSON.parse(JSON.stringify(type.ast));
+
+        switch (type.ast.$class) {
+        case `${MetaModelNamespace}.StringScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.StringProperty`;
+            break;
+        case `${MetaModelNamespace}.BooleanScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.BooleanProperty`;
+            break;
+
+        case `${MetaModelNamespace}.DateTimeScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.DateTimeProperty`;
+            break;
+
+        case `${MetaModelNamespace}.DoubleScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.DoubleProperty`;
+            break;
+
+        case `${MetaModelNamespace}.IntegerScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.IntegerProperty`;
+            break;
+
+        case `${MetaModelNamespace}.LongScalar`:
+            fieldAst.$class = `${MetaModelNamespace}.LongProperty`;
+            break;
+        default:
+            throw new Error(`Unrecognized scalar type ${type.ast.$class}`);
+        }
+
+        fieldAst.name = this.ast.name;
+        this.scalarField = new Field(this.getParent(), fieldAst);
+        return this.scalarField;
     }
 }
 
