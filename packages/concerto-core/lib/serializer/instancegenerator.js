@@ -127,17 +127,17 @@ class InstanceGenerator {
                 return parameters.valueGenerator.getDateTime();
             case 'Integer':
                 if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getInteger();
             case 'Long':
                 if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getLong();
             case 'Double':
                 if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, field.validator.upperBound, type);
+                    return parameters.valueGenerator.getRange(fieldOrScalarDeclaration.validator.lowerBound, fieldOrScalarDeclaration.validator.upperBound, type);
                 }
                 return parameters.valueGenerator.getDouble();
             case 'Boolean':
