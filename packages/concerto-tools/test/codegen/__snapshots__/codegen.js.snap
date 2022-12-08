@@ -60,11 +60,16 @@ type Person struct {
    LastName string \`json:"lastName"\`
    MiddleNames string \`json:"middleNames"\`
    HomeAddress Address \`json:"homeAddress"\`
-   Ssn SSN \`json:"ssn"\`
+   Ssn string \`json:"ssn"\`
+   Height float64 \`json:"height"\`
+   Dob time.Time \`json:"dob"\`
 }
 type Employee struct {
    Person
    EmployeeId string \`json:"employeeId"\`
+   Salary int64 \`json:"salary"\`
+   NumDependents int32 \`json:"numDependents"\`
+   Retired bool \`json:"retired"\`
    Department Department \`json:"department"\`
    OfficeAddress Address \`json:"officeAddress"\`
    CompanyAssets []Equipment \`json:"companyAssets"\`
@@ -264,7 +269,16 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "$ref": "#/definitions/org.acme.hr.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
@@ -273,7 +287,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ],
       "$decorators": {
         "resource": []
@@ -292,6 +308,15 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "employeeId": {
           "type": "string"
+        },
+        "salary": {
+          "type": "integer"
+        },
+        "numDependents": {
+          "type": "integer"
+        },
+        "retired": {
+          "type": "boolean"
         },
         "department": {
           "$ref": "#/definitions/org.acme.hr.Department"
@@ -326,12 +351,24 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "$ref": "#/definitions/org.acme.hr.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
         "$class",
         "employeeId",
+        "salary",
+        "numDependents",
+        "retired",
         "department",
         "officeAddress",
         "companyAssets",
@@ -339,7 +376,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr.Contractor": {
@@ -377,7 +416,16 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "$ref": "#/definitions/org.acme.hr.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
@@ -387,7 +435,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr.Manager": {
@@ -410,6 +460,15 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "employeeId": {
           "type": "string"
+        },
+        "salary": {
+          "type": "integer"
+        },
+        "numDependents": {
+          "type": "integer"
+        },
+        "retired": {
+          "type": "boolean"
         },
         "department": {
           "$ref": "#/definitions/org.acme.hr.Department"
@@ -444,12 +503,24 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "$ref": "#/definitions/org.acme.hr.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
         "$class",
         "employeeId",
+        "salary",
+        "numDependents",
+        "retired",
         "department",
         "officeAddress",
         "companyAssets",
@@ -457,7 +528,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr.CompanyEvent": {
@@ -729,7 +802,9 @@ xmlns:concerto="concerto"
       <xs:element name="lastName" type="xs:string"/>
       <xs:element name="middleNames" type="xs:string"/>
       <xs:element name="homeAddress" type="org.acme.hr:Address"/>
-      <xs:element name="ssn" type="org.acme.hr:SSN"/>
+      <xs:element name="ssn" type="xs:string"/>
+      <xs:element name="height" type="xs:double"/>
+      <xs:element name="dob" type="xs:dateTime"/>
    </xs:sequence>
    </xs:extension>
    </xs:complexContent>
@@ -740,6 +815,9 @@ xmlns:concerto="concerto"
    <xs:extension base="org.acme.hr:Person">
    <xs:sequence>
       <xs:element name="employeeId" type="xs:string"/>
+      <xs:element name="salary" type="xs:long"/>
+      <xs:element name="numDependents" type="xs:integer"/>
+      <xs:element name="retired" type="xs:boolean"/>
       <xs:element name="department" type="org.acme.hr:Department"/>
       <xs:element name="officeAddress" type="org.acme.hr:Address"/>
       <xs:element name="companyAssets" type="org.acme.hr:Equipment" minOccurs="0" maxOccurs="unbounded"/>
@@ -862,11 +940,16 @@ class org.acme.hr.Person << (P,lightblue) >> {
    + String lastName
    + String middleNames
    + Address homeAddress
-   + SSN ssn
+   + String ssn
+   + Double height
+   + DateTime dob
 }
 org.acme.hr.Person --|> concerto.Participant
 class org.acme.hr.Employee << (P,lightblue) >> {
    + String employeeId
+   + Long salary
+   + Integer numDependents
+   + Boolean retired
    + Department department
    + Address officeAddress
    + Equipment[] companyAssets
@@ -1076,7 +1159,9 @@ export interface IPerson extends IParticipant {
    lastName: string;
    middleNames?: string;
    homeAddress: IAddress;
-   ssn: ISSN;
+   ssn: string;
+   height: number;
+   dob: Date;
 }
 
 export type PersonUnion = IEmployee | 
@@ -1084,6 +1169,9 @@ IContractor;
 
 export interface IEmployee extends IPerson {
    employeeId: string;
+   salary: number;
+   numDependents: number;
+   retired: boolean;
    department: Department;
    officeAddress: IAddress;
    companyAssets: IEquipment[];
@@ -1482,7 +1570,9 @@ public abstract class Person extends Participant {
    private String lastName;
    private String middleNames;
    private Address homeAddress;
-   private SSN ssn;
+   private String ssn;
+   private double height;
+   private java.util.Date dob;
    public String getEmail() {
       return this.email;
    }
@@ -1498,8 +1588,14 @@ public abstract class Person extends Participant {
    public Address getHomeAddress() {
       return this.homeAddress;
    }
-   public SSN getSsn() {
+   public String getSsn() {
       return this.ssn;
+   }
+   public double getHeight() {
+      return this.height;
+   }
+   public java.util.Date getDob() {
+      return this.dob;
    }
    public void setEmail(String email) {
       this.email = email;
@@ -1516,8 +1612,14 @@ public abstract class Person extends Participant {
    public void setHomeAddress(Address homeAddress) {
       this.homeAddress = homeAddress;
    }
-   public void setSsn(SSN ssn) {
+   public void setSsn(String ssn) {
       this.ssn = ssn;
+   }
+   public void setHeight(double height) {
+      this.height = height;
+   }
+   public void setDob(java.util.Date dob) {
+      this.dob = dob;
    }
 }
 ",
@@ -1547,12 +1649,24 @@ public class Employee extends Person {
    }
 
    private String employeeId;
+   private long salary;
+   private int numDependents;
+   private boolean retired;
    private Department department;
    private Address officeAddress;
    private Equipment[] companyAssets;
    private Manager manager;
    public String getEmployeeId() {
       return this.employeeId;
+   }
+   public long getSalary() {
+      return this.salary;
+   }
+   public int getNumDependents() {
+      return this.numDependents;
+   }
+   public boolean getRetired() {
+      return this.retired;
    }
    public Department getDepartment() {
       return this.department;
@@ -1568,6 +1682,15 @@ public class Employee extends Person {
    }
    public void setEmployeeId(String employeeId) {
       this.employeeId = employeeId;
+   }
+   public void setSalary(long salary) {
+      this.salary = salary;
+   }
+   public void setNumDependents(int numDependents) {
+      this.numDependents = numDependents;
+   }
+   public void setRetired(boolean retired) {
+      this.retired = retired;
    }
    public void setDepartment(Department department) {
       this.department = department;
@@ -1791,11 +1914,16 @@ type Person @resource {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Employee {
    employeeId: String!
+   salary: Int!
+   numDependents: Int!
+   retired: Boolean!
    department: Department!
    officeAddress: Address!
    companyAssets: [Equipment]!
@@ -1805,7 +1933,9 @@ type Employee {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Contractor {
@@ -1816,12 +1946,17 @@ type Contractor {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Manager {
    reports: [ID] # Person
    employeeId: String!
+   salary: Int!
+   numDependents: Int!
+   retired: Boolean!
    department: Department!
    officeAddress: Address!
    companyAssets: [Equipment]!
@@ -1831,7 +1966,9 @@ type Manager {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type CompanyEvent {
@@ -2015,7 +2152,9 @@ public abstract class Person : Participant {
    public string lastName { get; set; }
    public string middleNames { get; set; }
    public Address homeAddress { get; set; }
-   public SSN ssn { get; set; }
+   public string ssn { get; set; }
+   public float height { get; set; }
+   public System.DateTime dob { get; set; }
 }
 [AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = null, Name = "Employee")]
 [System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
@@ -2023,6 +2162,9 @@ public class Employee : Person {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "org.acme.hr.Employee";
    public string employeeId { get; set; }
+   public long salary { get; set; }
+   public int numDependents { get; set; }
+   public bool retired { get; set; }
    public Department department { get; set; }
    public Address officeAddress { get; set; }
    public Equipment[] companyAssets { get; set; }
@@ -2189,11 +2331,21 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
          </Property>
          <Property Name="homeAddress" Type="org.acme.hr.Address"  >
          </Property>
-         <Property Name="ssn" Type="org.acme.hr.SSN"  >
+         <Property Name="ssn" Type="Edm.String"  DefaultValue="000-00-0000">
+         </Property>
+         <Property Name="height" Type="Edm.Double"  >
+         </Property>
+         <Property Name="dob" Type="Edm.DateTimeOffset"  >
          </Property>
       </EntityType>
       <EntityType Name="Employee"  BaseType="org.acme.hr.Person">
          <Property Name="employeeId" Type="Edm.String"  >
+         </Property>
+         <Property Name="salary" Type="Edm.Int64"  >
+         </Property>
+         <Property Name="numDependents" Type="Edm.Int32"  >
+         </Property>
+         <Property Name="retired" Type="Edm.Boolean"  >
          </Property>
          <Property Name="department" Type="org.acme.hr.Department"  >
          </Property>
@@ -2308,13 +2460,18 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
-    +SSN ssn
+    +String ssn
+    +Double height
+    +DateTime dob
 }
 
 Person --|> Participant
 class Employee {
 << participant>>
     +String employeeId
+    +Long salary
+    +Integer numDependents
+    +Boolean retired
     +Department department
     +Address officeAddress
     +Equipment[] companyAssets
@@ -2445,13 +2602,18 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
-    +SSN ssn
+    +String ssn
+    +Double height
+    +DateTime dob
 }
 
 Person --|> Participant
 class Employee {
 << participant>>
     +String employeeId
+    +Long salary
+    +Integer numDependents
+    +Boolean retired
     +Department department
     +Address officeAddress
     +Equipment[] companyAssets
@@ -2562,15 +2724,20 @@ message _Subclasses_of_class_Person {
 message Employee {
   repeated _Subclasses_of_class_Equipment companyAssets = 1;
   Department department = 2;
-  string email = 3;
-  string employeeId = 4;
-  string firstName = 5;
-  Address homeAddress = 6;
-  string lastName = 7;
-  optional string manager = 8;
-  optional string middleNames = 9;
-  Address officeAddress = 10;
-  SSN ssn = 11;
+  google.protobuf.Timestamp dob = 3;
+  string email = 4;
+  string employeeId = 5;
+  string firstName = 6;
+  double height = 7;
+  Address homeAddress = 8;
+  string lastName = 9;
+  optional string manager = 10;
+  optional string middleNames = 11;
+  sint64 numDependents = 12;
+  Address officeAddress = 13;
+  bool retired = 14;
+  sint64 salary = 15;
+  string ssn = 16;
 }
 
 message _Subclasses_of_class_Employee {
@@ -2582,28 +2749,35 @@ message _Subclasses_of_class_Employee {
 
 message Contractor {
   Company company = 1;
-  string email = 2;
-  string firstName = 3;
-  Address homeAddress = 4;
-  string lastName = 5;
-  optional string manager = 6;
-  optional string middleNames = 7;
-  SSN ssn = 8;
+  google.protobuf.Timestamp dob = 2;
+  string email = 3;
+  string firstName = 4;
+  double height = 5;
+  Address homeAddress = 6;
+  string lastName = 7;
+  optional string manager = 8;
+  optional string middleNames = 9;
+  string ssn = 10;
 }
 
 message Manager {
   repeated _Subclasses_of_class_Equipment companyAssets = 1;
   Department department = 2;
-  string email = 3;
-  string employeeId = 4;
-  string firstName = 5;
-  Address homeAddress = 6;
-  string lastName = 7;
-  optional string manager = 8;
-  optional string middleNames = 9;
-  Address officeAddress = 10;
-  repeated string reports = 11;
-  SSN ssn = 12;
+  google.protobuf.Timestamp dob = 3;
+  string email = 4;
+  string employeeId = 5;
+  string firstName = 6;
+  double height = 7;
+  Address homeAddress = 8;
+  string lastName = 9;
+  optional string manager = 10;
+  optional string middleNames = 11;
+  sint64 numDependents = 12;
+  Address officeAddress = 13;
+  repeated string reports = 14;
+  bool retired = 15;
+  sint64 salary = 16;
+  string ssn = 17;
 }
 
 message CompanyEvent {
@@ -2813,7 +2987,16 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "$ref": "#/components/schemas/org.acme.hr.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -2822,7 +3005,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ],
         "$decorators": {
           "resource": []
@@ -2841,6 +3026,15 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           },
           "employeeId": {
             "type": "string"
+          },
+          "salary": {
+            "type": "integer"
+          },
+          "numDependents": {
+            "type": "integer"
+          },
+          "retired": {
+            "type": "boolean"
           },
           "department": {
             "$ref": "#/components/schemas/org.acme.hr.Department"
@@ -2875,12 +3069,24 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "$ref": "#/components/schemas/org.acme.hr.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
           "$class",
           "employeeId",
+          "salary",
+          "numDependents",
+          "retired",
           "department",
           "officeAddress",
           "companyAssets",
@@ -2888,7 +3094,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr.Contractor": {
@@ -2926,7 +3134,16 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "$ref": "#/components/schemas/org.acme.hr.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -2936,7 +3153,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr.Manager": {
@@ -2959,6 +3178,15 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           },
           "employeeId": {
             "type": "string"
+          },
+          "salary": {
+            "type": "integer"
+          },
+          "numDependents": {
+            "type": "integer"
+          },
+          "retired": {
+            "type": "boolean"
           },
           "department": {
             "$ref": "#/components/schemas/org.acme.hr.Department"
@@ -2993,12 +3221,24 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "$ref": "#/components/schemas/org.acme.hr.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
           "$class",
           "employeeId",
+          "salary",
+          "numDependents",
+          "retired",
           "department",
           "officeAddress",
           "companyAssets",
@@ -3006,7 +3246,9 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr.CompanyEvent": {
@@ -3422,11 +3664,16 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
    record Employee {
       string employeeId;
+      long salary;
+      int numDependents;
+      boolean retired;
       Department department;
       Address officeAddress;
       array<Equipment> companyAssets;
@@ -3437,6 +3684,8 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
@@ -3449,12 +3698,17 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
    record Manager {
       union { null, array<string> } reports;
       string employeeId;
+      long salary;
+      int numDependents;
+      boolean retired;
       Department department;
       Address officeAddress;
       array<Equipment> companyAssets;
@@ -3465,6 +3719,8 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
@@ -3548,11 +3804,16 @@ type Person struct {
    LastName string \`json:"lastName"\`
    MiddleNames string \`json:"middleNames"\`
    HomeAddress Address \`json:"homeAddress"\`
-   Ssn SSN \`json:"ssn"\`
+   Ssn string \`json:"ssn"\`
+   Height float64 \`json:"height"\`
+   Dob time.Time \`json:"dob"\`
 }
 type Employee struct {
    Person
    EmployeeId string \`json:"employeeId"\`
+   Salary int64 \`json:"salary"\`
+   NumDependents int32 \`json:"numDependents"\`
+   Retired bool \`json:"retired"\`
    Department Department \`json:"department"\`
    OfficeAddress Address \`json:"officeAddress"\`
    CompanyAssets []Equipment \`json:"companyAssets"\`
@@ -3752,7 +4013,16 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
@@ -3761,7 +4031,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ],
       "$decorators": {
         "resource": []
@@ -3780,6 +4052,15 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "employeeId": {
           "type": "string"
+        },
+        "salary": {
+          "type": "integer"
+        },
+        "numDependents": {
+          "type": "integer"
+        },
+        "retired": {
+          "type": "boolean"
         },
         "department": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Department"
@@ -3814,12 +4095,24 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
         "$class",
         "employeeId",
+        "salary",
+        "numDependents",
+        "retired",
         "department",
         "officeAddress",
         "companyAssets",
@@ -3827,7 +4120,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr@1.0.0.Contractor": {
@@ -3865,7 +4160,16 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
@@ -3875,7 +4179,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr@1.0.0.Manager": {
@@ -3898,6 +4204,15 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "employeeId": {
           "type": "string"
+        },
+        "salary": {
+          "type": "integer"
+        },
+        "numDependents": {
+          "type": "integer"
+        },
+        "retired": {
+          "type": "boolean"
         },
         "department": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Department"
@@ -3932,12 +4247,24 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "$ref": "#/definitions/org.acme.hr@1.0.0.Address"
         },
         "ssn": {
-          "$ref": "#/definitions/org.acme.hr@1.0.0.SSN"
+          "default": "000-00-0000",
+          "type": "string",
+          "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dob": {
+          "format": "date-time",
+          "type": "string"
         }
       },
       "required": [
         "$class",
         "employeeId",
+        "salary",
+        "numDependents",
+        "retired",
         "department",
         "officeAddress",
         "companyAssets",
@@ -3945,7 +4272,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "firstName",
         "lastName",
         "homeAddress",
-        "ssn"
+        "ssn",
+        "height",
+        "dob"
       ]
     },
     "org.acme.hr@1.0.0.CompanyEvent": {
@@ -4217,7 +4546,9 @@ xmlns:concerto="concerto"
       <xs:element name="lastName" type="xs:string"/>
       <xs:element name="middleNames" type="xs:string"/>
       <xs:element name="homeAddress" type="org.acme.hr:Address"/>
-      <xs:element name="ssn" type="org.acme.hr:SSN"/>
+      <xs:element name="ssn" type="xs:string"/>
+      <xs:element name="height" type="xs:double"/>
+      <xs:element name="dob" type="xs:dateTime"/>
    </xs:sequence>
    </xs:extension>
    </xs:complexContent>
@@ -4228,6 +4559,9 @@ xmlns:concerto="concerto"
    <xs:extension base="org.acme.hr:Person">
    <xs:sequence>
       <xs:element name="employeeId" type="xs:string"/>
+      <xs:element name="salary" type="xs:long"/>
+      <xs:element name="numDependents" type="xs:integer"/>
+      <xs:element name="retired" type="xs:boolean"/>
       <xs:element name="department" type="org.acme.hr:Department"/>
       <xs:element name="officeAddress" type="org.acme.hr:Address"/>
       <xs:element name="companyAssets" type="org.acme.hr:Equipment" minOccurs="0" maxOccurs="unbounded"/>
@@ -4350,11 +4684,16 @@ class org.acme.hr.Person << (P,lightblue) >> {
    + String lastName
    + String middleNames
    + Address homeAddress
-   + SSN ssn
+   + String ssn
+   + Double height
+   + DateTime dob
 }
 org.acme.hr.Person --|> concerto.Participant
 class org.acme.hr.Employee << (P,lightblue) >> {
    + String employeeId
+   + Long salary
+   + Integer numDependents
+   + Boolean retired
    + Department department
    + Address officeAddress
    + Equipment[] companyAssets
@@ -4564,7 +4903,9 @@ export interface IPerson extends IParticipant {
    lastName: string;
    middleNames?: string;
    homeAddress: IAddress;
-   ssn: ISSN;
+   ssn: string;
+   height: number;
+   dob: Date;
 }
 
 export type PersonUnion = IEmployee | 
@@ -4572,6 +4913,9 @@ IContractor;
 
 export interface IEmployee extends IPerson {
    employeeId: string;
+   salary: number;
+   numDependents: number;
+   retired: boolean;
    department: Department;
    officeAddress: IAddress;
    companyAssets: IEquipment[];
@@ -4970,7 +5314,9 @@ public abstract class Person extends Participant {
    private String lastName;
    private String middleNames;
    private Address homeAddress;
-   private SSN ssn;
+   private String ssn;
+   private double height;
+   private java.util.Date dob;
    public String getEmail() {
       return this.email;
    }
@@ -4986,8 +5332,14 @@ public abstract class Person extends Participant {
    public Address getHomeAddress() {
       return this.homeAddress;
    }
-   public SSN getSsn() {
+   public String getSsn() {
       return this.ssn;
+   }
+   public double getHeight() {
+      return this.height;
+   }
+   public java.util.Date getDob() {
+      return this.dob;
    }
    public void setEmail(String email) {
       this.email = email;
@@ -5004,8 +5356,14 @@ public abstract class Person extends Participant {
    public void setHomeAddress(Address homeAddress) {
       this.homeAddress = homeAddress;
    }
-   public void setSsn(SSN ssn) {
+   public void setSsn(String ssn) {
       this.ssn = ssn;
+   }
+   public void setHeight(double height) {
+      this.height = height;
+   }
+   public void setDob(java.util.Date dob) {
+      this.dob = dob;
    }
 }
 ",
@@ -5035,12 +5393,24 @@ public class Employee extends Person {
    }
 
    private String employeeId;
+   private long salary;
+   private int numDependents;
+   private boolean retired;
    private Department department;
    private Address officeAddress;
    private Equipment[] companyAssets;
    private Manager manager;
    public String getEmployeeId() {
       return this.employeeId;
+   }
+   public long getSalary() {
+      return this.salary;
+   }
+   public int getNumDependents() {
+      return this.numDependents;
+   }
+   public boolean getRetired() {
+      return this.retired;
    }
    public Department getDepartment() {
       return this.department;
@@ -5056,6 +5426,15 @@ public class Employee extends Person {
    }
    public void setEmployeeId(String employeeId) {
       this.employeeId = employeeId;
+   }
+   public void setSalary(long salary) {
+      this.salary = salary;
+   }
+   public void setNumDependents(int numDependents) {
+      this.numDependents = numDependents;
+   }
+   public void setRetired(boolean retired) {
+      this.retired = retired;
    }
    public void setDepartment(Department department) {
       this.department = department;
@@ -5279,11 +5658,16 @@ type Person @resource {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Employee {
    employeeId: String!
+   salary: Int!
+   numDependents: Int!
+   retired: Boolean!
    department: Department!
    officeAddress: Address!
    companyAssets: [Equipment]!
@@ -5293,7 +5677,9 @@ type Employee {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Contractor {
@@ -5304,12 +5690,17 @@ type Contractor {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type Manager {
    reports: [ID] # Person
    employeeId: String!
+   salary: Int!
+   numDependents: Int!
+   retired: Boolean!
    department: Department!
    officeAddress: Address!
    companyAssets: [Equipment]!
@@ -5319,7 +5710,9 @@ type Manager {
    lastName: String!
    middleNames: String
    homeAddress: Address!
-   ssn: SSN!
+   ssn: String!
+   height: Float!
+   dob: DateTime!
    _identifier: String!
 }
 type CompanyEvent {
@@ -5503,7 +5896,9 @@ public abstract class Person : Participant {
    public string lastName { get; set; }
    public string middleNames { get; set; }
    public Address homeAddress { get; set; }
-   public SSN ssn { get; set; }
+   public string ssn { get; set; }
+   public float height { get; set; }
+   public System.DateTime dob { get; set; }
 }
 [AccordProject.Concerto.Type(Namespace = "org.acme.hr", Version = "1.0.0", Name = "Employee")]
 [System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
@@ -5511,6 +5906,9 @@ public class Employee : Person {
    [System.Text.Json.Serialization.JsonPropertyName("$class")]
    public override string _class { get; } = "org.acme.hr@1.0.0.Employee";
    public string employeeId { get; set; }
+   public long salary { get; set; }
+   public int numDependents { get; set; }
+   public bool retired { get; set; }
    public Department department { get; set; }
    public Address officeAddress { get; set; }
    public Equipment[] companyAssets { get; set; }
@@ -5677,11 +6075,21 @@ exports[`codegen #formats check we can convert all formats from namespace versio
          </Property>
          <Property Name="homeAddress" Type="org.acme.hr.Address"  >
          </Property>
-         <Property Name="ssn" Type="org.acme.hr.SSN"  >
+         <Property Name="ssn" Type="Edm.String"  DefaultValue="000-00-0000">
+         </Property>
+         <Property Name="height" Type="Edm.Double"  >
+         </Property>
+         <Property Name="dob" Type="Edm.DateTimeOffset"  >
          </Property>
       </EntityType>
       <EntityType Name="Employee"  BaseType="org.acme.hr.Person">
          <Property Name="employeeId" Type="Edm.String"  >
+         </Property>
+         <Property Name="salary" Type="Edm.Int64"  >
+         </Property>
+         <Property Name="numDependents" Type="Edm.Int32"  >
+         </Property>
+         <Property Name="retired" Type="Edm.Boolean"  >
          </Property>
          <Property Name="department" Type="org.acme.hr.Department"  >
          </Property>
@@ -5796,13 +6204,18 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
-    +SSN ssn
+    +String ssn
+    +Double height
+    +DateTime dob
 }
 
 Person --|> Participant
 class Employee {
 << participant>>
     +String employeeId
+    +Long salary
+    +Integer numDependents
+    +Boolean retired
     +Department department
     +Address officeAddress
     +Equipment[] companyAssets
@@ -5933,13 +6346,18 @@ class Person {
     +String lastName
     +String middleNames
     +Address homeAddress
-    +SSN ssn
+    +String ssn
+    +Double height
+    +DateTime dob
 }
 
 Person --|> Participant
 class Employee {
 << participant>>
     +String employeeId
+    +Long salary
+    +Integer numDependents
+    +Boolean retired
     +Department department
     +Address officeAddress
     +Equipment[] companyAssets
@@ -6050,15 +6468,20 @@ message _Subclasses_of_class_Person {
 message Employee {
   repeated _Subclasses_of_class_Equipment companyAssets = 1;
   Department department = 2;
-  string email = 3;
-  string employeeId = 4;
-  string firstName = 5;
-  Address homeAddress = 6;
-  string lastName = 7;
-  optional string manager = 8;
-  optional string middleNames = 9;
-  Address officeAddress = 10;
-  SSN ssn = 11;
+  google.protobuf.Timestamp dob = 3;
+  string email = 4;
+  string employeeId = 5;
+  string firstName = 6;
+  double height = 7;
+  Address homeAddress = 8;
+  string lastName = 9;
+  optional string manager = 10;
+  optional string middleNames = 11;
+  sint64 numDependents = 12;
+  Address officeAddress = 13;
+  bool retired = 14;
+  sint64 salary = 15;
+  string ssn = 16;
 }
 
 message _Subclasses_of_class_Employee {
@@ -6070,28 +6493,35 @@ message _Subclasses_of_class_Employee {
 
 message Contractor {
   Company company = 1;
-  string email = 2;
-  string firstName = 3;
-  Address homeAddress = 4;
-  string lastName = 5;
-  optional string manager = 6;
-  optional string middleNames = 7;
-  SSN ssn = 8;
+  google.protobuf.Timestamp dob = 2;
+  string email = 3;
+  string firstName = 4;
+  double height = 5;
+  Address homeAddress = 6;
+  string lastName = 7;
+  optional string manager = 8;
+  optional string middleNames = 9;
+  string ssn = 10;
 }
 
 message Manager {
   repeated _Subclasses_of_class_Equipment companyAssets = 1;
   Department department = 2;
-  string email = 3;
-  string employeeId = 4;
-  string firstName = 5;
-  Address homeAddress = 6;
-  string lastName = 7;
-  optional string manager = 8;
-  optional string middleNames = 9;
-  Address officeAddress = 10;
-  repeated string reports = 11;
-  SSN ssn = 12;
+  google.protobuf.Timestamp dob = 3;
+  string email = 4;
+  string employeeId = 5;
+  string firstName = 6;
+  double height = 7;
+  Address homeAddress = 8;
+  string lastName = 9;
+  optional string manager = 10;
+  optional string middleNames = 11;
+  sint64 numDependents = 12;
+  Address officeAddress = 13;
+  repeated string reports = 14;
+  bool retired = 15;
+  sint64 salary = 16;
+  string ssn = 17;
 }
 
 message CompanyEvent {
@@ -6301,7 +6731,16 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -6310,7 +6749,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ],
         "$decorators": {
           "resource": []
@@ -6329,6 +6770,15 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           },
           "employeeId": {
             "type": "string"
+          },
+          "salary": {
+            "type": "integer"
+          },
+          "numDependents": {
+            "type": "integer"
+          },
+          "retired": {
+            "type": "boolean"
           },
           "department": {
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Department"
@@ -6363,12 +6813,24 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
           "$class",
           "employeeId",
+          "salary",
+          "numDependents",
+          "retired",
           "department",
           "officeAddress",
           "companyAssets",
@@ -6376,7 +6838,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr@1.0.0.Contractor": {
@@ -6414,7 +6878,16 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -6424,7 +6897,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr@1.0.0.Manager": {
@@ -6447,6 +6922,15 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           },
           "employeeId": {
             "type": "string"
+          },
+          "salary": {
+            "type": "integer"
+          },
+          "numDependents": {
+            "type": "integer"
+          },
+          "retired": {
+            "type": "boolean"
           },
           "department": {
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Department"
@@ -6481,12 +6965,24 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Address"
           },
           "ssn": {
-            "$ref": "#/components/schemas/org.acme.hr@1.0.0.SSN"
+            "default": "000-00-0000",
+            "type": "string",
+            "pattern": "\\\\d{3}-\\\\d{2}-\\\\{4}+"
+          },
+          "height": {
+            "type": "number"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
           "$class",
           "employeeId",
+          "salary",
+          "numDependents",
+          "retired",
           "department",
           "officeAddress",
           "companyAssets",
@@ -6494,7 +6990,9 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "firstName",
           "lastName",
           "homeAddress",
-          "ssn"
+          "ssn",
+          "height",
+          "dob"
         ]
       },
       "org.acme.hr@1.0.0.CompanyEvent": {
@@ -6910,11 +7408,16 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
    record Employee {
       string employeeId;
+      long salary;
+      int numDependents;
+      boolean retired;
       Department department;
       Address officeAddress;
       array<Equipment> companyAssets;
@@ -6925,6 +7428,8 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
@@ -6937,12 +7442,17 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 
    record Manager {
       union { null, array<string> } reports;
       string employeeId;
+      long salary;
+      int numDependents;
+      boolean retired;
       Department department;
       Address officeAddress;
       array<Equipment> companyAssets;
@@ -6953,6 +7463,8 @@ protocol MyProtocol {
       union { null, string } middleNames;
       Address homeAddress;
       string ssn;
+      double height;
+      string dob;
       string $identifier;
    }
 

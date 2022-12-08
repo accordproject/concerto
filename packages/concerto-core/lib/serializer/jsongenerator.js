@@ -66,6 +66,8 @@ class JSONGenerator {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
+        } else if (thing.isTypeScalar?.()) {
+            return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
@@ -163,7 +165,7 @@ class JSONGenerator {
             } else {
                 result = array;
             }
-        } else if (field.isPrimitive() || ModelUtil.isScalar(field)) {
+        } else if (field.isPrimitive()) {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
             if (this.ergo) {

@@ -16,7 +16,6 @@
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
-const ModelUtil = require('../modelutil');
 dayjs.extend(utc);
 
 // Types needed for TypeScript generation.
@@ -144,19 +143,15 @@ class Typed {
 
         for (let n = 0; n < fields.length; n++) {
             let field = fields[n];
+            if(field.isTypeScalar?.()) {
+                field = field.getScalarField();
+            }
             let defaultValue;
             let type;
             if (field.isField?.()) {
                 defaultValue = field.getDefaultValue();
                 type = field.getType();
             }
-            if (ModelUtil.isScalar(field)){
-                const modelFile = field.getParent().getModelFile();
-                const scalarDeclaration = modelFile.getType(field.getType());
-                defaultValue = scalarDeclaration.getDefaultValue();
-                type = scalarDeclaration.getType();
-            }
-
             if (defaultValue) {
                 if (type === 'String') {
                     this.setPropertyValue(field.getName(), defaultValue);

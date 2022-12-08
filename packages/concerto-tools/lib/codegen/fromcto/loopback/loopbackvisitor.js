@@ -71,6 +71,8 @@ class LoopbackVisitor {
             return this.visitEventDeclaration(thing, parameters);
         } else if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
+        } else if (thing.isTypeScalar?.()) {
+            return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {

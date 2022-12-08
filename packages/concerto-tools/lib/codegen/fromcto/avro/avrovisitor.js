@@ -43,6 +43,8 @@ class AvroVisitor {
             return this.visitEnumDeclaration(thing, parameters);
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isTypeScalar?.()) {
+            return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -158,24 +160,17 @@ class AvroVisitor {
      * @private
      */
     visitField(field, parameters) {
+        let avroType = this.toAvroType(field.getType());
 
-        let fieldOrScalar = field;
-
-        if(field.isTypeScalar()) {
-            fieldOrScalar = field.getScalarField();
-        }
-
-        let avroType = this.toAvroType(fieldOrScalar.getType());
-
-        if (fieldOrScalar.isArray()) {
+        if (field.isArray()) {
             avroType = `array<${avroType}>`;
         }
 
-        if (fieldOrScalar.isOptional()) {
+        if (field.isOptional()) {
             avroType = `union { null, ${avroType} }`;
         }
 
-        parameters.fileWriter.writeLine(2, `${avroType} ${fieldOrScalar.getName()};`);
+        parameters.fileWriter.writeLine(2, `${avroType} ${field.getName()};`);
         return null;
     }
 

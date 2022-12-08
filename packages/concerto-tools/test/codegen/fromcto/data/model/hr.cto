@@ -55,10 +55,15 @@ abstract participant Person identified by email {
     o String middleNames optional
     o Address homeAddress
     o SSN ssn
+    o Double height
+    o DateTime dob
 }
 
 participant Employee extends Person {
     o String employeeId
+    o Long salary
+    o Integer numDependents
+    o Boolean retired
     o Department department
     o Address officeAddress
     o Equipment[] companyAssets

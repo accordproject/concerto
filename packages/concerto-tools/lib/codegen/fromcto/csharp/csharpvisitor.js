@@ -58,6 +58,8 @@ class CSharpVisitor {
             return this.visitEnumDeclaration(thing, parameters);
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isTypeScalar?.()) {
+            return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
