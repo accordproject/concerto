@@ -10,6 +10,7 @@ export = Field;
  * @memberof module:concerto-core
  */
 declare class Field extends Property {
+    scalarField: any;
     validator: StringValidator | NumberValidator;
     defaultValue: any;
     /**
@@ -28,6 +29,18 @@ declare class Field extends Property {
      * @return {boolean} true if the class is a field
      */
     isField(): boolean;
+    /**
+     * Returns true if the field's type is a scalar
+     * @returns {boolean} true if the field is a scalar type
+     */
+    isTypeScalar(): boolean;
+    /**
+     * Unboxes a field that references a scalar type to an
+     * underlying Field definition.
+     * @throws {Error} throws an error if this field is not a scalar type.
+     * @returns {Field} the primitive field for this scalar
+     */
+    getScalarField(): Field;
 }
 import Property = require("./property");
 import StringValidator = require("./stringvalidator");
