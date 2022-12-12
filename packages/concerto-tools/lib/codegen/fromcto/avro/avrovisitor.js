@@ -15,6 +15,7 @@
 'use strict';
 
 const util = require('util');
+const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
 
 /**
  * Convert the contents of a ModelManager to Avro IDL code.
@@ -96,9 +97,12 @@ class AvroVisitor {
         const protocolName = parameters?.avroProtocolName ?? 'MyProtocol';
         parameters.fileWriter.writeLine(0, `protocol ${protocolName} {\n`);
 
-        modelFile.getImports().forEach((imp) => {
-            parameters.fileWriter.writeLine(1, `import idl ${imp}.avdl`);
-        });
+        modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
+            .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
+            .forEach(namespace => {
+                parameters.fileWriter.writeLine(1, `import idl "${namespace}.avdl";`);
+            });
+
         parameters.fileWriter.writeLine(1, '');
 
         modelFile
@@ -127,7 +131,8 @@ class AvroVisitor {
             'enum ' + enumDeclaration.getName() + ' {'
         );
 
-        enumDeclaration.getOwnProperties().forEach((property) => {
+        enumDeclaration.getOwnProperties().forEach((property,index) => {
+            parameters.last = enumDeclaration.getOwnProperties().length === index+1;
             property.accept(this, parameters);
         });
 
@@ -172,7 +177,9 @@ class AvroVisitor {
             avroType = `union { null, ${avroType} }`;
         }
 
-        parameters.fileWriter.writeLine(2, `${avroType} ${field.getName()};`);
+        const fieldName = this.toAvroName(field.getName());
+
+        parameters.fileWriter.writeLine(2, `${avroType} ${fieldName};`);
         return null;
     }
 
@@ -185,7 +192,7 @@ class AvroVisitor {
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
         const name = enumValueDeclaration.getName();
-        parameters.fileWriter.writeLine(2, name);
+        parameters.fileWriter.writeLine(2, `${name}${parameters.last ? '' : ','}`);
         return null;
     }
 
@@ -215,15 +222,13 @@ class AvroVisitor {
     }
 
     /**
-     * Converts a Concerto type to a Typescript  type. Primitive types are converted
+     * Converts a Concerto type to an Avro type. Primitive types are converted
      * everything else is passed through unchanged.
      * @param {string} type  - the concerto type
-     * @param {boolean} useInterface  - whether to use an interface type
-     * @param {boolean} useUnion  - whether to use a union type
-     * @return {string} the corresponding type in Typescript
+     * @return {string} the corresponding type in Avro
      * @private
      */
-    toAvroType(type, useInterface, useUnion) {
+    toAvroType(type) {
         switch (type) {
         case 'DateTime':
             return 'string';
@@ -241,6 +246,16 @@ class AvroVisitor {
             return type;
         }
         }
+    }
+
+    /**
+     * Escapes characters in a Concerto name to make them legal in Avro
+     * @param {string} name Concerto name
+     * @returns {string} a Avro legal name
+     */
+    toAvroName(name) {
+        // $ is unfortunately a restricted character in Avro!
+        return name.replace('$', '_');
     }
 }
 
