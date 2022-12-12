@@ -49,12 +49,19 @@ concept Person identified by name  {
 - Mermaid UML Diagrams
 - Markdown (with embedded Mermaid)
 - OpenAPI v3 specification document
+- Apache Avro
 
 🕸 Publish your reusable models to any website, including the Accord Project [model repository](https://models.accordproject.org)
+
+Infer models from other formats:
+- JSON document
+- JSON Schema
+- OpenAPI v3 specification document
 
 ## Getting Started
 
 - Install the [Command Line Tool](https://docs.accordproject.org/docs/ref-concerto-cli.html)
+- Read the [Concerto specification](https://docs.accordproject.org/docs/model-concerto.html)
 
 ```console
 $ npm i -g @accordproject/concerto-cli
