@@ -3549,19 +3549,19 @@ protocol MyProtocol {
    }
 
    record Asset {
-      string $identifier;
+      string _identifier;
    }
 
    record Participant {
-      string $identifier;
+      string _identifier;
    }
 
    record Transaction {
-      string $timestamp;
+      string _timestamp;
    }
 
    record Event {
-      string $timestamp;
+      string _timestamp;
    }
 
 }
@@ -3580,11 +3580,11 @@ protocol MyProtocol {
    }
 
    record Asset {
-      string $identifier;
+      string _identifier;
    }
 
    record Participant {
-      string $identifier;
+      string _identifier;
    }
 
    record Transaction {
@@ -3604,18 +3604,14 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
   "value": "@namespace("org.acme.hr")
 protocol MyProtocol {
 
-   import idl concerto@1.0.0.Concept.avdl
-   import idl concerto@1.0.0.Asset.avdl
-   import idl concerto@1.0.0.Transaction.avdl
-   import idl concerto@1.0.0.Participant.avdl
-   import idl concerto@1.0.0.Event.avdl
+   import idl "concerto@1.0.0.avdl";
    
    enum State {
-      MA
-      NY
-      CO
-      WA
-      IL
+      MA,
+      NY,
+      CO,
+      WA,
+      IL,
       CA
    }
 
@@ -3633,28 +3629,28 @@ protocol MyProtocol {
    }
 
    enum Department {
-      Sales
-      Marketing
-      Finance
-      HR
-      Engineering
+      Sales,
+      Marketing,
+      Finance,
+      HR,
+      Engineering,
       Design
    }
 
    record Equipment {
       string serialNumber;
-      string $identifier;
+      string _identifier;
    }
 
    enum LaptopMake {
-      Apple
+      Apple,
       Microsoft
    }
 
    record Laptop {
       LaptopMake make;
       string serialNumber;
-      string $identifier;
+      string _identifier;
    }
 
    record Person {
@@ -3666,7 +3662,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Employee {
@@ -3686,7 +3682,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Contractor {
@@ -3700,7 +3696,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Manager {
@@ -3721,22 +3717,22 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record CompanyEvent {
-      string $timestamp;
+      string _timestamp;
    }
 
    record Onboarded {
       string employee;
-      string $timestamp;
+      string _timestamp;
    }
 
    record ChangeOfAddress {
       string Person;
       Address newAddress;
-      string $timestamp;
+      string _timestamp;
    }
 
 }
@@ -7293,19 +7289,19 @@ protocol MyProtocol {
    }
 
    record Asset {
-      string $identifier;
+      string _identifier;
    }
 
    record Participant {
-      string $identifier;
+      string _identifier;
    }
 
    record Transaction {
-      string $timestamp;
+      string _timestamp;
    }
 
    record Event {
-      string $timestamp;
+      string _timestamp;
    }
 
 }
@@ -7324,11 +7320,11 @@ protocol MyProtocol {
    }
 
    record Asset {
-      string $identifier;
+      string _identifier;
    }
 
    record Participant {
-      string $identifier;
+      string _identifier;
    }
 
    record Transaction {
@@ -7348,18 +7344,14 @@ exports[`codegen #formats check we can convert all formats from namespace versio
   "value": "@namespace("org.acme.hr@1.0.0")
 protocol MyProtocol {
 
-   import idl concerto@1.0.0.Concept.avdl
-   import idl concerto@1.0.0.Asset.avdl
-   import idl concerto@1.0.0.Transaction.avdl
-   import idl concerto@1.0.0.Participant.avdl
-   import idl concerto@1.0.0.Event.avdl
+   import idl "concerto@1.0.0.avdl";
    
    enum State {
-      MA
-      NY
-      CO
-      WA
-      IL
+      MA,
+      NY,
+      CO,
+      WA,
+      IL,
       CA
    }
 
@@ -7377,28 +7369,28 @@ protocol MyProtocol {
    }
 
    enum Department {
-      Sales
-      Marketing
-      Finance
-      HR
-      Engineering
+      Sales,
+      Marketing,
+      Finance,
+      HR,
+      Engineering,
       Design
    }
 
    record Equipment {
       string serialNumber;
-      string $identifier;
+      string _identifier;
    }
 
    enum LaptopMake {
-      Apple
+      Apple,
       Microsoft
    }
 
    record Laptop {
       LaptopMake make;
       string serialNumber;
-      string $identifier;
+      string _identifier;
    }
 
    record Person {
@@ -7410,7 +7402,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Employee {
@@ -7430,7 +7422,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Contractor {
@@ -7444,7 +7436,7 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record Manager {
@@ -7465,22 +7457,22 @@ protocol MyProtocol {
       string ssn;
       double height;
       string dob;
-      string $identifier;
+      string _identifier;
    }
 
    record CompanyEvent {
-      string $timestamp;
+      string _timestamp;
    }
 
    record Onboarded {
       string employee;
-      string $timestamp;
+      string _timestamp;
    }
 
    record ChangeOfAddress {
       string Person;
       Address newAddress;
-      string $timestamp;
+      string _timestamp;
    }
 
 }
