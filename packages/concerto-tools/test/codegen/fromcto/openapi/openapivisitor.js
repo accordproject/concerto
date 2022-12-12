@@ -84,5 +84,13 @@ describe('OpenApi (samples)', function () {
             const spec = modelManager.accept(visitor);
             spec.paths.should.have.property('/peeps');
         });
+        it('should throw an error when an unrecognised type is supplied', () => {
+            let thing = 'Something of unrecognised type';
+            const visitor = new OpenApiVisitor();
+            const param = {};
+            (() => {
+                visitor.visit(thing, param);
+            }).should.throw(/Unrecognised/);
+        });
     });
 });

@@ -108,6 +108,8 @@ class JSONPopulator {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
+        } else if (thing.isTypeScalar?.()) {
+            return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
@@ -192,7 +194,7 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if(!field.isPrimitive() && !field.isTypeEnum() && !ModelUtil.isScalar(field)) {
+        if(!field.isPrimitive() && !field.isTypeEnum()) {
             if (this.ergo) {
                 const theClass = jsonItem.$class.$coll[0];
                 jsonItem = jsonItem.$data;
