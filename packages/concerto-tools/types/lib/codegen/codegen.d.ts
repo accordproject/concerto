@@ -12,6 +12,7 @@ import MermaidVisitor = require("./fromcto/mermaid/mermaidvisitor");
 import MarkdownVisitor = require("./fromcto/markdown/markdownvisitor");
 import ProtobufVisitor = require("./fromcto/protobuf/protobufvisitor");
 import OpenApiVisitor = require("./fromcto/openapi/openapivisitor");
+import AvroVisitor = require("./fromcto/avro/avrovisitor");
 import InferFromJsonSchema = require("./fromJsonSchema/cto/inferModel");
 export declare namespace formats {
     export { GoLangVisitor as golang };
@@ -27,5 +28,6 @@ export declare namespace formats {
     export { MarkdownVisitor as markdown };
     export { ProtobufVisitor as protobuf };
     export { OpenApiVisitor as openapi };
+    export { AvroVisitor as avro };
 }
-export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor, MermaidVisitor, MarkdownVisitor, ProtobufVisitor, OpenApiVisitor, InferFromJsonSchema };
+export { AbstractPlugin, GoLangVisitor, JSONSchemaVisitor, XmlSchemaVisitor, PlantUMLVisitor, TypescriptVisitor, JavaVisitor, GraphQLVisitor, CSharpVisitor, ODataVisitor, MermaidVisitor, MarkdownVisitor, ProtobufVisitor, OpenApiVisitor, AvroVisitor, InferFromJsonSchema };

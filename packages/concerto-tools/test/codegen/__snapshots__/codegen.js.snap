@@ -3557,11 +3557,13 @@ protocol MyProtocol {
    }
 
    record Transaction {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record Event {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
 }
@@ -3639,7 +3641,6 @@ protocol MyProtocol {
 
    record Equipment {
       string serialNumber;
-      string _identifier;
    }
 
    enum LaptopMake {
@@ -3650,7 +3651,6 @@ protocol MyProtocol {
    record Laptop {
       LaptopMake make;
       string serialNumber;
-      string _identifier;
    }
 
    record Person {
@@ -3661,8 +3661,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Employee {
@@ -3681,8 +3681,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Contractor {
@@ -3695,8 +3695,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Manager {
@@ -3716,23 +3716,26 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record CompanyEvent {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record Onboarded {
       string employee;
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record ChangeOfAddress {
       string Person;
       Address newAddress;
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
 }
@@ -7297,11 +7300,13 @@ protocol MyProtocol {
    }
 
    record Transaction {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record Event {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
 }
@@ -7379,7 +7384,6 @@ protocol MyProtocol {
 
    record Equipment {
       string serialNumber;
-      string _identifier;
    }
 
    enum LaptopMake {
@@ -7390,7 +7394,6 @@ protocol MyProtocol {
    record Laptop {
       LaptopMake make;
       string serialNumber;
-      string _identifier;
    }
 
    record Person {
@@ -7401,8 +7404,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Employee {
@@ -7421,8 +7424,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Contractor {
@@ -7435,8 +7438,8 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record Manager {
@@ -7456,23 +7459,26 @@ protocol MyProtocol {
       Address homeAddress;
       string ssn;
       double height;
-      string dob;
-      string _identifier;
+      @logicalType("timestamp-micros")
+      long dob;
    }
 
    record CompanyEvent {
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record Onboarded {
       string employee;
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
    record ChangeOfAddress {
       string Person;
       Address newAddress;
-      string _timestamp;
+      @logicalType("timestamp-micros")
+      long _timestamp;
    }
 
 }

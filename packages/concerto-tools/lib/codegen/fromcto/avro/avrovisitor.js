@@ -153,7 +153,9 @@ class AvroVisitor {
             `record ${classDeclaration.getName()} {`
         );
         classDeclaration.getProperties().forEach((property) => {
-            property.accept(this, parameters);
+            if(property.getName() !== '$identifier' || classDeclaration.isSystemIdentified()) {
+                property.accept(this, parameters);
+            }
         });
         parameters.fileWriter.writeLine(1, '}\n');
         return null;
@@ -179,6 +181,13 @@ class AvroVisitor {
 
         const fieldName = this.toAvroName(field.getName());
 
+        /**
+         * Note that this normalizes DateTime to be micros since unix epoch UTC
+         * and stores the value inside a long
+         */
+        if(field.getType() === 'DateTime') {
+            parameters.fileWriter.writeLine(2, '@logicalType("timestamp-micros")');
+        }
         parameters.fileWriter.writeLine(2, `${avroType} ${fieldName};`);
         return null;
     }
@@ -231,7 +240,7 @@ class AvroVisitor {
     toAvroType(type) {
         switch (type) {
         case 'DateTime':
-            return 'string';
+            return 'long';
         case 'Boolean':
             return 'boolean';
         case 'String':

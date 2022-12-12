@@ -13,6 +13,7 @@ export var CodeGen: {
     MarkdownVisitor: typeof import("./lib/codegen/fromcto/markdown/markdownvisitor");
     ProtobufVisitor: typeof import("./lib/codegen/fromcto/protobuf/protobufvisitor");
     OpenApiVisitor: typeof import("./lib/codegen/fromcto/openapi/openapivisitor");
+    AvroVisitor: typeof import("./lib/codegen/fromcto/avro/avrovisitor");
     InferFromJsonSchema: typeof import("./lib/codegen/fromJsonSchema/cto/inferModel");
     formats: {
         golang: typeof import("./lib/codegen/fromcto/golang/golangvisitor");
@@ -28,6 +29,7 @@ export var CodeGen: {
         markdown: typeof import("./lib/codegen/fromcto/markdown/markdownvisitor");
         protobuf: typeof import("./lib/codegen/fromcto/protobuf/protobufvisitor");
         openapi: typeof import("./lib/codegen/fromcto/openapi/openapivisitor");
+        avro: typeof import("./lib/codegen/fromcto/avro/avrovisitor");
     };
 };
 export var version: any;
