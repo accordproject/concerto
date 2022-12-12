@@ -31,6 +31,7 @@ class AvroVisitor {
      * Visitor design pattern
      * @param {Object} thing - the object being visited
      * @param {Object} parameters  - the parameter
+     * @param {string} [parameters.avroProtocolName] - name of the Avro protocol
      * @return {Object} the result of visiting or null
      * @public
      */
@@ -92,7 +93,8 @@ class AvroVisitor {
             0,
             `@namespace("${modelFile.getNamespace()}")`
         );
-        parameters.fileWriter.writeLine(0, 'protocol MyProtocol {\n');
+        const protocolName = parameters?.avroProtocolName ?? 'MyProtocol';
+        parameters.fileWriter.writeLine(0, `protocol ${protocolName} {\n`);
 
         modelFile.getImports().forEach((imp) => {
             parameters.fileWriter.writeLine(1, `import idl ${imp}.avdl`);
