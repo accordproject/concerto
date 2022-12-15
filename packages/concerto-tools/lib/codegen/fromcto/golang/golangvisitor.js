@@ -14,7 +14,6 @@
 
 'use strict';
 
-const { Relationship } = require('@accordproject/concerto-core');
 const util = require('util');
 const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
 /**
