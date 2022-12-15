@@ -60,20 +60,20 @@ declare class GoLangVisitor {
     private visitField;
     /**
      * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEnumValueDeclaration;
-    /**
-     * Visitor design pattern
      * @param {Relationship} relationship - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
      */
     private visitRelationship;
+    /**
+     * Visitor design pattern
+     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    private visitEnumValueDeclaration;
     /**
      * Returns true if the ModelFile contains a class that has a DateTime
      * field.
@@ -93,6 +93,7 @@ declare class GoLangVisitor {
     private toGoType;
     /**
      * Converts a Concerto namespace to a Go package name.
+     * See: https://rakyll.org/style-packages/
      * @param {string} namespace  - the concerto type
      * @return {string} the corresponding package name in Go Lang
      * @private
