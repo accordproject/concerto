@@ -2,16 +2,28 @@
 
 exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 1`] = `
 {
-  "key": "main.go",
-  "value": "package main
-import "fmt"
-type Relationship struct {
-   Namespace string \`json:"namespace"\`
-   Type string \`json:"type"\`
-   Identifier string \`json:"identifier"\`
+  "key": "concerto@1.0.0.go",
+  "value": "// Package concerto_1_0_0 contians domain objects and was generated from concerto@1.0.0.
+package concerto_1_0_0
+import "time"
+   
+type Concept struct {
 }
-func main() {
-   fmt.Printf("Hello, world.")
+type Asset struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Participant struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Transaction struct {
+   Concept
+   Timestamp time.Time \`json:"$timestamp"\`
+}
+type Event struct {
+   Concept
+   Timestamp time.Time \`json:"$timestamp"\`
 }
 ",
 }
@@ -19,9 +31,38 @@ func main() {
 
 exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 2`] = `
 {
-  "key": "orgacme.hr.go",
-  "value": "package main
+  "key": "concerto.go",
+  "value": "// Package concerto contians domain objects and was generated from concerto.
+package concerto
+   
+type Concept struct {
+}
+type Asset struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Participant struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Transaction struct {
+   Concept
+}
+type Event struct {
+   Concept
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 3`] = `
+{
+  "key": "org.acme.hr.go",
+  "value": "// Package org_acme_hr contians domain objects and was generated from org.acme.hr.
+package org_acme_hr
 import "time"
+import "concerto_1_0_0";
+   
 type State int
 const (
    MA State = 1 + iota
@@ -31,6 +72,19 @@ const (
    IL
    CA
 )
+type Address struct {
+   concerto_1_0_0.Concept
+   Street string \`json:"street"\`
+   City string \`json:"city"\`
+   State State \`json:"state"\`
+   ZipCode string \`json:"zipCode"\`
+   Country string \`json:"country"\`
+}
+type Company struct {
+   concerto_1_0_0.Concept
+   Name string \`json:"name"\`
+   Headquarters Address \`json:"headquarters"\`
+}
 type Department int
 const (
    Sales Department = 1 + iota
@@ -41,7 +95,7 @@ const (
    Design
 )
 type Equipment struct {
-   Asset
+   concerto_1_0_0.Asset
    SerialNumber string \`json:"serialNumber"\`
 }
 type LaptopMake int
@@ -54,7 +108,7 @@ type Laptop struct {
    Make LaptopMake \`json:"make"\`
 }
 type Person struct {
-   Participant
+   concerto_1_0_0.Participant
    Email string \`json:"email"\`
    FirstName string \`json:"firstName"\`
    LastName string \`json:"lastName"\`
@@ -73,25 +127,34 @@ type Employee struct {
    Department Department \`json:"department"\`
    OfficeAddress Address \`json:"officeAddress"\`
    CompanyAssets []Equipment \`json:"companyAssets"\`
+   Manager *Manager \`json:"manager"\`
 }
 type Contractor struct {
    Person
    Company Company \`json:"company"\`
+   Manager *Manager \`json:"manager"\`
 }
 type Manager struct {
    Employee
+   Reports []*Person \`json:"reports"\`
 }
 type CompanyEvent struct {
-   Event
+   concerto_1_0_0.Event
 }
 type Onboarded struct {
    CompanyEvent
+   Employee *Employee \`json:"employee"\`
+}
+type ChangeOfAddress struct {
+   concerto_1_0_0.Transaction
+   Person *Person \`json:"Person"\`
+   NewAddress Address \`json:"newAddress"\`
 }
 ",
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 3`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 4`] = `
 {
   "key": "schema.json",
   "value": "{
@@ -601,7 +664,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 4`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 5`] = `
 {
   "key": "concerto@1.0.0.xsd",
   "value": "<?xml version="1.0"?>
@@ -657,7 +720,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 5`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 6`] = `
 {
   "key": "concerto.xsd",
   "value": "<?xml version="1.0"?>
@@ -711,7 +774,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 6`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 7`] = `
 {
   "key": "org.acme.hr.xsd",
   "value": "<?xml version="1.0"?>
@@ -883,7 +946,7 @@ xmlns:concerto="concerto"
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 7`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 8`] = `
 {
   "key": "model.puml",
   "value": "@startuml
@@ -982,7 +1045,7 @@ org.acme.hr.ChangeOfAddress --|> concerto.Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 8`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 9`] = `
 {
   "key": "concerto@1.0.0.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -1058,7 +1121,7 @@ export type EventUnion = ICompanyEvent;
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 9`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 10`] = `
 {
   "key": "concerto.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -1089,7 +1152,7 @@ export interface IEvent extends IConcept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 10`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 11`] = `
 {
   "key": "org.acme.hr.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -1207,7 +1270,7 @@ export interface IChangeOfAddress extends ITransaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 11`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 12`] = `
 {
   "key": "concerto/Concept.java",
   "value": "// this code is generated and should not be modified
@@ -1222,7 +1285,7 @@ public abstract class Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 12`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 13`] = `
 {
   "key": "concerto/Asset.java",
   "value": "// this code is generated and should not be modified
@@ -1261,7 +1324,7 @@ public abstract class Asset extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 13`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 14`] = `
 {
   "key": "concerto/Participant.java",
   "value": "// this code is generated and should not be modified
@@ -1300,7 +1363,7 @@ public abstract class Participant extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 14`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 15`] = `
 {
   "key": "concerto/Transaction.java",
   "value": "// this code is generated and should not be modified
@@ -1315,7 +1378,7 @@ public abstract class Transaction extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 15`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 16`] = `
 {
   "key": "concerto/Event.java",
   "value": "// this code is generated and should not be modified
@@ -1330,7 +1393,7 @@ public abstract class Event extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 16`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 17`] = `
 {
   "key": "org/acme/hr/State.java",
   "value": "// this code is generated and should not be modified
@@ -1350,7 +1413,7 @@ public enum State {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 17`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 18`] = `
 {
   "key": "org/acme/hr/Address.java",
   "value": "// this code is generated and should not be modified
@@ -1405,7 +1468,7 @@ public class Address extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 18`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 19`] = `
 {
   "key": "org/acme/hr/Company.java",
   "value": "// this code is generated and should not be modified
@@ -1439,7 +1502,7 @@ public class Company extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 19`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 20`] = `
 {
   "key": "org/acme/hr/Department.java",
   "value": "// this code is generated and should not be modified
@@ -1459,7 +1522,7 @@ public enum Department {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 20`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 21`] = `
 {
   "key": "org/acme/hr/Equipment.java",
   "value": "// this code is generated and should not be modified
@@ -1493,7 +1556,7 @@ public abstract class Equipment extends Asset {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 21`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 22`] = `
 {
   "key": "org/acme/hr/LaptopMake.java",
   "value": "// this code is generated and should not be modified
@@ -1509,7 +1572,7 @@ public enum LaptopMake {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 22`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 23`] = `
 {
   "key": "org/acme/hr/Laptop.java",
   "value": "// this code is generated and should not be modified
@@ -1543,7 +1606,7 @@ public class Laptop extends Equipment {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 23`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 24`] = `
 {
   "key": "org/acme/hr/Person.java",
   "value": "// this code is generated and should not be modified
@@ -1626,7 +1689,7 @@ public abstract class Person extends Participant {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 24`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 25`] = `
 {
   "key": "org/acme/hr/Employee.java",
   "value": "// this code is generated and should not be modified
@@ -1709,7 +1772,7 @@ public class Employee extends Person {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 25`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 26`] = `
 {
   "key": "org/acme/hr/Contractor.java",
   "value": "// this code is generated and should not be modified
@@ -1750,7 +1813,7 @@ public class Contractor extends Person {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 26`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 27`] = `
 {
   "key": "org/acme/hr/Manager.java",
   "value": "// this code is generated and should not be modified
@@ -1784,7 +1847,7 @@ public class Manager extends Employee {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 27`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 28`] = `
 {
   "key": "org/acme/hr/CompanyEvent.java",
   "value": "// this code is generated and should not be modified
@@ -1803,7 +1866,7 @@ public class CompanyEvent extends Event {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 28`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 29`] = `
 {
   "key": "org/acme/hr/Onboarded.java",
   "value": "// this code is generated and should not be modified
@@ -1829,7 +1892,7 @@ public class Onboarded extends CompanyEvent {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 29`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 30`] = `
 {
   "key": "org/acme/hr/ChangeOfAddress.java",
   "value": "// this code is generated and should not be modified
@@ -1862,7 +1925,7 @@ public class ChangeOfAddress extends Transaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 30`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 31`] = `
 {
   "key": "model.gql",
   "value": "directive @resource on OBJECT | FIELD_DEFINITION
@@ -1987,7 +2050,7 @@ type ChangeOfAddress {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 31`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 32`] = `
 {
   "key": "concerto@1.0.0.cs",
   "value": "namespace AccordProject.Concerto;
@@ -2035,7 +2098,7 @@ public abstract class Event : Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 32`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 33`] = `
 {
   "key": "concerto.cs",
   "value": "namespace AccordProject.Concerto;
@@ -2079,7 +2142,7 @@ public abstract class Event : Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 33`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 34`] = `
 {
   "key": "org.acme.hr.cs",
   "value": "namespace org.acme.hr;
@@ -2210,7 +2273,7 @@ public class ChangeOfAddress : Transaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 34`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 35`] = `
 {
   "key": "concerto.csdl",
   "value": "<?xml version="1.0"?>
@@ -2243,7 +2306,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 35`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 36`] = `
 {
   "key": "org.acme.hr.csdl",
   "value": "<?xml version="1.0"?>
@@ -2391,7 +2454,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 36`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 37`] = `
 {
   "key": "model.mmd",
   "value": "classDiagram
@@ -2513,7 +2576,7 @@ ChangeOfAddress --|> Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 37`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 38`] = `
 {
   "key": "models.md",
   "value": "# Namespace org.acme.hr
@@ -2657,7 +2720,7 @@ ChangeOfAddress --|> Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 38`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 39`] = `
 {
   "key": "org.acme.hr.v.proto",
   "value": "syntax = "proto3";
@@ -2803,7 +2866,7 @@ message ChangeOfAddress {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 39`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 40`] = `
 {
   "key": "openapi.json",
   "value": "{
@@ -3538,7 +3601,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 40`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 41`] = `
 {
   "key": "concerto@1.0.0.avdl",
   "value": "@namespace("concerto@1.0.0")
@@ -3571,7 +3634,7 @@ protocol MyProtocol {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 41`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 42`] = `
 {
   "key": "concerto.avdl",
   "value": "@namespace("concerto")
@@ -3600,7 +3663,7 @@ protocol MyProtocol {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 42`] = `
+exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 43`] = `
 {
   "key": "org.acme.hr.avdl",
   "value": "@namespace("org.acme.hr")
@@ -3745,16 +3808,28 @@ protocol MyProtocol {
 
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 1`] = `
 {
-  "key": "main.go",
-  "value": "package main
-import "fmt"
-type Relationship struct {
-   Namespace string \`json:"namespace"\`
-   Type string \`json:"type"\`
-   Identifier string \`json:"identifier"\`
+  "key": "concerto@1.0.0.go",
+  "value": "// Package concerto_1_0_0 contians domain objects and was generated from concerto@1.0.0.
+package concerto_1_0_0
+import "time"
+   
+type Concept struct {
 }
-func main() {
-   fmt.Printf("Hello, world.")
+type Asset struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Participant struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Transaction struct {
+   Concept
+   Timestamp time.Time \`json:"$timestamp"\`
+}
+type Event struct {
+   Concept
+   Timestamp time.Time \`json:"$timestamp"\`
 }
 ",
 }
@@ -3762,9 +3837,38 @@ func main() {
 
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 2`] = `
 {
-  "key": "orgacme.hr_1.0.0.go",
-  "value": "package main
+  "key": "concerto.go",
+  "value": "// Package concerto contians domain objects and was generated from concerto.
+package concerto
+   
+type Concept struct {
+}
+type Asset struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Participant struct {
+   Concept
+   Identifier string \`json:"$identifier"\`
+}
+type Transaction struct {
+   Concept
+}
+type Event struct {
+   Concept
+}
+",
+}
+`;
+
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 3`] = `
+{
+  "key": "org.acme.hr@1.0.0.go",
+  "value": "// Package org_acme_hr_1_0_0 contians domain objects and was generated from org.acme.hr@1.0.0.
+package org_acme_hr_1_0_0
 import "time"
+import "concerto_1_0_0";
+   
 type State int
 const (
    MA State = 1 + iota
@@ -3774,6 +3878,19 @@ const (
    IL
    CA
 )
+type Address struct {
+   concerto_1_0_0.Concept
+   Street string \`json:"street"\`
+   City string \`json:"city"\`
+   State State \`json:"state"\`
+   ZipCode string \`json:"zipCode"\`
+   Country string \`json:"country"\`
+}
+type Company struct {
+   concerto_1_0_0.Concept
+   Name string \`json:"name"\`
+   Headquarters Address \`json:"headquarters"\`
+}
 type Department int
 const (
    Sales Department = 1 + iota
@@ -3784,7 +3901,7 @@ const (
    Design
 )
 type Equipment struct {
-   Asset
+   concerto_1_0_0.Asset
    SerialNumber string \`json:"serialNumber"\`
 }
 type LaptopMake int
@@ -3797,7 +3914,7 @@ type Laptop struct {
    Make LaptopMake \`json:"make"\`
 }
 type Person struct {
-   Participant
+   concerto_1_0_0.Participant
    Email string \`json:"email"\`
    FirstName string \`json:"firstName"\`
    LastName string \`json:"lastName"\`
@@ -3816,25 +3933,34 @@ type Employee struct {
    Department Department \`json:"department"\`
    OfficeAddress Address \`json:"officeAddress"\`
    CompanyAssets []Equipment \`json:"companyAssets"\`
+   Manager *Manager \`json:"manager"\`
 }
 type Contractor struct {
    Person
    Company Company \`json:"company"\`
+   Manager *Manager \`json:"manager"\`
 }
 type Manager struct {
    Employee
+   Reports []*Person \`json:"reports"\`
 }
 type CompanyEvent struct {
-   Event
+   concerto_1_0_0.Event
 }
 type Onboarded struct {
    CompanyEvent
+   Employee *Employee \`json:"employee"\`
+}
+type ChangeOfAddress struct {
+   concerto_1_0_0.Transaction
+   Person *Person \`json:"Person"\`
+   NewAddress Address \`json:"newAddress"\`
 }
 ",
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 3`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 4`] = `
 {
   "key": "schema.json",
   "value": "{
@@ -4344,7 +4470,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 4`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 5`] = `
 {
   "key": "concerto@1.0.0.xsd",
   "value": "<?xml version="1.0"?>
@@ -4400,7 +4526,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 5`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 6`] = `
 {
   "key": "concerto.xsd",
   "value": "<?xml version="1.0"?>
@@ -4454,7 +4580,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 6`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 7`] = `
 {
   "key": "org.acme.hr@1.0.0.xsd",
   "value": "<?xml version="1.0"?>
@@ -4626,7 +4752,7 @@ xmlns:concerto="concerto"
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 7`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 8`] = `
 {
   "key": "model.puml",
   "value": "@startuml
@@ -4725,7 +4851,7 @@ org.acme.hr.ChangeOfAddress --|> concerto.Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 8`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 9`] = `
 {
   "key": "concerto@1.0.0.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -4801,7 +4927,7 @@ export type EventUnion = ICompanyEvent;
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 9`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 10`] = `
 {
   "key": "concerto.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -4832,7 +4958,7 @@ export interface IEvent extends IConcept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 10`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 11`] = `
 {
   "key": "org.acme.hr@1.0.0.ts",
   "value": "/* eslint-disable @typescript-eslint/no-empty-interface */
@@ -4950,7 +5076,7 @@ export interface IChangeOfAddress extends ITransaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 11`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 12`] = `
 {
   "key": "concerto/Concept.java",
   "value": "// this code is generated and should not be modified
@@ -4965,7 +5091,7 @@ public abstract class Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 12`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 13`] = `
 {
   "key": "concerto/Asset.java",
   "value": "// this code is generated and should not be modified
@@ -5004,7 +5130,7 @@ public abstract class Asset extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 13`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 14`] = `
 {
   "key": "concerto/Participant.java",
   "value": "// this code is generated and should not be modified
@@ -5043,7 +5169,7 @@ public abstract class Participant extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 14`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 15`] = `
 {
   "key": "concerto/Transaction.java",
   "value": "// this code is generated and should not be modified
@@ -5058,7 +5184,7 @@ public abstract class Transaction extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 15`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 16`] = `
 {
   "key": "concerto/Event.java",
   "value": "// this code is generated and should not be modified
@@ -5073,7 +5199,7 @@ public abstract class Event extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 16`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 17`] = `
 {
   "key": "org/acme/hr/State.java",
   "value": "// this code is generated and should not be modified
@@ -5093,7 +5219,7 @@ public enum State {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 17`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 18`] = `
 {
   "key": "org/acme/hr/Address.java",
   "value": "// this code is generated and should not be modified
@@ -5148,7 +5274,7 @@ public class Address extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 18`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 19`] = `
 {
   "key": "org/acme/hr/Company.java",
   "value": "// this code is generated and should not be modified
@@ -5182,7 +5308,7 @@ public class Company extends Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 19`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 20`] = `
 {
   "key": "org/acme/hr/Department.java",
   "value": "// this code is generated and should not be modified
@@ -5202,7 +5328,7 @@ public enum Department {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 20`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 21`] = `
 {
   "key": "org/acme/hr/Equipment.java",
   "value": "// this code is generated and should not be modified
@@ -5236,7 +5362,7 @@ public abstract class Equipment extends Asset {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 21`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 22`] = `
 {
   "key": "org/acme/hr/LaptopMake.java",
   "value": "// this code is generated and should not be modified
@@ -5252,7 +5378,7 @@ public enum LaptopMake {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 22`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 23`] = `
 {
   "key": "org/acme/hr/Laptop.java",
   "value": "// this code is generated and should not be modified
@@ -5286,7 +5412,7 @@ public class Laptop extends Equipment {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 23`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 24`] = `
 {
   "key": "org/acme/hr/Person.java",
   "value": "// this code is generated and should not be modified
@@ -5369,7 +5495,7 @@ public abstract class Person extends Participant {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 24`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 25`] = `
 {
   "key": "org/acme/hr/Employee.java",
   "value": "// this code is generated and should not be modified
@@ -5452,7 +5578,7 @@ public class Employee extends Person {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 25`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 26`] = `
 {
   "key": "org/acme/hr/Contractor.java",
   "value": "// this code is generated and should not be modified
@@ -5493,7 +5619,7 @@ public class Contractor extends Person {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 26`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 27`] = `
 {
   "key": "org/acme/hr/Manager.java",
   "value": "// this code is generated and should not be modified
@@ -5527,7 +5653,7 @@ public class Manager extends Employee {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 27`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 28`] = `
 {
   "key": "org/acme/hr/CompanyEvent.java",
   "value": "// this code is generated and should not be modified
@@ -5546,7 +5672,7 @@ public class CompanyEvent extends Event {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 28`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 29`] = `
 {
   "key": "org/acme/hr/Onboarded.java",
   "value": "// this code is generated and should not be modified
@@ -5572,7 +5698,7 @@ public class Onboarded extends CompanyEvent {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 29`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 30`] = `
 {
   "key": "org/acme/hr/ChangeOfAddress.java",
   "value": "// this code is generated and should not be modified
@@ -5605,7 +5731,7 @@ public class ChangeOfAddress extends Transaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 30`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 31`] = `
 {
   "key": "model.gql",
   "value": "directive @resource on OBJECT | FIELD_DEFINITION
@@ -5730,7 +5856,7 @@ type ChangeOfAddress {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 31`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 32`] = `
 {
   "key": "concerto@1.0.0.cs",
   "value": "namespace AccordProject.Concerto;
@@ -5778,7 +5904,7 @@ public abstract class Event : Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 32`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 33`] = `
 {
   "key": "concerto.cs",
   "value": "namespace AccordProject.Concerto;
@@ -5822,7 +5948,7 @@ public abstract class Event : Concept {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 33`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 34`] = `
 {
   "key": "org.acme.hr@1.0.0.cs",
   "value": "namespace org.acme.hr;
@@ -5953,7 +6079,7 @@ public class ChangeOfAddress : Transaction {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 34`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 35`] = `
 {
   "key": "concerto.csdl",
   "value": "<?xml version="1.0"?>
@@ -5986,7 +6112,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 35`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 36`] = `
 {
   "key": "org.acme.hr.csdl",
   "value": "<?xml version="1.0"?>
@@ -6134,7 +6260,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 36`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 37`] = `
 {
   "key": "model.mmd",
   "value": "classDiagram
@@ -6256,7 +6382,7 @@ ChangeOfAddress --|> Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 37`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 38`] = `
 {
   "key": "models.md",
   "value": "# Namespace org.acme.hr@1.0.0
@@ -6400,7 +6526,7 @@ ChangeOfAddress --|> Transaction
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 38`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 39`] = `
 {
   "key": "org.acme.hr.v1_0_0.proto",
   "value": "syntax = "proto3";
@@ -6546,7 +6672,7 @@ message ChangeOfAddress {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 39`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 40`] = `
 {
   "key": "openapi.json",
   "value": "{
@@ -7281,7 +7407,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 40`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 41`] = `
 {
   "key": "concerto@1.0.0.avdl",
   "value": "@namespace("concerto@1.0.0")
@@ -7314,7 +7440,7 @@ protocol MyProtocol {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 41`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 42`] = `
 {
   "key": "concerto.avdl",
   "value": "@namespace("concerto")
@@ -7343,7 +7469,7 @@ protocol MyProtocol {
 }
 `;
 
-exports[`codegen #formats check we can convert all formats from namespace versioned CTO 42`] = `
+exports[`codegen #formats check we can convert all formats from namespace versioned CTO 43`] = `
 {
   "key": "org.acme.hr@1.0.0.avdl",
   "value": "@namespace("org.acme.hr@1.0.0")
