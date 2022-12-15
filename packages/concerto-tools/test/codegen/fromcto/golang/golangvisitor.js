@@ -204,7 +204,7 @@ describe('GoLangVisitor', function () {
 
             goVisit.visitModelFile(mockModelFileDefinition, param);
             param.fileWriter.openFile.withArgs('org.acme.go').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Package org_acme contians domain objects and was generated from org.acme.']);
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Package org_acme contains domain objects and was generated from Concerto namespace org.acme.']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org_acme']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import "time"']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;

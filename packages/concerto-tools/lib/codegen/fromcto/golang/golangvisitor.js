@@ -83,7 +83,7 @@ class GoLangVisitor {
     visitModelFile(modelFile, parameters) {
         const packageName = this.toGoPackageName(modelFile.getNamespace());
         parameters.fileWriter.openFile(`${modelFile.getNamespace()}.go`);
-        parameters.fileWriter.writeLine(0, `// Package ${packageName} contians domain objects and was generated from ${modelFile.getNamespace()}.`);
+        parameters.fileWriter.writeLine(0, `// Package ${packageName} contains domain objects and was generated from Concerto namespace ${modelFile.getNamespace()}.`);
         parameters.fileWriter.writeLine(0, `package ${packageName}`);
 
         if(this.containsDateTimeField(modelFile)) {

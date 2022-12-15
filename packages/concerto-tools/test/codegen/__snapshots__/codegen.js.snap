@@ -3,7 +3,7 @@
 exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 1`] = `
 {
   "key": "concerto@1.0.0.go",
-  "value": "// Package concerto_1_0_0 contians domain objects and was generated from concerto@1.0.0.
+  "value": "// Package concerto_1_0_0 contains domain objects and was generated from Concerto namespace concerto@1.0.0.
 package concerto_1_0_0
 import "time"
    
@@ -32,7 +32,7 @@ type Event struct {
 exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 2`] = `
 {
   "key": "concerto.go",
-  "value": "// Package concerto contians domain objects and was generated from concerto.
+  "value": "// Package concerto contains domain objects and was generated from Concerto namespace concerto.
 package concerto
    
 type Concept struct {
@@ -58,7 +58,7 @@ type Event struct {
 exports[`codegen #formats check we can convert all formats from namespace unversioned CTO 3`] = `
 {
   "key": "org.acme.hr.go",
-  "value": "// Package org_acme_hr contians domain objects and was generated from org.acme.hr.
+  "value": "// Package org_acme_hr contains domain objects and was generated from Concerto namespace org.acme.hr.
 package org_acme_hr
 import "time"
 import "concerto_1_0_0";
@@ -3809,7 +3809,7 @@ protocol MyProtocol {
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 1`] = `
 {
   "key": "concerto@1.0.0.go",
-  "value": "// Package concerto_1_0_0 contians domain objects and was generated from concerto@1.0.0.
+  "value": "// Package concerto_1_0_0 contains domain objects and was generated from Concerto namespace concerto@1.0.0.
 package concerto_1_0_0
 import "time"
    
@@ -3838,7 +3838,7 @@ type Event struct {
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 2`] = `
 {
   "key": "concerto.go",
-  "value": "// Package concerto contians domain objects and was generated from concerto.
+  "value": "// Package concerto contains domain objects and was generated from Concerto namespace concerto.
 package concerto
    
 type Concept struct {
@@ -3864,7 +3864,7 @@ type Event struct {
 exports[`codegen #formats check we can convert all formats from namespace versioned CTO 3`] = `
 {
   "key": "org.acme.hr@1.0.0.go",
-  "value": "// Package org_acme_hr_1_0_0 contians domain objects and was generated from org.acme.hr@1.0.0.
+  "value": "// Package org_acme_hr_1_0_0 contains domain objects and was generated from Concerto namespace org.acme.hr@1.0.0.
 package org_acme_hr_1_0_0
 import "time"
 import "concerto_1_0_0";
