@@ -209,7 +209,16 @@ class JSONPopulator {
             }
 
             // This throws if the type does not exist.
-            const classDeclaration = parameters.modelManager.getType(typeName);
+            let classDeclaration = parameters.modelManager.getType(typeName);
+
+            // It's possible that classDeclaration is abstract, however, if there's only one concrete
+            // subclass we can choose that instead
+            const subclasses = classDeclaration.getAssignableClassDeclarations()
+                .filter(clazz => !clazz.isAbstract());
+            if (subclasses.length === 1){
+                typeName = subclasses[0].getFullyQualifiedName();
+                classDeclaration = parameters.modelManager.getType(typeName);
+            }
 
             // create a new instance, using the identifier field name as the ID.
             let subResource = null;

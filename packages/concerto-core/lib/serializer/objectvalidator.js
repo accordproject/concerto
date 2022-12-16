@@ -120,6 +120,15 @@ class ObjectValidator {
 
         const obj = parameters.stack.pop();
 
+        if (!obj.$class){
+            // Choose the only concrete subclass if it exists
+            const subclasses = classDeclaration.getAssignableClassDeclarations()
+                .filter(clazz => !clazz.isAbstract());
+            if (subclasses.length === 1){
+                obj.$class = subclasses[0].getFullyQualifiedName();
+            }
+        }
+
         if(this.concerto.isIdentifiable(obj)) {
             parameters.rootResourceIdentifier = this.concerto.getFullyQualifiedIdentifier(obj);
         }
@@ -326,6 +335,13 @@ class ObjectValidator {
         else {
             // a field that points to a transaction, asset, participant...
             let classDeclaration = this.concerto.getModelManager().getType(field.getFullyQualifiedTypeName());
+            if (!obj.$class){
+                const subclasses = classDeclaration.getAssignableClassDeclarations()
+                    .filter(clazz => !clazz.isAbstract());
+                if (subclasses.length === 1){
+                    obj.$class = subclasses[0].getFullyQualifiedName();
+                }
+            }
             try {
                 classDeclaration = this.concerto.getModelManager().getType(obj.$class);
             } catch (err) {

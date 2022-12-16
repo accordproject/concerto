@@ -81,6 +81,29 @@ describe('ObjectValidator', function () {
             }).should.throw(/Missing concerto instance/);
         });
     });
+
+    describe('#visit', () => {
+        it('should infer $class when it can be determined from the context', () => {
+            const data = {
+                // $class : 'test.Vehicle',
+                color: 'red',
+                wheels : [{
+                    // $class : 'test.Wheel',
+                    brand : 'Michelin'
+                }],
+                owner: {
+                    // $class : 'test.Person',
+                    email: 'foo@bar.com'
+                }
+            };
+            const parameters = {
+                stack: new TypedStack(data),
+            };
+            objectValidator.visit(concerto.getModelManager().getType('test.Vehicle'), parameters);
+        });
+    });
+
+
     describe('#checkEnum', () => {
         it('should fail if instance is not an array', () => {
             const data = {

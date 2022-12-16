@@ -51,6 +51,7 @@ describe('Serializer', () => {
         o String participantId
         o String firstName
         o String lastName
+        o IAddress address optional
         }
 
         transaction SampleTransaction identified by transactionId {
@@ -59,7 +60,9 @@ describe('Serializer', () => {
         o String newValue
         }
 
-        concept Address {
+        abstract concept IAddress {}
+
+        concept Address extends IAddress {
             o String city
             o String country
             o Double elevation
@@ -410,6 +413,52 @@ describe('Serializer', () => {
             };
             const result = serializer.fromJSON(json);
             result.should.be.an.instanceOf(Resource);
+        });
+
+        it('should infer complex types where they are unambiguous', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norrice',
+                address: {
+                    // We deliberately omit this
+                    // $class: 'org.acme.sample.Address',
+                    city: 'Oxford',
+                    country: 'UK',
+                    elevation: 61.0,
+                }
+            };
+
+            const result = serializer.fromJSON(json);
+            result.should.be.an.instanceOf(Resource);
+        });
+
+        it('should fail to infer complex types where they are ambiguous', () => {
+            modelManager.addCTOModel(`
+            namespace org.acme.sample2
+
+            import org.acme.sample.IAddress
+
+            concept MyAddress extends IAddress {}
+
+            `);
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norrice',
+                address: {
+                    // We deliberately omit this
+                    // $class: 'org.acme.sample.Address',
+                    city: 'Oxford',
+                    country: 'UK',
+                    elevation: 61.0,
+                }
+            };
+
+            (() => serializer.fromJSON(json))
+                .should.throw('Cannot instantiate the abstract type "IAddress" in the "org.acme.sample" namespace.');
         });
 
         const json = {
