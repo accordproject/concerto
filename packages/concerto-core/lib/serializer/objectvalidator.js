@@ -121,7 +121,7 @@ class ObjectValidator {
         const obj = parameters.stack.pop();
 
         if (!obj.$class){
-            // Choose the only concrete subclass if it exists
+            // Choose the only concrete class/subclass if it exists
             const subclasses = classDeclaration.getAssignableClassDeclarations()
                 .filter(clazz => !clazz.isAbstract());
             if (subclasses.length === 1){

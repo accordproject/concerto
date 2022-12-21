@@ -212,7 +212,7 @@ class JSONPopulator {
             let classDeclaration = parameters.modelManager.getType(typeName);
 
             // It's possible that classDeclaration is abstract, however, if there's only one concrete
-            // subclass we can choose that instead
+            // class/subclass we can choose that instead
             const subclasses = classDeclaration.getAssignableClassDeclarations()
                 .filter(clazz => !clazz.isAbstract());
             if (subclasses.length === 1){
