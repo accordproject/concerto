@@ -15,6 +15,7 @@
 'use strict';
 
 const chai = require('chai');
+// eslint-disable-next-line no-unused-vars
 const should = chai.should();
 const sinon = require('sinon');
 
@@ -23,13 +24,10 @@ const GoLangVisitor = require('../../../../lib/codegen/fromcto/golang/golangvisi
 const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
 const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
 const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
-const ConceptDeclaration = require('@accordproject/concerto-core').ConceptDeclaration;
 const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const Field = require('@accordproject/concerto-core').Field;
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
-const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
 describe('GoLangVisitor', function () {
@@ -71,20 +69,13 @@ describe('GoLangVisitor', function () {
 
         it('should call visitClassDeclaration for a AssetDeclaration', () => {
             let thing = sinon.createStubInstance(AssetDeclaration);
-            thing.isAsset.returns(true);
+            thing.isClassDeclaration.returns(true);
             let mockSpecialVisit = sinon.stub(goVisit, 'visitClassDeclaration');
             mockSpecialVisit.returns('Duck');
 
             goVisit.visit(thing, param).should.deep.equal('Duck');
 
             mockSpecialVisit.calledWith(thing, param).should.be.ok;
-        });
-
-        it('should call nothing for a TransactionDeclaration', () => {
-            let thing = sinon.createStubInstance(TransactionDeclaration);
-            thing.isTransaction.returns(true);
-
-            should.equal(goVisit.visit(thing, param), undefined);
         });
 
         it('should call visitEnumDeclaration for a EnumDeclaration', () => {
@@ -96,13 +87,6 @@ describe('GoLangVisitor', function () {
             goVisit.visit(thing, param).should.deep.equal('Duck');
 
             mockSpecialVisit.calledWith(thing, param).should.be.ok;
-        });
-
-        it('should call nothing for a ConceptDeclaration', () => {
-            let thing = sinon.createStubInstance(ConceptDeclaration);
-            thing.isConcept.returns(true);
-
-            should.equal(goVisit.visit(thing, param), undefined);
         });
 
         it('should call visitClassDeclaration for a ClassDeclaration', () => {
@@ -127,13 +111,6 @@ describe('GoLangVisitor', function () {
             mockSpecialVisit.calledWith(thing, param).should.be.ok;
         });
 
-        it('should call nothing for a RelationshipDeclaration', () => {
-            let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing.isRelationship.returns(true);
-
-            should.equal(goVisit.visit(thing, param), undefined);
-        });
-
         it('should call visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
             thing.isEnumValue.returns(true);
@@ -156,7 +133,7 @@ describe('GoLangVisitor', function () {
 
     describe('visitModelManager', () => {
 
-        it('should write to the main.go file and call accept for each model file', () => {
+        it('should call accept for each model file', () => {
             let param = {
                 fileWriter: mockFileWriter
             };
@@ -172,9 +149,6 @@ describe('GoLangVisitor', function () {
             }]);
 
             goVisit.visitModelManager(mockModelManagerDefinition, param);
-            param.fileWriter.openFile.withArgs('main.go').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.callCount.should.deep.equal(10);
-            param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(goVisit, param).calledTwice.should.be.ok;
         });
     });
@@ -190,8 +164,6 @@ describe('GoLangVisitor', function () {
 
         it('should open the modelFile\'s namespace\'s .go file and write to it', () => {
             let acceptSpy = sinon.spy();
-            let mockToGoPackageName = sinon.stub(goVisit, 'toGoPackageName');
-            mockToGoPackageName.returns('space');
 
             let mockContainsDateTimeField = sinon.stub(goVisit, 'containsDateTimeField');
             mockContainsDateTimeField.returns(false);
@@ -199,6 +171,7 @@ describe('GoLangVisitor', function () {
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
             mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns('org.acme');
+            mockModelFileDefinition.getImports.returns([]);
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
             },
@@ -207,16 +180,13 @@ describe('GoLangVisitor', function () {
             }]);
 
             goVisit.visitModelFile(mockModelFileDefinition, param);
-            param.fileWriter.openFile.withArgs('space.go').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.withArgs(0, 'package main').calledOnce.should.be.ok;
+            param.fileWriter.openFile.withArgs('org.acme.go').calledOnce.should.be.ok;
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(goVisit, param).calledTwice.should.be.ok;
         });
 
         it('should open the modelFile\'s namespace\'s .go file and write to it importing time when needed', () => {
             let acceptSpy = sinon.spy();
-            let mockToGoPackageName = sinon.stub(goVisit, 'toGoPackageName');
-            mockToGoPackageName.returns('space');
 
             let mockContainsDateTimeField = sinon.stub(goVisit, 'containsDateTimeField');
             mockContainsDateTimeField.returns(true);
@@ -224,6 +194,7 @@ describe('GoLangVisitor', function () {
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
             mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns('org.acme');
+            mockModelFileDefinition.getImports.returns([]);
             mockModelFileDefinition.getAllDeclarations.returns([{
                 accept: acceptSpy
             },
@@ -232,9 +203,10 @@ describe('GoLangVisitor', function () {
             }]);
 
             goVisit.visitModelFile(mockModelFileDefinition, param);
-            param.fileWriter.openFile.withArgs('space.go').calledOnce.should.be.ok;
-            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'package main']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'import "time"']);
+            param.fileWriter.openFile.withArgs('org.acme.go').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '// Package org_acme contains domain objects and was generated from Concerto namespace org.acme.']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org_acme']);
+            param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, 'import "time"']);
             param.fileWriter.closeFile.calledOnce.should.be.ok;
             acceptSpy.withArgs(goVisit, param).calledTwice.should.be.ok;
         });
@@ -284,6 +256,7 @@ describe('GoLangVisitor', function () {
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Bob');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
@@ -304,18 +277,19 @@ describe('GoLangVisitor', function () {
             let mockClassDeclaration = sinon.createStubInstance(ClassDeclaration);
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getName.returns('Bob');
+            mockClassDeclaration.getFullyQualifiedName.returns('com.example.Bob');
             mockClassDeclaration.getOwnProperties.returns([{
                 accept: acceptSpy
             },
             {
                 accept: acceptSpy
             }]);
-            mockClassDeclaration.getSuperType.returns('Person');
+            mockClassDeclaration.getSuperType.returns('org.acme.Person');
 
             goVisit.visitClassDeclaration(mockClassDeclaration, param);
 
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'type Bob struct {']);
-            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'Person']);
+            param.fileWriter.writeLine.getCall(1).args.should.deep.equal([1, 'org_acme.Person']);
             param.fileWriter.writeLine.getCall(2).args.should.deep.equal([0, '}']);
             acceptSpy.withArgs(goVisit, param).calledTwice.should.be.ok;
         });
@@ -411,38 +385,6 @@ describe('GoLangVisitor', function () {
         });
     });
 
-    describe('visitRelationship', () => {
-        let param;
-
-        beforeEach(() => {
-            param = {
-                fileWriter: mockFileWriter
-            };
-        });
-
-        it('should write a line defining a relationship', () => {
-            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship.isRelationship.returns(true);
-            mockRelationship.isArray.returns(false);
-            mockRelationship.getName.returns('bob');
-
-            goVisit.visitRelationship(mockRelationship, param);
-
-            param.fileWriter.writeLine.withArgs(1, 'Bob Relationship `json:"bob"`').calledOnce.should.be.ok;
-        });
-
-        it('should write a line defining a relationship and add [] if an array', () => {
-            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship.isRelationship.returns(true);
-            mockRelationship.isArray.returns(true);
-            mockRelationship.getName.returns('bob');
-
-            goVisit.visitRelationship(mockRelationship, param);
-
-            param.fileWriter.writeLine.withArgs(1, 'Bob []Relationship `json:"bob"`').calledOnce.should.be.ok;
-        });
-    });
-
     describe('containsDateTimeField', () => {
         it('should return true if the model file contains a data and time field', () => {
             let mockModelFileDefinition = sinon.createStubInstance(ModelFile);
@@ -512,8 +454,8 @@ describe('GoLangVisitor', function () {
     });
 
     describe('toGoPackageName', () => {
-        it('should replace first dot in the passed param with nothing', () => {
-            goVisit.toGoPackageName('some.dotted.sequence').should.deep.equal('somedotted.sequence');
+        it('should replace dots in the passed param with underscore', () => {
+            goVisit.toGoPackageName('some.dotted.sequence').should.deep.equal('some_dotted_sequence');
         });
     });
 });

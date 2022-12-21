@@ -39,28 +39,22 @@ class GoLangVisitor {
             return this.visitModelManager(thing, parameters);
         } else if (thing.isModelFile?.()) {
             return this.visitModelFile(thing, parameters);
-        } else if (thing.isAsset?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isTransaction?.()) {
-            //  return this.visitTransactionDeclaration(thing, parameters);
         } else if (thing.isEnum?.()) {
             return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing.isConcept?.()) {
-            //return this.visitConceptDeclaration(thing, parameters);
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
             return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            //  return this.visitRelationshipDeclaration(thing, parameters);
+        } else if(thing.isRelationship?.()) {
+            return this.visitRelationship(thing, parameters);
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else if (thing.isScalarDeclaration?.()) {
             return;
         } else {
-            throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: null }));
+            throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: false, depth: 1 }));
         }
     }
 
@@ -72,20 +66,7 @@ class GoLangVisitor {
      * @private
      */
     visitModelManager(modelManager, parameters) {
-        parameters.fileWriter.openFile('main.go');
-        parameters.fileWriter.writeLine(0, 'package main');
-        parameters.fileWriter.writeLine(0, 'import "fmt"');
-        parameters.fileWriter.writeLine(0, 'type Relationship struct {' );
-        parameters.fileWriter.writeLine(1, 'Namespace string `json:"namespace"`' );
-        parameters.fileWriter.writeLine(1, 'Type string `json:"type"`' );
-        parameters.fileWriter.writeLine(1, 'Identifier string `json:"identifier"`' );
-        parameters.fileWriter.writeLine(0, '}' );
-        parameters.fileWriter.writeLine(0, 'func main() {');
-        parameters.fileWriter.writeLine(1, 'fmt.Printf("Hello, world.")');
-        parameters.fileWriter.writeLine(0, '}');
-        parameters.fileWriter.closeFile();
-
-        modelManager.getModelFiles().forEach((modelFile) => {
+        modelManager.getModelFiles(true).forEach((modelFile) => {
             modelFile.accept(this,parameters);
         });
         return null;
@@ -99,15 +80,22 @@ class GoLangVisitor {
      * @private
      */
     visitModelFile(modelFile, parameters) {
-        // we put all the code into the main package, but we
-        // seperate out into multiple files using the namespaces
-        const { escapedNamespace } = ModelUtil.parseNamespace(modelFile.getNamespace());
-        parameters.fileWriter.openFile(this.toGoPackageName(escapedNamespace) + '.go');
-        parameters.fileWriter.writeLine(0, 'package main');
+        const packageName = this.toGoPackageName(modelFile.getNamespace());
+        parameters.fileWriter.openFile(`${modelFile.getNamespace()}.go`);
+        parameters.fileWriter.writeLine(0, `// Package ${packageName} contains domain objects and was generated from Concerto namespace ${modelFile.getNamespace()}.`);
+        parameters.fileWriter.writeLine(0, `package ${packageName}`);
 
         if(this.containsDateTimeField(modelFile)) {
             parameters.fileWriter.writeLine(0, 'import "time"' );
         }
+
+        modelFile.getImports().map(importString => ModelUtil.getNamespace(importString)).filter(namespace => namespace !== modelFile.getNamespace()) // Skip own namespace.
+            .filter((v, i, a) => a.indexOf(v) === i) // Remove any duplicates from direct imports
+            .forEach(namespace => {
+                parameters.fileWriter.writeLine(0, `import "${this.toGoPackageName(namespace)}";`);
+            });
+
+        parameters.fileWriter.writeLine(1, '');
 
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
@@ -151,7 +139,10 @@ class GoLangVisitor {
 
         //embed the super-type, because Go Lang does not have 'extends'
         if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(1, ModelUtil.getShortName(classDeclaration.getSuperType()));
+            let superPackageName = ModelUtil.getNamespace(classDeclaration.getSuperType());
+            let thisPackageName = ModelUtil.getNamespace(classDeclaration.getFullyQualifiedName());
+            let useName = superPackageName === thisPackageName ? '' : `${this.toGoPackageName(superPackageName)}.`;
+            parameters.fileWriter.writeLine(1, `${useName}${ModelUtil.getShortName(classDeclaration.getSuperType())}`);
         }
 
         classDeclaration.getOwnProperties().forEach((property) => {
@@ -177,7 +168,29 @@ class GoLangVisitor {
         }
 
         // we export all fields by capitalizing them
-        parameters.fileWriter.writeLine(1, ModelUtil.capitalizeFirstLetter(field.getName()) + ' ' + array + this.toGoType(field.getType()) + ' `json:"' + field.getName() + '"`' );
+        // we strip $ as it is not legal in Go
+        const name = field.getName().startsWith('$') ? field.getName().substring(1) : field.getName();
+        parameters.fileWriter.writeLine(1, ModelUtil.capitalizeFirstLetter(name) + ' ' + array + this.toGoType(field.getType()) + ' `json:"' + field.getName() + '"`' );
+        return null;
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Relationship} relationship - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitRelationship(relationship, parameters) {
+        let array = '';
+
+        if(relationship.isArray()) {
+            array = '[]';
+        }
+
+        // we export all fields by capitalizing them
+        // relationships become pointers to types
+        parameters.fileWriter.writeLine(1, `${ModelUtil.capitalizeFirstLetter(relationship.getName())} ${array}*${this.toGoType(relationship.getType())} \`json:"${relationship.getName()}"\``);
         return null;
     }
 
@@ -205,25 +218,6 @@ class GoLangVisitor {
     }
 
     /**
-     * Visitor design pattern
-     * @param {Relationship} relationship - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitRelationship(relationship, parameters) {
-        let array = '';
-
-        if(relationship.isArray()) {
-            array = '[]';
-        }
-
-        // we export all relationships by capitalizing them
-        parameters.fileWriter.writeLine(1, ModelUtil.capitalizeFirstLetter(relationship.getName()) + ' ' + array + 'Relationship `json:"' + relationship.getName() + '"`' );
-        return null;
-    }
-
-    /**
      * Returns true if the ModelFile contains a class that has a DateTime
      * field.
      * @param {ModelFile} modelFile  - the modelFile
@@ -239,6 +233,9 @@ class GoLangVisitor {
             let fields = classDecl.getProperties();
             for(let i=0; i < fields.length; i++) {
                 let field = fields[i];
+                if(field.isTypeScalar?.()) {
+                    field = field.getScalarField();
+                }
                 if(field.getType() === 'DateTime') {
                     return true;
                 }
@@ -275,12 +272,13 @@ class GoLangVisitor {
 
     /**
      * Converts a Concerto namespace to a Go package name.
+     * See: https://rakyll.org/style-packages/
      * @param {string} namespace  - the concerto type
      * @return {string} the corresponding package name in Go Lang
      * @private
      */
     toGoPackageName(namespace) {
-        return namespace.replace('.', '');
+        return namespace.replace(/@/g, '_').replace(/\./g, '_');
     }
 }
 
