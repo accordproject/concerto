@@ -15,6 +15,9 @@
 'use strict';
 
 const { TypedStack } = require('@accordproject/concerto-util');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 const Globalize = require('./globalize');
 const JSONGenerator = require('./serializer/jsongenerator');
 const JSONPopulator = require('./serializer/jsonpopulator');
@@ -59,7 +62,7 @@ class Serializer {
 
         this.factory = factory;
         this.modelManager = modelManager;
-        this.defaultOptions = Object.assign({}, baseDefaultOptions, options || {});
+        this.defaultOptions = { ...baseDefaultOptions, ...options };
     }
 
     /**
@@ -68,7 +71,7 @@ class Serializer {
      */
     setDefaultOptions(newDefaultOptions) {
         // Combine the specified default options with the base default
-        this.defaultOptions = Object.assign({}, baseDefaultOptions, newDefaultOptions);
+        this.defaultOptions = { ...baseDefaultOptions, ...newDefaultOptions };
     }
 
     /**
@@ -107,8 +110,15 @@ class Serializer {
         parameters.dedupeResources = new Set();
         const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
 
+        options = {
+            ...this.defaultOptions,
+            ...options,
+            // if there is no explicit offset, we use Z
+            // i.e. the default offset is only used for parsing ambiguous dates
+            utcOffset: options?.utcOffset
+        };
+
         // validate the resource against the model
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
         if(options.validate) {
             const validator = new ResourceValidator(options);
             classDeclaration.accept(validator, parameters);
@@ -149,7 +159,7 @@ class Serializer {
      */
     fromJSON(jsonObject, options) {
         // set default options
-        options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
+        options = { ...this.defaultOptions, ...options };
 
         if (options && options.ergo === true) {
             const theClass = jsonObject.$class.$coll[0];
@@ -191,7 +201,12 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.ergo === true, options.utcOffset);
+
+        const utcOffset = options.utcOffset;
+        const acceptResourcesForRelationships = options.acceptResourcesForRelationships === true;
+        const ergo = options.ergo === true;
+
+        const populator = new JSONPopulator(acceptResourcesForRelationships, ergo, utcOffset);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model

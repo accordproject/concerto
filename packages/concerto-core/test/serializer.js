@@ -420,9 +420,10 @@ describe('Serializer', () => {
         const dateTests = [
             // Test Structure
             // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
+            // NOTE: the tests explicitly set the local offset to be +01:00
 
             // RFC 3339 & ISO 8601
-            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000+01:00'],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
             ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000-05:00', '-05:00'],
@@ -456,23 +457,33 @@ describe('Serializer', () => {
             ['2022-11-28T01:02:03.987z', 'Lowercase z'],
 
             // ISO 8601
-            ['2022', 'YYYY', '2022-01-01T00:00:00.000Z'],
-            ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+            ['2022', 'YYYY', '2022-01-01T00:00:00.000+01:00'],
+            ['2022', 'YYYY', '2022-01-01T00:00:00.000Z', 0],
+            ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000+01:00'],
+            ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
 
             // ISO 8601 & HTML Living Standard
-            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss'],
-            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.987-05:00' ,'-05:00'],
-            ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000+01:00'],
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 'Z'],
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 0],
+            ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000-05:00', '-05:00'],
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', '2022-11-28T01:02:03.987+01:00'],
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', undefined, 0],
+            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', '2022-11-28T01:02:03.987-05:00' ,'-05:00'],
+            ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000+01:00'],
             ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000-05:00', '-05:00'],
 
             // HTML Living Standard
-            ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
+            ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-28T01:02:03.987+01:00'],
             ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-28T01:02:03.987-05:00', '-05:00'],
         ];
         dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
             it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
+                // Simulate running the tests in UTC+1, i.e. a non-zero local offset
+                serializer.setDefaultOptions({ utcOffset: 60 });
+
                 json.date = dateValue;
-                const options = { utcOffset };
+                const options = utcOffset !== undefined ? { utcOffset } : {};
                 const result = serializer.toJSON(serializer.fromJSON(json, options), options);
                 result.date.should.equal(expected || '2022-11-28T01:02:03.987Z');
             });

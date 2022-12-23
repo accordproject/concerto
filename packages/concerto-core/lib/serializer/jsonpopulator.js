@@ -268,8 +268,8 @@ class JSONPopulator {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             // Unqualified Local Time, i.e. no zone designation in string
             } else if (!json.match(/(Z|(\+|-)\d{2}:\d{2}?)$/i)){
-                // Default to UTC
-                const offset = this.utcOffset !== undefined ? this.utcOffset : 0;
+                // Default to local offset
+                const offset = this.utcOffset !== undefined ? this.utcOffset : dayjs().utcOffset();
                 result = dayjs.utc(json).utcOffset(offset, true);
             // Otherwise, all of the offset information is in the string
             } else {
