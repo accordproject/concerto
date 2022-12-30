@@ -195,6 +195,11 @@ class Field extends Property {
         }
 
         fieldAst.name = this.ast.name;
+
+        if (this.getDefaultValue()) {
+            fieldAst.defaultValue = this.getDefaultValue();
+        }
+
         this.scalarField = new Field(this.getParent(), fieldAst);
         return this.scalarField;
     }

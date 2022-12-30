@@ -351,6 +351,71 @@
                 "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
                 "name": "ssn"
             }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "validator": {
+                "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+                "pattern": "\\d{3}-\\d{2}-\\{4}+",
+                "flags": ""
+            },
+            "name": "ExtendedSSN"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "PersonWithExtendedSsn",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "ssn",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "ExtendedSSN"
+                    },
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": "999-99-9999"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "givenName",
+                    "isArray": false,
+                    "isOptional": false
+                }
+            ],
+            "identified": {
+                "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+                "name": "ssn"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "PersonWithOverriddenExtendedSsn",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "ssn",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "SSN"
+                    },
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": "999-99-9999"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "givenName",
+                    "isArray": false,
+                    "isOptional": false
+                }
+            ],
+            "identified": {
+                "$class": "concerto.metamodel@1.0.0.IdentifiedBy",
+                "name": "ssn"
+            }
         }
     ]
 }

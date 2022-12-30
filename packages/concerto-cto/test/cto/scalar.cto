@@ -66,3 +66,15 @@ concept Person identified by ssn {
   o SSN ssn
   o String givenName
 }
+
+scalar ExtendedSSN extends String regex=/\d{3}-\d{2}-\{4}+/
+
+concept PersonWithExtendedSsn identified by ssn {
+  o ExtendedSSN ssn default="999-99-9999"
+  o String givenName
+}
+
+concept PersonWithOverriddenExtendedSsn identified by ssn {
+  o SSN ssn default="999-99-9999"
+  o String givenName
+}
