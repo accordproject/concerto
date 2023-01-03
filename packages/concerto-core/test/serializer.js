@@ -427,29 +427,11 @@ describe('Serializer', () => {
 
         describe('legacy datetime formats', () => {
 
-            // See the visualization at https://ijmacd.github.io/rfc3339-iso8601/
-            const dateTests = [
             // Test Structure
             // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
-
-                // Component Design goals
-                // CLI and above: Respect user's local offset
-                // API: Explicitly define and publish the assumed offset (e.g. Z)
-                // SDK: Allow both options above, and be backwards compatible.
-
-
-                // WIP Rules
-                // Rule 1: When an offset is not specified in the input string, assume the local offset.
-                // Rule 2: When a target offset is specified, format the date in the target offset.
-                // Rule 3a: When a target offset is not specified, format the date as Z.
-                // Rule 3b: When a target offset is not specified, format the date as the local offset ().
-
-                // Plan
-                // 1. Add an opt-in flag to drop support for unqualified dates/times
-                // 2. Same flag should treat the offset param as a rendering target
-
+            // For a comparison of formats see the visualization at https://ijmacd.github.io/rfc3339-iso8601/
+            const dateTests = [
                 // RFC 3339 & ISO 8601
-                // Current Behaviour
                 ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
                 ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
                 ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
@@ -508,9 +490,6 @@ describe('Serializer', () => {
             ];
             dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
                 it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
-                // Simulate running the tests in UTC+1, i.e. a non-zero local offset
-                // serializer.setDefaultOptions({ utcOffset: 60 });
-
                     json.date = dateValue;
                     const options = utcOffset !== undefined ? { utcOffset } : {};
                     const result = serializer.toJSON(serializer.fromJSON(json, options), options);
