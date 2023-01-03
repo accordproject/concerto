@@ -40,6 +40,8 @@ describe('Serializer', () => {
         modelManager.addCTOModel(`
         namespace org.acme.sample
 
+        scalar PostalCode extends String
+
         asset SampleAsset identified by assetId {
         o String assetId
         --> SampleParticipant owner
@@ -63,6 +65,7 @@ describe('Serializer', () => {
             o String city
             o String country
             o Double elevation
+            o PostalCode postcode optional
         }
 
         concept DateTimeTest {
@@ -218,12 +221,14 @@ describe('Serializer', () => {
             address.city = 'Winchester';
             address.country = 'UK';
             address.elevation = 3.14;
+            address.postcode = 'SO21 2JN';
             const json = serializer.toJSON(address);
             json.should.deep.equal({
                 $class: 'org.acme.sample.Address',
                 country: 'UK',
                 elevation: 3.14,
-                city: 'Winchester'
+                city: 'Winchester',
+                postcode: 'SO21 2JN',
             });
         });
 
@@ -316,13 +321,15 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
                 country: 'UK',
-                elevation: 3.14
+                elevation: 3.14,
+                postcode: 'SO21 2JN',
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.city.should.equal('Winchester');
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
+            resource.postcode.should.equal('SO21 2JN');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {
