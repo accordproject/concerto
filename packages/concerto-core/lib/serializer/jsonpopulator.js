@@ -87,16 +87,13 @@ class JSONPopulator {
      * place of relationships, false by default.
      * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
+     * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset) {
+    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.ergo = ergo;
-
-        // 0 is a valid offset, but is falsy in JS
-        if (utcOffset !== undefined){
-            const normalizedUtcOffset = dayjs.utc().utcOffset(utcOffset).utcOffset();
-            this.utcOffset =  normalizedUtcOffset;
-        }
+        this.utcOffset = utcOffset || 0; // Defaults to UTC
+        this.strictQualifiedDateTimes = strictQualifiedDateTimes;
     }
 
     /**
@@ -261,22 +258,16 @@ class JSONPopulator {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            // Yearless dates from the HTML Living Standard are supported by DayJS and JS Date
-            // however, their behaviour is not stable in a distributed system with different
-            // offsets. Specifically, parsing does not respect the local offset.
-            } else if (json.match(/^(--)?\d{2}-\d{2}$/)) {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            // Unqualified Local Time, i.e. no zone designation in string
-            } else if (!json.match(/(Z|(\+|-)\d{2}:\d{2}?)$/i)){
-                // Default to local offset
-                const offset = this.utcOffset !== undefined ? this.utcOffset : dayjs().utcOffset();
-                result = dayjs.utc(json).utcOffset(offset, true);
-            // Otherwise, all of the offset information is in the string
-            } else {
-                result = dayjs.utc(json);
+            } else if (!this.strictQualifiedDateTimes){
+                result = dayjs.utc(json).utcOffset(this.utcOffset);
+            } else if (this.strictQualifiedDateTimes){
+                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
+                    result = dayjs.utc(json);
+                } else {
+                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+                }
             }
-
-            if (!result.isValid()) {
+            if (!result || !result.isValid()) {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }

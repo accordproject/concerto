@@ -14,10 +14,6 @@
 
 'use strict';
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
-
 const Resource = require('../model/resource');
 const Typed = require('../model/typed');
 const ModelUtil = require('../modelutil');
@@ -55,12 +51,7 @@ class JSONGenerator {
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
         this.ergo = ergo;
-
-        // 0 is a valid offset, but is falsy in JS
-        if (utcOffset !== undefined){
-            const normalizedUtcOffset = dayjs.utc().utcOffset(utcOffset).utcOffset();
-            this.utcOffset =  normalizedUtcOffset;
-        }
+        this.utcOffset = utcOffset || 0;
     }
 
     /**
@@ -223,16 +214,12 @@ class JSONGenerator {
         switch (field.getType()) {
         case 'DateTime':
         {
+            const objWithOffset = obj.utc().utcOffset(this.utcOffset);
             if (this.ergo) {
-                return obj;
+                return objWithOffset;
             } else {
-                // Render the date using the explicitly provided offset
-                if (this.utcOffset !== undefined && this.utcOffset !== obj.utcOffset()) {
-                    const inZ = this.utcOffset === 0;
-                    return obj.utcOffset(this.utcOffset).format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
-                }
-                const inZ = obj.utcOffset() === 0;
-                return obj.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
+                const inZ = objWithOffset.utcOffset() === 0;
+                return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
             }
         }
         case 'Integer':
