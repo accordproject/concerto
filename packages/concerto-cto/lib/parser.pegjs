@@ -140,7 +140,7 @@ SingleLineComment
   = "//" (!LineTerminator SourceCharacter)*
 
 Identifier
-  = !ReservedWord name:IdentifierName { return name; }
+  = name:IdentifierName { return name; }
 
 IdentifierName "identifier"
   = first:IdentifierStart rest:IdentifierPart* {
@@ -152,6 +152,7 @@ IdentifierName "identifier"
 
 IdentifierStart
   = UnicodeLetter
+  / UnicodeDigit
   / "$"
   / "_"
   / "\\" sequence:UnicodeEscapeSequence { return sequence; }
@@ -159,7 +160,6 @@ IdentifierStart
 IdentifierPart
   = IdentifierStart
   / UnicodeCombiningMark
-  / UnicodeDigit
   / UnicodeConnectorPunctuation
   / "\u200C"
   / "\u200D"

@@ -64,6 +64,91 @@ describe('parser', () => {
             }
         );
     });
+
+    describe('identifiers', () => {
+
+        const acceptedIdentifiers = [
+            'a',
+            'abc',
+            'a123',
+            '$class',
+            '_class',
+            'foo$bar',
+            'foo_bar',
+            'nully',
+            'αβγδεζηθικλμνξοπρσςτυφχψω',
+            'ᾩ',
+            '\u03C9', // escaped ᾧ
+            '\u03C9\u03C9', // escaped ᾧᾧ
+            'foo\u03C9bar',
+            'ĦĔĽĻŎ',
+            '〱〱〱〱',
+            'जावास्क्रिप्ट',
+            'KingGeorgeⅦ',
+            'true',
+            'false',
+            'null',
+            '123',
+        ];
+        acceptedIdentifiers.forEach(id => {
+
+            it(`Should parse identifier '${id}'`, () => {
+                const content = `namespace ${id}
+            concept ${id} {
+                o String ${id}
+            }`;
+                const mm = Parser.parse(content);
+                mm.namespace.should.equal(id);
+                mm.declarations[0].name.should.equal(id);
+                mm.declarations[0].properties[0].name.should.equal(id);
+            });
+        });
+
+        const rejectedNamespaceIdentifiers = [
+            '',
+            'foo bar',
+            'foo\u0020bar', // Escaped space
+            'foo-bar',
+            'foo‐bar', // U+2010 HYPHEN'
+            'foo−bar', // U+2212 MINUS
+            'foo|bar',
+            'foo@bar',
+            'foo#bar',
+            'foo/bar',
+            'foo>bar',
+        ];
+        const rejectedIdentifiers = [
+            ...rejectedNamespaceIdentifiers,
+            'foo.bar',
+        ];
+        rejectedNamespaceIdentifiers.forEach(id => {
+            it(`Should not parse identifier '${id}' for namespace`, () => {
+                const content = `namespace ${id}`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+        });
+        rejectedIdentifiers.forEach(id => {
+            it(`Should not parse identifier '${id}' for concept`, () => {
+                const content = `namespace com.test
+            concept ${id} {}`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+
+            it(`Should not parse identifier '${id}' for property`, () => {
+                const content = `namespace com.test
+            concept Test {
+                o String ${id}
+            }`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+        });
+    });
 });
 
 describe('parser-exception', () => {

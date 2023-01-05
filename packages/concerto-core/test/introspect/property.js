@@ -45,15 +45,13 @@ describe('Property', () => {
             }).should.throw(/No name for type/);
         });
 
-        it('throw an error for a reserved name', () => {
-            (() => {
-                new Property(mockClassDeclaration, {
-                    $class: `${MetaModelNamespace}.StringProperty`,
-                    name: 'null'
-                });
-            }).should.throw(/Validator error for field 'name'. 'null' is a reserved name./);
+        it('should not throw for an identifier named null', () => {
+            let p = new Property(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.StringProperty`,
+                name: 'null'
+            });
+            p.name.should.equal('null');
         });
-
 
         it('should save the incoming property type', () => {
             let p = new Property(mockClassDeclaration, {
