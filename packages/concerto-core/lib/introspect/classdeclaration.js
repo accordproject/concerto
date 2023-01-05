@@ -216,7 +216,7 @@ class ClassDeclaration extends Decorated {
         const uniqueNames = [...new Set(declarationNames)];
 
         if (uniqueNames.length !== declarationNames.length) {
-            const duplicateElements = declarationNames.filter((item, index) => declarationNames.indexOf(item) !== index)
+            const duplicateElements = declarationNames.filter((item, index) => declarationNames.indexOf(item) !== index);
             throw new IllegalModelException(`Duplicate class name ${duplicateElements[0]}`);
         }
 
