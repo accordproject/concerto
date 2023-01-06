@@ -387,6 +387,5 @@ describe('concerto', () => {
                 concerto.validate(obj);
             }).should.throw(/The class "org.accordproject.test.Person" is abstract and should not contain an instance./);
         });
-
     });
 });

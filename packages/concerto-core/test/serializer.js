@@ -40,6 +40,8 @@ describe('Serializer', () => {
         modelManager.addCTOModel(`
         namespace org.acme.sample
 
+        scalar PostalCode extends String
+
         asset SampleAsset identified by assetId {
         o String assetId
         --> SampleParticipant owner
@@ -63,6 +65,7 @@ describe('Serializer', () => {
             o String city
             o String country
             o Double elevation
+            o PostalCode postcode optional
         }
 
         concept DateTimeTest {
@@ -218,12 +221,14 @@ describe('Serializer', () => {
             address.city = 'Winchester';
             address.country = 'UK';
             address.elevation = 3.14;
+            address.postcode = 'SO21 2JN';
             const json = serializer.toJSON(address);
             json.should.deep.equal({
                 $class: 'org.acme.sample.Address',
                 country: 'UK',
                 elevation: 3.14,
-                city: 'Winchester'
+                city: 'Winchester',
+                postcode: 'SO21 2JN',
             });
         });
 
@@ -316,13 +321,15 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
                 country: 'UK',
-                elevation: 3.14
+                elevation: 3.14,
+                postcode: 'SO21 2JN',
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
             resource.city.should.equal('Winchester');
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
+            resource.postcode.should.equal('SO21 2JN');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {
@@ -416,77 +423,196 @@ describe('Serializer', () => {
             $class : 'org.acme.sample.DateTimeTest',
         };
 
-        // See the visualization at https://ijmacd.github.io/rfc3339-iso8601/
-        const dateTests = [
-            // Intersection RFC 3339 & ISO 8601
-            ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
-            ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z'],
-            ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
-            ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
-            ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
-            ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:mm:ss.SSSZ'],
-            ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:mm:ss+HH:mm', '2022-11-27T17:02:03.000Z'],
-            ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:mm:ss.SSS+HH:mm', '2022-11-27T17:02:03.987Z'],
-            ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS+HH:mm', '2022-11-27T17:02:03.987Z'],
-            ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
-            ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:mm:ss.SSS-HH:mm', '2022-11-28T09:02:03.987Z'],
-            ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+        const DEFAULT_EXPECTED_VALUE =  '2022-11-28T01:02:03.987Z';
 
-            // Tests below this line are accepted but fall outside the specification for Concerto
-            // Future failures of these tests are not considered breaking changes.
+        describe('legacy datetime formats', () => {
 
-            ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
+            // Test Structure
+            // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
+            // For a comparison of formats see the visualization at https://ijmacd.github.io/rfc3339-iso8601/
+            const dateTests = [
+                // RFC 3339 & ISO 8601
+                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 'Z'],
+                ['2022-11-28', 'YYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
+                ['2022-11-28', 'YYYY-MM-DD', '2022-11-27T19:00:00.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 'Z'],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 0],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-27T20:02:03.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03-05:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T01:02:03.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
+                ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
+                ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
+                ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:mm:ss.SSSZ'],
+                ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:mm:ss+HH:mm', '2022-11-27T17:02:03.000Z'],
+                ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:mm:ss.SSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+                ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+                ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
+                ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:mm:ss.SSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+                ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS-HH:mm', '2022-11-28T09:02:03.987Z'],
 
-            // RFC 3339 && HTML Living Standard
-            ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ'],
+                // Tests below this line are accepted but fall outside the specification for Concerto
+                // Future failures of these tests are not considered breaking changes.
 
-            // RFC 3339
-            ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
-            ['2022-11-28T01:02:03.987z', 'Lowercase z'],
+                // Truncated nanoseconds
+                ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
 
-            // ISO 8601
-            ['2022', 'YYYY', '2022-01-01T00:00:00.000Z'],
-            ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+                // RFC 3339 && HTML Living Standard
+                ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ'],
 
-            // ISO 8601 & HTML Living Standard
-            ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss'],
-            ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
+                // RFC 3339
+                ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
+                ['2022-11-28T01:02:03.987z', 'Lowercase z'],
 
-            // HTML Living Standard
-            ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
-            ['--11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
-            ['11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
+                // ISO 8601
+                ['2022', 'YYYY', '2022-01-01T00:00:00.000Z'],
+                ['2022', 'YYYY', '2022-01-01T00:00:00.000Z', 0],
+                ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z'],
+                ['+002022-11-28', '+YYYYYY-MM-DD', '2022-11-28T00:00:00.000Z', 0],
 
-        ];
+                // ISO 8601 & HTML Living Standard
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 'Z'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-28T01:02:03.000Z', 0],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss', '2022-11-27T20:02:03.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', DEFAULT_EXPECTED_VALUE, 0],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS', '2022-11-27T20:02:03.987-05:00' ,'-05:00'],
+                ['2022-11', 'YYYY-MM', '2022-11-01T00:00:00.000Z'],
+                ['2022-11', 'YYYY-MM', '2022-10-31T19:00:00.000-05:00', '-05:00'],
 
-        dateTests.forEach(([dateValue, message, expected]) => {
-            it(`should accept dates and dateTime values in the intersection of RFC 3339 and ISO 8601, ${message}`, () => {
-                json.date = dateValue;
-                const result = serializer.toJSON(serializer.fromJSON(json, {}), {});
-                result.date.should.equal(expected || '2022-11-28T01:02:03.987Z');
+                // HTML Living Standard
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information', '2022-11-27T20:02:03.987-05:00', '-05:00'],
+                ['--11-28', '--MM-DD', '2001-11-28T00:00:00.000Z'],
+                ['11-28', 'MM-DD', '2001-11-28T00:00:00.000Z'],
+            ];
+            dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
+                it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
+                    json.date = dateValue;
+                    const options = utcOffset !== undefined ? { utcOffset } : {};
+                    const result = serializer.toJSON(serializer.fromJSON(json, options), options);
+                    result.date.should.equal(expected || DEFAULT_EXPECTED_VALUE);
+                });
+            });
+
+            const negativeDateTests =[
+                // ISO 8601
+                ['2022‐11‐28T01:02:03.987Z', 'U+2010 HYPHEN'],
+                ['2022−11−28T01:02:03.987Z', 'U+2212 MINUS'],
+                ['2022-11-28T11,7', 'YYYY-MM-DDTHH,1h'],
+                ['2022-W48', 'YYYY-Ww'],
+                ['2022-W48-1', 'YYYY-Ww-z'],
+                ['20', 'YYY'],
+                ['+0020221128T115723Z', '+YYYYYYMMDDTHHMMSSZ'],
+
+                // RFC 3339
+                ['2022-11-28_01:02:03.987Z', 'Underscore separator'],
+            ];
+
+            negativeDateTests.forEach(([dateValue, message, utcOffset = 0]) => {
+                it(`should not accept invalid dates or dateTime values, ${message}`, () => {
+                    json.date = dateValue;
+                    (() => {
+                        const options = { utcOffset };
+                        serializer.toJSON(serializer.fromJSON(json, options), options);
+                    }).should.throw('Expected value at path `$.date` to be of type `DateTime`');
+                });
             });
         });
 
-        const negativeDateTests =[
-            // ISO 8601
-            ['2022‐11‐28T01:02:03.987Z', 'U+2010 HYPHEN'],
-            ['2022−11−28T01:02:03.987Z', 'U+2212 MINUS'],
-            ['2022-11-28T11,7', 'YYYY-MM-DDTHH,1h'],
-            ['2022-W48', 'YYYY-Ww'],
-            ['2022-W48-1', 'YYYY-Ww-z'],
-            ['20', 'YYY'],
-            ['+0020221128T115723Z', '+YYYYYYMMDDTHHMMSSZ'],
+        describe('strict datetime format, strictQualifiedDateTimes parameter', () => {
+            // Test Structure
+            // [TEST_STRING, DESCRIPTION, EXPECTED_VALUE, EXPLICIT_UTC_OFFSET]
+            const dateTests = [
+                // RFC 3339 & ISO 8601
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z'],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 'Z'],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-28T01:02:03.000Z', 0],
+                ['2022-11-28T01:02:03Z', 'YYYY-MM-DDTHH:mm:ssZ', '2022-11-27T20:02:03.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03-05:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T01:02:03.000-05:00', '-05:00'],
+                ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
+                ['2022-11-28T01:02:03.9Z', 'YYYY-MM-DDTHH:mm:ss.SZ', '2022-11-28T01:02:03.900Z'],
+                ['2022-11-28T01:02:03.98Z', 'YYYY-MM-DDTHH:mm:ss.SSZ', '2022-11-28T01:02:03.980Z'],
+                ['2022-11-28T01:02:03.987Z', 'YYYY-MM-DDTHH:mm:ss.SSSZ'],
+                ['2022-11-28T01:02:03+08:00', 'YYYY-MM-DDTHH:mm:ss+HH:mm', '2022-11-27T17:02:03.000Z'],
+                ['2022-11-28T01:02:03.987+08:00', 'YYYY-MM-DDTHH:mm:ss.SSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+                ['2022-11-28T01:02:03.98765+08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS+HH:mm', '2022-11-27T17:02:03.987Z'],
+                ['2022-11-28T01:02:03-08:00', 'YYYY-MM-DDTHH:mm:ss-HH:mm', '2022-11-28T09:02:03.000Z'],
+                ['2022-11-28T01:02:03.987-08:00', 'YYYY-MM-DDTHH:mm:ss.SSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+                ['2022-11-28T01:02:03.98765-08:00', 'YYYY-MM-DDTHH:mm:ss.SSSSSS-HH:mm', '2022-11-28T09:02:03.987Z'],
+                ['2022-11-28T01:02:03.98765Z', 'YYYY-MM-DDTHH:mm:ss.SSSSSS'],
 
-            // RFC 3339
-            ['2022-11-28_01:02:03.987Z', 'Underscore separator'],
-        ];
+            ];
+            dateTests.forEach(([dateValue, message, expected, utcOffset]) => {
+                it(`should accept date-time values with the format '${message}' and offset '${utcOffset}'`, () => {
+                    json.date = dateValue;
+                    const options = utcOffset !== undefined ? { utcOffset } : {};
+                    options.strictQualifiedDateTimes = true;
+                    const result = serializer.toJSON(serializer.fromJSON(json, options), options);
+                    result.date.should.equal(expected || DEFAULT_EXPECTED_VALUE);
+                });
+            });
 
-        negativeDateTests.forEach(([dateValue, message]) => {
-            it(`should not accept invalid dates or dateTime values, ${message}`, () => {
-                json.date = dateValue;
-                (() =>
-                    serializer.toJSON(serializer.fromJSON(json, {}), {})
-                ).should.throw('Expected value at path `$.date` to be of type `DateTime`');
+            const negativeDateTests =[
+                // RFC 3339 & ISO 8601
+                ['2022-11-28', 'YYYY-MM-DD'],
+                ['2022-11-28', 'YYYY-MM-DD'],
+                ['2022-11-28', 'YYYY-MM-DD'],
+                ['2022-11-28', 'YYYY-MM-DD'],
+
+                // RFC 3339 && HTML Living Standard
+                ['2022-11-28 01:02:03.987Z', 'YYYY-MM-DD HH:mm:ss.SSSZ'],
+
+                // RFC 3339
+                ['2022-11-28t01:02:03.987Z', 'Lowercase t'],
+                ['2022-11-28T01:02:03.987z', 'Lowercase z'],
+                ['2022-11-28_01:02:03.987Z', 'Underscore separator'],
+
+                // ISO 8601
+                ['2022', 'YYYY'],
+                ['2022', 'YYYY'],
+                ['+002022-11-28', '+YYYYYY-MM-DD'],
+                ['+002022-11-28', '+YYYYYY-MM-DD'],
+                ['2022‐11‐28T01:02:03.987Z', 'U+2010 HYPHEN'],
+                ['2022−11−28T01:02:03.987Z', 'U+2212 MINUS'],
+                ['2022-11-28T11,7', 'YYYY-MM-DDTHH,1h'],
+                ['2022-W48', 'YYYY-Ww'],
+                ['2022-W48-1', 'YYYY-Ww-z'],
+                ['20', 'YYY'],
+                ['+0020221128T115723Z', '+YYYYYYMMDDTHHMMSSZ'],
+
+                // ISO 8601 & HTML Living Standard
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss'],
+                ['2022-11-28T01:02:03', 'YYYY-MM-DDTHH:mm:ss'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS'],
+                ['2022-11-28T01:02:03.987', 'YYYY-MM-DDTHH:mm:ss.SSS'],
+                ['2022-11', 'YYYY-MM'],
+                ['2022-11', 'YYYY-MM'],
+
+                // HTML Living Standard
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
+                ['2022-11-28 01:02:03.987', 'No separator, no offset information'],
+                ['--11-28', '--MM-DD'],
+                ['11-28', 'MM-DD'],
+
+                // Other
+                ['2022-11-28T01:02:03.987-08', 'YYYY-MM-DDTHH:mm:ss.SSS-HH'],
+
+            ];
+
+            negativeDateTests.forEach(([dateValue, message, utcOffset = 0]) => {
+                it(`should not accept invalid dates or dateTime values, ${message}`, () => {
+                    json.date = dateValue;
+                    (() => {
+                        const options = { utcOffset, strictQualifiedDateTimes: true };
+                        serializer.toJSON(serializer.fromJSON(json, options), options);
+                    }).should.throw('Expected value at path `$.date` to be of type `DateTime`');
+                });
             });
         });
     });

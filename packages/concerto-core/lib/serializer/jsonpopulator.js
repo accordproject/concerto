@@ -87,11 +87,13 @@ class JSONPopulator {
      * place of relationships, false by default.
      * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
+     * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset) {
+    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.ergo = ergo;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
+        this.strictQualifiedDateTimes = strictQualifiedDateTimes;
     }
 
     /**
@@ -256,10 +258,16 @@ class JSONPopulator {
                 result = json;
             } else if (typeof json !== 'string') {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            } else {
+            } else if (!this.strictQualifiedDateTimes){
                 result = dayjs.utc(json).utcOffset(this.utcOffset);
+            } else if (this.strictQualifiedDateTimes){
+                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
+                    result = dayjs.utc(json);
+                } else {
+                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+                }
             }
-            if (!result.isValid()) {
+            if (!result || !result.isValid()) {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
         }

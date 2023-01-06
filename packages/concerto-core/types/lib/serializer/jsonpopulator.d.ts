@@ -18,11 +18,13 @@ declare class JSONPopulator {
      * place of relationships, false by default.
      * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
+     * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      */
-    constructor(acceptResourcesForRelationships?: boolean, ergo?: boolean, utcOffset?: number);
+    constructor(acceptResourcesForRelationships?: boolean, ergo?: boolean, utcOffset?: number, strictQualifiedDateTimes?: number);
     acceptResourcesForRelationships: boolean;
     ergo: boolean;
     utcOffset: number;
+    strictQualifiedDateTimes: number;
     /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited

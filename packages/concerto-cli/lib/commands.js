@@ -122,7 +122,7 @@ class Commands {
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
 
-            const object = serializer.fromJSON(json);
+            const object = serializer.fromJSON(json, options);
             return JSON.stringify(serializer.toJSON(object, options));
         }
     }
