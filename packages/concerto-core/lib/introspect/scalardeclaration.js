@@ -136,16 +136,18 @@ class ScalarDeclaration extends Decorated {
         super.validate();
 
         const declarations = this.getModelFile().getAllDeclarations();
-        for (let n = 0; n < declarations.length; n++) {
-            let declaration = declarations[n];
+        const declarationNames = declarations.map(
+            d => d.getFullyQualifiedName()
+        );
+        const uniqueNames = new Set(declarationNames);
 
-            // check we don't have an asset with the same name
-            for (let i = n + 1; i < declarations.length; i++) {
-                let otherDeclaration = declarations[i];
-                if (declaration.getFullyQualifiedName() === otherDeclaration.getFullyQualifiedName()) {
-                    throw new IllegalModelException(`Duplicate class name ${declaration.getName()}`);
-                }
-            }
+        if (uniqueNames.size !== declarations.length) {
+            const duplicateElements = declarationNames.filter(
+                (item, index) => declarationNames.indexOf(item) !== index
+            );
+            throw new IllegalModelException(
+                `Duplicate class name ${duplicateElements[0]}`
+            );
         }
     }
 

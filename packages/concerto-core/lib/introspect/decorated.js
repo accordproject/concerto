@@ -110,17 +110,28 @@ class Decorated {
      * @protected
      */
     validate(...args) {
-        for(let n=0; n < this.decorators.length; n++) {
-            let decorator = this.decorators[n];
-            decorator.validate();
+        if (this.decorators && this.decorators.length > 0) {
+            for(let n=0; n < this.decorators.length; n++) {
+                this.decorators[n].validate();
+            }
 
             // check we don't have this decorator twice
-            for(let i=n+1; i < this.decorators.length; i++) {
-                let otherDecorator = this.decorators[i];
-                if(decorator.getName() === otherDecorator.getName()) {
-                    let modelFile = this.getModelFile();
-                    throw new IllegalModelException(`Duplicate decorator ${decorator.getName()}`,modelFile, this.ast.location);
-                }
+            const decoratorNames = this.decorators.map(
+                d => d.getName()
+            );
+            const uniqueDecoratorNames = new Set(decoratorNames);
+
+            if (uniqueDecoratorNames.size !== this.decorators.length) {
+                const duplicateElements = decoratorNames
+                    .filter(
+                        (item, index) => decoratorNames.indexOf(item) !== index
+                    );
+                const modelFile = this.getModelFile();
+                throw new IllegalModelException(
+                    `Duplicate decorator ${duplicateElements[0]}`,
+                    modelFile,
+                    this.ast.location,
+                );
             }
         }
     }

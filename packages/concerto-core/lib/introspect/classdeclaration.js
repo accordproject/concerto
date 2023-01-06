@@ -212,12 +212,18 @@ class ClassDeclaration extends Decorated {
         super.validate();
 
         const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(d => d.getFullyQualifiedName());
-        const uniqueNames = [...new Set(declarationNames)];
+        const declarationNames = declarations.map(
+            d => d.getFullyQualifiedName()
+        );
+        const uniqueNames = new Set(declarationNames);
 
-        if (uniqueNames.length !== declarationNames.length) {
-            const duplicateElements = declarationNames.filter((item, index) => declarationNames.indexOf(item) !== index);
-            throw new IllegalModelException(`Duplicate class name ${duplicateElements[0]}`);
+        if (uniqueNames.size !== declarations.length) {
+            const duplicateElements = declarationNames.filter(
+                (item, index) => declarationNames.indexOf(item) !== index
+            );
+            throw new IllegalModelException(
+                `Duplicate class name ${duplicateElements[0]}`
+            );
         }
 
         // if we have a super type make sure it exists
@@ -270,28 +276,38 @@ class ClassDeclaration extends Decorated {
                 }
             }
         }
-
         // we also have to check fields defined in super classes
         const properties = this.getProperties();
+        const propertyFieldNames = properties.map(
+            d => d.getName()
+        );
+        const uniquePropertyFieldNames = new Set(propertyFieldNames);
+
+        if (uniquePropertyFieldNames.size !== properties.length) {
+            const duplicateElements = propertyFieldNames
+                .filter(
+                    (item, index) => propertyFieldNames.indexOf(item) !== index
+                );
+            const formatter = Globalize('en').messageFormatter(
+                'classdeclaration-validate-duplicatefieldname'
+            );
+            throw new IllegalModelException(formatter({
+                'class': this.name,
+                'fieldName': duplicateElements[0]
+            }), this.modelFile, this.ast.location);
+        }
+
         for (let n = 0; n < properties.length; n++) {
             let field = properties[n];
-
-            // check we don't have a field with the same name
-            for (let i = n + 1; i < properties.length; i++) {
-                let otherField = properties[i];
-                if (field.getName() === otherField.getName()) {
-                    let formatter = Globalize('en').messageFormatter('classdeclaration-validate-duplicatefieldname');
-                    throw new IllegalModelException(formatter({
-                        'class': this.name,
-                        'fieldName': field.getName()
-                    }), this.modelFile, this.ast.location);
-                }
-            }
 
             // we now validate the field, however to ensure that
             // imports are resolved correctly we validate in the context
             // of the declared type of the field for non-primitives in a different namespace
-            if (field.isPrimitive() || this.isEnum() || field.getNamespace() === this.getNamespace()) {
+            if (
+                field.isPrimitive() ||
+                this.isEnum() ||
+                field.getNamespace() === this.getNamespace()
+            ) {
                 field.validate(this);
             } else {
                 const typeFqn = field.getFullyQualifiedTypeName();
