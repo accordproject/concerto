@@ -298,7 +298,7 @@ class JSONSchemaVisitor {
             type: 'string',
             default: classDeclaration.getFullyQualifiedName(),
             pattern: `^${classDeclaration.getFullyQualifiedName().split('.').join('\\.')}$`,
-            description: 'The class identifier for this type'
+            description: `The class identifier for ${classDeclaration.getFullyQualifiedName()}`
         };
 
         result.schema.required.push('$class');

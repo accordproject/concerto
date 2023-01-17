@@ -80,6 +80,7 @@ class OpenApiVisitor {
             info: {
                 title,
                 version,
+                description: 'Create, read, update and delete entities'
             },
             components: {
                 schemas: jsonSchema.definitions,
@@ -190,6 +191,7 @@ class OpenApiVisitor {
                 operationId: `list${capitalPlural}`,
                 summary: `List All ${capitalPlural}`,
                 description: `Gets a list of all \`${name}\` entities.`,
+                tags: [plural]
             },
             post: {
                 requestBody: {
@@ -211,6 +213,7 @@ class OpenApiVisitor {
                 operationId: `create${capitalName}`,
                 summary: `Create a ${capitalName}`,
                 description: `Creates a new instance of a \`${name}\`.`,
+                tags: [plural]
             },
         };
         result[`/${plural}/{${classDeclaration.getIdentifierFieldName()}}`] = {
@@ -232,6 +235,7 @@ class OpenApiVisitor {
                 operationId: `get${capitalName}`,
                 summary: `Get a ${name}`,
                 description: `Gets the details of a single instance of a \`${name}\`.`,
+                tags: [plural]
             },
             put: {
                 requestBody: {
@@ -253,6 +257,7 @@ class OpenApiVisitor {
                 operationId: `replace${capitalName}`,
                 summary: `Update a ${name}`,
                 description: `Updates an existing \`${name}\`.`,
+                tags: [plural]
             },
             delete: {
                 responses: {
@@ -263,6 +268,7 @@ class OpenApiVisitor {
                 operationId: `delete${capitalName}`,
                 summary: `Delete a ${name}`,
                 description: `Deletes an existing \`${name}\`.`,
+                tags: [plural]
             },
             parameters: [
                 {

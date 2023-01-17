@@ -181,7 +181,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Address",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Address$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Address"
         },
         "street": {
           "type": "string"
@@ -216,7 +216,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Company",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Company$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Company"
         },
         "name": {
           "type": "string"
@@ -252,7 +252,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Equipment",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Equipment$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Equipment"
         },
         "serialNumber": {
           "type": "string",
@@ -284,7 +284,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Laptop",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Laptop$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Laptop"
         },
         "make": {
           "$ref": "#/definitions/org.acme.hr.LaptopMake"
@@ -313,7 +313,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Person",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Person$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Person"
         },
         "email": {
           "type": "string",
@@ -367,7 +367,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Employee",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Employee$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Employee"
         },
         "employeeId": {
           "type": "string"
@@ -453,7 +453,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Contractor",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Contractor$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Contractor"
         },
         "company": {
           "$ref": "#/definitions/org.acme.hr.Company"
@@ -512,7 +512,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Manager",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Manager$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Manager"
         },
         "reports": {
           "type": "array",
@@ -605,7 +605,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.CompanyEvent",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.CompanyEvent$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.CompanyEvent"
         }
       },
       "required": [
@@ -621,7 +621,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.Onboarded",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.Onboarded$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.Onboarded"
         },
         "employee": {
           "type": "string",
@@ -642,7 +642,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "type": "string",
           "default": "org.acme.hr.ChangeOfAddress",
           "pattern": "^org\\\\.acme\\\\.hr\\\\.ChangeOfAddress$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr.ChangeOfAddress"
         },
         "Person": {
           "type": "string",
@@ -2874,7 +2874,8 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
   "servers": [],
   "info": {
     "title": "Generated Open API from Concerto Models",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "Create, read, update and delete entities"
   },
   "components": {
     "schemas": {
@@ -2899,7 +2900,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Address",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Address$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Address"
           },
           "street": {
             "type": "string"
@@ -2934,7 +2935,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Company",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Company$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Company"
           },
           "name": {
             "type": "string"
@@ -2970,7 +2971,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Equipment",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Equipment$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Equipment"
           },
           "serialNumber": {
             "type": "string",
@@ -3002,7 +3003,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Laptop",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Laptop$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Laptop"
           },
           "make": {
             "$ref": "#/components/schemas/org.acme.hr.LaptopMake"
@@ -3031,7 +3032,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Person",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Person$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Person"
           },
           "email": {
             "type": "string",
@@ -3085,7 +3086,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Employee",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Employee$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Employee"
           },
           "employeeId": {
             "type": "string"
@@ -3171,7 +3172,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Contractor",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Contractor$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Contractor"
           },
           "company": {
             "$ref": "#/components/schemas/org.acme.hr.Company"
@@ -3230,7 +3231,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Manager",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Manager$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Manager"
           },
           "reports": {
             "type": "array",
@@ -3323,7 +3324,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.CompanyEvent",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.CompanyEvent$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.CompanyEvent"
           }
         },
         "required": [
@@ -3339,7 +3340,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.Onboarded",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.Onboarded$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.Onboarded"
           },
           "employee": {
             "type": "string",
@@ -3360,7 +3361,7 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
             "type": "string",
             "default": "org.acme.hr.ChangeOfAddress",
             "pattern": "^org\\\\.acme\\\\.hr\\\\.ChangeOfAddress$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr.ChangeOfAddress"
           },
           "Person": {
             "type": "string",
@@ -3400,7 +3401,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "listEquipment",
         "summary": "List All Equipment",
-        "description": "Gets a list of all \`equipment\` entities."
+        "description": "Gets a list of all \`equipment\` entities.",
+        "tags": [
+          "equipment"
+        ]
       },
       "post": {
         "requestBody": {
@@ -3421,7 +3425,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "createEquipment",
         "summary": "Create a Equipment",
-        "description": "Creates a new instance of a \`equipment\`."
+        "description": "Creates a new instance of a \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       }
     },
     "/equipment/{serialNumber}": {
@@ -3442,7 +3449,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "getEquipment",
         "summary": "Get a equipment",
-        "description": "Gets the details of a single instance of a \`equipment\`."
+        "description": "Gets the details of a single instance of a \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "put": {
         "requestBody": {
@@ -3463,7 +3473,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "replaceEquipment",
         "summary": "Update a equipment",
-        "description": "Updates an existing \`equipment\`."
+        "description": "Updates an existing \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "delete": {
         "responses": {
@@ -3473,7 +3486,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "deleteEquipment",
         "summary": "Delete a equipment",
-        "description": "Deletes an existing \`equipment\`."
+        "description": "Deletes an existing \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "parameters": [
         {
@@ -3508,7 +3524,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "listPeople",
         "summary": "List All People",
-        "description": "Gets a list of all \`person\` entities."
+        "description": "Gets a list of all \`person\` entities.",
+        "tags": [
+          "people"
+        ]
       },
       "post": {
         "requestBody": {
@@ -3529,7 +3548,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "createPerson",
         "summary": "Create a Person",
-        "description": "Creates a new instance of a \`person\`."
+        "description": "Creates a new instance of a \`person\`.",
+        "tags": [
+          "people"
+        ]
       }
     },
     "/people/{email}": {
@@ -3550,7 +3572,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "getPerson",
         "summary": "Get a person",
-        "description": "Gets the details of a single instance of a \`person\`."
+        "description": "Gets the details of a single instance of a \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "put": {
         "requestBody": {
@@ -3571,7 +3596,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "replacePerson",
         "summary": "Update a person",
-        "description": "Updates an existing \`person\`."
+        "description": "Updates an existing \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "delete": {
         "responses": {
@@ -3581,7 +3609,10 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         },
         "operationId": "deletePerson",
         "summary": "Delete a person",
-        "description": "Deletes an existing \`person\`."
+        "description": "Deletes an existing \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "parameters": [
         {
@@ -3987,7 +4018,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Address",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Address$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Address"
         },
         "street": {
           "type": "string"
@@ -4022,7 +4053,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Company",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Company$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Company"
         },
         "name": {
           "type": "string"
@@ -4058,7 +4089,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Equipment",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Equipment$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Equipment"
         },
         "serialNumber": {
           "type": "string",
@@ -4090,7 +4121,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Laptop",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Laptop$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Laptop"
         },
         "make": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.LaptopMake"
@@ -4119,7 +4150,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Person",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Person$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Person"
         },
         "email": {
           "type": "string",
@@ -4173,7 +4204,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Employee",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Employee$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Employee"
         },
         "employeeId": {
           "type": "string"
@@ -4259,7 +4290,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Contractor",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Contractor$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Contractor"
         },
         "company": {
           "$ref": "#/definitions/org.acme.hr@1.0.0.Company"
@@ -4318,7 +4349,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Manager",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Manager$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Manager"
         },
         "reports": {
           "type": "array",
@@ -4411,7 +4442,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.CompanyEvent",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.CompanyEvent$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.CompanyEvent"
         }
       },
       "required": [
@@ -4427,7 +4458,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.Onboarded",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Onboarded$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.Onboarded"
         },
         "employee": {
           "type": "string",
@@ -4448,7 +4479,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "type": "string",
           "default": "org.acme.hr@1.0.0.ChangeOfAddress",
           "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.ChangeOfAddress$",
-          "description": "The class identifier for this type"
+          "description": "The class identifier for org.acme.hr@1.0.0.ChangeOfAddress"
         },
         "Person": {
           "type": "string",
@@ -6680,7 +6711,8 @@ exports[`codegen #formats check we can convert all formats from namespace versio
   "servers": [],
   "info": {
     "title": "Generated Open API from Concerto Models",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "Create, read, update and delete entities"
   },
   "components": {
     "schemas": {
@@ -6705,7 +6737,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Address",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Address$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Address"
           },
           "street": {
             "type": "string"
@@ -6740,7 +6772,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Company",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Company$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Company"
           },
           "name": {
             "type": "string"
@@ -6776,7 +6808,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Equipment",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Equipment$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Equipment"
           },
           "serialNumber": {
             "type": "string",
@@ -6808,7 +6840,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Laptop",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Laptop$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Laptop"
           },
           "make": {
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.LaptopMake"
@@ -6837,7 +6869,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Person",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Person$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Person"
           },
           "email": {
             "type": "string",
@@ -6891,7 +6923,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Employee",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Employee$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Employee"
           },
           "employeeId": {
             "type": "string"
@@ -6977,7 +7009,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Contractor",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Contractor$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Contractor"
           },
           "company": {
             "$ref": "#/components/schemas/org.acme.hr@1.0.0.Company"
@@ -7036,7 +7068,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Manager",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Manager$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Manager"
           },
           "reports": {
             "type": "array",
@@ -7129,7 +7161,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.CompanyEvent",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.CompanyEvent$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.CompanyEvent"
           }
         },
         "required": [
@@ -7145,7 +7177,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.Onboarded",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.Onboarded$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.Onboarded"
           },
           "employee": {
             "type": "string",
@@ -7166,7 +7198,7 @@ exports[`codegen #formats check we can convert all formats from namespace versio
             "type": "string",
             "default": "org.acme.hr@1.0.0.ChangeOfAddress",
             "pattern": "^org\\\\.acme\\\\.hr@1\\\\.0\\\\.0\\\\.ChangeOfAddress$",
-            "description": "The class identifier for this type"
+            "description": "The class identifier for org.acme.hr@1.0.0.ChangeOfAddress"
           },
           "Person": {
             "type": "string",
@@ -7206,7 +7238,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "listEquipment",
         "summary": "List All Equipment",
-        "description": "Gets a list of all \`equipment\` entities."
+        "description": "Gets a list of all \`equipment\` entities.",
+        "tags": [
+          "equipment"
+        ]
       },
       "post": {
         "requestBody": {
@@ -7227,7 +7262,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "createEquipment",
         "summary": "Create a Equipment",
-        "description": "Creates a new instance of a \`equipment\`."
+        "description": "Creates a new instance of a \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       }
     },
     "/equipment/{serialNumber}": {
@@ -7248,7 +7286,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "getEquipment",
         "summary": "Get a equipment",
-        "description": "Gets the details of a single instance of a \`equipment\`."
+        "description": "Gets the details of a single instance of a \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "put": {
         "requestBody": {
@@ -7269,7 +7310,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "replaceEquipment",
         "summary": "Update a equipment",
-        "description": "Updates an existing \`equipment\`."
+        "description": "Updates an existing \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "delete": {
         "responses": {
@@ -7279,7 +7323,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "deleteEquipment",
         "summary": "Delete a equipment",
-        "description": "Deletes an existing \`equipment\`."
+        "description": "Deletes an existing \`equipment\`.",
+        "tags": [
+          "equipment"
+        ]
       },
       "parameters": [
         {
@@ -7314,7 +7361,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "listPeople",
         "summary": "List All People",
-        "description": "Gets a list of all \`person\` entities."
+        "description": "Gets a list of all \`person\` entities.",
+        "tags": [
+          "people"
+        ]
       },
       "post": {
         "requestBody": {
@@ -7335,7 +7385,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "createPerson",
         "summary": "Create a Person",
-        "description": "Creates a new instance of a \`person\`."
+        "description": "Creates a new instance of a \`person\`.",
+        "tags": [
+          "people"
+        ]
       }
     },
     "/people/{email}": {
@@ -7356,7 +7409,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "getPerson",
         "summary": "Get a person",
-        "description": "Gets the details of a single instance of a \`person\`."
+        "description": "Gets the details of a single instance of a \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "put": {
         "requestBody": {
@@ -7377,7 +7433,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "replacePerson",
         "summary": "Update a person",
-        "description": "Updates an existing \`person\`."
+        "description": "Updates an existing \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "delete": {
         "responses": {
@@ -7387,7 +7446,10 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         },
         "operationId": "deletePerson",
         "summary": "Delete a person",
-        "description": "Deletes an existing \`person\`."
+        "description": "Deletes an existing \`person\`.",
+        "tags": [
+          "people"
+        ]
       },
       "parameters": [
         {
