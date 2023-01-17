@@ -64,6 +64,112 @@ describe('parser', () => {
             }
         );
     });
+
+    describe('identifiers', () => {
+
+        const acceptedIdentifiers = [
+            // Leading Characters
+            'a',        // Letter, lowercase
+            'ՠ',        // Letter, lowercase. Unicode 11.0
+            'A',        // Letter, uppercase
+            'ĦĔĽĻŎ',    // Letter, uppercase
+            'ǅ',        // Letter, titlecase
+            'ᾩ',        // Letter, titlecase
+            '〱〱〱〱',  // Letter, modifier
+            'जावास्क्रिप्ट',  // Letter, other
+            'Ⅶ',      // Number, letter
+            '$class',   // leading $
+            '_class',   // leading _
+            '\u03C9',   // Escaped Unicode Code Point, ᾧ
+
+            // Other
+            'abc',      // Letter, lowercase
+            'a123',     // Number, digit
+            'foo$bar',  // $ separator
+            'foo_bar',  // _ separator
+            'αβγδεζηθ', // Letter, lowercase
+            'foo\u03C9bar', // Escaped Unicode Code Point, fooᾧbar
+            'foo\u03c9bar', // Escaped Unicode Code Point lowercase, fooᾧbar
+            'foo‿bar',  // Punctuation, connector
+            'पः',        // Mark, combining character
+            'CharlesⅢ', // Number, letter
+            'true',     // reserved words
+            'false',
+            'null',
+            'while',
+            'for',
+            'nully',    // leading reserved word
+            'foo‌bar',   // unescaped zero-width non-joiner
+            'foo‍bar',   // unescaped zero-width joiner
+        ];
+        acceptedIdentifiers.forEach(id => {
+
+            it(`Should parse identifier '${id}'`, () => {
+                const content = `namespace ${id}
+            concept ${id} {
+                o String ${id}
+            }`;
+                const mm = Parser.parse(content);
+                mm.namespace.should.equal(id);
+                mm.declarations[0].name.should.equal(id);
+                mm.declarations[0].properties[0].name.should.equal(id);
+            });
+        });
+
+        const rejectedNamespaceIdentifiers = [
+            '',
+            '123',
+            '1st',
+            'foo bar',
+            'foo\u0020bar', // Escaped Unicode, space
+            'foo\x3Dbar',   // Escaped Hex Sequence, foo=bar
+            'foo\x3Dbar',   // Escaped Hex Sequence, foo=bar
+            '‍foo', // leading unescaped zero-width joiner
+            'foo-bar',
+            'foo‐bar', // U+2010 HYPHEN'
+            'foo−bar', // U+2212 MINUS
+            'foo|bar',
+            'foo@bar',
+            'foo#bar',
+            'foo/bar',
+            'foo>bar',
+            '\x3D',     // Escaped Hex Sequence, =
+            '😄',       // Surrogate pair, Emoji
+            '\u{1F604}',  // Escaped surrogate pair, Emoji
+            '𐴓𐴠𐴑𐴤𐴝', // Surrogate pairs, Hanifi Rohingya RTL
+        ];
+        const rejectedIdentifiers = [
+            ...rejectedNamespaceIdentifiers,
+            'foo.bar',
+        ];
+        rejectedNamespaceIdentifiers.forEach(id => {
+            it(`Should not parse identifier '${id}' for namespace`, () => {
+                const content = `namespace ${id}`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+        });
+        rejectedIdentifiers.forEach(id => {
+            it(`Should not parse identifier '${id}' for concept`, () => {
+                const content = `namespace com.test
+            concept ${id} {}`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+
+            it(`Should not parse identifier '${id}' for property`, () => {
+                const content = `namespace com.test
+            concept Test {
+                o String ${id}
+            }`;
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(/Expected .+ but /);
+            });
+        });
+    });
 });
 
 describe('parser-exception', () => {
