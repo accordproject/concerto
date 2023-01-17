@@ -134,8 +134,9 @@ describe('parser', () => {
             'foo/bar',
             'foo>bar',
             '\x3D',     // Escaped Hex Sequence, =
-            '😄',       // Surrogate pair
-
+            '😄',       // Surrogate pair, Emoji
+            '\u{1F604}',  // Escaped surrogate pair, Emoji
+            '𐴓𐴠𐴑𐴤𐴝', // Surrogate pairs, Hanifi Rohingya RTL
         ];
         const rejectedIdentifiers = [
             ...rejectedNamespaceIdentifiers,
