@@ -94,6 +94,10 @@ class JSONPopulator {
         this.ergo = ergo;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes;
+
+        if (process.env.TZ){
+            console.warn(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
+        }
     }
 
     /**
