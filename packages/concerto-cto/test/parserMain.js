@@ -70,6 +70,7 @@ describe('parser', () => {
         const acceptedIdentifiers = [
             // Leading Characters
             'a',        // Letter, lowercase
+            'ՠ',        // Letter, lowercase. Unicode 11.0
             'A',        // Letter, uppercase
             'ĦĔĽĻŎ',    // Letter, uppercase
             'ǅ',        // Letter, titlecase
@@ -88,6 +89,7 @@ describe('parser', () => {
             'foo_bar',  // _ separator
             'αβγδεζηθ', // Letter, lowercase
             'foo\u03C9bar', // Escaped Unicode Code Point, fooᾧbar
+            'foo\u03c9bar', // Escaped Unicode Code Point lowercase, fooᾧbar
             'foo‿bar',  // Punctuation, connector
             'पः',        // Mark, combining character
             'CharlesⅢ', // Number, letter
@@ -119,7 +121,9 @@ describe('parser', () => {
             '123',
             '1st',
             'foo bar',
-            'foo\u0020bar', // Escaped space
+            'foo\u0020bar', // Escaped Unicode, space
+            'foo\x3Dbar',   // Escaped Hex Sequence, foo=bar
+            'foo\x3Dbar',   // Escaped Hex Sequence, foo=bar
             '‍foo', // leading unescaped zero-width joiner
             'foo-bar',
             'foo‐bar', // U+2010 HYPHEN'
@@ -129,6 +133,9 @@ describe('parser', () => {
             'foo#bar',
             'foo/bar',
             'foo>bar',
+            '\x3D',     // Escaped Hex Sequence, =
+            '😄',       // Surrogate pair
+
         ];
         const rejectedIdentifiers = [
             ...rejectedNamespaceIdentifiers,
