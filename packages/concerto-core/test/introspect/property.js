@@ -96,7 +96,7 @@ describe('Property', () => {
                     $class: `${MetaModelNamespace}.StringProperty`,
                     name: '1st',
                 });
-            }).should.throw(/Invalid property name '1st'/)
+            }).should.throw(/Invalid property name '1st'/);
         });
 
     });
