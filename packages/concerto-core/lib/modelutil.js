@@ -18,6 +18,8 @@ const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const Globalize = require('./globalize');
 
+const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
+
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -32,14 +34,12 @@ class ModelUtil {
      * @return {string} - the string after the last dot
      */
     static getShortName(fqn) {
-        //console.log('toShortName ' + name );
         let result = fqn;
         let dotIndex = fqn.lastIndexOf('.');
         if (dotIndex > -1) {
             result = fqn.substr(dotIndex + 1);
         }
 
-        //console.log('result ' + result );
         return result;
     }
 
@@ -182,6 +182,15 @@ class ModelUtil {
         const modelFile = scalar.getParent().getModelFile();
         const declaration = modelFile.getType(scalar.getType());
         return (declaration !== null && declaration.isScalarDeclaration?.());
+    }
+
+    /**
+     * Return true if the name is a valid Concerto identifier
+     * @param {string} name - the name of the identifier to test.
+     * @returns {boolean} true if the identifier is valid.
+     */
+    static isValidIdentifier(name) {
+        return ID_REGEX.test(name);
     }
 
     /**

@@ -679,6 +679,14 @@ class ModelFile extends Decorated {
      */
     fromAst(ast) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
+
+        const namespaceParts = nsInfo.name.split('.');
+        namespaceParts.forEach(part => {
+            if (!ModelUtil.isValidIdentifier(part)){
+                throw new IllegalModelException(`Invalid namespace part '${part}'`, this.modelFile, this.ast.location);
+            }
+        });
+
         this.namespace = ast.namespace;
         this.version = nsInfo.version;
 
