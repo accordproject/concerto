@@ -99,6 +99,12 @@ declare class ModelUtil {
      */
     private static isScalar;
     /**
+     * Return true if the name is a valid Concerto identifier
+     * @param {string} name - the name of the identifier to test.
+     * @returns {boolean} true if the identifier is valid.
+     */
+    static isValidIdentifier(name: string): boolean;
+    /**
      * Get the fully qualified name of a type.
      * @param {string} namespace - namespace of the type.
      * @param {string} type - short name of the type.
