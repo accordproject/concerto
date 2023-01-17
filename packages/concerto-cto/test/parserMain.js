@@ -68,27 +68,37 @@ describe('parser', () => {
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [
-            'a',
-            'abc',
-            'a123',
-            '$class',
-            '_class',
-            'foo$bar',
-            'foo_bar',
-            'nully',
-            'αβγδεζηθικλμνξοπρσςτυφχψω',
-            'ᾩ',
-            '\u03C9', // escaped ᾧ
-            '\u03C9\u03C9', // escaped ᾧᾧ
-            'foo\u03C9bar',
-            'ĦĔĽĻŎ',
-            '〱〱〱〱',
-            'जावास्क्रिप्ट',
-            'KingGeorgeⅦ',
-            'true',
+            // Leading Characters
+            'a',        // Letter, lowercase
+            'A',        // Letter, uppercase
+            'ĦĔĽĻŎ',    // Letter, uppercase
+            'ǅ',        // Letter, titlecase
+            'ᾩ',        // Letter, titlecase
+            '〱〱〱〱',  // Letter, modifier
+            'जावास्क्रिप्ट',  // Letter, other
+            'Ⅶ',      // Number, letter
+            '$class',   // leading $
+            '_class',   // leading _
+            '\u03C9',   // Escaped Unicode Code Point, ᾧ
+
+            // Other
+            'abc',      // Letter, lowercase
+            'a123',     // Number, digit
+            'foo$bar',  // $ separator
+            'foo_bar',  // _ separator
+            'αβγδεζηθ', // Letter, lowercase
+            'foo\u03C9bar', // Escaped Unicode Code Point, fooᾧbar
+            'foo‿bar',  // Punctuation, connector
+            'पः',        // Mark, combining character
+            'CharlesⅢ', // Number, letter
+            'true',     // reserved words
             'false',
             'null',
-            '123',
+            'while',
+            'for',
+            'nully',    // leading reserved word
+            'foo‌bar',   // unescaped zero-width non-joiner
+            'foo‍bar',   // unescaped zero-width joiner
         ];
         acceptedIdentifiers.forEach(id => {
 
@@ -106,8 +116,11 @@ describe('parser', () => {
 
         const rejectedNamespaceIdentifiers = [
             '',
+            '123',
+            '1st',
             'foo bar',
             'foo\u0020bar', // Escaped space
+            '‍foo', // leading unescaped zero-width joiner
             'foo-bar',
             'foo‐bar', // U+2010 HYPHEN'
             'foo−bar', // U+2212 MINUS

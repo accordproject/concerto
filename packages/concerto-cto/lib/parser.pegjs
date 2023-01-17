@@ -152,7 +152,6 @@ IdentifierName "identifier"
 
 IdentifierStart
   = UnicodeLetter
-  / UnicodeDigit
   / "$"
   / "_"
   / "\\" sequence:UnicodeEscapeSequence { return sequence; }
@@ -160,6 +159,7 @@ IdentifierStart
 IdentifierPart
   = IdentifierStart
   / UnicodeCombiningMark
+  / UnicodeDigit
   / UnicodeConnectorPunctuation
   / "\u200C"
   / "\u200D"
