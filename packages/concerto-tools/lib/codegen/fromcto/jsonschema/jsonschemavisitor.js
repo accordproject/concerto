@@ -381,14 +381,25 @@ class JSONSchemaVisitor {
         // Not primitive, so must be a class or enumeration!
         } else {
             // Look up the type of the property.
-            let type = field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName());
-            if(!parameters.inlineTypes) {
-                const refRoot = parameters.refRoot ? parameters.refRoot : '#/definitions';
-                jsonSchema = { $ref: `${refRoot}/${type.getFullyQualifiedName()}` };
-            } else {
-                // inline the schema
-                jsonSchema = this.visit( type, parameters ).schema;
-            }
+            const type = field.getParent().getModelFile().getModelManager().getType(field.getFullyQualifiedTypeName());
+
+            // get all the types that extend the type, including this type
+            const derivedTypes = type.getAssignableClassDeclarations();
+            let jsonSchemaTypes = [];
+
+            derivedTypes.forEach( (derivedType) => {
+                if(!parameters.inlineTypes) {
+                    const refRoot = parameters.refRoot ? parameters.refRoot : '#/definitions';
+                    jsonSchemaTypes.push({ $ref: `${refRoot}/${derivedType.getFullyQualifiedName()}` });
+                } else {
+                    // inline the schema
+                    jsonSchemaTypes.push(this.visit( derivedType, parameters ).schema);
+                }
+            });
+
+            jsonSchema = jsonSchemaTypes.length >= 2 ? {
+                anyOf : jsonSchemaTypes
+            } : jsonSchemaTypes[0];
         }
 
         // Is the type an array?

@@ -390,7 +390,14 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "companyAssets": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/org.acme.hr.Equipment"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/org.acme.hr.Equipment"
+              },
+              {
+                "$ref": "#/definitions/org.acme.hr.Laptop"
+              }
+            ]
           }
         },
         "manager": {
@@ -542,7 +549,14 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
         "companyAssets": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/org.acme.hr.Equipment"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/org.acme.hr.Equipment"
+              },
+              {
+                "$ref": "#/definitions/org.acme.hr.Laptop"
+              }
+            ]
           }
         },
         "manager": {
@@ -3109,7 +3123,14 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "companyAssets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/org.acme.hr.Equipment"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/org.acme.hr.Equipment"
+                },
+                {
+                  "$ref": "#/components/schemas/org.acme.hr.Laptop"
+                }
+              ]
             }
           },
           "manager": {
@@ -3261,7 +3282,14 @@ exports[`codegen #formats check we can convert all formats from namespace unvers
           "companyAssets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/org.acme.hr.Equipment"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/org.acme.hr.Equipment"
+                },
+                {
+                  "$ref": "#/components/schemas/org.acme.hr.Laptop"
+                }
+              ]
             }
           },
           "manager": {
@@ -4227,7 +4255,14 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "companyAssets": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+              },
+              {
+                "$ref": "#/definitions/org.acme.hr@1.0.0.Laptop"
+              }
+            ]
           }
         },
         "manager": {
@@ -4379,7 +4414,14 @@ exports[`codegen #formats check we can convert all formats from namespace versio
         "companyAssets": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/org.acme.hr@1.0.0.Equipment"
+              },
+              {
+                "$ref": "#/definitions/org.acme.hr@1.0.0.Laptop"
+              }
+            ]
           }
         },
         "manager": {
@@ -6946,7 +6988,14 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "companyAssets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+                },
+                {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Laptop"
+                }
+              ]
             }
           },
           "manager": {
@@ -7098,7 +7147,14 @@ exports[`codegen #formats check we can convert all formats from namespace versio
           "companyAssets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Equipment"
+                },
+                {
+                  "$ref": "#/components/schemas/org.acme.hr@1.0.0.Laptop"
+                }
+              ]
             }
           },
           "manager": {
