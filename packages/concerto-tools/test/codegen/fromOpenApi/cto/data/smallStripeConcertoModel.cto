@@ -1,0 +1,116 @@
+namespace com.test@1.0.0
+
+concept customer {
+  o Integer created
+  o String id
+  @StringifiedJson
+  o String metadata optional
+}
+
+concept $_v1$_customers$_$_customer$_$_post {
+  o paths$_$_v1$_customers$_$_customer$_$_post$_address address optional
+  o Integer balance optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_bank_account bank_account optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_card card optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance cash_balance optional
+  o String coupon optional
+  o String default_alipay_account optional
+  o String default_bank_account optional
+  o String default_card optional
+  o String default_source optional
+  o String description optional
+  o String email optional
+  o String[] expand optional
+  o String invoice_prefix optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings invoice_settings optional
+  @StringifiedJson
+  o String metadata optional
+  o String name optional
+  o Integer next_invoice_sequence optional
+  o String phone optional
+  o String[] preferred_locales optional
+  o String promotion_code optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_shipping shipping optional
+  o String source optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_tax tax optional
+  o String tax_exempt optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_address {
+  o String city optional
+  o String country optional
+  o String line1 optional
+  o String line2 optional
+  o String postal_code optional
+  o String state optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_bank_account {
+  o String account_holder_name optional
+  o String account_holder_type optional
+  o String account_number
+  o String country
+  o String currency optional
+  o String object optional
+  o String routing_number optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_card {
+  o String address_city optional
+  o String address_country optional
+  o String address_line1 optional
+  o String address_line2 optional
+  o String address_state optional
+  o String address_zip optional
+  o String cvc optional
+  o Integer exp_month
+  o Integer exp_year
+  @StringifiedJson
+  o String metadata optional
+  o String name optional
+  o String number
+  o String object optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance {
+  o paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance$_settings settings optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance$_settings {
+  o String reconciliation_mode optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings {
+  o paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_custom_fields[] custom_fields optional
+  o String default_payment_method optional
+  o String footer optional
+  o paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_rendering_options rendering_options optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_custom_fields {
+  o String name
+  o String value
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_rendering_options {
+  o String amount_tax_display optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_shipping {
+  o paths$_$_v1$_customers$_$_customer$_$_post$_shipping$_address address
+  o String name
+  o String phone optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_shipping$_address {
+  o String city optional
+  o String country optional
+  o String line1 optional
+  o String line2 optional
+  o String postal_code optional
+  o String state optional
+}
+
+concept paths$_$_v1$_customers$_$_customer$_$_post$_tax {
+  o String ip_address optional
+}

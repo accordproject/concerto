@@ -16,13 +16,16 @@
                     "type": "string"
                 },
                 "age": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMaximum": 150
                 },
                 "hairColor": {
                     "type": "string"
                 },
                 "coolDude": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": "true"
                 },
                 "missing": {
                     "type": "string"
@@ -42,7 +45,8 @@
                 "favoriteNumbers": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "integer",
+                        "exclusiveMaximum": 999999
                     }
                 },
                 "mixed": {
@@ -104,6 +108,13 @@
                 "json": {
                     "type": "object"
                 },
+                "jsonWithAdditionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "maxLength": 500,
+                        "type": "string"
+                    }
+                },
                 "alternation": {
                     "oneOf": [
                         { "type": "number" },
@@ -147,7 +158,8 @@
                     "type": "string"
                 },
                 "breed": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^[a-zA-Z]*$"
                 }
             },
             "required": ["$class", "name", "breed"]
@@ -167,7 +179,8 @@
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "exclusiveMaximum": 99999999.0
                 },
                 "product": {
                     "title": "Pet",
@@ -253,11 +266,21 @@
             "format": "date-time",
             "type": "string"
         },
+        "graduationDate": {
+            "format": "date",
+            "type": "string"
+        },
         "age": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
         },
         "height": {
-            "type": "number"
+            "type": "number",
+            "minimum": 50.0
+        },
+        "favouriteFood": {
+            "format": "food",
+            "type": "string"
         },
         "children": {
             "type": "array",
@@ -377,7 +400,8 @@
                                     "type": "string"
                                 },
                                 "price": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "minimum": 0.0
                                 },
                                 "product": {
                                     "title": "Pet",
