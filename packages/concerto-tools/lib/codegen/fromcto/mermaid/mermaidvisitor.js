@@ -14,6 +14,8 @@
 
 'use strict';
 
+const DiagramVisitor = require('../common/diagramvisitor');
+
 /**
  * Convert the contents of a ModelManager
  * to Mermaid format file.
@@ -23,212 +25,63 @@
  * @private
  * @class
  */
-class MermaidVisitor {
-    /**
-     * Visitor design pattern
-     * @param {Object} thing - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visit(thing, parameters) {
-        if (thing.isModelManager?.()) {
-            return this.visitModelManager(thing, parameters);
-        } else if (thing.isModelFile?.()) {
-            return this.visitModelFile(thing, parameters);
-        } else if (thing.isParticipant?.()) {
-            return this.visitParticipantDeclaration(thing, parameters);
-        } else if (thing.isTransaction?.()) {
-            return this.visitTransactionDeclaration(thing, parameters);
-        } else if (thing.isEvent?.()) {
-            return this.visitEventDeclaration(thing, parameters);
-        } else if (thing.isAsset?.()) {
-            return this.visitAssetDeclaration(thing, parameters);
-        } else if (thing.isEnum?.()) {
-            return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationship(thing, parameters);
-        } else if (thing.isEnumValue?.()) {
-            return this.visitEnumValueDeclaration(thing, parameters);
-        } else if (thing.isScalarDeclaration?.()) {
-            return;
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
-        }
-    }
-
+class MermaidVisitor extends DiagramVisitor {
     /**
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitModelManager(modelManager, parameters) {
         parameters.fileWriter.openFile('model.mmd');
         parameters.fileWriter.writeLine(0, 'classDiagram');
 
-        modelManager.getModelFiles().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
+        super.visitModelManager(modelManager, parameters);
 
         parameters.fileWriter.closeFile();
-
-        return null;
     }
-
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitModelFile(modelFile, parameters) {
-        modelFile.getAllDeclarations().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitAssetDeclaration(classDeclaration, parameters) {
-        return this.visitClassDeclaration(classDeclaration, parameters, 'asset');
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitEnumDeclaration(classDeclaration, parameters) {
-        return this.visitClassDeclaration(classDeclaration, parameters, 'enumeration');
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitEventDeclaration(classDeclaration, parameters) {
-        return this.visitClassDeclaration(classDeclaration, parameters, 'event');
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitParticipantDeclaration(classDeclaration, parameters) {
-        return this.visitClassDeclaration(classDeclaration, parameters, 'participant');
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitTransactionDeclaration(classDeclaration, parameters) {
-        return this.visitClassDeclaration(classDeclaration, parameters, 'transaction');
-    }
-
 
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @param {string} type  - the type of the declaration
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters, type = 'concept') {
-
         if (classDeclaration.getOwnProperties().length > 0) {
-            parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getName() + ' {');
+            parameters.fileWriter.writeLine(0, 'class `' + classDeclaration.getFullyQualifiedName() + '` {');
             parameters.fileWriter.writeLine(0, '<< ' + type + '>>');
 
-            classDeclaration.getOwnProperties().forEach((property) => {
-                if (!property.isRelationship?.()) {
-                    property.accept(this, parameters);
-                }
-            });
+            super.visitClassDeclaration(classDeclaration, parameters, type);
 
             parameters.fileWriter.writeLine(0, '}\n');
         }
         else {
-            parameters.fileWriter.writeLine(0, 'class ' + classDeclaration.getName());
-            parameters.fileWriter.writeLine(0, '<< ' + type + '>>' + ' ' + classDeclaration.getName() + '\n');
+            parameters.fileWriter.writeLine(0, 'class `' + classDeclaration.getFullyQualifiedName() + '`');
+            parameters.fileWriter.writeLine(0, '<< ' + type + '>>' + ' `' + classDeclaration.getFullyQualifiedName() + '`\n');
         }
 
-        classDeclaration.getOwnProperties().forEach((property) => {
-            if (property.isRelationship?.()) {
-                property.accept(this, parameters);
-            }
-        });
-
-        if (classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, classDeclaration.getName() + ' --|> ' + classDeclaration.getSuperTypeDeclaration().getName());
+        if (!classDeclaration.isEnum()){
+            classDeclaration.getOwnProperties().forEach((property) => {
+                if (property.isRelationship?.()) {
+                    property.accept(this, parameters);
+                } else if (parameters.showCompositionRelationships && !property.isPrimitive()){
+                    const source = this.escapeString(classDeclaration.getFullyQualifiedName());
+                    const target = this.escapeString(property.getFullyQualifiedTypeName());
+                    const type = `"1" ${DiagramVisitor.COMPOSITION} ${property.isArray() ? '"*"':'"1"'}`;
+                    parameters.fileWriter.writeLine(0, `${source} ${type} ${target}`);
+                }
+            });
         }
 
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {Field} field - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitField(field, parameters) {
-        let array = '';
-
-        if (field.isArray()) {
-            array = '[]';
-        }
-
-        parameters.fileWriter.writeLine(1, ' +' + field.getType() + array + ' ' + field.getName());
-
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        parameters.fileWriter.writeLine(1, enumValueDeclaration.getName());
-        return null;
+        super.writeDeclarationSupertype(classDeclaration, parameters);
     }
 
     /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationship - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitRelationship(relationship, parameters) {
@@ -236,8 +89,21 @@ class MermaidVisitor {
         if (relationship.isArray()) {
             array = '"*"';
         }
-        parameters.fileWriter.writeLine(0, relationship.getParent().getName() + ' "1"' + ' o-- ' + array + ' ' + relationship.getType() + ' : ' + relationship.getName());
-        return null;
+        const source = this.escapeString(relationship.getParent().getFullyQualifiedName());
+        const target = this.escapeString(relationship.getFullyQualifiedTypeName());
+        const label = relationship.getName();
+        const type = `"1" ${DiagramVisitor.AGGREGATION} ${array}`;
+        parameters.fileWriter.writeLine(0, `${source} ${type} ${target} : ${label}`);
+    }
+
+    /**
+     * Escape versions and periods.
+     * @param {String} string - the object being visited
+     * @return {String} string  - the parameter
+     * @private
+     */
+    escapeString(string) {
+        return `\`${string}\``;
     }
 }
 
