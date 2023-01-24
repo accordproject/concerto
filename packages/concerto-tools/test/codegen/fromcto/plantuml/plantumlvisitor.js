@@ -28,7 +28,6 @@ const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaratio
 const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
 const EnumValueDeclaration = require('@accordproject/concerto-core').EnumValueDeclaration;
 const Field = require('@accordproject/concerto-core').Field;
-const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
 
@@ -39,6 +38,20 @@ describe('PlantUMLVisitor', function () {
         plantUMLvisitor = new PlantUMLVisitor();
         mockFileWriter = sinon.createStubInstance(FileWriter);
     });
+
+    const property1 = {
+        getFullyQualifiedTypeName: () => 'String',
+        getName: () => 'name',
+        isArray: () => true,
+        isTypeEnum: () => false
+    };
+
+    const property2 = {
+        getFullyQualifiedTypeName: () => 'Boolean',
+        getName: () => 'isValue',
+        isArray: () => false,
+        isTypeEnum: () => false
+    };
 
     describe('visit', () => {
         let param;
@@ -132,17 +145,6 @@ describe('PlantUMLVisitor', function () {
             mockSpecialVisit.calledWith(thing, param).should.be.ok;
         });
 
-        it('should return visitRelationship for a RelationshipDeclaration', () => {
-            let thing = sinon.createStubInstance(RelationshipDeclaration);
-            thing.isRelationship.returns(true);
-            let mockSpecialVisit = sinon.stub(plantUMLvisitor, 'visitRelationship');
-            mockSpecialVisit.returns('Duck');
-
-            plantUMLvisitor.visit(thing, param).should.deep.equal('Duck');
-
-            mockSpecialVisit.calledWith(thing, param).should.be.ok;
-        });
-
         it('should return visitEnumValueDeclaration for a EnumValueDeclaration', () => {
             let thing = sinon.createStubInstance(EnumValueDeclaration);
             thing.isEnumValue.returns(true);
@@ -174,10 +176,10 @@ describe('PlantUMLVisitor', function () {
             let mockModelManagerDefinition = sinon.createStubInstance(ModelManager);
             mockModelManagerDefinition.isModelManager.returns(true);
             mockModelManagerDefinition.getModelFiles.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitModelManager(mockModelManagerDefinition, param);
@@ -203,10 +205,10 @@ describe('PlantUMLVisitor', function () {
             mockModelFileDefinition.isModelFile.returns(true);
             mockModelFileDefinition.getNamespace.returns;
             mockModelFileDefinition.getAllDeclarations.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitModelFile(mockModelFileDefinition, param);
@@ -226,10 +228,10 @@ describe('PlantUMLVisitor', function () {
             mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockAssetDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitAssetDeclaration(mockAssetDeclaration, param);
@@ -252,10 +254,10 @@ describe('PlantUMLVisitor', function () {
             mockAssetDeclaration.isAsset.returns(true);
             mockAssetDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockAssetDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
             mockAssetDeclaration.getSuperType.returns('org.acme.Human');
 
@@ -282,10 +284,10 @@ describe('PlantUMLVisitor', function () {
             mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockEnumDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitEnumDeclaration(mockEnumDeclaration, param);
@@ -308,10 +310,10 @@ describe('PlantUMLVisitor', function () {
             mockEnumDeclaration.isEnum.returns(true);
             mockEnumDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockEnumDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
             mockEnumDeclaration.getSuperType.returns('org.acme.Human');
 
@@ -338,10 +340,10 @@ describe('PlantUMLVisitor', function () {
             mockParticipantDeclaration.isParticipant.returns(true);
             mockParticipantDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockParticipantDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitParticipantDeclaration(mockParticipantDeclaration, param);
@@ -364,10 +366,10 @@ describe('PlantUMLVisitor', function () {
             mockParticipantDeclaration.isParticipant.returns(true);
             mockParticipantDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockParticipantDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
             mockParticipantDeclaration.getSuperType.returns('org.acme.Human');
 
@@ -394,10 +396,10 @@ describe('PlantUMLVisitor', function () {
             mockTransDeclaration.isTransaction.returns(true);
             mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockTransDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitTransactionDeclaration(mockTransDeclaration, param);
@@ -420,10 +422,10 @@ describe('PlantUMLVisitor', function () {
             mockTransDeclaration.isTransaction.returns(true);
             mockTransDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockTransDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
             mockTransDeclaration.getSuperType.returns('org.acme.Human');
 
@@ -450,10 +452,10 @@ describe('PlantUMLVisitor', function () {
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
 
             plantUMLvisitor.visitClassDeclaration(mockClassDeclaration, param);
@@ -476,10 +478,10 @@ describe('PlantUMLVisitor', function () {
             mockClassDeclaration.isClassDeclaration.returns(true);
             mockClassDeclaration.getFullyQualifiedName.returns('org.acme.Person');
             mockClassDeclaration.getOwnProperties.returns([{
-                accept: acceptSpy
+                accept: acceptSpy, ...property1
             },
             {
-                accept: acceptSpy
+                accept: acceptSpy, ...property2
             }]);
             mockClassDeclaration.getSuperType.returns('org.acme.Human');
 
@@ -504,6 +506,9 @@ describe('PlantUMLVisitor', function () {
             mockField.isField.returns(true);
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
+            mockField.getParent.returns({
+                getFullyQualifiedName: () => { return 'org.acme.Human'; },
+            });
 
             plantUMLvisitor.visitField(mockField, param);
 
@@ -520,6 +525,9 @@ describe('PlantUMLVisitor', function () {
             mockField.getType.returns('string');
             mockField.getName.returns('Bob');
             mockField.isArray.returns(true);
+            mockField.getParent.returns({
+                getFullyQualifiedName: () => { return 'org.acme.Human'; },
+            });
 
             plantUMLvisitor.visitField(mockField, param);
 
@@ -540,39 +548,6 @@ describe('PlantUMLVisitor', function () {
             plantUMLvisitor.visitEnumValueDeclaration(mockEnumValueDecl, param);
 
             param.fileWriter.writeLine.withArgs(1, '+ Bob').calledOnce.should.be.ok;
-        });
-    });
-
-    describe('visitRelationship', () => {
-        it('should write a line for a relationship', () => {
-            let param = {
-                fileWriter: mockFileWriter
-            };
-
-            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship.isRelationship.returns(true);
-            mockRelationship.getType.returns('string');
-            mockRelationship.getName.returns('Bob');
-
-            plantUMLvisitor.visitRelationship(mockRelationship, param);
-
-            param.fileWriter.writeLine.withArgs(1, '+ string Bob');
-        });
-
-        it('should write a line for a relationship thats an array', () => {
-            let param = {
-                fileWriter: mockFileWriter
-            };
-
-            let mockRelationship = sinon.createStubInstance(RelationshipDeclaration);
-            mockRelationship.isRelationship.returns(true);
-            mockRelationship.getType.returns('string');
-            mockRelationship.getName.returns('Bob');
-            mockRelationship.isArray.returns(true);
-
-            plantUMLvisitor.visitRelationship(mockRelationship, param);
-
-            param.fileWriter.writeLine.withArgs(1, '+ string Bob');
         });
     });
 });

@@ -44,13 +44,14 @@ describe('codegen', function () {
     });
 
     describe('#formats', function () {
-        it('check we can convert all formats from namespace versioned CTO', function () {
-            Object.keys(formats).forEach(function(format){
+        Object.keys(formats).forEach(function(format){
+            it(`check we can convert all formats from namespace versioned CTO, format '${format}'`, function () {
                 const visitor = new formats[format];
                 visitor.should.not.be.null;
                 const writer = new InMemoryWriter();
                 const parameters = {
-                    fileWriter: writer
+                    fileWriter: writer,
+                    showCompositionRelationships: true,
                 };
                 versionedModelManager.accept(visitor, parameters);
                 const files = writer.getFilesInMemory();
@@ -58,16 +59,48 @@ describe('codegen', function () {
                     expect({value,key}).toMatchSnapshot();
                 });
             });
-        });
-        it('check we can convert all formats from namespace unversioned CTO', function () {
-            Object.keys(formats).forEach(function(format){
+
+            it(`should throw for unexpected node type, format '${format}'`, function () {
                 const visitor = new formats[format];
                 visitor.should.not.be.null;
                 const writer = new InMemoryWriter();
                 const parameters = {
                     fileWriter: writer
                 };
+                const mockNode = {
+                    accept: (visitor, parameters) => visitor.visit(this, parameters),
+                };
+                (() => mockNode.accept(visitor, parameters)).should.throw(/(Unrecognised|Converting)/);
+            });
+
+            it(`check we can convert all formats from namespace unversioned CTO, format '${format}'`, function () {
+                const visitor = new formats[format];
+                visitor.should.not.be.null;
+                const writer = new InMemoryWriter();
+                const parameters = {
+                    fileWriter: writer,
+                };
                 unversionedModelManager.accept(visitor, parameters);
+                const files = writer.getFilesInMemory();
+                files.forEach(function(value,key){
+                    expect({value,key}).toMatchSnapshot();
+                });
+            });
+        });
+
+        const diagramFormats = ['mermaid', 'plantuml'];
+
+        diagramFormats.forEach(function(format){
+            it(`check we can convert all formats from namespace versioned CTO without the base model, format '${format}'`, function () {
+                const visitor = new formats[format];
+                visitor.should.not.be.null;
+                const writer = new InMemoryWriter();
+                const parameters = {
+                    fileWriter: writer,
+                    showCompositionRelationships: true,
+                    hideBaseModel: true,
+                };
+                versionedModelManager.accept(visitor, parameters);
                 const files = writer.getFilesInMemory();
                 files.forEach(function(value,key){
                     expect({value,key}).toMatchSnapshot();

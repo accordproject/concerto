@@ -148,6 +148,8 @@ class Commands {
             useNewtonsoftJson: options && options.useNewtonsoftJson,
             namespacePrefix: options && options.namespacePrefix,
             pascalCase: options && options.pascalCase,
+            hideBaseModel: options && options.hideBaseModel,
+            showCompositionRelationships: options && options.showCompositionRelationships,
         };
 
         const modelManager = await ModelLoader.loadModelManager(ctoFiles, modelManagerOptions);

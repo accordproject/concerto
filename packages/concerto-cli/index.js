@@ -136,6 +136,16 @@ require('yargs')
             type: 'boolean',
             default: true
         });
+        yargs.option('showCompositionRelationships', {
+            describe: 'Show UML Composition Relationships in diagrams (`plantuml` and `mermaid` targets only)',
+            type: 'boolean',
+            default: false
+        });
+        yargs.option('hideBaseModel', {
+            describe: 'Hide the base concerto namespace in diagrams (`plantuml` and `mermaid` targets only)',
+            type: 'boolean',
+            default: false
+        });
         yargs.check(({ model, metamodel }) => {
             if (model.length > 0 || metamodel) {
                 return true;
@@ -156,6 +166,8 @@ require('yargs')
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
         options.pascalCase = argv.pascalCase;
+        options.hideBaseModel = argv.hideBaseModel;
+        options.showCompositionRelationships = argv.showCompositionRelationships;
         return Commands.compile(argv.target, argv.model, argv.output, options)
             .then((result) => {
                 Logger.info(result);

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
+const DiagramVisitor = require('../common/diagramvisitor');
 
 /**
  * Convert the contents of a ModelManager
@@ -26,49 +26,11 @@ const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
  * @class
  * @memberof module:concerto-tools
  */
-class PlantUMLVisitor {
-    /**
-     * Visitor design pattern
-     * @param {Object} thing - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @public
-     */
-    visit(thing, parameters) {
-        if (thing.isModelManager?.()) {
-            return this.visitModelManager(thing, parameters);
-        } else if (thing.isModelFile?.()) {
-            return this.visitModelFile(thing, parameters);
-        } else if (thing.isParticipant?.()) {
-            return this.visitParticipantDeclaration(thing, parameters);
-        } else if (thing.isTransaction?.()) {
-            return this.visitTransactionDeclaration(thing, parameters);
-        } else if (thing.isAsset?.()) {
-            return this.visitAssetDeclaration(thing, parameters);
-        } else if (thing.isEnum?.()) {
-            return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationship(thing, parameters);
-        } else if (thing.isEnumValue?.()) {
-            return this.visitEnumValueDeclaration(thing, parameters);
-        } else if (thing.isScalarDeclaration?.()) {
-            return;
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
-        }
-    }
-
+class PlantUMLVisitor extends DiagramVisitor {
     /**
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitModelManager(modelManager, parameters) {
@@ -78,76 +40,50 @@ class PlantUMLVisitor {
         parameters.fileWriter.writeLine(0, 'Model' );
         parameters.fileWriter.writeLine(0, 'endtitle' );
 
-        modelManager.getModelFiles().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
+        super.visitModelManager(modelManager, parameters);
 
         parameters.fileWriter.writeLine(0, '@enduml');
         parameters.fileWriter.closeFile();
-
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitModelFile(modelFile, parameters) {
-        modelFile.getAllDeclarations().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
-        return null;
     }
 
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitAssetDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(A,green)' );
-        return null;
     }
 
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitEnumDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(E,grey)' );
-        return null;
     }
 
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitParticipantDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(P,lightblue)' );
-        return null;
     }
 
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitTransactionDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(T,yellow)' );
-        return null;
     }
 
 
@@ -155,12 +91,10 @@ class PlantUMLVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters );
-        return null;
     }
 
     /**
@@ -171,74 +105,39 @@ class PlantUMLVisitor {
      * @private
      */
     writeDeclaration(classDeclaration, parameters, style) {
-        parameters.fileWriter.writeLine(0, 'class ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + (style ? ` << ${style} >> ` : ' ') + '{' );
+        parameters.fileWriter.writeLine(0, 'class ' + this.escapeString(classDeclaration.getFullyQualifiedName()) + (style ? ` << ${style} >> ` : ' ') + '{' );
 
-        classDeclaration.getOwnProperties().forEach((property) => {
-            property.accept(this, parameters);
-        });
+        super.visitClassDeclaration(classDeclaration, parameters, style);
 
         parameters.fileWriter.writeLine(0, '}' );
 
-        if(classDeclaration.getSuperType()) {
-            parameters.fileWriter.writeLine(0, PlantUMLVisitor.toPlantUmlName(classDeclaration.getFullyQualifiedName()) + ' --|> ' + PlantUMLVisitor.toPlantUmlName(classDeclaration.getSuperType()));
-        }
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {Field} field - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitField(field, parameters) {
-        let array = '';
-
-        if(field.isArray()) {
-            array = '[]';
+        if (!classDeclaration.isEnum()){
+            classDeclaration.getOwnProperties().forEach((property) => {
+                const source = classDeclaration.getFullyQualifiedName();
+                const target = property.getFullyQualifiedTypeName();
+                const label = property.getName();
+                const array = property.isArray() ? '"*"':'"1"';
+                if (property.isRelationship?.()) {
+                    const type = `"1" ${DiagramVisitor.AGGREGATION} ${array}`;
+                    parameters.fileWriter.writeLine(0, `${source} ${type} ${target} : ${label}`);
+                } else if (parameters.showCompositionRelationships && !property.isPrimitive()){
+                    const type = `"1" ${DiagramVisitor.COMPOSITION} ${array}`;
+                    parameters.fileWriter.writeLine(0, `${source} ${type} ${target} : ${label}`);
+                }
+            });
         }
 
-        parameters.fileWriter.writeLine(1, '+ ' + field.getType() + array + ' ' + field.getName());
-        return null;
+        super.writeDeclarationSupertype(classDeclaration, parameters);
     }
 
     /**
-     * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
+     * Escape versions and periods.
+     * @param {String} string - the object being visited
+     * @return {String} string  - the parameter
      * @private
      */
-    visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        parameters.fileWriter.writeLine(1, '+ ' + enumValueDeclaration.getName());
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {Relationship} relationship - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitRelationship(relationship, parameters) {
-        let array = '';
-
-        if(relationship.isArray()) {
-            array = '[]';
-        }
-
-        parameters.fileWriter.writeLine(1, '+ ' + relationship.getType() + array + ' ' + relationship.getName());
-        return null;
-    }
-
-    /**
-     * Converts a fully qualified type name to a valid PlantUML name
-     * @param {string} fqn fully qualified name of a type
-     * @returns {string} the name for use with PlantUML
-     */
-    static toPlantUmlName(fqn) {
-        return ModelUtil.removeNamespaceVersionFromFullyQualifiedName(fqn);
+    escapeString(string) {
+        return string.replace('@', '_');
     }
 }
 
