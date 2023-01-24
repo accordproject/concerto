@@ -136,6 +136,20 @@ describe('ModelFile', () => {
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
+        it('should throw for a bad namespace part', () => {
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.foo-bar',
+                imports: [],
+                declarations: [ ]
+            };
+            sandbox.stub(Parser, 'parse').returns(ast);
+
+            (() => {
+                ParserUtil.newModelFile(modelManager, 'fake definitions');
+            }).should.throw(/Invalid namespace part 'foo-bar'/);
+        });
+
         it('should throw for a wildcard import when strict is true', () => {
             const strictModelManager = new ModelManager({ strict: true });
 

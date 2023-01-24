@@ -58,6 +58,15 @@ describe('ClassDeclaration', () => {
             }).should.throw(/Unrecognised model element/);
         });
 
+        it('should throw for a bad identifier', () => {
+            (() => {
+                new ClassDeclaration(modelFile, {
+                    name: '2nd',
+                    properties: []
+                });
+            }).should.throw(/Invalid class name '2nd'/);
+        });
+
     });
 
     describe('#validate', () => {

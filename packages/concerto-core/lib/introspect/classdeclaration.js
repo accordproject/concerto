@@ -79,6 +79,12 @@ class ClassDeclaration extends Decorated {
     process() {
         super.process();
 
+        if (!ModelUtil.isValidIdentifier(this.ast.name)){
+            throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
+        }
+
+        const reservedProperties = ['$class', '$identifier', '$timestamp'];
+
         this.name = this.ast.name;
         this.properties = [];
         this.superType = null;
@@ -111,8 +117,8 @@ class ClassDeclaration extends Decorated {
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
-            if(thing.name && thing.name.startsWith('$')) {
-                throw new IllegalModelException(`Invalid field name ${thing.name}`, this.modelFile, this.ast.location);
+            if(reservedProperties.includes(thing.name)) {
+                throw new IllegalModelException(`Invalid field name '${thing.name}'`, this.modelFile, this.ast.location);
             }
 
             if (thing.$class === `${MetaModelNamespace}.RelationshipProperty`) {

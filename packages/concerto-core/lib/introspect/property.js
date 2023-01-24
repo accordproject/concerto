@@ -17,6 +17,7 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const ModelUtil = require('../modelutil');
+const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
@@ -74,6 +75,10 @@ class Property extends Decorated {
      */
     process() {
         super.process();
+
+        if (!ModelUtil.isValidIdentifier(this.ast.name)){
+            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.modelFile, this.ast.location);
+        }
 
         this.name = this.ast.name;
         this.decorator = null;

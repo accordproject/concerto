@@ -90,6 +90,15 @@ describe('Property', () => {
             p.array.should.equal(true);
         });
 
+        it('should throw for a bad property identifier', () => {
+            (() => {
+                new Property(mockClassDeclaration, {
+                    $class: `${MetaModelNamespace}.StringProperty`,
+                    name: '1st',
+                });
+            }).should.throw(/Invalid property name '1st'/);
+        });
+
     });
 
     describe('#hasInstance', () => {

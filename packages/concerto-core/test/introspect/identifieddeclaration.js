@@ -182,7 +182,22 @@ asset Order identified by sku {
                 asset Order {
                     o String $identifier
                 }`, 'test.cto');
-            }).should.throw(/Invalid field name \$identifier/);
+            }).should.throw(/Invalid field name '\$identifier'/);
+        });
+
+        it('should allow field called $foo', () => {
+            const mm = new ModelManager();
+
+            mm.addCTOModel( `
+                namespace test
+
+                asset Order {
+                    o String $foo
+                }`, 'test.cto');
+
+            const order = mm.getType('test.Order');
+            order.should.not.be.null;
+            order.getProperties().length.should.equal(2); // XXX Assets always have an identifier
         });
 
         it('should allow abstract assets without an identifier', () => {
