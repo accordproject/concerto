@@ -9,74 +9,11 @@ export = PlantUMLVisitor;
  * @class
  * @memberof module:concerto-tools
  */
-declare class PlantUMLVisitor {
-    /**
-     * Converts a fully qualified type name to a valid PlantUML name
-     * @param {string} fqn fully qualified name of a type
-     * @returns {string} the name for use with PlantUML
-     */
-    static toPlantUmlName(fqn: string): string;
-    /**
-     * Visitor design pattern
-     * @param {Object} thing - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @public
-     */
-    public visit(thing: any, parameters: any): any;
-    /**
-     * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitModelManager;
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitModelFile;
+declare class PlantUMLVisitor extends DiagramVisitor {
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitAssetDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEnumDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitParticipantDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitTransactionDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     private visitClassDeclaration;
@@ -89,27 +26,11 @@ declare class PlantUMLVisitor {
      */
     private writeDeclaration;
     /**
-     * Visitor design pattern
-     * @param {Field} field - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
+     * Escape versions and periods.
+     * @param {String} string - the object being visited
+     * @return {String} string  - the parameter
      * @private
      */
-    private visitField;
-    /**
-     * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEnumValueDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {Relationship} relationship - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitRelationship;
+    private escapeString;
 }
+import DiagramVisitor = require("../common/diagramvisitor");

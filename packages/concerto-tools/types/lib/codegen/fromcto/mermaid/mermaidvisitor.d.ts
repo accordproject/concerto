@@ -8,102 +8,20 @@ export = MermaidVisitor;
  * @private
  * @class
  */
-declare class MermaidVisitor {
-    /**
-     * Visitor design pattern
-     * @param {Object} thing - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visit;
-    /**
-     * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitModelManager;
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitModelFile;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitAssetDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEnumDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEventDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitParticipantDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitTransactionDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @param {string} type  - the type of the declaration
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitClassDeclaration;
-    /**
-     * Visitor design pattern
-     * @param {Field} field - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitField;
-    /**
-     * Visitor design pattern
-     * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private visitEnumValueDeclaration;
+declare class MermaidVisitor extends DiagramVisitor {
     /**
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationship - the object being visited
      * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
      * @private
      */
     private visitRelationship;
+    /**
+     * Escape versions and periods.
+     * @param {String} string - the object being visited
+     * @return {String} string  - the parameter
+     * @private
+     */
+    private escapeString;
 }
+import DiagramVisitor = require("../common/diagramvisitor");
