@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-vocabulary",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -49,7 +49,7 @@
     "typescript": "4.6.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.3.0",
+    "@accordproject/concerto-metamodel": "3.4.0",
     "yaml": "2.0.0-9"
   },
   "browserslist": "> 0.25%, not dead",
