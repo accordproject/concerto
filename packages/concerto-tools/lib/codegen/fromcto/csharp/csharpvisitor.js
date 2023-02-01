@@ -236,14 +236,8 @@ class CSharpVisitor {
      * @private
      */
     visitScalarField(field, parameters) {
-        let fieldType;
-        let scalarField = field.getScalarField();
-        if (scalarField.getType() === 'String') {
-            if(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName()) === 'concerto.scalar.UUID') {
-                fieldType = 'concerto.scalar.UUID';
-            }
-        }
-        return this.writeField(field.getScalarField(), parameters, fieldType);
+        const fieldType = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName());
+        return this.writeField(field.getScalarField(), parameters, fieldType === 'concerto.scalar.UUID' ? fieldType : null );
     }
 
     /**
