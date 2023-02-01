@@ -239,9 +239,8 @@ class CSharpVisitor {
         let fieldType;
         let scalarField = field.getScalarField();
         if (scalarField.getType() === 'String') {
-            const type = field.getParent().getModelFile().getType(field.getType());
-            if (type.getName() === 'UUID' && type.getNamespace().startsWith('concerto.scalar')) {
-                fieldType = 'UUID';
+            if(ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName()) === 'concerto.scalar.UUID') {
+                fieldType = 'concerto.scalar.UUID';
             }
         }
         return this.writeField(field.getScalarField(), parameters, fieldType);
@@ -467,7 +466,7 @@ class CSharpVisitor {
             return 'long';
         case 'Integer':
             return 'int';
-        case 'UUID':
+        case 'concerto.scalar.UUID':
             return 'Guid';
         default:
             return this.toCSharpIdentifier(undefined, type, parameters);
