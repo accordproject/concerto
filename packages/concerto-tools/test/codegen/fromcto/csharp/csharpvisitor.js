@@ -29,6 +29,7 @@ const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
+const ScalarDeclaration = require('@accordproject/concerto-core').ScalarDeclaration;
 
 describe('CSharpVisitor', function () {
     let csharpVisitor;
@@ -246,6 +247,30 @@ describe('CSharpVisitor', function () {
             file1.should.match(/class Thing/);
             file1.should.match(/AccordProject.Concerto.Identifier\(\)/);
             file1.should.match(/public string ThingId/);
+        });
+
+        it('should use Guid if scalar type with name UUID provided with namespace concerto.scalar', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace concerto.scalar@1.0.0
+
+            scalar UUID extends String default="00000000-0000-0000-0000-000000000000" regex=/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            import concerto.scalar@1.0.0.{ UUID }
+
+            concept Thing {
+                o UUID ThingId
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme;/);
+            file1.should.match(/class Thing/);
+            file1.should.match(/public Guid ThingId/);
         });
     });
 
@@ -816,6 +841,41 @@ describe('CSharpVisitor', function () {
         });
     });
 
+    describe('visitScalarField', () => {
+        let param;
+        beforeEach(() => {
+            param = {
+                fileWriter: mockFileWriter
+            };
+        });
+
+        it('should write a line for scalar field of type UUID with dotnet type Guid', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('someId');
+            mockField.getType.returns('UUID');
+            mockField.isArray.returns(false);
+            mockField.isTypeScalar.returns(true);
+
+            const mockScalarField = sinon.createStubInstance(Field);
+            mockScalarField.getType.returns('String');
+            mockField.getScalarField.returns(mockScalarField);
+
+            const mockModelManager = sinon.createStubInstance(ModelManager);
+            const mockModelFile = sinon.createStubInstance(ModelFile);
+            const mockScalarDeclaration = sinon.createStubInstance(ScalarDeclaration);
+
+            mockModelManager.getType.returns(mockScalarDeclaration);
+            mockScalarDeclaration.getName.returns('UUID');
+            mockScalarDeclaration.getNamespace.returns('concerto.scalar@1.2.3');
+            mockModelFile.getModelManager.returns(mockModelManager);
+            mockScalarDeclaration.getModelFile.returns(mockModelFile);
+            mockField.getParent.returns(mockScalarDeclaration);
+            csharpVisitor.visitField(mockField, param);
+            param.fileWriter.writeLine.withArgs(1, 'public Guid someId { get; set; }').calledOnce.should.be.ok;
+        });
+    });
+
     describe('visitField', () => {
         let param;
         beforeEach(() => {
@@ -938,6 +998,9 @@ describe('CSharpVisitor', function () {
         });
         it('should return number for Integer', () => {
             csharpVisitor.toCSharpType('Integer').should.deep.equal('int');
+        });
+        it('should return Guid for Scalar type UUID', () => {
+            csharpVisitor.toCSharpType('UUID').should.deep.equal('Guid');
         });
         it('should return passed in type by default', () => {
             csharpVisitor.toCSharpType('Penguin').should.deep.equal('Penguin');

@@ -59,7 +59,7 @@ class CSharpVisitor {
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
+            return this.visitScalarField(thing, parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -235,7 +235,38 @@ class CSharpVisitor {
      * @return {Object} the result of visiting or null
      * @private
      */
+    visitScalarField(field, parameters) {
+        let fieldType;
+        let scalarField = field.getScalarField();
+        if (scalarField.getType() === 'String') {
+            const type = field.getParent().getModelFile().getType(field.getType());
+            if (type.getName() === 'UUID' && type.getNamespace().startsWith('concerto.scalar')) {
+                fieldType = 'UUID';
+            }
+        }
+        return this.writeField(field.getScalarField(), parameters, fieldType);
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
     visitField(field, parameters) {
+        return this.writeField(field, parameters);
+    }
+
+    /**
+     * Write a field
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {string} [externalFieldType] - the external field type like UUID (optional)
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    writeField(field, parameters, externalFieldType) {
         // If no serlialization library is specified we default to the .NET one.
         // However, we also allow both options to be specified
         if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
@@ -258,11 +289,13 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(1, '[AccordProject.Concerto.Identifier()]');
         }
 
+        let fieldType = externalFieldType ? externalFieldType : field.getType();
+
         const lines = this.toCSharpProperty(
             'public',
             field.getParent()?.getName(),
             field.getName(),
-            field.getType()+nullableType,
+            fieldType+nullableType,
             array,
             '{ get; set; }',
             parameters
@@ -434,6 +467,8 @@ class CSharpVisitor {
             return 'long';
         case 'Integer':
             return 'int';
+        case 'UUID':
+            return 'Guid';
         default:
             return this.toCSharpIdentifier(undefined, type, parameters);
         }
