@@ -97,7 +97,9 @@ class MarkdownVisitor {
         writer.writeLine(0, 'classDiagram');
 
         const childParameters = {
-            fileWriter: writer
+            fileWriter: writer,
+            hideBaseModel: true,
+            showCompositionRelationships: true
         };
         modelFile.accept(visitor, childParameters);
         writer.writeLine(0, '```');
