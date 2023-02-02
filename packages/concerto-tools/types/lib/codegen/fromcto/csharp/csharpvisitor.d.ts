@@ -55,7 +55,24 @@ declare class CSharpVisitor {
      * @return {Object} the result of visiting or null
      * @private
      */
+    private visitScalarField;
+    /**
+     * Visitor design pattern
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
     private visitField;
+    /**
+     * Write a field
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {string} [externalFieldType] - the external field type like UUID (optional)
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    private writeField;
     /**
      * Visitor design pattern
      * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
