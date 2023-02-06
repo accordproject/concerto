@@ -1,8 +1,0 @@
-{
-  "$class": "record@0.1.0.Dictionary",
-  "simpleDictionary": {
-    "a": "A",
-    "a": "B",
-    "1": 1
-  }
-}
