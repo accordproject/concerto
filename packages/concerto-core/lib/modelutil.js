@@ -130,7 +130,6 @@ class ModelUtil {
      * @private
      */
     static isAggregateType(typeName) {
-        // TODO
         const aggregateTypes = ['Record'];
         return (aggregateTypes.indexOf(typeName) >= 0);
     }

@@ -638,6 +638,7 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
+                'isAggregate':function(){return false;},
                 'getParent':function(){
                     return {
                         'getModelFile':function(){
@@ -688,6 +689,7 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
+                'isAggregate':function(){return false;},
                 'getParent':function(){
                     return {
                         'getModelFile':function(){

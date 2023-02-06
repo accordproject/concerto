@@ -1,0 +1,29 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [],
+  "namespace": "record@0.1.0",
+  "imports": [],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Dictionary",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.RecordProperty",
+          "name": "simpleDictionary",
+          "keyType": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "String"
+          },
+          "valueType": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "String"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ]
+    }
+  ]
+}

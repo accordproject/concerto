@@ -237,6 +237,19 @@ describe('Serializer', () => {
             });
         });
 
+        it('should generate a record', () => {
+            let dictionaries = factory.newConcept('org.acme.sample', 'Dictionaries');
+            dictionaries.simpleDictionary = new Map([['a', 'A'], ['b', 'B']]);
+            const json = serializer.toJSON(dictionaries);
+            json.should.deep.equal({
+                $class: 'org.acme.sample.Dictionaries',
+                simpleDictionary: {
+                    a: 'A',
+                    b: 'B'
+                }
+            });
+        });
+
         it('should generate a field if an empty string is specififed', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
@@ -337,7 +350,7 @@ describe('Serializer', () => {
             resource.postcode.should.equal('SO21 2JN');
         });
 
-        it.only('should deserialize a valid Record', () => {
+        it('should deserialize a valid Record', () => {
             let json = {
                 $class: 'org.acme.sample.Dictionaries',
                 simpleDictionary: {
@@ -347,8 +360,8 @@ describe('Serializer', () => {
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
-            resource.simpleDictionary.foo.should.equal('a foo');
-            resource.simpleDictionary.bar.should.equal('a bar');
+            resource.simpleDictionary.get('foo').should.equal('a foo');
+            resource.simpleDictionary.get('bar').should.equal('a bar');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {

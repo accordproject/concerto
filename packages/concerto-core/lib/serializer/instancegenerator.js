@@ -78,6 +78,9 @@ class InstanceGenerator {
      * @private
      */
     visitField(field, parameters) {
+        if(field.isAggregate()){
+            return new Map();
+        }
         if(!field.isPrimitive()){
             let type = field.getFullyQualifiedTypeName();
             let classDeclaration = parameters.modelManager.getType(type);

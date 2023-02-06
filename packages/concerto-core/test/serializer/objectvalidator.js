@@ -62,6 +62,7 @@ describe('ObjectValidator', function () {
             --> Person[] previousOwners optional
             o TestEnum[] testEnums optional
             --> Person lastOwner optional
+            o Record<String, String> simpleRecord optional
         }
         `, 'test.cto');
     });
@@ -232,6 +233,21 @@ describe('ObjectValidator', function () {
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
             }).should.throw('Type "Missing" is not defined in namespace "test".');
+        });
+
+        it('should fail if value is not a string', () => {
+            const data = {
+                $class : 'test.Vehicle',
+                simpleRecord: {
+                    a: 123,
+                },
+            };
+            const parameters = {};
+            parameters.stack = new TypedStack(data);
+
+            (function () {
+                objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
+            }).should.throw('Value of \'simpleRecord.a\' does not have a \'String\' type at `simpleRecord`');
         });
     });
 

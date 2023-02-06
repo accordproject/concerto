@@ -199,10 +199,25 @@ class JSONPopulator {
      */
     convertItem(field, jsonItem, parameters) {
         let result = null;
+        parameters.path ?? (parameters.path = new TypedStack('$'));
+        const path = parameters.path.stack.join('');
 
         if (field.isAggregate()){
-            // TODO complex types
-            result = jsonItem;
+            const entries = Object.entries(jsonItem);
+
+            // TODO complex types & enums
+
+            // Record
+            entries.forEach(([key, value]) => {
+                if (typeof key !== 'string'){
+                    throw new ValidationException(`Key '${key}' does not have a 'string' type at \`${path}\``);
+                }
+                if (typeof value !== 'string'){
+                    throw new ValidationException(`Value '${value}' does not have a 'string' type at \`${path}\``);
+                }
+            });
+            result = new Map(entries);
+            console.log(result);
         }
         else if(!field.isPrimitive() && !field.isTypeEnum()) {
             if (this.ergo) {

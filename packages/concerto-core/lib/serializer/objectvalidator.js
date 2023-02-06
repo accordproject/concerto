@@ -279,7 +279,7 @@ class ObjectValidator {
      * @param {Object} parameters  - the parameter
      * @private
      */
-    checkItem(obj,field, parameters) {
+    checkItem(obj, field, parameters) {
         let dataType = typeof obj;
         let propName = field.getName();
 
@@ -287,7 +287,21 @@ class ObjectValidator {
             ObjectValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, this.concerto);
         }
 
-        if(field.isPrimitive()) {
+        if(field.isAggregate()){
+            const entries = Object.entries(obj);
+            // TODO complex types & enums
+
+            // Record
+            entries.forEach(([key, value]) => {
+                if (typeof key !== 'string'){
+                    throw new ValidationException(`Key '${key}' does not have a '${field.keyType}' type at \`${propName}\``);
+                }
+                if (typeof value !== 'string'){
+                    throw new ValidationException(`Value of '${propName}.${key}' does not have a '${field.keyType}' type at \`${propName}\``);
+                }
+            });
+        }
+        else if(field.isPrimitive()) {
             let invalid = false;
 
             switch(field.getType()) {

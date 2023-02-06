@@ -186,6 +186,8 @@ class JSONGenerator {
             } else {
                 result = this.convertToJSON(field, obj);
             }
+        } else if (field.isAggregate()) {
+            result = Object.fromEntries(obj.entries());
         } else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());

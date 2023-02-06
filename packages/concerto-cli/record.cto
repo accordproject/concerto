@@ -1,0 +1,5 @@
+namespace record@0.1.0
+
+concept Dictionary {
+    o Record<String, String> simpleDictionary
+}
