@@ -842,6 +842,20 @@ PrimitiveType
    DateTimeType /
    BooleanType
 
+/** Aggregate Types */
+RecordType
+ = "Record" __? "<" __? key:Identifier __? "," __? value:Identifier __? ">" !IdentifierPart {
+    return {
+      name: "Record",
+      keyType: key,
+      valueType: value
+    }
+}
+
+AggregateType
+   = RecordType
+//    / SetType
+
 /* Object Type */
 ObjectType
  = !PrimitiveType type:Identifier !IdentifierPart {
@@ -1198,6 +1212,7 @@ FieldDeclarations
   / BooleanFieldDeclaration
   / DateTimeFieldDeclaration
   / RelationshipDeclaration
+  / AggregateFieldDeclaration
   / ObjectFieldDeclaration
   / IntegerFieldDeclaration
   / LongFieldDeclaration
@@ -1224,6 +1239,23 @@ ObjectFieldDeclaration
       if (d) {
         result.defaultValue = d;
       }
+      if (decorators.length > 0) {
+        result.decorators = decorators;
+      }
+      return result;
+    }
+
+AggregateFieldDeclaration
+    = decorators:Decorators __ "o" __ propertyType:AggregateType __ array:"[]"? __ id:Identifier __ optional:Optional? __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.RecordProperty",
+    		name: id.name,
+    		keyType: propertyType.keyType,
+            valueType: propertyType.valueType,
+    		isArray: buildBoolean(array),
+    		isOptional: buildBoolean(optional),
+            ...buildRange(location())
+    	};
       if (decorators.length > 0) {
         result.decorators = decorators;
       }

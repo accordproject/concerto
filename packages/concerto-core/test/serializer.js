@@ -78,6 +78,11 @@ describe('Serializer', () => {
         o String newValue
         }
 
+        concept Dictionaries {
+            o Record<String, String> simpleDictionary optional
+            // o Record<String, SampleParticipant> complexDictionary optional
+        }
+
         `);
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
@@ -330,6 +335,20 @@ describe('Serializer', () => {
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
             resource.postcode.should.equal('SO21 2JN');
+        });
+
+        it.only('should deserialize a valid Record', () => {
+            let json = {
+                $class: 'org.acme.sample.Dictionaries',
+                simpleDictionary: {
+                    'foo': 'a foo',
+                    'bar': 'a bar',
+                }
+            };
+            let resource = serializer.fromJSON(json);
+            resource.should.be.an.instanceOf(Resource);
+            resource.simpleDictionary.foo.should.equal('a foo');
+            resource.simpleDictionary.bar.should.equal('a bar');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {

@@ -290,7 +290,7 @@ class ModelFile extends Decorated {
      */
     resolveType(context, type, fileLocation) {
         // is the type a primitive?
-        if(!ModelUtil.isPrimitiveType(type)) {
+        if(!ModelUtil.isPrimitiveType(type) && !ModelUtil.isAggregateType(type)) {
             // is it an imported type?
             if(!this.isImportedType(type)) {
                 // is the type declared locally?

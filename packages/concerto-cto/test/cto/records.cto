@@ -1,0 +1,22 @@
+namespace records@1.0.0
+
+scalar GUID extends String
+
+enum States {
+  o STOPPED
+  o RUNNING
+  o ERRORED
+}
+
+concept Bar {
+}
+
+concept Foo {
+  o Record<String, String> stringMap
+  o Record<String, Boolean> booleanMap
+  o Record<String, Bar> conceptMap
+  o Record<States, String> enumMap
+  o Record<String, States> enumMap2
+  o Record<GUID, String> scalarMap
+  o Record<GUID, Bar> scalarConceptMap
+}

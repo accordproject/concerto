@@ -76,6 +76,21 @@ asset BaseAsset identified by stringProperty {
 
     o Person myPerson optional
     o Person[] myPeople optional
+
+    o Record<String, String> stringMap optional
+    o Record<String, Boolean> booleanMap optional
+    o Record<String, Bar> conceptMap optional
+    // o Record<State, String> enumMap optional
+    o Record<String, State> enumMap2 optional
+    // o Record<GUID, String> scalarMap optional
+    // o Record<GUID, Bar> scalarConceptMap optional
+    // o Set<String> stringSet optional
+    // o Set<States> enumSet optional
+    // o Set<Integer> integerSet optional
+    // o Set<GUID> scalarSet optional
+    // TODO this should still be valid for backwards-compatibility
+        // concept Record {}
+        // o Record record
 }
 
 asset DerivedAsset extends BaseAsset {

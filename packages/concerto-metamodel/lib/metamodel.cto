@@ -30,6 +30,7 @@ concept Range {
 concept TypeIdentifier {
   o String name
   o String namespace optional
+  o TypeIdentifier[] typeParameters optional
 }
 
 abstract concept DecoratorLiteral {
@@ -116,6 +117,11 @@ concept RelationshipProperty extends Property {
 concept ObjectProperty extends Property {
   o String defaultValue optional
   o TypeIdentifier type
+}
+
+concept RecordProperty extends Property {
+  o TypeIdentifier keyType
+  o TypeIdentifier valueType
 }
 
 concept BooleanProperty extends Property {

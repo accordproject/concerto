@@ -19,6 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Decorated = require('./decorated');
 const EnumValueDeclaration = require('./enumvaluedeclaration');
 const Field = require('./field');
+const RecordField = require('./recordfield');
 const Globalize = require('../globalize');
 const IllegalModelException = require('./illegalmodelexception');
 const Introspector = require('./introspector');
@@ -129,6 +130,10 @@ class ClassDeclaration extends Decorated {
                     thing.$class === `${MetaModelNamespace}.ObjectProperty`
             ) {
                 this.properties.push(new Field(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.RecordProperty`
+            ) {
+                this.properties.push(new RecordField(this, thing));
             } else {
                 let formatter = Globalize.messageFormatter('classdeclaration-process-unrecmodelelem');
                 throw new IllegalModelException(formatter({

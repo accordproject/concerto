@@ -1,0 +1,141 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "records@1.0.0",
+    "imports": [],
+    "declarations": [
+      {
+        "$class": "concerto.metamodel@1.0.0.StringScalar",
+        "name": "GUID"
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+        "name": "States",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+            "name": "STOPPED"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+            "name": "RUNNING"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+            "name": "ERRORED"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+        "name": "Bar",
+        "isAbstract": false,
+        "properties": []
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+        "name": "Foo",
+        "isAbstract": false,
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "stringMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "booleanMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Boolean"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "conceptMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Bar"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "enumMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "States"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "enumMap2",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "States"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "scalarMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "GUID"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.RecordProperty",
+            "name": "scalarConceptMap",
+            "keyType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "GUID"
+            },
+            "valueType": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Bar"
+            },
+            "isArray": false,
+            "isOptional": false
+          }
+        ]
+      }
+    ]
+  }

@@ -326,7 +326,13 @@ class ResourceValidator {
                 }
             }
         }
-        else {
+        else if(field.isAggregate()) {
+            let invalid = false;
+            // TODO
+            if (invalid) {
+                ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            }
+        } else {
             // a field that points to a transaction, asset, participant...
             let classDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
             if(obj instanceof Identifiable) {

@@ -233,6 +233,14 @@ class Property extends Decorated {
     isPrimitive() {
         return ModelUtil.isPrimitiveType(this.getType());
     }
+
+    /**
+     * Returns true if this property is an aggregate type.
+     * @return {boolean} true if the property is an aggregate type.
+     */
+    isAggregate() {
+        return ModelUtil.isAggregateType(this.getType());
+    }
 }
 
 module.exports = Property;

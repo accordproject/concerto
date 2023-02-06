@@ -124,6 +124,18 @@ class ModelUtil {
     }
 
     /**
+     * Returns true if the type is an aggregate type
+     * @param {string} typeName - the name of the type
+     * @return {boolean} - true if the type is an aggregate
+     * @private
+     */
+    static isAggregateType(typeName) {
+        // TODO
+        const aggregateTypes = ['Record'];
+        return (aggregateTypes.indexOf(typeName) >= 0);
+    }
+
+    /**
      * Returns true if the type is assignable to the propertyType.
      *
      * @param {ModelFile} modelFile - the ModelFile that owns the Property

@@ -101,6 +101,9 @@ function typeFromMetaModel(mm){
     case `${MetaModelNamespace}.StringScalar`:
         result += ' String';
         break;
+    case `${MetaModelNamespace}.RecordProperty`:
+        result += ` Record<${mm.keyType.name}, ${mm.valueType.name}>`;
+        break;
     case `${MetaModelNamespace}.ObjectProperty`:
         result += ` ${mm.type.name}`;
         break;

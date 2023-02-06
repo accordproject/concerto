@@ -200,7 +200,11 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if(!field.isPrimitive() && !field.isTypeEnum()) {
+        if (field.isAggregate()){
+            // TODO complex types
+            result = jsonItem;
+        }
+        else if(!field.isPrimitive() && !field.isTypeEnum()) {
             if (this.ergo) {
                 const theClass = jsonItem.$class.$coll[0];
                 jsonItem = jsonItem.$data;
