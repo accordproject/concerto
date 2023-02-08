@@ -1920,7 +1920,6 @@ class \`org.acme.hr.State\` {
    + \`CA\`
 }
 
-\`org.acme.hr.State\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr.Address\` {
 << concept>>
    + \`String\` \`street\`
@@ -1930,14 +1929,14 @@ class \`org.acme.hr.Address\` {
    + \`String\` \`country\`
 }
 
-\`org.acme.hr.Address\` --|> \`concerto@1.0.0.Concept\`
+\`org.acme.hr.Address\` "1" *-- "1" \`org.acme.hr.State\`
 class \`org.acme.hr.Company\` {
 << concept>>
    + \`String\` \`name\`
    + \`Address\` \`headquarters\`
 }
 
-\`org.acme.hr.Company\` --|> \`concerto@1.0.0.Concept\`
+\`org.acme.hr.Company\` "1" *-- "1" \`org.acme.hr.Address\`
 class \`org.acme.hr.Department\` {
 << enumeration>>
    + \`Sales\`
@@ -1948,25 +1947,23 @@ class \`org.acme.hr.Department\` {
    + \`Design\`
 }
 
-\`org.acme.hr.Department\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr.Equipment\` {
 << asset>>
    + \`String\` \`serialNumber\`
 }
 
-\`org.acme.hr.Equipment\` --|> \`concerto@1.0.0.Asset\`
 class \`org.acme.hr.LaptopMake\` {
 << enumeration>>
    + \`Apple\`
    + \`Microsoft\`
 }
 
-\`org.acme.hr.LaptopMake\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr.Laptop\` {
 << asset>>
    + \`LaptopMake\` \`make\`
 }
 
+\`org.acme.hr.Laptop\` "1" *-- "1" \`org.acme.hr.LaptopMake\`
 \`org.acme.hr.Laptop\` --|> \`org.acme.hr.Equipment\`
 class \`org.acme.hr.Person\` {
 << participant>>
@@ -1980,7 +1977,8 @@ class \`org.acme.hr.Person\` {
    + \`DateTime\` \`dob\`
 }
 
-\`org.acme.hr.Person\` --|> \`concerto@1.0.0.Participant\`
+\`org.acme.hr.Person\` "1" *-- "1" \`org.acme.hr.Address\`
+\`org.acme.hr.Person\` "1" *-- "1" \`org.acme.hr.SSN\`
 class \`org.acme.hr.Employee\` {
 << participant>>
    + \`String\` \`employeeId\`
@@ -1992,6 +1990,9 @@ class \`org.acme.hr.Employee\` {
    + \`Equipment[]\` \`companyAssets\`
 }
 
+\`org.acme.hr.Employee\` "1" *-- "1" \`org.acme.hr.Department\`
+\`org.acme.hr.Employee\` "1" *-- "1" \`org.acme.hr.Address\`
+\`org.acme.hr.Employee\` "1" *-- "*" \`org.acme.hr.Equipment\`
 \`org.acme.hr.Employee\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 \`org.acme.hr.Employee\` --|> \`org.acme.hr.Person\`
 class \`org.acme.hr.Contractor\` {
@@ -1999,6 +2000,7 @@ class \`org.acme.hr.Contractor\` {
    + \`Company\` \`company\`
 }
 
+\`org.acme.hr.Contractor\` "1" *-- "1" \`org.acme.hr.Company\`
 \`org.acme.hr.Contractor\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 \`org.acme.hr.Contractor\` --|> \`org.acme.hr.Person\`
 class \`org.acme.hr.Manager\` {
@@ -2010,7 +2012,6 @@ class \`org.acme.hr.Manager\` {
 class \`org.acme.hr.CompanyEvent\`
 << event>> \`org.acme.hr.CompanyEvent\`
 
-\`org.acme.hr.CompanyEvent\` --|> \`concerto@1.0.0.Event\`
 class \`org.acme.hr.Onboarded\` {
 << event>>
 }
@@ -2023,7 +2024,7 @@ class \`org.acme.hr.ChangeOfAddress\` {
 }
 
 \`org.acme.hr.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr.Person\` : Person
-\`org.acme.hr.ChangeOfAddress\` --|> \`concerto@1.0.0.Transaction\`
+\`org.acme.hr.ChangeOfAddress\` "1" *-- "1" \`org.acme.hr.Address\`
 \`\`\`
 
 ",
@@ -6008,7 +6009,6 @@ class \`org.acme.hr@1.0.0.State\` {
    + \`CA\`
 }
 
-\`org.acme.hr@1.0.0.State\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr@1.0.0.Address\` {
 << concept>>
    + \`String\` \`street\`
@@ -6018,14 +6018,14 @@ class \`org.acme.hr@1.0.0.Address\` {
    + \`String\` \`country\`
 }
 
-\`org.acme.hr@1.0.0.Address\` --|> \`concerto@1.0.0.Concept\`
+\`org.acme.hr@1.0.0.Address\` "1" *-- "1" \`org.acme.hr@1.0.0.State\`
 class \`org.acme.hr@1.0.0.Company\` {
 << concept>>
    + \`String\` \`name\`
    + \`Address\` \`headquarters\`
 }
 
-\`org.acme.hr@1.0.0.Company\` --|> \`concerto@1.0.0.Concept\`
+\`org.acme.hr@1.0.0.Company\` "1" *-- "1" \`org.acme.hr@1.0.0.Address\`
 class \`org.acme.hr@1.0.0.Department\` {
 << enumeration>>
    + \`Sales\`
@@ -6036,25 +6036,23 @@ class \`org.acme.hr@1.0.0.Department\` {
    + \`Design\`
 }
 
-\`org.acme.hr@1.0.0.Department\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr@1.0.0.Equipment\` {
 << asset>>
    + \`String\` \`serialNumber\`
 }
 
-\`org.acme.hr@1.0.0.Equipment\` --|> \`concerto@1.0.0.Asset\`
 class \`org.acme.hr@1.0.0.LaptopMake\` {
 << enumeration>>
    + \`Apple\`
    + \`Microsoft\`
 }
 
-\`org.acme.hr@1.0.0.LaptopMake\` --|> \`concerto@1.0.0.Concept\`
 class \`org.acme.hr@1.0.0.Laptop\` {
 << asset>>
    + \`LaptopMake\` \`make\`
 }
 
+\`org.acme.hr@1.0.0.Laptop\` "1" *-- "1" \`org.acme.hr@1.0.0.LaptopMake\`
 \`org.acme.hr@1.0.0.Laptop\` --|> \`org.acme.hr@1.0.0.Equipment\`
 class \`org.acme.hr@1.0.0.Person\` {
 << participant>>
@@ -6068,7 +6066,8 @@ class \`org.acme.hr@1.0.0.Person\` {
    + \`DateTime\` \`dob\`
 }
 
-\`org.acme.hr@1.0.0.Person\` --|> \`concerto@1.0.0.Participant\`
+\`org.acme.hr@1.0.0.Person\` "1" *-- "1" \`org.acme.hr@1.0.0.Address\`
+\`org.acme.hr@1.0.0.Person\` "1" *-- "1" \`org.acme.hr@1.0.0.SSN\`
 class \`org.acme.hr@1.0.0.Employee\` {
 << participant>>
    + \`String\` \`employeeId\`
@@ -6080,6 +6079,9 @@ class \`org.acme.hr@1.0.0.Employee\` {
    + \`Equipment[]\` \`companyAssets\`
 }
 
+\`org.acme.hr@1.0.0.Employee\` "1" *-- "1" \`org.acme.hr@1.0.0.Department\`
+\`org.acme.hr@1.0.0.Employee\` "1" *-- "1" \`org.acme.hr@1.0.0.Address\`
+\`org.acme.hr@1.0.0.Employee\` "1" *-- "*" \`org.acme.hr@1.0.0.Equipment\`
 \`org.acme.hr@1.0.0.Employee\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 \`org.acme.hr@1.0.0.Employee\` --|> \`org.acme.hr@1.0.0.Person\`
 class \`org.acme.hr@1.0.0.Contractor\` {
@@ -6087,6 +6089,7 @@ class \`org.acme.hr@1.0.0.Contractor\` {
    + \`Company\` \`company\`
 }
 
+\`org.acme.hr@1.0.0.Contractor\` "1" *-- "1" \`org.acme.hr@1.0.0.Company\`
 \`org.acme.hr@1.0.0.Contractor\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 \`org.acme.hr@1.0.0.Contractor\` --|> \`org.acme.hr@1.0.0.Person\`
 class \`org.acme.hr@1.0.0.Manager\` {
@@ -6098,7 +6101,6 @@ class \`org.acme.hr@1.0.0.Manager\` {
 class \`org.acme.hr@1.0.0.CompanyEvent\`
 << event>> \`org.acme.hr@1.0.0.CompanyEvent\`
 
-\`org.acme.hr@1.0.0.CompanyEvent\` --|> \`concerto@1.0.0.Event\`
 class \`org.acme.hr@1.0.0.Onboarded\` {
 << event>>
 }
@@ -6111,7 +6113,7 @@ class \`org.acme.hr@1.0.0.ChangeOfAddress\` {
 }
 
 \`org.acme.hr@1.0.0.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr@1.0.0.Person\` : Person
-\`org.acme.hr@1.0.0.ChangeOfAddress\` --|> \`concerto@1.0.0.Transaction\`
+\`org.acme.hr@1.0.0.ChangeOfAddress\` "1" *-- "1" \`org.acme.hr@1.0.0.Address\`
 \`\`\`
 
 ",
