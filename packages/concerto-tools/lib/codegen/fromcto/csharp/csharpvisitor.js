@@ -217,6 +217,7 @@ class CSharpVisitor {
             '$class',
             'String',
             '',
+            '',
             `{ get; } = "${classDeclaration.getFullyQualifiedName()}";`,
             parameters
         );
@@ -272,11 +273,6 @@ class CSharpVisitor {
             array = '[]';
         }
 
-        let nullableType = '';
-        if(field.isOptional() && field.isTypeEnum()){
-            nullableType = '?';
-        }
-
         let isIdentifier = field.getName() === field.getParent()?.getIdentifierFieldName();
         if (isIdentifier) {
             parameters.fileWriter.writeLine(1, '[AccordProject.Concerto.Identifier()]');
@@ -284,11 +280,17 @@ class CSharpVisitor {
 
         let fieldType = externalFieldType ? externalFieldType : field.getType();
 
+        let nullableType = '';
+        if(field.isOptional() && fieldType !== 'String'){ //string type is nullable by default.
+            nullableType = '?';
+        }
+
         const lines = this.toCSharpProperty(
             'public',
             field.getParent()?.getName(),
             field.getName(),
-            fieldType+nullableType,
+            fieldType,
+            nullableType,
             array,
             '{ get; set; }',
             parameters
@@ -335,6 +337,7 @@ class CSharpVisitor {
             relationship.getParent()?.getName(),
             relationship.getName(),
             relationship.getType(),
+            '',
             array,
             '{ get; set; }',
             parameters
@@ -350,11 +353,12 @@ class CSharpVisitor {
      * @param {string} propertyName the Concerto property name
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
+     * @param {string} nullableType the nullable expression ?
      * @param {string} getset the getter and setter declaration
      * @param {Object} [parameters]  - the parameter
      * @returns {string} the property declaration
      */
-    toCSharpProperty(access, parentName, propertyName, propertyType, array, getset, parameters) {
+    toCSharpProperty(access, parentName, propertyName, propertyType, array, nullableType, getset, parameters) {
         const identifier = this.toCSharpIdentifier(parentName, propertyName, parameters);
         const type = this.toCSharpType(propertyType, parameters);
 
@@ -369,7 +373,7 @@ class CSharpVisitor {
             }
         }
 
-        lines.push(`${access} ${type}${array} ${identifier} ${getset}`);
+        lines.push(`${access} ${type}${array}${nullableType} ${identifier} ${getset}`);
         return lines;
     }
 
@@ -461,7 +465,7 @@ class CSharpVisitor {
         case 'Integer':
             return 'int';
         case 'concerto.scalar.UUID':
-            return 'Guid';
+            return 'System.Guid';
         default:
             return this.toCSharpIdentifier(undefined, type, parameters);
         }
