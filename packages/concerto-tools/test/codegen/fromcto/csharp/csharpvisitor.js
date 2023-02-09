@@ -230,6 +230,43 @@ describe('CSharpVisitor', function () {
             file1.should.match(/public string _Identifier/);
         });
 
+        it('should add ?(nullable) expression for optional fields except for string type', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            concept Thing identified by thingId {
+                o String thingId
+                o String value optional
+                o Integer nullableIntValue optional
+                o Integer nonNullableIntValue
+                o Double nullableDoubleValue optional
+                o Double nonNullableDoubleValue
+                o Boolean nullableBooleanValue optional
+                o Boolean nonNullableBooleanValue
+                o DateTime nullableDateTimeValue optional
+                o DateTime nonNullableDateTimeValue
+                o Long nullableLongValue optional
+                o Long nonNullableLongValue
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter, pascalCase: true });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/public string ThingId/);
+            file1.should.match(/public string Value/);
+            file1.should.match(/public int\? NullableIntValue/);
+            file1.should.match(/public int NonNullableIntValue/);
+            file1.should.match(/public float\? NullableDoubleValue/);
+            file1.should.match(/public float NonNullableDoubleValue/);
+            file1.should.match(/public bool\? NullableBooleanValue/);
+            file1.should.match(/public bool NonNullableBooleanValue/);
+            file1.should.match(/public System.DateTime\? NullableDateTimeValue/);
+            file1.should.match(/public System.DateTime NonNullableDateTimeValue/);
+            file1.should.match(/public long\? NullableLongValue/);
+            file1.should.match(/public long NonNullableLongValue/);
+        });
+
         it('should add identifier attributes for concepts with identified by', () => {
             const modelManager = new ModelManager({ strict: true });
             modelManager.addCTOModel(`
@@ -262,6 +299,7 @@ describe('CSharpVisitor', function () {
 
             concept Thing {
                 o UUID ThingId
+                o UUID SomeOtherId optional
             }
             `);
             csharpVisitor.visit(modelManager, { fileWriter });
@@ -269,7 +307,8 @@ describe('CSharpVisitor', function () {
             const file1 = files.get('org.acme@1.2.3.cs');
             file1.should.match(/namespace org.acme;/);
             file1.should.match(/class Thing/);
-            file1.should.match(/public Guid ThingId/);
+            file1.should.match(/public System.Guid ThingId/);
+            file1.should.match(/public System.Guid? SomeOtherId/);
         });
 
         it('should use string for scalar type UUID but with different namespace than concerto.scalar ', () => {
@@ -310,6 +349,7 @@ describe('CSharpVisitor', function () {
 
             concept Thing {
                 o SSN ThingId
+                o SSN SomeOtherId optional
             }
             `);
             csharpVisitor.visit(modelManager, { fileWriter });
@@ -318,6 +358,7 @@ describe('CSharpVisitor', function () {
             file1.should.match(/namespace org.acme;/);
             file1.should.match(/class Thing/);
             file1.should.match(/public string ThingId/);
+            file1.should.match(/public string SomeOtherId/);
         });
     });
 
@@ -911,7 +952,27 @@ describe('CSharpVisitor', function () {
             mockField.getScalarField.returns(mockScalarField);
 
             csharpVisitor.visitScalarField(mockField, param);
-            param.fileWriter.writeLine.withArgs(1, 'public Guid someId { get; set; }').calledOnce.should.be.ok;
+            param.fileWriter.writeLine.withArgs(1, 'public System.Guid someId { get; set; }').calledOnce.should.be.ok;
+        });
+
+        it('should write a line for scalar optional field of type UUID with dotnet type nullable Guid', () => {
+            const mockField = sinon.createStubInstance(Field);
+            mockField.isPrimitive.returns(false);
+            mockField.getName.returns('someId');
+            mockField.getType.returns('UUID');
+            mockField.isArray.returns(false);
+            mockField.isTypeScalar.returns(true);
+
+            mockField.getFullyQualifiedTypeName.returns('concerto.scalar@1.0.0.UUID');
+
+            const mockScalarField = sinon.createStubInstance(Field);
+            mockScalarField.getType.returns('String');
+            mockScalarField.getName.returns('someId');
+            mockScalarField.isOptional.returns(true);
+            mockField.getScalarField.returns(mockScalarField);
+
+            csharpVisitor.visitScalarField(mockField, param);
+            param.fileWriter.writeLine.withArgs(1, 'public System.Guid? someId { get; set; }').calledOnce.should.be.ok;
         });
 
         it('should write a line for scalar field of type UUID from org specific namespce with dotnet type string', () => {
@@ -1075,7 +1136,7 @@ describe('CSharpVisitor', function () {
             csharpVisitor.toCSharpType('Integer').should.deep.equal('int');
         });
         it('should return Guid for Scalar type UUID', () => {
-            csharpVisitor.toCSharpType('concerto.scalar.UUID').should.deep.equal('Guid');
+            csharpVisitor.toCSharpType('concerto.scalar.UUID').should.deep.equal('System.Guid');
         });
         it('should return passed in type by default', () => {
             csharpVisitor.toCSharpType('Penguin').should.deep.equal('Penguin');
