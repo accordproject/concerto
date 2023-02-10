@@ -24,14 +24,17 @@ const util = require('util');
 if (global === undefined) {
     const { ModelFile } = require('@accordproject/concerto-core');
 }
-const reservedKeywords = ['abstract','as','base','bool','break','byte','case','catch','char','checked',
-    'class','const','continue','decimal','default','delegate','do','double','else',
-    'enum','event','explicit','extern','false','finally','fixed','float','for','foreach',
-    'goto','if','implicit','in','int','interface','internal','is','lock','long','namespace',
+const csharpBuiltInTypes = ['bool','byte','char','decimal','double','float','int','long','nint','nuint','sbyte','short',
+    'string','uint','ulong','ushort'];
+
+const reservedKeywords = csharpBuiltInTypes.concat(['abstract','as','base','break','case','catch','checked',
+    'class','const','continue','default','delegate','do','else',
+    'enum','event','explicit','extern','false','finally','fixed','for','foreach',
+    'goto','if','implicit','in','interface','internal','is','lock','namespace',
     'new','null','object','operator','out','override','params','private','protected','public',
-    'readonly','ref','return','sbyte','sealed','short','sizeof','stackalloc','static',
-    'string','struct','switch','this','throw','true','try','typeof','uint','ulong','unchecked',
-    'unsafe','ushort','using','virtual','void','volatile','while'];
+    'readonly','ref','return','sealed','sizeof','stackalloc','static',
+    'struct','switch','this','throw','true','try','typeof','unchecked',
+    'unsafe','using','virtual','void','volatile','while']);
 
 /**
  * Convert the contents of a ModelManager to C# code. Set a
@@ -278,7 +281,7 @@ class CSharpVisitor {
             parameters.fileWriter.writeLine(1, '[AccordProject.Concerto.Identifier()]');
         }
 
-        let fieldType = externalFieldType ? externalFieldType : field.getType();
+        let fieldType = externalFieldType ? externalFieldType : this.getFieldType(field);
 
         let nullableType = '';
         if(field.isOptional() && fieldType !== 'String'){ //string type is nullable by default.
@@ -467,6 +470,9 @@ class CSharpVisitor {
         case 'concerto.scalar.UUID':
             return 'System.Guid';
         default:
+            if(csharpBuiltInTypes.includes(type)) {
+                return type;
+            }
             return this.toCSharpIdentifier(undefined, type, parameters);
         }
     }
@@ -495,6 +501,24 @@ class CSharpVisitor {
         const args = decorator.getArguments();
         if (args.length !== 1) {
             throw new Error('Malformed @DotNetNamespace decorator');
+        }
+        return args[0];
+    }
+
+    /**
+     * Get the field type for a given field.
+     * @private
+     * @param {Field} field - the object being visited
+     * @return {string} the type for the field
+     */
+    getFieldType(field) {
+        const decorator = field.getDecorator('DotNetType');
+        if (!decorator) {
+            return field.getType();
+        }
+        const args = decorator.getArguments();
+        if (args.length !== 1 || !csharpBuiltInTypes.includes(args[0])) {
+            throw new Error('Malformed @DotNetType decorator');
         }
         return args[0];
     }

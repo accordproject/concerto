@@ -29,6 +29,8 @@ const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
+const csharpBuiltInTypes = ['bool','byte','char','decimal','double','float','int','long','nint','nuint','sbyte','short',
+    'string','uint','ulong','ushort'];
 
 describe('CSharpVisitor', function () {
     let csharpVisitor;
@@ -81,6 +83,43 @@ describe('CSharpVisitor', function () {
             file1.should.match(/using org.acme.other;/);
             const file2 = files.get('org.acme.other@2.3.4.cs');
             file2.should.match(/namespace org.acme.other;/);
+        });
+
+        csharpBuiltInTypes.forEach(builtInType => {
+            it('should use the dotnet built in type '+ builtInType +' if @DotNetType if present', () => {
+                const modelManager = new ModelManager({ strict: true });
+                modelManager.addCTOModel(`
+                namespace org.acme@1.2.3
+    
+                concept Thing {
+                    @DotNetType("`+ builtInType +`")
+                    o String builtInTypeValue
+                    @DotNetType("`+ builtInType +`")
+                    o String optionalBuiltInTypeValue optional
+                }
+                `);
+                csharpVisitor.visit(modelManager, { fileWriter });
+                const files = fileWriter.getFilesInMemory();
+                const file = files.get('org.acme@1.2.3.cs');
+                let matchText = 'public '+ builtInType + ' builtInTypeValue';
+                file.should.match(new RegExp(matchText,'g'));
+                matchText = 'public '+ builtInType + '\\? optionalBuiltInTypeValue';
+                file.should.match(new RegExp(matchText,'g'));
+            });
+        });
+
+        it('should throw an error when an non built in @DotNetType is supplied', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+            
+            concept Thing {
+                @DotNetType("nonBuiltInType")
+                o String builtInTypeValue
+            }`);
+            (() => {
+                csharpVisitor.visit(modelManager, { fileWriter });
+            }).should.throw('Malformed @DotNetType decorator');
         });
 
         it('should use the @DotNetNamespace decorator if present', () => {
@@ -1136,6 +1175,11 @@ describe('CSharpVisitor', function () {
         });
         it('should return Guid for Scalar type UUID', () => {
             csharpVisitor.toCSharpType('concerto.scalar.UUID').should.deep.equal('System.Guid');
+        });
+        csharpBuiltInTypes.forEach(builtInType => {
+            it('should return ' + builtInType + ' for ' + builtInType, () => {
+                csharpVisitor.toCSharpType(builtInType).should.deep.equal(builtInType);
+            });
         });
         it('should return passed in type by default', () => {
             csharpVisitor.toCSharpType('Penguin').should.deep.equal('Penguin');
