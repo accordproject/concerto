@@ -49,6 +49,9 @@ const TypedStack = require('./lib/typedstack');
 // Label
 const Label = require('./lib/label');
 
+// Identifiers
+const Identifiers = require('./lib/identifiers');
+
 module.exports = {
     BaseException,
     BaseFileException,
@@ -63,5 +66,6 @@ module.exports = {
     ModelWriter,
     Logger,
     TypedStack,
-    Label
+    Label,
+    Identifiers
 };
