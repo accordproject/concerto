@@ -14,6 +14,8 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const { InMemoryWriter } = require('@accordproject/concerto-util');
 const chai = require('chai');
 chai.should();
@@ -292,7 +294,7 @@ describe('CSharpVisitor', function () {
             const files = fileWriter.getFilesInMemory();
             const file1 = files.get('org.acme@1.2.3.cs');
             file1.should.match(/public string ThingId/);
-            file1.should.match(/public string Value/);
+            file1.should.match(/public string\? Value/);
             file1.should.match(/public int\? NullableIntValue/);
             file1.should.match(/public int NonNullableIntValue/);
             file1.should.match(/public float\? NullableDoubleValue/);
@@ -346,7 +348,34 @@ describe('CSharpVisitor', function () {
             file1.should.match(/namespace org.acme;/);
             file1.should.match(/class Thing/);
             file1.should.match(/public System.Guid ThingId/);
-            file1.should.match(/public System.Guid? SomeOtherId/);
+            file1.should.match(/public System.Guid\? SomeOtherId/);
+        });
+
+        it('should use regex annotation when regex pattern provided to a field', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(fs.readFileSync(path.resolve(__dirname, '../data/model/agreement.cto'), 'utf8'), 'agreement.cto');
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.equal(`namespace org.acme;
+using AccordProject.Concerto;
+[AccordProject.Concerto.Type(Namespace = "org.acme", Version = "1.2.3", Name = "AgreementBase")]
+[System.Text.Json.Serialization.JsonConverter(typeof(AccordProject.Concerto.ConcertoConverterFactorySystem))]
+public class AgreementBase : Concept {
+   [System.Text.Json.Serialization.JsonPropertyName("$class")]
+   public override string _class { get; } = "org.acme@1.2.3.AgreementBase";
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"^[^?\\/:<>|]*$", ErrorMessage = "Invalid characters")]
+   public string name { get; set; }
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$", ErrorMessage = "Invalid characters")]
+   public string externalSource { get; set; }
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$", ErrorMessage = "Invalid characters")]
+   public string externalId { get; set; }
+   public string agreementType { get; set; }
+   public decimal? value { get; set; }
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"^[^\\<\\>]*$", ErrorMessage = "Invalid characters")]
+   public string requestor { get; set; }
+}
+`);
         });
 
         it('should use string for scalar type UUID but with different namespace than concerto.scalar ', () => {
@@ -396,7 +425,7 @@ describe('CSharpVisitor', function () {
             file1.should.match(/namespace org.acme;/);
             file1.should.match(/class Thing/);
             file1.should.match(/public string ThingId/);
-            file1.should.match(/public string SomeOtherId/);
+            file1.should.match(/public string\? SomeOtherId/);
         });
     });
 

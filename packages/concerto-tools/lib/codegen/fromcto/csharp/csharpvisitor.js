@@ -241,7 +241,7 @@ class CSharpVisitor {
      */
     visitScalarField(field, parameters) {
         const fieldType = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName());
-        return this.writeField(field.getScalarField(), parameters, fieldType === 'concerto.scalar.UUID' ? fieldType : null );
+        return this.writeField(field.getScalarField(), parameters, fieldType === 'concerto.scalar.UUID' ? fieldType : null , field.isOptional());
     }
 
     /**
@@ -260,10 +260,11 @@ class CSharpVisitor {
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter
      * @param {string} [externalFieldType] - the external field type like UUID (optional)
+     * @param {bool} [isOptional] - the bool value indicating if external field type like UUID is optional (optional)
      * @return {Object} the result of visiting or null
      * @private
      */
-    writeField(field, parameters, externalFieldType) {
+    writeField(field, parameters, externalFieldType, isOptional = false) {
         // If no serlialization library is specified we default to the .NET one.
         // However, we also allow both options to be specified
         if (!parameters.useSystemTextJson && !parameters.useNewtonsoftJson){
@@ -283,8 +284,17 @@ class CSharpVisitor {
 
         let fieldType = externalFieldType ? externalFieldType : this.getFieldType(field);
 
+        if (fieldType === 'String') {
+            let validator = field.getValidator();
+
+            if(validator) {
+                let regexVal = validator.getRegex().source;
+                parameters.fileWriter.writeLine(1, `[System.ComponentModel.DataAnnotations.RegularExpression(@"${regexVal}", ErrorMessage = "Invalid characters")]`);
+            }
+        }
+
         let nullableType = '';
-        if(field.isOptional() && fieldType !== 'String'){ //string type is nullable by default.
+        if(field.isOptional() || isOptional){
             nullableType = '?';
         }
 
