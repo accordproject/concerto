@@ -40,6 +40,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/estree": "1.0.0",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -55,7 +56,6 @@
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
-    "@types/node": "18.14.0",
     "axios": "0.23.0",
     "colors": "1.4.0",
     "debug": "4.3.1",

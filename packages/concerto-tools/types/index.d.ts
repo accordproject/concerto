@@ -1,4 +1,4 @@
-export var CodeGen: {
+export const CodeGen: {
     AbstractPlugin: typeof import("./lib/codegen/abstractplugin");
     GoLangVisitor: typeof import("./lib/codegen/fromcto/golang/golangvisitor");
     JSONSchemaVisitor: typeof import("./lib/codegen/fromcto/jsonschema/jsonschemavisitor");
@@ -32,4 +32,4 @@ export var CodeGen: {
         avro: typeof import("./lib/codegen/fromcto/avro/avrovisitor");
     };
 };
-export var version: any;
+export const version: any;
