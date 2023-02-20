@@ -29,8 +29,8 @@ declare class BaseModelManager {
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
-    factory: Factory;
-    serializer: Serializer;
+    factory: any;
+    serializer: any;
     decoratorFactories: any[];
     strict: boolean;
     options: {
@@ -296,8 +296,6 @@ declare class BaseModelManager {
      */
     getAst(resolve?: boolean): any;
 }
-import Factory = require("./factory");
-import Serializer = require("./serializer");
 import ModelFile = require("./introspect/modelfile");
 import { FileDownloader } from "@accordproject/concerto-util";
 import ClassDeclaration = require("./introspect/classdeclaration");
@@ -307,4 +305,6 @@ import EventDeclaration = require("./introspect/eventdeclaration");
 import ParticipantDeclaration = require("./introspect/participantdeclaration");
 import EnumDeclaration = require("./introspect/enumdeclaration");
 import ConceptDeclaration = require("./introspect/conceptdeclaration");
+import Factory = require("./factory");
+import Serializer = require("./serializer");
 import DecoratorFactory = require("./introspect/decoratorfactory");

@@ -96,12 +96,11 @@ declare class CSharpVisitor {
      * @param {string} propertyName the Concerto property name
      * @param {string} propertyType the Concerto property type
      * @param {string} array the array declaration
-     * @param {string} nullableType the nullable expression ?
      * @param {string} getset the getter and setter declaration
      * @param {Object} [parameters]  - the parameter
      * @returns {string} the property declaration
      */
-    toCSharpProperty(access: string, parentName: string | undefined, propertyName: string, propertyType: string, array: string, nullableType: string, getset: string, parameters?: any): string;
+    toCSharpProperty(access: string, parentName: string | undefined, propertyName: string, propertyType: string, array: string, getset: string, parameters?: any): string;
     /**
      * Converts a Concerto namespace to a CSharp namespace. If pascal casing is enabled,
      * each component of the namespace is pascal cased - for example org.example will
@@ -146,11 +145,4 @@ declare class CSharpVisitor {
      * @return {string} the .NET namespace for the model file
      */
     private getDotNetNamespace;
-    /**
-     * Get the field type for a given field.
-     * @private
-     * @param {Field} field - the object being visited
-     * @return {string} the type for the field
-     */
-    private getFieldType;
 }

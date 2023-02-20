@@ -10,7 +10,7 @@ export = Field;
  * @memberof module:concerto-core
  */
 declare class Field extends Property {
-    scalarField: Field;
+    scalarField: any;
     validator: StringValidator | NumberValidator;
     defaultValue: any;
     /**
