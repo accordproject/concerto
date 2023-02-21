@@ -42,10 +42,8 @@ function normalizeIdentifier(identifier, truncateLength = -1) {
         throw new Error(`Unsupported identifier type, '${typeof result}'.`);
     }
 
-    // Stringify non-strings
-    result = result
-
     // 1. If the identifier begins with a number, add a leading underscore
+    result = result
         .replace(/^\p{Nd}/u, '_$&')
 
     // 2. Substitute Whitespace, and joiners
