@@ -12,4 +12,5 @@ import ModelWriter = require("./lib/modelwriter");
 import Logger = require("./lib/logger");
 import TypedStack = require("./lib/typedstack");
 import Label = require("./lib/label");
-export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label };
+import Identifiers = require("./lib/identifiers");
+export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label, Identifiers };
