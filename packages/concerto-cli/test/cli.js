@@ -569,44 +569,39 @@ describe('concerto-cli', () => {
 
     describe('#infer', async () => {
         it('should infer a Concerto model from a JSON Schema', async () => {
-            const obj = await Commands.inferConcertoSchema(
-                path.resolve(__dirname, 'models/jsonschema.json'),
-                'concerto.test.jsonSchema',
+            const inferredConcertoModel = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/json-schema-model.json'),
+                'com.test@1.0.0',
             );
-            obj.should.equal(`namespace concerto.test.jsonSchema
 
-concept Root {
-   o String name optional
-   o Root[] children optional
-}
+            const desiredConcertoModel = fs.readFileSync(
+                path.resolve(
+                    __dirname, 'models/inferred-from-json-schema-model.cto'
+                ), 'utf8'
+            );
 
-`);
+            (inferredConcertoModel + '\n').should.equal(
+                desiredConcertoModel
+            );
         });
 
-        it('should infer a Concerto model from an Open API Spec', async () => {
-            const obj = await Commands.inferConcertoSchema(
-                path.resolve(__dirname, 'models/petstore.json'),
-                'petstore',
+        it('should infer a Concerto model from an Open API definition', async () => {
+            const inferredConcertoModel = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/open-api-definition.json'),
+                'com.test@1.0.0',
                 'Root',
                 'openapi'
             );
-            obj.should.equal(`namespace petstore
 
-concept Pet {
-   o NewPet pet optional
-}
+            const desiredConcertoModel = fs.readFileSync(
+                path.resolve(
+                    __dirname, 'models/inferred-from-open-api-definition.cto'
+                ), 'utf8'
+            );
 
-concept NewPet {
-   o String name
-   o String tag optional
-}
-
-concept ErrorModel {
-   o Integer code
-   o String message
-}
-
-`);
+            (inferredConcertoModel + '\n').should.equal(
+                desiredConcertoModel
+            );
         });
     });
 
