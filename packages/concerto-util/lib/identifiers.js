@@ -18,11 +18,11 @@
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 /**
- * Function that attempts to normalize arbitrary strings, numbers or booleans
+ * Function that attempts to normalize arbitrary strings
  * into valid Concerto identifiers
  *
- * @param {string|number|boolean} identifier - the input value
- * @param {number} [truncateLength] - Optionally length at which to truncate the identifier
+ * @param {string} identifier - the input value
+ * @param {number} [truncateLength] - Length at which to truncate the identifier
  * @returns {string} - An identifier that meets the Concerto specification
  */
 function normalizeIdentifier(identifier, truncateLength = -1) {
@@ -38,12 +38,12 @@ function normalizeIdentifier(identifier, truncateLength = -1) {
     // Stringify null & undefined values
     let result = identifier ?? String(identifier);
 
-    if (!['string', 'number', 'boolean'].includes(typeof result)){
+    if (typeof result !== 'string'){
         throw new Error(`Unsupported identifier type, '${typeof result}'.`);
     }
 
     // Stringify non-strings
-    result = `${result}`
+    result = result
 
     // 1. If the identifier begins with a number, add a leading underscore
         .replace(/^\p{Nd}/u, '_$&')
@@ -72,4 +72,5 @@ function normalizeIdentifier(identifier, truncateLength = -1) {
 
 module.exports = {
     normalizeIdentifier,
+    ID_REGEX
 };

@@ -77,11 +77,6 @@ describe('Identifiers', function () {
             ['𐴓𐴠𐴑𐴤𐴝', '_d803_dd13_d803_dd20_d803_dd11'], // Surrogate pairs, Hanifi Rohingya RTL
             [null, 'null'],
             [undefined, 'undefined'],
-            [false, 'false'],
-            [true, 'true'],
-            [1, '_1'],
-            [1.112345678987654, '_1_2e112345678987654'],
-            [3.1e2, '_310'],
         ];
         ids.forEach(([id, expectedValue]) => {
             it(`'${id}' should equal '${expectedValue ?? id}'`, function() {
@@ -93,9 +88,14 @@ describe('Identifiers', function () {
             (() => normalizeIdentifier('')).should.throw(/Unexpected error/);
         });
 
-        it('should normalize non string identifiers', () => {
+        it('should not normalize non string identifiers', () => {
             (() => normalizeIdentifier({ a: 1 })).should.throw(/Unsupported identifier type/);
             (() => normalizeIdentifier(Symbol.for('a'))).should.throw(/Unsupported identifier type/);
+            (() => normalizeIdentifier(false)).should.throw(/Unsupported identifier type/);
+            (() => normalizeIdentifier(true)).should.throw(/Unsupported identifier type/);
+            (() => normalizeIdentifier(1)).should.throw(/Unsupported identifier type/);
+            (() => normalizeIdentifier(1.112345678987654)).should.throw(/Unsupported identifier type/);
+            (() => normalizeIdentifier(3.1e2)).should.throw(/Unsupported identifier type/);
         });
 
         it('should truncate identifiers', () => {
@@ -103,6 +103,7 @@ describe('Identifiers', function () {
             normalizeIdentifier('aaa', 2).should.equal('aa');
             normalizeIdentifier('aaa', 0).should.equal('aaa');
             normalizeIdentifier('aaa', -1).should.equal('aaa');
+            normalizeIdentifier('$a', 1).should.equal('$');
             normalizeIdentifier('😄', 2).should.equal('_1');
             normalizeIdentifier('𐴓', 2).should.equal('_d'); // surrogate pair character
         });
