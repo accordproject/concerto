@@ -44,6 +44,7 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "devDependencies": {
+        "@accordproject/concerto-cto": "3.5.0",
         "@babel/preset-env": "7.16.11",
         "babel-loader": "8.2.3",
         "chai": "4.3.6",
