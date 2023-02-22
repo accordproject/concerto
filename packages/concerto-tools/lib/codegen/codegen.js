@@ -34,8 +34,6 @@ const JSONSchemaToConcertoVisitor = require(
     './fromJsonSchema/cto/jsonSchemaVisitor'
 );
 const OpenApiToConcertoVisitor = require('./fromOpenApi/cto/openApiVisitor');
-const { JsonSchemaModel } = require('./fromJsonSchema/cto/jsonSchemaClasses');
-const { OpenApiDefinition } = require('./fromOpenApi/cto/openApiClasses');
 
 module.exports = {
     AbstractPlugin,
@@ -55,8 +53,6 @@ module.exports = {
     AvroVisitor,
     JSONSchemaToConcertoVisitor,
     OpenApiToConcertoVisitor,
-    JsonSchemaModel,
-    OpenApiDefinition,
     formats: {
         golang: GoLangVisitor,
         jsonschema: JSONSchemaVisitor,

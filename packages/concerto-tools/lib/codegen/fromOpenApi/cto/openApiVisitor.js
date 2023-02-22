@@ -16,6 +16,7 @@
 
 const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
 const migrate = require('json-schema-migrate');
+const { OpenApiDefinition } = require('./openApiClasses');
 
 const {
     JsonSchemaModel,
@@ -47,29 +48,37 @@ class OpenApiVisitor {
             openApiDefinition.body.paths || {}
         ).reduce(
             (acc, path) => {
-                const requestBodyVerbs = ['post'];
+                const requestBodyVerbs = ['post', 'put', 'patch'];
+                const requestBodyContentType = [
+                    'application/json', 'application/x-www-form-urlencoded'
+                ];
                 const pathUri = path[0];
 
                 const pathRestVerbDeclarations = Object.fromEntries(
                     Object.entries(path[1])
                         .filter(
                             restVerbEntry => requestBodyVerbs
-                                .includes(restVerbEntry[0]) &&
-                            typeof restVerbEntry[1]
-                                .requestBody
-                                .content['application/x-www-form-urlencoded']
+                                .includes(restVerbEntry[0].toLowerCase()) &&
+                            typeof Object.entries(
+                                restVerbEntry[1].requestBody.content
+                            ).find(([k]) => requestBodyContentType.includes(k))
+                                ?.[1]
                                 ?.schema === 'object'
                         ).map(
                             restVerbEntry => [
                                 `${pathUri}/${restVerbEntry[0]}`,
-                                restVerbEntry[1].requestBody
-                                    .content['application/x-www-form-urlencoded']
+                                Object.entries(
+                                    restVerbEntry[1].requestBody.content
+                                ).find(
+                                    ([k]) => requestBodyContentType.includes(k)
+                                )
+                                    ?.[1]
                                     ?.schema
                             ]
                         )
                 );
 
-                return {...acc, ...pathRestVerbDeclarations};
+                return { ...acc, ...pathRestVerbDeclarations };
             },
             {}
         );
@@ -94,8 +103,8 @@ class OpenApiVisitor {
         );
 
         const declarationsFromSchemas = (
-            inferredConcertoJsonModel.models[0]?.declarations || []
-        ).filter(
+            inferredConcertoJsonModel.models[0]?.declarations
+        )?.filter(
             declaration => declaration.properties !== undefined
         );
 
@@ -109,8 +118,8 @@ class OpenApiVisitor {
         );
 
         const declarationsFromPaths = (
-            inferredConcertoJsonModelFromPaths.models[0]?.declarations || []
-        ).filter(
+            inferredConcertoJsonModelFromPaths.models[0]?.declarations
+        )?.filter(
             declaration => declaration.properties !== undefined
         );
 
@@ -152,6 +161,17 @@ class OpenApiVisitor {
         if (thing.isOpenApiDefinition) {
             return this.visitOpenApiDefinition(thing, parameters);
         }
+    }
+    /**
+     * Create an OpenAPI definition class, used to start the inference into
+     * Concerto JSON.
+     * @param {Object} openApiDefinition - the OpenAPI definition.
+     *
+     * @return {Object} the result of visiting or undefined.
+     * @public
+     */
+    static parse(openApiDefinition) {
+        return new OpenApiDefinition(openApiDefinition);
     }
 }
 

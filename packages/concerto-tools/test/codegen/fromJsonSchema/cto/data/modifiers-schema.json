@@ -1,0 +1,33 @@
+{
+    "$id": "https://example.com/geographical-location.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Longitude and Latitude Values",
+    "description": "A geographical coordinate.",
+    "required": ["latitude", "longitude"],
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "default": "home",
+            "pattern": "[\\w\\s]+"
+        },
+        "latitude": {
+            "type": "number",
+            "exclusiveMinimum": -90,
+            "maximum": 90
+        },
+        "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "exclusiveMaximum": 180
+        },
+        "elevation": {
+            "type": "number",
+            "minimum": -11034
+        },
+        "yearDiscovered": {
+            "type": "integer",
+            "exclusiveMaximum": 2022
+        }
+    }
+}

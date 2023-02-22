@@ -50,7 +50,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_address"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_address"
                             }
                         },
                         {
@@ -66,7 +66,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_bank_account"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account"
                             }
                         },
                         {
@@ -76,7 +76,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_card"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_card"
                             }
                         },
                         {
@@ -86,7 +86,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance"
                             }
                         },
                         {
@@ -150,7 +150,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings"
                             }
                         },
                         {
@@ -202,7 +202,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_shipping"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_shipping"
                             }
                         },
                         {
@@ -218,20 +218,24 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_tax"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_tax"
                             }
                         },
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "tax_exempt",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_tax_exempt"
+                            }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_address",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_address",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -274,7 +278,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_bank_account",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -284,10 +288,14 @@
                             "isOptional": true
                         },
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "account_holder_type",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account$_properties$_account_holder_type"
+                            }
                         },
                         {
                             "$class": "concerto.metamodel@1.0.0.StringProperty",
@@ -308,10 +316,14 @@
                             "isOptional": true
                         },
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "object",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account$_properties$_object"
+                            }
                         },
                         {
                             "$class": "concerto.metamodel@1.0.0.StringProperty",
@@ -322,8 +334,32 @@
                     ]
                 },
                 {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account$_properties$_account_holder_type",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "company"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "individual"
+                        }
+                    ]
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_bank_account$_properties$_object",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "bank_account"
+                        }
+                    ]
+                },
+                {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_card",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_card",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -405,16 +441,30 @@
                             "isOptional": false
                         },
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "object",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_card$_properties$_object"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_card$_properties$_object",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "card"
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -424,27 +474,49 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance$_settings"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance$_properties$_settings"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_cash_balance$_settings",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance$_properties$_settings",
                     "isAbstract": false,
                     "properties": [
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "reconciliation_mode",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance$_properties$_settings$_properties$_reconciliation_mode"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_cash_balance$_properties$_settings$_properties$_reconciliation_mode",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "automatic"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "manual"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "merchant_default"
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -454,7 +526,7 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_custom_fields"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_custom_fields"
                             }
                         },
                         {
@@ -476,14 +548,14 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_rendering_options"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_rendering_options"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_custom_fields",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_custom_fields",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -502,20 +574,38 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_invoice_settings$_rendering_options",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_rendering_options",
                     "isAbstract": false,
                     "properties": [
                         {
-                            "$class": "concerto.metamodel@1.0.0.StringProperty",
+                            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
                             "name": "amount_tax_display",
                             "isArray": false,
-                            "isOptional": true
+                            "isOptional": true,
+                            "type": {
+                                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_rendering_options$_properties$_amount_tax_display"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_invoice_settings$_properties$_rendering_options$_properties$_amount_tax_display",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "exclude_tax"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "include_inclusive_tax"
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_shipping",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_shipping",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -525,7 +615,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_shipping$_address"
+                                "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_shipping$_properties$_address"
                             }
                         },
                         {
@@ -544,7 +634,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_shipping$_address",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_shipping$_properties$_address",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -587,7 +677,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_tax",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_tax",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -595,6 +685,24 @@
                             "name": "ip_address",
                             "isArray": false,
                             "isOptional": true
+                        }
+                    ]
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.EnumDeclaration",
+                    "name": "paths$_$_v1$_customers$_$_customer$_$_post$_properties$_tax_exempt",
+                    "properties": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "exempt"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "none"
+                        },
+                        {
+                            "$class": "concerto.metamodel@1.0.0.EnumProperty",
+                            "name": "reverse"
                         }
                     ]
                 }

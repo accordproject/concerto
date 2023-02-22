@@ -10,6 +10,15 @@ export = JsonSchemaVisitor;
  */
 declare class JsonSchemaVisitor {
     /**
+     * Create a JSON Schema model class, used to start the inference into
+     * Concerto JSON.
+     * @param {Object} jsonSchemaModel - the JSON Schema Model.
+     *
+     * @return {Object} the result of visiting or undefined.
+     * @public
+     */
+    public static parse(jsonSchemaModel: any): any;
+    /**
      * Returns true if the property maps to the Concerto DateTime type.
      * @param {Object} property - a JSON Schema model property.
      *
@@ -66,6 +75,14 @@ declare class JsonSchemaVisitor {
      */
     private parseLocalReferenceString;
     /**
+     * Parse a $id URL to use it as a namespace and root type.
+     * @param {string} id - the $id value from a JSON schema.
+     *
+     * @returns {object} A namespace and type pair.
+     * @private
+     */
+    private parseIdUri;
+    /**
      * Infers a primitive Concerto type from a JSON Schema model property.
      * @param {Object} property - a JSON Schema model property.
      * @param {Object} parameters - the visitor parameters.
@@ -87,9 +104,6 @@ declare class JsonSchemaVisitor {
      * Infers a Concerto concept name from a JSON Schema model inline property
      * path.
      * @param {Object} propertyPath - a JSON Schema model property path.
-     * @param {Object} options - the options:
-     * - removePropertiesSegment: removes any occurances of "properties" from
-     * the generated name.
      *
      * @return {Object} the Concerto concept name inferred from the JSON Schema
      * model inline object property path.

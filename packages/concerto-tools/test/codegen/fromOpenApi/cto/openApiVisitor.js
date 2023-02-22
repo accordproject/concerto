@@ -112,9 +112,8 @@ describe('OpenApiVisitor', function () {
                 ), 'utf8'
             );
 
-            const smallStripeOpenApiDefinitionClass = new OpenApiDefinition(smallStripeOpenApiDefinition);
-
-            const inferredConcertoJsonModel = smallStripeOpenApiDefinitionClass
+            const inferredConcertoJsonModel = OpenApiVisitor
+                .parse(smallStripeOpenApiDefinition)
                 .accept(
                     openApiVisitor, openApiVisitorParameters
                 );

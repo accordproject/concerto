@@ -584,21 +584,22 @@ class Commands {
         let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
 
         if (format.toLowerCase() === 'openapi'){
-            const inferredConcertoJsonModel = (
-                new CodeGen.OpenApiDefinition(schema)
-            ).accept(
-                (new CodeGen.OpenApiToConcertoVisitor),
-                {
-                    metaModelNamespace: 'concerto.metamodel@1.0.0',
-                    namespace,
-                },
-            );
+            const inferredConcertoJsonModel = CodeGen.OpenApiToConcertoVisitor
+                .parse(schema)
+                .accept(
+                    (new CodeGen.OpenApiToConcertoVisitor),
+                    {
+                        metaModelNamespace: 'concerto.metamodel@1.0.0',
+                        namespace,
+                    },
+                );
 
             return Printer.toCTO(
                 inferredConcertoJsonModel.models[0]
             );
         }
-        const inferredConcertoJsonModel = (new CodeGen.JsonSchemaModel(schema))
+        const inferredConcertoJsonModel = CodeGen.JSONSchemaToConcertoVisitor
+            .parse(schema)
             .accept(
                 (new CodeGen.JSONSchemaToConcertoVisitor),
                 {

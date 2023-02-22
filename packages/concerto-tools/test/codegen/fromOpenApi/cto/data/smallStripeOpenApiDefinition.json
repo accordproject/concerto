@@ -89,25 +89,12 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/customer"
-                      },
-                      {
-                        "$ref": "#/components/schemas/deleted_customer"
                       }
                     ]
                   }
                 }
               },
               "description": "Successful response."
-            },
-            "default": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/error"
-                  }
-                }
-              },
-              "description": "Error response."
             }
           }
         },
@@ -641,16 +628,6 @@
                 }
               },
               "description": "Successful response."
-            },
-            "default": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/error"
-                  }
-                }
-              },
-              "description": "Error response."
             }
           }
         }

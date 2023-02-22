@@ -96,14 +96,14 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "components$_schemas$_customer$_foo"
+                                "name": "components$_schemas$_customer$_properties$_foo"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "components$_schemas$_customer$_foo",
+                    "name": "components$_schemas$_customer$_properties$_foo",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -113,14 +113,14 @@
                             "isOptional": true,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "components$_schemas$_customer$_foo$_bar"
+                                "name": "components$_schemas$_customer$_properties$_foo$_properties$_bar"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "components$_schemas$_customer$_foo$_bar",
+                    "name": "components$_schemas$_customer$_properties$_foo$_properties$_bar",
                     "isAbstract": false,
                     "properties": [
                         {

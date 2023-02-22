@@ -10,6 +10,15 @@ export = OpenApiVisitor;
  */
 declare class OpenApiVisitor {
     /**
+     * Create an OpenAPI definition class, used to start the inference into
+     * Concerto JSON.
+     * @param {Object} openApiDefinition - the OpenAPI definition.
+     *
+     * @return {Object} the result of visiting or undefined.
+     * @public
+     */
+    public static infer(openApiDefinition: any): any;
+    /**
      * OpenAPI definition visitor.
      * @param {Object} openApiDefinition - the OpenAPI definition.
      * @param {Object} parameters - the visitor parameters.

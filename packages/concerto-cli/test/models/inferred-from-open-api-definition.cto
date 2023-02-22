@@ -15,13 +15,13 @@ concept customer {
   o address address optional
   @StringifiedJson
   o String metadata optional
-  o components$_schemas$_customer$_foo foo optional
+  o components$_schemas$_customer$_properties$_foo foo optional
 }
 
-concept components$_schemas$_customer$_foo {
-  o components$_schemas$_customer$_foo$_bar bar optional
+concept components$_schemas$_customer$_properties$_foo {
+  o components$_schemas$_customer$_properties$_foo$_properties$_bar bar optional
 }
 
-concept components$_schemas$_customer$_foo$_bar {
+concept components$_schemas$_customer$_properties$_foo$_properties$_bar {
   o String har optional
 }

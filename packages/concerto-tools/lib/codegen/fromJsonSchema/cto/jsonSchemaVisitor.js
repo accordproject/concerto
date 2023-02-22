@@ -14,7 +14,13 @@
 
 'use strict';
 
+const Ajv2019 = require('ajv/dist/2019');
+const Ajv2020 = require('ajv/dist/2020');
+const draft6MetaSchema = require('ajv/dist/refs/json-schema-draft-06.json');
+const draft7MetaSchema = require('ajv/dist/refs/json-schema-draft-07.json');
+const addFormats = require('ajv-formats');
 const getValue = require('get-value');
+const { Identifiers } = require('@accordproject/concerto-util');
 
 const {
     LocalReference,
@@ -26,7 +32,8 @@ const {
     EnumDefinition,
     Definition,
     Definitions,
-} = require('./jsonSchemaClasses.js');
+    JsonSchemaModel,
+} = require('./jsonSchemaClasses');
 
 /**
  * Convert the contents of a JSON Schema file to a Concerto JSON model.
@@ -140,6 +147,32 @@ class JsonSchemaVisitor {
             .filter(pathSegment => pathSegment.length > 0);
     }
     /**
+     * Parse a $id URL to use it as a namespace and root type.
+     * @param {string} id - the $id value from a JSON schema.
+     *
+     * @returns {object} A namespace and type pair.
+     * @private
+     */
+    parseIdUri(id) {
+        if (!id) { return; }
+
+        // TODO (MCR) - support non-URL URI $id values
+        // https://datatracker.ietf.org/doc/html/draft-wright-json-schema-01#section-9.2
+        const url = new URL(id);
+        let namespace = url.hostname.split('.').reverse().join('.');
+        const path = url.pathname.split('/');
+        const type = Identifiers.normalizeIdentifier(
+            // @ts-ignore
+            path.pop()
+                .replace(/\.json$/, '') // Convention is to add .schema.json to $id
+                .replace(/\.schema$/, '')
+        );
+
+        namespace += path.length > 0 ? path.join('.') : '';
+
+        return { namespace, type };
+    }
+    /**
      * Infers a primitive Concerto type from a JSON Schema model property.
      * @param {Object} property - a JSON Schema model property.
      * @param {Object} parameters - the visitor parameters.
@@ -176,13 +209,14 @@ class JsonSchemaVisitor {
                 // Could also be Long?
                 return `${parameters.metaModelNamespace}.IntegerProperty`;
             default:
-                throw new Error(
-                    `Type keyword '${property.body.type}' in '${
-                        property.path[property.path.length - 1]
-                    }' is not supported.`
-                );
             }
         }
+
+        throw new Error(
+            `Type keyword '${property.body.type}' in '${
+                property.path[property.path.length - 1]
+            }' is not supported.`
+        );
     }
     /**
      * Normalizes a name by replacing forbidden characters with "$_".
@@ -192,30 +226,21 @@ class JsonSchemaVisitor {
      * @private
      */
     normalizeName(name) {
-        return name.replaceAll(/\/|{|}/ig, '$_');
+        return Identifiers.normalizeIdentifier(
+            name.replaceAll(/\/|{|}/ig, '$_')
+        );
     }
     /**
      * Infers a Concerto concept name from a JSON Schema model inline property
      * path.
      * @param {Object} propertyPath - a JSON Schema model property path.
-     * @param {Object} options - the options:
-     * - removePropertiesSegment: removes any occurances of "properties" from
-     * the generated name.
      *
      * @return {Object} the Concerto concept name inferred from the JSON Schema
      * model inline object property path.
      * @private
      */
-    inferInlineObjectConceptName(propertyPath, options) {
-        return `${
-            propertyPath
-                // Note: We're running the risk of removing objects legitimately named "properties".
-                .filter(
-                    (segment) => options.removePropertiesSegment &&
-                        segment !== 'properties'
-                )
-                .join('$_')
-        }`;
+    inferInlineObjectConceptName(propertyPath) {
+        return propertyPath.join('$_');
     }
     /**
      * Infers a type-specific validator, appropriate to a Concerto primitive.
@@ -266,7 +291,7 @@ class JsonSchemaVisitor {
                 validator: {
                     $class: `${metaModelNamespace}.StringRegexValidator`,
                     pattern: property.body.pattern,
-                    flags: 'u',
+                    flags: '',
                 }
             };
         }
@@ -314,6 +339,10 @@ class JsonSchemaVisitor {
         const pathToDefinition = this.parseLocalReferenceString(reference.body);
         const pathToDefinitions = parameters.pathToDefinitions ||
             ['definitions'];
+
+        if (pathToDefinitions.length === 0) {
+            return null;
+        }
 
         if (
             pathToDefinition.slice(0, -1).toString() ===
@@ -407,6 +436,45 @@ class JsonSchemaVisitor {
             return;
         }
 
+        // Handle an enum.
+        if (
+            typeof property.body.enum === 'object' &&
+            typeof property.body.enum.length === 'number'
+        ) {
+            const inlineObjectDerivedConceptName = this.normalizeName(
+                this.inferInlineObjectConceptName(property.path)
+            );
+
+            const properties = property.body.enum
+                .filter(enumName => enumName)
+                .map(
+                    enumName => ({
+                        $class: `${parameters.metaModelNamespace}.EnumProperty`,
+                        name: Identifiers.normalizeIdentifier(
+                            enumName.toString()
+                        ),
+                    })
+                );
+
+            const enumDeclaration = {
+                $class: `${parameters.metaModelNamespace}.EnumDeclaration`,
+                name: inlineObjectDerivedConceptName,
+                properties,
+            };
+
+            return [
+                {
+                    $class: `${parameters.metaModelNamespace}.ObjectProperty`,
+                    ...propertyProperties,
+                    type: {
+                        $class: `${parameters.metaModelNamespace}.TypeIdentifier`,
+                        name: inlineObjectDerivedConceptName,
+                    }
+                },
+                enumDeclaration,
+            ];
+        }
+
         // Handle an array.
         if (
             property.body.type === 'array' &&
@@ -434,22 +502,24 @@ class JsonSchemaVisitor {
                 new Reference(property.body.$ref, property.path)
             ).accept(this, parameters);
 
-            return {
+            return [{
                 $class: `${parameters.metaModelNamespace}.ObjectProperty`,
                 ...propertyProperties,
                 type: {
                     $class: `${parameters.metaModelNamespace}.TypeIdentifier`,
-                    name: this.normalizeName(referenced.name)
+                    name: referenced !== null && referenced !== undefined
+                        ? this.normalizeName(referenced.name)
+                        : 'Root',
                 }
-            };
+            }];
         }
 
         // Handle an undefined type.
         if (
             property.body.type === 'object' &&
-            // typeof property.body.properties === 'undefined' &&
             (
                 typeof property.body.additionalProperties === 'object' ||
+                property.body.additionalProperties === true ||
                 typeof property.body.properties !== 'object'
             )
         ) {
@@ -470,12 +540,7 @@ class JsonSchemaVisitor {
             property.body.type === 'object' &&
             typeof property.body.properties === 'object'
         ) {
-            const inlineObjectDerivedConceptName = this.inferInlineObjectConceptName(
-                property.path,
-                {
-                    removePropertiesSegment: true,
-                }
-            );
+            const inlineObjectDerivedConceptName = this.inferInlineObjectConceptName(property.path);
 
             const inlineObjectDerivedConcept = (
                 new Definition(
@@ -529,7 +594,6 @@ class JsonSchemaVisitor {
                 )
             );
 
-
         return propertyClasses
             .map(
                 propertyClass => propertyClass.accept(this, parameters)
@@ -549,13 +613,25 @@ class JsonSchemaVisitor {
      * @private
      */
     visitNonEnumDefinition(nonEnumDefinition, parameters) {
+        const nameOfDefinition = this.normalizeName(
+            nonEnumDefinition.path[
+                nonEnumDefinition.path.length - 1
+            ]
+        );
+
+        if (
+            nonEnumDefinition?.path.length !== 1 &&
+            nonEnumDefinition?.path[0] !== 'Root' &&
+            !['object'].includes(nonEnumDefinition.body.type)
+        ) {
+            throw new Error(
+                `Type keyword '${nonEnumDefinition.body.type}' in definition '${nameOfDefinition}' is not supported.`
+            );
+        }
+
         const conceptWithoutProperties = {
             $class: `${parameters.metaModelNamespace}.ConceptDeclaration`,
-            name: this.normalizeName(
-                nonEnumDefinition.path[
-                    nonEnumDefinition.path.length - 1
-                ]
-            ),
+            name: nameOfDefinition,
             isAbstract: false,
         };
 
@@ -563,6 +639,20 @@ class JsonSchemaVisitor {
             nonEnumDefinition.body.properties !== undefined &&
             nonEnumDefinition.body.properties !== null
         ) {
+            // Handle an undefined type.
+            if (
+                nonEnumDefinition.body.type === 'object' &&
+                (
+                    typeof nonEnumDefinition.body.additionalProperties === 'object' ||
+                    nonEnumDefinition.body.additionalProperties === true ||
+                    typeof nonEnumDefinition.body.properties !== 'object'
+                )
+            ) {
+                throw new Error(
+                    `Definition '${nameOfDefinition}' is undefined and unsupported by Concerto.`
+                );
+            }
+
             const propertiesAndInlineObjectDerived = (
                 new Properties(
                     nonEnumDefinition.body.properties,
@@ -604,7 +694,7 @@ class JsonSchemaVisitor {
             return conceptDeclaration;
         }
 
-        return [conceptWithoutProperties];
+        return;
     }
     /**
      * Enum definition visitor.
@@ -684,33 +774,75 @@ class JsonSchemaVisitor {
      * @private
      */
     visitJsonSchemaModel(jsonSchemaModel, parameters) {
-        const rootDefinitionClass = new Definition(
-            jsonSchemaModel.body,
-            [`${ jsonSchemaModel.title || 'Root' }`]
+        const schemaVersion = jsonSchemaModel.body.$schema;
+
+        // @ts-ignore
+        let ajv = new Ajv2019({ strict: false })
+            .addMetaSchema(draft6MetaSchema)
+            .addMetaSchema(draft7MetaSchema);
+
+        if (
+            schemaVersion &&
+            schemaVersion.startsWith(
+                'https://json-schema.org/draft/2020-12/schema'
+            )
+        ) {
+            // @ts-ignore
+            ajv = new Ajv2020({ strict: false });
+        }
+
+        const rootName = this.parseIdUri(jsonSchemaModel.body.$id)?.type ||
+            jsonSchemaModel.body.title ||
+            'Root';
+
+        ajv.addSchema(jsonSchemaModel.body, rootName);
+        // @ts-ignore
+        addFormats(ajv);
+
+        // Will throw an error for bad schemas
+        ajv.compile(jsonSchemaModel.body);
+
+        const pathToDefinitions = parameters.pathToDefinitions || (
+            typeof jsonSchemaModel.body.definitions === 'object'
+                ? ['definitions']
+                : typeof jsonSchemaModel.body.$defs === 'object'
+                    ? ['$defs']
+                    : typeof jsonSchemaModel.body.schema?.components?.schemas === 'object'
+                        ? ['schema', 'components', 'schemas']
+                        : []
         );
 
         const definitions = getValue(
             jsonSchemaModel.body,
-            parameters.pathToDefinitions || ['definitions'],
-        );
-
-        const definitionsClass = new Definitions(
-            definitions,
-            parameters.pathToDefinitions || ['definitions'],
+            pathToDefinitions,
         );
 
         const parametersWithJsonSchemaModel = {
             ...parameters, jsonSchemaModel: jsonSchemaModel.body
         };
 
+        const declarationsFromRootDefinitions = new Definition(
+            jsonSchemaModel.body,
+            [rootName]
+        ).accept(
+            this, parametersWithJsonSchemaModel
+        ) ?? [];
+
+        const declarationsFromDefinitions = definitions
+            ? new Definitions(
+                definitions,
+                pathToDefinitions,
+            ).accept(
+                this, parametersWithJsonSchemaModel
+            )
+            : [];
+
         const declarations = [
-            ...rootDefinitionClass.accept(
-                this, parametersWithJsonSchemaModel
-            ),
-            ...definitionsClass.accept(
-                this, parametersWithJsonSchemaModel
-            ),
-        ];
+            ...declarationsFromRootDefinitions.length
+                ? declarationsFromRootDefinitions
+                : [declarationsFromRootDefinitions],
+            ...declarationsFromDefinitions,
+        ].filter(declaration => typeof declaration?.$class === 'string');
 
         const convertedModel = {
             $class: `${parameters.metaModelNamespace}.Model`,
@@ -772,6 +904,19 @@ class JsonSchemaVisitor {
             return this.visitJsonSchemaModel(thing, parameters);
         }
     }
+    /**
+     * Create a JSON Schema model class, used to start the inference into
+     * Concerto JSON.
+     * @param {Object} jsonSchemaModel - the JSON Schema Model.
+     *
+     * @return {Object} the result of visiting or undefined.
+     * @public
+     */
+    static parse(jsonSchemaModel) {
+        return new JsonSchemaModel(jsonSchemaModel);
+    }
 }
 
 module.exports = JsonSchemaVisitor;
+
+

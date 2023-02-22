@@ -65,7 +65,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_children"
+                                "name": "Root$_properties$_children"
                             }
                         },
                         {
@@ -75,7 +75,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_company"
+                                "name": "Root$_properties$_company"
                             }
                         },
                         {
@@ -88,7 +88,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_children",
+                    "name": "Root$_properties$_children",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -128,7 +128,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_children$_pet"
+                                "name": "Root$_properties$_children$_properties$_pet"
                             }
                         },
                         {
@@ -168,7 +168,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_children$_favoritePets"
+                                "name": "Root$_properties$_children$_properties$_favoritePets"
                             }
                         },
                         {
@@ -178,7 +178,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_children$_stuff"
+                                "name": "Root$_properties$_children$_properties$_stuff"
                             }
                         },
                         {
@@ -191,7 +191,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_children$_pet",
+                    "name": "Root$_properties$_children$_properties$_pet",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -210,7 +210,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_children$_favoritePets",
+                    "name": "Root$_properties$_children$_properties$_favoritePets",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -229,7 +229,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_children$_stuff",
+                    "name": "Root$_properties$_children$_properties$_stuff",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -258,7 +258,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_company",
+                    "name": "Root$_properties$_company",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -274,14 +274,14 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "Root$_company$_employees"
+                                "name": "Root$_properties$_company$_properties$_employees"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "Root$_company$_employees",
+                    "name": "Root$_properties$_company$_properties$_employees",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -397,7 +397,7 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "definitions$_Children$_stuff"
+                                "name": "definitions$_Children$_properties$_stuff"
                             }
                         },
                         {
@@ -434,7 +434,7 @@
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "definitions$_Children$_stuff",
+                    "name": "definitions$_Children$_properties$_stuff",
                     "isAbstract": false,
                     "properties": [
                         {
@@ -506,7 +506,7 @@
                             "validator": {
                                 "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
                                 "pattern": "^[a-zA-Z]*$",
-                                "flags": "u"
+                                "flags": ""
                             }
                         }
                     ]
@@ -562,14 +562,14 @@
                             "isOptional": false,
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                                "name": "definitions$_Company$_employees"
+                                "name": "definitions$_Company$_properties$_employees"
                             }
                         }
                     ]
                 },
                 {
                     "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-                    "name": "definitions$_Company$_employees",
+                    "name": "definitions$_Company$_properties$_employees",
                     "isAbstract": false,
                     "properties": [
                         {
