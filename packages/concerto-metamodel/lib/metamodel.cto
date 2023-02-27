@@ -135,6 +135,20 @@ concept StringRegexValidator {
   o String flags
 }
 
+concept MapDeclaration extends Declaration {
+  o Boolean isAbstract default=false
+  o Identified identified optional
+  o TypeIdentifier superType optional
+	o MapProperty key 
+	o MapProperty value 
+}
+
+concept MapProperty {
+  o String name regex=/^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u
+  o Decorator[] decorators optional
+  o Range location optional
+}
+
 concept DoubleProperty extends Property {
   o Double defaultValue optional
   o DoubleDomainValidator validator optional

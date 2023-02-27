@@ -104,6 +104,9 @@ function typeFromMetaModel(mm){
     case `${MetaModelNamespace}.ObjectProperty`:
         result += ` ${mm.type.name}`;
         break;
+    case `${MetaModelNamespace}.MapProperty`:
+        result += ` ${mm.type.name}`;
+        break;
     case `${MetaModelNamespace}.RelationshipProperty`:
         result += ` ${mm.type.name}`;
         break;
@@ -186,6 +189,11 @@ function modifiersFromMetaModel(mm){
         }
         break;
     case `${MetaModelNamespace}.ObjectProperty`:
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
+        break;
+    case `${MetaModelNamespace}.MapProperty`:
         if (mm.defaultValue) {
             defaultString += ` default="${mm.defaultValue}"`;
         }

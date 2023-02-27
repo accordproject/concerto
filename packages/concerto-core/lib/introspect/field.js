@@ -62,24 +62,32 @@ class Field extends Property {
         this.validator = null;
 
         switch (this.getType()) {
-        case 'Integer':
-        case 'Double':
-        case 'Long':
-            if (this.ast.validator) {
-                this.validator = new NumberValidator(
-                    this,
-                    this.ast.validator
-                );
-            }
-            break;
-        case 'String':
-            if (this.ast.validator) {
-                this.validator = new StringValidator(
-                    this,
-                    this.ast.validator
-                );
-            }
-            break;
+            case 'Integer':
+            case 'Double':
+            case 'Long':
+                if (this.ast.validator) {
+                    this.validator = new NumberValidator(
+                        this,
+                        this.ast.validator
+                    );
+                }
+                break;
+            case 'String':
+                if (this.ast.validator) {
+                    this.validator = new StringValidator(
+                        this,
+                        this.ast.validator
+                    );
+                }
+                break;
+            case 'Map':
+                if (this.ast.validator) {
+                    this.validator = new StringValidator(
+                        this,
+                        this.ast.validator
+                    );
+                }
+                break;
         }
 
         if (this.ast.defaultValue) {
@@ -168,30 +176,30 @@ class Field extends Property {
         const fieldAst = JSON.parse(JSON.stringify(type.ast));
 
         switch (type.ast.$class) {
-        case `${MetaModelNamespace}.StringScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.StringProperty`;
-            break;
-        case `${MetaModelNamespace}.BooleanScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.BooleanProperty`;
-            break;
+            case `${MetaModelNamespace}.StringScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.StringProperty`;
+                break;
+            case `${MetaModelNamespace}.BooleanScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.BooleanProperty`;
+                break;
 
-        case `${MetaModelNamespace}.DateTimeScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DateTimeProperty`;
-            break;
+            case `${MetaModelNamespace}.DateTimeScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.DateTimeProperty`;
+                break;
 
-        case `${MetaModelNamespace}.DoubleScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.DoubleProperty`;
-            break;
+            case `${MetaModelNamespace}.DoubleScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.DoubleProperty`;
+                break;
 
-        case `${MetaModelNamespace}.IntegerScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.IntegerProperty`;
-            break;
+            case `${MetaModelNamespace}.IntegerScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.IntegerProperty`;
+                break;
 
-        case `${MetaModelNamespace}.LongScalar`:
-            fieldAst.$class = `${MetaModelNamespace}.LongProperty`;
-            break;
-        default:
-            throw new Error(`Unrecognized scalar type ${type.ast.$class}`);
+            case `${MetaModelNamespace}.LongScalar`:
+                fieldAst.$class = `${MetaModelNamespace}.LongProperty`;
+                break;
+            default:
+                throw new Error(`Unrecognized scalar type ${type.ast.$class}`);
         }
 
         fieldAst.name = this.ast.name;

@@ -88,32 +88,35 @@ class Property extends Decorated {
         }
 
         switch (this.ast.$class) {
-        case `${MetaModelNamespace}.EnumProperty`:
-            break;
-        case `${MetaModelNamespace}.BooleanProperty`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeProperty`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.DoubleProperty`:
-            this.type = 'Double';
-            break;
-        case `${MetaModelNamespace}.IntegerProperty`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongProperty`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.StringProperty`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.ObjectProperty`:
-            this.type = this.ast.type ? this.ast.type.name : null;
-            break;
-        case `${MetaModelNamespace}.RelationshipProperty`:
-            this.type = this.ast.type.name;
-            break;
+            case `${MetaModelNamespace}.EnumProperty`:
+                break;
+            case `${MetaModelNamespace}.BooleanProperty`:
+                this.type = 'Boolean';
+                break;
+            case `${MetaModelNamespace}.DateTimeProperty`:
+                this.type = 'DateTime';
+                break;
+            case `${MetaModelNamespace}.DoubleProperty`:
+                this.type = 'Double';
+                break;
+            case `${MetaModelNamespace}.IntegerProperty`:
+                this.type = 'Integer';
+                break;
+            case `${MetaModelNamespace}.LongProperty`:
+                this.type = 'Long';
+                break;
+            case `${MetaModelNamespace}.StringProperty`:
+                this.type = 'String';
+                break;
+            case `${MetaModelNamespace}.ObjectProperty`:
+                this.type = this.ast.type ? this.ast.type.name : null;
+                break;
+            case `${MetaModelNamespace}.MapProperty`:
+                this.type = this.ast.type ? this.ast.type.name : null;
+                break;
+            case `${MetaModelNamespace}.RelationshipProperty`:
+                this.type = this.ast.type.name;
+                break;
         }
         this.array = false;
 
