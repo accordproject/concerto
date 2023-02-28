@@ -77,8 +77,7 @@ class DirectedGraph {
      * Optionally supports a list of source vertices, to allow searching from
      * multiple start vertices.
      *
-     * Returns a sparsely populated map of vertex names with a flag to indicate
-     * if the vertex is present in the connected graph.
+     * Returns a new DirectedGraph instance
      *
      * @param {string | string[]} source - The root vertex (or vertices) from
      * which to begin the search
@@ -197,24 +196,24 @@ module.exports = {
     DirectedGraph
 };
 
-const mm = new ModelManager();
-mm.addCTOModel(fs.readFileSync('./lib/common/stripe.cto', 'utf-8'));
+// const mm = new ModelManager();
+// mm.addCTOModel(fs.readFileSync('./lib/common/stripe.cto', 'utf-8'));
 
-const graph = new DirectedGraph();
-mm.accept(new ConcertoGraphVisitor(), { graph });
+// const graph = new DirectedGraph();
+// mm.accept(new ConcertoGraphVisitor(), { graph });
 
-console.log('Number of concepts', mm.getConceptDeclarations().length);
-console.log('Number of models', mm.getModelFiles().length);
+// console.log('Number of concepts', mm.getConceptDeclarations().length);
+// console.log('Number of models', mm.getModelFiles().length);
 
-console.log('##### Filtering #####');
-const connectedGraph = graph.findConnectedGraph('com.stripe.action.test@1.0.0.account');
-const filteredModelManager = mm.filter(decorated => connectedGraph.hasVertex(`${decorated.getNamespace()}.${decorated.getName()}`));
+// console.log('##### Filtering #####');
+// const connectedGraph = graph.findConnectedGraph('com.stripe.action.test@1.0.0.account');
+// const filteredModelManager = mm.filter(decorated => connectedGraph.hasVertex(`${decorated.getNamespace()}.${decorated.getName()}`));
 
-console.log('Number of concepts', filteredModelManager.getConceptDeclarations().length);
-console.log('Number of models', filteredModelManager.getModelFiles().length);
+// console.log('Number of concepts', filteredModelManager.getConceptDeclarations().length);
+// console.log('Number of models', filteredModelManager.getModelFiles().length);
 
-const writer = new FileWriter(__dirname);
-writer.openFile('graph.mmd');
-// graph.print(writer);
-connectedGraph.print(writer);
-writer.closeFile();
+// const writer = new FileWriter(__dirname);
+// writer.openFile('graph.mmd');
+// // graph.print(writer);
+// connectedGraph.print(writer);
+// writer.closeFile();

@@ -802,6 +802,28 @@ class ModelFile extends Decorated {
         }
     }
 
+    /**
+     * Returns a new ModelFile with only the types for which the
+     * filter function returns true.
+     *
+     * Will return null if the filtered ModelFile doesn't contain any declarations.
+     *
+     * @param {function(Decorated): boolean} predicate - the filter function over a Decorated object
+     * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
+     * @returns {ModelFile?} - the filtered ModelFile
+     * @private
+     */
+    filter(predicate, modelManager){
+        const declarations = this.declarations?.filter(predicate).map(declaration => declaration.ast);
+        const ast = {
+            ...this.ast,
+            declarations: declarations,
+        };
+        if (ast.declarations?.length > 0){
+            return new ModelFile(modelManager, ast, undefined, this.fileName);
+        }
+        return null;
+    }
 }
 
 module.exports = ModelFile;

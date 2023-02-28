@@ -709,6 +709,24 @@ class BaseModelManager {
         });
         return result;
     }
+
+    /**
+     * Returns a new ModelManager with only the types for which the
+     * filter function returns true.
+     *
+     * ModelFiles with no declarations after filtering will be removed.
+     *
+     * @param {function(Decorated): boolean} predicate - the filter function over a Decorated object
+     * @returns {ModelManager} - the filtered ModelManager
+     */
+    filter(predicate){
+        const modelManager = new BaseModelManager({...this.options}, this.processFile);
+        const filteredModels = Object.values(this.modelFiles)
+            .map((modelFile) => modelFile.filter(predicate, modelManager))
+            .filter(Boolean);
+        modelManager.addModelFiles(filteredModels);
+        return modelManager;
+    }
 }
 
 module.exports = BaseModelManager;

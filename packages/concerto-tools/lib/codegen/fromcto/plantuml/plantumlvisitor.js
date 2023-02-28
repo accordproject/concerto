@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DiagramVisitor = require('../common/diagramvisitor');
+const DiagramVisitor = require('../../../common/diagramvisitor');
 
 /**
  * Convert the contents of a ModelManager
