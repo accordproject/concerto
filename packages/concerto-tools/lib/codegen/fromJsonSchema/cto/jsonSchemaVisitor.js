@@ -220,15 +220,18 @@ class JsonSchemaVisitor {
     }
     /**
      * Normalizes a name by replacing forbidden characters with "$_".
-     * @param {Object} name - a name.
+     * @param {String} name - a name.
      *
      * @return {Object} a normalized name.
      * @private
      */
     normalizeName(name) {
-        return Identifiers.normalizeIdentifier(
-            name.replaceAll(/\/|{|}/ig, '$_')
-        );
+        return typeof name === 'string'
+            ? Identifiers.normalizeIdentifier(
+                // @ts-ignore
+                name.replaceAll(/\/|{|}/ig, '$_')
+            )
+            : undefined;
     }
     /**
      * Infers a Concerto concept name from a JSON Schema model inline property
@@ -336,37 +339,50 @@ class JsonSchemaVisitor {
      * @private
      */
     visitLocalReference(reference, parameters) {
-        const pathToDefinition = this.parseLocalReferenceString(reference.body);
-        const pathToDefinitions = parameters.pathToDefinitions ||
-            ['definitions'];
+        const traversedReferences = parameters.traversedReferences ?? [];
 
-        if (pathToDefinitions.length === 0) {
-            return null;
+        if (!traversedReferences.includes(reference.body)) { // Break out of circular refences.
+            const pathToDefinition = this.parseLocalReferenceString(reference.body);
+            const pathToDefinitions = parameters.pathToDefinitions ||
+                ['definitions'];
+
+            if (pathToDefinitions.length === 0) {
+                return null;
+            }
+
+            if (
+                pathToDefinition.slice(0, -1).toString() ===
+                pathToDefinitions.toString()
+            ) {
+                const definitionName = pathToDefinition[
+                    pathToDefinition.length - 1
+                ];
+
+                const definition = getValue(
+                    parameters.jsonSchemaModel,
+                    [
+                        ...(
+                            parameters.pathToDefinitions ||
+                                ['definitions']
+                        ),
+                        definitionName
+                    ],
+                );
+
+                return (
+                    new Definition(definition, pathToDefinition)
+                ).accept(
+                    this, {
+                        ...parameters, traversedReferences: [
+                            ...traversedReferences,
+                            reference.body
+                        ]
+                    }
+                );
+            }
         }
 
-        if (
-            pathToDefinition.slice(0, -1).toString() ===
-            pathToDefinitions.toString()
-        ) {
-            const definitionName = pathToDefinition[
-                pathToDefinition.length - 1
-            ];
-
-            const definition = getValue(
-                parameters.jsonSchemaModel,
-                [
-                    ...(
-                        parameters.pathToDefinitions ||
-                            ['definitions']
-                    ),
-                    definitionName
-                ],
-            );
-
-            return (
-                new Definition(definition, pathToDefinition)
-            ).accept(this, parameters);
-        }
+        return null;
     }
     /**
      * Reference property visitor.
@@ -622,7 +638,11 @@ class JsonSchemaVisitor {
         if (
             nonEnumDefinition?.path.length !== 1 &&
             nonEnumDefinition?.path[0] !== 'Root' &&
-            !['object'].includes(nonEnumDefinition.body.type)
+            !['object'].includes(nonEnumDefinition.body.type) &&
+            !(
+                typeof nonEnumDefinition.body.type === 'undefined' &&
+                typeof nonEnumDefinition.body.anyOf === 'object'
+            )
         ) {
             throw new Error(
                 `Type keyword '${nonEnumDefinition.body.type}' in definition '${nameOfDefinition}' is not supported.`

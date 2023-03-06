@@ -138,4 +138,47 @@ describe('OpenApiVisitor', function () {
             );
         }
     );
+
+    it(
+        'should generate a Concerto JSON and CTO from a Stripe OpenAPI definition (full)',
+        async () => {
+            const fullStripeOpenApiDefinition = JSON.parse(
+                fs.readFileSync(
+                    path.resolve(
+                        __dirname, '../cto/data/fullStripeOpenApiDefinition.json'
+                    ), 'utf8'
+                )
+            );
+            const desiredConcertoJsonModelString = fs.readFileSync(
+                path.resolve(
+                    __dirname, '../cto/data/fullStripeConcertoJsonModel.json'
+                ), 'utf8'
+            );
+            const desiredConcertoModel = fs.readFileSync(
+                path.resolve(
+                    __dirname, '../cto/data/fullStripeConcertoModel.cto'
+                ), 'utf8'
+            );
+
+            const inferredConcertoJsonModel = OpenApiVisitor
+                .parse(fullStripeOpenApiDefinition)
+                .accept(
+                    openApiVisitor, openApiVisitorParameters
+                );
+
+            const inferredConcertoModel = Printer.toCTO(
+                inferredConcertoJsonModel.models[0]
+            );
+
+            assert.equal(
+                JSON.stringify(inferredConcertoJsonModel, null, 4) + '\n',
+                desiredConcertoJsonModelString
+            );
+
+            assert.equal(
+                inferredConcertoModel + '\n',
+                desiredConcertoModel
+            );
+        }
+    );
 });
