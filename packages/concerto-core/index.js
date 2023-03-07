@@ -39,6 +39,7 @@ const EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
 const EventDeclaration = require('./lib/introspect/eventdeclaration');
 const ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
+const ScalarDeclaration = require('./lib/introspect/scalarDeclaration');
 
 // Properties
 const Property = require('./lib/introspect/property');
@@ -114,6 +115,7 @@ module.exports = {
     EventDeclaration,
     ParticipantDeclaration,
     TransactionDeclaration,
+    ScalarDeclaration,
     Property,
     Field,
     EnumDeclaration,

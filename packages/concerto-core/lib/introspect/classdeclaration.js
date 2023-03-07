@@ -16,20 +16,18 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const Decorated = require('./decorated');
+const Declaration = require('./declaration');
 const EnumValueDeclaration = require('./enumvaluedeclaration');
 const Field = require('./field');
 const Globalize = require('../globalize');
 const IllegalModelException = require('./illegalmodelexception');
 const Introspector = require('./introspector');
-const ModelUtil = require('../modelutil');
 const RelationshipDeclaration = require('./relationshipdeclaration');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const ModelFile = require('./modelfile');
     const Property = require('./property');
 }
 /* eslint-enable no-unused-vars */
@@ -45,31 +43,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class ClassDeclaration extends Decorated {
-    /**
-     * Create a ClassDeclaration from an Abstract Syntax Tree. The AST is the
-     * result of parsing.
-     *
-     * @param {ModelFile} modelFile - the ModelFile for this class
-     * @param {Object} ast - the AST created by the parser
-     * @throws {IllegalModelException}
-     */
-    constructor(modelFile, ast) {
-        super(ast);
-        this.modelFile = modelFile;
-        this.process();
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.modelFile;
-    }
-
+class ClassDeclaration extends Declaration {
     /**
      * Process the AST and build the model
      *
@@ -79,13 +53,8 @@ class ClassDeclaration extends Decorated {
     process() {
         super.process();
 
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
-        }
-
         const reservedProperties = ['$class', '$identifier', '$timestamp'];
 
-        this.name = this.ast.name;
         this.properties = [];
         this.superType = null;
         this.superTypeDeclaration = null;
@@ -142,8 +111,6 @@ class ClassDeclaration extends Decorated {
                 }), this.modelFile, this.ast.location);
             }
         }
-
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
 
         if (this.fqn === 'concerto@1.0.0.Transaction' || this.fqn === 'concerto@1.0.0.Event') {
             this.addTimestampField();
@@ -330,34 +297,6 @@ class ClassDeclaration extends Decorated {
      */
     isAbstract() {
         return this.abstract;
-    }
-
-    /**
-     * Returns the short name of a class. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.name;
-    }
-
-    /**
-     * Return the namespace of this class.
-     * @return {string} namespace - a namespace.
-     */
-    getNamespace() {
-        return this.modelFile.getNamespace();
-    }
-
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
     }
 
     /**

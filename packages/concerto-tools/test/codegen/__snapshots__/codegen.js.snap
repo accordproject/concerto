@@ -1988,6 +1988,7 @@ class \`org.acme.hr.Employee\` {
    + \`Department\` \`department\`
    + \`Address\` \`officeAddress\`
    + \`Equipment[]\` \`companyAssets\`
+\`org.acme.hr.Employee\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 }
 
 \`org.acme.hr.Employee\` "1" *-- "1" \`org.acme.hr.Department\`
@@ -1998,6 +1999,7 @@ class \`org.acme.hr.Employee\` {
 class \`org.acme.hr.Contractor\` {
 << participant>>
    + \`Company\` \`company\`
+\`org.acme.hr.Contractor\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 }
 
 \`org.acme.hr.Contractor\` "1" *-- "1" \`org.acme.hr.Company\`
@@ -2005,6 +2007,7 @@ class \`org.acme.hr.Contractor\` {
 \`org.acme.hr.Contractor\` --|> \`org.acme.hr.Person\`
 class \`org.acme.hr.Manager\` {
 << participant>>
+\`org.acme.hr.Manager\` "1" o-- "*" \`org.acme.hr.Person\` : reports
 }
 
 \`org.acme.hr.Manager\` "1" o-- "*" \`org.acme.hr.Person\` : reports
@@ -2014,12 +2017,14 @@ class \`org.acme.hr.CompanyEvent\`
 
 class \`org.acme.hr.Onboarded\` {
 << event>>
+\`org.acme.hr.Onboarded\` "1" o-- "1" \`org.acme.hr.Employee\` : employee
 }
 
 \`org.acme.hr.Onboarded\` "1" o-- "1" \`org.acme.hr.Employee\` : employee
 \`org.acme.hr.Onboarded\` --|> \`org.acme.hr.CompanyEvent\`
 class \`org.acme.hr.ChangeOfAddress\` {
 << transaction>>
+\`org.acme.hr.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr.Person\` : Person
    + \`Address\` \`newAddress\`
 }
 
@@ -2115,6 +2120,7 @@ class \`org.acme.hr.Employee\` {
    + \`Department\` \`department\`
    + \`Address\` \`officeAddress\`
    + \`Equipment[]\` \`companyAssets\`
+\`org.acme.hr.Employee\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 }
 
 \`org.acme.hr.Employee\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
@@ -2122,12 +2128,14 @@ class \`org.acme.hr.Employee\` {
 class \`org.acme.hr.Contractor\` {
 << participant>>
    + \`Company\` \`company\`
+\`org.acme.hr.Contractor\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 }
 
 \`org.acme.hr.Contractor\` "1" o-- "1" \`org.acme.hr.Manager\` : manager
 \`org.acme.hr.Contractor\` --|> \`org.acme.hr.Person\`
 class \`org.acme.hr.Manager\` {
 << participant>>
+\`org.acme.hr.Manager\` "1" o-- "*" \`org.acme.hr.Person\` : reports
 }
 
 \`org.acme.hr.Manager\` "1" o-- "*" \`org.acme.hr.Person\` : reports
@@ -2138,12 +2146,14 @@ class \`org.acme.hr.CompanyEvent\`
 \`org.acme.hr.CompanyEvent\` --|> \`concerto@1.0.0.Event\`
 class \`org.acme.hr.Onboarded\` {
 << event>>
+\`org.acme.hr.Onboarded\` "1" o-- "1" \`org.acme.hr.Employee\` : employee
 }
 
 \`org.acme.hr.Onboarded\` "1" o-- "1" \`org.acme.hr.Employee\` : employee
 \`org.acme.hr.Onboarded\` --|> \`org.acme.hr.CompanyEvent\`
 class \`org.acme.hr.ChangeOfAddress\` {
 << transaction>>
+\`org.acme.hr.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr.Person\` : Person
    + \`Address\` \`newAddress\`
 }
 
@@ -3184,15 +3194,18 @@ class org.acme.hr.Employee << (P,lightblue) >> {
    + Department department
    + Address officeAddress
    + Equipment[] companyAssets
+   + Manager manager
 }
 org.acme.hr.Employee "1" o-- "1" org.acme.hr.Manager : manager
 org.acme.hr.Employee --|> org.acme.hr.Person
 class org.acme.hr.Contractor << (P,lightblue) >> {
    + Company company
+   + Manager manager
 }
 org.acme.hr.Contractor "1" o-- "1" org.acme.hr.Manager : manager
 org.acme.hr.Contractor --|> org.acme.hr.Person
 class org.acme.hr.Manager << (P,lightblue) >> {
+   + Person[] reports
 }
 org.acme.hr.Manager "1" o-- "*" org.acme.hr.Person : reports
 org.acme.hr.Manager --|> org.acme.hr.Employee
@@ -3200,10 +3213,12 @@ class org.acme.hr.CompanyEvent {
 }
 org.acme.hr.CompanyEvent --|> concerto_1.0.0.Event
 class org.acme.hr.Onboarded {
+   + Employee employee
 }
 org.acme.hr.Onboarded "1" o-- "1" org.acme.hr.Employee : employee
 org.acme.hr.Onboarded --|> org.acme.hr.CompanyEvent
 class org.acme.hr.ChangeOfAddress << (T,yellow) >> {
+   + Person Person
    + Address newAddress
 }
 org.acme.hr.ChangeOfAddress "1" o-- "1" org.acme.hr.Person : Person
@@ -3948,6 +3963,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
    + \`Department\` \`department\`
    + \`Address\` \`officeAddress\`
    + \`Equipment[]\` \`companyAssets\`
+\`org.acme.hr@1.0.0.Employee\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Employee\` "1" *-- "1" \`org.acme.hr@1.0.0.Department\`
@@ -3958,6 +3974,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
 class \`org.acme.hr@1.0.0.Contractor\` {
 << participant>>
    + \`Company\` \`company\`
+\`org.acme.hr@1.0.0.Contractor\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Contractor\` "1" *-- "1" \`org.acme.hr@1.0.0.Company\`
@@ -3965,6 +3982,7 @@ class \`org.acme.hr@1.0.0.Contractor\` {
 \`org.acme.hr@1.0.0.Contractor\` --|> \`org.acme.hr@1.0.0.Person\`
 class \`org.acme.hr@1.0.0.Manager\` {
 << participant>>
+\`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
 }
 
 \`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
@@ -3974,12 +3992,14 @@ class \`org.acme.hr@1.0.0.CompanyEvent\`
 
 class \`org.acme.hr@1.0.0.Onboarded\` {
 << event>>
+\`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 }
 
 \`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 \`org.acme.hr@1.0.0.Onboarded\` --|> \`org.acme.hr@1.0.0.CompanyEvent\`
 class \`org.acme.hr@1.0.0.ChangeOfAddress\` {
 << transaction>>
+\`org.acme.hr@1.0.0.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr@1.0.0.Person\` : Person
    + \`Address\` \`newAddress\`
 }
 
@@ -4057,6 +4077,7 @@ class org.acme.hr_1.0.0.Employee << (P,lightblue) >> {
    + Department department
    + Address officeAddress
    + Equipment[] companyAssets
+   + Manager manager
 }
 org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Department : department
 org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Address : officeAddress
@@ -4065,21 +4086,25 @@ org.acme.hr@1.0.0.Employee "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
 org.acme.hr_1.0.0.Employee --|> org.acme.hr_1.0.0.Person
 class org.acme.hr_1.0.0.Contractor << (P,lightblue) >> {
    + Company company
+   + Manager manager
 }
 org.acme.hr@1.0.0.Contractor "1" *-- "1" org.acme.hr@1.0.0.Company : company
 org.acme.hr@1.0.0.Contractor "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
 org.acme.hr_1.0.0.Contractor --|> org.acme.hr_1.0.0.Person
 class org.acme.hr_1.0.0.Manager << (P,lightblue) >> {
+   + Person[] reports
 }
 org.acme.hr@1.0.0.Manager "1" o-- "*" org.acme.hr@1.0.0.Person : reports
 org.acme.hr_1.0.0.Manager --|> org.acme.hr_1.0.0.Employee
 class org.acme.hr_1.0.0.CompanyEvent {
 }
 class org.acme.hr_1.0.0.Onboarded {
+   + Employee employee
 }
 org.acme.hr@1.0.0.Onboarded "1" o-- "1" org.acme.hr@1.0.0.Employee : employee
 org.acme.hr_1.0.0.Onboarded --|> org.acme.hr_1.0.0.CompanyEvent
 class org.acme.hr_1.0.0.ChangeOfAddress << (T,yellow) >> {
+   + Person Person
    + Address newAddress
 }
 org.acme.hr@1.0.0.ChangeOfAddress "1" o-- "1" org.acme.hr@1.0.0.Person : Person
@@ -6077,6 +6102,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
    + \`Department\` \`department\`
    + \`Address\` \`officeAddress\`
    + \`Equipment[]\` \`companyAssets\`
+\`org.acme.hr@1.0.0.Employee\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Employee\` "1" *-- "1" \`org.acme.hr@1.0.0.Department\`
@@ -6087,6 +6113,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
 class \`org.acme.hr@1.0.0.Contractor\` {
 << participant>>
    + \`Company\` \`company\`
+\`org.acme.hr@1.0.0.Contractor\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Contractor\` "1" *-- "1" \`org.acme.hr@1.0.0.Company\`
@@ -6094,6 +6121,7 @@ class \`org.acme.hr@1.0.0.Contractor\` {
 \`org.acme.hr@1.0.0.Contractor\` --|> \`org.acme.hr@1.0.0.Person\`
 class \`org.acme.hr@1.0.0.Manager\` {
 << participant>>
+\`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
 }
 
 \`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
@@ -6103,12 +6131,14 @@ class \`org.acme.hr@1.0.0.CompanyEvent\`
 
 class \`org.acme.hr@1.0.0.Onboarded\` {
 << event>>
+\`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 }
 
 \`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 \`org.acme.hr@1.0.0.Onboarded\` --|> \`org.acme.hr@1.0.0.CompanyEvent\`
 class \`org.acme.hr@1.0.0.ChangeOfAddress\` {
 << transaction>>
+\`org.acme.hr@1.0.0.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr@1.0.0.Person\` : Person
    + \`Address\` \`newAddress\`
 }
 
@@ -6209,6 +6239,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
    + \`Department\` \`department\`
    + \`Address\` \`officeAddress\`
    + \`Equipment[]\` \`companyAssets\`
+\`org.acme.hr@1.0.0.Employee\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Employee\` "1" *-- "1" \`org.acme.hr@1.0.0.Department\`
@@ -6219,6 +6250,7 @@ class \`org.acme.hr@1.0.0.Employee\` {
 class \`org.acme.hr@1.0.0.Contractor\` {
 << participant>>
    + \`Company\` \`company\`
+\`org.acme.hr@1.0.0.Contractor\` "1" o-- "1" \`org.acme.hr@1.0.0.Manager\` : manager
 }
 
 \`org.acme.hr@1.0.0.Contractor\` "1" *-- "1" \`org.acme.hr@1.0.0.Company\`
@@ -6226,6 +6258,7 @@ class \`org.acme.hr@1.0.0.Contractor\` {
 \`org.acme.hr@1.0.0.Contractor\` --|> \`org.acme.hr@1.0.0.Person\`
 class \`org.acme.hr@1.0.0.Manager\` {
 << participant>>
+\`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
 }
 
 \`org.acme.hr@1.0.0.Manager\` "1" o-- "*" \`org.acme.hr@1.0.0.Person\` : reports
@@ -6236,12 +6269,14 @@ class \`org.acme.hr@1.0.0.CompanyEvent\`
 \`org.acme.hr@1.0.0.CompanyEvent\` --|> \`concerto@1.0.0.Event\`
 class \`org.acme.hr@1.0.0.Onboarded\` {
 << event>>
+\`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 }
 
 \`org.acme.hr@1.0.0.Onboarded\` "1" o-- "1" \`org.acme.hr@1.0.0.Employee\` : employee
 \`org.acme.hr@1.0.0.Onboarded\` --|> \`org.acme.hr@1.0.0.CompanyEvent\`
 class \`org.acme.hr@1.0.0.ChangeOfAddress\` {
 << transaction>>
+\`org.acme.hr@1.0.0.ChangeOfAddress\` "1" o-- "1" \`org.acme.hr@1.0.0.Person\` : Person
    + \`Address\` \`newAddress\`
 }
 
@@ -7288,6 +7323,7 @@ class org.acme.hr_1.0.0.Employee << (P,lightblue) >> {
    + Department department
    + Address officeAddress
    + Equipment[] companyAssets
+   + Manager manager
 }
 org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Department : department
 org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Address : officeAddress
@@ -7296,11 +7332,13 @@ org.acme.hr@1.0.0.Employee "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
 org.acme.hr_1.0.0.Employee --|> org.acme.hr_1.0.0.Person
 class org.acme.hr_1.0.0.Contractor << (P,lightblue) >> {
    + Company company
+   + Manager manager
 }
 org.acme.hr@1.0.0.Contractor "1" *-- "1" org.acme.hr@1.0.0.Company : company
 org.acme.hr@1.0.0.Contractor "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
 org.acme.hr_1.0.0.Contractor --|> org.acme.hr_1.0.0.Person
 class org.acme.hr_1.0.0.Manager << (P,lightblue) >> {
+   + Person[] reports
 }
 org.acme.hr@1.0.0.Manager "1" o-- "*" org.acme.hr@1.0.0.Person : reports
 org.acme.hr_1.0.0.Manager --|> org.acme.hr_1.0.0.Employee
@@ -7308,10 +7346,12 @@ class org.acme.hr_1.0.0.CompanyEvent {
 }
 org.acme.hr_1.0.0.CompanyEvent --|> concerto_1.0.0.Event
 class org.acme.hr_1.0.0.Onboarded {
+   + Employee employee
 }
 org.acme.hr@1.0.0.Onboarded "1" o-- "1" org.acme.hr@1.0.0.Employee : employee
 org.acme.hr_1.0.0.Onboarded --|> org.acme.hr_1.0.0.CompanyEvent
 class org.acme.hr_1.0.0.ChangeOfAddress << (T,yellow) >> {
+   + Person Person
    + Address newAddress
 }
 org.acme.hr@1.0.0.ChangeOfAddress "1" o-- "1" org.acme.hr@1.0.0.Person : Person

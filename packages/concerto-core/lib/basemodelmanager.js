@@ -32,6 +32,7 @@ const { getRootModel } = require('./rootmodel');
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
+    const Decorated = require('./introspect/decorated');
     const AssetDeclaration = require('./introspect/assetdeclaration');
     const ClassDeclaration = require('./introspect/classdeclaration');
     const ConceptDeclaration = require('./introspect/conceptdeclaration');
@@ -717,7 +718,7 @@ class BaseModelManager {
      * ModelFiles with no declarations after filtering will be removed.
      *
      * @param {function(Decorated): boolean} predicate - the filter function over a Decorated object
-     * @returns {ModelManager} - the filtered ModelManager
+     * @returns {BaseModelManager} - the filtered ModelManager
      */
     filter(predicate){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);

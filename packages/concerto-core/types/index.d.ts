@@ -12,6 +12,7 @@ import EnumValueDeclaration = require("./lib/introspect/enumvaluedeclaration");
 import EventDeclaration = require("./lib/introspect/eventdeclaration");
 import ParticipantDeclaration = require("./lib/introspect/participantdeclaration");
 import TransactionDeclaration = require("./lib/introspect/transactiondeclaration");
+import ScalarDeclaration = require("./lib/introspect/scalarDeclaration");
 import Property = require("./lib/introspect/property");
 import Field = require("./lib/introspect/field");
 import EnumDeclaration = require("./lib/introspect/enumdeclaration");
@@ -39,4 +40,4 @@ export const version: {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
+export { SecurityException, IllegalModelException, TypeNotFoundException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
