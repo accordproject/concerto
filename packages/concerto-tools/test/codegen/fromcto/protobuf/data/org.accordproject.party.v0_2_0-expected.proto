@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package org.accordproject.party.v0_2_0;
+
+import "google/protobuf/timestamp.proto";
+
+message Party {
+  string partyId = 1;
+}
+
+message _Subclasses_of_class_Party {
+  oneof _class_oneof_Party {
+    AgreementParty _subclass_of_class_Party_AgreementParty = 1;
+    Party _subclass_of_class_Party_Party = 2;
+  }
+}
+

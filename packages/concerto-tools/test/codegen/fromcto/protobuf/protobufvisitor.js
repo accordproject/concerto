@@ -16,12 +16,18 @@
 
 const chai = require('chai');
 chai.should();
+const { assert } = chai;
 const sinon = require('sinon');
+const fs = require('fs');
+const path = require('path');
 
-const ProtobufVisitor = require('../../../../lib/codegen/fromcto/protobuf/protobufvisitor.js');
+const ProtobufVisitor = require(
+    '../../../../lib/codegen/fromcto/protobuf/protobufvisitor.js'
+);
 
 const ModelFile = require('@accordproject/concerto-core').ModelFile;
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
+const ModelLoader = require('@accordproject/concerto-core').ModelLoader;
 const AssetDeclaration = require('@accordproject/concerto-core').AssetDeclaration;
 const ClassDeclaration = require('@accordproject/concerto-core').ClassDeclaration;
 const EnumDeclaration = require('@accordproject/concerto-core').EnumDeclaration;
@@ -388,6 +394,99 @@ describe('ProtobufVisitor', function () {
 
             param.fileWriter.writeLine.callCount.should.deep.equal(1);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, '  repeated string Bob = 0;']);
+        });
+    });
+
+    describe('visit CTO file', () => {
+        it('should process an APAP protocol CTO file', async () => {
+            const modelManager = await ModelLoader.loadModelManager(
+                [path.resolve(__dirname, './data/apapProtocol.cto')]
+            );
+
+            modelManager.accept(
+                new ProtobufVisitor(), {
+                    fileWriter: new FileWriter(
+                        path.resolve(__dirname, './data')
+                    )
+                }
+            );
+
+            const expectedMetamodelProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/concerto.metamodel.v0_4_0-expected.proto'
+                ),
+                'utf8'
+            );
+            const expectedCommonmarkProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.commonmark.v0_5_0-expected.proto'
+                ),
+                'utf8'
+            );
+            const expectedApapPartyProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.party.v0_2_0-expected.proto'
+                ),
+                'utf8'
+            );
+            const expectedApapProtocolProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.protocol.v1_0_0-expected.proto'
+                ),
+                'utf8'
+            );
+            const producedMetamodelProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/concerto.metamodel.v0_4_0.proto'
+                ),
+                'utf8'
+            );
+            const producedCommonmarkProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.commonmark.v0_5_0.proto'
+                ),
+                'utf8'
+            );
+            const producedApapPartyProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.party.v0_2_0.proto'
+                ),
+                'utf8'
+            );
+            const producedApapProtocolProtobuf = fs.readFileSync(
+                path.resolve(
+                    __dirname,
+                    './data/org.accordproject.protocol.v1_0_0.proto'
+                ),
+                'utf8'
+            );
+
+            assert.equal(
+                producedMetamodelProtobuf,
+                expectedMetamodelProtobuf
+            );
+
+            assert.equal(
+                producedCommonmarkProtobuf,
+                expectedCommonmarkProtobuf
+            );
+
+            assert.equal(
+                producedApapPartyProtobuf,
+                expectedApapPartyProtobuf
+            );
+
+            assert.equal(
+                producedApapProtocolProtobuf,
+                expectedApapProtocolProtobuf
+            );
         });
     });
 });

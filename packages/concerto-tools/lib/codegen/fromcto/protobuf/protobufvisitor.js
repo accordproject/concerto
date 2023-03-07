@@ -114,7 +114,7 @@ class ProtobufVisitor {
      * @public
      */
     getNamesOfSubclassesOfClassRecursively(classDeclaration) {
-        return typeof classDeclaration.getAssignableClassDeclarations === 'function'
+        return typeof classDeclaration?.getAssignableClassDeclarations === 'function'
             ? classDeclaration.getAssignableClassDeclarations()
                 ?.filter(
                     assignableClass => assignableClass.getName() !== classDeclaration.getName()

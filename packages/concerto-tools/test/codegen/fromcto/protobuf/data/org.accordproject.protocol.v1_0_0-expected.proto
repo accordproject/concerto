@@ -1,0 +1,172 @@
+syntax = "proto3";
+
+package org.accordproject.protocol.v1_0_0;
+
+import "google/protobuf/timestamp.proto";
+import "concerto.metamodel.v0_4_0.proto";
+import "org.accordproject.commonmark.v0_5_0.proto";
+import "org.accordproject.party.v0_2_0.proto";
+
+message Blob {
+  string base64 = 1;
+  string mimeType = 2;
+}
+
+message Text {
+  Document templateMark = 1;
+}
+
+message TemplateModel {
+  optional Model model = 1;
+  optional string sharedModel = 2;
+  string typeName = 3;
+}
+
+message SharedModel {
+  Model model = 1;
+  string modelId = 2;
+}
+
+enum CodeType {
+  CodeType_ES2015 = 0;
+  CodeType_WASM_BYTES = 1;
+}
+
+enum CodeEncodingType {
+  CodeEncodingType_BASE64 = 0;
+  CodeEncodingType_PLAIN_TEXT = 1;
+}
+
+message Code {
+  CodeEncodingType encoding = 1;
+  CodeType type = 2;
+  string value = 3;
+}
+
+message Function {
+  Code code = 1;
+  string emittedTypes = 2;
+  string name = 3;
+  string requestType = 4;
+  string responseType = 5;
+}
+
+message Logic {
+  repeated Function functions = 1;
+  string stateType = 2;
+}
+
+message Template {
+  string author = 1;
+  optional string description = 2;
+  optional string displayName = 3;
+  repeated string keywords = 4;
+  string license = 5;
+  optional Logic logic = 6;
+  optional Blob logo = 7;
+  string name = 8;
+  TemplateModel templateModel = 9;
+  Text text = 10;
+  string version = 11;
+}
+
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+message Metadata {
+  repeated KeyValue values = 1;
+}
+
+message Agreement {
+  string agreementId = 1;
+  repeated AgreementParty agreementParties = 2;
+  AgreementStatusType agreementStatus = 3;
+  repeated Blob attachments = 4;
+  string data = 5;
+  repeated HistoryEntry historyEntries = 6;
+  Metadata metadata = 7;
+  repeated string references = 8;
+  repeated Signature signatures = 9;
+  string state = 10;
+  string template = 11;
+}
+
+message AgreementParty {
+  optional Address address = 1;
+  optional string company = 2;
+  optional string email = 3;
+  string name = 4;
+  optional string network = 5;
+  string partyId = 6;
+  optional string phone = 7;
+  optional string role = 8;
+  bool signatory = 9;
+}
+
+message Address {
+  optional string country = 1;
+  optional string postalCode = 2;
+  optional string stateTerritoryRegion = 3;
+  repeated string streetRoad = 4;
+  optional string suburbTownCity = 5;
+}
+
+message HistoryEntry {
+  AgreementStatusType agreementStatus = 1;
+  string data = 2;
+  Metadata metadata = 3;
+}
+
+message Signature {
+  Metadata metadata = 1;
+  AgreementParty signatory = 2;
+  repeated Blob signatureImage = 3;
+  optional google.protobuf.Timestamp signedAt = 4;
+}
+
+message _Subclasses_of_class_ConversionOptions {
+  oneof _class_oneof_ConversionOptions {
+    PdfConversionOptions _subclass_of_class_ConversionOptions_PdfConversionOptions = 1;
+  }
+}
+
+message PdfConversionOptions {
+  string styles = 1;
+}
+
+enum FeatureType {
+  FeatureType_AGREEMENT_CONVERT_PDF = 0;
+  FeatureType_AGREEMENT_MANAGE = 1;
+  FeatureType_AGREEMENT_STATE = 2;
+  FeatureType_AGREEMENT_TRIGGER = 3;
+  FeatureType_SHARED_MODEL_MANAGE = 4;
+  FeatureType_TEMPLATE_LOGIC = 5;
+  FeatureType_TEMPLATE_STATEFUL = 6;
+  FeatureType_TEMPLATE_VERIFY_SIGNATURES = 7;
+}
+
+message Capabilities {
+  repeated FeatureType features = 1;
+}
+
+message TriggerRequest {
+  string functionName = 1;
+  string payload = 2;
+}
+
+message TriggerResponse {
+  optional string errorDetails = 1;
+  optional string errorMessage = 2;
+  bool isError = 3;
+  string result = 4;
+}
+
+enum AgreementStatusType {
+  AgreementStatusType_COMPLETED = 0;
+  AgreementStatusType_DRAFT = 1;
+  AgreementStatusType_SIGNNG = 2;
+  AgreementStatusType_SUPERSEDED = 3;
+}
+
