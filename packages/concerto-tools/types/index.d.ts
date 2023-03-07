@@ -32,4 +32,5 @@ export var CodeGen: {
         avro: typeof import("./lib/codegen/fromcto/avro/avrovisitor");
     };
 };
+export var Common: typeof import("./lib/common/common");
 export var version: any;

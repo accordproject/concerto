@@ -14,11 +14,12 @@
 
 'use strict';
 
-/**
- * Concerto Tools module.
- * @module concerto-tools
- */
+const DiagramVisitor = require('./diagramVisitor');
+const { ConcertoGraphVisitor, DirectedGraph } = require('./graph');
 
-module.exports.CodeGen = require('./lib/codegen/codegen');
-module.exports.Common = require('./lib/common/common');
-module.exports.version = require('./package.json');
+
+module.exports = {
+    DiagramVisitor,
+    ConcertoGraphVisitor,
+    DirectedGraph
+};

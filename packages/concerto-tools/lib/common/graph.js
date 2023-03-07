@@ -14,11 +14,18 @@
  */
 'use strict';
 
-const fs = require('fs');
-const { ModelUtil, ModelManager } = require('@accordproject/concerto-core');
-const { FileWriter } = require('@accordproject/concerto-util');
+const { ModelUtil } = require('@accordproject/concerto-core');
 
 const DiagramVisitor = require('./diagramvisitor');
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ClassDeclaration, ScalarDeclaration, Field, EnumValueDeclaration, RelationshipDeclaration} = require('@accordproject/concerto-core');
+    const { Writer } = require('@accordproject/concerto-util');
+}
+/* eslint-enable no-unused-vars */
 
 /*
  * This class represents a directed graph using an
@@ -39,9 +46,19 @@ class DirectedGraph {
     }
 
     /**
+     * Checks if the graph has an edge from source to target
+     * @param {string} source - the origin of the edge
+     * @param {string} target - the destination of the edge
+     * @return {boolean} - true, if the graph has the edge
+     */
+    hasEdge(source, target) {
+        return this.adjacencyMap[source].includes(target);
+    }
+
+    /**
      * Adds an edge from `source` to `target`
      * @param {string} source - the origin of the edge
-     * @param {*} target - the destination of the edge
+     * @param {string} target - the destination of the edge
      */
     addEdge(source, target) {
         this.adjacencyMap[source] ??= [];
@@ -139,7 +156,7 @@ class DirectedGraph {
  * Convert the contents of a ModelManager to a directed graph where types are
  * vertices and edges are relationships between types.
  *
- * @private
+ * @protected
  * @class
  * @memberof module:concerto-util
  */
@@ -148,21 +165,46 @@ class ConcertoGraphVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitClassDeclaration(classDeclaration, parameters) {
         parameters.stack ??= [];
         parameters.stack.push(classDeclaration.getFullyQualifiedName());
         parameters.graph.addVertex(classDeclaration.getFullyQualifiedName());
+
+        if (classDeclaration.getSuperType()){
+            parameters.graph.addEdge(classDeclaration.getFullyQualifiedName(), classDeclaration.getSuperType());
+        }
+
         super.visitClassDeclaration(classDeclaration, parameters);
         parameters.stack.pop();
     }
 
     /**
      * Visitor design pattern
+     * @param {ScalarDeclaration} scalarDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @protected
+     */
+    visitScalarDeclaration(scalarDeclaration, parameters) {
+        parameters.graph.addVertex(scalarDeclaration.getFullyQualifiedName());
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Field} scalar - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @protected
+     */
+    visitScalarField(scalar, parameters) {
+        parameters.graph.addEdge(parameters.stack.slice(-1), scalar.getFullyQualifiedTypeName());
+    }
+
+    /**
+     * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitField(field, parameters) {
         if (!ModelUtil.isPrimitiveType(field.getFullyQualifiedTypeName())) {
@@ -172,9 +214,9 @@ class ConcertoGraphVisitor extends DiagramVisitor {
 
     /**
      * Visitor design pattern
-     * @param {Relationship} relationship - the object being visited
+     * @param {RelationshipDeclaration} relationship - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitRelationship(relationship, parameters) {
         parameters.graph.addEdge(parameters.stack.slice(-1), relationship.getFullyQualifiedTypeName());
@@ -184,7 +226,7 @@ class ConcertoGraphVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
         return;
@@ -195,25 +237,3 @@ module.exports = {
     ConcertoGraphVisitor,
     DirectedGraph
 };
-
-// const mm = new ModelManager();
-// mm.addCTOModel(fs.readFileSync('./lib/common/stripe.cto', 'utf-8'));
-
-// const graph = new DirectedGraph();
-// mm.accept(new ConcertoGraphVisitor(), { graph });
-
-// console.log('Number of concepts', mm.getConceptDeclarations().length);
-// console.log('Number of models', mm.getModelFiles().length);
-
-// console.log('##### Filtering #####');
-// const connectedGraph = graph.findConnectedGraph('com.stripe.action.test@1.0.0.account');
-// const filteredModelManager = mm.filter(decorated => connectedGraph.hasVertex(`${decorated.getNamespace()}.${decorated.getName()}`));
-
-// console.log('Number of concepts', filteredModelManager.getConceptDeclarations().length);
-// console.log('Number of models', filteredModelManager.getModelFiles().length);
-
-// const writer = new FileWriter(__dirname);
-// writer.openFile('graph.mmd');
-// // graph.print(writer);
-// connectedGraph.print(writer);
-// writer.closeFile();

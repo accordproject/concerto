@@ -22,7 +22,7 @@ const DiagramVisitor = require('../../../common/diagramvisitor');
  * Set a fileWriter property (instance of FileWriter) on the parameters
  * object to control where the generated code is written to disk.
  *
- * @private
+ * @protected
  * @class
  * @memberof module:concerto-tools
  */
@@ -31,7 +31,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitModelManager(modelManager, parameters) {
         parameters.fileWriter.openFile('model.puml');
@@ -50,7 +50,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitAssetDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(A,green)' );
@@ -60,7 +60,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitEnumDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(E,grey)' );
@@ -70,7 +70,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitParticipantDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(P,lightblue)' );
@@ -80,7 +80,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitTransactionDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters, '(T,yellow)' );
@@ -91,7 +91,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitClassDeclaration(classDeclaration, parameters) {
         this.writeDeclaration(classDeclaration, parameters );
@@ -102,7 +102,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @param {string} [style] - the style for the prototype (optional)
-     * @private
+     * @protected
      */
     writeDeclaration(classDeclaration, parameters, style) {
         parameters.fileWriter.writeLine(0, 'class ' + this.escapeString(classDeclaration.getFullyQualifiedName()) + (style ? ` << ${style} >> ` : ' ') + '{' );
@@ -134,7 +134,7 @@ class PlantUMLVisitor extends DiagramVisitor {
      * Escape versions and periods.
      * @param {String} string - the object being visited
      * @return {String} string  - the parameter
-     * @private
+     * @protected
      */
     escapeString(string) {
         return string.replace('@', '_');
