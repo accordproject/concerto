@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DiagramVisitor = require('./diagramVisitor');
+const DiagramVisitor = require('./diagramvisitor');
 const { ConcertoGraphVisitor, DirectedGraph } = require('./graph');
 
 

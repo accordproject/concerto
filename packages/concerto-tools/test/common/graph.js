@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { DirectedGraph, ConcertoGraphVisitor } = require('../../lib/common/graph.js');
+const { DirectedGraph, ConcertoGraphVisitor } = require('../../lib/common/common.js');
 const { ModelManager } = require('@accordproject/concerto-core');
 const fs = require('fs');
 const { expect } = require('expect');
@@ -102,7 +102,9 @@ describe('graph', function () {
 
             const graph = new DirectedGraph();
             modelManager.accept(visitor, { graph });
+
             const connectedGraph = graph.findConnectedGraph('org.acme.hr@1.0.0.ChangeOfAddress');
+            expect(connectedGraph.hasEdge('org.acme.hr@1.0.0.ChangeOfAddress', 'org.acme.hr@1.0.0.Person'));
 
             const filteredModelManager = modelManager.filter(declaration => connectedGraph.hasVertex(declaration.getFullyQualifiedName()));
 

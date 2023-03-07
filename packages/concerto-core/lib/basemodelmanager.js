@@ -32,7 +32,7 @@ const { getRootModel } = require('./rootmodel');
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const Decorated = require('./introspect/decorated');
+    const Declaration = require('./introspect/declaration');
     const AssetDeclaration = require('./introspect/assetdeclaration');
     const ClassDeclaration = require('./introspect/classdeclaration');
     const ConceptDeclaration = require('./introspect/conceptdeclaration');
@@ -711,13 +711,21 @@ class BaseModelManager {
         return result;
     }
 
+
+    /**
+     * A function type definition for use as an argument to the filter function
+     * @callback FilterFunction
+     * @param {Declaration} declaration
+     * @returns {boolean} true, if the declaration satisfies the filter function
+     */
+
     /**
      * Returns a new ModelManager with only the types for which the
      * filter function returns true.
      *
      * ModelFiles with no declarations after filtering will be removed.
      *
-     * @param {function(Decorated): boolean} predicate - the filter function over a Decorated object
+     * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @returns {BaseModelManager} - the filtered ModelManager
      */
     filter(predicate){
