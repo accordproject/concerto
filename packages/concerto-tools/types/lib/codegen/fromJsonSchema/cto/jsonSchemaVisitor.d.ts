@@ -94,7 +94,7 @@ declare class JsonSchemaVisitor {
     private inferPrimitiveConcertoType;
     /**
      * Normalizes a name by replacing forbidden characters with "$_".
-     * @param {Object} name - a name.
+     * @param {String} name - a name.
      *
      * @return {Object} a normalized name.
      * @private

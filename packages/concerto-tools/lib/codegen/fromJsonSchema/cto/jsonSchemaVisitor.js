@@ -228,8 +228,7 @@ class JsonSchemaVisitor {
     normalizeName(name) {
         return typeof name === 'string'
             ? Identifiers.normalizeIdentifier(
-                // @ts-ignore
-                name.replaceAll(/\/|{|}/ig, '$_')
+                name.replace(/\/|{|}/ig, '$_')
             )
             : undefined;
     }
@@ -340,14 +339,16 @@ class JsonSchemaVisitor {
      */
     visitLocalReference(reference, parameters) {
         const traversedReferences = parameters.traversedReferences ?? [];
+        const pathToDefinition = this.parseLocalReferenceString(reference.body);
 
         if (!traversedReferences.includes(reference.body)) { // Break out of circular refences.
-            const pathToDefinition = this.parseLocalReferenceString(reference.body);
             const pathToDefinitions = parameters.pathToDefinitions ||
                 ['definitions'];
 
-            if (pathToDefinitions.length === 0) {
-                return null;
+            if (pathToDefinition.length === 0) {
+                return new Definition(
+                    parameters.jsonSchemaModel, ['Root']
+                );
             }
 
             if (
@@ -382,7 +383,7 @@ class JsonSchemaVisitor {
             }
         }
 
-        return null;
+        return { name: this.inferInlineObjectConceptName(pathToDefinition) };
     }
     /**
      * Reference property visitor.
@@ -448,7 +449,7 @@ class JsonSchemaVisitor {
         delete parameters.assignableFields;
 
         // Handle reserved properties.
-        if (['$identifier', '$class'].includes(propertyName)) {
+        if (['$identifier', '$class', '$timestamp'].includes(propertyName)) {
             return;
         }
 
@@ -518,14 +519,22 @@ class JsonSchemaVisitor {
                 new Reference(property.body.$ref, property.path)
             ).accept(this, parameters);
 
+            if (referenced === null || referenced === undefined) {
+                throw new Error(
+                    `Reference ${property.body.$ref} not found.`
+                );
+            }
+
             return [{
                 $class: `${parameters.metaModelNamespace}.ObjectProperty`,
                 ...propertyProperties,
                 type: {
                     $class: `${parameters.metaModelNamespace}.TypeIdentifier`,
-                    name: referenced !== null && referenced !== undefined
-                        ? this.normalizeName(referenced.name)
-                        : 'Root',
+                    name: typeof referenced.path === 'object' &&
+                        referenced.path.length === 1 &&
+                        referenced.path[0] === 'Root'
+                        ? 'Root'
+                        : this.normalizeName(referenced.name),
                 }
             }];
         }
@@ -668,9 +677,16 @@ class JsonSchemaVisitor {
                     typeof nonEnumDefinition.body.properties !== 'object'
                 )
             ) {
-                throw new Error(
-                    `Definition '${nameOfDefinition}' is undefined and unsupported by Concerto.`
-                );
+                return {
+                    $class: `${parameters.metaModelNamespace}.StringScalar`,
+                    name: nameOfDefinition,
+                    decorators: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.Decorator',
+                            name: 'StringifiedJson',
+                        }
+                    ]
+                };
             }
 
             const propertiesAndInlineObjectDerived = (

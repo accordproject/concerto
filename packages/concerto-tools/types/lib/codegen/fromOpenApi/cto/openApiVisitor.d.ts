@@ -17,7 +17,7 @@ declare class OpenApiVisitor {
      * @return {Object} the result of visiting or undefined.
      * @public
      */
-    public static infer(openApiDefinition: any): any;
+    public static parse(openApiDefinition: any): any;
     /**
      * OpenAPI definition visitor.
      * @param {Object} openApiDefinition - the OpenAPI definition.

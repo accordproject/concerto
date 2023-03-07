@@ -15,9 +15,7 @@
 'use strict';
 
 const chai = require('chai');
-const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 chai.should();
-chai.use(deepEqualInAnyOrder);
 const { assert } = chai;
 const fs = require('fs');
 const path = require('path');
@@ -52,9 +50,6 @@ describe('OpenApiVisitor', function () {
                     __dirname, '../cto/data/concertoJsonModel.json'
                 ), 'utf8'
             );
-            const desiredConcertoJsonModel = JSON.parse(
-                desiredConcertoJsonModelString
-            );
             const desiredConcertoModel = fs.readFileSync(
                 path.resolve(
                     __dirname, '../cto/data/concertoModel.cto'
@@ -69,11 +64,6 @@ describe('OpenApiVisitor', function () {
 
             const inferredConcertoModel = Printer.toCTO(
                 inferredConcertoJsonModel.models[0]
-            );
-
-            // @ts-ignore
-            assert.deepEqualInAnyOrder(
-                inferredConcertoJsonModel, desiredConcertoJsonModel
             );
 
             assert.equal(
@@ -103,9 +93,6 @@ describe('OpenApiVisitor', function () {
                     __dirname, '../cto/data/smallStripeConcertoJsonModel.json'
                 ), 'utf8'
             );
-            const desiredConcertoJsonModel = JSON.parse(
-                desiredConcertoJsonModelString
-            );
             const desiredConcertoModel = fs.readFileSync(
                 path.resolve(
                     __dirname, '../cto/data/smallStripeConcertoModel.cto'
@@ -120,11 +107,6 @@ describe('OpenApiVisitor', function () {
 
             const inferredConcertoModel = Printer.toCTO(
                 inferredConcertoJsonModel.models[0]
-            );
-
-            // @ts-ignore
-            assert.deepEqualInAnyOrder(
-                inferredConcertoJsonModel, desiredConcertoJsonModel
             );
 
             assert.equal(

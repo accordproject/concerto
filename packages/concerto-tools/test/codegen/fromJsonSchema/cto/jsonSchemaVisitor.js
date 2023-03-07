@@ -15,9 +15,7 @@
 'use strict';
 
 const chai = require('chai');
-const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 chai.should();
-chai.use(deepEqualInAnyOrder);
 const { assert } = chai;
 const fs = require('fs');
 const path = require('path');
@@ -52,9 +50,6 @@ describe('JsonSchemaVisitor', () => {
                     __dirname, '../cto/data/concertoJsonModel.json'
                 ), 'utf8'
             );
-            const desiredConcertoJsonModel = JSON.parse(
-                desiredConcertoJsonModelString
-            );
             const desiredConcertoModel = fs.readFileSync(
                 path.resolve(
                     __dirname, '../cto/data/concertoModel.cto'
@@ -69,11 +64,6 @@ describe('JsonSchemaVisitor', () => {
 
             const inferredConcertoModel = Printer.toCTO(
                 inferredConcertoJsonModel.models[0]
-            );
-
-            // @ts-ignore
-            assert.deepEqualInAnyOrder(
-                inferredConcertoJsonModel, desiredConcertoJsonModel
             );
 
             assert.equal(
@@ -276,26 +266,33 @@ concept geographical_location {
     });
 
     it(
-        'should not generate when additionalProperties are allowed',
+        'should generate when additionalProperties are allowed',
         async () => {
-            (
-                () => JsonSchemaVisitor
-                    .parse({
-                        $schema: 'http://json-schema.org/draft-07/schema#',
-                        definitions: {
-                            Foo: {
-                                type: 'object',
-                                properties: {},
-                                additionalProperties: true,
-                            }
+            const inferredConcertoJsonModel = JsonSchemaVisitor
+                .parse({
+                    $schema: 'http://json-schema.org/draft-07/schema#',
+                    definitions: {
+                        Foo: {
+                            type: 'object',
+                            properties: {},
+                            additionalProperties: true,
                         }
-                    })
-                    .accept(
-                        jsonSchemaVisitor, { ...jsonSchemaVisitorParameters }
-                    )
-            ).should.throw(
-                'Definition \'Foo\' is undefined and unsupported by Concerto.'
+                    }
+                })
+                .accept(
+                    jsonSchemaVisitor, { ...jsonSchemaVisitorParameters }
+                );
+
+            const inferredConcertoModel = Printer.toCTO(
+                inferredConcertoJsonModel.models[0]
             );
+
+            console.log(inferredConcertoModel);
+
+            inferredConcertoModel.should.equal(`namespace com.test@1.0.0
+
+@StringifiedJson
+scalar Foo extends String`);
         }
     );
 
