@@ -1,0 +1,107 @@
+{
+    "components": {
+        "schemas": {
+            "address": {
+                "description": "",
+                "properties": {
+                    "city": {
+                        "description": "City, district, suburb, town, or village.",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    "country": {
+                        "description": "Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    "line1": {
+                        "description": "Address line 1 (e.g., street, PO Box, or company name).",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    "line2": {
+                        "description": "Address line 2 (e.g., apartment, suite, unit, or building).",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    "postal_code": {
+                        "description": "ZIP or postal code.",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    "state": {
+                        "description": "State, county, province, or region.",
+                        "maxLength": 5000,
+                        "nullable": true,
+                        "type": "string"
+                    }
+                },
+                "title": "Address",
+                "type": "object",
+                "x-expandableFields": []
+            },
+            "customer": {
+                "description": "This object represents a customer of your business. It lets you create recurring charges and track payments that belong to the same customer.\n\nRelated guide: [Save a card during payment](https://stripe.com/docs/payments/save-during-payment).",
+                "properties": {
+                    "created": {
+                        "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+                        "format": "unix-time",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "description": "Unique identifier for the object.",
+                        "maxLength": 5000,
+                        "type": "string"
+                    },
+                    "address": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/address"
+                            }
+                        ],
+                        "description": "The customer's address.",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "additionalProperties": {
+                            "maxLength": 500,
+                            "type": "string"
+                        },
+                        "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+                        "type": "object"
+                    },
+                    "foo": {
+                        "description": "A foo.",
+                        "type": "object",
+                        "properties": {
+                            "bar": {
+                                "description": "",
+                                "type": "object",
+                                "properties": {
+                                    "har": {
+                                        "description": "",
+                                        "maxLength": 5000,
+                                        "nullable": true,
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "created",
+                    "id"
+                ],
+                "title": "Customer",
+                "type": "object",
+                "x-resourceId": "customer"
+            }
+        }
+    }
+}

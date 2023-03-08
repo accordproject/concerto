@@ -18,8 +18,6 @@ const c = require('ansi-colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
-const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
-const migrate = require('json-schema-migrate');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -586,11 +584,33 @@ class Commands {
         let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
 
         if (format.toLowerCase() === 'openapi'){
-            const jsonSchema = toJsonSchema(schema);
-            migrate.draft2020(jsonSchema);
-            return CodeGen.InferFromJsonSchema(namespace, typeName, jsonSchema, options);
+            const inferredConcertoJsonModel = CodeGen.OpenApiToConcertoVisitor
+                .parse(schema)
+                .accept(
+                    (new CodeGen.OpenApiToConcertoVisitor),
+                    {
+                        metaModelNamespace: 'concerto.metamodel@1.0.0',
+                        namespace,
+                    },
+                );
+
+            return Printer.toCTO(
+                inferredConcertoJsonModel.models[0]
+            );
         }
-        return CodeGen.InferFromJsonSchema(namespace, typeName, schema, options);
+        const inferredConcertoJsonModel = CodeGen.JSONSchemaToConcertoVisitor
+            .parse(schema)
+            .accept(
+                (new CodeGen.JSONSchemaToConcertoVisitor),
+                {
+                    metaModelNamespace: 'concerto.metamodel@1.0.0',
+                    namespace,
+                },
+            );
+
+        return Printer.toCTO(
+            inferredConcertoJsonModel.models[0]
+        );
     }
 }
 

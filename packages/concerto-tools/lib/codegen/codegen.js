@@ -30,9 +30,10 @@ const MarkdownVisitor = require('./fromcto/markdown/markdownvisitor');
 const ProtobufVisitor = require('./fromcto/protobuf/protobufvisitor');
 const OpenApiVisitor = require('./fromcto/openapi/openapivisitor');
 const AvroVisitor = require('./fromcto/avro/avrovisitor');
-
-
-const InferFromJsonSchema = require('./fromJsonSchema/cto/inferModel');
+const JSONSchemaToConcertoVisitor = require(
+    './fromJsonSchema/cto/jsonSchemaVisitor'
+);
+const OpenApiToConcertoVisitor = require('./fromOpenApi/cto/openApiVisitor');
 
 module.exports = {
     AbstractPlugin,
@@ -50,7 +51,8 @@ module.exports = {
     ProtobufVisitor,
     OpenApiVisitor,
     AvroVisitor,
-    InferFromJsonSchema,
+    JSONSchemaToConcertoVisitor,
+    OpenApiToConcertoVisitor,
     formats: {
         golang: GoLangVisitor,
         jsonschema: JSONSchemaVisitor,
@@ -65,6 +67,6 @@ module.exports = {
         markdown: MarkdownVisitor,
         protobuf: ProtobufVisitor,
         openapi: OpenApiVisitor,
-        avro: AvroVisitor
+        avro: AvroVisitor,
     }
 };
