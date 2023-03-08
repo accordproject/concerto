@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { ModelUtil } = require('@accordproject/concerto-core');
 const DiagramVisitor = require('../../../common/diagramvisitor');
 
 /**
@@ -131,13 +132,29 @@ class PlantUMLVisitor extends DiagramVisitor {
     }
 
     /**
-     * Escape versions and periods.
-     * @param {String} string - the object being visited
+     * Escape fully qualified names. We preserve the dots in the
+     * package name, remove the '@' symbol because it is invalid
+     * and remove the dots in the version (because otherwise packages get created)
+     * @param {String} input - the object being visited
      * @return {String} string  - the parameter
      * @protected
      */
-    escapeString(string) {
-        return string.replace('@', '_');
+    escapeString(input) {
+        const hasNamespace = ModelUtil.getNamespace(input) !== '';
+        if(hasNamespace) {
+            const typeName = ModelUtil.getShortName(input);
+            const ns = ModelUtil.getNamespace(input);
+            const {name,version} = ModelUtil.parseNamespace(ns);
+            if(version) {
+                return `${name}_${version.replace(/\./g, '_')}.${typeName}`;
+            }
+            else {
+                return `${name}.${typeName}`;
+            }
+        }
+        else {
+            return input;
+        }
     }
 }
 
