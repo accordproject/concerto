@@ -145,7 +145,12 @@ class PlantUMLVisitor extends DiagramVisitor {
             const typeName = ModelUtil.getShortName(input);
             const ns = ModelUtil.getNamespace(input);
             const {name,version} = ModelUtil.parseNamespace(ns);
-            return `${name}_${version.replace(/\./g, '_')}.${typeName}`;
+            if(version) {
+                return `${name}_${version.replace(/\./g, '_')}.${typeName}`;
+            }
+            else {
+                return `${name}.${typeName}`;
+            }
         }
         else {
             return input;
