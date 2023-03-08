@@ -4031,12 +4031,12 @@ class org.acme.hr_1_0_0.Address {
    + String zipCode
    + String country
 }
-org.acme.hr@1.0.0.Address "1" *-- "1" org.acme.hr@1.0.0.State : state
+org.acme.hr_1_0_0.Address "1" *-- "1" org.acme.hr_1_0_0.State : state
 class org.acme.hr_1_0_0.Company {
    + String name
    + Address headquarters
 }
-org.acme.hr@1.0.0.Company "1" *-- "1" org.acme.hr@1.0.0.Address : headquarters
+org.acme.hr_1_0_0.Company "1" *-- "1" org.acme.hr_1_0_0.Address : headquarters
 class org.acme.hr_1_0_0.Department << (E,grey) >> {
    + Sales
    + Marketing
@@ -4055,7 +4055,7 @@ class org.acme.hr_1_0_0.LaptopMake << (E,grey) >> {
 class org.acme.hr_1_0_0.Laptop << (A,green) >> {
    + LaptopMake make
 }
-org.acme.hr@1.0.0.Laptop "1" *-- "1" org.acme.hr@1.0.0.LaptopMake : make
+org.acme.hr_1_0_0.Laptop "1" *-- "1" org.acme.hr_1_0_0.LaptopMake : make
 org.acme.hr_1_0_0.Laptop --|> org.acme.hr_1_0_0.Equipment
 class org.acme.hr_1_0_0.Person << (P,lightblue) >> {
    + String email
@@ -4067,8 +4067,8 @@ class org.acme.hr_1_0_0.Person << (P,lightblue) >> {
    + Double height
    + DateTime dob
 }
-org.acme.hr@1.0.0.Person "1" *-- "1" org.acme.hr@1.0.0.Address : homeAddress
-org.acme.hr@1.0.0.Person "1" *-- "1" org.acme.hr@1.0.0.SSN : ssn
+org.acme.hr_1_0_0.Person "1" *-- "1" org.acme.hr_1_0_0.Address : homeAddress
+org.acme.hr_1_0_0.Person "1" *-- "1" org.acme.hr_1_0_0.SSN : ssn
 class org.acme.hr_1_0_0.Employee << (P,lightblue) >> {
    + String employeeId
    + Long salary
@@ -4079,36 +4079,36 @@ class org.acme.hr_1_0_0.Employee << (P,lightblue) >> {
    + Equipment[] companyAssets
    + Manager manager
 }
-org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Department : department
-org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Address : officeAddress
-org.acme.hr@1.0.0.Employee "1" *-- "*" org.acme.hr@1.0.0.Equipment : companyAssets
-org.acme.hr@1.0.0.Employee "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
+org.acme.hr_1_0_0.Employee "1" *-- "1" org.acme.hr_1_0_0.Department : department
+org.acme.hr_1_0_0.Employee "1" *-- "1" org.acme.hr_1_0_0.Address : officeAddress
+org.acme.hr_1_0_0.Employee "1" *-- "*" org.acme.hr_1_0_0.Equipment : companyAssets
+org.acme.hr_1_0_0.Employee "1" o-- "1" org.acme.hr_1_0_0.Manager : manager
 org.acme.hr_1_0_0.Employee --|> org.acme.hr_1_0_0.Person
 class org.acme.hr_1_0_0.Contractor << (P,lightblue) >> {
    + Company company
    + Manager manager
 }
-org.acme.hr@1.0.0.Contractor "1" *-- "1" org.acme.hr@1.0.0.Company : company
-org.acme.hr@1.0.0.Contractor "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
+org.acme.hr_1_0_0.Contractor "1" *-- "1" org.acme.hr_1_0_0.Company : company
+org.acme.hr_1_0_0.Contractor "1" o-- "1" org.acme.hr_1_0_0.Manager : manager
 org.acme.hr_1_0_0.Contractor --|> org.acme.hr_1_0_0.Person
 class org.acme.hr_1_0_0.Manager << (P,lightblue) >> {
    + Person[] reports
 }
-org.acme.hr@1.0.0.Manager "1" o-- "*" org.acme.hr@1.0.0.Person : reports
+org.acme.hr_1_0_0.Manager "1" o-- "*" org.acme.hr_1_0_0.Person : reports
 org.acme.hr_1_0_0.Manager --|> org.acme.hr_1_0_0.Employee
 class org.acme.hr_1_0_0.CompanyEvent {
 }
 class org.acme.hr_1_0_0.Onboarded {
    + Employee employee
 }
-org.acme.hr@1.0.0.Onboarded "1" o-- "1" org.acme.hr@1.0.0.Employee : employee
+org.acme.hr_1_0_0.Onboarded "1" o-- "1" org.acme.hr_1_0_0.Employee : employee
 org.acme.hr_1_0_0.Onboarded --|> org.acme.hr_1_0_0.CompanyEvent
 class org.acme.hr_1_0_0.ChangeOfAddress << (T,yellow) >> {
    + Person Person
    + Address newAddress
 }
-org.acme.hr@1.0.0.ChangeOfAddress "1" o-- "1" org.acme.hr@1.0.0.Person : Person
-org.acme.hr@1.0.0.ChangeOfAddress "1" *-- "1" org.acme.hr@1.0.0.Address : newAddress
+org.acme.hr_1_0_0.ChangeOfAddress "1" o-- "1" org.acme.hr_1_0_0.Person : Person
+org.acme.hr_1_0_0.ChangeOfAddress "1" *-- "1" org.acme.hr_1_0_0.Address : newAddress
 @enduml
 ",
 }
@@ -7271,13 +7271,13 @@ class org.acme.hr_1_0_0.Address {
    + String zipCode
    + String country
 }
-org.acme.hr@1.0.0.Address "1" *-- "1" org.acme.hr@1.0.0.State : state
+org.acme.hr_1_0_0.Address "1" *-- "1" org.acme.hr_1_0_0.State : state
 org.acme.hr_1_0_0.Address --|> concerto_1_0_0.Concept
 class org.acme.hr_1_0_0.Company {
    + String name
    + Address headquarters
 }
-org.acme.hr@1.0.0.Company "1" *-- "1" org.acme.hr@1.0.0.Address : headquarters
+org.acme.hr_1_0_0.Company "1" *-- "1" org.acme.hr_1_0_0.Address : headquarters
 org.acme.hr_1_0_0.Company --|> concerto_1_0_0.Concept
 class org.acme.hr_1_0_0.Department << (E,grey) >> {
    + Sales
@@ -7300,7 +7300,7 @@ org.acme.hr_1_0_0.LaptopMake --|> concerto_1_0_0.Concept
 class org.acme.hr_1_0_0.Laptop << (A,green) >> {
    + LaptopMake make
 }
-org.acme.hr@1.0.0.Laptop "1" *-- "1" org.acme.hr@1.0.0.LaptopMake : make
+org.acme.hr_1_0_0.Laptop "1" *-- "1" org.acme.hr_1_0_0.LaptopMake : make
 org.acme.hr_1_0_0.Laptop --|> org.acme.hr_1_0_0.Equipment
 class org.acme.hr_1_0_0.Person << (P,lightblue) >> {
    + String email
@@ -7312,8 +7312,8 @@ class org.acme.hr_1_0_0.Person << (P,lightblue) >> {
    + Double height
    + DateTime dob
 }
-org.acme.hr@1.0.0.Person "1" *-- "1" org.acme.hr@1.0.0.Address : homeAddress
-org.acme.hr@1.0.0.Person "1" *-- "1" org.acme.hr@1.0.0.SSN : ssn
+org.acme.hr_1_0_0.Person "1" *-- "1" org.acme.hr_1_0_0.Address : homeAddress
+org.acme.hr_1_0_0.Person "1" *-- "1" org.acme.hr_1_0_0.SSN : ssn
 org.acme.hr_1_0_0.Person --|> concerto_1_0_0.Participant
 class org.acme.hr_1_0_0.Employee << (P,lightblue) >> {
    + String employeeId
@@ -7325,22 +7325,22 @@ class org.acme.hr_1_0_0.Employee << (P,lightblue) >> {
    + Equipment[] companyAssets
    + Manager manager
 }
-org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Department : department
-org.acme.hr@1.0.0.Employee "1" *-- "1" org.acme.hr@1.0.0.Address : officeAddress
-org.acme.hr@1.0.0.Employee "1" *-- "*" org.acme.hr@1.0.0.Equipment : companyAssets
-org.acme.hr@1.0.0.Employee "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
+org.acme.hr_1_0_0.Employee "1" *-- "1" org.acme.hr_1_0_0.Department : department
+org.acme.hr_1_0_0.Employee "1" *-- "1" org.acme.hr_1_0_0.Address : officeAddress
+org.acme.hr_1_0_0.Employee "1" *-- "*" org.acme.hr_1_0_0.Equipment : companyAssets
+org.acme.hr_1_0_0.Employee "1" o-- "1" org.acme.hr_1_0_0.Manager : manager
 org.acme.hr_1_0_0.Employee --|> org.acme.hr_1_0_0.Person
 class org.acme.hr_1_0_0.Contractor << (P,lightblue) >> {
    + Company company
    + Manager manager
 }
-org.acme.hr@1.0.0.Contractor "1" *-- "1" org.acme.hr@1.0.0.Company : company
-org.acme.hr@1.0.0.Contractor "1" o-- "1" org.acme.hr@1.0.0.Manager : manager
+org.acme.hr_1_0_0.Contractor "1" *-- "1" org.acme.hr_1_0_0.Company : company
+org.acme.hr_1_0_0.Contractor "1" o-- "1" org.acme.hr_1_0_0.Manager : manager
 org.acme.hr_1_0_0.Contractor --|> org.acme.hr_1_0_0.Person
 class org.acme.hr_1_0_0.Manager << (P,lightblue) >> {
    + Person[] reports
 }
-org.acme.hr@1.0.0.Manager "1" o-- "*" org.acme.hr@1.0.0.Person : reports
+org.acme.hr_1_0_0.Manager "1" o-- "*" org.acme.hr_1_0_0.Person : reports
 org.acme.hr_1_0_0.Manager --|> org.acme.hr_1_0_0.Employee
 class org.acme.hr_1_0_0.CompanyEvent {
 }
@@ -7348,14 +7348,14 @@ org.acme.hr_1_0_0.CompanyEvent --|> concerto_1_0_0.Event
 class org.acme.hr_1_0_0.Onboarded {
    + Employee employee
 }
-org.acme.hr@1.0.0.Onboarded "1" o-- "1" org.acme.hr@1.0.0.Employee : employee
+org.acme.hr_1_0_0.Onboarded "1" o-- "1" org.acme.hr_1_0_0.Employee : employee
 org.acme.hr_1_0_0.Onboarded --|> org.acme.hr_1_0_0.CompanyEvent
 class org.acme.hr_1_0_0.ChangeOfAddress << (T,yellow) >> {
    + Person Person
    + Address newAddress
 }
-org.acme.hr@1.0.0.ChangeOfAddress "1" o-- "1" org.acme.hr@1.0.0.Person : Person
-org.acme.hr@1.0.0.ChangeOfAddress "1" *-- "1" org.acme.hr@1.0.0.Address : newAddress
+org.acme.hr_1_0_0.ChangeOfAddress "1" o-- "1" org.acme.hr_1_0_0.Person : Person
+org.acme.hr_1_0_0.ChangeOfAddress "1" *-- "1" org.acme.hr_1_0_0.Address : newAddress
 org.acme.hr_1_0_0.ChangeOfAddress --|> concerto_1_0_0.Transaction
 @enduml
 ",
