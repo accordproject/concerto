@@ -438,12 +438,10 @@ class JsonSchemaVisitor {
         ];
 
         const propertyProperties = {
-            ...{
-                name: propertyName,
-                isArray: false,
-                isOptional: !parameters.required
+            name: propertyName,
+            isArray: false,
+            isOptional: !parameters.required
                     ?.includes(propertyName),
-            },
             ...parameters.assignableFields
         };
         delete parameters.assignableFields;
