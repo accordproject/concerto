@@ -287,7 +287,6 @@ concept geographical_location {
                 inferredConcertoJsonModel.models[0]
             );
 
-            console.log(inferredConcertoModel);
 
             inferredConcertoModel.should.equal(`namespace com.test@1.0.0
 
