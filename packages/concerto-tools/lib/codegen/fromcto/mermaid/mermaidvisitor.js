@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DiagramVisitor = require('../common/diagramvisitor');
+const DiagramVisitor = require('../../../common/diagramvisitor');
 
 /**
  * Convert the contents of a ModelManager
@@ -22,7 +22,7 @@ const DiagramVisitor = require('../common/diagramvisitor');
  * Set a fileWriter property (instance of FileWriter) on the parameters
  * object to control where the generated code is written to disk.
  *
- * @private
+ * @protected
  * @class
  */
 class MermaidVisitor extends DiagramVisitor {
@@ -30,7 +30,7 @@ class MermaidVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitModelManager(modelManager, parameters) {
         parameters.fileWriter.openFile('model.mmd');
@@ -46,7 +46,7 @@ class MermaidVisitor extends DiagramVisitor {
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @param {string} type  - the type of the declaration
-     * @private
+     * @protected
      */
     visitClassDeclaration(classDeclaration, parameters, type = 'concept') {
         if (classDeclaration.getOwnProperties().length > 0) {
@@ -82,7 +82,7 @@ class MermaidVisitor extends DiagramVisitor {
      * Visitor design pattern
      * @param {RelationshipDeclaration} relationship - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitRelationship(relationship, parameters) {
         let array = '"1"';
@@ -100,7 +100,7 @@ class MermaidVisitor extends DiagramVisitor {
      * Escape versions and periods.
      * @param {String} string - the object being visited
      * @return {String} string  - the parameter
-     * @private
+     * @protected
      */
     escapeString(string) {
         return `\`${string}\``;

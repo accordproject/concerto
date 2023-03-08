@@ -102,11 +102,9 @@ describe('ScalarDeclaration', () => {
             const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
             modelManager.addModelFiles(modelFiles);
         });
-        it('should throw an error', () => {
+        it('should return null', () => {
             const testClass = modelManager.getType('com.testing.SSN');
-            (() => {
-                testClass.getSuperType();
-            }).should.throw('Scalars do not have super types.');
+            should.equal(testClass.getSuperType(), null);
         });
     });
 

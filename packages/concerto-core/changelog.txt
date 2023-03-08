@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.5.0 {b419dc1b3db9662d8c941a044cd8db5a} 2023-03-07
+- Introduce Declaration type. ClassDeclaration and Scalar Declaration both extend Declaration.
+
 Version 3.0.0 {5fac664420fea3649a7a304941f190f1} 2022-08-28
 - Allow client-provided RegExp engine to ModelManager
 - Allow decorators to be attached to model files/namespaces

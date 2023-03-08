@@ -10,18 +10,7 @@ export = ClassDeclaration;
  * @class
  * @memberof module:concerto-core
  */
-declare class ClassDeclaration extends Decorated {
-    /**
-     * Create a ClassDeclaration from an Abstract Syntax Tree. The AST is the
-     * result of parsing.
-     *
-     * @param {ModelFile} modelFile - the ModelFile for this class
-     * @param {Object} ast - the AST created by the parser
-     * @throws {IllegalModelException}
-     */
-    constructor(modelFile: ModelFile, ast: any);
-    modelFile: ModelFile;
-    name: any;
+declare class ClassDeclaration extends Declaration {
     properties: any[];
     superType: any;
     superTypeDeclaration: any;
@@ -29,7 +18,6 @@ declare class ClassDeclaration extends Decorated {
     timestamped: boolean;
     abstract: boolean;
     type: any;
-    fqn: string;
     /**
      * Adds a required field named 'timestamp' of type 'DateTime' if this class declaration has the 'concerto.Concept'
      * super type.
@@ -64,48 +52,10 @@ declare class ClassDeclaration extends Decorated {
      */
     isAbstract(): boolean;
     /**
-     * Returns the short name of a class. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName(): string;
-    /**
-     * Return the namespace of this class.
-     * @return {string} namespace - a namespace.
-     */
-    getNamespace(): string;
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName(): string;
-    /**
-     * Returns true if this class declaration declares an identifying field
-     * (system or explicit)
-     * @returns {Boolean} true if the class declaration includes an identifier
-     */
-    isIdentified(): boolean;
-    /**
-     * Returns true if this class declaration declares a system identifier
-     * $identifier
-     * @returns {Boolean} true if the class declaration includes a system identifier
-     */
-    isSystemIdentified(): boolean;
-    /**
      * Returns true if this class declaration declares an explicit identifier
      * @returns {Boolean} true if the class declaration includes an explicit identifier
      */
     isExplicitlyIdentified(): boolean;
-    /**
-     * Returns the name of the identifying field for this class. Note
-     * that the identifying field may come from a super type.
-     *
-     * @return {string} the name of the id field for this class or null if it does not exist
-     */
-    getIdentifierFieldName(): string;
     /**
      * Returns the field with a given name or null if it does not exist.
      * The field must be directly owned by this class -- the super-type is
@@ -199,19 +149,6 @@ declare class ClassDeclaration extends Decorated {
      * @return {boolean} true if the class is an asset
      */
     isConcept(): boolean;
-    /**
-     * Returns true if this class is the definition of a enum.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isEnum(): boolean;
-    /**
-     * Returns true if this class is the definition of a enum.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isClassDeclaration(): boolean;
 }
-import Decorated = require("./decorated");
-import ModelFile = require("./modelfile");
+import Declaration = require("./declaration");
 import Property = require("./property");

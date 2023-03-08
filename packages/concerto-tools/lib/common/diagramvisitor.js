@@ -16,12 +16,20 @@
 
 const ModelUtil = require('@accordproject/concerto-core').ModelUtil;
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ModelManager, ModelFile, ClassDeclaration, ScalarDeclaration, Field, EnumValueDeclaration, RelationshipDeclaration} = require('@accordproject/concerto-core');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Convert the contents of a ModelManager a diagram format (such as PlantUML or Mermaid)
  * Set a fileWriter property (instance of FileWriter) on the parameters
  * object to control where the generated code is written to disk.
  *
- * @private
+ * @protected
  * @class
  */
 class DiagramVisitor {
@@ -31,7 +39,7 @@ class DiagramVisitor {
      * @param {Object} thing - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
+     * @protected
      */
     visit(thing, parameters) {
         if (thing.isModelManager?.()) {
@@ -51,7 +59,7 @@ class DiagramVisitor {
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
+            return this.visitScalarField(thing, parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -59,7 +67,7 @@ class DiagramVisitor {
         } else if (thing.isEnumValue?.()) {
             return this.visitEnumValueDeclaration(thing, parameters);
         } else if (thing.isScalarDeclaration?.()) {
-            return;
+            return this.visitScalarDeclaration(thing, parameters);
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing) );
         }
@@ -69,7 +77,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ModelManager} modelManager - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitModelManager(modelManager, parameters) {
         modelManager.getModelFiles().forEach((decl) => {
@@ -81,7 +89,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ModelFile} modelFile - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitModelFile(modelFile, parameters) {
         modelFile.getAllDeclarations().forEach((decl) => {
@@ -93,7 +101,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitAssetDeclaration(classDeclaration, parameters) {
         this.visitClassDeclaration(classDeclaration, parameters, 'asset');
@@ -103,7 +111,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitEnumDeclaration(classDeclaration, parameters) {
         this.visitClassDeclaration(classDeclaration, parameters, 'enumeration');
@@ -113,7 +121,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitEventDeclaration(classDeclaration, parameters) {
         this.visitClassDeclaration(classDeclaration, parameters, 'event');
@@ -123,7 +131,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitParticipantDeclaration(classDeclaration, parameters) {
         this.visitClassDeclaration(classDeclaration, parameters, 'participant');
@@ -133,7 +141,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitTransactionDeclaration(classDeclaration, parameters) {
         this.visitClassDeclaration(classDeclaration, parameters, 'transaction');
@@ -145,21 +153,49 @@ class DiagramVisitor {
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @param {string} type  - the type of the declaration
-     * @private
+     * @protected
      */
     visitClassDeclaration(classDeclaration, parameters, type = 'concept') {
         classDeclaration.getOwnProperties().forEach((property) => {
-            if (!property.isRelationship?.()) {
-                property.accept(this, parameters);
-            }
+            property.accept(this, parameters);
         });
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {ScalarDeclaration} scalarDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @protected
+     */
+    visitScalarDeclaration(scalarDeclaration, parameters) {
+        return;
     }
 
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
+     */
+    visitScalarField(field, parameters) {
+        this.visitField(field.getScalarField(), parameters);
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {RelationshipDeclaration} relationship - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @protected
+     */
+    visitRelationship(relationship, parameters) {
+        this.visitField(relationship, parameters);
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @protected
      */
     visitField(field, parameters) {
         let array = '';
@@ -175,7 +211,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {EnumValueDeclaration} enumValueDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
         parameters.fileWriter.writeLine(1, '+ ' + this.escapeString(enumValueDeclaration.getName()));
@@ -185,7 +221,7 @@ class DiagramVisitor {
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
-     * @private
+     * @protected
      */
     writeDeclarationSupertype(classDeclaration, parameters) {
         if(classDeclaration.getSuperType()) {

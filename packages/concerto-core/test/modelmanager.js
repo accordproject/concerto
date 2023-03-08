@@ -1046,4 +1046,19 @@ concept Bar {
         });
     });
 
+    describe('#filter', () => {
+        it('should return true for a valid ModelManager', () => {
+            modelManager.addModelFiles([composerModel, modelBase, farm2fork, concertoModel]);
+
+            modelManager.getModelFiles().length.should.equal(5);
+            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(68);
+
+            const filtered = modelManager.filter(declaration => declaration.getFullyQualifiedName() === 'org.accordproject.test.Product');
+
+            filtered.getModelFiles().length.should.equal(1);
+            filtered.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(1);
+
+            filtered.validateModelFiles();
+        });
+    });
 });

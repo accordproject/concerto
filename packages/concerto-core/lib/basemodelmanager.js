@@ -32,6 +32,7 @@ const { getRootModel } = require('./rootmodel');
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
+    const Declaration = require('./introspect/declaration');
     const AssetDeclaration = require('./introspect/assetdeclaration');
     const ClassDeclaration = require('./introspect/classdeclaration');
     const ConceptDeclaration = require('./introspect/conceptdeclaration');
@@ -708,6 +709,32 @@ class BaseModelManager {
             result.models.push(metaModel);
         });
         return result;
+    }
+
+
+    /**
+     * A function type definition for use as an argument to the filter function
+     * @callback FilterFunction
+     * @param {Declaration} declaration
+     * @returns {boolean} true, if the declaration satisfies the filter function
+     */
+
+    /**
+     * Returns a new ModelManager with only the types for which the
+     * filter function returns true.
+     *
+     * ModelFiles with no declarations after filtering will be removed.
+     *
+     * @param {FilterFunction} predicate - the filter function over a Declaration object
+     * @returns {BaseModelManager} - the filtered ModelManager
+     */
+    filter(predicate){
+        const modelManager = new BaseModelManager({...this.options}, this.processFile);
+        const filteredModels = Object.values(this.modelFiles)
+            .map((modelFile) => modelFile.filter(predicate, modelManager))
+            .filter(Boolean);
+        modelManager.addModelFiles(filteredModels);
+        return modelManager;
     }
 }
 

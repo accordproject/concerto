@@ -259,6 +259,24 @@ declare class ModelFile extends Decorated {
      */
     private fromAst;
     namespace: any;
+    /**
+     * A function type definition for use as an argument to the filter function
+     * @callback FilterFunction
+     * @param {Declaration} declaration
+     * @returns {boolean} true, if the declaration satisfies the filter function
+     */
+    /**
+     * Returns a new ModelFile with only the types for which the
+     * filter function returns true.
+     *
+     * Will return null if the filtered ModelFile doesn't contain any declarations.
+     *
+     * @param {FilterFunction} predicate - the filter function over a Declaration object
+     * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
+     * @returns {ModelFile?} - the filtered ModelFile
+     * @private
+     */
+    private filter;
 }
 import Decorated = require("./decorated");
 import ModelManager = require("../modelmanager");
