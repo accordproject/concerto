@@ -517,12 +517,6 @@ class JsonSchemaVisitor {
                 new Reference(property.body.$ref, property.path)
             ).accept(this, parameters);
 
-            if (referenced === null || referenced === undefined) {
-                throw new Error(
-                    `Reference ${property.body.$ref} not found.`
-                );
-            }
-
             return [{
                 $class: `${parameters.metaModelNamespace}.ObjectProperty`,
                 ...propertyProperties,
