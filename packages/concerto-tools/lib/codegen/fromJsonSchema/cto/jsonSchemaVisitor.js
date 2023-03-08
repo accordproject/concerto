@@ -441,7 +441,7 @@ class JsonSchemaVisitor {
             name: propertyName,
             isArray: false,
             isOptional: !parameters.required
-                    ?.includes(propertyName),
+                ?.includes(propertyName),
             ...parameters.assignableFields
         };
         delete parameters.assignableFields;
