@@ -21,14 +21,14 @@ require('chai').should();
 const should = require('chai').should();
 const sinon = require('sinon');
 
-describe('Decorated', () => {
+describe('Declaration', () => {
 
     let modelFile;
-    let decorated;
+    let declaration;
 
     beforeEach(() => {
         modelFile = sinon.createStubInstance(ModelFile);
-        decorated = new Declaration(modelFile, { ast: true });
+        declaration = new Declaration(modelFile, { ast: true });
     });
 
     describe('#constructor', () => {
@@ -43,31 +43,31 @@ describe('Decorated', () => {
 
     describe('#isIdentified', () => {
         it('should be false', () => {
-            decorated.isIdentified().should.equal(false);
+            declaration.isIdentified().should.equal(false);
         });
     });
 
     describe('#isSystemIdentified', () => {
         it('should be false', () => {
-            decorated.isSystemIdentified().should.equal(false);
+            declaration.isSystemIdentified().should.equal(false);
         });
     });
 
     describe('#getIdentifierFieldName', () => {
         it('should be null', () => {
-            should.equal(decorated.getIdentifierFieldName(), null);
+            should.equal(declaration.getIdentifierFieldName(), null);
         });
     });
 
     describe('#getType', () => {
         it('should be null', () => {
-            should.equal(decorated.getType(), null);
+            should.equal(declaration.getType(), null);
         });
     });
 
     describe('#toString', () => {
         it('should be null', () => {
-            should.equal(decorated.toString(), null);
+            should.equal(declaration.toString(), null);
         });
     });
 });
