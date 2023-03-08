@@ -114,8 +114,8 @@ class PlantUMLVisitor extends DiagramVisitor {
 
         if (!classDeclaration.isEnum()){
             classDeclaration.getOwnProperties().forEach((property) => {
-                const source = classDeclaration.getFullyQualifiedName();
-                const target = property.getFullyQualifiedTypeName();
+                const source = this.escapeString(classDeclaration.getFullyQualifiedName());
+                const target = this.escapeString(property.getFullyQualifiedTypeName());
                 const label = property.getName();
                 const array = property.isArray() ? '"*"':'"1"';
                 if (property.isRelationship?.()) {
