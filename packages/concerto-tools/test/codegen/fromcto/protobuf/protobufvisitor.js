@@ -441,22 +441,26 @@ describe('ProtobufVisitor', function () {
             );
 
             assert.equal(
-                writer.data.get('concerto.metamodel.v0_4_0.proto'),
+                writer.data.get('concerto.metamodel.v0_4_0.proto')
+                    .replace(/\r\n/g, '\n'),
                 expectedMetamodelProtobuf
             );
 
             assert.equal(
-                writer.data.get('org.accordproject.commonmark.v0_5_0.proto'),
+                writer.data.get('org.accordproject.commonmark.v0_5_0.proto')
+                    .replace(/\r\n/g, '\n'),
                 expectedCommonmarkProtobuf
             );
 
             assert.equal(
-                writer.data.get('org.accordproject.party.v0_2_0.proto'),
+                writer.data.get('org.accordproject.party.v0_2_0.proto')
+                    .replace(/\r\n/g, '\n'),
                 expectedApapPartyProtobuf
             );
 
             assert.equal(
-                writer.data.get('org.accordproject.protocol.v1_0_0.proto'),
+                writer.data.get('org.accordproject.protocol.v1_0_0.proto')
+                    .replace(/\r\n/g, '\n'),
                 expectedApapProtocolProtobuf
             );
         });
