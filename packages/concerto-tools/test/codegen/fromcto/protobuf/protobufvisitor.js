@@ -144,7 +144,7 @@ describe('ProtobufVisitor', function () {
             mockModelFile.getAllDeclarations.returns([]);
 
             protobufVisitor.visitModelFile(mockModelFile, param);
-            param.fileWriter.
+
             param.fileWriter.writeLine.callCount.should.deep.equal(4);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'syntax = "proto3";\n']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org.accordproject.address.v1_0_0;\n']);
