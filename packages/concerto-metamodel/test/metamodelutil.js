@@ -50,6 +50,43 @@ describe('MetaModel (Empty)', () => {
     });
 });
 
+describe('MetaModel (Missing optional values)', () => {
+    const model = {
+        '$class': 'concerto.metamodel@1.0.0.Models',
+        'models': [
+            {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.vehicle',
+            },
+            {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'namespace': 'org.car',
+                'imports': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ImportAll',
+                        'namespace': 'org.vehicle'
+                    }
+                ],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'Car',
+                        'isAbstract': false,
+                        'properties': []
+                    }
+                ]
+            }
+        ]
+    };
+
+    describe('#toMetaModel', () => {
+        it('should convert a CTO model to its metamodel with name resolution', async () => {
+            const mm1r = MetaModelUtil.resolveLocalNames([], model);
+            mm1r.should.deep.equal(model);
+        });
+    });
+});
+
 describe('MetaModel (Car)', () => {
     const carModelPath = path.resolve(__dirname, './cto/car.json');
     const carModel = JSON.parse(fs.readFileSync(carModelPath, 'utf8'));
