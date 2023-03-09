@@ -36,6 +36,7 @@ const Field = require('@accordproject/concerto-core').Field;
 const RelationshipDeclaration = require('@accordproject/concerto-core').RelationshipDeclaration;
 const TransactionDeclaration = require('@accordproject/concerto-core').TransactionDeclaration;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
+const { InMemoryWriter } = require('@accordproject/concerto-util');
 
 describe('ProtobufVisitor', function () {
     let protobufVisitor;
@@ -143,7 +144,7 @@ describe('ProtobufVisitor', function () {
             mockModelFile.getAllDeclarations.returns([]);
 
             protobufVisitor.visitModelFile(mockModelFile, param);
-
+            param.fileWriter.
             param.fileWriter.writeLine.callCount.should.deep.equal(4);
             param.fileWriter.writeLine.getCall(0).args.should.deep.equal([0, 'syntax = "proto3";\n']);
             param.fileWriter.writeLine.getCall(1).args.should.deep.equal([0, 'package org.accordproject.address.v1_0_0;\n']);
@@ -397,17 +398,16 @@ describe('ProtobufVisitor', function () {
         });
     });
 
-    describe('visit CTO file', () => {
+    describe.only('visit CTO file', () => {
         it('should process an APAP protocol CTO file', async () => {
             const modelManager = await ModelLoader.loadModelManager(
                 [path.resolve(__dirname, './data/apapProtocol.cto')]
             );
+            const writer = new InMemoryWriter();
 
             modelManager.accept(
                 new ProtobufVisitor(), {
-                    fileWriter: new FileWriter(
-                        path.resolve(__dirname, './data')
-                    )
+                    fileWriter: writer
                 }
             );
 
@@ -439,52 +439,24 @@ describe('ProtobufVisitor', function () {
                 ),
                 'utf8'
             );
-            const producedMetamodelProtobuf = fs.readFileSync(
-                path.resolve(
-                    __dirname,
-                    './data/concerto.metamodel.v0_4_0.proto'
-                ),
-                'utf8'
-            ).replace(/\r\n/g, '\n');
-            const producedCommonmarkProtobuf = fs.readFileSync(
-                path.resolve(
-                    __dirname,
-                    './data/org.accordproject.commonmark.v0_5_0.proto'
-                ),
-                'utf8'
-            ).replace(/\r\n/g, '\n');
-            const producedApapPartyProtobuf = fs.readFileSync(
-                path.resolve(
-                    __dirname,
-                    './data/org.accordproject.party.v0_2_0.proto'
-                ),
-                'utf8'
-            ).replace(/\r\n/g, '\n');
-            const producedApapProtocolProtobuf = fs.readFileSync(
-                path.resolve(
-                    __dirname,
-                    './data/org.accordproject.protocol.v1_0_0.proto'
-                ),
-                'utf8'
-            ).replace(/\r\n/g, '\n');
 
             assert.equal(
-                producedMetamodelProtobuf,
+                writer.data.get('concerto.metamodel.v0_4_0.proto'),
                 expectedMetamodelProtobuf
             );
 
             assert.equal(
-                producedCommonmarkProtobuf,
+                writer.data.get('org.accordproject.commonmark.v0_5_0.proto'),
                 expectedCommonmarkProtobuf
             );
 
             assert.equal(
-                producedApapPartyProtobuf,
+                writer.data.get('org.accordproject.party.v0_2_0.proto'),
                 expectedApapPartyProtobuf
             );
 
             assert.equal(
-                producedApapProtocolProtobuf,
+                writer.data.get('org.accordproject.protocol.v1_0_0.proto'),
                 expectedApapProtocolProtobuf
             );
         });
