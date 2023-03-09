@@ -1,0 +1,265 @@
+syntax = "proto3";
+
+package org.accordproject.commonmark.v0_5_0;
+
+import "google/protobuf/timestamp.proto";
+
+message _Subclasses_of_class_Node {
+  oneof _class_oneof_Node {
+    BlockQuote _subclass_of_class_Node_BlockQuote = 1;
+    Code _subclass_of_class_Node_Code = 2;
+    CodeBlock _subclass_of_class_Node_CodeBlock = 3;
+    Document _subclass_of_class_Node_Document = 4;
+    Emph _subclass_of_class_Node_Emph = 5;
+    HeaderCell _subclass_of_class_Node_HeaderCell = 6;
+    Heading _subclass_of_class_Node_Heading = 7;
+    HtmlBlock _subclass_of_class_Node_HtmlBlock = 8;
+    HtmlInline _subclass_of_class_Node_HtmlInline = 9;
+    Image _subclass_of_class_Node_Image = 10;
+    Item _subclass_of_class_Node_Item = 11;
+    Linebreak _subclass_of_class_Node_Linebreak = 12;
+    Link _subclass_of_class_Node_Link = 13;
+    List _subclass_of_class_Node_List = 14;
+    Paragraph _subclass_of_class_Node_Paragraph = 15;
+    Softbreak _subclass_of_class_Node_Softbreak = 16;
+    Strong _subclass_of_class_Node_Strong = 17;
+    Table _subclass_of_class_Node_Table = 18;
+    TableBody _subclass_of_class_Node_TableBody = 19;
+    TableCell _subclass_of_class_Node_TableCell = 20;
+    TableHead _subclass_of_class_Node_TableHead = 21;
+    TableRow _subclass_of_class_Node_TableRow = 22;
+    Text _subclass_of_class_Node_Text = 23;
+    ThematicBreak _subclass_of_class_Node_ThematicBreak = 24;
+  }
+}
+
+message _Subclasses_of_class_Root {
+  oneof _class_oneof_Root {
+    Document _subclass_of_class_Root_Document = 1;
+  }
+}
+
+message _Subclasses_of_class_Child {
+  oneof _class_oneof_Child {
+    BlockQuote _subclass_of_class_Child_BlockQuote = 1;
+    Code _subclass_of_class_Child_Code = 2;
+    CodeBlock _subclass_of_class_Child_CodeBlock = 3;
+    Emph _subclass_of_class_Child_Emph = 4;
+    HeaderCell _subclass_of_class_Child_HeaderCell = 5;
+    Heading _subclass_of_class_Child_Heading = 6;
+    HtmlBlock _subclass_of_class_Child_HtmlBlock = 7;
+    HtmlInline _subclass_of_class_Child_HtmlInline = 8;
+    Image _subclass_of_class_Child_Image = 9;
+    Item _subclass_of_class_Child_Item = 10;
+    Linebreak _subclass_of_class_Child_Linebreak = 11;
+    Link _subclass_of_class_Child_Link = 12;
+    List _subclass_of_class_Child_List = 13;
+    Paragraph _subclass_of_class_Child_Paragraph = 14;
+    Softbreak _subclass_of_class_Child_Softbreak = 15;
+    Strong _subclass_of_class_Child_Strong = 16;
+    Table _subclass_of_class_Child_Table = 17;
+    TableBody _subclass_of_class_Child_TableBody = 18;
+    TableCell _subclass_of_class_Child_TableCell = 19;
+    TableHead _subclass_of_class_Child_TableHead = 20;
+    TableRow _subclass_of_class_Child_TableRow = 21;
+    Text _subclass_of_class_Child_Text = 22;
+    ThematicBreak _subclass_of_class_Child_ThematicBreak = 23;
+  }
+}
+
+message Text {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Attribute {
+  string name = 1;
+  string value = 2;
+}
+
+message TagInfo {
+  repeated Attribute attributes = 1;
+  string attributeString = 2;
+  bool closed = 3;
+  string content = 4;
+  string tagName = 5;
+}
+
+message CodeBlock {
+  optional sint64 endLine = 1;
+  optional string info = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional sint64 startLine = 4;
+  optional TagInfo tag = 5;
+  optional string text = 6;
+}
+
+message Code {
+  optional sint64 endLine = 1;
+  optional string info = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional sint64 startLine = 4;
+  optional string text = 5;
+}
+
+message HtmlInline {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional TagInfo tag = 4;
+  optional string text = 5;
+}
+
+message HtmlBlock {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional TagInfo tag = 4;
+  optional string text = 5;
+}
+
+message Emph {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Strong {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message BlockQuote {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Heading {
+  optional sint64 endLine = 1;
+  string level = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional sint64 startLine = 4;
+  optional string text = 5;
+}
+
+message ThematicBreak {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Softbreak {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Linebreak {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Link {
+  string destination = 1;
+  optional sint64 endLine = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional sint64 startLine = 4;
+  optional string text = 5;
+  string title = 6;
+}
+
+message Image {
+  string destination = 1;
+  optional sint64 endLine = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional sint64 startLine = 4;
+  optional string text = 5;
+  string title = 6;
+}
+
+message Paragraph {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message List {
+  optional string delimiter = 1;
+  optional sint64 endLine = 2;
+  repeated _Subclasses_of_class_Node nodes = 3;
+  optional string start = 4;
+  optional sint64 startLine = 5;
+  optional string text = 6;
+  string tight = 7;
+  string type = 8;
+}
+
+message Item {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message Document {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+  string xmlns = 5;
+}
+
+message Table {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message TableHead {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message TableBody {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message TableRow {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message HeaderCell {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
+message TableCell {
+  optional sint64 endLine = 1;
+  repeated _Subclasses_of_class_Node nodes = 2;
+  optional sint64 startLine = 3;
+  optional string text = 4;
+}
+
