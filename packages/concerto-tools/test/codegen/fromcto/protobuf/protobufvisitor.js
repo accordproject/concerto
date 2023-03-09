@@ -398,7 +398,7 @@ describe('ProtobufVisitor', function () {
         });
     });
 
-    describe.only('visit CTO file', () => {
+    describe('visit CTO file', () => {
         it('should process an APAP protocol CTO file', async () => {
             const modelManager = await ModelLoader.loadModelManager(
                 [path.resolve(__dirname, './data/apapProtocol.cto')]
