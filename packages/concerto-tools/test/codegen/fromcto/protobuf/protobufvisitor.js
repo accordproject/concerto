@@ -445,28 +445,28 @@ describe('ProtobufVisitor', function () {
                     './data/concerto.metamodel.v0_4_0.proto'
                 ),
                 'utf8'
-            );
+            ).replace(/\r\n/g, '\n');
             const producedCommonmarkProtobuf = fs.readFileSync(
                 path.resolve(
                     __dirname,
                     './data/org.accordproject.commonmark.v0_5_0.proto'
                 ),
                 'utf8'
-            );
+            ).replace(/\r\n/g, '\n');
             const producedApapPartyProtobuf = fs.readFileSync(
                 path.resolve(
                     __dirname,
                     './data/org.accordproject.party.v0_2_0.proto'
                 ),
                 'utf8'
-            );
+            ).replace(/\r\n/g, '\n');
             const producedApapProtocolProtobuf = fs.readFileSync(
                 path.resolve(
                     __dirname,
                     './data/org.accordproject.protocol.v1_0_0.proto'
                 ),
                 'utf8'
-            );
+            ).replace(/\r\n/g, '\n');
 
             assert.equal(
                 producedMetamodelProtobuf,
