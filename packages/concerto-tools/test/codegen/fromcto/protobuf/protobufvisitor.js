@@ -443,25 +443,25 @@ describe('ProtobufVisitor', function () {
             assert.equal(
                 writer.data.get('concerto.metamodel.v0_4_0.proto')
                     .replace(/\r\n/g, '\n'),
-                expectedMetamodelProtobuf
+                expectedMetamodelProtobuf.replace(/\r\n/g, '\n')
             );
 
             assert.equal(
                 writer.data.get('org.accordproject.commonmark.v0_5_0.proto')
                     .replace(/\r\n/g, '\n'),
-                expectedCommonmarkProtobuf
+                expectedCommonmarkProtobuf.replace(/\r\n/g, '\n')
             );
 
             assert.equal(
                 writer.data.get('org.accordproject.party.v0_2_0.proto')
                     .replace(/\r\n/g, '\n'),
-                expectedApapPartyProtobuf
+                expectedApapPartyProtobuf.replace(/\r\n/g, '\n')
             );
 
             assert.equal(
                 writer.data.get('org.accordproject.protocol.v1_0_0.proto')
                     .replace(/\r\n/g, '\n'),
-                expectedApapProtocolProtobuf
+                expectedApapProtocolProtobuf.replace(/\r\n/g, '\n')
             );
         });
     });
