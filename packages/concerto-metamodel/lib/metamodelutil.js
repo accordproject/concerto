@@ -67,8 +67,7 @@ function createNameTable(priorModels, metaModel) {
     };
 
     // First list the imported names in order (overriding as we go along)
-    const imports = metaModel.imports;
-    imports.forEach((imp) => {
+    (metaModel.imports || []).forEach((imp) => {
         const namespace = imp.namespace;
         const modelFile = findNamespace(priorModels, namespace);
         if (imp.$class === `${MetaModelNamespace}.ImportType`) {
@@ -84,19 +83,16 @@ function createNameTable(priorModels, metaModel) {
                 table[type] = namespace;
             }
         } else {
-            const decls = modelFile.declarations;
-            decls.forEach((decl) => {
+            (modelFile.declarations || []).forEach((decl) => {
                 table[decl.name] = namespace;
             });
         }
     });
 
     // Then add the names local to this metaModel (overriding as we go along)
-    if (metaModel.declarations) {
-        metaModel.declarations.forEach((decl) => {
-            table[decl.name] = metaModel.namespace;
-        });
-    }
+    (metaModel.declarations || []).forEach((decl) => {
+        table[decl.name] = metaModel.namespace;
+    });
 
     return table;
 }
@@ -123,11 +119,9 @@ function resolveName(name, table) {
 function resolveTypeNames(metaModel, table) {
     switch (metaModel.$class) {
     case `${MetaModelNamespace}.Model`: {
-        if (metaModel.declarations) {
-            metaModel.declarations.forEach((decl) => {
-                resolveTypeNames(decl, table);
-            });
-        }
+        (metaModel.declarations || []).forEach((decl) => {
+            resolveTypeNames(decl, table);
+        });
     }
         break;
     case `${MetaModelNamespace}.AssetDeclaration`:
@@ -139,22 +133,18 @@ function resolveTypeNames(metaModel, table) {
             const name = metaModel.superType.name;
             metaModel.superType.namespace = resolveName(name, table);
         }
-        metaModel.properties.forEach((property) => {
+        (metaModel.properties || []).forEach((property) => {
             resolveTypeNames(property, table);
         });
-        if (metaModel.decorators) {
-            metaModel.decorators.forEach((decorator) => {
-                resolveTypeNames(decorator, table);
-            });
-        }
+        (metaModel.decorators || []).forEach((decorator) => {
+            resolveTypeNames(decorator, table);
+        });
     }
         break;
     case `${MetaModelNamespace}.EnumDeclaration`: {
-        if (metaModel.decorators) {
-            metaModel.decorators.forEach((decorator) => {
-                resolveTypeNames(decorator, table);
-            });
-        }
+        (metaModel.decorators || []).forEach((decorator) => {
+            resolveTypeNames(decorator, table);
+        });
     }
         break;
     case `${MetaModelNamespace}.EnumProperty`:
@@ -162,19 +152,15 @@ function resolveTypeNames(metaModel, table) {
     case `${MetaModelNamespace}.RelationshipProperty`: {
         const name = metaModel.type.name;
         metaModel.type.namespace = resolveName(name, table);
-        if (metaModel.decorators) {
-            metaModel.decorators.forEach((decorator) => {
-                resolveTypeNames(decorator, table);
-            });
-        }
+        (metaModel.decorators || []).forEach((decorator) => {
+            resolveTypeNames(decorator, table);
+        });
     }
         break;
     case `${MetaModelNamespace}.Decorator`: {
-        if (metaModel.arguments) {
-            metaModel.arguments.forEach((argument) => {
-                resolveTypeNames(argument, table);
-            });
-        }
+        (metaModel.arguments || []).forEach((argument) => {
+            resolveTypeNames(argument, table);
+        });
     }
         break;
     case `${MetaModelNamespace}.DecoratorTypeReference`: {
