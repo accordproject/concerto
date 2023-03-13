@@ -140,15 +140,18 @@ concept MapDeclaration extends Declaration {
   o MapValue value
 }
 
-concept MapKey extends Declaration {
-    o Property property
-    o TypeIdentifier type
+concept MapKey {
+  o TypeIdentifier type
+  o Decorator[] decorators optional
+  o Range location optional
 }
 
-concept MapValue extends Declaration {
-    o Property property
-    o TypeIdentifier type
- }
+concept MapValue {
+  o TypeIdentifier type
+  o Boolean isRelationship
+  o Decorator[] decorators optional
+  o Range location optional
+}
 
 concept DoubleProperty extends Property {
   o Double defaultValue optional
