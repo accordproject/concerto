@@ -1402,12 +1402,12 @@ MapDeclaration
     = decorators:Decorators __ MapToken __ id:Identifier __
     "{" __ body:MapDeclarationBody __ "}"
     {
-      const result = {
-        $class: "concerto.metamodel@1.0.0.MapDeclaration",
-        name:   id.name,
-        properties:  body.declarations,
-        ...buildRange(location())
-      };
+        const result = {
+          $class: "concerto.metamodel@1.0.0.MapDeclaration",
+          name:   id.name,
+          properties:  body.declarations,
+          ...buildRange(location())
+        };
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
@@ -1415,23 +1415,39 @@ MapDeclaration
     }
 
 MapDeclarationBody
-  = decls:MapPropertyDeclaration* {
+  = key:MapPropertyKeyDeclaration __ value:MapPropertyValueDeclaration {
       return {
         type: "MapDeclarationBody",
-        declarations: optionalList(decls)
+        declarations: optionalList([key, value])
       };
     }
 
-MapPropertyDeclaration
+MapPropertyKeyDeclaration
     = decorators:Decorators __ "o"__ id:Identifier __ {
+        const result = {
+            $class: "concerto.metamodel@1.0.0.MapyPropertyKey",
+            name: id.name,
+            ...buildRange(location())
+        };
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+        return result;
+    }
+
+MapPropertyValueDeclaration
+    = decorators:Decorators __ symbol:("o" / "-->") __ id:Identifier __ {
     	const result = {
-    		$class: "concerto.metamodel@1.0.0.MapProperty",
+    		$class: "concerto.metamodel@1.0.0.MapPropertyValue",
     		name: id.name,
             ...buildRange(location())
     	};
-      if (decorators.length > 0) {
-        result.decorators = decorators;
-      }
+        if(symbol === "-->") {
+          result.isRelationship = true
+        }
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
       return result;
     }
 
@@ -1604,6 +1620,8 @@ SourceElement
   / ConceptDeclaration
   / ScalarDeclaration
   / MapDeclaration
+  / MapPropertyKeyDeclaration
+  / MapPropertyValueDeclaration
 
 
 
