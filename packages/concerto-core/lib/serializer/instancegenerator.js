@@ -160,7 +160,16 @@ class InstanceGenerator {
 
         let id = null;
         if (classDeclaration.isIdentified()) {
-            id = this.generateRandomId(classDeclaration);
+            let idFieldName = classDeclaration.getIdentifierFieldName();
+            let idField = classDeclaration.getProperty(idFieldName);
+            if (idField?.isTypeScalar?.()){
+                idField = idField.getScalarField();
+            }
+            if(idField?.validator?.regex){
+                id = parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
+            } else {
+                id = this.generateRandomId(classDeclaration);
+            }
         }
         let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);
         parameters.stack.push(resource);

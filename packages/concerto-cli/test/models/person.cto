@@ -1,0 +1,19 @@
+namespace person@1.0.0
+
+concept Person identified by ssn {
+ o String name
+ @description("Height (cm)")
+ o Double height range=[0.0,]
+ o DateTime dateOfBirth
+ o String ssn regex=/\d{3}-\d{2}-\d{4}/
+}
+
+scalar SSN extends String regex=/\d{3}-\d{2}-\d{4}/
+
+concept Person2 identified by ssn {
+ o String name
+ @description("Height (cm)")
+ o Double height range=[0.0,]
+ o DateTime dateOfBirth
+ o SSN ssn
+}

@@ -18,6 +18,7 @@ const c = require('ansi-colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
+const RandExp = require('randexp');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -317,10 +318,23 @@ class Commands {
         };
 
         const classDeclaration = modelManager.getType(concept);
+
+        let idFieldName = classDeclaration.getIdentifierFieldName();
+        let idField = classDeclaration.getProperty(idFieldName);
+        let id = 'resource1';
+        if (idField) {
+            if(idField.isTypeScalar && idField.isTypeScalar()){
+                idField = idField.getScalarField();
+            }
+            if(idField.validator && idField.validator.regex) {
+                id = new RandExp(idField.validator.regex.source, idField.validator.regex.flags).gen();
+            }
+        }
+
         const resource = factory.newResource(
             classDeclaration.getNamespace(),
             classDeclaration.getName(),
-            classDeclaration.isIdentified() ? 'resource1' : null,
+            classDeclaration.isIdentified() ? id : null,
             factoryOptions
         );
         const serializer = new Serializer(factory, modelManager);
