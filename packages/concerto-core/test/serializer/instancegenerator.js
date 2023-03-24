@@ -443,6 +443,17 @@ describe('InstanceGenerator', () => {
             resource.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
             resource.ssn2.should.equal('000-00-0000');
         });
+
+        it('should throw an error when id provided does not match regex on id field', function () {
+            (() => test(`namespace org.acme.test
+
+            scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
+
+            asset MyAsset identified by ssn {
+                o String id
+                o SSN ssn
+            }`)).should.throw(/Provided id does not match regex/);
+        });
     });
 
     describe('#findConcreteSubclass', () => {

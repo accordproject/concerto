@@ -30,7 +30,7 @@ const { Parser } = require('@accordproject/concerto-cto');
 
 describe('concerto-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
-    const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
+    const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto'),path.resolve(__dirname, 'models/person.cto')];
     const input1 = path.resolve(__dirname, 'data/input1.json');
     const input2 = path.resolve(__dirname, 'data/input2.json');
     const inputText1 = fs.readFileSync(input1, 'utf8');
@@ -640,6 +640,26 @@ describe('concerto-cli', () => {
             );
             obj.$class.should.equal('org.accordproject.cicero.dom.ContractTemplate');
             Object.keys(obj).should.eql(['$class', 'metadata', 'content', 'id', '$identifier']);
+        });
+
+        it('should generate an identified object with an identifier property with regex', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'person@1.0.0.Person',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            obj.ssn.should.match(/\d{3}-\d{2}-\d{4}/);
+        });
+
+        it('should generate an identified object identified by a scalar', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'person@1.0.0.Person2',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            (typeof obj.ssn).should.equal('string');
         });
     });
 });
