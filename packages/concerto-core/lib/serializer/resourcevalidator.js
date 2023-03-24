@@ -138,7 +138,7 @@ class ResourceValidator {
         let props = Object.getOwnPropertyNames(obj);
         for (let n = 0; n < props.length; n++) {
             let propName = props[n];
-            if(!this.isSystemProperty(propName)) {
+            if(!ModelUtil.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
                     if(classDeclaration.isIdentified()) {
@@ -178,17 +178,6 @@ class ResourceValidator {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns true if the property is a system property.
-     * System properties are not declared in the model.
-     * @param {String} propertyName - the name of the property
-     * @return {Boolean} true if the property is a system property
-     * @private
-     */
-    isSystemProperty(propertyName) {
-        return propertyName.charAt(0) === '$';
     }
 
     /**

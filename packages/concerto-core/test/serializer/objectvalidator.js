@@ -233,6 +233,19 @@ describe('ObjectValidator', function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
             }).should.throw('Type "Missing" is not defined in namespace "test".');
         });
+
+        it('should fail for an undeclared field', () => {
+            const data = {
+                $class : 'test.Vehicle',
+                manufacturer: 'Ford',
+            };
+            const parameters = {};
+            parameters.stack = new TypedStack(data);
+
+            (function () {
+                objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
+            }).should.throw('Instance "undefined" has a property named "manufacturer", which is not declared in "test.Vehicle"');
+        });
     });
 
     describe('#visitRelationshipDeclaration', () => {

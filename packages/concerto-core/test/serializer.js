@@ -407,6 +407,32 @@ describe('Serializer', () => {
                 .should.throw(/WRONG/);
         });
 
+        it('should error on unexpected properties that start with $', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                $WRONG: 'blah',
+            };
+            (() =>
+                serializer.fromJSON(json)
+            ).should.throw(/Unexpected properties for type org.acme.sample.SampleParticipant: \$WRONG/);
+        });
+
+        it('should error on unexpected properties that start with reserved keywords', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                $validator: 'blah',
+            };
+            (() =>
+                serializer.fromJSON(json)
+            ).should.throw(/Unexpected reserved properties for type org.acme.sample.SampleParticipant: \$validator/);
+        });
+
         it('should not error on unexpected properties if their value is undefined', () => {
             const json = {
                 $class: 'org.acme.sample.SampleParticipant',

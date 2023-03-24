@@ -20,6 +20,25 @@ const Globalize = require('./globalize');
 
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
+const privateReservedProperties = [
+    '$classDeclaration',
+    '$namespace',
+    '$type',
+    '$modelManager',
+    '$validator',
+];
+
+const assignableReservedProperties = [
+    '$identifier',
+    '$timestamp'
+];
+
+const reservedProperties = [
+    '$class',
+    ...assignableReservedProperties,
+    ...privateReservedProperties
+];
+
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -221,6 +240,28 @@ class ModelUtil {
         const { name: namespace } = ModelUtil.parseNamespace(ns);
         const typeName = ModelUtil.getShortName(fqn);
         return ModelUtil.getFullyQualifiedName(namespace, typeName);
+    }
+
+    /**
+     * Returns true if the property is a system property.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    static isSystemProperty(propertyName) {
+        return reservedProperties.includes(propertyName);
+    }
+
+    /**
+     * Returns true if the property is an system property that can be set in serialized JSON.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    static isPrivateSystemProperty(propertyName) {
+        return privateReservedProperties.includes(propertyName);
     }
 }
 

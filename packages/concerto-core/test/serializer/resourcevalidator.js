@@ -447,6 +447,19 @@ describe('ResourceValidator', function () {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
             }).should.throw('Instance "undefined" has a property named "numberOfWipers", which is not declared in "org.acme.l1.Data".');
         });
+
+        it('should report undeclared field with a $ prefix', () => {
+            const data = factory.newConcept('org.acme.l1', 'Data');
+            data.name = 'name';
+            data.$numberOfWipers = 2;
+            const typedStack = new TypedStack(data);
+            const conceptDeclaration = modelManager.getType('org.acme.l1.Data');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            (() => {
+                resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
+            }).should.throw('Instance "undefined" has a property named "$numberOfWipers", which is not declared in "org.acme.l1.Data".');
+        });
     });
 
     describe('#reportFieldTypeViolation', () => {

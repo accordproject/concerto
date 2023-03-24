@@ -30,24 +30,23 @@ const duration = require('dayjs/plugin/duration');
 dayjs.extend(duration);
 
 /**
- * Check if a given property name is a system property, e.g. '$class'.
- * @param {String} name property name.
- * @return {boolean} true for a system property; otherwise false.
- * @private
- */
-function isSystemProperty(name) {
-    return name.startsWith('$');
-}
-
-/**
  * Get all properties on a resource object that both have a value and are not system properties.
  * @param {Object} resourceData JSON object representation of a resource.
+ * @param {ClassDeclaration} classDeclaration class declaration.
  * @return {Array} property names.
  * @private
  */
-function getAssignableProperties(resourceData) {
-    return Object.keys(resourceData).filter((property) => {
-        return !isSystemProperty(property) && !Util.isNull(resourceData[property]);
+function getAssignableProperties(resourceData, classDeclaration) {
+    const properties = Object.keys(resourceData);
+    const privateProperties = properties.filter(ModelUtil.isPrivateSystemProperty);
+    if (privateProperties.length > 0){
+        const errorText = `Unexpected reserved properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
+            privateProperties.join(', ');
+        throw new ValidationException(errorText);
+    }
+
+    return properties.filter((property) => {
+        return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
     });
 }
 
@@ -135,7 +134,7 @@ class JSONPopulator {
         const resourceObj = parameters.resourceStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        const properties = getAssignableProperties(jsonObj);
+        const properties = getAssignableProperties(jsonObj, classDeclaration);
         validateProperties(properties, classDeclaration);
 
         properties.forEach((property) => {
