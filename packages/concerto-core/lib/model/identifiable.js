@@ -44,7 +44,8 @@ class Identifiable extends Typed {
      */
     constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
         super(modelManager, classDeclaration, ns, type);
-        this.$identifier = id;
+        this.setIdentifierFieldName();
+        this.setIdentifier(id);
         this.$timestamp = timestamp;
     }
 
@@ -61,7 +62,7 @@ class Identifiable extends Typed {
      * @return {string} The identifier for this object
      */
     getIdentifier() {
-        return this.$identifier;
+        return this[this.$identifierFieldName];
     }
 
     /**
@@ -70,10 +71,7 @@ class Identifiable extends Typed {
      */
     setIdentifier(id) {
         this.$identifier = id;
-        const modelFile = this.$modelManager.getModelFile(this.getNamespace());
-        const typeDeclaration = modelFile.getType(this.getFullyQualifiedType());
-        const idField = typeDeclaration.getIdentifierFieldName();
-        this[idField] = id;
+        this[this.$identifierFieldName] = id;
     }
 
     /**
@@ -82,10 +80,22 @@ class Identifiable extends Typed {
      * @return {string} the fully qualified identifier of this instance
      */
     getFullyQualifiedIdentifier() {
-        if (this.$identifier) {
-            return this.getFullyQualifiedType() + '#' + this.$identifier;
+        if (this.getIdentifier()) {
+            return this.getFullyQualifiedType() + '#' + this.getIdentifier();
         }
         return this.getFullyQualifiedType();
+    }
+
+    /**
+     * Returns the name of the identifying field for this class.
+     * @private
+     */
+    setIdentifierFieldName() {
+        if (!this.$identifierFieldName){
+            const modelFile = this.$modelManager.getModelFile(this.getNamespace());
+            const typeDeclaration = modelFile?.getType(this.getFullyQualifiedType());
+            this.$identifierFieldName = typeDeclaration?.getIdentifierFieldName() || '$identifier';
+        }
     }
 
     /**
@@ -121,7 +131,6 @@ class Identifiable extends Typed {
     toURI() {
         const resourceId = new ResourceId(this.getNamespace(), this.getType(), this.getIdentifier());
         const result = resourceId.toURI();
-        //console.log( '***** URI for ' + this.toString() + ' is ' + result );
         return result;
     }
 }

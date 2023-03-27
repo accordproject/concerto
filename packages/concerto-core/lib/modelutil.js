@@ -21,20 +21,31 @@ const Globalize = require('./globalize');
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 const privateReservedProperties = [
-    '$classDeclaration',
-    '$namespace',
-    '$type',
-    '$modelManager',
-    '$validator',
+    // Internal use only
+    '$classDeclaration',    // Used to cache a reference to theClass Declaration instance
+    '$namespace',           // Used to cache the namespace for a type
+    '$type',                // Used to cache the type for a type
+    '$modelManager',        // Used to cache a reference to the ModelManager instance
+    '$validator',           // Used to cache a reference to the ResourceValidator instance
+    '$identifierFieldName', // Used for caching the identifier field name
+
+    '$imports',             // Reserved for future use
+    '$superTypes',          // Reserved for future use
+
+    // Included in serialization
+    '$id',                  // Used for URI identifier
 ];
 
 const assignableReservedProperties = [
-    '$identifier',
-    '$timestamp'
+    // Included in serialization
+    '$identifier',          // Used for shadowing the identifier field, or where a system identifier is required
+    '$timestamp'            // Used in Event and Transaction prototype classes
 ];
 
 const reservedProperties = [
-    '$class',
+    // Included in serialization
+    '$class',               // Used for discriminating between instances of different classes
+
     ...assignableReservedProperties,
     ...privateReservedProperties
 ];

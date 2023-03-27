@@ -45,6 +45,13 @@ function getAssignableProperties(resourceData, classDeclaration) {
         throw new ValidationException(errorText);
     }
 
+    if (properties.includes('$timestamp') &&
+        !(classDeclaration.isTransaction() || classDeclaration.isEvent())
+    ) {
+        const errorText = `Unexpected property for type ${classDeclaration.getFullyQualifiedName()}: $timestamp`;
+        throw new ValidationException(errorText);
+    }
+
     return properties.filter((property) => {
         return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
     });
@@ -58,9 +65,21 @@ function getAssignableProperties(resourceData, classDeclaration) {
  * @private
  */
 function validateProperties(properties, classDeclaration) {
-    const expectedProperties = classDeclaration.getProperties().map((property) => property.getName());
+    const expectedProperties = classDeclaration
+        .getProperties()
+        .map((property) => property.getName());
+
     const invalidProperties = properties.filter((property) => !expectedProperties.includes(property));
     if (invalidProperties.length > 0) {
+
+        // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
+        if (invalidProperties.includes('$identifier') &&
+            classDeclaration.isIdentified() &&
+            classDeclaration.getIdentifierFieldName() !== '$identifier'
+        ) {
+            return;
+        }
+
         const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
             invalidProperties.join(', ');
         throw new ValidationException(errorText);

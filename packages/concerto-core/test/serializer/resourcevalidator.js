@@ -395,7 +395,7 @@ describe('ResourceValidator', function () {
 
         it('should detect additional field', function () {
             const vehicle = factory.newResource('org.acme.l3', 'Car', 'ABC');
-            vehicle.foo = 'Baz';
+            vehicle.foo = 'Baz'; // additional field
             const typedStack = new TypedStack(vehicle);
             const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
@@ -405,7 +405,7 @@ describe('ResourceValidator', function () {
             }).should.throw('Instance "ABC" has a property named "foo", which is not declared in "org.acme.l3.Car".');
         });
 
-        it('should detect an empty identifier', function () {
+        it('should normalize a shadowed identifier to the value from the indentified field', function () {
             const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
             vehicle.$identifier = ''; // empty the identifier
             vehicle.model = 'Ford';
@@ -415,9 +415,8 @@ describe('ResourceValidator', function () {
             const assetDeclaration = modelManager.getType('org.acme.l3.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
-            (function () {
-                assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw(/has an empty identifier/);
+            assetDeclaration.accept(resourceValidator, parameters);
+            vehicle.$identifier.should.equal('foo');
         });
 
         it('should reject a Double which is not finite', function () {
@@ -432,7 +431,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 assetDeclaration.accept(resourceValidator,parameters);
-            }).should.throw('Model violation in the "org.acme.l3.Car#42" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
+            }).should.throw('Model violation in the "org.acme.l3.Car#foo" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
         });
 
         it('should report undeclared field if not identifiable', () => {

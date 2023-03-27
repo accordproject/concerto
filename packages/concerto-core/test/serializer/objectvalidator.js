@@ -339,7 +339,7 @@ describe('ObjectValidator', function () {
                 $class: 'test.Person',
                 email: 'matt@example',
             };
-            const field = concerto.getTypeDeclaration(data).getProperties()[1];
+            const field = concerto.getTypeDeclaration(data).getProperties()[0];
             (function () {
                 ObjectValidator.reportFieldTypeViolation('123', 'name', data, field, concerto);
             }).should.throw('Model violation in the "123" instance. The field "name" has a value of "matt@example" (type of value: "Person"). Expected type of value: "String"');
