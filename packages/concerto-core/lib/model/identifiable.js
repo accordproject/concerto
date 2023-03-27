@@ -44,7 +44,12 @@ class Identifiable extends Typed {
      */
     constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
         super(modelManager, classDeclaration, ns, type);
-        this.setIdentifierFieldName();
+
+        // Cache the identifier field name
+        const modelFile = this.$modelManager.getModelFile(this.getNamespace());
+        const typeDeclaration = modelFile?.getType(this.getFullyQualifiedType());
+        this.$identifierFieldName = typeDeclaration?.getIdentifierFieldName() || '$identifier';
+
         this.setIdentifier(id);
         this.$timestamp = timestamp;
     }
@@ -84,18 +89,6 @@ class Identifiable extends Typed {
             return this.getFullyQualifiedType() + '#' + this.getIdentifier();
         }
         return this.getFullyQualifiedType();
-    }
-
-    /**
-     * Returns the name of the identifying field for this class.
-     * @private
-     */
-    setIdentifierFieldName() {
-        if (!this.$identifierFieldName){
-            const modelFile = this.$modelManager.getModelFile(this.getNamespace());
-            const typeDeclaration = modelFile?.getType(this.getFullyQualifiedType());
-            this.$identifierFieldName = typeDeclaration?.getIdentifierFieldName() || '$identifier';
-        }
     }
 
     /**

@@ -71,15 +71,6 @@ function validateProperties(properties, classDeclaration) {
 
     const invalidProperties = properties.filter((property) => !expectedProperties.includes(property));
     if (invalidProperties.length > 0) {
-
-        // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
-        if (invalidProperties.includes('$identifier') &&
-            classDeclaration.isIdentified() &&
-            classDeclaration.getIdentifierFieldName() !== '$identifier'
-        ) {
-            return;
-        }
-
         const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
             invalidProperties.join(', ');
         throw new ValidationException(errorText);

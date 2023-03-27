@@ -405,6 +405,21 @@ describe('ResourceValidator', function () {
             }).should.throw('Instance "ABC" has a property named "foo", which is not declared in "org.acme.l3.Car".');
         });
 
+        it('should detect an empty identifier', function () {
+            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            vehicle.setIdentifier('');
+            vehicle.model = 'Ford';
+            vehicle.numberOfWheels = 4;
+            vehicle.milage = 3.14;
+            const typedStack = new TypedStack(vehicle);
+            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            (function () {
+                assetDeclaration.accept(resourceValidator,parameters );
+            }).should.throw(/has an empty identifier/);
+        });
+
         it('should normalize a shadowed identifier to the value from the indentified field', function () {
             const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
             vehicle.$identifier = ''; // empty the identifier
