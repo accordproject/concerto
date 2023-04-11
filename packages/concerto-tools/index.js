@@ -20,4 +20,5 @@
  */
 
 module.exports.CodeGen = require('./lib/codegen/codegen');
+module.exports.Common = require('./lib/common/common');
 module.exports.version = require('./package.json');

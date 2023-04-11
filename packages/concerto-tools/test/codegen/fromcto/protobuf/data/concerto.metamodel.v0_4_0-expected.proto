@@ -1,0 +1,295 @@
+syntax = "proto3";
+
+package concerto.metamodel.v0_4_0;
+
+import "google/protobuf/timestamp.proto";
+
+message Position {
+  sint64 column = 1;
+  sint64 line = 2;
+  sint64 offset = 3;
+}
+
+message Range {
+  Position end = 1;
+  optional string source = 2;
+  Position start = 3;
+}
+
+message TypeIdentifier {
+  string name = 1;
+  optional string namespace = 2;
+}
+
+message _Subclasses_of_class_DecoratorLiteral {
+  oneof _class_oneof_DecoratorLiteral {
+    DecoratorBoolean _subclass_of_class_DecoratorLiteral_DecoratorBoolean = 1;
+    DecoratorNumber _subclass_of_class_DecoratorLiteral_DecoratorNumber = 2;
+    DecoratorString _subclass_of_class_DecoratorLiteral_DecoratorString = 3;
+    DecoratorTypeReference _subclass_of_class_DecoratorLiteral_DecoratorTypeReference = 4;
+  }
+}
+
+message DecoratorString {
+  optional Range location = 1;
+  string value = 2;
+}
+
+message DecoratorNumber {
+  optional Range location = 1;
+  double value = 2;
+}
+
+message DecoratorBoolean {
+  optional Range location = 1;
+  bool value = 2;
+}
+
+message DecoratorTypeReference {
+  bool isArray = 1;
+  optional Range location = 2;
+  TypeIdentifier type = 3;
+}
+
+message Decorator {
+  repeated _Subclasses_of_class_DecoratorLiteral arguments = 1;
+  optional Range location = 2;
+  string name = 3;
+}
+
+message Identified {}
+
+message _Subclasses_of_class_Identified {
+  oneof _class_oneof_Identified {
+    Identified _subclass_of_class_Identified_Identified = 1;
+    IdentifiedBy _subclass_of_class_Identified_IdentifiedBy = 2;
+  }
+}
+
+message IdentifiedBy {
+  string name = 1;
+}
+
+message _Subclasses_of_class_Declaration {
+  oneof _class_oneof_Declaration {
+    AssetDeclaration _subclass_of_class_Declaration_AssetDeclaration = 1;
+    ConceptDeclaration _subclass_of_class_Declaration_ConceptDeclaration = 2;
+    EnumDeclaration _subclass_of_class_Declaration_EnumDeclaration = 3;
+    EventDeclaration _subclass_of_class_Declaration_EventDeclaration = 4;
+    ParticipantDeclaration _subclass_of_class_Declaration_ParticipantDeclaration = 5;
+    TransactionDeclaration _subclass_of_class_Declaration_TransactionDeclaration = 6;
+  }
+}
+
+message EnumDeclaration {
+  repeated Decorator decorators = 1;
+  optional Range location = 2;
+  string name = 3;
+  repeated EnumProperty properties = 4;
+}
+
+message EnumProperty {
+  repeated Decorator decorators = 1;
+  optional Range location = 2;
+  string name = 3;
+}
+
+message ConceptDeclaration {
+  repeated Decorator decorators = 1;
+  optional _Subclasses_of_class_Identified identified = 2;
+  bool isAbstract = 3;
+  optional Range location = 4;
+  string name = 5;
+  repeated _Subclasses_of_class_Property properties = 6;
+  optional TypeIdentifier superType = 7;
+}
+
+message _Subclasses_of_class_ConceptDeclaration {
+  oneof _class_oneof_ConceptDeclaration {
+    AssetDeclaration _subclass_of_class_ConceptDeclaration_AssetDeclaration = 1;
+    ConceptDeclaration _subclass_of_class_ConceptDeclaration_ConceptDeclaration = 2;
+    EventDeclaration _subclass_of_class_ConceptDeclaration_EventDeclaration = 3;
+    ParticipantDeclaration _subclass_of_class_ConceptDeclaration_ParticipantDeclaration = 4;
+    TransactionDeclaration _subclass_of_class_ConceptDeclaration_TransactionDeclaration = 5;
+  }
+}
+
+message AssetDeclaration {
+  repeated Decorator decorators = 1;
+  optional _Subclasses_of_class_Identified identified = 2;
+  bool isAbstract = 3;
+  optional Range location = 4;
+  string name = 5;
+  repeated _Subclasses_of_class_Property properties = 6;
+  optional TypeIdentifier superType = 7;
+}
+
+message ParticipantDeclaration {
+  repeated Decorator decorators = 1;
+  optional _Subclasses_of_class_Identified identified = 2;
+  bool isAbstract = 3;
+  optional Range location = 4;
+  string name = 5;
+  repeated _Subclasses_of_class_Property properties = 6;
+  optional TypeIdentifier superType = 7;
+}
+
+message TransactionDeclaration {
+  repeated Decorator decorators = 1;
+  optional _Subclasses_of_class_Identified identified = 2;
+  bool isAbstract = 3;
+  optional Range location = 4;
+  string name = 5;
+  repeated _Subclasses_of_class_Property properties = 6;
+  optional TypeIdentifier superType = 7;
+}
+
+message EventDeclaration {
+  repeated Decorator decorators = 1;
+  optional _Subclasses_of_class_Identified identified = 2;
+  bool isAbstract = 3;
+  optional Range location = 4;
+  string name = 5;
+  repeated _Subclasses_of_class_Property properties = 6;
+  optional TypeIdentifier superType = 7;
+}
+
+message _Subclasses_of_class_Property {
+  oneof _class_oneof_Property {
+    BooleanProperty _subclass_of_class_Property_BooleanProperty = 1;
+    DateTimeProperty _subclass_of_class_Property_DateTimeProperty = 2;
+    DoubleProperty _subclass_of_class_Property_DoubleProperty = 3;
+    IntegerProperty _subclass_of_class_Property_IntegerProperty = 4;
+    LongProperty _subclass_of_class_Property_LongProperty = 5;
+    ObjectProperty _subclass_of_class_Property_ObjectProperty = 6;
+    RelationshipProperty _subclass_of_class_Property_RelationshipProperty = 7;
+    StringProperty _subclass_of_class_Property_StringProperty = 8;
+  }
+}
+
+message RelationshipProperty {
+  repeated Decorator decorators = 1;
+  bool isArray = 2;
+  bool isOptional = 3;
+  optional Range location = 4;
+  string name = 5;
+  TypeIdentifier type = 6;
+}
+
+message ObjectProperty {
+  repeated Decorator decorators = 1;
+  optional string defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+  TypeIdentifier type = 7;
+}
+
+message BooleanProperty {
+  repeated Decorator decorators = 1;
+  optional bool defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+}
+
+message DateTimeProperty {
+  repeated Decorator decorators = 1;
+  bool isArray = 2;
+  bool isOptional = 3;
+  optional Range location = 4;
+  string name = 5;
+}
+
+message StringProperty {
+  repeated Decorator decorators = 1;
+  optional string defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+  optional StringRegexValidator validator = 7;
+}
+
+message StringRegexValidator {
+  string flags = 1;
+  string pattern = 2;
+}
+
+message DoubleProperty {
+  repeated Decorator decorators = 1;
+  optional double defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+  optional DoubleDomainValidator validator = 7;
+}
+
+message DoubleDomainValidator {
+  optional double lower = 1;
+  optional double upper = 2;
+}
+
+message IntegerProperty {
+  repeated Decorator decorators = 1;
+  optional sint64 defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+  optional IntegerDomainValidator validator = 7;
+}
+
+message IntegerDomainValidator {
+  optional sint64 lower = 1;
+  optional sint64 upper = 2;
+}
+
+message LongProperty {
+  repeated Decorator decorators = 1;
+  optional sint64 defaultValue = 2;
+  bool isArray = 3;
+  bool isOptional = 4;
+  optional Range location = 5;
+  string name = 6;
+  optional LongDomainValidator validator = 7;
+}
+
+message LongDomainValidator {
+  optional sint64 lower = 1;
+  optional sint64 upper = 2;
+}
+
+message _Subclasses_of_class_Import {
+  oneof _class_oneof_Import {
+    ImportAll _subclass_of_class_Import_ImportAll = 1;
+    ImportType _subclass_of_class_Import_ImportType = 2;
+  }
+}
+
+message ImportAll {
+  string namespace = 1;
+  optional string uri = 2;
+}
+
+message ImportType {
+  string name = 1;
+  string namespace = 2;
+  optional string uri = 3;
+}
+
+message Model {
+  optional string concertoVersion = 1;
+  repeated _Subclasses_of_class_Declaration declarations = 2;
+  repeated _Subclasses_of_class_Import imports = 3;
+  string namespace = 4;
+  optional string sourceUri = 5;
+}
+
+message Models {
+  repeated Model models = 1;
+}
+

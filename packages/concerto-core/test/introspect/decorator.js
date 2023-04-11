@@ -57,6 +57,8 @@ describe('Decorator', () => {
             d.getParent().should.equal(mockAssetDeclaration);
             d.getName().should.equal('Test');
             d.getArguments().should.deep.equal(['one','two','three']);
+            d.isDecorator().should.equal(true);
+
         });
     });
 

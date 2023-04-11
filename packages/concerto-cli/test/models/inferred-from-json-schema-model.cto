@@ -1,0 +1,115 @@
+namespace com.test@1.0.0
+
+concept Root {
+  o String firstName
+  o String lastName
+  o DateTime dob
+  o DateTime graduationDate optional
+  o Integer age
+  o Double height range=[50,]
+  o String favouriteFood optional
+  o Root$_properties$_children[] children
+  o Root$_properties$_company company
+  o String alternative optional
+}
+
+concept Root$_properties$_children {
+  o String name
+  o Integer age
+  o String hairColor
+  o Boolean coolDude
+  o String missing optional
+  o Root$_properties$_children$_properties$_pet pet
+  o String[] favoriteColors
+  o Integer[] favoriteNumbers
+  o String[] mixed
+  o String[] arrayOfNull
+  o String[] emptyArray
+  o Root$_properties$_children$_properties$_favoritePets[] favoritePets
+  o Root$_properties$_children$_properties$_stuff[] stuff
+  o String alternative optional
+}
+
+concept Root$_properties$_children$_properties$_pet {
+  o String name
+  o String breed
+}
+
+concept Root$_properties$_children$_properties$_favoritePets {
+  o String name
+  o String breed
+}
+
+concept Root$_properties$_children$_properties$_stuff {
+  o String sku
+  o Double price
+  o Pet product
+}
+
+concept Root$_properties$_company {
+  o String name
+  o Root$_properties$_company$_properties$_employees[] employees
+}
+
+concept Root$_properties$_company$_properties$_employees {
+  o String name
+}
+
+concept Children {
+  o String name
+  o Integer age range=[,150]
+  o String hairColor
+  o Boolean coolDude
+  o String missing optional
+  o Pet pet
+  o Color[] favoriteColors
+  o Integer[] favoriteNumbers range=[,999999]
+  o String[] mixed
+  o String[] arrayOfNull
+  o String[] emptyArray
+  o Pet[] favoritePets
+  o definitions$_Children$_properties$_stuff[] stuff
+  @StringifiedJson
+  o String json optional
+  @StringifiedJson
+  o String jsonWithAdditionalProperties optional
+  o Double alternation optional
+}
+
+concept definitions$_Children$_properties$_stuff {
+  o String sku
+  o Double price
+  o Pet product
+}
+
+enum Color {
+  o blue
+  o green
+  o red
+  o yellow
+  o orange
+}
+
+concept Pet {
+  o String name
+  o String breed regex=/^[a-zA-Z]*$/
+}
+
+concept Stuff {
+  o String sku
+  o Double price range=[,99999999]
+  o Pet product
+}
+
+concept Company {
+  o String name
+  o definitions$_Company$_properties$_employees[] employees
+}
+
+concept definitions$_Company$_properties$_employees {
+  o String name
+}
+
+concept Employees {
+  o String name
+}

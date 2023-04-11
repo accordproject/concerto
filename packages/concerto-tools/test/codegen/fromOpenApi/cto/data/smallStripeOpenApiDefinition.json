@@ -1,0 +1,636 @@
+{
+    "components": {
+      "schemas": {
+          "customer": {
+              "description": "This object represents a customer of your business. It lets you create recurring charges and track payments that belong to the same customer.\n\nRelated guide: [Save a card during payment](https://stripe.com/docs/payments/save-during-payment).",
+              "properties": {
+                  "created": {
+                      "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+                      "format": "unix-time",
+                      "type": "integer"
+                  },
+                  "id": {
+                      "description": "Unique identifier for the object.",
+                      "maxLength": 5000,
+                      "type": "string"
+                  },
+                  "metadata": {
+                      "additionalProperties": {
+                          "maxLength": 500,
+                          "type": "string"
+                      },
+                      "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+                      "type": "object"
+                  }
+              },
+              "required": [
+                  "created",
+                  "id"
+              ],
+              "title": "Customer",
+              "type": "object",
+              "x-resourceId": "customer"
+          }
+      }
+    },
+    "openapi": "3.0.0",
+    "paths": {
+      "/v1/customers/{customer}": {
+        "get": {
+          "description": "<p>Retrieves a Customer object.</p>",
+          "operationId": "GetCustomersCustomer",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "customer",
+              "required": true,
+              "schema": {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              "style": "simple"
+            },
+            {
+              "description": "Specifies which fields in the response should be expanded.",
+              "explode": true,
+              "in": "query",
+              "name": "expand",
+              "required": false,
+              "schema": {
+                "items": {
+                  "maxLength": 5000,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "style": "deepObject"
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "encoding": {
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "required": false
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/customer"
+                      }
+                    ]
+                  }
+                }
+              },
+              "description": "Successful response."
+            }
+          }
+        },
+        "post": {
+          "description": "<p>Updates the specified customer by setting the values of the parameters passed. Any parameters not provided will be left unchanged. For example, if you pass the <strong>source</strong> parameter, that becomes the customer’s active source (e.g., a card) to be used for all charges in the future. When you update a customer to a new valid card source by passing the <strong>source</strong> parameter: for each of the customer’s current subscriptions, if the subscription bills automatically and is in the <code>past_due</code> state, then the latest open invoice for the subscription with automatic collection enabled will be retried. This retry will not count as an automatic retry, and will not affect the next regularly scheduled payment for the invoice. Changing the <strong>default_source</strong> for a customer will not trigger this behavior.</p>\n\n<p>This request accepts mostly the same arguments as the customer creation call.</p>",
+          "operationId": "PostCustomersCustomer",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "customer",
+              "required": true,
+              "schema": {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              "style": "simple"
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "encoding": {
+                  "address": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "bank_account": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "card": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "cash_balance": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "expand": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "invoice_settings": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "metadata": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "preferred_locales": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "shipping": {
+                    "explode": true,
+                    "style": "deepObject"
+                  },
+                  "tax": {
+                    "explode": true,
+                    "style": "deepObject"
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "address": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "city": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "country": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "line1": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "line2": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "postal_code": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "state": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            }
+                          },
+                          "title": "optional_fields_address",
+                          "type": "object"
+                        },
+                        {
+                          "enum": [
+                            ""
+                          ],
+                          "type": "string"
+                        }
+                      ],
+                      "description": "The customer's address."
+                    },
+                    "balance": {
+                      "description": "An integer amount in cents (or local equivalent) that represents the customer's current balance, which affect the customer's future invoices. A negative amount represents a credit that decreases the amount due on an invoice; a positive amount increases the amount due on an invoice.",
+                      "type": "integer"
+                    },
+                    "bank_account": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "account_holder_name": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "account_holder_type": {
+                              "enum": [
+                                "company",
+                                "individual"
+                              ],
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "account_number": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "country": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "currency": {
+                              "type": "string"
+                            },
+                            "object": {
+                              "enum": [
+                                "bank_account"
+                              ],
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "routing_number": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "account_number",
+                            "country"
+                          ],
+                          "title": "customer_payment_source_bank_account",
+                          "type": "object"
+                        },
+                        {
+                          "maxLength": 5000,
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Either a token, like the ones returned by [Stripe.js](https://stripe.com/docs/js), or a dictionary containing a user's bank account details."
+                    },
+                    "card": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "address_city": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "address_country": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "address_line1": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "address_line2": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "address_state": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "address_zip": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "cvc": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "exp_month": {
+                              "type": "integer"
+                            },
+                            "exp_year": {
+                              "type": "integer"
+                            },
+                            "metadata": {
+                              "additionalProperties": {
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "name": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "number": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "object": {
+                              "enum": [
+                                "card"
+                              ],
+                              "maxLength": 5000,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "exp_month",
+                            "exp_year",
+                            "number"
+                          ],
+                          "title": "customer_payment_source_card",
+                          "type": "object"
+                        },
+                        {
+                          "maxLength": 5000,
+                          "type": "string"
+                        }
+                      ],
+                      "description": "A token, like the ones returned by [Stripe.js](https://stripe.com/docs/js).",
+                      "x-stripeBypassValidation": true
+                    },
+                    "cash_balance": {
+                      "description": "Balance information and default balance settings for this customer.",
+                      "properties": {
+                        "settings": {
+                          "properties": {
+                            "reconciliation_mode": {
+                              "enum": [
+                                "automatic",
+                                "manual",
+                                "merchant_default"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "title": "balance_settings_param",
+                          "type": "object"
+                        }
+                      },
+                      "title": "cash_balance_param",
+                      "type": "object"
+                    },
+                    "coupon": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "default_alipay_account": {
+                      "description": "ID of Alipay account to make the customer's new default for invoice payments.",
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    "default_bank_account": {
+                      "description": "ID of bank account to make the customer's new default for invoice payments.",
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    "default_card": {
+                      "description": "ID of card to make the customer's new default for invoice payments.",
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    "default_source": {
+                      "description": "If you are using payment methods created via the PaymentMethods API, see the [invoice_settings.default_payment_method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method) parameter.\n\nProvide the ID of a payment source already attached to this customer to make it this customer's default payment source.\n\nIf you want to add a new payment source and make it the default, see the [source](https://stripe.com/docs/api/customers/update#update_customer-source) property.",
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    "description": {
+                      "description": "An arbitrary string that you can attach to a customer object. It is displayed alongside the customer in the dashboard.",
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "email": {
+                      "description": "Customer's email address. It's displayed alongside the customer in your dashboard and can be useful for searching and tracking. This may be up to *512 characters*.",
+                      "maxLength": 512,
+                      "type": "string"
+                    },
+                    "expand": {
+                      "description": "Specifies which fields in the response should be expanded.",
+                      "items": {
+                        "maxLength": 5000,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "invoice_prefix": {
+                      "description": "The prefix for the customer used to generate unique invoice numbers. Must be 3–12 uppercase letters or numbers.",
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "invoice_settings": {
+                      "description": "Default invoice settings for this customer.",
+                      "properties": {
+                        "custom_fields": {
+                          "anyOf": [
+                            {
+                              "items": {
+                                "properties": {
+                                  "name": {
+                                    "maxLength": 30,
+                                    "type": "string"
+                                  },
+                                  "value": {
+                                    "maxLength": 30,
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "value"
+                                ],
+                                "title": "custom_field_params",
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            {
+                              "enum": [
+                                ""
+                              ],
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "default_payment_method": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "footer": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "rendering_options": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "amount_tax_display": {
+                                  "enum": [
+                                    "",
+                                    "exclude_tax",
+                                    "include_inclusive_tax"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "title": "rendering_options_param",
+                              "type": "object"
+                            },
+                            {
+                              "enum": [
+                                ""
+                              ],
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "title": "customer_param",
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "enum": [
+                            ""
+                          ],
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`."
+                    },
+                    "name": {
+                      "description": "The customer's full name or business name.",
+                      "maxLength": 256,
+                      "type": "string"
+                    },
+                    "next_invoice_sequence": {
+                      "description": "The sequence to be used on the customer's next invoice. Defaults to 1.",
+                      "type": "integer"
+                    },
+                    "phone": {
+                      "description": "The customer's phone number.",
+                      "maxLength": 20,
+                      "type": "string"
+                    },
+                    "preferred_locales": {
+                      "description": "Customer's preferred languages, ordered by preference.",
+                      "items": {
+                        "maxLength": 5000,
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "promotion_code": {
+                      "description": "The API ID of a promotion code to apply to the customer. The customer will have a discount applied on all recurring payments. Charges you create through the API will not have the discount.",
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "shipping": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "address": {
+                              "properties": {
+                                "city": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "country": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "line1": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "line2": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "postal_code": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                }
+                              },
+                              "title": "optional_fields_address",
+                              "type": "object"
+                            },
+                            "name": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "phone": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "address",
+                            "name"
+                          ],
+                          "title": "customer_shipping",
+                          "type": "object"
+                        },
+                        {
+                          "enum": [
+                            ""
+                          ],
+                          "type": "string"
+                        }
+                      ],
+                      "description": "The customer's shipping information. Appears on invoices emailed to this customer."
+                    },
+                    "source": {
+                      "maxLength": 5000,
+                      "type": "string",
+                      "x-stripeBypassValidation": true
+                    },
+                    "tax": {
+                      "description": "Tax details about the customer.",
+                      "properties": {
+                        "ip_address": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "enum": [
+                                ""
+                              ],
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "title": "tax_param",
+                      "type": "object"
+                    },
+                    "tax_exempt": {
+                      "description": "The customer's tax exemption. One of `none`, `exempt`, or `reverse`.",
+                      "enum": [
+                        "",
+                        "exempt",
+                        "none",
+                        "reverse"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "required": false
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/customer"
+                  }
+                }
+              },
+              "description": "Successful response."
+            }
+          }
+        }
+      }
+    }
+  }

@@ -295,6 +295,22 @@ declare class BaseModelManager {
      * @returns {*} the metamodel
      */
     getAst(resolve?: boolean): any;
+    /**
+     * A function type definition for use as an argument to the filter function
+     * @callback FilterFunction
+     * @param {Declaration} declaration
+     * @returns {boolean} true, if the declaration satisfies the filter function
+     */
+    /**
+     * Returns a new ModelManager with only the types for which the
+     * filter function returns true.
+     *
+     * ModelFiles with no declarations after filtering will be removed.
+     *
+     * @param {FilterFunction} predicate - the filter function over a Declaration object
+     * @returns {BaseModelManager} - the filtered ModelManager
+     */
+    filter(predicate: (declaration: Declaration) => boolean): BaseModelManager;
 }
 import ModelFile = require("./introspect/modelfile");
 import { FileDownloader } from "@accordproject/concerto-util";
@@ -308,3 +324,4 @@ import ConceptDeclaration = require("./introspect/conceptdeclaration");
 import Factory = require("./factory");
 import Serializer = require("./serializer");
 import DecoratorFactory = require("./introspect/decoratorfactory");
+import Declaration = require("./introspect/declaration");

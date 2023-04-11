@@ -174,13 +174,13 @@ class ModelUtil {
 
     /**
      * Returns the true if the given field is a Scalar type
-     * @param {Scalar} scalar - the string
+     * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar
      * @private
      */
-    static isScalar(scalar) {
-        const modelFile = scalar.getParent().getModelFile();
-        const declaration = modelFile.getType(scalar.getType());
+    static isScalar(field) {
+        const modelFile = field.getParent().getModelFile();
+        const declaration = modelFile.getType(field.getType());
         return (declaration !== null && declaration.isScalarDeclaration?.());
     }
 

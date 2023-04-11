@@ -30,7 +30,7 @@ const { Parser } = require('@accordproject/concerto-cto');
 
 describe('concerto-cli', () => {
     const models = [path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
-    const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto')];
+    const offlineModels = [path.resolve(__dirname, 'models/contract.cto'),path.resolve(__dirname, 'models/dom.cto'),path.resolve(__dirname, 'models/money.cto'),path.resolve(__dirname, 'models/person.cto')];
     const input1 = path.resolve(__dirname, 'data/input1.json');
     const input2 = path.resolve(__dirname, 'data/input2.json');
     const inputText1 = fs.readFileSync(input1, 'utf8');
@@ -569,44 +569,39 @@ describe('concerto-cli', () => {
 
     describe('#infer', async () => {
         it('should infer a Concerto model from a JSON Schema', async () => {
-            const obj = await Commands.inferConcertoSchema(
-                path.resolve(__dirname, 'models/jsonschema.json'),
-                'concerto.test.jsonSchema',
+            const inferredConcertoModel = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/json-schema-model.json'),
+                'com.test@1.0.0',
             );
-            obj.should.equal(`namespace concerto.test.jsonSchema
 
-concept Root {
-   o String name optional
-   o Root[] children optional
-}
+            const desiredConcertoModel = fs.readFileSync(
+                path.resolve(
+                    __dirname, 'models/inferred-from-json-schema-model.cto'
+                ), 'utf8'
+            );
 
-`);
+            (inferredConcertoModel + '\n').should.equal(
+                desiredConcertoModel
+            );
         });
 
-        it('should infer a Concerto model from an Open API Spec', async () => {
-            const obj = await Commands.inferConcertoSchema(
-                path.resolve(__dirname, 'models/petstore.json'),
-                'petstore',
+        it('should infer a Concerto model from an Open API definition', async () => {
+            const inferredConcertoModel = await Commands.inferConcertoSchema(
+                path.resolve(__dirname, 'models/open-api-definition.json'),
+                'com.test@1.0.0',
                 'Root',
                 'openapi'
             );
-            obj.should.equal(`namespace petstore
 
-concept Pet {
-   o NewPet pet optional
-}
+            const desiredConcertoModel = fs.readFileSync(
+                path.resolve(
+                    __dirname, 'models/inferred-from-open-api-definition.cto'
+                ), 'utf8'
+            );
 
-concept NewPet {
-   o String name
-   o String tag optional
-}
-
-concept ErrorModel {
-   o Integer code
-   o String message
-}
-
-`);
+            (inferredConcertoModel + '\n').should.equal(
+                desiredConcertoModel
+            );
         });
     });
 
@@ -645,6 +640,26 @@ concept ErrorModel {
             );
             obj.$class.should.equal('org.accordproject.cicero.dom.ContractTemplate');
             Object.keys(obj).should.eql(['$class', 'metadata', 'content', 'id', '$identifier']);
+        });
+
+        it('should generate an identified object with an identifier property with regex', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'person@1.0.0.Person',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            obj.ssn.should.match(/\d{3}-\d{2}-\d{4}/);
+        });
+
+        it('should generate an identified object identified by a scalar', async () => {
+            const obj = await Commands.generate(
+                offlineModels,
+                'person@1.0.0.Person2',
+                'sample',
+                { offline: true, optionalFields: true }
+            );
+            (typeof obj.ssn).should.equal('string');
         });
     });
 });

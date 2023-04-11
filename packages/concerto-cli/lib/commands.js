@@ -18,8 +18,7 @@ const c = require('ansi-colors');
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
-const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
-const migrate = require('json-schema-migrate');
+const RandExp = require('randexp');
 
 const Logger = require('@accordproject/concerto-util').Logger;
 const FileWriter = require('@accordproject/concerto-util').FileWriter;
@@ -319,10 +318,23 @@ class Commands {
         };
 
         const classDeclaration = modelManager.getType(concept);
+
+        let idFieldName = classDeclaration.getIdentifierFieldName();
+        let idField = classDeclaration.getProperty(idFieldName);
+        let id = 'resource1';
+        if (idField) {
+            if(idField.isTypeScalar && idField.isTypeScalar()){
+                idField = idField.getScalarField();
+            }
+            if(idField.validator && idField.validator.regex) {
+                id = new RandExp(idField.validator.regex.source, idField.validator.regex.flags).gen();
+            }
+        }
+
         const resource = factory.newResource(
             classDeclaration.getNamespace(),
             classDeclaration.getName(),
-            classDeclaration.isIdentified() ? 'resource1' : null,
+            classDeclaration.isIdentified() ? id : null,
             factoryOptions
         );
         const serializer = new Serializer(factory, modelManager);
@@ -586,11 +598,33 @@ class Commands {
         let schema = JSON.parse(fs.readFileSync(input, 'utf8'));
 
         if (format.toLowerCase() === 'openapi'){
-            const jsonSchema = toJsonSchema(schema);
-            migrate.draft2020(jsonSchema);
-            return CodeGen.InferFromJsonSchema(namespace, typeName, jsonSchema, options);
+            const inferredConcertoJsonModel = CodeGen.OpenApiToConcertoVisitor
+                .parse(schema)
+                .accept(
+                    (new CodeGen.OpenApiToConcertoVisitor),
+                    {
+                        metaModelNamespace: 'concerto.metamodel@1.0.0',
+                        namespace,
+                    },
+                );
+
+            return Printer.toCTO(
+                inferredConcertoJsonModel.models[0]
+            );
         }
-        return CodeGen.InferFromJsonSchema(namespace, typeName, schema, options);
+        const inferredConcertoJsonModel = CodeGen.JSONSchemaToConcertoVisitor
+            .parse(schema)
+            .accept(
+                (new CodeGen.JSONSchemaToConcertoVisitor),
+                {
+                    metaModelNamespace: 'concerto.metamodel@1.0.0',
+                    namespace,
+                },
+            );
+
+        return Printer.toCTO(
+            inferredConcertoJsonModel.models[0]
+        );
     }
 }
 

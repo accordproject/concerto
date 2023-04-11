@@ -93,7 +93,7 @@ declare class ModelUtil {
     private static isEnum;
     /**
      * Returns the true if the given field is a Scalar type
-     * @param {Scalar} scalar - the string
+     * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar
      * @private
      */

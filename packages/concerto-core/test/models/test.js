@@ -53,7 +53,7 @@ describe('Test Model', function(){
 
             // create a new instance
             let cObject = factory.newResource(
-                'org.acme', 'Vehicle', 'CAR_123' );
+                'org.acme', 'Vehicle', 'YVBVLSFXXAL342374' );
 
             // model is defined as a string
             // set model to a number
@@ -61,10 +61,10 @@ describe('Test Model', function(){
             cObject.model.should.equal('CAPRI');
 
             // now try some invalid values
-            ( function() {cObject.setPropertyValue('model', 1);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
-            ( function() {cObject.setPropertyValue('model', true);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', 1);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', true);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
             ( function() {cObject.setPropertyValue('model', dayjs.utc());}).should.throw(/.+Expected type of value: "String"./);
-            ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "[1,2,3]" (type of value: "object"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "[1,2,3]" (type of value: "object"). Expected type of value: "String".');
         });
     });
 
@@ -161,12 +161,12 @@ describe('Test Model', function(){
             // create a new instance
             let factory = new Factory(modelManager);
             let cObject =  factory.newResource(
-                'org.acme', 'Vehicle', 'CAR_123' );
+                'org.acme', 'Vehicle', 'YVBVLSFXXAL342374' );
 
             // vin is the identifying field for Vehicles, so should have been
             // set during object creation
-            cObject.vin.should.equal('CAR_123');
-            cObject.getFullyQualifiedIdentifier().should.equal('org.acme.Vehicle#CAR_123');
+            cObject.vin.should.equal('YVBVLSFXXAL342374');
+            cObject.getFullyQualifiedIdentifier().should.equal('org.acme.Vehicle#YVBVLSFXXAL342374');
 
             cObject.make = 'Renault';
 
@@ -190,15 +190,15 @@ describe('Test Model', function(){
             // model is defined as a string
             // set model to a number
             cObject.model = 1;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
 
             // set model to a double
             cObject.model = 42.05;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "42.05" (type of value: "number"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "42.05" (type of value: "number"). Expected type of value: "String".');
 
             // set model to a Boolean
             cObject.model = true;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
 
             // set model to a DateTime
             cObject.model = dayjs.utc();
@@ -206,19 +206,19 @@ describe('Test Model', function(){
 
             // set model to an object
             cObject.model = { 'foo' : 'bar' };
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
 
             // set model to null
             cObject.model = null;
-            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme.Vehicle#CAR_123" is missing the required field "model".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme.Vehicle#YVBVLSFXXAL342374" is missing the required field "model".');
 
             // set model to an array
             cObject.model = ['1','2'];
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "["1","2"]" (type of value: "object"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "["1","2"]" (type of value: "object"). Expected type of value: "String".');
 
             // set model to a function
             cObject.model = function() {throw new Error('OOps');};
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#CAR_123" instance. The field "model" has a value of "undefined" (type of value: "function"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "undefined" (type of value: "function"). Expected type of value: "String".');
         });
     });
 

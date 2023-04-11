@@ -119,6 +119,17 @@ class Factory {
                     type: type
                 }));
             }
+
+            if (id) {
+                let idFullField = classDecl.getProperty(idField);
+                if (idFullField?.isTypeScalar?.()){
+                    idFullField = idFullField.getScalarField();
+                }
+                // if regex on identifier field & provided id does not match regex, throw error
+                if(idFullField?.validator?.regex && (idFullField.validator?.regex.test(id) === false)) {
+                    throw new Error('Provided id does not match regex: ' + idFullField?.validator?.regex);
+                }
+            }
         } else if(id) {
             throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
         }

@@ -1,6 +1,6 @@
 {
     "name": "@accordproject/concerto-tools",
-    "version": "3.5.0",
+    "version": "3.6.0",
     "description": "Tools for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
@@ -44,6 +44,7 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "devDependencies": {
+        "@accordproject/concerto-cto": "3.5.0",
         "@babel/preset-env": "7.16.11",
         "babel-loader": "8.2.3",
         "chai": "4.3.6",
@@ -63,16 +64,19 @@
         "sinon-chai": "3.7.0",
         "tmp-promise": "3.0.2",
         "typescript": "4.6.3",
-        "webpack": "5.64.2",
+        "webpack": "5.76.0",
         "webpack-cli": "4.9.1"
     },
     "dependencies": {
-        "@accordproject/concerto-core": "3.5.0",
-        "@accordproject/concerto-util": "3.5.0",
+        "@accordproject/concerto-core": "3.6.0",
+        "@accordproject/concerto-util": "3.6.0",
+        "@openapi-contrib/openapi-schema-to-json-schema": "3.2.0",
         "ajv": "8.10.0",
         "ajv-formats": "2.1.1",
         "camelcase": "6.3.0",
         "debug": "4.3.1",
+        "get-value": "3.0.1",
+        "json-schema-migrate": "2.0.0",
         "pluralize": "8.0.0"
     },
     "license-check-and-add-config": {

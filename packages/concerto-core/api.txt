@@ -34,6 +34,7 @@ class BaseModelManager {
    + object resolveMetaModel(object) 
    + void fromAst(ast) 
    + void getAst(boolean?) 
+   + BaseModelManager filter(FilterFunction) 
 }
 class Concerto {
    + void constructor(ModelManager) 
@@ -71,15 +72,10 @@ class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string declarationKind() 
 }
-class ClassDeclaration extends Decorated {
-   + void constructor(ModelFile,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
+class ClassDeclaration extends Declaration {
    + ClassDeclaration _resolveSuperType() 
    ~ void validate() throws IllegalModelException
    + boolean isAbstract() 
-   + string getName() 
-   + string getNamespace() 
-   + string getFullyQualifiedName() 
    + Boolean isIdentified() 
    + Boolean isSystemIdentified() 
    + Boolean isExplicitlyIdentified() 
@@ -106,6 +102,21 @@ class ClassDeclaration extends Decorated {
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string declarationKind() 
+}
+class Declaration extends Decorated {
+   + void constructor(ModelFile,Object) throws IllegalModelException
+   + ModelFile getModelFile() 
+   + string getName() 
+   + string getNamespace() 
+   + string getFullyQualifiedName() 
+   + Boolean isIdentified() 
+   + Boolean isSystemIdentified() 
+   + string getIdentifierFieldName() 
+   + string getType() 
+   + String toString() 
+   + boolean isEnum() 
+   + boolean isClassDeclaration() 
+   + boolean isScalarDeclaration() 
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
@@ -202,31 +213,24 @@ class RelationshipDeclaration extends Property {
    + String toString() 
    + boolean isRelationship() 
 }
-class ScalarDeclaration extends Decorated {
-   + void constructor(ModelFile,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
+class ScalarDeclaration extends Declaration {
    ~ void validate() throws IllegalModelException
-   + string getName() 
-   + string getNamespace() 
-   + string getFullyQualifiedName() 
    + Boolean isIdentified() 
    + Boolean isSystemIdentified() 
-   + void getIdentifierFieldName() 
+   + string getIdentifierFieldName() 
    + string getType() 
-   + void getSuperType() 
-   + void getSuperTypeDeclaration() 
+   + string getSuperType() 
+   + ClassDeclaration getSuperTypeDeclaration() 
    + Validator getValidator() 
    + void getDefaultValue() 
    + String toString() 
    + boolean isAbstract() 
+   + boolean isScalarDeclaration() 
    + boolean isAsset() 
    + boolean isParticipant() 
    + boolean isTransaction() 
    + boolean isEvent() 
    + boolean isConcept() 
-   + boolean isEnum() 
-   + boolean isClassDeclaration() 
-   + boolean isScalarDeclaration() 
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
