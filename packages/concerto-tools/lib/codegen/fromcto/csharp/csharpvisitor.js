@@ -36,6 +36,9 @@ const reservedKeywords = csharpBuiltInTypes.concat(['abstract','as','base','brea
     'struct','switch','this','throw','true','try','typeof','unchecked',
     'unsafe','using','virtual','void','volatile','while']);
 
+const dotnetTypeDecoratorName = 'DotNetType';
+const enumValueDecoratorName = 'AcceptedValue';
+
 /**
  * Convert the contents of a ModelManager to C# code. Set a
  * fileWriter property (instance of FileWriter) on the parameters
@@ -320,6 +323,10 @@ class CSharpVisitor {
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
+        const acceptedValue = this.getDecoratorValue(enumValueDeclaration, enumValueDecoratorName);
+        if (acceptedValue) {
+            parameters.fileWriter.writeLine(1, `[System.Runtime.Serialization.EnumMember(Value = "${acceptedValue}")]`);
+        }
         parameters.fileWriter.writeLine(2, `${enumValueDeclaration.getName()},`);
         return null;
     }
@@ -344,12 +351,24 @@ class CSharpVisitor {
             array = '[]';
         }
 
+        let type = relationship.getType();
+        if (parameters.enableReferenceType) {
+            const relationshipTypeDecl = relationship.getModelFile().getModelManager().getType(relationship.getFullyQualifiedTypeName());
+            const idPropertyName = relationshipTypeDecl.getIdentifierFieldName();
+            // If id property exists then get type of that field
+            if (idPropertyName) {
+                const qualifiedType = relationshipTypeDecl.getProperty(idPropertyName).getFullyQualifiedTypeName();
+                // if it's scalar type, remove namespace and version from fqn
+                type = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(qualifiedType);
+            }
+        }
+
         // we export all relationships
         const lines = this.toCSharpProperty(
             'public',
             relationship.getParent()?.getName(),
             relationship.getName(),
-            relationship.getType(),
+            type,
             '',
             array,
             '{ get; set; }',
@@ -522,15 +541,33 @@ class CSharpVisitor {
      * @return {string} the type for the field
      */
     getFieldType(field) {
-        const decorator = field.getDecorator('DotNetType');
-        if (!decorator) {
-            return field.getType();
+        const dotnetType = this.getDecoratorValue(field, dotnetTypeDecoratorName);
+        if (dotnetType) {
+            if (!csharpBuiltInTypes.includes(dotnetType)) {
+                throw new Error('Malformed @DotNetType decorator');
+            }
+            return dotnetType;
         }
-        const args = decorator.getArguments();
-        if (args.length !== 1 || !csharpBuiltInTypes.includes(args[0])) {
-            throw new Error('Malformed @DotNetType decorator');
+        return field.getType();
+    }
+
+    /**
+     * Get the decorator value for a given object.
+     * @private
+     * @param {Object} thing - the object being visited
+     * @param {string} decoratorName - name of the decorator
+     * @returns {String} - value of decorator or null
+     */
+    getDecoratorValue(thing, decoratorName) {
+        const decorator = thing.getDecorator(decoratorName);
+        if (decorator) {
+            const args = decorator.getArguments();
+            if (args.length !== 1) {
+                throw new Error(`Malformed @${decoratorName} decorator`);
+            }
+            return args[0];
         }
-        return args[0];
+        return null;
     }
 }
 

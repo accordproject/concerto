@@ -427,6 +427,154 @@ public class AgreementBase : Concept {
             file1.should.match(/public string ThingId/);
             file1.should.match(/public string\? SomeOtherId/);
         });
+
+        it('should use the @AcceptedValue decorator if present', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            enum SomeEnum {
+                @AcceptedValue("Payment terms")
+                o PaymentTerms
+                @AcceptedValue("Payment Late Fees")
+                o PaymentLateFees
+                @AcceptedValue("NA")
+                o NotApplicable
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme;/);
+            file1.should.match(/enum SomeEnum/);
+            file1.should.match(/[System.Runtime.Serialization.EnumMember(Value = "Payment terms")]/);
+            file1.should.match(/PaymentTerms/);
+            file1.should.match(/[System.Runtime.Serialization.EnumMember(Value = "Payment Late Fees")]/);
+            file1.should.match(/PaymentLateFees/);
+            file1.should.match(/[System.Runtime.Serialization.EnumMember(Value = "NA")]/);
+            file1.should.match(/NotApplicable/);
+        });
+
+        it('should throw an error when an invalid @AcceptedValue provided', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+            
+            enum SomeEnum {
+                @AcceptedValue("Payment terms", 123)
+                o PaymentTerms
+            }`);
+            (() => {
+                csharpVisitor.visit(modelManager, { fileWriter });
+            }).should.throw('Malformed @AcceptedValue decorator');
+        });
+
+        it('should use relationship id if enableReferenceType param is set to true', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme.other@2.3.4
+
+            concept OtherThing identified by someId {
+                o String someId
+            }
+
+            concept SomeOtherThing identified {
+                o Integer intField
+            }
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            import org.acme.other@2.3.4.{ OtherThing }
+            import org.acme.other@2.3.4.{ SomeOtherThing }
+
+            concept Thing {
+                o Integer someIntField
+                --> OtherThing otherThingId
+                --> SomeOtherThing someOtherThingId
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter, enableReferenceType: true });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme;/);
+            file1.should.match(/public string otherThingId/);
+            file1.should.match(/public string someOtherThingId/);
+        });
+
+        it('should not use relationship id if enableReferenceType param is not set', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace org.acme.other@2.3.4
+
+            concept OtherThing identified by someId {
+                o String someId
+            }
+
+            concept SomeOtherThing identified {
+                o Integer intField
+            }
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            import org.acme.other@2.3.4.{ OtherThing }
+            import org.acme.other@2.3.4.{ SomeOtherThing }
+
+            concept Thing {
+                o Integer someIntField
+                --> OtherThing otherThingId
+                --> SomeOtherThing someOtherThingId
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme;/);
+            file1.should.match(/public OtherThing otherThingId/);
+            file1.should.match(/public SomeOtherThing someOtherThingId/);
+        });
+
+        it('should use relationship id (System.Guid) if enableReferenceType param is set to true', () => {
+            const modelManager = new ModelManager({ strict: true });
+            modelManager.addCTOModel(`
+            namespace concerto.scalar@1.0.0
+
+            scalar UUID extends String default="00000000-0000-0000-0000-000000000000" regex=/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme.other@2.3.4
+
+            import concerto.scalar@1.0.0.{ UUID }
+
+            concept OtherThing identified by id {
+                o UUID id
+                o String someId
+            }
+
+            concept SomeOtherThing identified {
+                o Integer intField
+            }
+            `);
+            modelManager.addCTOModel(`
+            namespace org.acme@1.2.3
+
+            import org.acme.other@2.3.4.{ OtherThing }
+            import org.acme.other@2.3.4.{ SomeOtherThing }
+
+            concept Thing {
+                o Integer someIntField
+                --> OtherThing otherThingId
+                --> SomeOtherThing someOtherThingId
+            }
+            `);
+            csharpVisitor.visit(modelManager, { fileWriter, enableReferenceType: true });
+            const files = fileWriter.getFilesInMemory();
+            const file1 = files.get('org.acme@1.2.3.cs');
+            file1.should.match(/namespace org.acme;/);
+            file1.should.match(/public System.Guid otherThingId/);
+            file1.should.match(/public string someOtherThingId/);
+        });
     });
 
     describe('visit', () => {
