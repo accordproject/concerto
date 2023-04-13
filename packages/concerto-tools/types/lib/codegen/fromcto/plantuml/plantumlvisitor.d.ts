@@ -61,11 +61,13 @@ declare class PlantUMLVisitor extends DiagramVisitor {
      */
     protected writeDeclaration(classDeclaration: ClassDeclaration, parameters: any, style?: string): void;
     /**
-     * Escape versions and periods.
-     * @param {String} string - the object being visited
+     * Escape fully qualified names. We preserve the dots in the
+     * package name, remove the '@' symbol because it is invalid
+     * and remove the dots in the version (because otherwise packages get created)
+     * @param {String} input - the object being visited
      * @return {String} string  - the parameter
      * @protected
      */
-    protected escapeString(string: string): string;
+    protected escapeString(input: string): string;
 }
 import DiagramVisitor = require("../../../common/diagramvisitor");
