@@ -288,7 +288,7 @@ class CSharpVisitor {
         let fieldType = externalFieldType ? externalFieldType : this.getFieldType(field);
 
         if (fieldType === 'String') {
-            let validator = field.getValidator();
+            const validator = field.getValidator();
 
             if(validator) {
                 let regexVal = validator.getRegex().source;
