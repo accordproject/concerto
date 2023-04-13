@@ -131,6 +131,11 @@ require('yargs')
             describe: 'A prefix to add to all namespaces (`csharp` target only)',
             type: 'string',
         });
+        yargs.option('enableReferenceType', {
+            describe: 'Enable resolving referential type id (`csharp` target only)',
+            type: 'boolean',
+            default: false
+        });
         yargs.option('pascalCase', {
             describe: 'Use PascalCase for generated identifier names',
             type: 'boolean',
@@ -165,6 +170,7 @@ require('yargs')
         options.useSystemTextJson = argv.useSystemTextJson;
         options.useNewtonsoftJson = argv.useNewtonsoftJson;
         options.namespacePrefix = argv.namespacePrefix;
+        options.enableReferenceType = argv.enableReferenceType;
         options.pascalCase = argv.pascalCase;
         options.hideBaseModel = argv.hideBaseModel;
         options.showCompositionRelationships = argv.showCompositionRelationships;

@@ -368,8 +368,9 @@ public abstract class Person : Participant {
    public string email { get; set; }
    public string firstName { get; set; }
    public string lastName { get; set; }
-   public string middleNames { get; set; }
+   public string? middleNames { get; set; }
    public Address homeAddress { get; set; }
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"\\d{3}-\\d{2}-\\{4}+", ErrorMessage = "Invalid characters")]
    public string ssn { get; set; }
    public float height { get; set; }
    public System.DateTime dob { get; set; }
@@ -4482,8 +4483,9 @@ public abstract class Person : Participant {
    public string email { get; set; }
    public string firstName { get; set; }
    public string lastName { get; set; }
-   public string middleNames { get; set; }
+   public string? middleNames { get; set; }
    public Address homeAddress { get; set; }
+   [System.ComponentModel.DataAnnotations.RegularExpression(@"\\d{3}-\\d{2}-\\{4}+", ErrorMessage = "Invalid characters")]
    public string ssn { get; set; }
    public float height { get; set; }
    public System.DateTime dob { get; set; }
