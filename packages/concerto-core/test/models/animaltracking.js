@@ -16,7 +16,6 @@
 
 //const assert = require('assert');
 require('chai').should();
-const Logger = require('@accordproject/concerto-util').Logger;
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
 const Relationship = require('../../lib/model/relationship');
@@ -41,8 +40,6 @@ describe('animaltracking Model', function(){
         animaltrackingModel = fs.readFileSync('./test/data/model/animaltracking.cto', 'utf8');
         animaltrackingModel.should.not.be.null;
         modelManager.addCTOModel(animaltrackingModel, 'animaltracking.cto');
-        Logger.info('no###');
-        Logger.info(modelManager.getNamespaces());
 
         modelFile = modelManager.getModelFile('com.hyperledger.composer.animaltracking');
         modelFile.should.not.be.null;

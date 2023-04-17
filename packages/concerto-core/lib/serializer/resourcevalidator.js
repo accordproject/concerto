@@ -126,6 +126,7 @@ class ResourceValidator {
 
         const toBeAssignedClassDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
         const toBeAssignedClassDecName = toBeAssignedClassDeclaration.getFullyQualifiedName();
+        const identifierFieldName = toBeAssignedClassDeclaration.getIdentifierFieldName();
 
         // is the type we are assigning to abstract?
         // the only way this can happen is if the type is non-abstract
@@ -138,10 +139,13 @@ class ResourceValidator {
         let props = Object.getOwnPropertyNames(obj);
         for (let n = 0; n < props.length; n++) {
             let propName = props[n];
-            if(!this.isSystemProperty(propName)) {
+            if(!ModelUtil.isSystemProperty(propName)) {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
-                    if(classDeclaration.isIdentified()) {
+                    if(classDeclaration.isIdentified() &&
+                        // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
+                        propName !== '$identifier'
+                    ){
                         ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
                     }
                     else {
@@ -159,6 +163,12 @@ class ResourceValidator {
                 ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier);
             }
 
+            // Enforce that shadowed $identifier fields have the same value as the explicit identifying field.
+            // The value of the explicit identified field takes precedence.
+            if (identifierFieldName !== '$identifier'){
+                obj.$identifier = id;
+            }
+
             parameters.currentIdentifier = obj.getFullyQualifiedIdentifier();
         }
 
@@ -173,22 +183,16 @@ class ResourceValidator {
             }
             else {
                 if(!property.isOptional()) {
+                    // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
+                    if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
+                    ) {
+                        continue;
+                    }
                     ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
                 }
             }
         }
         return null;
-    }
-
-    /**
-     * Returns true if the property is a system property.
-     * System properties are not declared in the model.
-     * @param {String} propertyName - the name of the property
-     * @return {Boolean} true if the property is a system property
-     * @private
-     */
-    isSystemProperty(propertyName) {
-        return propertyName.charAt(0) === '$';
     }
 
     /**

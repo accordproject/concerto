@@ -395,7 +395,7 @@ describe('ResourceValidator', function () {
 
         it('should detect additional field', function () {
             const vehicle = factory.newResource('org.acme.l3', 'Car', 'ABC');
-            vehicle.foo = 'Baz';
+            vehicle.foo = 'Baz'; // additional field
             const typedStack = new TypedStack(vehicle);
             const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
@@ -407,7 +407,7 @@ describe('ResourceValidator', function () {
 
         it('should detect an empty identifier', function () {
             const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
-            vehicle.$identifier = ''; // empty the identifier
+            vehicle.setIdentifier('');
             vehicle.model = 'Ford';
             vehicle.numberOfWheels = 4;
             vehicle.milage = 3.14;
@@ -418,6 +418,20 @@ describe('ResourceValidator', function () {
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
             }).should.throw(/has an empty identifier/);
+        });
+
+        it('should normalize a shadowed identifier to the value from the indentified field', function () {
+            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            vehicle.$identifier = ''; // empty the identifier
+            vehicle.model = 'Ford';
+            vehicle.numberOfWheels = 4;
+            vehicle.milage = 3.14;
+            const typedStack = new TypedStack(vehicle);
+            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            assetDeclaration.accept(resourceValidator, parameters);
+            vehicle.$identifier.should.equal('foo');
         });
 
         it('should reject a Double which is not finite', function () {
@@ -432,7 +446,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 assetDeclaration.accept(resourceValidator,parameters);
-            }).should.throw('Model violation in the "org.acme.l3.Car#42" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
+            }).should.throw('Model violation in the "org.acme.l3.Car#foo" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
         });
 
         it('should report undeclared field if not identifiable', () => {
@@ -446,6 +460,19 @@ describe('ResourceValidator', function () {
             (() => {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
             }).should.throw('Instance "undefined" has a property named "numberOfWipers", which is not declared in "org.acme.l1.Data".');
+        });
+
+        it('should report undeclared field with a $ prefix', () => {
+            const data = factory.newConcept('org.acme.l1', 'Data');
+            data.name = 'name';
+            data.$numberOfWipers = 2;
+            const typedStack = new TypedStack(data);
+            const conceptDeclaration = modelManager.getType('org.acme.l1.Data');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
+
+            (() => {
+                resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
+            }).should.throw('Instance "undefined" has a property named "$numberOfWipers", which is not declared in "org.acme.l1.Data".');
         });
     });
 

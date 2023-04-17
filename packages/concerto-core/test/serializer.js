@@ -407,6 +407,73 @@ describe('Serializer', () => {
                 .should.throw(/WRONG/);
         });
 
+        it('should error on unexpected properties that start with $', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                $WRONG: 'blah',
+            };
+            (() =>
+                serializer.fromJSON(json)
+            ).should.throw(/Unexpected properties for type org.acme.sample.SampleParticipant: \$WRONG/);
+        });
+
+        it('should error on unexpected properties that start with reserved keywords', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                $validator: 'blah',
+            };
+            (() =>
+                serializer.fromJSON(json)
+            ).should.throw(/Unexpected reserved properties for type org.acme.sample.SampleParticipant: \$validator/);
+        });
+
+        it('should error on unexpected $timestamp property when the model doesn\'t require them', () => {
+            const json = {
+                $class: 'org.acme.sample.Address',
+                country: 'UK',
+                elevation: 3.14,
+                city: 'Winchester',
+                postcode: 'SO21 2JN',
+                $timestamp: 'now',
+            };
+            (() =>
+                serializer.fromJSON(json)
+            ).should.throw(/Unexpected property for type org.acme.sample.Address: \$timestamp/);
+        });
+
+        it('should not error on unexpected $identifier property when the model doesn\'t require them', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleEvent',
+                eventId: '111',
+                asset: 'resource:org.acme.sample.SampleAsset#1',
+                newValue: 'the value',
+                $timestamp: '2022-11-28T01:02:03.987Z',
+                $identifier: '111',
+            };
+            const result = serializer.fromJSON(json);
+            result.should.be.an.instanceOf(Resource);
+        });
+
+        it('should not error when shadowed $identifier does not match explicit identifier value', () => {
+            const json = {
+                $class: 'org.acme.sample.SampleEvent',
+                eventId: '111',
+                asset: 'resource:org.acme.sample.SampleAsset#1',
+                newValue: 'the value',
+                $timestamp: '2022-11-28T01:02:03.987Z',
+                $identifier: '222',
+            };
+            const result = serializer.fromJSON(json);
+            result.should.be.an.instanceOf(Resource);
+            result.$identifier = '111';
+        });
+
         it('should not error on unexpected properties if their value is undefined', () => {
             const json = {
                 $class: 'org.acme.sample.SampleParticipant',
