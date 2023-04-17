@@ -168,6 +168,16 @@ namespace concerto.scalar@1.0.0
 scalar UUID extends String default="00000000-0000-0000-0000-000000000000" regex=/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/
 `;
 
+const MODEL_SIMPLE3 = `
+namespace test
+
+import concerto.scalar@1.0.0.{ UUID }
+
+concept OtherThing identified by id {
+    o UUID id
+    o String someId
+}
+`;
 const MODEL_RELATIONSHIP_SIMPLE = `
 namespace test
 
@@ -262,6 +272,19 @@ describe('JSONSchema (samples)', function () {
             expect(schema.properties.otherThingId.$ref).to.be.undefined;
             expect(schema.properties.otherThingId.type).equal('string');
             expect(schema.properties.otherThingId.format).equal('uuid');
+        });
+
+        it('should use format uuid for scalar uuid data type', () => {
+            const modelManager = new ModelManager();
+            modelManager.addCTOModel( UUID_SCALAR );
+            modelManager.addCTOModel( MODEL_SIMPLE3 );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.OtherThing'});
+            expect(schema.properties.id.$ref).to.be.undefined;
+            expect(schema.properties.id.type).equal('string');
+            expect(schema.properties.id.format).equal('uuid');
+            expect(schema.properties.someId.type).equal('string');
+            expect(schema.properties.someId.format).to.be.undefined;
         });
 
         it('should write to disk', () => {

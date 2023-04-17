@@ -61,17 +61,20 @@ class JSONSchemaVisitor {
     /**
      * Get the validators for a field or a scalar definition in JSON schema form.
      * @param {Object} field - the scalar declaration being visited
+     * @param {bool} [isScalarUUID] - flag to indicate given field type is scalar uuid
      * @return {Object} the result of visiting or null
      * @private
      */
-    getFieldOrScalarDeclarationValidatorsForSchema(field) {
+    getFieldOrScalarDeclarationValidatorsForSchema(field, isScalarUUID = false) {
         const validator = field.getValidator();
         let jsonSchema = {};
 
         switch (field.getType()) {
         case 'String':
             jsonSchema.type = 'string';
-            if(validator) {
+            if (isScalarUUID) {
+                jsonSchema.format = 'uuid';
+            } else if(validator) { // validator for uuid is not required.
                 // Note that regex flags are lost in this transformation
                 jsonSchema.pattern = validator.getRegex().source;
             }
@@ -150,7 +153,7 @@ class JSONSchemaVisitor {
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
+            return this.visitScalarField(thing, parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -347,11 +350,24 @@ class JSONSchemaVisitor {
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
-     * @param {Object} parameters - the parameter
+     * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitField(field, parameters) {
+    visitScalarField(field, parameters) {
+        const fieldType = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName());
+        return this.visitField(field.getScalarField(), parameters, fieldType === 'concerto.scalar.UUID');
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters - the parameter
+     * @param {bool} [isScalarUUID] - flag to indicate given field type is scalar uuid
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitField(field, parameters, isScalarUUID = false) {
         debug('entering visitField', field.getName());
 
         // Is this a primitive typed property?
@@ -366,7 +382,7 @@ class JSONSchemaVisitor {
 
             jsonSchema = {
                 ...jsonSchema,
-                ...this.getFieldOrScalarDeclarationValidatorsForSchema(field)
+                ...this.getFieldOrScalarDeclarationValidatorsForSchema(field, isScalarUUID)
             };
 
             // If this field has a default value, add it.
