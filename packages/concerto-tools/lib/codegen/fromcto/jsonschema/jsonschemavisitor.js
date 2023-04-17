@@ -17,6 +17,7 @@
 const debug = require('debug')('concerto-core:jsonschemavisitor');
 const util = require('util');
 const RecursionDetectionVisitor = require('./recursionvisitor');
+const { ModelUtil } = require('@accordproject/concerto-core');
 
 /**
  * Convert the contents of a {@link ModelManager} to a JSON Schema, returning
@@ -483,6 +484,18 @@ class JSONSchemaVisitor {
             type: 'string',
             description: `The identifier of an instance of ${relationshipDeclaration.getFullyQualifiedTypeName()}`
         };
+
+        // Retrieve type of the id field of a relationship declaration
+        // if data type is uuid, then add the format.
+        const relationshipTypeDecl = relationshipDeclaration.getModelFile().getModelManager().getType(relationshipDeclaration.getFullyQualifiedTypeName());
+        const idPropertyName = relationshipTypeDecl.getIdentifierFieldName();
+        if (idPropertyName) {
+            const qualifiedType = relationshipTypeDecl.getProperty(idPropertyName).getFullyQualifiedTypeName();
+            const type = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(qualifiedType);
+            if (type === 'concerto.scalar.UUID') {
+                jsonSchema.format = 'uuid';
+            }
+        }
 
         // Is the type an array?
         if (relationshipDeclaration.isArray()) {

@@ -162,6 +162,28 @@ concept Person {
 }
 `;
 
+const UUID_SCALAR = `
+namespace concerto.scalar@1.0.0
+
+scalar UUID extends String default="00000000-0000-0000-0000-000000000000" regex=/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/
+`;
+
+const MODEL_RELATIONSHIP_SIMPLE = `
+namespace test
+
+import concerto.scalar@1.0.0.{ UUID }
+
+concept OtherThing identified by id {
+    o UUID id
+    o String someId
+}
+
+concept SomeOtherThing identified {
+    o Integer intField
+    --> OtherThing otherThingId
+}
+`;
+
 describe('JSONSchema (samples)', function () {
 
     describe('samples', () => {
@@ -228,6 +250,18 @@ describe('JSONSchema (samples)', function () {
             const schema = modelManager.accept(visitor, { rootType: 'test.MyRequest', inlineTypes: true});
             expect(schema.properties.money.$ref).to.be.undefined;
             expect(schema.properties.money.title).equal('Money');
+        });
+
+        it('should use format uuid if relationship identifier is UUID type', () => {
+            const modelManager = new ModelManager();
+            modelManager.addCTOModel( UUID_SCALAR );
+            modelManager.addCTOModel( MODEL_RELATIONSHIP_SIMPLE );
+            const visitor = new JSONSchemaVisitor();
+            const schema = modelManager.accept(visitor, { rootType: 'test.SomeOtherThing', inlineTypes: true});
+            expect(schema.properties.intField.$ref).to.be.undefined;
+            expect(schema.properties.otherThingId.$ref).to.be.undefined;
+            expect(schema.properties.otherThingId.type).equal('string');
+            expect(schema.properties.otherThingId.format).equal('uuid');
         });
 
         it('should write to disk', () => {
