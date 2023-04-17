@@ -17,6 +17,7 @@
 const debug = require('debug')('concerto-core:jsonschemavisitor');
 const util = require('util');
 const RecursionDetectionVisitor = require('./recursionvisitor');
+const { ModelUtil } = require('@accordproject/concerto-core');
 
 /**
  * Convert the contents of a {@link ModelManager} to a JSON Schema, returning
@@ -60,17 +61,20 @@ class JSONSchemaVisitor {
     /**
      * Get the validators for a field or a scalar definition in JSON schema form.
      * @param {Object} field - the scalar declaration being visited
+     * @param {bool} [isScalarUUID] - flag to indicate given field type is scalar uuid
      * @return {Object} the result of visiting or null
      * @private
      */
-    getFieldOrScalarDeclarationValidatorsForSchema(field) {
+    getFieldOrScalarDeclarationValidatorsForSchema(field, isScalarUUID = false) {
         const validator = field.getValidator();
         let jsonSchema = {};
 
         switch (field.getType()) {
         case 'String':
             jsonSchema.type = 'string';
-            if(validator) {
+            if (isScalarUUID) {
+                jsonSchema.format = 'uuid';
+            } else if(validator) { // validator for uuid is not required.
                 // Note that regex flags are lost in this transformation
                 jsonSchema.pattern = validator.getRegex().source;
             }
@@ -149,7 +153,7 @@ class JSONSchemaVisitor {
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
+            return this.visitScalarField(thing, parameters);
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else if (thing.isRelationship?.()) {
@@ -346,11 +350,24 @@ class JSONSchemaVisitor {
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
-     * @param {Object} parameters - the parameter
+     * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitField(field, parameters) {
+    visitScalarField(field, parameters) {
+        const fieldType = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(field.getFullyQualifiedTypeName());
+        return this.visitField(field.getScalarField(), parameters, fieldType === 'concerto.scalar.UUID');
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {Field} field - the object being visited
+     * @param {Object} parameters - the parameter
+     * @param {bool} [isScalarUUID] - flag to indicate given field type is scalar uuid
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitField(field, parameters, isScalarUUID = false) {
         debug('entering visitField', field.getName());
 
         // Is this a primitive typed property?
@@ -365,7 +382,7 @@ class JSONSchemaVisitor {
 
             jsonSchema = {
                 ...jsonSchema,
-                ...this.getFieldOrScalarDeclarationValidatorsForSchema(field)
+                ...this.getFieldOrScalarDeclarationValidatorsForSchema(field, isScalarUUID)
             };
 
             // If this field has a default value, add it.
@@ -483,6 +500,18 @@ class JSONSchemaVisitor {
             type: 'string',
             description: `The identifier of an instance of ${relationshipDeclaration.getFullyQualifiedTypeName()}`
         };
+
+        // Retrieve type of the id field of a relationship declaration
+        // if data type is uuid, then add the format.
+        const relationshipTypeDecl = relationshipDeclaration.getModelFile().getModelManager().getType(relationshipDeclaration.getFullyQualifiedTypeName());
+        const idPropertyName = relationshipTypeDecl.getIdentifierFieldName();
+        if (idPropertyName) {
+            const qualifiedType = relationshipTypeDecl.getProperty(idPropertyName).getFullyQualifiedTypeName();
+            const type = ModelUtil.removeNamespaceVersionFromFullyQualifiedName(qualifiedType);
+            if (type === 'concerto.scalar.UUID') {
+                jsonSchema.format = 'uuid';
+            }
+        }
 
         // Is the type an array?
         if (relationshipDeclaration.isArray()) {
