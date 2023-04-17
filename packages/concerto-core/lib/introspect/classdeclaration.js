@@ -23,6 +23,7 @@ const Globalize = require('../globalize');
 const IllegalModelException = require('./illegalmodelexception');
 const Introspector = require('./introspector');
 const RelationshipDeclaration = require('./relationshipdeclaration');
+const ModelUtil = require('../modelutil');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -52,8 +53,6 @@ class ClassDeclaration extends Declaration {
      */
     process() {
         super.process();
-
-        const reservedProperties = ['$class', '$identifier', '$timestamp'];
 
         this.properties = [];
         this.superType = null;
@@ -86,7 +85,7 @@ class ClassDeclaration extends Declaration {
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
-            if(reservedProperties.includes(thing.name)) {
+            if(ModelUtil.isSystemProperty(thing.name)) {
                 throw new IllegalModelException(`Invalid field name '${thing.name}'`, this.modelFile, this.ast.location);
             }
 
@@ -537,9 +536,10 @@ class ClassDeclaration extends Declaration {
             }
 
             // go get the fields from the super type
+            // Note: this allows addition of an $identifier field from a supertype
+            // even if this type is explicitly identified.
+            // We allow this because it allows normalization of identifier lookup without the model present
             result = result.concat(classDecl.getProperties());
-        } else {
-            // console.log('No super type for ' + this.getName() );
         }
 
         return result;

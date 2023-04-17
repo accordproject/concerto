@@ -20,6 +20,36 @@ const Globalize = require('./globalize');
 
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
+const privateReservedProperties = [
+    // Internal use only
+    '$classDeclaration',    // Used to cache a reference to theClass Declaration instance
+    '$namespace',           // Used to cache the namespace for a type
+    '$type',                // Used to cache the type for a type
+    '$modelManager',        // Used to cache a reference to the ModelManager instance
+    '$validator',           // Used to cache a reference to the ResourceValidator instance
+    '$identifierFieldName', // Used for caching the identifier field name
+
+    '$imports',             // Reserved for future use
+    '$superTypes',          // Reserved for future use
+
+    // Included in serialization
+    '$id',                  // Used for URI identifier
+];
+
+const assignableReservedProperties = [
+    // Included in serialization
+    '$identifier',          // Used for shadowing the identifier field, or where a system identifier is required
+    '$timestamp'            // Used in Event and Transaction prototype classes
+];
+
+const reservedProperties = [
+    // Included in serialization
+    '$class',               // Used for discriminating between instances of different classes
+
+    ...assignableReservedProperties,
+    ...privateReservedProperties
+];
+
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -221,6 +251,28 @@ class ModelUtil {
         const { name: namespace } = ModelUtil.parseNamespace(ns);
         const typeName = ModelUtil.getShortName(fqn);
         return ModelUtil.getFullyQualifiedName(namespace, typeName);
+    }
+
+    /**
+     * Returns true if the property is a system property.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    static isSystemProperty(propertyName) {
+        return reservedProperties.includes(propertyName);
+    }
+
+    /**
+     * Returns true if the property is an system property that can be set in serialized JSON.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    static isPrivateSystemProperty(propertyName) {
+        return privateReservedProperties.includes(propertyName);
     }
 }
 

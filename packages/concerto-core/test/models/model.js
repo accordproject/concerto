@@ -83,75 +83,75 @@ describe('Model Tests', function(){
             // o String stringProperty
             resource.setPropertyValue('stringProperty', 'string');
             resource.stringProperty.should.equal('string');
-            assert.throws( function() {resource.setPropertyValue('stringProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stringProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String"./);
+            assert.throws( function() {resource.setPropertyValue('stringProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "stringProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String"./);
 
             // o Integer integerProperty
             resource.setPropertyValue('integerProperty', 999);
             resource.integerProperty.should.equal(999);
-            assert.throws( function() {resource.setPropertyValue('integerProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "integerProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer"./);
+            assert.throws( function() {resource.setPropertyValue('integerProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "integerProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer"./);
 
             // o Double doubleProperty
             resource.setPropertyValue('doubleProperty', 10.0);
             resource.doubleProperty.should.equal(10.0);
-            assert.throws( function() {resource.setPropertyValue('doubleProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "doubleProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double"./);
+            assert.throws( function() {resource.setPropertyValue('doubleProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "doubleProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double"./);
 
             // o Boolean booleanProperty
             resource.setPropertyValue('booleanProperty', true );
             resource.booleanProperty.should.equal(true);
-            assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "booleanProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean"./);
+            assert.throws( function() {resource.setPropertyValue('booleanProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "booleanProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean"./);
 
             // o DateTime dateTimeProperty
             const dateTime = dayjs.utc('2016-10-11T02:30:26.262Z');
             resource.setPropertyValue('dateTimeProperty', dateTime );
             resource.dateTimeProperty.should.equal(dateTime);
-            assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "dateTimeProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime"./);
+            assert.throws( function() {resource.setPropertyValue('dateTimeProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "dateTimeProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime"./);
 
             // o Long longProperty
             resource.setPropertyValue('longProperty', 100 );
             resource.longProperty.should.equal(100);
-            assert.throws( function() {resource.setPropertyValue('longProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "longProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long"./);
+            assert.throws( function() {resource.setPropertyValue('longProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "longProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long"./);
 
             // o State stateProperty
             resource.setPropertyValue('stateProperty', 'GOLD' );
             resource.stateProperty.should.equal('GOLD');
-            assert.throws( function() {resource.setPropertyValue('stateProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "Foo" for the field "State"./);
-            assert.throws( function() {resource.setPropertyValue('stateProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "1" for the field "State"./);
+            assert.throws( function() {resource.setPropertyValue('stateProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. Invalid enum value of "Foo" for the field "State"./);
+            assert.throws( function() {resource.setPropertyValue('stateProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. Invalid enum value of "1" for the field "State"./);
 
             // o String[] stringArrayProperty
             resource.setPropertyValue('stringArrayProperty', ['string'] );
             resource.stringArrayProperty.should.contain('string');
-            assert.throws( function() {resource.setPropertyValue('stringArrayProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stringArrayProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('stringArrayProperty', 1);}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "stringArrayProperty" has a value of "1" \(type of value: "number"\). Expected type of value: "String\[\]"./);
 
             // o Integer[] integerArrayProperty
             resource.setPropertyValue('integerArrayProperty', [999] );
             resource.integerArrayProperty.should.contain(999);
-            assert.throws( function() {resource.setPropertyValue('integerArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "integerArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('integerArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "integerArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Integer\[\]"./);
 
             // o Double[] doubleArrayProperty
             resource.setPropertyValue('doubleArrayProperty', [999.0] );
             resource.doubleArrayProperty.should.contain(999.0);
-            assert.throws( function() {resource.setPropertyValue('doubleArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "doubleArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('doubleArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "doubleArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Double\[\]"./);
 
             // o Boolean[] booleanArrayProperty
             resource.setPropertyValue('booleanArrayProperty', [true, false] );
             resource.booleanArrayProperty.should.contain(true);
-            assert.throws( function() {resource.setPropertyValue('booleanArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "booleanArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('booleanArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "booleanArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Boolean\[\]"./);
 
             // o DateTime[] dateTimeArrayProperty
             resource.setPropertyValue('dateTimeArrayProperty', [dateTime] );
             resource.dateTimeArrayProperty.should.contain(dateTime);
-            assert.throws( function() {resource.setPropertyValue('dateTimeArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "dateTimeArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('dateTimeArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "dateTimeArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "DateTime\[\]"./);
 
             // o Long[] longArrayProperty
             resource.setPropertyValue('longArrayProperty', [1,2,3] );
             resource.longArrayProperty.should.contain(3);
-            assert.throws( function() {resource.setPropertyValue('longArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "longArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('longArrayProperty', 'Foo');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "longArrayProperty" has a value of ""Foo"" \(type of value: "string"\). Expected type of value: "Long\[\]"./);
 
             // o State[] stateArrayProperty
             resource.setPropertyValue('stateArrayProperty', ['GOLD', 'SILVER'] );
             resource.stateArrayProperty.should.contain('SILVER');
-            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', ['GOLD', 'Foo']);}, 'ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. Invalid enum value of "Foo" for the field "State".');
-            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', 'GOLD');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#123" instance. The field "stateArrayProperty" has a value of ""GOLD"" \(type of value: "string"\). Expected type of value: "State\[\]"./);
+            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', ['GOLD', 'Foo']);}, 'ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. Invalid enum value of "Foo" for the field "State".');
+            assert.throws( function() {resource.setPropertyValue('stateArrayProperty', 'GOLD');}, /ValidationException: Model violation in the "org.acme.base.BaseAsset#string" instance. The field "stateArrayProperty" has a value of ""GOLD"" \(type of value: "string"\). Expected type of value: "State\[\]"./);
 
             // set the relationships
             const personRelationship = factory.newRelationship('org.acme.base', 'Person', 'DAN' );
@@ -160,7 +160,7 @@ describe('Model Tests', function(){
 
             // set an invalid relationship
             const blokeRelationship = factory.newRelationship('org.acme.base', 'Bloke', 'DAN' );
-            assert.throws( function() {resource.setPropertyValue('singlePerson', blokeRelationship );}, /ValidationException: Instance "org.acme.base.BaseAsset#123" has a property "singlePerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
+            assert.throws( function() {resource.setPropertyValue('singlePerson', blokeRelationship );}, /ValidationException: Instance "org.acme.base.BaseAsset#string" has a property "singlePerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
 
             // create a Person
             const person = factory.newResource('org.acme.base', 'Person', 'P1' );
@@ -182,12 +182,12 @@ describe('Model Tests', function(){
 
             resource.myPeople = [person,person];
 
-            assert.throws( function() {resource.validate();}, /ValidationException: Instance "org.acme.base.BaseAsset#123" has a property "myPerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
+            assert.throws( function() {resource.validate();}, /ValidationException: Instance "org.acme.base.BaseAsset#string" has a property "myPerson" with type "org.acme.base.Bloke" that is not derived from "org.acme.base.Person"./);
             resource.myPerson = person;
 
             // set an extra property
             resource.blotto = 'Yes!';
-            assert.throws( function() {resource.validate();}, /ValidationException: Instance "123" has a property named "blotto", which is not declared in "org.acme.base.BaseAsset"./);
+            assert.throws( function() {resource.validate();}, /ValidationException: Instance "string" has a property named "blotto", which is not declared in "org.acme.base.BaseAsset"./);
             delete resource.blotto;
 
             // set a missing property
@@ -203,7 +203,7 @@ describe('Model Tests', function(){
             let json = serializer.toJSON(resource, { utcOffset: 0 });
 
             // assert on the entire format of the JSON serialization
-            JSON.stringify(json).should.be.equal('{"$class":"org.acme.base.BaseAsset","stringProperty":"string","integerProperty":999,"doubleProperty":10,"booleanProperty":true,"dateTimeProperty":"2016-10-11T02:30:26.262Z","longProperty":100,"stateProperty":"GOLD","stringArrayProperty":["string"],"integerArrayProperty":[999],"doubleArrayProperty":[999],"booleanArrayProperty":[true,false],"dateTimeArrayProperty":["2016-10-11T02:30:26.262Z"],"longArrayProperty":[1,2,3],"stateArrayProperty":["GOLD","SILVER"],"singlePerson":"resource:org.acme.base.Person#DAN","personArray":["resource:org.acme.base.Person#DAN","resource:org.acme.base.Person#DAN"],"myPerson":{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"},"myPeople":[{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"},{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"}],"$identifier":"123"}');
+            JSON.stringify(json).should.be.equal('{"$class":"org.acme.base.BaseAsset","stringProperty":"string","integerProperty":999,"doubleProperty":10,"booleanProperty":true,"dateTimeProperty":"2016-10-11T02:30:26.262Z","longProperty":100,"stateProperty":"GOLD","stringArrayProperty":["string"],"integerArrayProperty":[999],"doubleArrayProperty":[999],"booleanArrayProperty":[true,false],"dateTimeArrayProperty":["2016-10-11T02:30:26.262Z"],"longArrayProperty":[1,2,3],"stateArrayProperty":["GOLD","SILVER"],"singlePerson":"resource:org.acme.base.Person#DAN","personArray":["resource:org.acme.base.Person#DAN","resource:org.acme.base.Person#DAN"],"myPerson":{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"},"myPeople":[{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"},{"$class":"org.acme.base.Person","stringProperty":"P1","address":{"$class":"org.acme.base.UnitedStatesAddress","zipcode":"CA","street":"Test","city":"Winchester","country":"UK"},"$identifier":"P1"}],"$identifier":"string"}');
 
             // check we can convert back to an object
             const newResource = serializer.fromJSON(json);

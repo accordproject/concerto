@@ -233,6 +233,19 @@ describe('ObjectValidator', function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
             }).should.throw('Type "Missing" is not defined in namespace "test".');
         });
+
+        it('should fail for an undeclared field', () => {
+            const data = {
+                $class : 'test.Vehicle',
+                manufacturer: 'Ford',
+            };
+            const parameters = {};
+            parameters.stack = new TypedStack(data);
+
+            (function () {
+                objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
+            }).should.throw('Instance "undefined" has a property named "manufacturer", which is not declared in "test.Vehicle"');
+        });
     });
 
     describe('#visitRelationshipDeclaration', () => {
@@ -326,7 +339,7 @@ describe('ObjectValidator', function () {
                 $class: 'test.Person',
                 email: 'matt@example',
             };
-            const field = concerto.getTypeDeclaration(data).getProperties()[1];
+            const field = concerto.getTypeDeclaration(data).getProperties()[0];
             (function () {
                 ObjectValidator.reportFieldTypeViolation('123', 'name', data, field, concerto);
             }).should.throw('Model violation in the "123" instance. The field "name" has a value of "matt@example" (type of value: "Person"). Expected type of value: "String"');
