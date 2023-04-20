@@ -27,15 +27,12 @@ describe('Wildcards Model', function () {
     let factory;
     let modelManager;
     let serializer;
-    let ergoSerializer;
 
     beforeEach(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
-        ergoSerializer = new Serializer(factory, modelManager);
-        ergoSerializer.setDefaultOptions({ ergo: true });
         const files = [
             './test/data/model/dependencies/base/base.cto',
             './test/data/model/wildcards.cto'
@@ -71,43 +68,6 @@ describe('Wildcards Model', function () {
             person: 'resource:stdlib.base.Person#ALICE_1'
         };
         const resource = serializer.fromJSON(json);
-        resource.assetId.should.equal('1');
-        resource.$identifier.should.equal('1');
-        resource.concept.gender.should.equal('FEMALE');
-        resource.participant.personId.should.equal('1');
-        resource.participant.firstName.should.equal('Alice');
-        resource.participant.lastName.should.equal('A');
-        resource.participant.contactDetails.email.should.equal('alice@email.com');
-        resource.person.getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
-    });
-
-    it('should parse a resource using types from a wildcard import (Ergo)', () => {
-        const json = {
-            $class: { $coll: ['org.acme.wildcards.MyAsset'], $length: 1 },
-            $data: {
-                assetId: '1',
-                concept: {
-                    $class: { $coll: ['org.acme.wildcards.MyConcept'], $length: 1 },
-                    $data: {
-                        gender: { '$class': 'stdlib.base.Gender', '$data': { '$right' : { '$left': 'FEMALE' } } }
-                    }
-                },
-                participant: {
-                    $class: { $coll: ['org.acme.wildcards.MyParticipant'], $length: 1 },
-                    $data: {
-                        personId: '1',
-                        firstName: 'Alice',
-                        lastName: 'A',
-                        contactDetails: {
-                            $class: { $coll: ['stdlib.base.ContactDetails'], $length: 1 },
-                            $data: { email: 'alice@email.com' }
-                        }
-                    }
-                },
-                person: 'resource:stdlib.base.Person#ALICE_1'
-            }
-        };
-        const resource = ergoSerializer.fromJSON(json);
         resource.assetId.should.equal('1');
         resource.$identifier.should.equal('1');
         resource.concept.gender.should.equal('FEMALE');

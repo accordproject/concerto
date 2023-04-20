@@ -21,15 +21,13 @@ declare class JSONGenerator {
      * written for subsequent instances, false by default.
      * @param {boolean} [convertResourcesToId] Convert resources that
      * are specified for relationship fields into their id, false by default.
-     * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
-    constructor(convertResourcesToRelationships?: boolean, permitResourcesForRelationships?: boolean, deduplicateResources?: boolean, convertResourcesToId?: boolean, ergo?: boolean, utcOffset?: number);
+    constructor(convertResourcesToRelationships?: boolean, permitResourcesForRelationships?: boolean, deduplicateResources?: boolean, convertResourcesToId?: boolean, utcOffset?: number);
     convertResourcesToRelationships: boolean;
     permitResourcesForRelationships: boolean;
     deduplicateResources: boolean;
     convertResourcesToId: boolean;
-    ergo: boolean;
     utcOffset: number;
     /**
      * Visitor design pattern

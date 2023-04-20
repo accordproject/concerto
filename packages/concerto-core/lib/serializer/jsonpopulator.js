@@ -94,13 +94,11 @@ class JSONPopulator {
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
      * place of relationships, false by default.
-     * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
      * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
+    constructor(acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
-        this.ergo = ergo;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes;
 
@@ -149,13 +147,6 @@ class JSONPopulator {
 
         properties.forEach((property) => {
             let value = jsonObj[property];
-            if (this.ergo) { // XXX Unpack optionals
-                if (Object.prototype.hasOwnProperty.call(value,'$left')) {
-                    value = value.$left;
-                } else if (Object.prototype.hasOwnProperty.call(value,'$right')) {
-                    value = value.$right;
-                }
-            }
             if (value !== null) {
                 parameters.path.push(`.${property}`);
                 parameters.jsonStack.push(value);
@@ -180,11 +171,6 @@ class JSONPopulator {
         let result = null;
 
         if(field.isArray()) {
-            if (this.ergo) {
-                if (Object.prototype.hasOwnProperty.call(jsonObj,'$coll')) {
-                    jsonObj = jsonObj.$coll.slice(0,jsonObj.$length);
-                }
-            }
             result = [];
             for(let n=0; n < jsonObj.length; n++) {
                 parameters.path.push(`[${n}]`);
@@ -210,11 +196,6 @@ class JSONPopulator {
         let result = null;
 
         if(!field.isPrimitive() && !field.isTypeEnum()) {
-            if (this.ergo) {
-                const theClass = jsonItem.$class.$coll[0];
-                jsonItem = jsonItem.$data;
-                jsonItem.$class = theClass ;
-            }
             let typeName = jsonItem.$class;
             if(!typeName) {
                 // If the type name is not specified in the data, then use the
@@ -287,7 +268,7 @@ class JSONPopulator {
             break;
         case 'Integer':
         case 'Long': {
-            const num = this.ergo ? json.$nat : json;
+            const num = json;
             if (typeof num === 'number') {
                 if (Math.trunc(num) !== num) {
                     throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
@@ -324,16 +305,7 @@ class JSONPopulator {
             break;
         default: {
             // everything else should be an enumerated value...
-            if (this.ergo) {
-                // unpack the enum
-                let current = json.$data;
-                while (!current.$left) {
-                    current = current.$right;
-                }
-                result = current.$left;
-            } else {
-                result = json;
-            }
+            result = json;
         }
         }
         return result;
@@ -374,11 +346,6 @@ class JSONPopulator {
                         throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonItem + ' for relationship ' + relationshipDeclaration );
                     }
 
-                    if (this.ergo) {
-                        const theClass = jsonItem.$class.$coll[0];
-                        jsonItem = jsonItem.$data;
-                        jsonItem.$class = theClass;
-                    }
                     const classDeclaration = parameters.modelManager.getType(jsonItem.$class);
 
                     // create a new instance, using the identifier field name as the ID.
@@ -402,11 +369,6 @@ class JSONPopulator {
                 // this isn't a relationship, but it might be an object!
                 if(!jsonObj.$class) {
                     throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
-                }
-                if (this.ergo) {
-                    const theClass = jsonObj.$class.$coll[0];
-                    jsonObj = jsonObj.$data;
-                    jsonObj.$class = theClass;
                 }
                 const classDeclaration = parameters.modelManager.getType(jsonObj.$class);
 
