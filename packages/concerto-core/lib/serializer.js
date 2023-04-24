@@ -187,7 +187,7 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.utcOffset, options.strictQualifiedDateTimes === true);
+        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model
