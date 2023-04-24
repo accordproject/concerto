@@ -50,11 +50,6 @@ require('yargs')
             type: 'boolean',
             default: false
         });
-        yargs.option('ergo', {
-            describe: 'validation and emit for Ergo',
-            type: 'boolean',
-            default: false
-        });
     }, (argv) => {
         if (argv.verbose) {
             Logger.info(`validate ${argv.input} against the models ${argv.model}`);
@@ -67,8 +62,7 @@ require('yargs')
             if (argv.utcOffset !== undefined) {
                 options.utcOffset = argv.utcOffset;
             }
-            options.functional = !argv.ergo && argv.functional; // XXX Ergo option takes priority
-            options.ergo = argv.ergo;
+            options.functional = argv.functional;
             return Commands.validate(argv.input, argv.model, options)
                 .then((result) => {
                     Logger.info('Input is valid');

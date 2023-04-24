@@ -32,8 +32,6 @@ describe('JSONGenerator', () => {
     let modelManager;
     let factory;
     let jsonGenerator;
-    let ergoJsonGenerator;
-    let ergoJsonGeneratorId;
     let sandbox;
     let relationshipDeclaration1;
     let relationshipDeclaration2;
@@ -112,8 +110,6 @@ describe('JSONGenerator', () => {
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         jsonGenerator = new JSONGenerator(null, null, null, null, null, 'Z');
-        ergoJsonGenerator = new JSONGenerator(null,null,null,null,true);
-        ergoJsonGeneratorId = new JSONGenerator(null,null,null,true,true);
     });
 
     afterEach(() => {
@@ -134,7 +130,6 @@ describe('JSONGenerator', () => {
 
         it('should pass through an integer object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).should.equal(123456);
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Integer'; } }, 123456).$nat.should.equal(123456);
         });
 
         it('should pass through a finite double object', () => {
@@ -143,7 +138,6 @@ describe('JSONGenerator', () => {
 
         it('should pass through a long object', () => {
             jsonGenerator.convertToJSON({ getType: () => { return 'Long'; } }, 1234567890).should.equal(1234567890);
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'Long'; } }, 1234567890).$nat.should.equal(1234567890);
         });
 
         it('should pass through a string object', () => {
@@ -155,12 +149,10 @@ describe('JSONGenerator', () => {
         it('should convert a date time object to ISOString', () => {
             let date = dayjs.utc('Wed, 09 Aug 1995 00:00:00 GMT');
             jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T00:00:00.000Z');
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('1995-08-09T00:00:00.000Z');
         });
         it('should convert a date time object to ISOString in a different timezone', () => {
             let date = dayjs.utc('Wed, 09 Aug 1995 00:00:00 -0500');
             jsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).should.equal('1995-08-09T05:00:00.000Z');
-            ergoJsonGenerator.convertToJSON({ getType: () => { return 'DateTime'; } }, date).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('1995-08-09T05:00:00.000Z');
         });
 
         it('should pass through a boolean object', () => {
@@ -294,28 +286,6 @@ describe('JSONGenerator', () => {
             }).should.throw(/Expected a Resource, but found string/);
         });
 
-        it('should generate a relationship (Ergo)', () => {
-            let relationship = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_1');
-            let options = {
-                stack: new TypedStack({}),
-                modelManager: modelManager
-            };
-            options.stack.push(relationship);
-            let result = ergoJsonGenerator.visitRelationshipDeclaration(relationshipDeclaration1, options);
-            result.should.be.equal(result, 'resource:org.acme.MyAsset1#DOGE_1');
-        });
-
-        it('should generate a relationship (Ergo with Id)', () => {
-            let relationship = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_1');
-            let options = {
-                stack: new TypedStack({}),
-                modelManager: modelManager
-            };
-            options.stack.push(relationship);
-            let result = ergoJsonGeneratorId.visitRelationshipDeclaration(relationshipDeclaration1, options);
-            result.should.be.equal(result, 'DOGE_1');
-        });
-
     });
 
     describe('#getRelationshipText', () => {
@@ -407,42 +377,6 @@ describe('JSONGenerator', () => {
             should.equal(jsonGenerator.visitField(field, parameters), null);
         });
 
-        it('should populate if an optional primitive string (Ergo)', () => {
-            let field = {
-                'isArray':function(){return false;},
-                'isOptional':function(){return true;},
-                'isPrimitive':function(){return true;},
-                'getType':function(){return 'String';}
-            };
-            isEnumStub.returns(false);
-            let primitive = 'WONGA-1';
-            let parameters = {
-                stack: new TypedStack({}),
-                modelManager: modelManager,
-                seenResources: new Set()
-            };
-            parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).$left, 'WONGA-1');
-        });
-
-        it('should populate if an optional primitive string (null) (Ergo)', () => {
-            let field = {
-                'isArray':function(){return false;},
-                'isOptional':function(){return true;},
-                'isPrimitive':function(){return true;},
-                'getType':function(){return 'String';}
-            };
-            isEnumStub.returns(false);
-            let primitive = null;
-            let parameters = {
-                stack: new TypedStack({}),
-                modelManager: modelManager,
-                seenResources: new Set()
-            };
-            parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).$right, null);
-        });
-
         it('should populate if a primitive integer', () => {
             let field = {
                 'isArray':function(){return false;},
@@ -459,24 +393,6 @@ describe('JSONGenerator', () => {
             };
             parameters.stack.push(primitive);
             should.equal(jsonGenerator.visitField(field, parameters), 2);
-        });
-
-        it('should populate if a primitive integer (Ergo)', () => {
-            let field = {
-                'isArray':function(){return false;},
-                'isOptional':function(){return false;},
-                'isPrimitive':function(){return true;},
-                'getType':function(){return 'Integer';}
-            };
-            isEnumStub.returns(false);
-            let primitive = 2;
-            let parameters = {
-                stack: new TypedStack({}),
-                modelManager: modelManager,
-                seenResources: new Set()
-            };
-            parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).$nat, 2);
         });
 
         it('should populate if a primitive double', () => {
@@ -530,7 +446,7 @@ describe('JSONGenerator', () => {
                 seenResources: new Set()
             };
             parameters.stack.push(primitive);
-            should.equal(ergoJsonGenerator.visitField(field, parameters).$nat, 1234567890);
+            should.equal(jsonGenerator.visitField(field, parameters), 1234567890);
         });
 
         it('should populate if a primitive Boolean', () => {
@@ -588,50 +504,6 @@ describe('JSONGenerator', () => {
             should.equal(jsonGenerator.visitField(field, parameters), 'WONGA-1');
         });
 
-        it('should populate if an Enum (Ergo)', () => {
-            let field = {
-                'isArray':function(){return false;},
-                'isOptional':function(){return false;},
-                'isPrimitive':function(){return false;},
-                'getType':function(){return 'String';},
-                'getParent':function(){
-                    return {
-                        'getModelFile':function(){
-                            return {
-                                'getType':function(){
-                                    return {
-                                        'getFullyQualifiedName':function(){return 'MyEnum';},
-                                        'getProperties':function(){return [
-                                            {'getName':function(){ return 'FOO'; }},
-                                            {'getName':function(){ return 'BAR'; }},
-                                            {'getName':function(){ return 'WONGA-1'; }},
-                                        ];}
-                                    };
-                                }
-                            };
-                        }
-                    };
-                }
-            };
-            isEnumStub.returns(true);
-
-            let primitive = 'WONGA-1';
-            let parameters = {
-                stack: new TypedStack({}),
-                modelManager: modelManager,
-                seenResources: new Set()
-            };
-            parameters.stack.push(primitive);
-            let result = ergoJsonGenerator.visitField(field, parameters);
-            result.should.have.property('$class');
-            result.should.have.property('$data');
-            result.$class[0].should.equal('MyEnum');
-            result.$data.should.have.property('$right');
-            result.$data.$right.should.have.property('$right');
-            result.$data.$right.$right.should.have.property('$left');
-            result.$data.$right.$right.$left.should.equal('WONGA-1');
-        });
-
         it('should recurse if an object', () => {
             let field = {
                 'getName':function(){return 'vehicle';},
@@ -679,57 +551,6 @@ describe('JSONGenerator', () => {
                 color: 'GREEN',
                 numberOfSeats: '2',
                 numberPlate: 'PENGU1N' });
-            spy.callCount.should.equal(4); // We call it once at the start, then it recurses three times
-        });
-
-        it('should recurse if an object (Ergo)', () => {
-            let field = {
-                'getName':function(){return 'vehicle';},
-                'isArray':function(){return false;},
-                'isOptional':function(){return false;},
-                'isPrimitive':function(){return false;},
-                'getParent':function(){
-                    return {
-                        'getModelFile':function(){
-                            return {
-                                'getType':function(){
-                                    return {
-                                        'getFullyQualifiedName':function(){return 'MyEnum';},
-                                        'getProperties':function(){return [
-                                            {'getName':function(){ return 'FOO'; }},
-                                            {'getName':function(){ return 'BAR'; }},
-                                            {'getName':function(){ return 'WONGA-1'; }},
-                                        ];}
-                                    };
-                                }
-                            };
-                        }
-                    };
-                },
-                'getType':function(){return 'String';}
-            };
-            isEnumStub.returns(false);
-
-            let concept = factory.newConcept('org.acme.sample','Car');
-            concept.numberPlate = 'PENGU1N';
-            concept.numberOfSeats = '2';
-            concept.color = 'GREEN';
-
-            let parameters = {
-                stack: new TypedStack({}),
-                modelManager: modelManager,
-                seenResources: new Set()
-            };
-            parameters.stack.push(concept);
-
-            let spy = sinon.spy(ergoJsonGenerator, 'visitField');
-
-            let result = ergoJsonGenerator.visitField(field,parameters);
-            result.should.deep.equal({ '$class': { '$coll': ['org.acme.sample.Car'], '$length': 1 }, '$data': {
-                color: 'GREEN',
-                numberOfSeats: { '$nat' : '2' },
-                numberPlate: 'PENGU1N'
-            } });
             spy.callCount.should.equal(4); // We call it once at the start, then it recurses three times
         });
 

@@ -54,26 +54,6 @@ const validateFunctional = async (sample, ctoFiles, options) => {
 
     return concerto.validate(json);
 };
-const validateToErgo = async (sample, ctoFiles, options) => {
-    const json = loadJson(sample);
-
-    const modelManager = await ModelLoader.loadModelManager(ctoFiles.map((file) => path.join(__dirname,file)), options);
-    const factory = new Factory(modelManager);
-    const serializer = new Serializer(factory, modelManager);
-
-    const object = serializer.fromJSON(json);
-    return serializer.toJSON(object, { ergo: true, utcOffset: 0 });
-};
-const validateFromErgo = async (sample, ctoFiles, options) => {
-    const json = loadJson(sample);
-
-    const modelManager = await ModelLoader.loadModelManager(ctoFiles.map((file) => path.join(__dirname,file)), options);
-    const factory = new Factory(modelManager);
-    const serializer = new Serializer(factory, modelManager);
-
-    const object = serializer.fromJSON(json, { ergo: true, utcOffset: 0 });
-    return serializer.toJSON(object);
-};
 
 const positive = [{
     name: 'date',
@@ -110,18 +90,6 @@ const positive = [{
     sample: './data/timestamp1.json',
     ctoFiles: ['./models/timestamp1.cto'],
     expected: './data/timestamp1.expect'
-}, {
-    name: 'test1a',
-    sample: './data/test1a.json',
-    ctoFiles: ['./models/test1.cto'],
-    expected: './data/test1a.expect',
-    ergo: './data/test1a.ergo'
-}, {
-    name: 'test1b',
-    sample: './data/test1b.json',
-    ctoFiles: ['./models/test1.cto'],
-    expected: './data/test1b.expect',
-    ergo: './data/test1b.ergo'
 }];
 
 const negative = [{
@@ -153,7 +121,7 @@ describe('Validation (1.0.0)', () => {
 
     describe('#positive', () => {
         positive
-            .forEach(({ name, sample, ctoFiles, expected, ergo }) => {
+            .forEach(({ name, sample, ctoFiles, expected }) => {
                 it(`should validate - classic (${name})`, async function() {
                     const resultActual = await validateClassic(sample, ctoFiles);
                     const resultExpected = loadJson(expected);
@@ -164,20 +132,6 @@ describe('Validation (1.0.0)', () => {
                     const resultActual = await validateFunctional(sample, ctoFiles);
                     (typeof resultActual === 'undefined').should.equal(true);
                 });
-
-                if (ergo) {
-                    it(`should validate - to ergo (${name})`, async function() {
-                        const resultActual = await validateToErgo(sample, ctoFiles);
-                        const resultExpected = loadJson(ergo);
-                        resultActual.should.deep.equal(resultExpected);
-                    });
-
-                    it(`should validate - from ergo (${name})`, async function() {
-                        const resultActual = await validateFromErgo(ergo, ctoFiles);
-                        const resultExpected = loadJson(expected);
-                        resultActual.should.deep.equal(resultExpected);
-                    });
-                }
             });
     });
 

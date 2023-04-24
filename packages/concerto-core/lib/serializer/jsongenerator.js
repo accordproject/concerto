@@ -41,8 +41,8 @@ class JSONGenerator {
      * in the object graph only the first instance is serialized, with only the $id
      * written for subsequent instances, false by default.
      * @param {boolean} [convertResourcesToId] Convert resources that
+     * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * are specified for relationship fields into their id, false by default.
-     * @param {boolean} [ergo] target ergo.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
     constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset) {
@@ -50,7 +50,6 @@ class JSONGenerator {
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
-        this.ergo = ergo;
         this.utcOffset = utcOffset || 0;
     }
 
@@ -115,22 +114,9 @@ class JSONGenerator {
             if (!Util.isNull(value)) {
                 parameters.stack.push(value);
                 result[property.getName()] = property.accept(this, parameters);
-            } else if (this.ergo) {
-                result[property.getName()] = { '$right' : null };
             }
         }
 
-        if (this.ergo) {
-            const theClass = result.$class;
-            delete result.$class;
-            result = {
-                $class: {
-                    $coll: [theClass],
-                    $length: 1
-                },
-                $data: result,
-            };
-        }
         return result;
     }
 
@@ -157,49 +143,17 @@ class JSONGenerator {
                     array.push(this.convertToJSON(field, item));
                 }
             }
-            if (this.ergo) {
-                result = {
-                    $coll: array,
-                    $length: array.length
-                };
-            } else {
-                result = array;
-            }
+            result = array;
         } else if (field.isPrimitive()) {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
-            if (this.ergo) {
-                // Boxes an enum value to the expected combination of sum types
-                const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
-                const enumName = enumDeclaration.getFullyQualifiedName();
-                const properties = enumDeclaration.getProperties();
-                let either = { '$left' : obj };
-                for(let n=0; n < properties.length; n++) {
-                    const property = properties[n];
-                    if(property.getName() === obj) {
-                        break;
-                    } else {
-                        either = { '$right' : either };
-                    }
-                }
-                result = { '$class' : [enumName], '$data': either };
-            } else {
-                result = this.convertToJSON(field, obj);
-            }
+            result = this.convertToJSON(field, obj);
         } else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
             result = classDeclaration.accept(this, parameters);
         }
-        if (field.isOptional()) {
-            if (this.ergo) {
-                if (result) {
-                    result = { '$left' : result };
-                } else {
-                    result = { '$right' : result };
-                }
-            }
-        }
+
         return result;
     }
 
@@ -215,20 +169,12 @@ class JSONGenerator {
         case 'DateTime':
         {
             const objWithOffset = obj.utc().utcOffset(this.utcOffset);
-            if (this.ergo) {
-                return objWithOffset;
-            } else {
-                const inZ = objWithOffset.utcOffset() === 0;
-                return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
-            }
+            const inZ = objWithOffset.utcOffset() === 0;
+            return objWithOffset.format(`YYYY-MM-DDTHH:mm:ss.SSS${inZ ? '[Z]': 'Z'}`);
         }
         case 'Integer':
         case 'Long': {
-            if (this.ergo) {
-                return { $nat: obj };
-            } else {
-                return obj;
-            }
+            return obj;
         }
         case 'Double':
         case 'Boolean':
@@ -272,14 +218,7 @@ class JSONGenerator {
                     array.push(relationshipText);
                 }
             }
-            if (this.ergo) {
-                result = {
-                    $coll: array,
-                    $length: array.length
-                };
-            } else {
-                result = array;
-            }
+            result = array;
         } else if (this.permitResourcesForRelationships && obj instanceof Resource) {
             let fqi = obj.getFullyQualifiedIdentifier();
             if (parameters.seenResources.has(fqi)) {
