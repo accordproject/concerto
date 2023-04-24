@@ -121,6 +121,7 @@ class Serializer {
             options.permitResourcesForRelationships === true,
             options.deduplicateResources === true,
             options.convertResourcesToId === true,
+            false,
             options.utcOffset,
         );
 
