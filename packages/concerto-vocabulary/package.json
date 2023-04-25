@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.7.0",
-    "yaml": "2.0.0-9"
+    "yaml": "2.2.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
