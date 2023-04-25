@@ -1,7 +1,0 @@
-namespace org.car
-
-import org.vehicle.{Vehicle}
-
-concept Car extends Vehicle {
-  o Double mileage
-}
