@@ -199,7 +199,7 @@ function modifiersFromMetaModel(mm){
 /**
  * Create a property string from a metamodel property
  * @param {object} prop - the property in scope
- * @return {string} the string for that property
+ * @return {string} the CML string representation of the property
  */
 function propertyFromMetaModel(prop) {
     let result = '';
@@ -227,7 +227,7 @@ function propertyFromMetaModel(prop) {
 /**
  * Create a declaration string from a metamodel
  * @param {object} mm - the metamodel
- * @return {string} the CML string representation of the property
+ * @return {string} the string for that declaration
  */
 function declFromMetaModel(mm) {
     let result = '';
