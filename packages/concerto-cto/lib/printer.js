@@ -197,28 +197,28 @@ function modifiersFromMetaModel(mm){
 }
 
 /**
- * Create a property string from a metamodel
- * @param {object} mm - the metamodel
+ * Create a property string from a metamodel property
+ * @param {object} prop - the property in scope
  * @return {string} the string for that property
  */
-function propertyFromMetaModel(mm) {
+function propertyFromMetaModel(prop) {
     let result = '';
 
-    if (mm.decorators) {
-        result += decoratorsFromMetaModel(mm.decorators, '  ');
+    if (prop.decorators) {
+        result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
-    if (mm.$class === `${MetaModelNamespace}.RelationshipProperty`) {
+    if (prop.$class === `${MetaModelNamespace}.RelationshipProperty` || prop.isRelationship) {
         result += '-->';
     } else {
         result += 'o';
     }
-    result += typeFromMetaModel(mm);
-    if (mm.isArray) {
+    result += typeFromMetaModel(prop);
+    if (prop.isArray) {
         result += '[]';
     }
-    result += ` ${mm.name}`;
-    result += modifiersFromMetaModel(mm);
-    if (mm.isOptional) {
+    result += ` ${prop.name}`;
+    result += modifiersFromMetaModel(prop);
+    if (prop.isOptional) {
         result += ' optional';
     }
     return result;
@@ -227,7 +227,7 @@ function propertyFromMetaModel(mm) {
 /**
  * Create a declaration string from a metamodel
  * @param {object} mm - the metamodel
- * @return {string} the string for that declaration
+ * @return {string} the CML string representation of the property
  */
 function declFromMetaModel(mm) {
     let result = '';
@@ -279,6 +279,9 @@ function declFromMetaModel(mm) {
             break;
         case `${MetaModelNamespace}.EnumDeclaration`:
             result += `enum ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.MapDeclaration`:
+            result += `map ${mm.name} `;
             break;
         }
         if (mm.identified) {
