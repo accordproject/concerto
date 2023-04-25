@@ -134,14 +134,6 @@ declare class ResourceValidator {
      */
     private visitClassDeclaration;
     /**
-     * Returns true if the property is a system property.
-     * System properties are not declared in the model.
-     * @param {String} propertyName - the name of the property
-     * @return {Boolean} true if the property is a system property
-     * @private
-     */
-    private isSystemProperty;
-    /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter

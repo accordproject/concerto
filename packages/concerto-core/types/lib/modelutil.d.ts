@@ -118,4 +118,20 @@ declare class ModelUtil {
      * @returns {string} the fully qualified name minus the namespace version
      */
     static removeNamespaceVersionFromFullyQualifiedName(fqn: string): string;
+    /**
+     * Returns true if the property is a system property.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    private static isSystemProperty;
+    /**
+     * Returns true if the property is an system property that can be set in serialized JSON.
+     * System properties are not declared in the model.
+     * @param {String} propertyName - the name of the property
+     * @return {Boolean} true if the property is a system property
+     * @private
+     */
+    private static isPrivateSystemProperty;
 }
