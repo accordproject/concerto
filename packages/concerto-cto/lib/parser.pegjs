@@ -1620,7 +1620,3 @@ SourceElement
   / ConceptDeclaration
   / ScalarDeclaration
   / MapDeclaration
-  / MapPropertyKeyDeclaration
-  / MapPropertyValueDeclaration
-
-
