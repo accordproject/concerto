@@ -65,6 +65,15 @@ describe('parser', () => {
         );
     });
 
+    describe('maps', () => {
+        it('Should not parse bad map type', () => {
+            let content = fs.readFileSync('./test/cto/bad/map.bad.cto', 'utf8');
+            (() => {
+                Parser.parse(content);
+            }).should.throw(/Expected .+ but /);
+        });
+    });
+
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [
