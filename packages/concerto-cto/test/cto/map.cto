@@ -30,8 +30,11 @@ map StateMachine {
   o String
 }
 
+@Foo("Alexandria")
 map Library {
+  @Bar()
   o String
+  @Baz()
   o Dictionary
 }
 

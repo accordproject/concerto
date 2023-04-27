@@ -95,11 +95,37 @@
         "properties": [
           {
             "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
-            "name": "String"
+            "name": "String",
+            "decorators": [
+              {
+                "$class": "concerto.metamodel@1.0.0.Decorator",
+                "name": "Bar",
+                "arguments": []
+              }
+            ]
           },
           {
             "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
-            "name": "Dictionary"
+            "name": "Dictionary",
+            "decorators": [
+              {
+                "$class": "concerto.metamodel@1.0.0.Decorator",
+                "name": "Baz",
+                "arguments": []
+              }
+            ]
+          }
+        ],
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Foo",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "Alexandria"
+              }
+            ]
           }
         ]
       },
