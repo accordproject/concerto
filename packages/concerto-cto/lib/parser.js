@@ -1006,6 +1006,7 @@ function peg$parse(input, options) {
             ...buildRange(location())
     	};
         if(symbol === "-->") {
+          result.$class = "concerto.metamodel@1.0.0.MapRelationshipPropertyValue";
           result.isRelationship = true
         }
         if (decorators.length > 0) {
@@ -10572,12 +10573,6 @@ function peg$parse(input, options) {
                 s0 = peg$parseScalarDeclaration();
                 if (s0 === peg$FAILED) {
                   s0 = peg$parseMapDeclaration();
-                  if (s0 === peg$FAILED) {
-                    s0 = peg$parseMapPropertyKeyDeclaration();
-                    if (s0 === peg$FAILED) {
-                      s0 = peg$parseMapPropertyValueDeclaration();
-                    }
-                  }
                 }
               }
             }

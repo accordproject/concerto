@@ -69,7 +69,7 @@
             "name": "GUID"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.MapRelationshipPropertyValue",
             "name": "Person",
             "isRelationship": true
           }

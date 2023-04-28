@@ -1443,7 +1443,8 @@ MapPropertyValueDeclaration
             ...buildRange(location())
     	};
         if(symbol === "-->") {
-          result.isRelationship = true
+          result.$class = "concerto.metamodel@1.0.0.MapRelationshipPropertyValue";
+          result.isRelationship = true;
         }
         if (decorators.length > 0) {
           result.decorators = decorators;
