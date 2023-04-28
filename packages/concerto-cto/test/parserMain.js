@@ -72,6 +72,13 @@ describe('parser', () => {
                 Parser.parse(content);
             }).should.throw(/Expected .+ but /);
         });
+
+        it('Should not parse a map with identifiers', () => {
+            let content = fs.readFileSync('./test/cto/bad/map.bad.identifiers.cto', 'utf8');
+            (() => {
+                Parser.parse(content);
+            }).should.throw(/Expected .+ but /);
+        });
     });
 
     describe('identifiers', () => {
