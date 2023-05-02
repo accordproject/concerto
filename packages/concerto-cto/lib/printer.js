@@ -208,7 +208,7 @@ function propertyFromMetaModel(prop) {
         result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
     if (prop.$class === `${MetaModelNamespace}.RelationshipProperty` ||
-        prop.$class === `${MetaModelNamespace}.MapRelationshipPropertyValue`) {
+        prop.$class === `${MetaModelNamespace}.AggregateRelationshipValueType`) {
         result += '-->';
     } else {
         result += 'o';
