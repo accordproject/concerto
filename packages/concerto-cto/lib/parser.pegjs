@@ -1415,17 +1415,17 @@ MapDeclaration
     }
 
 MapDeclarationBody
-  = key:MapPropertyKeyDeclaration __ value:MapPropertyValueDeclaration {
+  = key:MapKeyTypeDeclaration __ value:AggregateValueTypeDeclaration {
       return {
         type: "MapDeclarationBody",
         declarations: optionalList([key, value])
       };
     }
 
-MapPropertyKeyDeclaration
+MapKeyTypeDeclaration
     = decorators:Decorators __ "o"__ id:Identifier __ {
         const result = {
-            $class: "concerto.metamodel@1.0.0.MapPropertyKey",
+            $class: "concerto.metamodel@1.0.0.MapKeyType",
             name: id.name,
             ...buildRange(location())
         };
@@ -1435,15 +1435,15 @@ MapPropertyKeyDeclaration
         return result;
     }
 
-MapPropertyValueDeclaration
+AggregateValueTypeDeclaration
     = decorators:Decorators __ symbol:("o" / "-->") __ id:Identifier __ {
     	const result = {
-    		$class: "concerto.metamodel@1.0.0.MapPropertyValue",
+    		$class: "concerto.metamodel@1.0.0.AggregateValueType",
     		name: id.name,
             ...buildRange(location())
     	};
         if(symbol === "-->") {
-          result.$class = "concerto.metamodel@1.0.0.MapRelationshipPropertyValue";
+          result.$class = "concerto.metamodel@1.0.0.AggregateRelationshipValueType";
           result.isRelationship = true;
         }
         if (decorators.length > 0) {

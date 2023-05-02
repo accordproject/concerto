@@ -990,7 +990,7 @@ function peg$parse(input, options) {
     };
   var peg$f86 = function(decorators, id) {
         const result = {
-            $class: "concerto.metamodel@1.0.0.MapPropertyKey",
+            $class: "concerto.metamodel@1.0.0.MapKeyType",
             name: id.name,
             ...buildRange(location())
         };
@@ -1001,12 +1001,12 @@ function peg$parse(input, options) {
     };
   var peg$f87 = function(decorators, symbol, id) {
     	const result = {
-    		$class: "concerto.metamodel@1.0.0.MapPropertyValue",
+    		$class: "concerto.metamodel@1.0.0.AggregateValueType",
     		name: id.name,
             ...buildRange(location())
     	};
         if(symbol === "-->") {
-          result.$class = "concerto.metamodel@1.0.0.MapRelationshipPropertyValue";
+          result.$class = "concerto.metamodel@1.0.0.AggregateRelationshipValueType";
           result.isRelationship = true;
         }
         if (decorators.length > 0) {
@@ -9685,10 +9685,10 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3;
 
     s0 = peg$currPos;
-    s1 = peg$parseMapPropertyKeyDeclaration();
+    s1 = peg$parseMapKeyTypeDeclaration();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
-      s3 = peg$parseMapPropertyValueDeclaration();
+      s3 = peg$parseAggregateValueTypeDeclaration();
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
         s0 = peg$f85(s1, s3);
@@ -9704,7 +9704,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseMapPropertyKeyDeclaration() {
+  function peg$parseMapKeyTypeDeclaration() {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
@@ -9736,7 +9736,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseMapPropertyValueDeclaration() {
+  function peg$parseAggregateValueTypeDeclaration() {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
