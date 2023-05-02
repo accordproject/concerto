@@ -9,11 +9,11 @@
         "name": "Dictionary",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "String"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "String"
           }
         ]
@@ -23,11 +23,11 @@
         "name": "Checklist",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "String"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "Boolean"
           }
         ]
@@ -37,11 +37,11 @@
         "name": "Timeline",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "DateTime"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "Activity"
           }
         ]
@@ -51,11 +51,11 @@
         "name": "AddressBook",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "GUID"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "Person"
           }
         ]
@@ -65,11 +65,11 @@
         "name": "AddressBook2",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "GUID"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapRelationshipPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateRelationshipValueType",
             "name": "Person",
             "isRelationship": true
           }
@@ -80,11 +80,11 @@
         "name": "StateMachine",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "Phase"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "String"
           }
         ]
@@ -94,7 +94,7 @@
         "name": "Library",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "String",
             "decorators": [
               {
@@ -105,7 +105,7 @@
             ]
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "Dictionary",
             "decorators": [
               {
@@ -134,11 +134,11 @@
         "name": "MarriageRegister",
         "properties": [
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyKey",
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
             "name": "Person"
           },
           {
-            "$class": "concerto.metamodel@1.0.0.MapPropertyValue",
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
             "name": "Person"
           }
         ]
