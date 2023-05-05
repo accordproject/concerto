@@ -1444,7 +1444,6 @@ AggregateValueTypeDeclaration
     	};
         if(symbol === "-->") {
           result.$class = "concerto.metamodel@1.0.0.AggregateRelationshipValueType";
-          result.isRelationship = true;
         }
         if (decorators.length > 0) {
           result.decorators = decorators;
