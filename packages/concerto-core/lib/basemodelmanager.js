@@ -597,6 +597,16 @@ class BaseModelManager {
     }
 
     /**
+     * Get the MapDeclarations defined in this model manager
+     * @return {MapDeclaration[]} the MapDeclaration defined in the model manager
+     */
+    getMapDeclarations() {
+        return this.getModelFiles().reduce((prev, cur) => {
+            return prev.concat(cur.getMapDeclarations());
+        }, []);
+    }
+
+    /**
      * Get the EnumDeclarations defined in this model manager
      * @return {EnumDeclaration[]} the EnumDeclaration defined in the model manager
      */
