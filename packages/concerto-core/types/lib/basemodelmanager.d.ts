@@ -241,6 +241,11 @@ declare class BaseModelManager {
      */
     getParticipantDeclarations(): ParticipantDeclaration[];
     /**
+     * Get the MapDeclarations defined in this model manager
+     * @return {MapDeclaration[]} the MapDeclaration defined in the model manager
+     */
+    getMapDeclarations(): MapDeclaration[];
+    /**
      * Get the EnumDeclarations defined in this model manager
      * @return {EnumDeclaration[]} the EnumDeclaration defined in the model manager
      */
