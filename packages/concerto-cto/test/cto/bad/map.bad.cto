@@ -1,0 +1,11 @@
+namespace com.acme@1.0.0
+
+map Library {
+  o String
+  o String
+  o Dictionary
+}
+
+concept Concept {
+  o Library library
+}

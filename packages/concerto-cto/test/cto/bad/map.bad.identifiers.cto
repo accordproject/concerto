@@ -1,0 +1,10 @@
+amespace com.acme@1.0.0
+
+map Library {
+  o String x
+  o String y
+}
+
+concept Concept {
+  o Library library
+}

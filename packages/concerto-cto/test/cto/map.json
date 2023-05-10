@@ -1,0 +1,263 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "com.acme@1.0.0",
+    "imports": [],
+    "declarations": [
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "Dictionary",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "String"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "String"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "Checklist",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "String"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "Boolean"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "Timeline",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "DateTime"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "Activity"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "AddressBook",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "GUID"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "Person"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "AddressBook2",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "GUID"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateRelationshipValueType",
+            "name": "Person"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "StateMachine",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "Phase"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "String"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "Library",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "String",
+            "decorators": [
+              {
+                "$class": "concerto.metamodel@1.0.0.Decorator",
+                "name": "Bar",
+                "arguments": []
+              }
+            ]
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "Dictionary",
+            "decorators": [
+              {
+                "$class": "concerto.metamodel@1.0.0.Decorator",
+                "name": "Baz",
+                "arguments": []
+              }
+            ]
+          }
+        ],
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Foo",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "Alexandria"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+        "name": "MarriageRegister",
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.MapKeyType",
+            "name": "Person"
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
+            "name": "Person"
+          }
+        ]
+      },
+      {
+        "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+        "name": "Concept",
+        "isAbstract": false,
+        "properties": [
+          {
+            "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
+            "name": "test",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "String"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "dictionary",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Dictionary"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "checklist",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Checklist"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "timeline",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Timeline"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "addressBook",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "AddressBook"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "remoteEmployees",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "AddressBook"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "state",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "StateMachine"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "arrayOfRecords",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Dictionary"
+            },
+            "isArray": true,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "optionalRecord",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Dictionary"
+            },
+            "isArray": false,
+            "isOptional": true
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "library",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "Library"
+            },
+            "isArray": false,
+            "isOptional": false
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+            "name": "marriages",
+            "type": {
+              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+              "name": "MarriageRegister"
+            },
+            "isArray": false,
+            "isOptional": false
+          }
+        ]
+      }
+    ]
+  }

@@ -414,6 +414,7 @@ Zs = [\u0020\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]
 /* Tokens */
 
 EnumToken       = "enum"       !IdentifierPart
+MapToken        = "map"        !IdentifierPart
 FalseToken      = "false"      !IdentifierPart
 ImportToken     = "import"     !IdentifierPart
 NullToken       = "null"       !IdentifierPart
@@ -1397,6 +1398,59 @@ LongFieldDeclaration
       return result;
     }
 
+MapDeclaration
+    = decorators:Decorators __ MapToken __ id:Identifier __
+    "{" __ body:MapDeclarationBody __ "}"
+    {
+        const result = {
+          $class: "concerto.metamodel@1.0.0.MapDeclaration",
+          name:   id.name,
+          properties:  body.declarations,
+          ...buildRange(location())
+        };
+      if (decorators.length > 0) {
+        result.decorators = decorators;
+      }
+      return result;
+    }
+
+MapDeclarationBody
+  = key:MapKeyTypeDeclaration __ value:AggregateValueTypeDeclaration {
+      return {
+        type: "MapDeclarationBody",
+        declarations: optionalList([key, value])
+      };
+    }
+
+MapKeyTypeDeclaration
+    = decorators:Decorators __ "o"__ id:Identifier __ {
+        const result = {
+            $class: "concerto.metamodel@1.0.0.MapKeyType",
+            name: id.name,
+            ...buildRange(location())
+        };
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+        return result;
+    }
+
+AggregateValueTypeDeclaration
+    = decorators:Decorators __ symbol:("o" / "-->") __ id:Identifier __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.AggregateValueType",
+    		name: id.name,
+            ...buildRange(location())
+    	};
+        if(symbol === "-->") {
+          result.$class = "concerto.metamodel@1.0.0.AggregateRelationshipValueType";
+        }
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
 EnumDeclaration
     = decorators:Decorators __ EnumToken __ id:Identifier __
     "{" __ body:EnumDeclarationBody __ "}"
@@ -1565,6 +1619,4 @@ SourceElement
   / EnumDeclaration
   / ConceptDeclaration
   / ScalarDeclaration
-
-
-
+  / MapDeclaration
