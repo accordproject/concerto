@@ -25,7 +25,7 @@ declare class Identifiable extends Typed {
      * @protected
      */
     protected constructor();
-    $identifier: string;
+    $identifierFieldName: any;
     $timestamp: string;
     /**
      * Get the timestamp of this instance
@@ -42,6 +42,7 @@ declare class Identifiable extends Typed {
      * @param {string} id - the new identifier for this object
      */
     setIdentifier(id: string): void;
+    $identifier: string;
     /**
      * Get the fully qualified identifier of this instance.
      * (namespace '.' type '#' identifier).

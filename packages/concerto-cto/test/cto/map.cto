@@ -1,0 +1,58 @@
+namespace com.acme@1.0.0
+
+map Dictionary {
+  o String
+  o String
+}
+
+map Checklist {
+  o String
+  o Boolean
+}
+
+map Timeline {
+  o DateTime
+  o Activity
+}
+
+map AddressBook {
+  o GUID
+  o Person
+}
+
+map AddressBook2 {
+  o GUID
+  --> Person
+}
+
+map StateMachine {
+  o Phase
+  o String
+}
+
+@Foo("Alexandria")
+map Library {
+  @Bar()
+  o String
+  @Baz()
+  o Dictionary
+}
+
+map MarriageRegister {
+  o Person
+  o Person
+}
+
+concept Concept {
+  --> String test
+  o Dictionary dictionary
+  o Checklist checklist
+  o Timeline timeline
+  o AddressBook addressBook
+  o AddressBook remoteEmployees
+  o StateMachine state
+  o Dictionary[] arrayOfRecords
+  o Dictionary optionalRecord optional
+  o Library library
+  o MarriageRegister marriages
+}

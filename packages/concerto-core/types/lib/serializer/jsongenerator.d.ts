@@ -20,10 +20,11 @@ declare class JSONGenerator {
      * in the object graph only the first instance is serialized, with only the $id
      * written for subsequent instances, false by default.
      * @param {boolean} [convertResourcesToId] Convert resources that
+     * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * are specified for relationship fields into their id, false by default.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
-    constructor(convertResourcesToRelationships?: boolean, permitResourcesForRelationships?: boolean, deduplicateResources?: boolean, convertResourcesToId?: boolean, utcOffset?: number);
+    constructor(convertResourcesToRelationships?: boolean, permitResourcesForRelationships?: boolean, deduplicateResources?: boolean, convertResourcesToId?: boolean, ergo?: boolean, utcOffset?: number);
     convertResourcesToRelationships: boolean;
     permitResourcesForRelationships: boolean;
     deduplicateResources: boolean;
