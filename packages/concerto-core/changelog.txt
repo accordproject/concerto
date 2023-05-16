@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.7.0 {b1e03cd409e75528a479c66faf3c4e93} 2023-05-16
+- Add MapDeclaration, MapKeyType, AggregateValueType
+
 Version 3.5.0 {b419dc1b3db9662d8c941a044cd8db5a} 2023-03-07
 - Introduce Declaration type. ClassDeclaration and Scalar Declaration both extend Declaration.
 

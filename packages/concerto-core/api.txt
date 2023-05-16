@@ -24,6 +24,7 @@ class BaseModelManager {
    + TransactionDeclaration[] getTransactionDeclarations() 
    + EventDeclaration[] getEventDeclarations() 
    + ParticipantDeclaration[] getParticipantDeclarations() 
+   + MapDeclaration[] getMapDeclarations() 
    + EnumDeclaration[] getEnumDeclarations() 
    + ConceptDeclaration[] getConceptDeclarations() 
    + Factory getFactory() 
@@ -152,6 +153,45 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
+class MapDeclaration extends Decorated {
+   + void constructor(ModelFile,Object) throws IllegalModelException
+   ~ void validate() throws IllegalModelException
+   + string getFullyQualifiedName() 
+   + ModelFile getModelFile() 
+   + string getName() 
+   + string getKey() 
+   + string getValue() 
+   + array getProperties() 
+   + String toString() 
+   + string declarationKind() 
+   + boolean isAbstract() 
+   + boolean isAsset() 
+   + boolean isParticipant() 
+   + boolean isTransaction() 
+   + boolean isEvent() 
+   + boolean isConcept() 
+   + boolean isEnum() 
+   + boolean isScalarDeclaration() 
+   + boolean isMapDeclaration() 
+}
+class MapKeyType extends Decorated {
+   + void constructor(MapDeclaration,Object) throws IllegalModelException
+   ~ void validate() throws IllegalModelException
+   + string getFullyQualifiedName() 
+   + ModelFile getModelFile() 
+   + string getName() 
+   + string getType() 
+   + String toString() 
+}
+class MapValueType extends Decorated {
+   + void constructor(MapDeclaration,Object) throws IllegalModelException
+   ~ void validate() throws IllegalModelException
+   + string getFullyQualifiedName() 
+   + ModelFile getModelFile() 
+   + string getName() 
+   + string getType() 
+   + String toString() 
+}
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
    + ModelManager modelManagerFromMetaModel() 
@@ -179,6 +219,7 @@ class ModelFile extends Decorated {
    + ParticipantDeclaration[] getParticipantDeclarations() 
    + ConceptDeclaration[] getConceptDeclarations() 
    + EnumDeclaration[] getEnumDeclarations() 
+   + MapDeclaration[] getMapDeclarations() 
    + ScalarDeclaration[] getScalarDeclarations() 
    + Object[] getDeclarations(Function) 
    + ClassDeclaration[] getAllDeclarations() 
