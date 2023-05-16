@@ -26,6 +26,7 @@ const ParticipantDeclaration = require('./participantdeclaration');
 const TransactionDeclaration = require('./transactiondeclaration');
 const EventDeclaration = require('./eventdeclaration');
 const IllegalModelException = require('./illegalmodelexception');
+const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
@@ -590,6 +591,14 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Get the MapDeclarations defined in this ModelFile
+     * @return {MapDeclaration[]} the MapDeclarations defined in the model file
+     */
+    getMapDeclarations() {
+        return this.getDeclarations(MapDeclaration);
+    }
+
+    /**
      * Get the ScalarDeclaration defined in this ModelFile
      * @return {ScalarDeclaration[]} the ScalarDeclaration defined in the model file
      */
@@ -779,6 +788,9 @@ class ModelFile extends Decorated {
             }
             else if(thing.$class === `${MetaModelNamespace}.EnumDeclaration`) {
                 this.declarations.push( new EnumDeclaration(this, thing) );
+            }
+            else if(thing.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                this.declarations.push( new MapDeclaration(this, thing) );
             }
             else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
                 this.declarations.push( new ConceptDeclaration(this, thing) );
