@@ -317,6 +317,25 @@ describe('MapDeclaration', () => {
             clz.getKey().ast.$class.should.equal('concerto.metamodel@1.0.0.MapKeyType');
             clz.getKey().ast.name.should.equal('DateTime');
         });
+
+        it('should return the correct values when called', () => {
+            let clz = new MapDeclaration(modelFile, {
+                name: 'MapTest',
+                properties: [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
+                        name: 'DateTime'
+                    },
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
+                        name: 'String'
+                    }
+                ]
+            });
+            clz.getKey().getFullyQualifiedName().should.equal('com.test.DateTime');
+            clz.getKey().getName().should.equal('DateTime');
+            clz.getKey().getType().should.equal('DateTime');
+        });
     });
 
     describe('#getValue', () => {
@@ -337,6 +356,25 @@ describe('MapDeclaration', () => {
             (clz.getValue() instanceof MapValueType).should.be.equal(true);
             clz.getValue().ast.$class.should.equal('concerto.metamodel@1.0.0.AggregateValueType');
             clz.getValue().ast.name.should.equal('String');
+        });
+
+        it('should return the correct values when called', () => {
+            let clz = new MapDeclaration(modelFile, {
+                name: 'MapTest',
+                properties: [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
+                        name: 'DateTime'
+                    },
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
+                        name: 'String'
+                    }
+                ]
+            });
+            clz.getValue().getFullyQualifiedName().should.equal('com.test.String');
+            clz.getValue().getName().should.equal('String');
+            clz.getValue().getType().should.equal('String');
         });
     });
 
@@ -359,10 +397,41 @@ describe('MapDeclaration', () => {
         });
     });
 
-    describe('#declarationKind', () => {
-        it('should return that declaration kind - MapDeclaration', () => {
+
+    describe('#Introspect', () => {
+        it('should return the correct model file', () => {
+            let clz = new MapDeclaration(modelFile, {
+                name: 'MapTest',
+                properties: [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
+                        'name': 'String'
+                    },
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
+                        'name': 'String'
+                    }
+                ]
+            });
+            clz.getModelFile().should.equal(modelFile);
+            clz.getKey().getModelFile().should.equal(modelFile);
+            clz.getValue().getModelFile().should.equal(modelFile);
+        });
+
+        it('should return the correct value on introspection', () => {
             let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
-            (declaration.declarationKind()).should.equal('MapDeclaration');
+            declaration.declarationKind().should.equal('MapDeclaration');
+            declaration.getFullyQualifiedName().should.equal('com.testing@1.0.0.Dictionary');
+            declaration.getName().should.equal('Dictionary');
+            declaration.isAbstract().should.equal(false);
+            declaration.isAsset().should.equal(false);
+            declaration.isParticipant().should.equal(false);
+            declaration.isTransaction().should.equal(false);
+            declaration.isEvent().should.equal(false);
+            declaration.isConcept().should.equal(false);
+            declaration.isEnum().should.equal(false);
+            declaration.isScalarDeclaration().should.equal(false);
+            declaration.isMapDeclaration().should.equal(true);
         });
     });
 
