@@ -54,13 +54,32 @@
             "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
             "pattern": "[a-zA-Z]*",
             "flags": "u"
+          },
+          "lengthValidator": {
+            "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+            "maxLength": 100
           }
         },
         {
           "$class": "concerto.metamodel@1.0.0.StringProperty",
           "name": "lastName",
           "isArray": false,
-          "isOptional": false
+          "isOptional": false,
+          "lengthValidator": {
+            "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+            "minLength": 1
+          }
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "middleName",
+          "isArray": false,
+          "isOptional": false,
+          "lengthValidator": {
+            "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+            "maxLength": 100,
+            "minLength": 1
+          }
         },
         {
           "$class": "concerto.metamodel@1.0.0.ObjectProperty",

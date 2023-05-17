@@ -1123,7 +1123,7 @@ RealScalar
   }
 
 StringScalar
-   = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ {
+   = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ {
       const result = {
         $class: "concerto.metamodel@1.0.0.StringScalar",
       };
@@ -1132,6 +1132,9 @@ StringScalar
       }
       if (regex) {
     		result.validator = regex;
+      }
+      if (length) {
+        result.lengthValidator = length;
       }
       return result;
   }
@@ -1268,7 +1271,7 @@ DateTimeFieldDeclaration
     }
 
 StringFieldDeclaration
-    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.StringProperty",
     		name: id.name,
@@ -1285,12 +1288,29 @@ StringFieldDeclaration
       if (regex) {
     		result.validator = regex;
       }
+      if (length) {
+        result.lengthValidator = length;
+      }
       return result;
     }
 
 StringRegexValidator
    = "regex" __ "=" __ regex:RegularExpressionLiteral {
    	return regex
+  }
+
+StringLengthValidator
+   = "length" __ "=" __ "[" __ minLength:$SignedInteger? __ "," __ maxLength:$SignedInteger? __ "]" {
+    const result = {
+      $class: `${metamodelNamespace}.StringLengthValidator`
+    };
+    if (minLength) {
+      result.minLength = parseInt(minLength);
+    }
+    if (maxLength) {
+      result.maxLength = parseInt(maxLength);
+    }
+   	return result;
   }
 
 RealDomainValidator

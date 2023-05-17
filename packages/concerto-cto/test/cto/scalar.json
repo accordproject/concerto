@@ -102,6 +102,40 @@
             "name": "DateTimeScalarWithDefault"
         },
         {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "defaultValue": "something",
+            "validator": {
+                "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
+                "pattern": ".*",
+                "flags": ""
+            },
+            "lengthValidator": {
+                "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+                "minLength": 1,
+                "maxLength": 100
+            },
+            "name": "StringScalarWithDefaultAndRegexAndLength"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "defaultValue": "something",
+            "lengthValidator": {
+                "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+                "minLength": 1,
+                "maxLength": 100
+            },
+            "name": "StringScalarWithDefaultAndLength"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "lengthValidator": {
+                "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+                "minLength": 1,
+                "maxLength": 100
+            },
+            "name": "StringScalarWithLength"
+        },
+        {
             "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
             "name": "Scalars",
             "isAbstract": false,
@@ -275,6 +309,36 @@
                     },
                     "isArray": false,
                     "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "stringScalarWithDefaultAndRegexAndLength",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "StringScalarWithDefaultAndRegexAndLength"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "stringScalarWithDefaultAndLength",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "StringScalarWithDefaultAndLength"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "stringScalarWithLength",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "StringScalarWithLength"
+                    },
+                    "isArray": false,
+                    "isOptional": false
                 }
             ]
         },
@@ -322,6 +386,11 @@
                 "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
                 "pattern": "\\d{3}-\\d{2}-\\{4}+",
                 "flags": ""
+            },
+            "lengthValidator": {
+                "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+                "minLength": 1,
+                "maxLength": 100
             },
             "name": "SSN"
         },

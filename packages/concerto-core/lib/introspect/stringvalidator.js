@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { isNull } = require('../util');
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.
@@ -37,17 +38,45 @@ class StringValidator extends Validator{
      * Create a StringValidator.
      * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string. This must be a regex
+     * @param {Object} lengthValidator - The length validation string - [minLength,maxLength] (inclusive).
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, validator) {
+    constructor(field, validator, lengthValidator) {
         super(field, validator);
-        try {
-            const CustomRegExp = field?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
-            this.regex = new CustomRegExp(validator.pattern, validator.flags);
+        this.minLength = null;
+        this.maxLength = null;
+        this.regex = null;
+
+        if (lengthValidator) {
+            if(Object.prototype.hasOwnProperty.call(lengthValidator, 'minLength')) {
+                this.minLength = lengthValidator.minLength;
+            }
+            if(Object.prototype.hasOwnProperty.call(lengthValidator, 'maxLength')) {
+                this.maxLength = lengthValidator.maxLength;
+            }
+            if(this.minLength === null && this.maxLength === null) {
+                // can't specify no upper and lower value
+                this.reportError(null, 'Invalid string length, minLength and-or maxLength must be specified.');
+            } else if (this.minLength < 0 || this.maxLength < 0) {
+                this.reportError(null, 'minLength and-or maxLength must be positive integers.');
+            } else if (this.minLength === null || this.maxLength === null) {
+                // this is fine and means that we don't need to check whether minLength > maxLength
+            } else {
+                if(this.minLength > this.maxLength) {
+                    this.reportError(null, 'minLength must be less than or equal to maxLength.');
+                }
+            }
         }
-        catch(exception) {
-            this.reportError(field.getName(), exception.message);
+
+        if (validator) {
+            try {
+                const CustomRegExp = field?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
+                this.regex = new CustomRegExp(validator.pattern, validator.flags);
+            }
+            catch(exception) {
+                this.reportError(field.getName(), exception.message);
+            }
         }
     }
 
@@ -60,14 +89,38 @@ class StringValidator extends Validator{
      */
     validate(identifier, value) {
         if(value !== null) {
-            if(!this.regex.test(value)) {
-                this.reportError(identifier, 'Value \'' + value + '\' failed to match validation regex: ' + this.regex);
+            if (this.regex) {
+                if(!this.regex.test(value)) {
+                    this.reportError(identifier, 'Value \'' + value + '\' failed to match validation regex: ' + this.regex);
+                }
+            }
+            //Enforce string length rule after regex check
+            if(this.minLength !== null && value.length < this.minLength) {
+                this.reportError(identifier, `The string length of ${value} should be at least ${this.minLength} characters.`);
+            }
+            if(this.maxLength !== null && value.length > this.maxLength) {
+                this.reportError(identifier, `The string length of ${value} should not exceed ${this.maxLength} characters.`);
             }
         }
     }
 
     /**
-     * Returns the RegExp object associated with the string validator
+     * Returns the minLength for this validator, or null if not specified
+     * @returns {number} the min length or null
+     */
+    getMinLength() {
+        return this.minLength;
+    }
+    /**
+     * Returns the maxLength for this validator, or null if not specified
+     * @returns {number} the max length or null
+     */
+    getMaxLength() {
+        return this.maxLength;
+    }
+
+    /**
+     * Returns the RegExp object associated with the string validator, or null if not specified
      * @returns {RegExp} the RegExp object
      */
     getRegex() {
@@ -85,13 +138,33 @@ class StringValidator extends Validator{
     compatibleWith(other) {
         if (!(other instanceof StringValidator)) {
             return false;
-        } else if (this.validator.pattern !== other.validator.pattern) {
-            return false;
-        } else if (this.validator.flags !== other.validator.flags) {
-            return false;
-        } else {
-            return true;
         }
+
+        if (this.validator?.pattern !== other.validator?.pattern) {
+            return false;
+        } else if (this.validator?.flags !== other.validator?.flags) {
+            return false;
+        }
+
+        const thisMinLength = this.getMinLength();
+        const otherMinLength = other.getMinLength();
+        if (isNull(thisMinLength) && !isNull(otherMinLength)) {
+            return false;
+        } else if (!isNull(thisMinLength) && !isNull(otherMinLength)) {
+            if (thisMinLength < otherMinLength) {
+                return false;
+            }
+        }
+        const thisMaxLength = this.getMaxLength();
+        const otherMaxLength = other.getMaxLength();
+        if (isNull(thisMaxLength) && !isNull(otherMaxLength)) {
+            return false;
+        } else if (!isNull(thisMaxLength) && !isNull(otherMaxLength)) {
+            if (thisMaxLength > otherMaxLength) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

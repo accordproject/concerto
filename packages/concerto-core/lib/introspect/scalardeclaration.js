@@ -83,8 +83,8 @@ class ScalarDeclaration extends Declaration {
             }
             break;
         case 'String':
-            if(this.ast.validator) {
-                this.validator = new StringValidator(this, this.ast.validator);
+            if(this.ast.validator || this.ast.lengthValidator) {
+                this.validator = new StringValidator(this, this.ast.validator, this.ast.lengthValidator);
             }
             break;
         }

@@ -73,10 +73,11 @@ class Field extends Property {
             }
             break;
         case 'String':
-            if (this.ast.validator) {
+            if (this.ast.validator || this.ast.lengthValidator) {
                 this.validator = new StringValidator(
                     this,
-                    this.ast.validator
+                    this.ast.validator,
+                    this.ast.lengthValidator
                 );
             }
             break;

@@ -33,7 +33,7 @@ concept BooleanValue {
 }
 
 concept TestConcept {
-    o String s default="test" regex=/test/
+    o String s default="test" regex=/test/ length=[1,100]
     o Double d default = 1.0 range=[0.0,10.0] optional 
     o Long l default = 1 range=[0,10]
     o Integer i default = 1 range=[0,10] optional 
@@ -79,4 +79,10 @@ concept Ranges {
     o Double d range=[-10.0,10.0]
     o Double d2 range=[,10.0]
     o Double d3 range=[-10.0,]
+}
+
+concept Lengths {
+    o String s length=[1,100]
+    o String s1 length=[1,]
+    o String s2 length=[,100]
 }

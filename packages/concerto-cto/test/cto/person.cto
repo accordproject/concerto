@@ -13,8 +13,9 @@ abstract participant Individual {
 }
 
 participant Person extends Individual {
-  o String firstName regex=/[a-zA-Z]*/u
-  o String lastName
+  o String firstName regex=/[a-zA-Z]*/u length=[,100]
+  o String lastName length=[1,]
+  o String middleName length=[1,100]
   o Address address
   o Address address2 default="USAddress"
   --> Address address3

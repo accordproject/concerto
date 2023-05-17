@@ -45,3 +45,9 @@ scalar StringScalarWithDefaultAndRegex extends String default="something" regex=
 scalar DateTimeScalar extends DateTime
 
 scalar DateTimeScalarWithDefault extends DateTime default="2022-11-18"
+
+scalar StringScalarWithLength extends String length=[1,100]
+
+scalar StringScalarWithDefaultAndLength extends String default="something" length=[1,]
+
+scalar StringScalarWithDefaultAndRegexAndLength extends String default="something" regex=/.*/ length=[,100]
