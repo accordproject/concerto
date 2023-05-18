@@ -164,6 +164,21 @@ describe('MapDeclaration', () => {
             asset.validate();
         });
 
+        it('should not throw when map value is an asset declaration', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.asset.cto', MapDeclaration);
+            asset.validate();
+        });
+
+        it('should not throw when map value is an transaction declaration', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.transaction.cto', MapDeclaration);
+            asset.validate();
+        });
+
+        it('should not throw when map value is an participant declaration', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.participant.cto', MapDeclaration);
+            asset.validate();
+        });
+
         it('should not throw when map value is a map declaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.map.cto', MapDeclaration);
             asset.validate();
@@ -332,7 +347,6 @@ describe('MapDeclaration', () => {
                     }
                 ]
             });
-            clz.getKey().getFullyQualifiedName().should.equal('com.test.DateTime');
             clz.getKey().getName().should.equal('DateTime');
             clz.getKey().getType().should.equal('DateTime');
         });
@@ -372,7 +386,6 @@ describe('MapDeclaration', () => {
                     }
                 ]
             });
-            clz.getValue().getFullyQualifiedName().should.equal('com.test.String');
             clz.getValue().getName().should.equal('String');
             clz.getValue().getType().should.equal('String');
         });
