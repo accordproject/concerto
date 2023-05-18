@@ -12,13 +12,12 @@ declare class MapValueType extends Decorated {
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
     constructor(parent: MapDeclaration, ast: any);
     parent: MapDeclaration;
-    name: any;
     type: any;
-    fqn: string;
     /**
      * Semantic validation of the structure of this class.
      *
@@ -26,13 +25,6 @@ declare class MapValueType extends Decorated {
      * @protected
      */
     protected validate(): void;
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName(): string;
     /**
      * Returns the name of the MapValue. This name does not include the
      * namespace from the owning ModelFile.
