@@ -96,6 +96,16 @@ class MapDeclaration extends Declaration {
     }
 
     /**
+     * Returns the fully qualified name of this class.
+     * The name will include the namespace if present.
+     *
+     * @return {string} the fully-qualified name of this class
+     */
+    getFullyQualifiedName() {
+        return this.fqn;
+    }
+
+    /**
      * Returns the ModelFile that defines this class.
      *
      * @public
