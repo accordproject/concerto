@@ -159,6 +159,11 @@ describe('MapDeclaration', () => {
             asset.validate();
         });
 
+        it('should not throw when map value is a concept derived from another concept declaration', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.derived.concept.cto', MapDeclaration);
+            asset.validate();
+        });
+
         it('should not throw when map value is an event declaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.event.cto', MapDeclaration);
             asset.validate();
