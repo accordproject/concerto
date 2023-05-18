@@ -18,7 +18,6 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
-const ModelUtil = require('../modelutil');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -62,7 +61,6 @@ class MapKeyType extends Declaration {
         super.process();
         this.name = this.ast.name;
         this.type = this.ast.name;
-        this.fqn = ModelUtil.getFullyQualifiedName(this.parent.getModelFile().getNamespace(), this.ast.name);
     }
 
     /**
@@ -99,16 +97,6 @@ class MapKeyType extends Declaration {
                 );
             }
         }
-    }
-
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
     }
 
     /**
