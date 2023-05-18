@@ -71,7 +71,10 @@ class MapValueType extends Decorated {
 
         if (!value?.isConcept?.()           &&
             !value?.isEnum?.()              &&
+            !value?.isAsset?.()             &&
             !value?.isEvent?.()             &&
+            !value?.isParticipant?.()       &&
+            !value?.isTransaction?.()       &&
             !value?.isMapDeclaration?.()    &&
             !value?.isScalarDeclaration?.() &&
             !['String', 'Long', 'Integer', 'Double', 'Boolean', 'DateTime'].includes(this.type)) {
