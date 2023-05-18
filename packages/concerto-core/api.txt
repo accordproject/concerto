@@ -98,6 +98,7 @@ class ClassDeclaration extends Declaration {
    + boolean isEvent() 
    + boolean isConcept() 
    + boolean isEnum() 
+   + boolean isMapDeclaration() 
    + boolean isClassDeclaration() 
 }
 class ConceptDeclaration extends ClassDeclaration {
@@ -153,7 +154,7 @@ class Introspector {
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
-class MapDeclaration extends Decorated {
+class MapDeclaration extends Declaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    ~ void validate() throws IllegalModelException
    + string getFullyQualifiedName() 
@@ -164,29 +165,19 @@ class MapDeclaration extends Decorated {
    + array getProperties() 
    + String toString() 
    + string declarationKind() 
-   + boolean isAbstract() 
-   + boolean isAsset() 
-   + boolean isParticipant() 
-   + boolean isTransaction() 
-   + boolean isEvent() 
-   + boolean isConcept() 
-   + boolean isEnum() 
-   + boolean isScalarDeclaration() 
    + boolean isMapDeclaration() 
 }
 class MapKeyType extends Decorated {
-   + void constructor(MapDeclaration,Object) throws IllegalModelException
+   + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + string getFullyQualifiedName() 
    + ModelFile getModelFile() 
    + string getName() 
    + string getType() 
    + String toString() 
 }
 class MapValueType extends Decorated {
-   + void constructor(MapDeclaration,Object) throws IllegalModelException
+   + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + string getFullyQualifiedName() 
    + ModelFile getModelFile() 
    + string getName() 
    + string getType() 
