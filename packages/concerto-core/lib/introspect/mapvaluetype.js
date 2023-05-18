@@ -43,7 +43,6 @@ class MapValueType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
-        this.name = null;
         this.type = null;
         this.process();
     }
@@ -56,7 +55,6 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-        this.name = this.ast.name;
         this.type = this.ast.name;
     }
 
@@ -69,7 +67,7 @@ class MapValueType extends Decorated {
     validate() {
         const declarations = this.getModelFile().getAllDeclarations();
 
-        const value = declarations.find(decl => decl.name === this.name);
+        const value = declarations.find(decl => decl.name === this.type);
 
         if (!value?.isConcept?.()           &&
             !value?.isEnum?.()              &&

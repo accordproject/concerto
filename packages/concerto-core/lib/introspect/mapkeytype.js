@@ -45,7 +45,6 @@ class MapKeyType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
-        this.name = null;
         this.type = null;
         this.process();
     }
@@ -58,7 +57,6 @@ class MapKeyType extends Decorated {
      */
     process() {
         super.process();
-        this.name = this.ast.name;
         this.type = this.ast.name;
     }
 
@@ -70,7 +68,7 @@ class MapKeyType extends Decorated {
      */
     validate() {
         const declaration = this.getModelFile().getAllDeclarations();
-        const key = declaration.find(decl => decl.name === this.name);
+        const key = declaration.find(decl => decl.name === this.type);
 
         if (!key?.isConcept?.()           &&
             !key?.isEnum?.()              &&
@@ -90,7 +88,7 @@ class MapKeyType extends Decorated {
             !(key?.ast.$class === `${MetaModelNamespace}.BooleanScalar`) &&
             !(key?.ast.$class === `${MetaModelNamespace}.DateTimeScalar` )) {
             throw new IllegalModelException(
-                `Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.name}`
+                `Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}`
             );
         }
 
