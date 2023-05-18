@@ -650,6 +650,15 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
+    isMapDeclaration() {
+        return this.type === `${MetaModelNamespace}.MapDeclaration`;
+    }
+
+    /**
+     * Returns true if this class is the definition of a enum.
+     *
+     * @return {boolean} true if the class is an asset
+     */
     isClassDeclaration() {
         return true;
     }
