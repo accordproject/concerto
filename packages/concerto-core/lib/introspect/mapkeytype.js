@@ -80,23 +80,21 @@ class MapKeyType extends Declaration {
             throw new IllegalModelException(`MapKeyType has invalid Type: ${this.type}`);
         }
 
-        if (key?.isConcept?.()) {
-            if(!key.isIdentified()) {
-                throw new IllegalModelException(
-                    `ConceptDeclaration must be identified in context of MapKeyType: ${this.type}`
-                );
-            }
+        if (key?.isConcept?.() && !key.isIdentified()) {
+            throw new IllegalModelException(
+                `ConceptDeclaration must be identified in context of MapKeyType: ${this.type}`
+            );
         }
 
-        if (key?.isScalarDeclaration?.()) {
-            if (!(key?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
-                !(key?.ast.$class === `${MetaModelNamespace}.BooleanScalar`) &&
-                !(key?.ast.$class === `${MetaModelNamespace}.DateTimeScalar` )) {
-                throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.name}`
-                );
-            }
+        if (key?.isScalarDeclaration?.() &&
+            !(key?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
+            !(key?.ast.$class === `${MetaModelNamespace}.BooleanScalar`) &&
+            !(key?.ast.$class === `${MetaModelNamespace}.DateTimeScalar` )) {
+            throw new IllegalModelException(
+                `Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.name}`
+            );
         }
+
     }
 
     /**
