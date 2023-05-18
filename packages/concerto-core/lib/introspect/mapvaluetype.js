@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Declaration = require('./declaration');
+const Decorated = require('./decorated');
 const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
@@ -32,7 +32,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class MapValueType extends Declaration {
+class MapValueType extends Decorated {
     /**
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
@@ -40,9 +40,8 @@ class MapValueType extends Declaration {
      * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast, modelFile) {
-        super(modelFile, ast);
-        this.modelFile = modelFile;
+    constructor(parent, ast) {
+        super(ast);
         this.parent = parent;
         this.name = null;
         this.type = null;
