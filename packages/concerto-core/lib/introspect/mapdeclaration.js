@@ -61,20 +61,20 @@ class MapDeclaration extends Decorated {
             throw new IllegalModelException(`MapDeclaration must contain exactly two properties -  MapKeyType & MapyValueType ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        const k = this.ast.properties.find(p => p.$class === 'concerto.metamodel@1.0.0.MapKeyType');
-        const v = this.ast.properties.find(p => p.$class === 'concerto.metamodel@1.0.0.AggregateValueType' || p.$class === 'concerto.metamodel@1.0.0.AggregateRelationshipValueType');
+        const key = this.ast.properties.find(property => property.$class === 'concerto.metamodel@1.0.0.MapKeyType');
+        const value = this.ast.properties.find(property => property.$class === 'concerto.metamodel@1.0.0.AggregateValueType' || property.$class === 'concerto.metamodel@1.0.0.AggregateRelationshipValueType');
 
-        if (!k) {
+        if (!key) {
             throw new IllegalModelException(`MapDeclaration must contain MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        if (!v) {
+        if (!value) {
             throw new IllegalModelException(`MapDeclaration must contain AggregateValueType  ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
         this.name = this.ast.name;
-        this.key = new MapKeyType(this, k);
-        this.value = new MapPropertyType(this, v);
+        this.key = new MapKeyType(this, key);
+        this.value = new MapPropertyType(this, value);
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
