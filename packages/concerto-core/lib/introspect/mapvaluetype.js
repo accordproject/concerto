@@ -79,7 +79,7 @@ class MapValueType extends Declaration {
             !value?.isScalarDeclaration?.() &&
             !['String', 'Long', 'Integer', 'Double', 'Boolean', 'DateTime'].includes(this.type)) {
             throw new IllegalModelException(
-                `MapPropertyType has invalid Type: ${this.type}` // TODO add useful error message
+                `MapPropertyType has invalid Type: ${this.type}`
             );
         }
     }
