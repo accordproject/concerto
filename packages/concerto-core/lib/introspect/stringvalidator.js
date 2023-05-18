@@ -49,23 +49,18 @@ class StringValidator extends Validator{
         this.regex = null;
 
         if (lengthValidator) {
-            if(Object.prototype.hasOwnProperty.call(lengthValidator, 'minLength')) {
-                this.minLength = lengthValidator.minLength;
-            }
-            if(Object.prototype.hasOwnProperty.call(lengthValidator, 'maxLength')) {
-                this.maxLength = lengthValidator.maxLength;
-            }
+            this.minLength = lengthValidator?.minLength;
+            this.maxLength = lengthValidator?.maxLength;
+
             if(this.minLength === null && this.maxLength === null) {
                 // can't specify no upper and lower value
-                this.reportError(null, 'Invalid string length, minLength and-or maxLength must be specified.');
+                this.reportError(field.getName(), 'Invalid string length, minLength and-or maxLength must be specified.');
             } else if (this.minLength < 0 || this.maxLength < 0) {
-                this.reportError(null, 'minLength and-or maxLength must be positive integers.');
+                this.reportError(field.getName(), 'minLength and-or maxLength must be positive integers.');
             } else if (this.minLength === null || this.maxLength === null) {
                 // this is fine and means that we don't need to check whether minLength > maxLength
-            } else {
-                if(this.minLength > this.maxLength) {
-                    this.reportError(null, 'minLength must be less than or equal to maxLength.');
-                }
+            } else if(this.minLength > this.maxLength) {
+                this.reportError(field.getName(), 'minLength must be less than or equal to maxLength.');
             }
         }
 
@@ -89,17 +84,16 @@ class StringValidator extends Validator{
      */
     validate(identifier, value) {
         if(value !== null) {
-            if (this.regex) {
-                if(!this.regex.test(value)) {
-                    this.reportError(identifier, 'Value \'' + value + '\' failed to match validation regex: ' + this.regex);
-                }
-            }
-            //Enforce string length rule after regex check
+            //Enforce string length rule first
             if(this.minLength !== null && value.length < this.minLength) {
-                this.reportError(identifier, `The string length of ${value} should be at least ${this.minLength} characters.`);
+                this.reportError(identifier, `The string length of '${value}' should be at least ${this.minLength} characters.`);
             }
             if(this.maxLength !== null && value.length > this.maxLength) {
-                this.reportError(identifier, `The string length of ${value} should not exceed ${this.maxLength} characters.`);
+                this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
+            }
+
+            if (this.regex && !this.regex.test(value)) {
+                this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
             }
         }
     }

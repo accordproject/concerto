@@ -88,6 +88,29 @@ describe('InstanceGenerator', () => {
             resource.theValue.should.be.a('string');
         });
 
+        it('should generate a value with specified lentgh constraint for a string property', () => {
+            useSampleGenerator();
+            let resource = test(`namespace org.acme.test
+            asset MyAsset identified by assetId {
+                o String assetId
+                o String valueWithRegexAndLength regex = /^[a-zA-Z0-9_]*$/ length=[1,100]
+                o String valueWthLength length=[1,100]
+                o String valueWithMinLength length=[1,]
+                o String valueWithMaxLength length=[,100]
+                o String valueWithExactLength length=[100,100]
+            }`);
+            resource.valueWithRegexAndLength.should.be.a('string');
+            resource.valueWithRegexAndLength.length.should.be.below(101).and.to.be.above(0);
+            resource.valueWthLength.should.be.a('string');
+            resource.valueWthLength.length.should.be.below(101).and.to.be.above(0);
+            resource.valueWithMinLength.should.be.a('string');
+            resource.valueWithMinLength.length.should.be.above(0);
+            resource.valueWithMaxLength.should.be.a('string');
+            resource.valueWithMaxLength.length.should.be.below(101);
+            resource.valueWithExactLength.should.be.a('string');
+            resource.valueWithExactLength.should.have.lengthOf(100);
+        });
+
         it('should not throw a recursion error', () => {
             let resource = test(`namespace org.acme.test
             participant MyParticipant identified by participantId{
@@ -442,6 +465,36 @@ describe('InstanceGenerator', () => {
             resource.ssn2.should.be.a('String');
             resource.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
             resource.ssn2.should.equal('000-00-0000');
+        });
+
+        it('should generate with appropritate string length value for a Scalar field', function () {
+            let resource = test(`namespace org.acme.test
+
+            scalar ScalarValueWithRegexAndLength extends String regex=/^[a-zA-Z0-9_]*$/ length=[1,100]
+            scalar ScalarValueWthLength extends String length=[1,100]
+            scalar ScalarValueWithMinLength extends String length=[1,]
+            scalar ScalarValueWithMaxLength extends String length=[,100]
+            scalar ScalarValueWithExactLength extends String length=[100,100]
+
+            asset MyAsset identified by id {
+                o String id
+                o ScalarValueWithRegexAndLength scalarValueWithRegexAndLength
+                o ScalarValueWthLength scalarValueWthLength
+                o ScalarValueWithMinLength scalarValueWithMinLength
+                o ScalarValueWithMaxLength scalarValueWithMaxLength
+                o ScalarValueWithExactLength scalarValueWithExactLength
+            }`);
+            resource.scalarValueWithRegexAndLength.should.be.a('String');
+            resource.scalarValueWithRegexAndLength.should.match(/^[a-zA-Z0-9_]*$/);
+            resource.scalarValueWithRegexAndLength.length.should.be.below(101).and.to.be.above(0);
+            resource.scalarValueWthLength.should.be.a('string');
+            resource.scalarValueWthLength.length.should.be.below(101).and.to.be.above(0);
+            resource.scalarValueWithMinLength.should.be.a('string');
+            resource.scalarValueWithMinLength.length.should.be.above(0);
+            resource.scalarValueWithMaxLength.should.be.a('string');
+            resource.scalarValueWithMaxLength.length.should.be.below(101);
+            resource.scalarValueWithExactLength.should.be.a('string');
+            resource.scalarValueWithExactLength.should.have.lengthOf(100);
         });
 
         it('should throw an error when id provided does not match regex on id field', function () {

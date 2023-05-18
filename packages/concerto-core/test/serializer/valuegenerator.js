@@ -164,6 +164,47 @@ describe('ValueGenerator', function() {
             expect(regex.test(output)).to.be.true;
         });
 
+        it('getRegex with string length should return a string that matches the regex', function() {
+            [
+                [1, 100],
+                [null, 100],
+                [1, null],
+                [1, 1],
+                [null, null],
+                [100, null],
+            ].forEach(([min, max]) => {
+                const regex = /^[a-zA-Z0-9_]*$/;
+                const output = ValueGeneratorFactory.sample().getRegex(regex, min, max);
+                expect(regex.test(output)).to.be.true;
+                if (min) {
+                    expect(output.length >= min).to.be.true;
+                }
+                if (max) {
+                    expect(output.length <= max).to.be.true;
+                }
+            });
+        });
+
+        it('getString with length should return a string that matches the length constraint', function() {
+            [
+                //[1, 100],
+                [null, 100],
+                [1, null],
+                [1, 1],
+                [null, null],
+                [100, null],
+            ].forEach(([min, max]) => {
+                const output = ValueGeneratorFactory.sample().getString(min, max);
+                expect(output !== null).to.be.true;
+                if (min) {
+                    expect(output.length >= min).to.be.true;
+                }
+                if (max) {
+                    expect(output.length <= max).to.be.true;
+                }
+            });
+        });
+
         it('getRange should return a Long in range', function() {
             const output = ValueGeneratorFactory.sample().getRange(0, 100, 'Long');
             expect(output).to.be.a('number');

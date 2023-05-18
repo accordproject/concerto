@@ -86,6 +86,76 @@ const getRange = (lowerBound, upperBound, type) => {
 };
 
 /**
+ * Get a randomly generated sample String value with lower and upper bound.
+ * @param {string} seedString a String value.
+ * @param {number} minLength the lower bound on the range, inclusive.
+ * @param {number} maxLength the upper bound on the range, inclusive.
+ * @param {Function}  stringGenFunc String gen function
+ * @return {string} a String value.
+ * @private
+ */
+const generateString = (seedString, minLength, maxLength, stringGenFunc) => {
+    minLength ??= 0; //set to 0 if null or underfined
+    maxLength ??= null; //set to null if null or undefined.
+    const stringLength = getRange(minLength, maxLength, 'Integer');
+    while(seedString.length < stringLength) {
+        seedString += stringGenFunc();
+    }
+    return seedString.substring(0, stringLength);
+};
+
+/**
+ * Get a randomly generated sample String value with lower and upper bound.
+ * @param {number} minLength the lower bound on the range, inclusive.
+ * @param {number} maxLength the upper bound on the range, inclusive.
+ * @return {string} a String value.
+ * @private
+ */
+const getString = (minLength, maxLength) => {
+    const lower = 1;
+    const upper = 5;
+    let stringValue = loremIpsum({
+        count: 1                        // Number of words, sentences, or paragraphs to generate.
+        , units: 'sentences'            // Generate words, sentences, or paragraphs.
+        , sentenceLowerBound: lower         // Minimum words per sentence.
+        , sentenceUpperBound: upper         // Maximum words per sentence.
+    });
+
+    if (minLength || maxLength) {
+        stringValue = generateString(stringValue, minLength, maxLength, () => loremIpsum({
+            count: 1                        // Number of words, sentences, or paragraphs to generate.
+            , units: 'sentences'            // Generate words, sentences, or paragraphs.
+            , sentenceLowerBound: lower         // Minimum words per sentence.
+            , sentenceUpperBound: upper         // Maximum words per sentence.
+        }));
+    }
+    return stringValue;
+};
+
+
+/**
+ * Get a randomly generated sample regex String value with lower and upper bound.
+ * @param {RegExp} regex A regular expression.
+ * @param {number} minLength the lower bound on the range, inclusive.
+ * @param {number} maxLength the upper bound on the range, inclusive.
+ * @return {string} a String value.
+ * @private
+ */
+const getRegexString = (regex, minLength, maxLength) => {
+    if (!regex) {
+        return '';
+    }
+    const randexp = new RandExp(regex.source, regex.flags);
+    let stringValue = randexp.gen();
+    if (minLength || maxLength) {
+        stringValue = generateString(stringValue, minLength, maxLength, () => randexp.gen());
+    }
+    return stringValue;
+};
+
+
+
+/**
  * Empty value generator.
  * @private
  */
@@ -139,10 +209,15 @@ class EmptyValueGenerator {
     }
 
     /**
-     * Get a default String value.
+     * Get a randomly generated sample String value with lower and upper bound.
+     * @param {number} minLength the lower bound on the range, inclusive.
+     * @param {number} maxLength the upper bound on the range, inclusive.
      * @return {string} a String value.
      */
-    getString() {
+    getString(minLength, maxLength) {
+        if (minLength || maxLength) {
+            return getString(minLength, maxLength);
+        }
         return '';
     }
 
@@ -165,12 +240,14 @@ class EmptyValueGenerator {
     }
 
     /**
-     * Get a default Regex value.
+     * Get a randomly generated sample regex String value with lower and upper bound.
      * @param {RegExp} regex A regular expression.
+     * @param {number} minLength the lower bound on the range, inclusive.
+     * @param {number} maxLength the upper bound on the range, inclusive.
      * @return {string} a String value.
      */
-    getRegex(regex) {
-        return regex ? new RandExp(regex.source, regex.flags).gen() : '';
+    getRegex(regex, minLength, maxLength) {
+        return getRegexString(regex, minLength, maxLength);
     }
 
     /**
@@ -232,17 +309,13 @@ class SampleValueGenerator extends EmptyValueGenerator {
     }
 
     /**
-     * Get a randomly generated sample String value.
+     * Get a randomly generated sample String value with lower and upper bound.
+     * @param {number} minLength the lower bound on the range, inclusive.
+     * @param {number} maxLength the upper bound on the range, inclusive.
      * @return {string} a String value.
      */
-    getString() {
-        return loremIpsum({
-            count: 1                        // Number of words, sentences, or paragraphs to generate.
-            , units: 'sentences'            // Generate words, sentences, or paragraphs.
-            , sentenceLowerBound: 1         // Minimum words per sentence.
-            , sentenceUpperBound: 5         // Maximum words per sentence.
-
-        });
+    getString(minLength, maxLength) {
+        return getString(minLength, maxLength);
     }
 
 
@@ -265,12 +338,14 @@ class SampleValueGenerator extends EmptyValueGenerator {
     }
 
     /**
-     * Get a default Regex value.
+     * Get a randomly generated sample regex String value with lower and upper bound.
      * @param {RegExp} regex A regular expression.
+     * @param {number} minLength the lower bound on the range, inclusive.
+     * @param {number} maxLength the upper bound on the range, inclusive.
      * @return {string} a String value.
      */
-    getRegex(regex) {
-        return regex ? new RandExp(regex.source, regex.flags).gen() : '';
+    getRegex(regex, minLength, maxLength) {
+        return getRegexString(regex, minLength, maxLength);
     }
 
     /**
