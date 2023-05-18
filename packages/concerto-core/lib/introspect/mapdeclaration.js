@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Decorated = require('./decorated');
+const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
-const MapPropertyType = require('./mapvaluetype');
+const MapValueType = require('./mapvaluetype');
 const MapKeyType = require('./mapkeytype');
 const ModelUtil = require('../modelutil');
 
@@ -35,15 +35,15 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class MapDeclaration extends Decorated {
+class MapDeclaration extends Declaration {
     /**
      * Create an MapDeclaration.
-     * @param {ModelFile} modelFile the ModelFile for this class
+     * @param {ModelFile} modelFile - the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
-        super(ast);
+        super(modelFile, ast);
         this.modelFile = modelFile;
         this.process();
     }
@@ -73,8 +73,8 @@ class MapDeclaration extends Decorated {
         }
 
         this.name = this.ast.name;
-        this.key = new MapKeyType(this, key);
-        this.value = new MapPropertyType(this, value);
+        this.key = new MapKeyType(this, key, this.modelFile);
+        this.value = new MapValueType(this, value, this.modelFile);
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
@@ -88,16 +88,6 @@ class MapDeclaration extends Decorated {
         super.validate();
         this.key.validate();
         this.value.validate();
-    }
-
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
     }
 
     /**
@@ -162,78 +152,6 @@ class MapDeclaration extends Decorated {
      */
     declarationKind() {
         return 'MapDeclaration';
-    }
-
-    /**
-     * Returns true if this class is abstract.
-     *
-     * @return {boolean} true if the class is abstract
-     */
-    isAbstract() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of an asset.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isAsset() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a participant.
-     *
-     * @return {boolean} true if the class is a participant
-     */
-    isParticipant() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a transaction.
-     *
-     * @return {boolean} true if the class is a transaction
-     */
-    isTransaction() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of an event.
-     *
-     * @return {boolean} true if the class is an event
-     */
-    isEvent() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is a concept
-     */
-    isConcept() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of an enum.
-     *
-     * @return {boolean} true if the class is an enum
-     */
-    isEnum() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a scalar declaration.
-     *
-     * @return {boolean} true if the class is a scalar
-     */
-    isScalarDeclaration() {
-        return false;
     }
 
     /**

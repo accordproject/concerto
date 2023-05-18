@@ -16,7 +16,7 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const Decorated = require('./decorated');
+const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 
@@ -35,19 +35,20 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class MapKeyType extends Decorated {
+class MapKeyType extends Declaration {
     /**
      * Create an MapKeyType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        super(ast);
+    constructor(parent, ast, modelFile) {
+        super(modelFile, ast);
+        this.modelFile = modelFile;
         this.parent = parent;
         this.name = null;
         this.type = null;
-        this.fqn = null;
         this.process();
     }
 

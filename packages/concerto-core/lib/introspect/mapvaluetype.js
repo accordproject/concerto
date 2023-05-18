@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Decorated = require('./decorated');
+const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 
@@ -33,15 +33,17 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class MapValueType extends Decorated {
+class MapValueType extends Declaration {
     /**
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        super(ast);
+    constructor(parent, ast, modelFile) {
+        super(modelFile, ast);
+        this.modelFile = modelFile;
         this.parent = parent;
         this.name = null;
         this.type = null;

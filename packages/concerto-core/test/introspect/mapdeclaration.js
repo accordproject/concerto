@@ -423,14 +423,6 @@ describe('MapDeclaration', () => {
             declaration.declarationKind().should.equal('MapDeclaration');
             declaration.getFullyQualifiedName().should.equal('com.testing@1.0.0.Dictionary');
             declaration.getName().should.equal('Dictionary');
-            declaration.isAbstract().should.equal(false);
-            declaration.isAsset().should.equal(false);
-            declaration.isParticipant().should.equal(false);
-            declaration.isTransaction().should.equal(false);
-            declaration.isEvent().should.equal(false);
-            declaration.isConcept().should.equal(false);
-            declaration.isEnum().should.equal(false);
-            declaration.isScalarDeclaration().should.equal(false);
             declaration.isMapDeclaration().should.equal(true);
         });
     });
