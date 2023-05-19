@@ -26,13 +26,6 @@ declare class MapKeyType extends Decorated {
      */
     protected validate(): void;
     /**
-     * Returns the name of the MapKey. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName(): string;
-    /**
      * Returns the Type of the MapKey. This name does not include the
      * namespace from the owning ModelFile.
      *

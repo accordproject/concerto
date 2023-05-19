@@ -21,17 +21,9 @@ declare class MapValueType extends Decorated {
     /**
      * Semantic validation of the structure of this class.
      *
-     * @throws {IllegalModelException}
-     * @protected
+     * @returns {boolean} - returns true, all concerto concepts and primitives are legal MapValueTypes.
      */
-    protected validate(): void;
-    /**
-     * Returns the name of the MapValue. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName(): string;
+    validate(): boolean;
     /**
      * Returns the Type of the MapValue. This name does not include the
      * namespace from the owning ModelFile.
