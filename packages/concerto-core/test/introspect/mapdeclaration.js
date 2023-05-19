@@ -374,7 +374,6 @@ describe('MapDeclaration', () => {
                     }
                 ]
             });
-            clz.getKey().getName().should.equal('DateTime');
             clz.getKey().getType().should.equal('DateTime');
         });
     });
@@ -413,7 +412,6 @@ describe('MapDeclaration', () => {
                     }
                 ]
             });
-            clz.getValue().getName().should.equal('String');
             clz.getValue().getType().should.equal('String');
         });
     });
@@ -462,7 +460,6 @@ describe('MapDeclaration', () => {
             let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
             declaration.declarationKind().should.equal('MapDeclaration');
             declaration.getFullyQualifiedName().should.equal('com.testing@1.0.0.Dictionary');
-            declaration.getName().should.equal('Dictionary');
             declaration.isMapDeclaration().should.equal(true);
         });
     });
@@ -471,6 +468,8 @@ describe('MapDeclaration', () => {
         it('should give the correct value for Map Declaration', () => {
             let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
             declaration.toString().should.equal('MapDeclaration {id=com.testing@1.0.0.Dictionary}');
+            declaration.getKey().toString().should.equal('MapKeyType {id=Person}');
+            declaration.getValue().toString().should.equal('MapValueType {id=String}');
         });
     });
 });

@@ -105,23 +105,13 @@ class MapKeyType extends Decorated {
     }
 
     /**
-     * Returns the name of the MapKey. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.ast.name;
-    }
-
-    /**
      * Returns the Type of the MapKey. This name does not include the
      * namespace from the owning ModelFile.
      *
      * @return {string} the short name of this class
      */
     getType() {
-        return this.ast.name;
+        return this.type;
     }
 
     /**
@@ -129,7 +119,7 @@ class MapKeyType extends Decorated {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'MapKeyType {id=' + this.getFullyQualifiedName() + '}';
+        return 'MapKeyType {id=' + this.getType() + '}';
     }
 }
 

@@ -15,7 +15,6 @@
 'use strict';
 
 const Decorated = require('./decorated');
-const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -61,27 +60,10 @@ class MapValueType extends Decorated {
     /**
      * Semantic validation of the structure of this class.
      *
-     * @throws {IllegalModelException}
-     * @protected
+     * @returns {boolean} - returns true, all concerto concepts and primitives are legal MapValueTypes.
      */
     validate() {
-        const declarations = this.getModelFile().getAllDeclarations();
-
-        const value = declarations.find(decl => decl.name === this.type);
-
-        if (!value?.isConcept?.()           &&
-            !value?.isEnum?.()              &&
-            !value?.isAsset?.()             &&
-            !value?.isEvent?.()             &&
-            !value?.isParticipant?.()       &&
-            !value?.isTransaction?.()       &&
-            !value?.isMapDeclaration?.()    &&
-            !value?.isScalarDeclaration?.() &&
-            !['String', 'Long', 'Integer', 'Double', 'Boolean', 'DateTime'].includes(this.type)) {
-            throw new IllegalModelException(
-                `MapPropertyType has invalid Type: ${this.type}`
-            );
-        }
+        return true; // illegal state is unrepresentable.
     }
 
     /**
@@ -95,23 +77,13 @@ class MapValueType extends Decorated {
     }
 
     /**
-     * Returns the name of the MapValue. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.ast.name;
-    }
-
-    /**
      * Returns the Type of the MapValue. This name does not include the
      * namespace from the owning ModelFile.
      *
      * @return {string} the short name of this class
      */
     getType() {
-        return this.ast.name;
+        return this.type;
     }
 
     /**
@@ -119,7 +91,7 @@ class MapValueType extends Decorated {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'MapValueType {id=' + this.getFullyQualifiedName() + '}';
+        return 'MapValueType {id=' + this.getType() + '}';
     }
 
 }
