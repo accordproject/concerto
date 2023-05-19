@@ -67,7 +67,11 @@ describe('MapDeclaration', () => {
                         {
                             '$class': 'concerto.metamodel@1.0.0.MapKeyType',
                             name: 'Integer'
-                        }]
+                        },
+                        {
+                            '$class': 'concerto.metamodel@1.0.0.SomeRandomInvalidType',
+                            name: 'String'
+                        },]
                 });
             }).should.throw(IllegalModelException);
         });
