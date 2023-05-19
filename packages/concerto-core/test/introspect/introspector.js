@@ -44,6 +44,7 @@ describe('Introspector', () => {
     describe('#getClassDeclarations', () => {
 
         it('should return all class declarations', () => {
+            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
@@ -62,6 +63,7 @@ describe('Introspector', () => {
     describe('#getClassDeclaration', () => {
 
         it('should be able to get a single class declaration', () => {
+            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);

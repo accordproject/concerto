@@ -40,6 +40,7 @@ describe('MapDeclaration', () => {
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.test', 'mapdeclaration.cto');
+        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
     });
 
     describe('#constructor', () => {
