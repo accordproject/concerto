@@ -26,6 +26,12 @@ declare class MapKeyType extends Decorated {
      */
     protected validate(): void;
     /**
+    * Returns the owner of this property
+     * @public
+     * @return {MapDeclaration} the parent map declaration
+     */
+    public getParent(): MapDeclaration;
+    /**
      * Returns the Type of the MapKey. This name does not include the
      * namespace from the owning ModelFile.
      *

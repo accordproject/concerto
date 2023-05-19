@@ -25,6 +25,12 @@ declare class MapValueType extends Decorated {
      */
     validate(): boolean;
     /**
+    * Returns the owner of this property
+     * @public
+     * @return {MapDeclaration} the parent map declaration
+     */
+    public getParent(): MapDeclaration;
+    /**
      * Returns the Type of the MapValue. This name does not include the
      * namespace from the owning ModelFile.
      *
