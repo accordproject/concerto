@@ -93,6 +93,27 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
+        it('should throw if no feature flag', () => {
+            process.env.ENABLE_MAP_TYPE = 'false';
+            (() =>
+            {
+                new MapDeclaration(modelFile, {
+                    name: 'MapTest',
+                    properties: [
+                        {
+                            '$class': 'concerto.metamodel@1.0.0.MapKeyType',
+                            name: 'String'
+                        },
+                        {
+                            '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
+                            name: 'String'
+                        }
+                    ]
+                });
+            }).should.throw(/MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true" to access this functionality./);
+            process.env.ENABLE_MAP_TYPE = 'true'; // enable after the test run. This is necessary to ensure functioning of other tests.
+        });
+
         it('should throw if ast contains properties other than MapKeyType, AggregateValueType & AggregateRelationshipValueType', () => {
             (() => {
                 new MapDeclaration(modelFile, {
