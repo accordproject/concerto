@@ -137,108 +137,108 @@ describe('MapDeclaration', () => {
     describe('#validate success scenarios', () => {
 
         it('should not throw when map key is an identified concept declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is an enum declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.enum.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.enum.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type boolean', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.boolean.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.boolean.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type datetime', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type string', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type scalar boolean', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.boolean.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.boolean.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type string datetime', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.datetime.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.datetime.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map key is primitive type scalar string', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is an identified concept declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.concept.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.concept.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a concept derived from another concept declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.derived.concept.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.derived.concept.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is an event declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.event.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.event.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is an asset declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.asset.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.asset.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is an transaction declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.transaction.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.transaction.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is an participant declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.participant.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.participant.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a map declaration', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.map.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.map.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a relationship', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.relationship.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.relationship.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a primitive string', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.string.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.string.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a primitive datetime', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.datetime.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.datetime.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a primitive double', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.double.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.double.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a primitive integer', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.integer.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.integer.cto', MapDeclaration);
+            decl.validate();
         });
 
         it('should not throw when map value is a primitive long', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.long.cto', MapDeclaration);
-            asset.validate();
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.long.cto', MapDeclaration);
+            decl.validate();
         });
 
     });
@@ -246,71 +246,71 @@ describe('MapDeclaration', () => {
     describe('#validate failure scenarios', () => {
         it('should throw validating with a non-identified concept declaration as key', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/ConceptDeclaration must be identified in context of MapKeyType: NotIdentified/);
         });
 
         it('should throw when an enum key declaration missing', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
         });
 
         it('should throw when map key is an event declaration', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.event.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.event.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: Activity/);
         });
 
         it('should throw when map key is of type MapDeclaration', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.map.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.map.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: IllegalMapKey/);
         });
 
         it('should throw when map key is of primitive type Double', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.double.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.double.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: Double/);
         });
 
         it('should throw when map key is of primitive type Integer', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.integer.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.integer.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: Integer/);
         });
 
         it('should throw when map key is of primitive type Long', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.long.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.long.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/MapKeyType has invalid Type: Long/);
         });
 
         it('should throw when map key is of scalar type Double', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
 
         it('should throw when map key is of scalar type Integer', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
 
         it('should throw when map key is of scalar type Long', function() {
             (() => {
-                let asset = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
-                asset.validate();
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
+                decl.validate();
             }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
     });
