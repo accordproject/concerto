@@ -45,7 +45,7 @@ class MapKeyType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
-        this.type = null;
+        this.type = this.ast.name;
         this.process();
     }
 
@@ -57,7 +57,6 @@ class MapKeyType extends Decorated {
      */
     process() {
         super.process();
-        this.type = this.ast.name;
     }
 
     /**
