@@ -176,8 +176,8 @@ class MapKeyType extends Decorated {
    + String toString() 
 }
 class MapValueType extends Decorated {
-   + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
-   + boolean validate() 
+   + void constructor(MapDeclaration,Object) throws IllegalModelException
+   ~ void validate() throws IllegalModelException
    + ModelFile getModelFile() 
    + MapDeclaration getParent() 
    + string getType() 
