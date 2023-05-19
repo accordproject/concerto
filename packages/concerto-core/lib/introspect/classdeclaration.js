@@ -646,7 +646,7 @@ class ClassDeclaration extends Declaration {
     }
 
     /**
-     * Returns true if this class is the definition of a enum.
+     * Returns true if this class is the definition of a map.
      *
      * @return {boolean} true if the class is an asset
      */
