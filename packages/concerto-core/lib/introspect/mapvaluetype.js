@@ -77,6 +77,15 @@ class MapValueType extends Decorated {
     }
 
     /**
+    * Returns the owner of this property
+     * @public
+     * @return {MapDeclaration} the parent map declaration
+     */
+    getParent() {
+        return this.parent;
+    }
+
+    /**
      * Returns the Type of the MapValue. This name does not include the
      * namespace from the owning ModelFile.
      *

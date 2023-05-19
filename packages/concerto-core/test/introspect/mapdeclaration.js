@@ -472,4 +472,12 @@ describe('MapDeclaration', () => {
             declaration.getValue().toString().should.equal('MapValueType {id=String}');
         });
     });
+
+    describe('#getParent', () => {
+        it.only('should return the correct parent MapDeclaration value ', () => {
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
+            declaration.getKey().getParent().should.equal(declaration);
+            declaration.getValue().getParent().should.equal(declaration);
+        });
+    });
 });
