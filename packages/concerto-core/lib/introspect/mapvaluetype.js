@@ -36,7 +36,6 @@ class MapValueType extends Decorated {
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
-     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {

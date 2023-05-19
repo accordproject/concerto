@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
 const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const MapValueType = require('./mapvaluetype');
@@ -67,8 +69,8 @@ class MapDeclaration extends Declaration {
             throw new IllegalModelException(`MapDeclaration must contain exactly two properties -  MapKeyType & MapyValueType ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        const key = this.ast.properties.find(property => property.$class === 'concerto.metamodel@1.0.0.MapKeyType');
-        const value = this.ast.properties.find(property => property.$class === 'concerto.metamodel@1.0.0.AggregateValueType' || property.$class === 'concerto.metamodel@1.0.0.AggregateRelationshipValueType');
+        const key = this.ast.properties.find(property => property.$class === `${MetaModelNamespace}.MapKeyType`);
+        const value = this.ast.properties.find(property => property.$class === `${MetaModelNamespace}.AggregateValueType` || property.$class === `${MetaModelNamespace}.AggregateRelationshipValueType`);
 
         if (!key) {
             throw new IllegalModelException(`MapDeclaration must contain MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
@@ -79,8 +81,8 @@ class MapDeclaration extends Declaration {
         }
 
         this.name = this.ast.name;
-        this.key = new MapKeyType(this, key, this.modelFile);
-        this.value = new MapValueType(this, value, this.modelFile);
+        this.key = new MapKeyType(this, key);
+        this.value = new MapValueType(this, value);
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
