@@ -146,11 +146,6 @@ describe('MapDeclaration', () => {
             decl.validate();
         });
 
-        it('should not throw when map key is primitive type boolean', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.boolean.cto', MapDeclaration);
-            decl.validate();
-        });
-
         it('should not throw when map key is primitive type datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
             decl.validate();
@@ -158,11 +153,6 @@ describe('MapDeclaration', () => {
 
         it('should not throw when map key is primitive type string', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
-            decl.validate();
-        });
-
-        it('should not throw when map key is primitive type scalar boolean', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.boolean.cto', MapDeclaration);
             decl.validate();
         });
 
@@ -258,6 +248,13 @@ describe('MapDeclaration', () => {
             }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
         });
 
+        it('should throw when map key is a boolean', function() {
+            (() => {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
+                decl.validate();
+            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BOOL/);
+        });
+
         it('should throw when map key is an event declaration', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.event.cto', MapDeclaration);
@@ -297,21 +294,21 @@ describe('MapDeclaration', () => {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
+            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
 
         it('should throw when map key is of scalar type Integer', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
+            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
 
         it('should throw when map key is of scalar type Long', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
+            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
     });
 

@@ -72,7 +72,7 @@ class MapKeyType extends Decorated {
         if (!key?.isConcept?.()           &&
             !key?.isEnum?.()              &&
             !key?.isScalarDeclaration?.() &&
-            !['String', 'Boolean', 'DateTime'].includes(this.type)) {
+            !['String', 'DateTime'].includes(this.type)) {
             throw new IllegalModelException(`MapKeyType has invalid Type: ${this.type}`);
         }
 
@@ -84,10 +84,9 @@ class MapKeyType extends Decorated {
 
         if (key?.isScalarDeclaration?.() &&
             !(key?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
-            !(key?.ast.$class === `${MetaModelNamespace}.BooleanScalar`) &&
             !(key?.ast.$class === `${MetaModelNamespace}.DateTimeScalar` )) {
             throw new IllegalModelException(
-                `Scalar must be one of StringScalar, BooleanScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}`
+                `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}`
             );
         }
 
