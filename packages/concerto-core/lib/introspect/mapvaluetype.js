@@ -15,6 +15,7 @@
 'use strict';
 
 const Decorated = require('./decorated');
+const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -58,10 +59,28 @@ class MapValueType extends Decorated {
     /**
      * Semantic validation of the structure of this class.
      *
-     * @returns {boolean} - returns true, all concerto concepts and primitives are legal MapValueTypes.
+     * @throws {IllegalModelException}
+     * @protected
      */
     validate() {
-        return true; // illegal state is unrepresentable.
+        const declarations = this.getModelFile().getAllDeclarations();
+
+        const value = declarations.find(decl => decl.name === this.type);
+
+        if (!value?.isConcept?.()           &&
+            !value?.isEnum?.()              &&
+            !value?.isAsset?.()             &&
+            !value?.isEvent?.()             &&
+            !value?.isParticipant?.()       &&
+            !value?.isTransaction?.()       &&
+            !value?.isMapDeclaration?.()    &&
+            !value?.isScalarDeclaration?.() &&
+            !['String', 'Long', 'Integer', 'Double', 'Boolean', 'DateTime'].includes(this.type)) {
+
+            throw new IllegalModelException(
+                `MapPropertyType has invalid Type: ${this.type}`
+            );
+        }
     }
 
     /**
