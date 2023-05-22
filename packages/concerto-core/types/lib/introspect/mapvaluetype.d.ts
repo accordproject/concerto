@@ -12,7 +12,6 @@ declare class MapValueType extends Decorated {
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
-     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
     constructor(parent: MapDeclaration, ast: any);
@@ -21,9 +20,10 @@ declare class MapValueType extends Decorated {
     /**
      * Semantic validation of the structure of this class.
      *
-     * @returns {boolean} - returns true, all concerto concepts and primitives are legal MapValueTypes.
+     * @throws {IllegalModelException}
+     * @protected
      */
-    validate(): boolean;
+    protected validate(): void;
     /**
     * Returns the owner of this property
      * @public
