@@ -1,7 +1,7 @@
 export = MapDeclaration;
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
- * of values, where each value is associated and indexed with a unique key,
+ * of values, where each value is associated and indexed with a unique key.
  *
  * @extends Decorated
  * @see See {@link Decorated}
@@ -59,19 +59,19 @@ declare class MapDeclaration {
     /**
      * Returns the type of the Map key property.
      *
-     * @return {string} the short name of this class
+     * @return {string} the Map key property
      */
     getKey(): string;
     /**
      * Returns the type of the Map Value property.
      *
-     * @return {string} the short name of this class
+     * @return {string} the Map Value property
      */
     getValue(): string;
     /**
      * Returns the MapDeclaration properties
      *
-     * @return {array} the short name of this class
+     * @return {array} the MapDeclaration properties
      */
     getProperties(): any[];
     /**
