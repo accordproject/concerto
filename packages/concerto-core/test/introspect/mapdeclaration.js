@@ -252,6 +252,13 @@ describe('MapDeclaration', () => {
             }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
         });
 
+        it('should throw when map value is an illegal type', function() {
+            (() => {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.nontype.cto', MapDeclaration);
+                decl.validate();
+            }).should.throw(/MapPropertyType has invalid Type: NONTYPE/);
+        });
+
         it('should throw when map key is a boolean', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
