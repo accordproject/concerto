@@ -212,6 +212,11 @@ declare class ModelFile extends Decorated {
      */
     getEnumDeclarations(): EnumDeclaration[];
     /**
+     * Get the MapDeclarations defined in this ModelFile
+     * @return {MapDeclaration[]} the MapDeclarations defined in the model file
+     */
+    getMapDeclarations(): MapDeclaration[];
+    /**
      * Get the ScalarDeclaration defined in this ModelFile
      * @return {ScalarDeclaration[]} the ScalarDeclaration defined in the model file
      */
@@ -287,4 +292,5 @@ import EventDeclaration = require("./eventdeclaration");
 import ParticipantDeclaration = require("./participantdeclaration");
 import ConceptDeclaration = require("./conceptdeclaration");
 import EnumDeclaration = require("./enumdeclaration");
+import MapDeclaration = require("./mapdeclaration");
 import ScalarDeclaration = require("./scalardeclaration");

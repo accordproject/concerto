@@ -222,6 +222,16 @@ describe('ClassDeclaration', () => {
             clz.isEnum().should.equal(true);
         });
 
+        it('should return true for maps', () => {
+            let clz = new ClassDeclaration(modelFile, {
+                name: 'suchName',
+                $class: `${MetaModelNamespace}.MapDeclaration`,
+                properties: [
+                ]
+            });
+            clz.isMapDeclaration().should.equal(true);
+        });
+
         it('should return true for transactions', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',

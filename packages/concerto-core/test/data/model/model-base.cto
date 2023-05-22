@@ -53,6 +53,11 @@ concept UnitedStatesAddress extends Address {
   o String zipcode
 }
 
+map Dictionary {
+    o String
+    o String
+}
+
 /**
  * Define an asset base class
  */

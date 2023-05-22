@@ -44,6 +44,7 @@ describe('Introspector', () => {
     describe('#getClassDeclarations', () => {
 
         it('should return all class declarations', () => {
+            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
@@ -55,13 +56,14 @@ describe('Introspector', () => {
             modelManager.addCTOModel(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
             let classDecl = introspector.getClassDeclarations();
-            classDecl.length.should.equal(44);
+            classDecl.length.should.equal(45);
         });
     });
 
     describe('#getClassDeclaration', () => {
 
         it('should be able to get a single class declaration', () => {
+            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);

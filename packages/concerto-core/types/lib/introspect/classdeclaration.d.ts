@@ -149,6 +149,12 @@ declare class ClassDeclaration extends Declaration {
      * @return {boolean} true if the class is an asset
      */
     isConcept(): boolean;
+    /**
+     * Returns true if this class is the definition of a map.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isMapDeclaration(): boolean;
 }
 import Declaration = require("./declaration");
 import Property = require("./property");

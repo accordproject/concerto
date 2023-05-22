@@ -22,6 +22,7 @@ const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
 const DecoratorFactory = require('../lib/introspect/decoratorfactory');
 const EnumDeclaration = require('../lib/introspect/enumdeclaration');
+const MapDeclaration = require('../lib/introspect/mapdeclaration');
 const EventDeclaration = require('../lib/introspect/eventdeclaration');
 const Factory = require('../lib/factory');
 const ModelFile = require('../lib/introspect/modelfile');
@@ -873,6 +874,17 @@ concept Bar {
 
         });
 
+        describe('#getMapDeclarations', () => {
+
+            it('should return all of the map declarations', () => {
+                modelManager.addCTOModel(modelBase);
+                let decls = modelManager.getMapDeclarations();
+                decls.should.all.be.an.instanceOf(MapDeclaration);
+                decls.length.should.equal(1);
+            });
+
+        });
+
         describe('#getTransactionDeclarations', () => {
 
             it('should return all of the transaction declarations', () => {
@@ -1051,7 +1063,7 @@ concept Bar {
             modelManager.addModelFiles([composerModel, modelBase, farm2fork, concertoModel]);
 
             modelManager.getModelFiles().length.should.equal(5);
-            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(68);
+            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(69);
 
             const filtered = modelManager.filter(declaration => declaration.getFullyQualifiedName() === 'org.accordproject.test.Product');
 
