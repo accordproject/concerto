@@ -142,10 +142,13 @@ class InstanceGenerator {
             case 'Boolean':
                 return parameters.valueGenerator.getBoolean();
             default:
-                if(fieldOrScalarDeclaration.validator){
-                    return parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
+                if(fieldOrScalarDeclaration.validator?.regex){
+                    return parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex,
+                        fieldOrScalarDeclaration.validator.minLength,
+                        fieldOrScalarDeclaration.validator.maxLength);
                 }
-                return parameters.valueGenerator.getString();
+                return parameters.valueGenerator.getString(fieldOrScalarDeclaration.validator?.minLength,
+                    fieldOrScalarDeclaration.validator?.maxLength);
             }
         }
 

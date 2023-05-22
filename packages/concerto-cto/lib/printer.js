@@ -184,6 +184,11 @@ function modifiersFromMetaModel(mm){
         if (mm.validator) {
             validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags}`;
         }
+        if (mm.lengthValidator) {
+            const minLength = mm.lengthValidator.minLength ? mm.lengthValidator.minLength : '';
+            const maxLength = mm.lengthValidator.maxLength ? mm.lengthValidator.maxLength : '';
+            validatorString += ` length=[${minLength},${maxLength}]`;
+        }
         break;
     case `${MetaModelNamespace}.ObjectProperty`:
         if (mm.defaultValue) {
