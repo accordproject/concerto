@@ -1,0 +1,6 @@
+namespace org.accordproject.concerto.test@1.2.3
+
+concept Thing {
+    o Integer number
+    o String string length=[1,100]
+}

@@ -93,6 +93,26 @@ describe('ValueGenerator', function() {
             expect(regex.test(output)).to.be.true;
         });
 
+        it('getString should return a string with given length constraint', function() {
+            [
+                [1, 100],
+                [null, 100],
+                [1, null],
+                [1, 1],
+                [null, null],
+                [100, null],
+            ].forEach(([min, max]) => {
+                const output = ValueGeneratorFactory.empty().getString(min, max);
+                expect(output !== null).to.be.true;
+                if (min) {
+                    expect(output.length >= min).to.be.true;
+                }
+                if (max) {
+                    expect(output.length <= max).to.be.true;
+                }
+            });
+        });
+
         it('getRange should return a Long in range', function() {
             const output = ValueGeneratorFactory.empty().getRange(0, 100, 'Long');
             expect(output).to.be.a('number');
@@ -187,7 +207,7 @@ describe('ValueGenerator', function() {
 
         it('getString with length should return a string that matches the length constraint', function() {
             [
-                //[1, 100],
+                [1, 100],
                 [null, 100],
                 [1, null],
                 [1, 1],
