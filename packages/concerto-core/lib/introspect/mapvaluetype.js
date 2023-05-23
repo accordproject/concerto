@@ -22,6 +22,7 @@ const IllegalModelException = require('../../lib/introspect/illegalmodelexceptio
 /* istanbul ignore next */
 if (global === undefined) {
     const ModelFile = require('./modelfile');
+    const MapDeclaration = require('./mapdeclaration');
 }
 
 /**
