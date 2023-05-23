@@ -324,6 +324,7 @@ import AssetDeclaration = require("./introspect/assetdeclaration");
 import TransactionDeclaration = require("./introspect/transactiondeclaration");
 import EventDeclaration = require("./introspect/eventdeclaration");
 import ParticipantDeclaration = require("./introspect/participantdeclaration");
+import MapDeclaration = require("./introspect/mapdeclaration");
 import EnumDeclaration = require("./introspect/enumdeclaration");
 import ConceptDeclaration = require("./introspect/conceptdeclaration");
 import Factory = require("./factory");

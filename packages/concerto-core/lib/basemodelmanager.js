@@ -35,6 +35,7 @@ if (global === undefined) {
     const Declaration = require('./introspect/declaration');
     const AssetDeclaration = require('./introspect/assetdeclaration');
     const ClassDeclaration = require('./introspect/classdeclaration');
+    const MapDeclaration = require('./introspect/mapdeclaration');
     const ConceptDeclaration = require('./introspect/conceptdeclaration');
     const DecoratorFactory = require('./introspect/decoratorfactory');
     const EnumDeclaration = require('./introspect/enumdeclaration');

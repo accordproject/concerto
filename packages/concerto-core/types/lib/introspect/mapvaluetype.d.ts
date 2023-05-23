@@ -39,3 +39,4 @@ declare class MapValueType extends Decorated {
     getType(): string;
 }
 import Decorated = require("./decorated");
+import MapDeclaration = require("./mapdeclaration");
