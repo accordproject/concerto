@@ -88,6 +88,29 @@ describe('InstanceGenerator', () => {
             resource.theValue.should.be.a('string');
         });
 
+        it('should generate default value for a Map', function () {
+            let resource = test(`namespace org.acme.test
+
+            map Foo {
+                o String
+                o String
+            }
+
+            concept MyAsset identified by assetId {
+                o String assetId
+                o Foo bar
+            }
+            `);
+            resource.bar.should.be.an.instanceOf(Map);
+            resource.bar.size.should.be.equal(1);
+
+            const iterator1 = resource.bar.entries();
+            let values = iterator1.next().value;
+
+            values[0].should.be.a('string');
+            values[1].should.be.a('string');
+        });
+
         it('should generate a value with specified lentgh constraint for a string property', () => {
             useSampleGenerator();
             let resource = test(`namespace org.acme.test

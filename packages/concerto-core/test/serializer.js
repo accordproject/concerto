@@ -66,6 +66,12 @@ describe('Serializer', () => {
             o String country
             o Double elevation
             o PostalCode postcode optional
+            o TestMap testMap optional
+        }
+
+        map TestMap {
+            o String
+            o String
         }
 
         concept DateTimeTest {
@@ -232,6 +238,29 @@ describe('Serializer', () => {
             });
         });
 
+        it('should generate concept with a map value', () => {
+            let address = factory.newConcept('org.acme.sample', 'Address');
+            address.city = 'Winchester';
+            address.country = 'UK';
+            address.elevation = 3.14;
+            address.postcode = 'SO21 2JN';
+            address.testMap = new Map();
+            address.testMap.set('Lorem','Ipsum');
+
+            // todo test for reserved identifiers in keys ($class)
+            const json = serializer.toJSON(address);
+            json.should.deep.equal({
+                $class: 'org.acme.sample.Address',
+                country: 'UK',
+                elevation: 3.14,
+                city: 'Winchester',
+                postcode: 'SO21 2JN',
+                testMap: {
+                    'Lorem': 'Ipsum'
+                }
+            });
+        });
+
         it('should generate a field if an empty string is specififed', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
@@ -330,6 +359,28 @@ describe('Serializer', () => {
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
             resource.postcode.should.equal('SO21 2JN');
+        });
+
+        it('should deserialize a valid concept with a map', () => {
+
+            let json = {
+                $class: 'org.acme.sample.Address',
+                city: 'Winchester',
+                country: 'UK',
+                elevation: 3.14,
+                postcode: 'SO21 2JN',
+                testMap: {
+                    'Lorem': 'Ipsum',
+                }
+            };
+            let resource = serializer.fromJSON(json);
+            resource.should.be.an.instanceOf(Resource);
+            resource.city.should.equal('Winchester');
+            resource.country.should.equal('UK');
+            resource.elevation.should.equal(3.14);
+            resource.postcode.should.equal('SO21 2JN');
+            resource.testMap.should.be.an.instanceOf(Map);
+            resource.testMap.get('Lorem').should.equal('Ipsum');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {

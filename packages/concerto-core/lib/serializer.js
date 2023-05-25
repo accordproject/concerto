@@ -173,6 +173,8 @@ class Serializer {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
+        } else if (classDeclaration.isMapDeclaration()) {
+            throw new Error('Attempting to create an Map declaration is not supported.');
         } else if (classDeclaration.isEnum()) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');
         } else {
