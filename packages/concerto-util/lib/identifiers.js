@@ -47,7 +47,7 @@ function normalizeIdentifier(identifier, truncateLength = -1) {
         .replace(/^\p{Nd}/u, '_$&')
 
     // 2. Substitute Whitespace, and joiners
-        .replace(/[-‐−@#:;><|/\\\u200c\u200d]/g, '_')
+        .replace(/[-‐−@#:;,><|/\\\u200c\u200d]/g, '_')
         .replace(/\s/g, '_')
 
     // 3a. Replace Invalid Characters
