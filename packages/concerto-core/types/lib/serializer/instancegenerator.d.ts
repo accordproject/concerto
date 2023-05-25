@@ -59,6 +59,14 @@ declare class InstanceGenerator {
      */
     private visitRelationshipDeclaration;
     /**
+     * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    private visitMapDeclaration;
+    /**
      * Generate a random ID for a given type.
      * @private
      * @param {ClassDeclaration} classDeclaration - class declaration for a type.

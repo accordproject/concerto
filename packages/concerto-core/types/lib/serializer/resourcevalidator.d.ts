@@ -31,7 +31,7 @@ declare class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {classDeclaration} classDeclaration - the declaration of the classs
+     * @param {ClassDeclaration} classDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
      */
@@ -39,7 +39,15 @@ declare class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the classs
+     * @param {MapDeclaration} mapDeclaration - the declaration of the map
+     * @param {Object} value - the value of the field.
+     * @private
+     */
+    private static reportInvalidMap;
+    /**
+     * Throw a new error for a model violation.
+     * @param {string} id - the identifier of this instance.
+     * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
      */
@@ -125,6 +133,14 @@ declare class ResourceValidator {
      * @private
      */
     private visitEnumDeclaration;
+    /**
+     * Visitor design pattern
+     *
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @private
+     */
+    private visitMapDeclaration;
     /**
      * Visitor design pattern
      * @param {ClassDeclaration} classDeclaration - the object being visited
