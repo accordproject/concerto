@@ -62,7 +62,7 @@ describe('ValueGenerator', function() {
             assertFunctionReturnsType('getBoolean', 'boolean');
         });
 
-        it.only('getBoolean should return a map', function() {
+        it('getBoolean should return a map', function() {
             assertFunctionReturnsType('getMap', 'Map');
         });
 
