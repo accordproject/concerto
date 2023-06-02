@@ -22,7 +22,7 @@ concept InventorySets {
  o String Model
  o Integer invCount
  o assetStatus invType // used or new?
- o Dictionary dictionary
+ o Dictionary dictionary optional
 }
 
 asset MakerInventory identified by makerId {
