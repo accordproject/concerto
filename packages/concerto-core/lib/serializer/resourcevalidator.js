@@ -114,19 +114,19 @@ class ResourceValidator {
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
-        const obj = parameters.stack.pop();
-        let m = new Map(Object.entries(obj));
-        const keys = m.keys();
-        const values = m.values();
 
-        for (let i= 0; i < m.size; i++) {
-            if ((typeof keys.next().value) !== 'string') {
-                ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
+        const obj = parameters.stack.pop();
+
+        obj.forEach((key,value) => {
+            if(!ModelUtil.isSystemProperty(key)) {
+                if (typeof key !== 'string') {
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
+                }
+                if (typeof value !== 'string') {
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
+                }
             }
-            if ((typeof values.next().value) !== 'string') {
-                ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
-            }
-        }
+        });
     }
 
     /**
