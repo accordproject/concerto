@@ -348,14 +348,27 @@ describe('ResourceValidator', function () {
 
     describe('#visitMapDeclaration', function() {
         it('should validate map', function () {
-            const typedStack = new TypedStack({ 'Lorem': 'Ipsum'});
+            const map = new Map([['Lorem', 'Ipsum']]);
+            const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             mapDeclaration.accept(resourceValidator,parameters );
         });
 
         it('should not validate map with bad value', function () {
-            const typedStack = new TypedStack({ 'Lorem': 3});
+            const map = new Map([['Lorem', 3]]);
+            const typedStack = new TypedStack(map);
+            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+
+            (() => {
+                mapDeclaration.accept(resourceValidator,parameters );
+            }).should.throw('Model violation in the "TEST" instance. Invalid Type for Map Key or Value - expected String type.');
+        });
+
+        it('should not validate map with bad key', function () {
+            const map = new Map([[1, 'Ipsum']]);
+            const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
