@@ -261,6 +261,18 @@ describe('Serializer', () => {
             });
         });
 
+        it('should throw if the value for a map is not a Map instance', () => {
+            let address = factory.newConcept('org.acme.sample', 'Address');
+            address.city = 'Winchester';
+            address.country = 'UK';
+            address.elevation = 3.14;
+            address.postcode = 'SO21 2JN';
+            address.testMap = 'xyz'; // bad value
+            (() => {
+                serializer.toJSON(address);
+            }).should.throw(Error, /Expected a Map, but found xyz/);
+        });
+
         it('should generate a field if an empty string is specififed', () => {
             let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
             resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');

@@ -85,9 +85,6 @@ class JSONGenerator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
-        if (!((obj instanceof Map))) {
-            throw new Error('Expected a Map, but found ' + obj);
-        }
         return Object.fromEntries(obj);
     }
 

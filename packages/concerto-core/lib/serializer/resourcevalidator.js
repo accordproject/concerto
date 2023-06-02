@@ -117,6 +117,10 @@ class ResourceValidator {
 
         const obj = parameters.stack.pop();
 
+        if (!((obj instanceof Map))) {
+            throw new Error('Expected a Map, but found ' + obj);
+        }
+
         obj.forEach((key,value) => {
             if(!ModelUtil.isSystemProperty(key)) {
                 if (typeof key !== 'string') {
