@@ -128,6 +128,17 @@ describe('Concept', function () {
             }).should.throw(/Attempting to create an ENUM declaration is not supported./);
         });
 
+        it.only('should generate an error trying to create an Map from JSON', function () {
+            let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
+            modelManager.addCTOModel(conceptModel, 'concept.cto');
+            const factory = new Factory(modelManager);
+            const serializer = new Serializer(factory, modelManager);
+            const jsObject = JSON.parse('{"$class":"org.acme.biznet.Dictionary"}');
+            (function () {
+                serializer.fromJSON(jsObject);
+            }).should.throw(/Attempting to create an Map declaration is not supported./);
+        });
+
     });
 
     describe('#isConcept', () => {
