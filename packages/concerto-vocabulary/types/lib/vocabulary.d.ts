@@ -54,3 +54,5 @@ declare class Vocabulary {
      */
     toJSON(): any;
 }
+import VocabularyManager = require("./vocabularymanager");
+import { ModelFile } from "@accordproject/concerto-core";

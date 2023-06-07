@@ -1,6 +1,6 @@
 'use strict';
 
-const { CodeGen: { TypescriptVisitor }} = require('@accordproject/concerto-tools');
+const { CodeGen: { TypescriptVisitor }} = require('@accordproject/concerto-codegen');
 const { MetaModelUtil: {metaModelCto} } = require('@accordproject/concerto-metamodel');
 const { ModelLoader } = require('@accordproject/concerto-core');
 const { FileWriter } = require('@accordproject/concerto-util');
