@@ -14,6 +14,15 @@
 
 'use strict';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const VocabularyManager = require('./vocabularymanager');
+    const { ModelFile } = require('@accordproject/concerto-core');
+}
+/* eslint-enable no-unused-vars */
+
 /**
 * A vocabulary for a concerto model
 * @class

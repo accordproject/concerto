@@ -117,3 +117,4 @@ declare class VocabularyManager {
     validate(modelManager: ModelManager): any;
 }
 import Vocabulary = require("./vocabulary");
+import { ModelManager } from "@accordproject/concerto-core";

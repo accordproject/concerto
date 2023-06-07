@@ -18,6 +18,14 @@ const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const { ModelManager } = require('@accordproject/concerto-core');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Converts a camel case string to a sentence
  * @param {string} text input
