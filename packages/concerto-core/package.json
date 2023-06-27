@@ -52,7 +52,7 @@
     "doctrine": "3.0.0",
     "eslint": "8.2.0",
     "fs-extra": "9.1.0",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^4.0.2",
     "klaw": "3.0.0",
     "license-check-and-add": "2.3.6",
     "mocha": "10.0.0",
