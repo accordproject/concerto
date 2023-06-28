@@ -248,11 +248,11 @@ describe('VocabularyManager', () => {
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
         result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model']);
-        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color']);
+        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color']);
         result.vocabularies['org.acme/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
-        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color', 'Truck']);
+        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'SSN', 'Vehicle.color', 'Truck']);
         result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
-        result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['Truck']);
+        result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['SSN', 'Truck']);
         result.vocabularies['org.acme/zh-cn'].additionalTerms.should.have.members([]);
     });
 
@@ -271,5 +271,10 @@ describe('VocabularyManager', () => {
         const decorator = vehicleDecl.getDecorator('Term');
         decorator.getArguments()[0].should.equal('A road vehicle');
         vehicleDecl.getProperty('vin').getDecorator('Term').getArguments()[0].should.equal('Vehicle Identification Number');
+
+        const scalarDeclarations = mf.getScalarDeclarations();
+        const ssnDeclaration = scalarDeclarations[0];
+        const ssnDecorator = ssnDeclaration.getDecorator('Term');
+        ssnDecorator.getArguments()[0].should.equal('SSN');
     });
 });
