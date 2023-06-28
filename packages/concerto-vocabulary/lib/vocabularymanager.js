@@ -259,7 +259,7 @@ class VocabularyManager {
                     });
                 }
 
-                decl.getProperties().forEach(property => {
+                decl.getProperties?.().forEach(property => {
                     const propertyTerm = this.resolveTerm(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
 
                     if (propertyTerm) {
