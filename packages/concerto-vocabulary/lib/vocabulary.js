@@ -100,19 +100,40 @@ class Vocabulary {
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(declarationName, propertyName) {
+    getTerm(declarationName, propertyName, identifier) {
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
         }
         if(!propertyName) {
-            return decl[declarationName];
+            return identifier ? decl[`.${identifier}`] : decl[declarationName];
         }
         else {
             const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
-            return property ? property[propertyName] : null;
+            return property ? identifier ? property[`.${identifier}`] : property[propertyName] : null;
+        }
+    }
+
+    /**
+     * Gets the terms for a concept, enum or property
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    getElementTerms(declarationName, propertyName) {
+        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
+        if(!decl) {
+            return null;
+        }
+        if(!propertyName) {
+            return decl;
+        }
+        else {
+            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
+            return property;
         }
     }
 
