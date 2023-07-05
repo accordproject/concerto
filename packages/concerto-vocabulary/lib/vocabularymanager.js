@@ -179,13 +179,32 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    resolveTerm(modelManager, namespace, locale, declarationName, propertyName) {
+    resolveTerm(modelManager, namespace, locale, declarationName, propertyName, identifier) {
         const modelFile = modelManager.getModelFile(namespace);
         const classDecl = modelFile ? modelFile.getType(declarationName) : null;
         const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
-        return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName);
+        return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName, identifier);
+    }
+
+    /**
+     * Resolve the terms for a property, looking up terms from a more general vocabulary
+     * if required, and resolving properties using an object manager, allowing terms defined
+     * on super types to be automatically resolved.
+     * @param {ModelManager} modelManager the model manager
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {*} the terms or null if it does not exist
+     */
+    resolveTerms(modelManager, namespace, locale, declarationName, propertyName) {
+        const modelFile = modelManager.getModelFile(namespace);
+        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
+        const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
+        return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName);
     }
 
     /**
@@ -195,13 +214,14 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(namespace, locale, declarationName, propertyName) {
+    getTerm(namespace, locale, declarationName, propertyName, identifier) {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
-            term = voc.getTerm(declarationName, propertyName);
+            term = voc.getTerm(declarationName, propertyName, identifier);
         }
         if (term) {
             return term;
@@ -209,7 +229,36 @@ class VocabularyManager {
         else {
             const dashIndex = locale.lastIndexOf('-');
             if (dashIndex >= 0) {
-                return this.getTerm(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
+                return this.getTerm(namespace, locale.substring(0, dashIndex), declarationName, propertyName, identifier);
+            }
+            else {
+                return this.missingTermGenerator ? this.missingTermGenerator(namespace, locale, declarationName, propertyName) : null;
+            }
+        }
+    }
+
+    /**
+     * Gets the term for a concept, enum or property, looking up terms
+     * from a more general vocabulary if required
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {*} the terms or null if it does not exist
+     */
+    getTerms(namespace, locale, declarationName, propertyName) {
+        const voc = this.getVocabulary(namespace, locale);
+        let term = null;
+        if (voc) {
+            term = voc.getElementTerms(declarationName, propertyName);
+        }
+        if (term) {
+            return term;
+        }
+        else {
+            const dashIndex = locale.lastIndexOf('-');
+            if (dashIndex >= 0) {
+                return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
                 return this.missingTermGenerator ? this.missingTermGenerator(namespace, locale, declarationName, propertyName) : null;
@@ -236,51 +285,103 @@ class VocabularyManager {
 
         modelManager.getModelFiles().forEach(model => {
             model.getAllDeclarations().forEach(decl => {
-                const term = this.resolveTerm(modelManager, model.getNamespace(), locale, decl.getName());
-                if (term) {
-                    decoratorCommandSet.commands.push({
-                        '$class': 'org.accordproject.decoratorcommands.Command',
-                        'type': 'UPSERT',
-                        'target': {
-                            '$class': 'org.accordproject.decoratorcommands.CommandTarget',
-                            'namespace': model.getNamespace(),
-                            'declaration': decl.getName(),
-                        },
-                        'decorator': {
-                            '$class': `${MetaModelNamespace}.Decorator`,
-                            'name': 'Term',
-                            'arguments': [
-                                {
-                                    '$class': `${MetaModelNamespace}.DecoratorString`,
-                                    'value': term
+                const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
+                if (terms) {
+                    Object.keys(terms).forEach( term => {
+                        if(term === decl.getName()) {
+                            decoratorCommandSet.commands.push({
+                                '$class': 'org.accordproject.decoratorcommands.Command',
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                    'namespace': model.getNamespace(),
+                                    'declaration': decl.getName(),
                                 },
-                            ]
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': 'Term',
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
+                        }
+                        else if( term.startsWith('.')) {
+                            decoratorCommandSet.commands.push({
+                                '$class': 'org.accordproject.decoratorcommands.Command',
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                    'namespace': model.getNamespace(),
+                                    'declaration': decl.getName(),
+                                },
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': `Term_${term}`,
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
                         }
                     });
                 }
 
                 decl.getProperties().forEach(property => {
-                    const propertyTerm = this.resolveTerm(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
+                    const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
+                    console.log(propertyTerms);
 
-                    if (propertyTerm) {
-                        decoratorCommandSet.commands.push({
-                            '$class': 'org.accordproject.decoratorcommands.Command',
-                            'type': 'UPSERT',
-                            'target': {
-                                '$class': 'org.accordproject.decoratorcommands.CommandTarget',
-                                'namespace': model.getNamespace(),
-                                'declaration': decl.getName(),
-                                'property': property.getName()
-                            },
-                            'decorator': {
-                                '$class': `${MetaModelNamespace}.Decorator`,
-                                'name': 'Term',
-                                'arguments': [
-                                    {
-                                        '$class': `${MetaModelNamespace}.DecoratorString`,
-                                        'value': propertyTerm
+                    if (propertyTerms) {
+                        Object.keys(terms).forEach( term => {
+                            if(term === property.getName()) {
+                                decoratorCommandSet.commands.push({
+                                    '$class': 'org.accordproject.decoratorcommands.Command',
+                                    'type': 'UPSERT',
+                                    'target': {
+                                        '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                        'namespace': model.getNamespace(),
+                                        'declaration': decl.getName(),
+                                        'property': property.getName()
                                     },
-                                ]
+                                    'decorator': {
+                                        '$class': `${MetaModelNamespace}.Decorator`,
+                                        'name': 'Term',
+                                        'arguments': [
+                                            {
+                                                '$class': `${MetaModelNamespace}.DecoratorString`,
+                                                'value': propertyTerms[term]
+                                            },
+                                        ]
+                                    }
+                                });
+                            }
+                            else if(term.startsWith('.')) {
+                                decoratorCommandSet.commands.push({
+                                    '$class': 'org.accordproject.decoratorcommands.Command',
+                                    'type': 'UPSERT',
+                                    'target': {
+                                        '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                        'namespace': model.getNamespace(),
+                                        'declaration': decl.getName(),
+                                        'property': property.getName()
+                                    },
+                                    'decorator': {
+                                        '$class': `${MetaModelNamespace}.Decorator`,
+                                        'name': `Term_${term}`,
+                                        'arguments': [
+                                            {
+                                                '$class': `${MetaModelNamespace}.DecoratorString`,
+                                                'value': propertyTerms[term]
+                                            },
+                                        ]
+                                    }
+                                });
                             }
                         });
                     }

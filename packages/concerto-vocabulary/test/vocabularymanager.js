@@ -16,11 +16,14 @@
 
 const fs = require('fs');
 const chai = require('chai');
+const { jestSnapshotPlugin } = require('mocha-chai-jest-snapshot');
 
 // eslint-disable-next-line no-unused-vars
 const should = chai.should();
+const expect = chai.expect;
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
+chai.use(jestSnapshotPlugin());
 
 const { VocabularyManager } = require('..');
 const ModelManager = require('../../concerto-core/lib/modelmanager');
@@ -152,7 +155,12 @@ describe('VocabularyManager', () => {
 
     it('getTerm - lookup declaration', () => {
         const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Truck');
-        term.should.equal('A lorry (a vehicle capable of carrying cargo)');
+        term.should.equal('A lorry');
+    });
+
+    it('getTerm - lookup declaration with identifier', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en', 'Truck', null, 'description');
+        term.should.equal('A vehicle capable of carrying cargo');
     });
 
     it('getTerm - lookup declaration', () => {
@@ -163,6 +171,11 @@ describe('VocabularyManager', () => {
     it('getTerm - lookup property', () => {
         const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin');
         term.should.equal('Vehicle Identification Number');
+    });
+
+    it('getTerm - lookup property with identifier', () => {
+        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin', 'tooltip');
+        term.should.equal('VIN');
     });
 
     it('getTerm - lookup unicode', () => {
@@ -201,11 +214,21 @@ describe('VocabularyManager', () => {
 
     it('resolveTerm - class', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck');
-        term.should.equal('A lorry (a vehicle capable of carrying cargo)');
+        term.should.equal('A lorry');
+    });
+
+    it('resolveTerm - class with identifier', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', null, 'description');
+        term.should.equal('A heavy goods vehicle');
     });
 
     it('resolveTerm - property', () => {
         const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight');
+        term.should.equal('The weight of the truck');
+    });
+
+    it('resolveTerm - property with identifier', () => {
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight', 'description');
         term.should.equal('The weight of the truck in KG');
     });
 
@@ -247,7 +270,7 @@ describe('VocabularyManager', () => {
         result.missingVocabularies[0].should.equal('org.accordproject');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example');
-        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model']);
+        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
         result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'Vehicle.color']);
         result.vocabularies['org.acme/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
         result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'Vehicle.color', 'Truck']);
@@ -265,6 +288,7 @@ describe('VocabularyManager', () => {
         const enGbVocString = fs.readFileSync('./test/org.acme_en-gb.voc', 'utf-8');
         vocabularyManager.addVocabulary(enGbVocString);
         const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-GB');
+        expect(commandSet).toMatchSnapshot();
         const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet);
         const mf = newModelManager.getModelFile('org.acme');
         const vehicleDecl = mf.getAssetDeclaration('Vehicle');
