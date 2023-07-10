@@ -261,7 +261,8 @@ class VocabularyManager {
                 return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
-                return this.missingTermGenerator ? this.missingTermGenerator(namespace, locale, declarationName, propertyName) : null;
+                const missingKey = propertyName ? propertyName : declarationName;
+                return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
             }
         }
     }
@@ -335,10 +336,8 @@ class VocabularyManager {
 
                 decl.getProperties().forEach(property => {
                     const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
-                    console.log(propertyTerms);
-
                     if (propertyTerms) {
-                        Object.keys(terms).forEach( term => {
+                        Object.keys(propertyTerms).forEach( term => {
                             if(term === property.getName()) {
                                 decoratorCommandSet.commands.push({
                                     '$class': 'org.accordproject.decoratorcommands.Command',
