@@ -132,7 +132,7 @@ Object {
             "value": "VIN",
           },
         ],
-        "name": "Term_.tooltip",
+        "name": "Term_tooltip",
       },
       "target": Object {
         "$class": "org.accordproject.decoratorcommands.CommandTarget",
@@ -211,7 +211,7 @@ Object {
             "value": "A heavy goods vehicle",
           },
         ],
-        "name": "Term_.description",
+        "name": "Term_description",
       },
       "target": Object {
         "$class": "org.accordproject.decoratorcommands.CommandTarget",
@@ -250,7 +250,7 @@ Object {
             "value": "The weight of the truck in KG",
           },
         ],
-        "name": "Term_.description",
+        "name": "Term_description",
       },
       "target": Object {
         "$class": "org.accordproject.decoratorcommands.CommandTarget",
@@ -270,7 +270,7 @@ Object {
             "value": "Truck weight",
           },
         ],
-        "name": "Term_.tooltip",
+        "name": "Term_tooltip",
       },
       "target": Object {
         "$class": "org.accordproject.decoratorcommands.CommandTarget",
@@ -310,7 +310,7 @@ Object {
             "value": "VIN",
           },
         ],
-        "name": "Term_.tooltip",
+        "name": "Term_tooltip",
       },
       "target": Object {
         "$class": "org.accordproject.decoratorcommands.CommandTarget",

@@ -140,15 +140,15 @@ describe('VocabularyManager', () => {
     it('getTerms - lookup declaration', () => {
         const terms = vocabularyManager.getTerms('org.acme', 'en', 'Truck');
         terms.Truck.should.equal('A truck');
-        terms['.description'].should.equal('A vehicle capable of carrying cargo');
-        terms['.tooltip'].should.equal('Truck');
+        terms.description.should.equal('A vehicle capable of carrying cargo');
+        terms.tooltip.should.equal('Truck');
     });
 
     it('getTerms - lookup property', () => {
         const terms = vocabularyManager.getTerms('org.acme', 'en', 'Truck', 'weight');
         terms.weight.should.equal('The weight of the truck');
-        terms['.description'].should.equal('The weight of the truck in KG');
-        terms['.tooltip'].should.equal('Truck weight');
+        terms.description.should.equal('The weight of the truck in KG');
+        terms.tooltip.should.equal('Truck weight');
     });
 
     it('getTerms - lookup unicode', () => {
@@ -274,7 +274,7 @@ describe('VocabularyManager', () => {
 
     it('resolveTerms - class with identifier', () => {
         const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck');
-        terms['.description'].should.equal('A heavy goods vehicle');
+        terms.description.should.equal('A heavy goods vehicle');
     });
 
     it('resolveTerms - property', () => {
@@ -284,7 +284,7 @@ describe('VocabularyManager', () => {
 
     it('resolveTerms - property with identifier', () => {
         const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight', 'description');
-        terms['.description'].should.equal('The weight of the truck in KG');
+        terms.description.should.equal('The weight of the truck in KG');
     });
 
     it('resolveTerms - property on super type', () => {
