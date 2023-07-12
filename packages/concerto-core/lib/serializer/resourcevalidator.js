@@ -114,20 +114,23 @@ class ResourceValidator {
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
-
         const obj = parameters.stack.pop();
 
-        if (!((obj instanceof Map))) {
-            throw new Error('Expected a Map, but found ' + obj);
+        if (!((obj.value instanceof Map))) {
+            throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
-        obj.forEach((key,value) => {
+        if (obj.$class !== mapDeclaration.getFullyQualifiedName()) {
+            throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
+        }
+
+        obj.value.forEach((key,value) => {
             if(!ModelUtil.isSystemProperty(key)) {
                 if (typeof key !== 'string') {
-                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
                 }
                 if (typeof value !== 'string') {
-                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj );
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
                 }
             }
         });

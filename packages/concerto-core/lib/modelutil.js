@@ -203,6 +203,18 @@ class ModelUtil {
     }
 
     /**
+     * Returns the true if the given field is an map type
+     * @param {Field} field - the string
+     * @return {boolean} true if the field is declared as an map
+     * @private
+     */
+    static isMap(field) {
+        const modelFile = field.getParent().getModelFile();
+        const typeDeclaration = modelFile.getType(field.getType());
+        return (typeDeclaration !== null && typeDeclaration?.isMapDeclaration());
+    }
+
+    /**
      * Returns the true if the given field is a Scalar type
      * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar

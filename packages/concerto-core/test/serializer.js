@@ -66,10 +66,15 @@ describe('Serializer', () => {
             o String country
             o Double elevation
             o PostalCode postcode optional
-            o TestMap testMap optional
+            o Dictionary dict optional
         }
 
-        map TestMap {
+        map Dictionary {
+            o String
+            o String
+        }
+
+        map PhoneBook {
             o String
             o String
         }
@@ -244,8 +249,10 @@ describe('Serializer', () => {
             address.country = 'UK';
             address.elevation = 3.14;
             address.postcode = 'SO21 2JN';
-            address.testMap = new Map();
-            address.testMap.set('Lorem','Ipsum');
+            address.dict = {
+                $class: 'org.acme.sample.Dictionary',
+                value: new Map(Object.entries({'Lorem':'Ipsum'}))
+            };
 
             // todo test for reserved identifiers in keys ($class)
             const json = serializer.toJSON(address);
@@ -255,11 +262,13 @@ describe('Serializer', () => {
                 elevation: 3.14,
                 city: 'Winchester',
                 postcode: 'SO21 2JN',
-                testMap: {
-                    'Lorem': 'Ipsum'
+                dict: {
+                    $class: 'org.acme.sample.Dictionary',
+                    value: { 'Lorem': 'Ipsum' }
                 }
             });
         });
+
 
         it('should throw if the value for a map is not a Map instance', () => {
             let address = factory.newConcept('org.acme.sample', 'Address');
@@ -267,10 +276,25 @@ describe('Serializer', () => {
             address.country = 'UK';
             address.elevation = 3.14;
             address.postcode = 'SO21 2JN';
-            address.testMap = 'xyz'; // bad value
+            address.dict = 'xyz'; // bad value
             (() => {
                 serializer.toJSON(address);
-            }).should.throw(Error, /Expected a Map, but found xyz/);
+            }).should.throw(`Expected a Map, but found ${JSON.stringify(address.dict)}`);
+        });
+
+        it('should throw validation error if there is a mismatch on map $class property', () => {
+            let address = factory.newConcept('org.acme.sample', 'Address');
+            address.city = 'Winchester';
+            address.country = 'UK';
+            address.elevation = 3.14;
+            address.postcode = 'SO21 2JN';
+            address.dict = {
+                $class: 'org.acme.sample.PhoneBook',
+                value: new Map(Object.entries({'Lorem':'Ipsum'}))
+            };
+            (() => {
+                serializer.toJSON(address);
+            }).should.throw('$class value must match org.acme.sample.Dictionary');
         });
 
         it('should generate a field if an empty string is specififed', () => {
@@ -381,18 +405,21 @@ describe('Serializer', () => {
                 country: 'UK',
                 elevation: 3.14,
                 postcode: 'SO21 2JN',
-                testMap: {
+                dict: {
+                    '$class': 'org.acme.sample.Dictionary',
                     'Lorem': 'Ipsum',
                 }
             };
             let resource = serializer.fromJSON(json);
+
             resource.should.be.an.instanceOf(Resource);
             resource.city.should.equal('Winchester');
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
             resource.postcode.should.equal('SO21 2JN');
-            resource.testMap.should.be.an.instanceOf(Map);
-            resource.testMap.get('Lorem').should.equal('Ipsum');
+            resource.dict.$class.should.equal('org.acme.sample.Dictionary');
+            resource.dict.value.should.be.an.instanceOf(Map);
+            resource.dict.value.get('Lorem').should.equal('Ipsum');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {

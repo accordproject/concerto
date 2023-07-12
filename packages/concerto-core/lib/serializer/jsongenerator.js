@@ -85,7 +85,7 @@ class JSONGenerator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
-        return Object.fromEntries(obj);
+        return { $class: obj.$class, value: Object.fromEntries(obj.value)};
     }
 
     /**
@@ -162,7 +162,7 @@ class JSONGenerator {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
             result = this.convertToJSON(field, obj);
-        } else if (obj instanceof Map) {
+        } else if (ModelUtil.isMap(field)) {
             parameters.stack.push(obj);
             const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
             result = mapDeclaration.accept(this, parameters);

@@ -171,7 +171,7 @@ class JSONPopulator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const jsonObj = parameters.jsonStack.pop();
-        return new Map(Object.entries(jsonObj));
+        return { $class: jsonObj.$class, value: new Map(Object.entries(jsonObj)) };
     }
 
     /**
