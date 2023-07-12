@@ -310,7 +310,7 @@ class VocabularyManager {
                                 }
                             });
                         }
-                        else if( term.startsWith('.')) {
+                        else if(term.localeCompare('properties')) {
                             decoratorCommandSet.commands.push({
                                 '$class': 'org.accordproject.decoratorcommands.Command',
                                 'type': 'UPSERT',
@@ -360,7 +360,7 @@ class VocabularyManager {
                                     }
                                 });
                             }
-                            else if(term.startsWith('.')) {
+                            else {
                                 decoratorCommandSet.commands.push({
                                     '$class': 'org.accordproject.decoratorcommands.Command',
                                     'type': 'UPSERT',
