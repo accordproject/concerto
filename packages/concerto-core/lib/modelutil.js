@@ -211,7 +211,7 @@ class ModelUtil {
     static isMap(field) {
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
-        return (typeDeclaration !== null && typeDeclaration?.isMapDeclaration());
+        return (typeDeclaration !== null && typeDeclaration?.isMapDeclaration?.());
     }
 
     /**
