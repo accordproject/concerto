@@ -6,6 +6,8 @@ enum Color {
     o GREEN
 }
 
+scalar SSN extends String default="000-00-0000"
+
 asset Vehicle identified by vin {
     o String vin
     o Color color

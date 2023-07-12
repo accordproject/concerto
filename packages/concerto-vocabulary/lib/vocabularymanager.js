@@ -334,7 +334,7 @@ class VocabularyManager {
                     });
                 }
 
-                decl.getProperties().forEach(property => {
+                decl.getProperties?.().forEach(property => {
                     const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
                     if (propertyTerms) {
                         Object.keys(propertyTerms).forEach( term => {

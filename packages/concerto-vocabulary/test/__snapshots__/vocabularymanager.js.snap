@@ -90,6 +90,25 @@ Object {
         "arguments": Array [
           Object {
             "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "SSN",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands.CommandTarget",
+        "declaration": "SSN",
+        "namespace": "org.acme",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
             "value": "A road vehicle",
           },
         ],
