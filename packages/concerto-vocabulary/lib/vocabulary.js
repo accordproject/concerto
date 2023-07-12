@@ -109,11 +109,11 @@ class Vocabulary {
             return null;
         }
         if(!propertyName) {
-            return identifier ? decl[`.${identifier}`] : decl[declarationName];
+            return identifier ? decl[identifier] : decl[declarationName];
         }
         else {
             const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
-            return property ? identifier ? property[`.${identifier}`] : property[propertyName] : null;
+            return property ? identifier ? property[identifier] : property[propertyName] : null;
         }
     }
 
