@@ -194,7 +194,7 @@ class InstanceGenerator {
      * @throws {Error} if no concrete subclasses exist.
      */
     findConcreteSubclass(declaration) {
-        if (!declaration.isAbstract?.()) {
+        if (declaration.isMapDeclaration?.() || !declaration.isAbstract()) {
             return declaration;
         }
 
