@@ -124,7 +124,7 @@ class ResourceValidator {
             throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
         }
 
-        obj.value.forEach((key,value) => {
+        obj.value.forEach((value, key) => {
             if(!ModelUtil.isSystemProperty(key)) {
                 if (typeof key !== 'string') {
                     ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);

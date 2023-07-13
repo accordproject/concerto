@@ -407,7 +407,9 @@ describe('Serializer', () => {
                 postcode: 'SO21 2JN',
                 dict: {
                     '$class': 'org.acme.sample.Dictionary',
-                    'Lorem': 'Ipsum',
+                    value: {
+                        'Lorem': 'Ipsum'
+                    }
                 }
             };
             let resource = serializer.fromJSON(json);
@@ -420,6 +422,45 @@ describe('Serializer', () => {
             resource.dict.$class.should.equal('org.acme.sample.Dictionary');
             resource.dict.value.should.be.an.instanceOf(Map);
             resource.dict.value.get('Lorem').should.equal('Ipsum');
+        });
+
+        it('should throw an error when deserializing a map without a $class property', () => {
+
+            let json = {
+                $class: 'org.acme.sample.Address',
+                city: 'Winchester',
+                country: 'UK',
+                elevation: 3.14,
+                postcode: 'SO21 2JN',
+                dict: {
+                    // '$class': 'org.acme.sample.Dictionary',
+                    value: {
+                        'Lorem': 'Ipsum'
+                    }
+                }
+            };
+            (() => {
+                serializer.fromJSON(json);
+            }).should.throw('Invalid JSON data at "$.dict". Map value does not contain a $class type identifier.');
+        });
+
+        it('should throw an error when deserializing a map without a value property', () => {
+            let json = {
+                $class: 'org.acme.sample.Address',
+                city: 'Winchester',
+                country: 'UK',
+                elevation: 3.14,
+                postcode: 'SO21 2JN',
+                dict: {
+                    '$class': 'org.acme.sample.Dictionary',
+                    // value: {
+                    //     'Lorem': 'Ipsum'
+                    // }
+                }
+            };
+            (() => {
+                serializer.fromJSON(json);
+            }).should.throw('Invalid JSON data at "$.dict". Map value does not contain a value property.');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {
