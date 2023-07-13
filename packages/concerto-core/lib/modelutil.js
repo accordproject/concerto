@@ -199,7 +199,7 @@ class ModelUtil {
     static isEnum(field) {
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
-        return (typeDeclaration !== null && typeDeclaration.isEnum());
+        return typeDeclaration?.isEnum();
     }
 
     /**
@@ -211,7 +211,7 @@ class ModelUtil {
     static isMap(field) {
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
-        return (typeDeclaration !== null && typeDeclaration?.isMapDeclaration?.());
+        return typeDeclaration?.isMapDeclaration?.();
     }
 
     /**
@@ -223,7 +223,7 @@ class ModelUtil {
     static isScalar(field) {
         const modelFile = field.getParent().getModelFile();
         const declaration = modelFile.getType(field.getType());
-        return (declaration !== null && declaration.isScalarDeclaration?.());
+        return declaration?.isScalarDeclaration?.();
     }
 
     /**
