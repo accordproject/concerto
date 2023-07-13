@@ -231,7 +231,7 @@ class EmptyValueGenerator {
     }
 
     /**
-     * Get an instanace of an empty map.
+     * Get an instance of an empty map.
      * @return {*} an map value.
      */
     getMap() {
@@ -338,7 +338,7 @@ class SampleValueGenerator extends EmptyValueGenerator {
 
     /**
      * Get a map instance with randomly generated values for key & value.
-     * @return {*} an enum value.
+     * @return {*} a map value.
      */
     getMap() {
         return new Map([[this.getString(1,10), this.getString(1,10)]]);

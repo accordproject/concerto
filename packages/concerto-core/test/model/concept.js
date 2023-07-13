@@ -128,7 +128,7 @@ describe('Concept', function () {
             }).should.throw(/Attempting to create an ENUM declaration is not supported./);
         });
 
-        it('should generate an error trying to create an Map from JSON', function () {
+        it('should generate an error trying to create a Map from JSON', function () {
             let conceptModel = fs.readFileSync('./test/data/model/concept.cto', 'utf8');
             modelManager.addCTOModel(conceptModel, 'concept.cto');
             const factory = new Factory(modelManager);
@@ -136,7 +136,7 @@ describe('Concept', function () {
             const jsObject = JSON.parse('{"$class":"org.acme.biznet.Dictionary"}');
             (function () {
                 serializer.fromJSON(jsObject);
-            }).should.throw(/Attempting to create an Map declaration is not supported./);
+            }).should.throw(/Attempting to create a Map declaration is not supported./);
         });
 
     });

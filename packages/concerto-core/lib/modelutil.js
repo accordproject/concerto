@@ -191,7 +191,7 @@ class ModelUtil {
     }
 
     /**
-     * Returns the true if the given field is an enumerated type
+     * Returns true if the given field is an enumerated type
      * @param {Field} field - the string
      * @return {boolean} true if the field is declared as an enumeration
      * @private
@@ -203,7 +203,7 @@ class ModelUtil {
     }
 
     /**
-     * Returns the true if the given field is an map type
+     * Returns true if the given field is an map type
      * @param {Field} field - the string
      * @return {boolean} true if the field is declared as an map
      * @private
@@ -215,7 +215,7 @@ class ModelUtil {
     }
 
     /**
-     * Returns the true if the given field is a Scalar type
+     * Returns true if the given field is a Scalar type
      * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar
      * @private
