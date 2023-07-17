@@ -69,6 +69,7 @@
         "resourcevalidator-undeclaredfield": "Instance \"{resourceId}\" has a property named \"{propertyName}\", which is not declared in \"{fullyQualifiedTypeName}\".",
         "resourcevalidator-invalidfieldassignment": "Instance \"{resourceId}\" has a property \"{propertyName}\" with type \"{objectType}\" that is not derived from \"{fieldType}\".",
         "resourcevalidator-emptyidentifier": "Instance \"{resourceId}\" has an empty identifier.",
+        "resourcevalidator-invalidmap": "Model violation in the \"{resourceId}\" instance. Invalid Type for Map Key or Value - expected String type.",
 
         "typenotfounderror-defaultmessage": "Type \"{typeName}\" not found.",
 

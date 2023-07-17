@@ -65,6 +65,8 @@ class JSONGenerator {
             return this.visitClassDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
+        }else if (thing.isMapDeclaration?.()) {
+            return this.visitMapDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
             return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
@@ -72,6 +74,18 @@ class JSONGenerator {
         } else {
             throw new Error('Unrecognised ' + JSON.stringify(thing));
         }
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitMapDeclaration(mapDeclaration, parameters) {
+        const obj = parameters.stack.pop();
+        return { $class: obj.$class, value: Object.fromEntries(obj.value)};
     }
 
     /**
@@ -148,7 +162,12 @@ class JSONGenerator {
             result = this.convertToJSON(field, obj);
         } else if (ModelUtil.isEnum(field)) {
             result = this.convertToJSON(field, obj);
-        } else {
+        } else if (ModelUtil.isMap(field)) {
+            parameters.stack.push(obj);
+            const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            result = mapDeclaration.accept(this, parameters);
+        }
+        else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
             result = classDeclaration.accept(this, parameters);

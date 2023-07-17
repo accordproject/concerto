@@ -22,6 +22,7 @@ concept InventorySets {
  o String Model
  o Integer invCount
  o assetStatus invType // used or new?
+ o Dictionary dictionary optional
 }
 
 asset MakerInventory identified by makerId {
@@ -34,4 +35,9 @@ enum assetStatus {
  o INUSE
  o REPAIRED
  o RETIRED
+}
+
+map Dictionary {
+ o String
+ o String
 }
