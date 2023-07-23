@@ -37,6 +37,8 @@ class InstanceGenerator {
     visit(thing, parameters) {
         if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isMapDeclaration?.()) {
+            return this.visitMapDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
@@ -152,31 +154,33 @@ class InstanceGenerator {
             }
         }
 
-        let classDeclaration = parameters.modelManager.getType(type);
+        let declaration = parameters.modelManager.getType(type);
 
-        if (classDeclaration.isEnum()) {
-            let enumValues = classDeclaration.getOwnProperties();
+        if (declaration.isEnum()) {
+            let enumValues = declaration.getOwnProperties();
             return parameters.valueGenerator.getEnum(enumValues).getName();
         }
 
-        classDeclaration = this.findConcreteSubclass(classDeclaration);
+        declaration = this.findConcreteSubclass(declaration);
 
-        let id = null;
-        if (classDeclaration.isIdentified()) {
-            let idFieldName = classDeclaration.getIdentifierFieldName();
-            let idField = classDeclaration.getProperty(idFieldName);
-            if (idField?.isTypeScalar?.()){
-                idField = idField.getScalarField();
+        if (!declaration.isMapDeclaration?.()) {
+            let id = null;
+            if (declaration.isIdentified()) {
+                let idFieldName = declaration.getIdentifierFieldName();
+                let idField = declaration.getProperty(idFieldName);
+                if (idField?.isTypeScalar?.()){
+                    idField = idField.getScalarField();
+                }
+                if(idField?.validator?.regex){
+                    id = parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
+                } else {
+                    id = this.generateRandomId(declaration);
+                }
             }
-            if(idField?.validator?.regex){
-                id = parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
-            } else {
-                id = this.generateRandomId(classDeclaration);
-            }
+            let resource = parameters.factory.newResource(declaration.getNamespace(), declaration.getName(), id);
+            parameters.stack.push(resource);
         }
-        let resource = parameters.factory.newResource(classDeclaration.getNamespace(), classDeclaration.getName(), id);
-        parameters.stack.push(resource);
-        return classDeclaration.accept(this, parameters);
+        return declaration.accept(this, parameters);
     }
 
     /**
@@ -190,7 +194,7 @@ class InstanceGenerator {
      * @throws {Error} if no concrete subclasses exist.
      */
     findConcreteSubclass(declaration) {
-        if (!declaration.isAbstract()) {
+        if (declaration.isMapDeclaration?.() || !declaration.isAbstract()) {
             return declaration;
         }
 
@@ -227,6 +231,17 @@ class InstanceGenerator {
         } else {
             return valueSupplier();
         }
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitMapDeclaration(mapDeclaration, parameters) {
+        return parameters.valueGenerator.getMap();
     }
 
     /**

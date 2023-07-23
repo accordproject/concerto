@@ -67,7 +67,9 @@ class ResourceValidator {
             return this.visitEnumDeclaration(thing, parameters);
         } else if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isRelationship?.()) {
+        } else if (thing.isMapDeclaration?.()) {
+            return this.visitMapDeclaration(thing, parameters);
+        }else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
             return this.visitField(thing.getScalarField(), parameters);
@@ -102,6 +104,36 @@ class ResourceValidator {
         }
 
         return null;
+    }
+
+    /**
+     * Visitor design pattern
+     *
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @private
+     */
+    visitMapDeclaration(mapDeclaration, parameters) {
+        const obj = parameters.stack.pop();
+
+        if (!((obj.value instanceof Map))) {
+            throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
+        }
+
+        if (obj.$class !== mapDeclaration.getFullyQualifiedName()) {
+            throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
+        }
+
+        obj.value.forEach((value, key) => {
+            if(!ModelUtil.isSystemProperty(key)) {
+                if (typeof key !== 'string') {
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
+                }
+                if (typeof value !== 'string') {
+                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
+                }
+            }
+        });
     }
 
     /**
@@ -450,7 +482,7 @@ class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {classDeclaration} classDeclaration - the declaration of the classs
+     * @param {ClassDeclaration} classDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
      */
@@ -466,7 +498,23 @@ class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the classs
+     * @param {MapDeclaration} mapDeclaration - the declaration of the map
+     * @param {Object} value - the value of the field.
+     * @private
+     */
+    static reportInvalidMap(id, mapDeclaration, value) {
+        let formatter = Globalize.messageFormatter('resourcevalidator-invalidmap');
+        throw new ValidationException(formatter({
+            resourceId: id,
+            classFQN: mapDeclaration.getFullyQualifiedName(),
+            invalidValue: value.toString()
+        }));
+    }
+
+    /**
+     * Throw a new error for a model violation.
+     * @param {string} id - the identifier of this instance.
+     * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
      */

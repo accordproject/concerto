@@ -121,6 +121,8 @@ class JSONPopulator {
 
         if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
+        } else if (thing.isMapDeclaration?.()) {
+            return this.visitMapDeclaration(thing, parameters);
         } else if (thing.isRelationship?.()) {
             return this.visitRelationshipDeclaration(thing, parameters);
         } else if (thing.isTypeScalar?.()) {
@@ -162,6 +164,29 @@ class JSONPopulator {
 
     /**
      * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitMapDeclaration(mapDeclaration, parameters) {
+        const jsonObj = parameters.jsonStack.pop();
+        parameters.path ?? (parameters.path = new TypedStack('$'));
+        const path = parameters.path.stack.join('');
+
+        if(!jsonObj.$class) {
+            throw new Error(`Invalid JSON data at "${path}". Map value does not contain a $class type identifier.`);
+        }
+
+        if(!jsonObj.value) {
+            throw new Error(`Invalid JSON data at "${path}". Map value does not contain a value property.`);
+        }
+
+        return { $class: jsonObj.$class, value: new Map(Object.entries(jsonObj.value)) };
+    }
+
+    /**
+     * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
@@ -197,7 +222,7 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if(!field.isPrimitive() && !field.isTypeEnum()) {
+        if(!field.isPrimitive?.() && !field.isTypeEnum?.()) {
             let typeName = jsonItem.$class;
             if(!typeName) {
                 // If the type name is not specified in the data, then use the
@@ -207,26 +232,26 @@ class JSONPopulator {
             }
 
             // This throws if the type does not exist.
-            const classDeclaration = parameters.modelManager.getType(typeName);
+            const declaration = parameters.modelManager.getType(typeName);
 
-            // create a new instance, using the identifier field name as the ID.
-            let subResource = null;
+            if (!declaration.isMapDeclaration?.()) {
 
-            // if this is identifiable, then we create a resource
-            if(classDeclaration.isIdentified()) {
-                subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonItem[classDeclaration.getIdentifierFieldName()] );
+                // create a new instance, using the identifier field name as the ID.
+                let subResource = null;
+
+                // if this is identifiable, then we create a resource
+                if (declaration.isIdentified()) {
+                    subResource = parameters.factory.newResource(declaration.getNamespace(),
+                        declaration.getName(), jsonItem[declaration.getIdentifierFieldName()] );
+                } else {
+                    // otherwise we create a concept
+                    subResource = parameters.factory.newConcept(declaration.getNamespace(),
+                        declaration.getName());
+                }
+                parameters.resourceStack.push(subResource);
             }
-            else {
-                // otherwise we create a concept
-                subResource = parameters.factory.newConcept(classDeclaration.getNamespace(),
-                    classDeclaration.getName() );
-            }
-
-            result = subResource;
-            parameters.resourceStack.push(subResource);
             parameters.jsonStack.push(jsonItem);
-            classDeclaration.accept(this, parameters);
+            result = declaration.accept(this, parameters);
         }
         else {
             result = this.convertToObject(field, jsonItem, parameters);

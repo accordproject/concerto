@@ -161,18 +161,20 @@ class Serializer {
 
         // create a new instance, using the identifier field name as the ID.
         let resource;
-        if (classDeclaration.isTransaction()) {
+        if (classDeclaration.isTransaction?.()) {
             resource = this.factory.newTransaction(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration.isEvent()) {
+        } else if (classDeclaration.isEvent?.()) {
             resource = this.factory.newEvent(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration.isConcept()) {
+        } else if (classDeclaration.isConcept?.()) {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
+        } else if (classDeclaration.isMapDeclaration?.()) {
+            throw new Error('Attempting to create a Map declaration is not supported.');
         } else if (classDeclaration.isEnum()) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');
         } else {

@@ -50,6 +50,15 @@ describe('ResourceValidator', function () {
       o DEER_OTHER
     }`;
 
+    const mapModelString = `namespace org.acme.map
+    map PhoneBook {
+      o String
+      o String
+    }
+    concept Data {
+        o PhoneBook numbers
+    }`;
+
     const levelOneModel = `namespace org.acme.l1
     enum VehicleType {
       o CAR
@@ -114,6 +123,7 @@ describe('ResourceValidator', function () {
     });
 
     beforeEach(function () {
+        modelManager.addCTOModel(mapModelString);
         modelManager.addCTOModel(enumModelString);
         modelManager.addCTOModel(levelOneModel);
         modelManager.addCTOModel(levelTwoModel);
@@ -333,6 +343,39 @@ describe('ResourceValidator', function () {
             const enumDeclaration = modelManager.getType('org.acme.enumerations.AnimalType');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             enumDeclaration.accept(resourceValidator,parameters );
+        });
+    });
+
+    describe('#visitMapDeclaration', function() {
+        it('should validate map', function () {
+            const map = { $class: 'org.acme.map.PhoneBook', value: new Map([['Lorem', 'Ipsum']]) };
+            const typedStack = new TypedStack(map);
+            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+            mapDeclaration.accept(resourceValidator,parameters );
+        });
+
+        it('should not validate map with bad value', function () {
+            const map = { $class: 'org.acme.map.PhoneBook', value: new Map([['Lorem', 3]]) };
+            const typedStack = new TypedStack(map);
+            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+
+            (() => {
+                mapDeclaration.accept(resourceValidator,parameters );
+            }).should.throw('Model violation in the "TEST" instance. Invalid Type for Map Key or Value - expected String type.');
+        });
+
+        it('should not validate map with bad key', function () {
+            const map = { $class: 'org.acme.map.PhoneBook', value: new Map([[1, 'Ipsum']]) };
+
+            const typedStack = new TypedStack(map);
+            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
+
+            (() => {
+                mapDeclaration.accept(resourceValidator,parameters );
+            }).should.throw('Model violation in the "TEST" instance. Invalid Type for Map Key or Value - expected String type.');
         });
     });
 

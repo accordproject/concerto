@@ -231,6 +231,14 @@ class EmptyValueGenerator {
     }
 
     /**
+     * Get an instance of an empty map.
+     * @return {*} an map value.
+     */
+    getMap() {
+        return new Map();
+    }
+
+    /**
      * Get an array using the supplied callback to obtain array values.
      * @param {Function} valueSupplier - callback to obtain values.
      * @return {Array} an array
@@ -326,6 +334,14 @@ class SampleValueGenerator extends EmptyValueGenerator {
      */
     getEnum(enumValues) {
         return enumValues[Math.floor(Math.random() * enumValues.length)];
+    }
+
+    /**
+     * Get a map instance with randomly generated values for key & value.
+     * @return {*} a map value.
+     */
+    getMap() {
+        return new Map([[this.getString(1,10), this.getString(1,10)]]);
     }
 
     /**

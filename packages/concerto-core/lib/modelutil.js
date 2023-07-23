@@ -191,7 +191,7 @@ class ModelUtil {
     }
 
     /**
-     * Returns the true if the given field is an enumerated type
+     * Returns true if the given field is an enumerated type
      * @param {Field} field - the string
      * @return {boolean} true if the field is declared as an enumeration
      * @private
@@ -199,11 +199,23 @@ class ModelUtil {
     static isEnum(field) {
         const modelFile = field.getParent().getModelFile();
         const typeDeclaration = modelFile.getType(field.getType());
-        return (typeDeclaration !== null && typeDeclaration.isEnum());
+        return typeDeclaration?.isEnum();
     }
 
     /**
-     * Returns the true if the given field is a Scalar type
+     * Returns true if the given field is an map type
+     * @param {Field} field - the string
+     * @return {boolean} true if the field is declared as an map
+     * @private
+     */
+    static isMap(field) {
+        const modelFile = field.getParent().getModelFile();
+        const typeDeclaration = modelFile.getType(field.getType());
+        return typeDeclaration?.isMapDeclaration?.();
+    }
+
+    /**
+     * Returns true if the given field is a Scalar type
      * @param {Field} field - the Field to test
      * @return {boolean} true if the field is declared as an scalar
      * @private
@@ -211,7 +223,7 @@ class ModelUtil {
     static isScalar(field) {
         const modelFile = field.getParent().getModelFile();
         const declaration = modelFile.getType(field.getType());
-        return (declaration !== null && declaration.isScalarDeclaration?.());
+        return declaration?.isScalarDeclaration?.();
     }
 
     /**
