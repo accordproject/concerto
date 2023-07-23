@@ -1,6 +1,7 @@
 locale: en-gb
 namespace: org.acme
 declarations:
-  - Truck: A lorry (a vehicle capable of carrying cargo)
+  - Truck: A lorry
+    description: A heavy goods vehicle
   - Color: A colour
   - Milkfloat
