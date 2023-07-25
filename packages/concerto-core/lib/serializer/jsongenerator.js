@@ -85,7 +85,7 @@ class JSONGenerator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
-        return { $class: obj.$class, value: Object.fromEntries(obj.value)};
+        return Object.fromEntries(obj);
     }
 
     /**

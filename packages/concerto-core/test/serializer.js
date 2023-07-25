@@ -243,16 +243,15 @@ describe('Serializer', () => {
             });
         });
 
-        it('should generate concept with a map value', () => {
+        it('should generate concept with a Map value', () => {
             let address = factory.newConcept('org.acme.sample', 'Address');
             address.city = 'Winchester';
             address.country = 'UK';
             address.elevation = 3.14;
             address.postcode = 'SO21 2JN';
-            address.dict = {
-                $class: 'org.acme.sample.Dictionary',
-                value: new Map(Object.entries({'Lorem':'Ipsum'}))
-            };
+            address.dict = new Map();
+            address.dict.set('$class', 'org.acme.sample.Dictionary');
+            address.dict.set('Lorem', 'Ipsum');
 
             // todo test for reserved identifiers in keys ($class)
             const json = serializer.toJSON(address);
@@ -264,13 +263,12 @@ describe('Serializer', () => {
                 postcode: 'SO21 2JN',
                 dict: {
                     $class: 'org.acme.sample.Dictionary',
-                    value: { 'Lorem': 'Ipsum' }
+                    Lorem: 'Ipsum'
                 }
             });
         });
 
-
-        it('should throw if the value for a map is not a Map instance', () => {
+        it('should throw if the value for a Map is not a Map instance', () => {
             let address = factory.newConcept('org.acme.sample', 'Address');
             address.city = 'Winchester';
             address.country = 'UK';
@@ -288,10 +286,10 @@ describe('Serializer', () => {
             address.country = 'UK';
             address.elevation = 3.14;
             address.postcode = 'SO21 2JN';
-            address.dict = {
-                $class: 'org.acme.sample.PhoneBook',
-                value: new Map(Object.entries({'Lorem':'Ipsum'}))
-            };
+            address.dict = new Map();
+            address.dict.set('$class', 'org.acme.sample.PhoneBook'); // dict is not a PhoneBook.
+            address.dict.set('Lorem', 'Ipsum');
+
             (() => {
                 serializer.toJSON(address);
             }).should.throw('$class value must match org.acme.sample.Dictionary');
@@ -397,8 +395,7 @@ describe('Serializer', () => {
             resource.postcode.should.equal('SO21 2JN');
         });
 
-        it('should deserialize a valid concept with a map', () => {
-
+        it('should deserialize a valid concept with a Map', () => {
             let json = {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
@@ -407,9 +404,7 @@ describe('Serializer', () => {
                 postcode: 'SO21 2JN',
                 dict: {
                     '$class': 'org.acme.sample.Dictionary',
-                    value: {
-                        'Lorem': 'Ipsum'
-                    }
+                    'Lorem': 'Ipsum'
                 }
             };
             let resource = serializer.fromJSON(json);
@@ -419,12 +414,12 @@ describe('Serializer', () => {
             resource.country.should.equal('UK');
             resource.elevation.should.equal(3.14);
             resource.postcode.should.equal('SO21 2JN');
-            resource.dict.$class.should.equal('org.acme.sample.Dictionary');
-            resource.dict.value.should.be.an.instanceOf(Map);
-            resource.dict.value.get('Lorem').should.equal('Ipsum');
+            resource.dict.should.be.an.instanceOf(Map);
+            resource.dict.get('$class').should.equal('org.acme.sample.Dictionary');
+            resource.dict.get('Lorem').should.equal('Ipsum');
         });
 
-        it('should throw an error when deserializing a map without a $class property', () => {
+        it('should throw an error when deserializing a Map without a $class property', () => {
 
             let json = {
                 $class: 'org.acme.sample.Address',
@@ -434,17 +429,15 @@ describe('Serializer', () => {
                 postcode: 'SO21 2JN',
                 dict: {
                     // '$class': 'org.acme.sample.Dictionary',
-                    value: {
-                        'Lorem': 'Ipsum'
-                    }
+                    'Lorem': 'Ipsum'
                 }
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw('Invalid JSON data at "$.dict". Map value does not contain a $class type identifier.');
+            }).should.throw('Invalid Map. Map must contain a properly formatted $class property');
         });
 
-        it('should throw an error when deserializing a map without a value property', () => {
+        it('should throw an error when deserializing a Map without entries', () => {
             let json = {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
@@ -452,15 +445,13 @@ describe('Serializer', () => {
                 elevation: 3.14,
                 postcode: 'SO21 2JN',
                 dict: {
-                    '$class': 'org.acme.sample.Dictionary',
-                    // value: {
-                    //     'Lorem': 'Ipsum'
-                    // }
+                    '$class': 'org.acme.sample.Dictionary', // $class is required and not considered an entry.
+                    // 'Lorem': 'Ipsum'
                 }
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw('Invalid JSON data at "$.dict". Map value does not contain a value property.');
+            }).should.throw('Invalid JSON data". Map value must contain entries');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {

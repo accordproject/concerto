@@ -116,15 +116,24 @@ class ResourceValidator {
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
 
-        if (!((obj.value instanceof Map))) {
+        if (!((obj instanceof Map))) {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
-        if (obj.$class !== mapDeclaration.getFullyQualifiedName()) {
+        if(!obj.has('$class')) {
+            throw new Error('Invalid Map. Map must contain a properly formatted $class property');
+        }
+
+        if(obj.has('$class') && obj.size === 1) {
+            throw new Error('Invalid Map". Map value must contain entries');
+        }
+
+        if (obj.get('$class') !== mapDeclaration.getFullyQualifiedName()) {
             throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
         }
 
-        obj.value.forEach((value, key) => {
+
+        obj.forEach((value, key) => {
             if(!ModelUtil.isSystemProperty(key)) {
                 if (typeof key !== 'string') {
                     ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
