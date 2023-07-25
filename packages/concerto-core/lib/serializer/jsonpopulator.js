@@ -46,7 +46,7 @@ function getAssignableProperties(resourceData, classDeclaration) {
     }
 
     if (properties.includes('$timestamp') &&
-        !(classDeclaration.isTransaction() || classDeclaration.isEvent())
+        !(classDeclaration.isTransaction?.() || classDeclaration.isEvent?.())
     ) {
         const errorText = `Unexpected property for type ${classDeclaration.getFullyQualifiedName()}: $timestamp`;
         throw new ValidationException(errorText);
@@ -172,17 +172,11 @@ class JSONPopulator {
     visitMapDeclaration(mapDeclaration, parameters) {
         const jsonObj = parameters.jsonStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
-        const path = parameters.path.stack.join('');
 
-        if(!jsonObj.$class) {
-            throw new Error(`Invalid JSON data at "${path}". Map value does not contain a $class type identifier.`);
-        }
+        // throws if Map contains private reserved properties as keys.
+        getAssignableProperties(jsonObj, mapDeclaration);
 
-        if(!jsonObj.value) {
-            throw new Error(`Invalid JSON data at "${path}". Map value does not contain a value property.`);
-        }
-
-        return { $class: jsonObj.$class, value: new Map(Object.entries(jsonObj.value)) };
+        return new Map(Object.entries(jsonObj));
     }
 
     /**
