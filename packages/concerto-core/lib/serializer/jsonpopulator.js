@@ -46,7 +46,7 @@ function getAssignableProperties(resourceData, classDeclaration) {
     }
 
     if (properties.includes('$timestamp') &&
-        !(classDeclaration.isTransaction() || classDeclaration.isEvent())
+        !(classDeclaration.isTransaction?.() || classDeclaration.isEvent?.())
     ) {
         const errorText = `Unexpected property for type ${classDeclaration.getFullyQualifiedName()}: $timestamp`;
         throw new ValidationException(errorText);
@@ -173,7 +173,8 @@ class JSONPopulator {
         const jsonObj = parameters.jsonStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-
+        // throws if Map contains private reserved properties as keys.
+        getAssignableProperties(jsonObj, mapDeclaration);
 
         return new Map(Object.entries(jsonObj));
     }

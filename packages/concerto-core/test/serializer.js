@@ -437,7 +437,9 @@ describe('Serializer', () => {
             }).should.throw('Invalid Map. Map must contain a properly formatted $class property');
         });
 
-        it('should throw an error when deserializing a Map without entries', () => {
+
+        it('should throw an error when deserializing a Map with a private reserved property', () => {
+
             let json = {
                 $class: 'org.acme.sample.Address',
                 city: 'Winchester',
@@ -445,13 +447,14 @@ describe('Serializer', () => {
                 elevation: 3.14,
                 postcode: 'SO21 2JN',
                 dict: {
-                    '$class': 'org.acme.sample.Dictionary', // $class is required and not considered an entry.
-                    // 'Lorem': 'Ipsum'
+                    '$class': 'org.acme.sample.Dictionary',
+                    '$namespace': 'com.reserved.property',
+                    'Lorem': 'Ipsum'
                 }
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw('Invalid JSON data". Map value must contain entries');
+            }).should.throw('Unexpected reserved properties for type org.acme.sample.Dictionary: $namespace');
         });
 
         it('should throw validation errors if the validate flag is not specified', () => {
