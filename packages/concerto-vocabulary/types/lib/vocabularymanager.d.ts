@@ -84,9 +84,22 @@ declare class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string): string;
+    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string;
+    /**
+     * Resolve the terms for a property, looking up terms from a more general vocabulary
+     * if required, and resolving properties using an object manager, allowing terms defined
+     * on super types to be automatically resolved.
+     * @param {ModelManager} modelManager the model manager
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {*} the terms or null if it does not exist
+     */
+    resolveTerms(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string): any;
     /**
      * Gets the term for a concept, enum or property, looking up terms
      * from a more general vocabulary if required
@@ -94,9 +107,20 @@ declare class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string): string;
+    getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string;
+    /**
+     * Gets the term for a concept, enum or property, looking up terms
+     * from a more general vocabulary if required
+     * @param {string} namespace the namespace
+     * @param {string} locale the BCP-47 locale identifier
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {*} the terms or null if it does not exist
+     */
+    getTerms(namespace: string, locale: string, declarationName: string, propertyName?: string): any;
     /**
      * Creates a DecoractorCommandSet with @Term decorators
      * to decorate all model elements based on the vocabulary for a locale.

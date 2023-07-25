@@ -38,9 +38,17 @@ declare class Vocabulary {
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(declarationName: string, propertyName?: string): string;
+    getTerm(declarationName: string, propertyName?: string, identifier?: string): string;
+    /**
+     * Gets the terms for a concept, enum or property
+     * @param {string} declarationName the name of a concept or enum
+     * @param {string} [propertyName] the name of a property (optional)
+     * @returns {string} the term or null if it does not exist
+     */
+    getElementTerms(declarationName: string, propertyName?: string): string;
     /**
      * Validates a vocabulary against a ModelFile, returning errors for
      * missing and additional terms.
