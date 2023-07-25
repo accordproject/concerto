@@ -124,10 +124,6 @@ class ResourceValidator {
             throw new Error('Invalid Map. Map must contain a properly formatted $class property');
         }
 
-        if(obj.has('$class') && obj.size === 1) {
-            throw new Error('Invalid Map". Map value must contain entries');
-        }
-
         if (obj.get('$class') !== mapDeclaration.getFullyQualifiedName()) {
             throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
         }
