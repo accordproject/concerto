@@ -21,7 +21,7 @@ const Serializer = require('../../../lib/serializer');
 const Util = require('../../composer/composermodelutility');
 const ModelUtil = require('../../../../concerto-core/lib/modelutil');
 
-const should = require('chai').should();
+require('chai').should();
 const sinon = require('sinon');
 
 describe('Serializer', () => {
