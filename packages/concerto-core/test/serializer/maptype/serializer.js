@@ -216,6 +216,7 @@ describe('Serializer', () => {
             concept.dict = new Map();
             concept.dict.set('$class', 'org.acme.sample.Dictionary');
             concept.dict.set('Lorem', 'Ipsum');
+            concept.dict.set('Ipsum', 'Lorem');
 
             const json = serializer.toJSON(concept);
 
@@ -223,7 +224,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 dict: {
                     $class: 'org.acme.sample.Dictionary',
-                    Lorem: 'Ipsum'
+                    Lorem: 'Ipsum',
+                    Ipsum: 'Lorem'
                 }
             });
         });
@@ -253,7 +255,8 @@ describe('Serializer', () => {
 
             concept.birthday = new Map();
             concept.birthday.set('$class', 'org.acme.sample.Birthday');
-            concept.birthday.set('Ipsum', '2023-10-28T01:02:03Z');
+            concept.birthday.set('Lorem', '2023-10-28T01:02:03Z');
+            concept.birthday.set('Ipsum', '2023-11-28T01:02:03Z');
 
             const json = serializer.toJSON(concept);
 
@@ -261,7 +264,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 birthday: {
                     $class: 'org.acme.sample.Birthday',
-                    'Ipsum': '2023-10-28T01:02:03Z'
+                    'Lorem': '2023-10-28T01:02:03Z',
+                    'Ipsum': '2023-11-28T01:02:03Z'
                 }
             });
         });
@@ -269,18 +273,21 @@ describe('Serializer', () => {
         it('should generate a JSON object with a Map <String, Concept>', () => {
             let concept = factory.newConcept('org.acme.sample', 'Concepts');
 
-            const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concept.rolodex = new Map();
             concept.rolodex.set('$class', 'org.acme.sample.Rolodex');
-            concept.rolodex.set('Abbeyleix', person);
+            concept.rolodex.set('Abbeyleix', bob);
+            concept.rolodex.set('Ireland', alice);
 
             const json = serializer.toJSON(concept);
             json.should.deep.equal({
                 $class: 'org.acme.sample.Concepts',
                 rolodex: {
                     $class: 'org.acme.sample.Rolodex',
-                    'Abbeyleix': '{"$class":"org.acme.sample.Person","name":"Bob"}'
+                    'Abbeyleix': '{"$class":"org.acme.sample.Person","name":"Bob"}',
+                    'Ireland': '{"$class":"org.acme.sample.Person","name":"Alice"}'
                 }
             });
         });
@@ -347,10 +354,12 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample', 'Concepts');
 
             const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concept.graduation = new Map();
             concept.graduation.set('$class', 'org.acme.sample.Graduation');
             concept.graduation.set('2023-10-28T01:02:03Z', person);
+            concept.graduation.set('2023-11-28T01:02:03Z', alice);
 
             const json = serializer.toJSON(concept);
 
@@ -358,7 +367,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 graduation: {
                     $class: 'org.acme.sample.Graduation',
-                    '2023-10-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Bob"}'
+                    '2023-10-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Bob"}',
+                    '2023-11-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Alice"}'
                 }
             });
         });
@@ -452,6 +462,7 @@ describe('Serializer', () => {
             concept.appointment = new Map();
             concept.appointment.set('$class', 'org.acme.sample.Appointment');
             concept.appointment.set('2023-10-28T01:02:03Z', 'Lorem');
+            concept.appointment.set('2023-11-28T01:02:03Z', 'Ipsum');
 
             const json = serializer.toJSON(concept);
 
@@ -460,6 +471,7 @@ describe('Serializer', () => {
                 appointment: {
                     $class: 'org.acme.sample.Appointment',
                     '2023-10-28T01:02:03Z': 'Lorem',
+                    '2023-11-28T01:02:03Z': 'Ipsum',
                 }
             });
         });
@@ -467,11 +479,13 @@ describe('Serializer', () => {
         it('should generate a JSON object with a Map <Scalar, Concept>, where Scalar extends DateTime', () => {
             let concept = factory.newConcept('org.acme.sample', 'Concepts');
 
-            const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concept.meeting = new Map();
             concept.meeting.set('$class', 'org.acme.sample.Meeting');
-            concept.meeting.set('2023-10-28T01:02:03Z', person);
+            concept.meeting.set('2023-10-28T01:02:03Z', bob);
+            concept.meeting.set('2023-11-28T01:02:03Z', alice);
 
             const json = serializer.toJSON(concept);
 
@@ -479,7 +493,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 meeting: {
                     $class: 'org.acme.sample.Meeting',
-                    '2023-10-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Bob"}'
+                    '2023-10-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Bob"}',
+                    '2023-11-28T01:02:03Z': '{"$class":"org.acme.sample.Person","name":"Alice"}'
                 }
             });
         });
@@ -510,11 +525,13 @@ describe('Serializer', () => {
         it('should generate a JSON object with a Map <Concept, Scalar>, where Concept is Identified & Scalar extends DateTime ', () => {
             let concepts = factory.newConcept('org.acme.sample', 'Concepts');
 
-            const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concepts.reservation = new Map();
             concepts.reservation.set('$class', 'org.acme.sample.Reservation');
-            concepts.reservation.set(person, '2023-10-28T01:02:03Z');
+            concepts.reservation.set(bob, '2023-10-28T01:02:03Z');
+            concepts.reservation.set(alice, '2023-11-28T01:02:03Z');
 
             const json = serializer.toJSON(concepts);
 
@@ -522,7 +539,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 reservation: {
                     $class: 'org.acme.sample.Reservation',
-                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : '2023-10-28T01:02:03Z'
+                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : '2023-10-28T01:02:03Z',
+                    '{"$class":"org.acme.sample.Person","name":"Alice"}' : '2023-11-28T01:02:03Z'
                 }
             });
         });
@@ -530,11 +548,13 @@ describe('Serializer', () => {
         it('should generate a JSON object with a Map <Concept, Boolean>, where Concept is Identified', () => {
             let concepts = factory.newConcept('org.acme.sample', 'Concepts');
 
-            const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concepts.vip = new Map();
             concepts.vip.set('$class', 'org.acme.sample.GuestList');
-            concepts.vip.set(person, true);
+            concepts.vip.set(bob, true);
+            concepts.vip.set(alice, true);
 
             const json = serializer.toJSON(concepts);
 
@@ -542,7 +562,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 vip: {
                     $class: 'org.acme.sample.GuestList',
-                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : true
+                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : true,
+                    '{"$class":"org.acme.sample.Person","name":"Alice"}' : true
                 }
             });
         });
@@ -571,11 +592,13 @@ describe('Serializer', () => {
         it('should generate a JSON object with a Map <Concept, DateTime>, where Concept is Identified', () => {
             let concepts = factory.newConcept('org.acme.sample', 'Concepts');
 
-            const person = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
 
             concepts.graduated = new Map();
             concepts.graduated.set('$class', 'org.acme.sample.Graduated');
-            concepts.graduated.set(person, '2023-10-28T01:02:03Z');
+            concepts.graduated.set(bob, '2023-10-28T01:02:03Z');
+            concepts.graduated.set(alice, '2023-11-28T01:02:03Z');
 
             const json = serializer.toJSON(concepts);
 
@@ -583,7 +606,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 graduated: {
                     $class: 'org.acme.sample.Graduated',
-                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : '2023-10-28T01:02:03Z'
+                    '{"$class":"org.acme.sample.Person","name":"Bob"}' : '2023-10-28T01:02:03Z',
+                    '{"$class":"org.acme.sample.Person","name":"Alice"}' : '2023-11-28T01:02:03Z'
                 }
             });
         });
@@ -681,7 +705,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 dict: {
                     '$class': 'org.acme.sample.Dictionary',
-                    'Lorem': 'Ipsum'
+                    'Lorem': 'Ipsum',
+                    'Ipsum': 'Lorem'
                 }
             };
             let resource = serializer.fromJSON(json);
@@ -697,7 +722,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 database: {
                     '$class': 'org.acme.sample.Database',
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': 'Ipsum'
+                    'E17B69D9-9B57-4C4A-957E-8B202D7B6C5A': 'Ipsum',
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': 'Lorem'
                 }
             };
             let resource = serializer.fromJSON(json);
@@ -705,7 +731,8 @@ describe('Serializer', () => {
             resource.should.be.an.instanceOf(Resource);
             resource.database.should.be.an.instanceOf(Map);
             resource.database.get('$class').should.equal('org.acme.sample.Database');
-            resource.database.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').should.equal('Ipsum');
+            resource.database.get('E17B69D9-9B57-4C4A-957E-8B202D7B6C5A').should.equal('Ipsum');
+            resource.database.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').should.equal('Lorem');
         });
 
         it('should deserialize a JSON object with a Map <Scalar, String>, where Scalar extends DateTime', () => {
@@ -713,7 +740,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 appointment: {
                     '$class': 'org.acme.sample.Appointment',
-                    '2023-10-28T01:02:03Z': 'Ipsum'
+                    '2023-10-28T01:02:03Z': 'Ipsum',
+                    '2023-11-28T01:02:03Z': 'Lorem'
                 }
             };
             let resource = serializer.fromJSON(json);
@@ -737,7 +765,8 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.marriages.should.be.an.instanceOf(Map);
-            resource.marriages.get('$class', 'org.acme.sample.MarriageRegister');
+            resource.marriages.get('$class').should.equal('org.acme.sample.MarriageRegister');
+
             resource.marriages.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
@@ -760,7 +789,7 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.grade.should.be.an.instanceOf(Map);
-            resource.grade.get('$class', 'org.acme.sample.ExaminationGrade');
+            resource.grade.get('$class').should.equal('org.acme.sample.ExaminationGrade');
             resource.grade.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
@@ -784,7 +813,7 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.graduated.should.be.an.instanceOf(Map);
-            resource.graduated.get('$class', 'org.acme.sample.Graduated');
+            resource.graduated.get('$class').should.equal('org.acme.sample.Graduated');
             resource.graduated.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
@@ -807,7 +836,7 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.reservation.should.be.an.instanceOf(Map);
-            resource.reservation.get('$class', 'org.acme.sample.Reservation');
+            resource.reservation.get('$class').should.equal('org.acme.sample.Reservation');
             resource.reservation.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
@@ -831,7 +860,7 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.vip.should.be.an.instanceOf(Map);
-            resource.vip.get('$class', 'org.acme.sample.GuestList');
+            resource.vip.get('$class').should.equal('org.acme.sample.GuestList');
             resource.vip.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
@@ -855,7 +884,7 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.team.should.be.an.instanceOf(Map);
-            resource.team.get('$class', 'org.acme.sample.Team');
+            resource.team.get('$class').should.equal('org.acme.sample.Team');
             resource.team.forEach((value, key) => {
                 if (!ModelUtil.isSystemProperty(key)) {
                     key.should.be.an.instanceOf(Resource);
