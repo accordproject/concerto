@@ -22,6 +22,10 @@ const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
+
 /**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
@@ -106,21 +110,84 @@ class ResourceValidator {
         return null;
     }
 
+
+    /**
+     * Check a Type that is declared as a Map Type.
+     * @param {Object} type - the type in scope for validation, can be MapTypeKey or MapTypeValue
+     * @param {Object} value - the object being validated
+     * @param {Object} parameters  - the parameter
+     * @param {Map} mapDeclaration - the object being visited
+     * @private
+     */
+    checkMapType(type, value, parameters, mapDeclaration, ) {
+
+        if (!ModelUtil.isPrimitiveType(type.getType())) {
+
+            // thing might be a Concept, Scalar String, Scalar DateTime
+            let thing = mapDeclaration.getModelFile()
+                .getAllDeclarations()
+                .find(decl => decl.name === type.getType());
+
+            // a ClassDeclaration used in the context of a Map Key must be identified.
+            if (type.isKey() && thing.isClassDeclaration() && !thing.isIdentified()) {
+                throw new Error('Map Key must be an Identified Class Declaration');
+            }
+
+            // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
+            if (ModelUtil.isScalar(mapDeclaration.getKey())) {
+                type = thing.getType();
+            }
+
+            if (thing.isClassDeclaration()) {
+                parameters.stack.push(value);
+                thing.accept(this, parameters);
+                return;
+            }
+        } else {
+            // otherwise its a primitive
+            type = type.getType();
+
+        }
+
+        // validate the primitive
+        switch(type) {
+        case 'String':
+            if (typeof value !== 'string') {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
+            }
+            break;
+        case 'DateTime':
+            if (!dayjs.utc(value).isValid()) {
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
+            }
+            break;
+        case 'Boolean':
+            if (typeof value !== 'boolean') {
+                const type = typeof value;
+                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${type} instead, for value '${value}'.`);
+            }
+            break;
+        }
+    }
+
     /**
      * Visitor design pattern
      *
      * @param {MapDeclaration} mapDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     *
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
+
         const obj = parameters.stack.pop();
 
         if (!((obj instanceof Map))) {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
-        if(!obj.has('$class')) {
+        if (!obj.has('$class')) {
             throw new Error('Invalid Map. Map must contain a properly formatted $class property');
         }
 
@@ -128,17 +195,14 @@ class ResourceValidator {
             throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
         }
 
-
         obj.forEach((value, key) => {
-            if(!ModelUtil.isSystemProperty(key)) {
-                if (typeof key !== 'string') {
-                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
-                }
-                if (typeof value !== 'string') {
-                    ResourceValidator.reportInvalidMap(parameters.rootResourceIdentifier, mapDeclaration, obj);
-                }
+            if (!ModelUtil.isSystemProperty(key)) {
+                this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
+                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
             }
         });
+
+        return null;
     }
 
     /**
@@ -505,14 +569,16 @@ class ResourceValidator {
      * @param {string} id - the identifier of this instance.
      * @param {MapDeclaration} mapDeclaration - the declaration of the map
      * @param {Object} value - the value of the field.
+     * @param {Object} type - the type of the field.
      * @private
      */
-    static reportInvalidMap(id, mapDeclaration, value) {
+    static reportInvalidMap(id, mapDeclaration, value, type) {
         let formatter = Globalize.messageFormatter('resourcevalidator-invalidmap');
         throw new ValidationException(formatter({
             resourceId: id,
             classFQN: mapDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString()
+            invalidValue: value.toString(),
+            typeOfValue: type
         }));
     }
 
