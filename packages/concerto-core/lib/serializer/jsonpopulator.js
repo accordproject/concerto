@@ -170,13 +170,60 @@ class JSONPopulator {
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
-        const jsonObj = parameters.jsonStack.pop();
+        let jsonObj = parameters.jsonStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        // throws if Map contains private reserved properties as keys.
+        // Throws if Map contains reserved properties - a Map containing reserved Properties should not be serialized.
         getAssignableProperties(jsonObj, mapDeclaration);
 
-        return new Map(Object.entries(jsonObj));
+        jsonObj = new Map(Object.entries(jsonObj));
+
+        let map = new Map();
+
+        jsonObj.forEach((value, key) => {
+
+            if (key === '$class') {
+                map.set(key, value);
+                return;
+            }
+
+            // If its a Non-Primitive, its likely a ClassDeclaration which needs visiting.
+            if (!ModelUtil.isSystemProperty(key) && !ModelUtil.isPrimitiveType(key)) {
+                // get the Key thing.
+                let thing = mapDeclaration.getModelFile()
+                    .getAllDeclarations()
+                    .find(decl => decl.name === mapDeclaration.getKey().getType());
+
+                // parse the Object, and visit the declaration.
+                if (thing?.isClassDeclaration()) {
+                    let subResource = parameters.factory.newConcept(thing.getNamespace(),
+                        thing.getName(), thing.getIdentifierFieldName() );
+                    parameters.jsonStack.push(JSON.parse(key));
+                    parameters.resourceStack.push(subResource);
+                    key = thing.accept(this, parameters);
+                }
+            }
+
+            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
+                // get the Value thing.
+                let thing = mapDeclaration.getModelFile()
+                    .getAllDeclarations()
+                    .find(decl => decl.name === mapDeclaration.getValue().getType());
+
+                // parse the Object, and visit the declaration.
+                if (thing?.isClassDeclaration() ) {
+                    let subResource = parameters.factory.newConcept(thing.getNamespace(),
+                        thing.getName(), thing.getIdentifierFieldName() );
+                    parameters.jsonStack.push(JSON.parse(value));
+                    parameters.resourceStack.push(subResource);
+                    value = thing.accept(this, parameters);
+                }
+            }
+
+            map.set(key, value);
+        });
+
+        return map;
     }
 
     /**
