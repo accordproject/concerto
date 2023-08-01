@@ -567,24 +567,6 @@ class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {MapDeclaration} mapDeclaration - the declaration of the map
-     * @param {Object} value - the value of the field.
-     * @param {Object} type - the type of the field.
-     * @private
-     */
-    static reportInvalidMap(id, mapDeclaration, value, type) {
-        let formatter = Globalize.messageFormatter('resourcevalidator-invalidmap');
-        throw new ValidationException(formatter({
-            resourceId: id,
-            classFQN: mapDeclaration.getFullyQualifiedName(),
-            invalidValue: value.toString(),
-            typeOfValue: type
-        }));
-    }
-
-    /**
-     * Throw a new error for a model violation.
-     * @param {string} id - the identifier of this instance.
      * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
