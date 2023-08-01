@@ -129,6 +129,24 @@ class MapKeyType extends Decorated {
     toString() {
         return 'MapKeyType {id=' + this.getType() + '}';
     }
+
+    /**
+     * Returns true if this class is the definition of a Map Key.
+     *
+     * @return {boolean} true if the class is a Map Key
+     */
+    isKey() {
+        return true;
+    }
+
+    /**
+     * Returns true if this class is the definition of a Map Value.
+     *
+     * @return {boolean} true if the class is a Map Value
+     */
+    isValue() {
+        return false;
+    }
 }
 
 module.exports = MapKeyType;
