@@ -38,6 +38,18 @@ declare class MapKeyType extends Decorated {
      * @return {string} the short name of this class
      */
     getType(): string;
+    /**
+     * Returns true if this class is the definition of a Map Key.
+     *
+     * @return {boolean} true if the class is a Map Key
+     */
+    isKey(): boolean;
+    /**
+     * Returns true if this class is the definition of a Map Value.
+     *
+     * @return {boolean} true if the class is a Map Value
+     */
+    isValue(): boolean;
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
