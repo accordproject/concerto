@@ -85,7 +85,40 @@ class JSONGenerator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
-        return Object.fromEntries(obj);
+
+        // initialise Map with $class property
+        let map = new Map([['$class',obj.get('$class')]]);
+
+        obj.forEach((value, key) => {
+
+            if (typeof key === 'object') {
+                let decl = mapDeclaration.getModelFile()
+                    .getAllDeclarations()
+                    .find(decl => decl.name === key.getType());
+
+                // convert declaration to JSON representation
+                parameters.stack.push(key);
+                const jsonKey = decl.accept(this, parameters);
+
+                key = JSON.stringify(jsonKey);
+            }
+
+            if (typeof value === 'object') {
+                let decl = mapDeclaration.getModelFile()
+                    .getAllDeclarations()
+                    .find(decl => decl.name === value.getType());
+
+                // convert declaration to JSON representation
+                parameters.stack.push(value);
+                const jsonValue = decl.accept(this, parameters);
+
+                value = JSON.stringify(jsonValue);
+            }
+
+            map.set(key, value);
+        });
+
+        return Object.fromEntries(map);
     }
 
     /**
