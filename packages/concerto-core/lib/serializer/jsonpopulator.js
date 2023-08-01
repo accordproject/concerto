@@ -188,35 +188,39 @@ class JSONPopulator {
             }
 
             // If its a Non-Primitive, its likely a ClassDeclaration which needs visiting.
-            if (!ModelUtil.isSystemProperty(key) && !ModelUtil.isPrimitiveType(key)) {
-                // get the Key thing.
-                let thing = mapDeclaration.getModelFile()
+            if (!ModelUtil.isSystemProperty(key) && !ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
+                // get the Key declaration.
+                let decl = mapDeclaration.getModelFile()
                     .getAllDeclarations()
                     .find(decl => decl.name === mapDeclaration.getKey().getType());
 
                 // parse the Object, and visit the declaration.
-                if (thing?.isClassDeclaration()) {
-                    let subResource = parameters.factory.newConcept(thing.getNamespace(),
-                        thing.getName(), thing.getIdentifierFieldName() );
+                if (decl?.isClassDeclaration()) {
+                    let subResource = parameters.factory.newConcept(decl.getNamespace(),
+                        decl.getName(), decl.getIdentifierFieldName() );
+
                     parameters.jsonStack.push(JSON.parse(key));
                     parameters.resourceStack.push(subResource);
-                    key = thing.accept(this, parameters);
+
+                    key = decl.accept(this, parameters);
                 }
             }
 
             if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
-                // get the Value thing.
-                let thing = mapDeclaration.getModelFile()
+                // get the Value declaration.
+                let decl = mapDeclaration.getModelFile()
                     .getAllDeclarations()
                     .find(decl => decl.name === mapDeclaration.getValue().getType());
 
                 // parse the Object, and visit the declaration.
-                if (thing?.isClassDeclaration() ) {
-                    let subResource = parameters.factory.newConcept(thing.getNamespace(),
-                        thing.getName(), thing.getIdentifierFieldName() );
+                if (decl?.isClassDeclaration() ) {
+                    let subResource = parameters.factory.newConcept(decl.getNamespace(),
+                        decl.getName(), decl.getIdentifierFieldName() );
+
                     parameters.jsonStack.push(JSON.parse(value));
                     parameters.resourceStack.push(subResource);
-                    value = thing.accept(this, parameters);
+
+                    value = decl.accept(this, parameters);
                 }
             }
 
