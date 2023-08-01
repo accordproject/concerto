@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.8.0 {916069dbcaf3be63a2954371fec719d4c79002ff} 2023-08-1
+Version 3.8.1 {794268f69b81f05f711d38a9ef1a7833} 2023-08-1
 - Add To MapKeyType, MapValue functionality
 
 Version 3.7.0 {a97cb6ebd45679354ba4da1940d2bb8d} 2023-05-19
