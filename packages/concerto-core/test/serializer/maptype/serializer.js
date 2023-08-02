@@ -64,6 +64,7 @@ describe('Serializer', () => {
             o Meeting meeting optional
             o Graduation graduation optional
             o Team team optional
+            o StateLog stateLog optional
         }
 
         map Dictionary {
@@ -199,6 +200,17 @@ describe('Serializer', () => {
         concept Leader {
             o String name
         }
+
+        enum State {
+            o ON
+            o OFF
+        }
+
+        map StateLog {
+            o State
+            o DateTime
+        }
+
         `);
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
@@ -696,6 +708,27 @@ describe('Serializer', () => {
                 serializer.toJSON(concept);
             }).should.throw('$class value must match org.acme.sample.Dictionary');
         });
+
+        it('should ignore system properties', () => {
+            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+
+            concept.dict = new Map();
+            concept.dict.set('$class', 'org.acme.sample.Dictionary');
+            concept.dict.set('$type', 'foo');
+            concept.dict.set('Lorem', 'Ipsum');
+            concept.dict.set('Ipsum', 'Lorem');
+
+            const json = serializer.toJSON(concept);
+
+            json.should.deep.equal({
+                $class: 'org.acme.sample.Concepts',
+                dict: {
+                    $class: 'org.acme.sample.Dictionary',
+                    Lorem: 'Ipsum',
+                    Ipsum: 'Lorem'
+                }
+            });
+        });
     });
 
     describe('#fromJSON', () => {
@@ -920,6 +953,21 @@ describe('Serializer', () => {
             (() => {
                 serializer.fromJSON(json);
             }).should.throw('Unexpected reserved properties for type org.acme.sample.Dictionary: $namespace');
+        });
+
+        it('should throw for Enums as Map key types', () => {
+
+            let json = {
+                $class: 'org.acme.sample.Concepts',
+                stateLog: {
+                    '$class': 'org.acme.sample.StateLog',
+                    'ON': '2000-01-01T00:00:00.000Z',
+                    'OFF': '2000-01-01T00:00:00.000Z',
+                }
+            };
+            (() => {
+                serializer.fromJSON(json);
+            }).should.throw('TODO ADD CORRECT ERROR MESSAGE HERE');
         });
     });
 });
