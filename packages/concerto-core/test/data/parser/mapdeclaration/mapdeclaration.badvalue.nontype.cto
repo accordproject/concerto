@@ -14,10 +14,6 @@
 
 namespace com.acme@1.0.0
 
-enum Phase {
-  o ONE
-  o TWO
-}
 map Dictionary {
   o Phase
   o NONTYPE

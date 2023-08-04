@@ -15,7 +15,10 @@
 'use strict';
 
 const Decorated = require('./decorated');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
+const ModelUtil = require('../modelutil');
+
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -43,7 +46,6 @@ class MapValueType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
-        this.type = this.ast.name;
         this.process();
     }
 
@@ -55,6 +57,7 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
+        this.#processType(this.ast);
     }
 
     /**
@@ -64,23 +67,53 @@ class MapValueType extends Decorated {
      * @protected
      */
     validate() {
-        const declarations = this.getModelFile().getAllDeclarations();
+        if (!ModelUtil.isPrimitiveType(this.type)) {
+            let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
 
-        const value = declarations.find(decl => decl.name === this.type);
+            // All declarations, with the exception of MapDeclarations are valid Values.
+            if(decl.isMapDeclaration?.()) {
+                throw new IllegalModelException(
+                    `MapDeclaration as Map Type Value is not supported: ${this.type}`
+                );
+            }
+        }
+    }
 
-        if (!value?.isConcept?.()           &&
-            !value?.isEnum?.()              &&
-            !value?.isAsset?.()             &&
-            !value?.isEvent?.()             &&
-            !value?.isParticipant?.()       &&
-            !value?.isTransaction?.()       &&
-            !value?.isMapDeclaration?.()    &&
-            !value?.isScalarDeclaration?.() &&
-            !['String', 'Long', 'Integer', 'Double', 'Boolean', 'DateTime'].includes(this.type)) {
-
-            throw new IllegalModelException(
-                `MapPropertyType has invalid Type: ${this.type}`
-            );
+    /**
+     * Sets the Type name for the Map Value
+     *
+     * @private
+     * @param {Object} ast - The AST created by the parser
+     */
+    #processType(ast) {
+        let decl;
+        switch(this.ast.$class) {
+        case `${MetaModelNamespace}.ObjectMapValueType`:
+            decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
+            this.type = decl.getName();
+            break;
+        // case 'RelationshipMapValueType':
+        //     // todo - how to handle relationship??
+        //     this.type = 'Boolean';
+        //     break;
+        case `${MetaModelNamespace}.BooleanMapValueType`:
+            this.type = 'Boolean';
+            break;
+        case `${MetaModelNamespace}.DateTimeMapValueType`:
+            this.type = 'DateTime';
+            break;
+        case `${MetaModelNamespace}.StringMapValueType`:
+            this.type = 'String';
+            break;
+        case `${MetaModelNamespace}.IntegerMapValueType`:
+            this.type = 'Integer';
+            break;
+        case `${MetaModelNamespace}.LongMapValueType`:
+            this.type = 'Long';
+            break;
+        case `${MetaModelNamespace}.DoubleMapValueType`:
+            this.type = 'Double';
+            break;
         }
     }
 

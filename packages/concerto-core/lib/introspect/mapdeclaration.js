@@ -65,24 +65,21 @@ class MapDeclaration extends Declaration {
     process() {
         super.process();
 
-        if (this.ast.properties.length !== 2) {
-            throw new IllegalModelException(`MapDeclaration must contain exactly two properties -  MapKeyType & MapyValueType ${this.ast.name}`, this.modelFile, this.ast.location);
+        if (!this.ast.key || !this.ast.value) {
+            throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        const key = this.ast.properties.find(property => property.$class === `${MetaModelNamespace}.MapKeyType`);
-        const value = this.ast.properties.find(property => property.$class === `${MetaModelNamespace}.AggregateValueType` || property.$class === `${MetaModelNamespace}.AggregateRelationshipValueType`);
-
-        if (!key) {
-            throw new IllegalModelException(`MapDeclaration must contain MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
+        if (!this.isValidMapKey(this.ast.key)) {
+            throw new IllegalModelException(`MapDeclaration must contain valid MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        if (!value) {
-            throw new IllegalModelException(`MapDeclaration must contain AggregateValueType  ${this.ast.name}`, this.modelFile, this.ast.location);
+        if (!this.isValidMapValue(this.ast.value)) {
+            throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
         }
 
         this.name = this.ast.name;
-        this.key = new MapKeyType(this, key);
-        this.value = new MapValueType(this, value);
+        this.key = new MapKeyType(this, this.ast.key);
+        this.value = new MapValueType(this, this.ast.value);
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
@@ -147,15 +144,6 @@ class MapDeclaration extends Declaration {
     }
 
     /**
-     * Returns the MapDeclaration properties
-     *
-     * @return {array} the MapDeclaration properties
-     */
-    getProperties() {
-        return this.ast.properties;
-    }
-
-    /**
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
@@ -179,6 +167,38 @@ class MapDeclaration extends Declaration {
      */
     isMapDeclaration() {
         return true;
+    }
+
+    // TODO MAKE PRIVATE
+    /**
+     * Returns true if this class is the definition of a class declaration.
+     * @param {MapDeclaration} key - the Key for the Map Declaration
+     * @return {boolean} true if the class is a class
+     */
+    isValidMapKey(key) {
+        return [
+            `${MetaModelNamespace}.StringMapKeyType`,
+            `${MetaModelNamespace}.DateTimeMapKeyType`,
+            `${MetaModelNamespace}.ObjectMapKeyType`,
+        ].includes(key.$class);
+    }
+
+    // TODO MAKE PRIVATE
+    /**
+     * Returns true if this class is the definition of a class declaration.
+     * @param {MapDeclaration} value - the Key for the Map Declaration
+     * @return {boolean} true if the class is a class
+     */
+    isValidMapValue(value) {
+        return [
+            `${MetaModelNamespace}.BooleanMapValueType`,
+            `${MetaModelNamespace}.DateTimeMapValueType`,
+            `${MetaModelNamespace}.StringMapValueType`,
+            `${MetaModelNamespace}.IntegerMapValueType`,
+            `${MetaModelNamespace}.LongMapValueType`,
+            `${MetaModelNamespace}.DoubleMapValueType`,
+            `${MetaModelNamespace}.ObjectMapValueType`
+        ].includes(value.$class);
     }
 }
 

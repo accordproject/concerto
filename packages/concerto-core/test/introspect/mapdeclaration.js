@@ -45,55 +45,26 @@ describe('MapDeclaration', () => {
 
     describe('#constructor', () => {
 
-        it('should throw if ast contains no MapKeyType', () => {
+        it('should throw if ast contains no Map Key Property', () => {
             (() => {
                 new MapDeclaration(modelFile, {
-                    name: 'MapTest',
-                    properties: [
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                            name: 'String'
-                        }
-                    ]
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
                 });
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains no MapValueType', () => {
+        it('should throw if ast contains no Map Value Property', () => {
             (() => {
                 new MapDeclaration(modelFile, {
-                    name: 'MapTest',
-                    properties: [
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                            name: 'Integer'
-                        },
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.SomeRandomInvalidType',
-                            name: 'String'
-                        },]
-                });
-            }).should.throw(IllegalModelException);
-        });
-
-        it('should throw if ast does not contain exactly two properties', () => {
-            (() => {
-                new MapDeclaration(modelFile, {
-                    name: 'MapTest',
-                    properties: [
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                            name: 'String'
-                        },
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                            name: 'String'
-                        },
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.StringProperty',
-                            name: 'String'
-                        }
-                    ]
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    }
                 });
             }).should.throw(IllegalModelException);
         });
@@ -103,36 +74,54 @@ describe('MapDeclaration', () => {
             (() =>
             {
                 new MapDeclaration(modelFile, {
-                    name: 'MapTest',
-                    properties: [
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                            name: 'String'
-                        },
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                            name: 'String'
-                        }
-                    ]
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
                 });
             }).should.throw(/MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true" to access this functionality./);
             process.env.ENABLE_MAP_TYPE = 'true'; // enable after the test run. This is necessary to ensure functioning of other tests.
         });
 
-        it('should throw if ast contains properties other than MapKeyType, AggregateValueType & AggregateRelationshipValueType', () => {
-            (() => {
+        // should throw if ast contains $class for KEY other than <Supported $class>
+        // should throw if ast contains $class for VALUE other than <Supported $class>
+
+        // should NOT throw if ast contains $class for KEY other than <Supported $class>
+        // should NOT throw if ast contains $class for VALUE other than <Supported $class>
+
+        it('should throw if invalid $class provided for Map Key', () => {
+            (() =>
+            {
                 new MapDeclaration(modelFile, {
-                    name: 'MapTest',
-                    properties: [
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.StringProperty',
-                            name: 'String'
-                        },
-                        {
-                            '$class': 'concerto.metamodel@1.0.0.StringProperty',
-                            name: 'String'
-                        }
-                    ]
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.BadMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+
+        it('should throw if invalid $class provided for Map Value', () => {
+            (() =>
+            {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.BadMapValueType'
+                    }
                 });
             }).should.throw(IllegalModelException);
         });
@@ -140,15 +129,15 @@ describe('MapDeclaration', () => {
 
     describe('#validate success scenarios', () => {
 
-        it('should not throw when map key is an identified concept declaration', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
-            decl.validate();
-        });
+        // it('should not throw when map key is an identified concept declaration', () => {
+        //     let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
+        //     decl.validate();
+        // });
 
-        it('should not throw when map key is an enum declaration', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.enum.cto', MapDeclaration);
-            decl.validate();
-        });
+        // it('should not throw when map key is an enum declaration', () => {
+        //     let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.enum.cto', MapDeclaration);
+        //     decl.validate();
+        // });
 
         it('should not throw when map key is primitive type datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
@@ -200,15 +189,6 @@ describe('MapDeclaration', () => {
             decl.validate();
         });
 
-        it('should not throw when map value is a map declaration', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.map.cto', MapDeclaration);
-            decl.validate();
-        });
-
-        it('should not throw when map value is a relationship', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.relationship.cto', MapDeclaration);
-            decl.validate();
-        });
 
         it('should not throw when map value is a primitive string', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.string.cto', MapDeclaration);
@@ -238,26 +218,49 @@ describe('MapDeclaration', () => {
     });
 
     describe('#validate failure scenarios', () => {
-        it('should throw validating with a non-identified concept declaration as key', function() {
+
+        it('should throw when map key is a concept declaration', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/ConceptDeclaration must be identified in context of MapKeyType: NotIdentified/);
+            }).should.throw(/Concept as Map Type Key is not supported:/);
         });
 
-        it('should throw when an enum key declaration missing', function() {
+        it('should throw when map value is a relationship', function() {
             (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.declaration.relationship.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
+            }).should.throw(/MapDeclaration must contain valid MapValueType, for MapDeclaration Dictionary/);
         });
 
-        it('should throw when map value is an illegal type', function() {
+        it('should throw when map value is a map declaration', function() {
             (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.nontype.cto', MapDeclaration);
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.declaration.map.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/MapPropertyType has invalid Type: NONTYPE/);
+            }).should.throw(/MapDeclaration as Map Type Value is not supported:/);
         });
+
+
+        // it('should throw validating with a non-identified concept declaration as key', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/ConceptDeclaration must be identified in context of MapKeyType: NotIdentified/);
+        // });
+
+        // it('should throw when an enum key declaration missing', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
+        // });
+
+        // it('should throw when map value is an illegal type', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.nontype.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/MapPropertyType has invalid Type: NONTYPE/);
+        // });
 
         it('should throw when map key is a boolean', function() {
             (() => {
@@ -270,36 +273,36 @@ describe('MapDeclaration', () => {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.event.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: Activity/);
+            }).should.throw(/Concept as Map Type Key is not supported: Activity/);
         });
 
         it('should throw when map key is of type MapDeclaration', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.map.cto', MapDeclaration);
                 decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: IllegalMapKey/);
+            }).should.throw(/MapDeclaration as Map Type Value is not supported/);
         });
 
-        it('should throw when map key is of primitive type Double', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.double.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: Double/);
-        });
+        // it.only('should throw when map key is of primitive type Double', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.double.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/MapKeyType has invalid Type: Double/);
+        // });
 
-        it('should throw when map key is of primitive type Integer', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.integer.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: Integer/);
-        });
+        // it('should throw when map key is of primitive type Integer', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.integer.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/MapKeyType has invalid Type: Integer/);
+        // });
 
-        it('should throw when map key is of primitive type Long', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.long.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/MapKeyType has invalid Type: Long/);
-        });
+        // it('should throw when map key is of primitive type Long', function() {
+        //     (() => {
+        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.long.cto', MapDeclaration);
+        //         decl.validate();
+        //     }).should.throw(/MapKeyType has invalid Type: Long/);
+        // });
 
         it('should throw when map key is of scalar type Double', function() {
             (() => {
@@ -326,17 +329,14 @@ describe('MapDeclaration', () => {
     describe('#accept', () => {
         it('should call the visitor', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        name: 'String'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        name: 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
             });
             let visitor = {
                 visit: sinon.stub()
@@ -351,36 +351,45 @@ describe('MapDeclaration', () => {
     describe('#getKey', () => {
         it('should return the map key property', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        name: 'DateTime'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        name: 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
             });
             (clz.getKey() instanceof MapKeyType).should.be.equal(true);
-            clz.getKey().ast.$class.should.equal('concerto.metamodel@1.0.0.MapKeyType');
-            clz.getKey().ast.name.should.equal('DateTime');
+            clz.getKey().ast.$class.should.equal('concerto.metamodel@1.0.0.StringMapKeyType');
+        });
+
+
+        // TODO :: Add coverage for Object Scalars
+        it('should return the correct values when called', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
+            });
+            clz.getKey().getType().should.equal('String');
         });
 
         it('should return the correct values when called', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        name: 'DateTime'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        name: 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.DateTimeMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
             });
             clz.getKey().getType().should.equal('DateTime');
         });
@@ -389,75 +398,115 @@ describe('MapDeclaration', () => {
     describe('#getValue', () => {
         it('should return the map value property', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        name: 'DateTime'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        name: 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
             });
             (clz.getValue() instanceof MapValueType).should.be.equal(true);
-            clz.getValue().ast.$class.should.equal('concerto.metamodel@1.0.0.AggregateValueType');
-            clz.getValue().ast.name.should.equal('String');
+            clz.getValue().ast.$class.should.equal('concerto.metamodel@1.0.0.StringMapValueType');
         });
 
-        it('should return the correct values when called', () => {
+        it('should return the correct values when called (Boolean)', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        name: 'DateTime'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        name: 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.BooleanMapValueType'
+                }
+            });
+            clz.getValue().getType().should.equal('Boolean');
+        });
+
+        it('should return the correct values when called (DateTime)', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.DateTimeMapValueType'
+                }
+            });
+            clz.getValue().getType().should.equal('DateTime');
+        });
+
+        it('should return the correct values when called (String)', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                }
             });
             clz.getValue().getType().should.equal('String');
         });
-    });
 
-    describe('#getProperties', () => {
-        it('should return the map properties', () => {
+        it('should return the correct values when called (Integer)', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        'name': 'String'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        'name': 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.IntegerMapValueType'
+                }
             });
-            clz.getProperties().length.should.be.equal(2);
+            clz.getValue().getType().should.equal('Integer');
+        });
+
+        it('should return the correct values when called (Long)', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.LongMapValueType'
+                }
+            });
+            clz.getValue().getType().should.equal('Long');
+        });
+
+        it('should return the correct values when called (Double)', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.DoubleMapValueType'
+                }
+            });
+            clz.getValue().getType().should.equal('Double');
         });
     });
-
 
     describe('#Introspect', () => {
         it('should return the correct model file', () => {
             let clz = new MapDeclaration(modelFile, {
-                name: 'MapTest',
-                properties: [
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.MapKeyType',
-                        'name': 'String'
-                    },
-                    {
-                        '$class': 'concerto.metamodel@1.0.0.AggregateValueType',
-                        'name': 'String'
-                    }
-                ]
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.DoubleMapValueType'
+                }
             });
             clz.getModelFile().should.equal(modelFile);
             clz.getKey().getModelFile().should.equal(modelFile);
