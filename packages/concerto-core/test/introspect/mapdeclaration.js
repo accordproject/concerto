@@ -564,6 +564,16 @@ describe('MapDeclaration', () => {
             });
             clz.getValue().getType().should.equal('Double');
         });
+
+        it('should return the correct values when called - Scalar DateTime', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.scalar.datetime.cto', MapDeclaration);
+            decl.getValue().getType().should.equal('DATE');
+        });
+
+        it('should return the correct values when called - Scalar String', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.scalar.string.cto', MapDeclaration);
+            decl.getValue().getType().should.equal('GUID');
+        });
     });
 
     describe('#Introspect', () => {
