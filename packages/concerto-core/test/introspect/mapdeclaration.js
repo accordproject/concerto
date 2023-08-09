@@ -145,7 +145,6 @@ describe('MapDeclaration', () => {
         });
     });
 
-
     describe('#validate success scenarios - Map Value', () => {
         it('should validate when map value is a concept declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.concept.cto', MapDeclaration);
@@ -289,26 +288,6 @@ describe('MapDeclaration', () => {
                 });
             }).should.throw(IllegalModelException);
         });
-
-        it.skip('should throw if ast contains illegal Map Key Property - Concept', () => {
-            (() => {
-                new MapDeclaration(modelFile, {
-                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
-                    name: 'MapPermutation1',
-                    key: {
-                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
-                        type: {
-                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
-                            name: 'Person'
-                        }
-                    },
-                    value: {
-                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
-                    }
-                });
-            }).should.throw(IllegalModelException);
-        });
-
 
         it('should throw if ast contains illegal Map Key Property - Enum', () => {
             (() => {

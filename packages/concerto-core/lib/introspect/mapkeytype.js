@@ -69,8 +69,6 @@ class MapKeyType extends Decorated {
      */
     validate() {
 
-
-        // TODO Test cases - illegal Primitives.
         if (!ModelUtil.isPrimitiveType(this.type)) {
             let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
 
@@ -78,22 +76,21 @@ class MapKeyType extends Decorated {
                 !(decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
                 !(decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`)) {
                 throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}`
+                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
                 );
             }
 
             if(decl.isMapDeclaration?.()) {
                 throw new IllegalModelException(
-                    `MapDeclaration as Map Type Value is not supported: ${this.type}`
+                    `MapDeclaration as MapKeyType is not supported, for MapDeclaration ${this.parent.name}`
                 );
             }
 
             if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
                 throw new IllegalModelException(
-                    `Concept as Map Type Key is not supported: ${this.type}`
+                    `MapKeyType supports String and DateTime only,for MapDeclaration ${this.parent.name}`
                 );
             }
-
         }
     }
 

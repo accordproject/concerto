@@ -108,10 +108,6 @@ class MapValueType extends Decorated {
 
             this.type = decl.getName();
             break;
-        // case 'RelationshipMapValueType':
-        //     // todo - how to handle relationship??
-        //     this.type = 'Boolean';
-        //     break;
         case `${MetaModelNamespace}.BooleanMapValueType`:
             this.type = 'Boolean';
             break;
