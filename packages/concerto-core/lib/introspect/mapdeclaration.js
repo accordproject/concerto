@@ -169,12 +169,12 @@ class MapDeclaration extends Declaration {
         return true;
     }
 
-    // TODO MAKE PRIVATE
     /**
-     * Returns true if this class is the definition of a class declaration.
-     * @param {MapDeclaration} key - the Key for the Map Declaration
-     * @return {boolean} true if the class is a class
-     */
+     * Returns true if this Key is a valid Map Key.
+     *
+     * @param {Object} key - the Key of the Map Declaration
+     * @return {boolean} true if the Key is a valid Map Key
+    */
     isValidMapKey(key) {
         return [
             `${MetaModelNamespace}.StringMapKeyType`,
@@ -183,11 +183,11 @@ class MapDeclaration extends Declaration {
         ].includes(key.$class);
     }
 
-    // TODO MAKE PRIVATE
     /**
-     * Returns true if this class is the definition of a class declaration.
-     * @param {MapDeclaration} value - the Key for the Map Declaration
-     * @return {boolean} true if the class is a class
+     * Returns true if this Value is a valid Map Value.
+     *
+     * @param {Object} value - the Value of the Map Declaration
+     * @return {boolean} true if the Value is a valid Map Value
      */
     isValidMapValue(value) {
         return [

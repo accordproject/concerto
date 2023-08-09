@@ -87,11 +87,7 @@ describe('MapDeclaration', () => {
             process.env.ENABLE_MAP_TYPE = 'true'; // enable after the test run. This is necessary to ensure functioning of other tests.
         });
 
-        // should throw if ast contains $class for KEY other than <Supported $class>
-        // should throw if ast contains $class for VALUE other than <Supported $class>
 
-        // should NOT throw if ast contains $class for KEY other than <Supported $class>
-        // should NOT throw if ast contains $class for VALUE other than <Supported $class>
 
         it('should throw if invalid $class provided for Map Key', () => {
             (() =>
@@ -127,202 +123,289 @@ describe('MapDeclaration', () => {
         });
     });
 
-    describe('#validate success scenarios', () => {
-
-        // it('should not throw when map key is an identified concept declaration', () => {
-        //     let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
-        //     decl.validate();
-        // });
-
-        // it('should not throw when map key is an enum declaration', () => {
-        //     let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.enum.cto', MapDeclaration);
-        //     decl.validate();
-        // });
-
-        it('should not throw when map key is primitive type datetime', () => {
+    describe('#validate success scenarios - Map Key', () => {
+        it('should validate when map key is primitive type datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map key is primitive type string', () => {
+        it('should validate when map key is primitive type string', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map key is primitive type string datetime', () => {
+        it('should validate when map key is primitive type scalar datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.datetime.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map key is primitive type scalar string', () => {
+        it('should validate when map key is primitive type scalar string', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
             decl.validate();
         });
+    });
 
-        it('should not throw when map value is an identified concept declaration', () => {
+
+    describe('#validate success scenarios - Map Value', () => {
+        it('should validate when map value is a concept declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.concept.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is a concept derived from another concept declaration', () => {
+        it('should validate when map value is an identified concept declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.identified.declaration.concept.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is a concept derived from another concept declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.derived.concept.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is an event declaration', () => {
+        it('should validate when map value is an event declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.event.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is an asset declaration', () => {
+        it('should validate when map value is an asset declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.asset.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is an transaction declaration', () => {
+        it('should validate when map value is an transaction declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.transaction.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is an participant declaration', () => {
+        it('should validate when map value is an participant declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.participant.cto', MapDeclaration);
             decl.validate();
         });
 
+        it('should validate when map value is a primitive boolean', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.boolean.cto', MapDeclaration);
+            decl.validate();
+        });
 
-        it('should not throw when map value is a primitive string', () => {
+        it('should validate when map value is a primitive string', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.string.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is a primitive datetime', () => {
+        it('should validate when map value is a primitive datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.datetime.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is a primitive double', () => {
+        it('should validate when map value is a primitive double', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.double.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is a primitive integer', () => {
+        it('should validate when map value is a primitive integer', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.integer.cto', MapDeclaration);
             decl.validate();
         });
 
-        it('should not throw when map value is a primitive long', () => {
+        it('should validate when map value is a primitive long', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.long.cto', MapDeclaration);
             decl.validate();
         });
-
     });
 
-    describe('#validate failure scenarios', () => {
+    describe('#validate failure scenarios - Map Key', () => {
 
-        it('should throw when map key is a concept declaration', function() {
+        it('should throw if ast contains illegal Map Key Property', () => {
             (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Concept as Map Type Key is not supported:/);
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.UnSupportedMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
         });
 
-        it('should throw when map value is a relationship', function() {
+        it('should throw if ast contains illegal Map Key Property - Boolean', () => {
             (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.declaration.relationship.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/MapDeclaration must contain valid MapValueType, for MapDeclaration Dictionary/);
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.BooleanMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
         });
+
+        it('should throw if ast contains illegal Map Key Property - Integer', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.IntegerMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Long', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.LongMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Double', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.DoubleMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it.skip('should throw if ast contains illegal Map Key Property - Concept', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapKeyType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                            name: 'Person'
+                        }
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+
+        it('should throw if ast contains illegal Map Key Property - Enum', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.EnumMapKeyType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                            name: 'States'
+                        }
+                    },
+
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+    });
+
+    describe('#validate failure scenarios - Map Value', () => {
+
+        it('should throw if ObjectMapValueType does not contain type property ', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ObjectMapValueType TypeIdentifier does not contain name property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        }
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ObjectMapValueType TypeIdentifier has bad $class', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.ObjectMapValueType',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.BAD_$CLASS',
+                            name: 'Person',
+                        }
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
+        it('should throw if ast contains illegal Map Value Property', () => {
+            (() => {
+                new MapDeclaration(modelFile, {
+                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                    name: 'MapPermutation1',
+                    key: {
+                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
+                    },
+                    value: {
+                        $class: 'concerto.metamodel@1.0.0.EnumMapValueType'
+                    }
+                });
+            }).should.throw(IllegalModelException);
+        });
+
 
         it('should throw when map value is a map declaration', function() {
             (() => {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.declaration.map.cto', MapDeclaration);
                 decl.validate();
             }).should.throw(/MapDeclaration as Map Type Value is not supported:/);
-        });
-
-
-        // it('should throw validating with a non-identified concept declaration as key', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/ConceptDeclaration must be identified in context of MapKeyType: NotIdentified/);
-        // });
-
-        // it('should throw when an enum key declaration missing', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/MapKeyType has invalid Type: NotDeclared/);
-        // });
-
-        // it('should throw when map value is an illegal type', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.nontype.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/MapPropertyType has invalid Type: NONTYPE/);
-        // });
-
-        it('should throw when map key is a boolean', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BOOL/);
-        });
-
-        it('should throw when map key is an event declaration', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.event.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Concept as Map Type Key is not supported: Activity/);
-        });
-
-        it('should throw when map key is of type MapDeclaration', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.map.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/MapDeclaration as Map Type Value is not supported/);
-        });
-
-        // it.only('should throw when map key is of primitive type Double', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.double.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/MapKeyType has invalid Type: Double/);
-        // });
-
-        // it('should throw when map key is of primitive type Integer', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.integer.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/MapKeyType has invalid Type: Integer/);
-        // });
-
-        // it('should throw when map key is of primitive type Long', function() {
-        //     (() => {
-        //         let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.primitive.long.cto', MapDeclaration);
-        //         decl.validate();
-        //     }).should.throw(/MapKeyType has invalid Type: Long/);
-        // });
-
-        it('should throw when map key is of scalar type Double', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
-        });
-
-        it('should throw when map key is of scalar type Integer', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
-        });
-
-        it('should throw when map key is of scalar type Long', function() {
-            (() => {
-                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
-                decl.validate();
-            }).should.throw(/Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: BAD/);
         });
     });
 
@@ -514,25 +597,25 @@ describe('MapDeclaration', () => {
         });
 
         it('should return the correct value on introspection', () => {
-            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
             declaration.declarationKind().should.equal('MapDeclaration');
-            declaration.getFullyQualifiedName().should.equal('com.testing@1.0.0.Dictionary');
+            declaration.getFullyQualifiedName().should.equal('com.acme@1.0.0.Dictionary');
             declaration.isMapDeclaration().should.equal(true);
         });
     });
 
     describe('#toString', () => {
         it('should give the correct value for Map Declaration', () => {
-            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
-            declaration.toString().should.equal('MapDeclaration {id=com.testing@1.0.0.Dictionary}');
-            declaration.getKey().toString().should.equal('MapKeyType {id=Person}');
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
+            declaration.toString().should.equal('MapDeclaration {id=com.acme@1.0.0.Dictionary}');
+            declaration.getKey().toString().should.equal('MapKeyType {id=String}');
             declaration.getValue().toString().should.equal('MapValueType {id=String}');
         });
     });
 
     describe('#getParent', () => {
         it('should return the correct parent MapDeclaration value ', () => {
-            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.declaration.concept.cto', MapDeclaration);
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
             declaration.getKey().getParent().should.equal(declaration);
             declaration.getValue().getParent().should.equal(declaration);
         });

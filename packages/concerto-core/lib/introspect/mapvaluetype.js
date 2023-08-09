@@ -90,6 +90,22 @@ class MapValueType extends Decorated {
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
             decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
+
+            // ObjectMapValueType must have TypeIdentifier.
+            if (!('type' in ast)) {
+                throw new IllegalModelException(`ObjectMapValueType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
+            }
+
+            // ObjectMapValueType TypeIdentifier must be properly formed.
+            if (!('$class' in ast.type) || !('name' in ast.type)) {
+                throw new IllegalModelException(`ObjectMapValueType type must contain property '$class' and property 'name', for MapDeclaration named ${this.parent.name}`);
+            }
+
+            // And the $class must be valid.
+            if (ast.type.$class !== 'concerto.metamodel@1.0.0.TypeIdentifier') {
+                throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
+            }
+
             this.type = decl.getName();
             break;
         // case 'RelationshipMapValueType':
