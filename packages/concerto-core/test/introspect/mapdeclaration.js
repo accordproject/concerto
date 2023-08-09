@@ -301,7 +301,6 @@ describe('MapDeclaration', () => {
                             name: 'States'
                         }
                     },
-
                     value: {
                         $class: 'concerto.metamodel@1.0.0.StringMapValueType'
                     }
@@ -426,9 +425,7 @@ describe('MapDeclaration', () => {
             clz.getKey().ast.$class.should.equal('concerto.metamodel@1.0.0.StringMapKeyType');
         });
 
-
-        // TODO :: Add coverage for Object Scalars
-        it('should return the correct values when called', () => {
+        it('should return the correct values when called - String', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -442,7 +439,7 @@ describe('MapDeclaration', () => {
             clz.getKey().getType().should.equal('String');
         });
 
-        it('should return the correct values when called', () => {
+        it('should return the correct values when called - DateTime', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -454,6 +451,17 @@ describe('MapDeclaration', () => {
                 }
             });
             clz.getKey().getType().should.equal('DateTime');
+        });
+
+
+        it('should return the correct values when called - Scalar DateTime', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.datetime.cto', MapDeclaration);
+            decl.getKey().getType().should.equal('DATE');
+        });
+
+        it('should return the correct values when called - Scalar String', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
+            decl.getKey().getType().should.equal('GUID');
         });
     });
 
