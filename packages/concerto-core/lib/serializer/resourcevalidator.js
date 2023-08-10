@@ -128,17 +128,12 @@ class ResourceValidator {
                 .getAllDeclarations()
                 .find(decl => decl.name === type.getType());
 
-            // a ClassDeclaration used in the context of a Map Key must be identified.
-            if (type.isKey() && thing.isClassDeclaration() && !thing.isIdentified()) {
-                throw new Error('Map Key must be an Identified Class Declaration');
-            }
-
             // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
             if (ModelUtil.isScalar(mapDeclaration.getKey())) {
                 type = thing.getType();
             }
 
-            if (thing.isClassDeclaration()) {
+            if (thing?.isClassDeclaration?.()) {
                 parameters.stack.push(value);
                 thing.accept(this, parameters);
                 return;
@@ -197,7 +192,9 @@ class ResourceValidator {
 
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
+                // Validate Key
                 this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
+                // Validate Value
                 this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
             }
         });

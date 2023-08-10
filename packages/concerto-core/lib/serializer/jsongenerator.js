@@ -91,6 +91,11 @@ class JSONGenerator {
 
         obj.forEach((value, key) => {
 
+            // don't serialize System Properties, other than $class
+            if(ModelUtil.isSystemProperty(key) && key !== '$class') {
+                return;
+            }
+
             if (typeof key === 'object') {
                 let decl = mapDeclaration.getModelFile()
                     .getAllDeclarations()
