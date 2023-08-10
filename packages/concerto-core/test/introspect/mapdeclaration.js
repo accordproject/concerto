@@ -27,6 +27,7 @@ const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const sinon = require('sinon');
+const expect = require('chai').expect;
 
 
 describe('MapDeclaration', () => {
@@ -425,7 +426,7 @@ describe('MapDeclaration', () => {
             clz.getKey().ast.$class.should.equal('concerto.metamodel@1.0.0.StringMapKeyType');
         });
 
-        it('should return the correct values when called - String', () => {
+        it('should return the correct Type when called - String', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -439,7 +440,7 @@ describe('MapDeclaration', () => {
             clz.getKey().getType().should.equal('String');
         });
 
-        it('should return the correct values when called - DateTime', () => {
+        it('should return the correct Type when called - DateTime', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -454,14 +455,29 @@ describe('MapDeclaration', () => {
         });
 
 
-        it('should return the correct values when called - Scalar DateTime', () => {
+        it('should return the correct Type when called - Scalar DateTime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.datetime.cto', MapDeclaration);
             decl.getKey().getType().should.equal('DATE');
         });
 
-        it('should return the correct values when called - Scalar String', () => {
+        it('should return the correct Type when called - Scalar String', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
             decl.getKey().getType().should.equal('GUID');
+        });
+
+        it('should return the correct boolean value introspecting isValue or isKey', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.DoubleMapValueType'
+                }
+            });
+            expect(clz.getKey().isKey()).to.be.true;
+            expect(clz.getKey().isValue()).to.be.false;
         });
     });
 
@@ -481,7 +497,7 @@ describe('MapDeclaration', () => {
             clz.getValue().ast.$class.should.equal('concerto.metamodel@1.0.0.StringMapValueType');
         });
 
-        it('should return the correct values when called (Boolean)', () => {
+        it('should return the correct Type when called - Boolean', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -495,7 +511,7 @@ describe('MapDeclaration', () => {
             clz.getValue().getType().should.equal('Boolean');
         });
 
-        it('should return the correct values when called (DateTime)', () => {
+        it('should return the correct Type when called - DateTime', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -509,7 +525,7 @@ describe('MapDeclaration', () => {
             clz.getValue().getType().should.equal('DateTime');
         });
 
-        it('should return the correct values when called (String)', () => {
+        it('should return the correct Type when called - String', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -523,7 +539,7 @@ describe('MapDeclaration', () => {
             clz.getValue().getType().should.equal('String');
         });
 
-        it('should return the correct values when called (Integer)', () => {
+        it('should return the correct Type when called - Integer', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -537,7 +553,7 @@ describe('MapDeclaration', () => {
             clz.getValue().getType().should.equal('Integer');
         });
 
-        it('should return the correct values when called (Long)', () => {
+        it('should return the correct Type when called - Long', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -551,7 +567,7 @@ describe('MapDeclaration', () => {
             clz.getValue().getType().should.equal('Long');
         });
 
-        it('should return the correct values when called (Double)', () => {
+        it('should return the correct Type when called - Double', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
@@ -573,6 +589,21 @@ describe('MapDeclaration', () => {
         it('should return the correct values when called - Scalar String', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.scalar.string.cto', MapDeclaration);
             decl.getValue().getType().should.equal('GUID');
+        });
+
+        it('should return the correct boolean value introspecting isValue or isKey', () => {
+            let clz = new MapDeclaration(modelFile, {
+                $class: 'concerto.metamodel@1.0.0.MapDeclaration',
+                name: 'MapPermutation1',
+                key: {
+                    $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
+                },
+                value: {
+                    $class: 'concerto.metamodel@1.0.0.DoubleMapValueType'
+                }
+            });
+            expect(clz.getValue().isValue()).to.be.true;
+            expect(clz.getValue().isKey()).to.be.false;
         });
     });
 
