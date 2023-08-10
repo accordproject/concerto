@@ -19,7 +19,6 @@ const ModelManager = require('../../../lib/modelmanager');
 const Resource = require('../../../lib/model/resource');
 const Serializer = require('../../../lib/serializer');
 const Util = require('../../composer/composermodelutility');
-// const ModelUtil = require('../../../../concerto-core/lib/modelutil');
 
 require('chai').should();
 const sinon = require('sinon');
