@@ -32,13 +32,10 @@ describe('Serializer', () => {
 
     beforeEach(() => {
         process.env.ENABLE_MAP_TYPE = 'true';
-
-
         sandbox = sinon.createSandbox();
 
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
-
         modelManager.addCTOModel(`
         namespace org.acme.sample
 
@@ -1143,7 +1140,6 @@ describe('Serializer', () => {
         });
 
         it('should throw for Enums as Map key types', () => {
-
             let json = {
                 $class: 'org.acme.sample.Concepts',
                 stateLog: {
