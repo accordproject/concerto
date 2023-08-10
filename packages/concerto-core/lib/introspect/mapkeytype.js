@@ -58,7 +58,7 @@ class MapKeyType extends Decorated {
      */
     process() {
         super.process();
-        this.#processType(this.ast);
+        this.processType(this.ast);
     }
 
     /**
@@ -97,10 +97,9 @@ class MapKeyType extends Decorated {
     /**
      * Sets the Type name for the Map Key
      *
-     * @private
      * @param {Object} ast - The AST created by the parser
      */
-    #processType(ast) {
+    processType(ast) {
         let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.DateTimeMapKeyType`:

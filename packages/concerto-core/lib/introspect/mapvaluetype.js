@@ -57,7 +57,7 @@ class MapValueType extends Decorated {
      */
     process() {
         super.process();
-        this.#processType(this.ast);
+        this.processType(this.ast);
     }
 
     /**
@@ -82,10 +82,9 @@ class MapValueType extends Decorated {
     /**
      * Sets the Type name for the Map Value
      *
-     * @private
      * @param {Object} ast - The AST created by the parser
      */
-    #processType(ast) {
+    processType(ast) {
         let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:

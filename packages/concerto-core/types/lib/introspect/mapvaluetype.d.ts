@@ -23,6 +23,12 @@ declare class MapValueType extends Decorated {
      * @protected
      */
     protected validate(): void;
+    /**
+     * Sets the Type name for the Map Value
+     *
+     * @param {Object} ast - The AST created by the parser
+     */
+    processType(ast: any): void;
     type: string;
     /**
     * Returns the owner of this property
@@ -49,7 +55,6 @@ declare class MapValueType extends Decorated {
      * @return {boolean} true if the class is a Map Value
      */
     isValue(): boolean;
-    #private;
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
