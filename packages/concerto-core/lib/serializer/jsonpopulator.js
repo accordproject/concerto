@@ -187,38 +187,44 @@ class JSONPopulator {
                 return;
             }
 
-            if (!ModelUtil.isSystemProperty(key) && !ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
-                let decl = mapDeclaration.getModelFile()
-                    .getAllDeclarations()
-                    .find(decl => decl.name === mapDeclaration.getKey().getType());
-                if (decl?.isClassDeclaration()) {
-                    let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                        decl.getName(), decl.getIdentifierFieldName() );
-                    parameters.jsonStack.push(JSON.parse(key));
-                    parameters.resourceStack.push(subResource);
-                    key = decl.accept(this, parameters);
-                }
+            if (!ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
+                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
             }
 
             if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
-                let decl = mapDeclaration.getModelFile()
-                    .getAllDeclarations()
-                    .find(decl => decl.name === mapDeclaration.getValue().getType());
-
-                if (decl?.isClassDeclaration()) {
-                    let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                        decl.getName(), decl.getIdentifierFieldName() );
-
-                    parameters.jsonStack.push(JSON.parse(value));
-                    parameters.resourceStack.push(subResource);
-                    value = decl.accept(this, parameters);
-                }
+                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
             }
 
             map.set(key, value);
         });
 
         return map;
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {Object} value - the key or value belonging to the Map Entry.
+     * @param {Object} type - the Type associated with the Key or Value Map Entry.
+     * @return {Object} value - the key or value belonging to the Map Entry.
+     */
+    processMapType(mapDeclaration, parameters, value, type) {
+        let decl = mapDeclaration.getModelFile()
+            .getAllDeclarations()
+            .find(decl => decl.name === type);
+
+        // if its a ClassDeclaration, populate the Concept.
+        if (decl?.isClassDeclaration()) {
+            let subResource = parameters.factory.newConcept(decl.getNamespace(),
+                decl.getName(), decl.getIdentifierFieldName() );
+
+            parameters.jsonStack.push(JSON.parse(value));
+            parameters.resourceStack.push(subResource);
+            return decl.accept(this, parameters);
+        }
+        // otherwise its a scalar value, we only need to return the primitve value of the scalar.
+        return value;
     }
 
     /**
