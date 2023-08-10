@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.8.3 {7dd828f29c49cedfb8eee2f3c6fefa6e} 2023-08-10
+- Removes private identifiers from MapKeyType & MapValueType
+
 Version 3.8.2 {1a497711c4cca84d1dfa92c0b581fadf} 2023-08-10
 - Add isValidMapKey(Object) isValidMapValue(Object)
 
