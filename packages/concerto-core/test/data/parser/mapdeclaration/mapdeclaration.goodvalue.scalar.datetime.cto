@@ -11,14 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace com.testing@1.0.0
 
-enum Phase {
-  o ONE
-  o TWO
-}
+namespace com.acme@1.0.0
+
+scalar DATE extends DateTime
+
 map Dictionary {
-  o Phase
   o String
+  o DATE
 }
-
