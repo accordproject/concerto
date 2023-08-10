@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.8.2 {1a497711c4cca84d1dfa92c0b581fadf} 2023-08-10
+- Add isValidMapKey(Object) isValidMapValue(Object)
+
 Version 3.8.1 {794268f69b81f05f711d38a9ef1a7833} 2023-08-1
 - Add To MapKeyType, MapValue functionality
 
