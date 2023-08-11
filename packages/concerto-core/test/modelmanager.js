@@ -1072,5 +1072,24 @@ concept Bar {
 
             filtered.validateModelFiles();
         });
+
+        it('should remove imports for filtered types', () => {
+            modelManager.addCTOModel(`namespace child@1.0.0
+            concept Used {}
+            concept Unused {}
+            `, 'child.cto', true);
+
+            modelManager.addCTOModel(`namespace test@1.0.0
+            import child@1.0.0.Unused
+            import child@1.0.0.Used
+            import child@1.0.0.{Used,Unused}
+            concept Person {
+                o Used used
+            }
+            `, 'test.cto');
+            const filtered = modelManager.filter(declaration =>
+                ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used'].includes(declaration.getFullyQualifiedName()));
+            filtered.validateModelFiles();
+        });
     });
 });

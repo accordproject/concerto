@@ -741,10 +741,51 @@ class BaseModelManager {
      */
     filter(predicate){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
-        const filteredModels = Object.values(this.modelFiles)
-            .map((modelFile) => modelFile.filter(predicate, modelManager))
+        const removedFqns = []; // the list of FQN of types that have been removed
+
+        // remove the types from model files, populating removedFqns
+        let filteredModels = Object.values(this.modelFiles)
+            .map((modelFile) => modelFile.filter(predicate, modelManager, removedFqns))
             .filter(Boolean);
-        modelManager.addModelFiles(filteredModels);
+
+        // remove concerto model files - as these are automatically added
+        // when we recreate the model manager below
+        filteredModels = filteredModels.filter(mf => !mf.isSystemModelFile());
+
+        // now update filteredModels to remove any imports of removed types
+        const modelsWithValidImports = filteredModels.map( modelFile => {
+            const ast = modelFile.getAst();
+            let modified = false;
+            removedFqns.forEach( removedFqn => {
+                const ns = ModelUtil.getNamespace(removedFqn);
+                const isSystemImport = ns.startsWith('concerto@') || ns === 'concerto';
+                if(!isSystemImport && modelFile.getImports().includes(removedFqn)) {
+                    const removeName = ModelUtil.getShortName(removedFqn);
+                    const removeNamespace = ModelUtil.getNamespace(removedFqn);
+                    ast.imports = ast.imports.filter(imp => {
+                        const remove = ModelUtil.getShortName(imp.$class) === 'ImportType' &&
+                            imp.name === removeName &&
+                            imp.namespace === removeNamespace;
+                        return !remove;
+                    });
+                    ast.imports.forEach( imp => {
+                        if(imp.namespace === removeNamespace) {
+                            if(ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
+                                imp.types = imp.types.filter((type) => type !== removeName);
+                            }
+                        }
+                    });
+                    modified = true;
+                }
+            });
+            if(modified) {
+                return new ModelFile(this, ast, undefined, modelFile.fileName);
+            }
+            else {
+                return modelFile;
+            }
+        });
+        modelManager.addModelFiles(modelsWithValidImports);
         return modelManager;
     }
 }
