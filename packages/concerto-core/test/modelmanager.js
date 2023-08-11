@@ -1079,12 +1079,18 @@ concept Bar {
             concept Unused {}
             `, 'child.cto', true);
 
+            modelManager.addCTOModel(`namespace cousin@1.0.0
+            concept Used2 {}
+            `, 'cousin.cto', true);
+
             modelManager.addCTOModel(`namespace test@1.0.0
             import child@1.0.0.Unused
             import child@1.0.0.Used
+            import cousing@1.0.0.Used2
             import child@1.0.0.{Used,Unused}
             concept Person {
                 o Used used
+                o Used2 used2
             }
             `, 'test.cto');
             const filtered = modelManager.filter(declaration =>
