@@ -34,7 +34,7 @@
     "devDependencies": {
         "@accordproject/concerto-codegen": "3.14.0",
         "@accordproject/concerto-core": "3.9.1",
-        "@accordproject/concerto-metamodel": "3.8.0",
+        "@accordproject/concerto-metamodel": "3.8.1",
         "@accordproject/concerto-util": "3.9.1",
         "eslint": "8.2.0",
         "license-check-and-add": "2.3.6",

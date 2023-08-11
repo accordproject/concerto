@@ -37,6 +37,7 @@ declare class BaseModelManager {
         strict?: boolean;
         regExp?: any;
     };
+    metamodelModelFile: any;
     /**
      * Returns true
      * @returns {boolean} true
@@ -93,6 +94,14 @@ declare class BaseModelManager {
      * @return {Object} The newly added model file (internal).
      */
     addModelFile(modelFile: ModelFile, cto?: string, fileName?: string, disableValidation?: boolean): any;
+    /**
+     * Check that a modelFile is valid with respect to the metamodel.
+     *
+     * @param {ModelFile} modelFile - Model as a ModelFile object
+     * @throws {MetamodelException} - throws if the ModelFile is invalid
+     * @private
+     */
+    private validateAst;
     /**
      * Adds a model to the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the

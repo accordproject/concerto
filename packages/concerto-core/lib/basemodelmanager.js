@@ -27,6 +27,7 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { getRootModel } = require('./rootmodel');
+const MetamodelException = require('./metamodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -89,6 +90,10 @@ class BaseModelManager {
         this.strict = !!options?.strict;
         this.options = options;
         this.addRootModel();
+
+        // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
+        this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
+
     }
 
     /**
@@ -118,16 +123,16 @@ class BaseModelManager {
 
         if(this.strict ) {
             // add the versioned concerto namespace
-            this.addModelFile(m, rootModelCto, rootModelFile);
+            this.addModelFile(m, rootModelCto, rootModelFile, true);
         }
         else {
             // add the versioned concerto namespace
-            this.addModelFile(m, rootModelCto, rootModelFile);
+            this.addModelFile(m, rootModelCto, rootModelFile, true);
 
             // create the unversioned concerto namespace and add
             const unversioned = getRootModel(false);
             const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
-            this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile);
+            this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile, true);
         }
     }
 
@@ -200,6 +205,10 @@ class BaseModelManager {
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
+                // Structural validation against the Metamodel
+                this.validateAst(modelFile);
+
+                // Semantic validation of the model file
                 modelFile.validate();
             }
             this.modelFiles[modelFile.getNamespace()] = modelFile;
@@ -208,6 +217,43 @@ class BaseModelManager {
         }
 
         return modelFile;
+    }
+
+    /**
+     * Check that a modelFile is valid with respect to the metamodel.
+     *
+     * @param {ModelFile} modelFile - Model as a ModelFile object
+     * @throws {MetamodelException} - throws if the ModelFile is invalid
+     * @private
+     */
+    validateAst(modelFile) {
+        const { version: modelFileVersion } = ModelUtil.parseNamespace(ModelUtil.getNamespace(modelFile.getAst().$class));
+        const { version: metamodelVersion } = ModelUtil.parseNamespace(MetaModelNamespace);
+
+        if (modelFileVersion !== metamodelVersion){
+            throw new MetamodelException(`Model file version ${modelFileVersion} does not match metamodel version ${metamodelVersion}`);
+        }
+
+        const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
+        if (!alreadyHasMetamodel) {
+            this.addModelFile(this.metamodelModelFile, undefined, MetaModelNamespace, true);
+        }
+
+        try {
+            // Use deserialization to validate the AST
+            this.getSerializer().fromJSON(modelFile.getAst());
+        } catch (err) {
+            // Rethrow as a MetamodelException
+            if (this.isStrict()) {
+                throw new MetamodelException(err.message);
+            } else {
+                console.warn('Invalid metamodel found. This will throw an exception in a future release. ', err.message);
+            }
+        }
+
+        if (!alreadyHasMetamodel) {
+            this.deleteModelFile(MetaModelNamespace);
+        }
     }
 
     /**

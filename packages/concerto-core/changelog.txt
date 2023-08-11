@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.9.1 {601f87a38e19293aad178f766d4ae746} 2023-08-11
+- Add MetamodelException
+
 Version 3.7.0 {a97cb6ebd45679354ba4da1940d2bb8d} 2023-05-19
 - Add MapDeclaration, MapKeyType, AggregateValueType
 
