@@ -286,7 +286,9 @@ describe('ModelManager', () => {
                 undeclared: []
             };
             // Displays console warning
-            basemodelmanager.addModel(ast, undefined, 'origFile');
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.not.throw();
         });
 
         it('should throw when using an unknown metamodel version', () => {
