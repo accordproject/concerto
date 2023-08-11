@@ -836,7 +836,6 @@ class ModelFile extends Decorated {
      * @private
      */
     filter(predicate, modelManager, removedDeclarations){
-
         let declarations = []; // ast for all included declarations
         this.declarations?.forEach( declaration => {
             const included = predicate(declaration);

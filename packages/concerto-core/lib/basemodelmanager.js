@@ -766,16 +766,24 @@ class BaseModelManager {
                         const remove = ModelUtil.getShortName(imp.$class) === 'ImportType' &&
                             imp.name === removeName &&
                             imp.namespace === removeNamespace;
+                        if(remove) {
+                            modified = true;
+                        }
                         return !remove;
                     });
                     ast.imports.forEach( imp => {
                         if(imp.namespace === removeNamespace) {
                             if(ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
-                                imp.types = imp.types.filter((type) => type !== removeName);
+                                imp.types = imp.types.filter((type) => {
+                                    const remove = (type === removeName);
+                                    if(remove) {
+                                        modified = true;
+                                    }
+                                    return !remove;
+                                });
                             }
                         }
                     });
-                    modified = true;
                 }
             });
             if(modified) {
