@@ -112,10 +112,6 @@ class MapKeyType extends Decorated {
             decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
             this.type = decl.getName();
             break;
-        default:
-            decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
-            this.type = decl.getName();
-            break;
         }
     }
 
