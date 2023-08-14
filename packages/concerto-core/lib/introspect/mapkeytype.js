@@ -80,12 +80,6 @@ class MapKeyType extends Decorated {
                 );
             }
 
-            if(decl.isMapDeclaration?.()) {
-                throw new IllegalModelException(
-                    `MapDeclaration as MapKeyType is not supported, for MapDeclaration ${this.parent.name}`
-                );
-            }
-
             if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapKeyType supports String and DateTime only,for MapDeclaration ${this.parent.name}`
