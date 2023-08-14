@@ -165,8 +165,6 @@ class MapDeclaration extends Declaration {
    + String toString() 
    + string declarationKind() 
    + boolean isMapDeclaration() 
-   + boolean isValidMapKey(Object) 
-   + boolean isValidMapValue(Object) 
 }
 class MapKeyType extends Decorated {
    + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException

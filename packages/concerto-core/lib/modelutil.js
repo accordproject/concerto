@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const Globalize = require('./globalize');
@@ -285,6 +286,38 @@ class ModelUtil {
      */
     static isPrivateSystemProperty(propertyName) {
         return privateReservedProperties.includes(propertyName);
+    }
+
+    /**
+     * Returns true if this Key is a valid Map Key.
+     *
+     * @param {Object} key - the Key of the Map Declaration
+     * @return {boolean} true if the Key is a valid Map Key
+    */
+    static isValidMapKey(key) {
+        return [
+            `${MetaModelNamespace}.StringMapKeyType`,
+            `${MetaModelNamespace}.DateTimeMapKeyType`,
+            `${MetaModelNamespace}.ObjectMapKeyType`,
+        ].includes(key.$class);
+    }
+
+    /**
+         * Returns true if this Value is a valid Map Value.
+         *
+         * @param {Object} value - the Value of the Map Declaration
+         * @return {boolean} true if the Value is a valid Map Value
+         */
+    static isValidMapValue(value) {
+        return [
+            `${MetaModelNamespace}.BooleanMapValueType`,
+            `${MetaModelNamespace}.DateTimeMapValueType`,
+            `${MetaModelNamespace}.StringMapValueType`,
+            `${MetaModelNamespace}.IntegerMapValueType`,
+            `${MetaModelNamespace}.LongMapValueType`,
+            `${MetaModelNamespace}.DoubleMapValueType`,
+            `${MetaModelNamespace}.ObjectMapValueType`
+        ].includes(value.$class);
     }
 }
 

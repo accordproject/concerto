@@ -85,20 +85,6 @@ declare class MapDeclaration {
      * @return {boolean} true if the class is a class
      */
     isMapDeclaration(): boolean;
-    /**
-     * Returns true if this Key is a valid Map Key.
-     *
-     * @param {Object} key - the Key of the Map Declaration
-     * @return {boolean} true if the Key is a valid Map Key
-    */
-    isValidMapKey(key: any): boolean;
-    /**
-     * Returns true if this Value is a valid Map Value.
-     *
-     * @param {Object} value - the Value of the Map Declaration
-     * @return {boolean} true if the Value is a valid Map Value
-     */
-    isValidMapValue(value: any): boolean;
 }
 import ModelFile = require("./modelfile");
 import MapKeyType = require("./mapkeytype");

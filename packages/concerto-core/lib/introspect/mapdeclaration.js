@@ -14,8 +14,6 @@
 
 'use strict';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
 const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const MapValueType = require('./mapvaluetype');
@@ -69,11 +67,11 @@ class MapDeclaration extends Declaration {
             throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        if (!this.isValidMapKey(this.ast.key)) {
+        if (!ModelUtil.isValidMapKey(this.ast.key)) {
             throw new IllegalModelException(`MapDeclaration must contain valid MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        if (!this.isValidMapValue(this.ast.value)) {
+        if (!ModelUtil.isValidMapValue(this.ast.value)) {
             throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
         }
 
@@ -167,38 +165,6 @@ class MapDeclaration extends Declaration {
      */
     isMapDeclaration() {
         return true;
-    }
-
-    /**
-     * Returns true if this Key is a valid Map Key.
-     *
-     * @param {Object} key - the Key of the Map Declaration
-     * @return {boolean} true if the Key is a valid Map Key
-    */
-    isValidMapKey(key) {
-        return [
-            `${MetaModelNamespace}.StringMapKeyType`,
-            `${MetaModelNamespace}.DateTimeMapKeyType`,
-            `${MetaModelNamespace}.ObjectMapKeyType`,
-        ].includes(key.$class);
-    }
-
-    /**
-     * Returns true if this Value is a valid Map Value.
-     *
-     * @param {Object} value - the Value of the Map Declaration
-     * @return {boolean} true if the Value is a valid Map Value
-     */
-    isValidMapValue(value) {
-        return [
-            `${MetaModelNamespace}.BooleanMapValueType`,
-            `${MetaModelNamespace}.DateTimeMapValueType`,
-            `${MetaModelNamespace}.StringMapValueType`,
-            `${MetaModelNamespace}.IntegerMapValueType`,
-            `${MetaModelNamespace}.LongMapValueType`,
-            `${MetaModelNamespace}.DoubleMapValueType`,
-            `${MetaModelNamespace}.ObjectMapValueType`
-        ].includes(value.$class);
     }
 }
 
