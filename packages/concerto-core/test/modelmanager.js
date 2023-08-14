@@ -267,7 +267,7 @@ describe('ModelManager', () => {
 
     describe('#addModel', () => {
         it('should throw for a bad metamodel AST in strict mode', () => {
-            const basemodelmanager = new BaseModelManager({ strict: true });
+            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValiation: true });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme@1.0.0',
@@ -279,7 +279,7 @@ describe('ModelManager', () => {
         });
 
         it('should warn for a bad metamodel AST', () => {
-            const basemodelmanager = new BaseModelManager();
+            const basemodelmanager = new BaseModelManager({ metamodelValiation: true });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
@@ -292,7 +292,7 @@ describe('ModelManager', () => {
         });
 
         it('should throw when using an unknown metamodel version', () => {
-            const basemodelmanager = new BaseModelManager({ strict: true });
+            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValiation: true });
             const ast = {
                 $class: 'concerto.metamodel@99.0.0.Model',
                 namespace: 'org.acme@1.0.0',
