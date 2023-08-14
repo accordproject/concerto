@@ -91,23 +91,13 @@ class JSONGenerator {
 
         obj.forEach((value, key) => {
 
+
             // don't serialize System Properties, other than $class
             if(ModelUtil.isSystemProperty(key) && key !== '$class') {
                 return;
             }
 
-            if (typeof key === 'object') {
-                let decl = mapDeclaration.getModelFile()
-                    .getAllDeclarations()
-                    .find(decl => decl.name === key.getType());
-
-                // convert declaration to JSON representation
-                parameters.stack.push(key);
-                const jsonKey = decl.accept(this, parameters);
-
-                key = JSON.stringify(jsonKey);
-            }
-
+            // Key is always a string, but value might be a ValidatedResource.
             if (typeof value === 'object') {
                 let decl = mapDeclaration.getModelFile()
                     .getAllDeclarations()
