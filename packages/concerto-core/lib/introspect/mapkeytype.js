@@ -92,6 +92,7 @@ class MapKeyType extends Decorated {
      * Sets the Type name for the Map Key
      *
      * @param {Object} ast - The AST created by the parser
+     * @private
      */
     processType(ast) {
         let decl;

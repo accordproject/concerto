@@ -208,6 +208,7 @@ class JSONPopulator {
      * @param {Object} value - the key or value belonging to the Map Entry.
      * @param {Object} type - the Type associated with the Key or Value Map Entry.
      * @return {Object} value - the key or value belonging to the Map Entry.
+     * @private
      */
     processMapType(mapDeclaration, parameters, value, type) {
         let decl = mapDeclaration.getModelFile()
