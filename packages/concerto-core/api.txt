@@ -169,7 +169,6 @@ class MapDeclaration extends Declaration {
 class MapKeyType extends Decorated {
    + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + void processType(Object) 
    + ModelFile getModelFile() 
    + MapDeclaration getParent() 
    + string getType() 
@@ -180,7 +179,6 @@ class MapKeyType extends Decorated {
 class MapValueType extends Decorated {
    + void constructor(MapDeclaration,Object) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + void processType(Object) 
    + ModelFile getModelFile() 
    + MapDeclaration getParent() 
    + string getType() 

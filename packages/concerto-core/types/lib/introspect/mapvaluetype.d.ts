@@ -27,8 +27,9 @@ declare class MapValueType extends Decorated {
      * Sets the Type name for the Map Value
      *
      * @param {Object} ast - The AST created by the parser
+     * @private
      */
-    processType(ast: any): void;
+    private processType;
     type: string;
     /**
     * Returns the owner of this property

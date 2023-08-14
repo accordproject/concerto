@@ -24,6 +24,8 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.8.5 {9cd54e67c4a39a3041706e4b37dce9f1} 2023-08-14
+- Makes MapKeyType MapValueType processType() private
 
 Version 3.8.4 {a99786670d2561bf2b84cb3eb1bb1a08} 2023-08-14
 - Move isValidMapKey & isValidMapValue to ModelUtils

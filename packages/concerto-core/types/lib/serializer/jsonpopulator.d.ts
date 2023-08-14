@@ -56,8 +56,9 @@ declare class JSONPopulator {
      * @param {Object} value - the key or value belonging to the Map Entry.
      * @param {Object} type - the Type associated with the Key or Value Map Entry.
      * @return {Object} value - the key or value belonging to the Map Entry.
+     * @private
      */
-    processMapType(mapDeclaration: MapDeclaration, parameters: any, value: any, type: any): any;
+    private processMapType;
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
