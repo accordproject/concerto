@@ -230,6 +230,41 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
+        it('should throw if ast contains illegal Map Key Property - Concept', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
+                decl.validate().should.throw(IllegalModelException);
+            });
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Scalar Long', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
+                decl.validate();
+            });
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Scalar Integer', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
+                decl.validate().should.throw(IllegalModelException);
+            });
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Scalar Double', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
+                decl.validate().should.throw(IllegalModelException);
+            });
+        });
+
+        it('should throw if ast contains illegal Map Key Property - Scalar Boolean', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
+                decl.validate().should.throw(IllegalModelException);
+            });
+        });
+
         it('should throw if ast contains illegal Map Key Property - Boolean', () => {
             (() => {
                 new MapDeclaration(modelFile, {
