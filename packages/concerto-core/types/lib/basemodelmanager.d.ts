@@ -21,14 +21,14 @@ declare class BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.metamodelValiation] - When true, modelfiles will be validated
+     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * against the metamodel when they are added to a BaseModelManager
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
         strict?: boolean;
         regExp?: any;
-        metamodelValiation?: boolean;
+        metamodelValidation?: boolean;
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
@@ -39,7 +39,7 @@ declare class BaseModelManager {
     options: {
         strict?: boolean;
         regExp?: any;
-        metamodelValiation?: boolean;
+        metamodelValidation?: boolean;
     };
     metamodelModelFile: any;
     /**

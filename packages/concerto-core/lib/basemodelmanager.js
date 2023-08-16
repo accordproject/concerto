@@ -79,7 +79,7 @@ class BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.metamodelValiation] - When true, modelfiles will be validated
+     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * against the metamodel when they are added to a BaseModelManager
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
@@ -208,7 +208,7 @@ class BaseModelManager {
         if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
                 // Structural validation against the Metamodel
-                if(this.options?.metamodelValiation){
+                if(this.options?.metamodelValidation){
                     this.validateAst(modelFile);
                 }
 
