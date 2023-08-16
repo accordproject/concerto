@@ -18,6 +18,7 @@ const fs = require('fs');
 const XRegExp = require('xregexp');
 
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const AssetDeclaration = require('../lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
 const DecoratorFactory = require('../lib/introspect/decoratorfactory');
@@ -41,6 +42,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const tmp = require('tmp-promise');
+const BaseModelManager = require('../lib/basemodelmanager');
 
 describe('ModelManager', () => {
 
@@ -170,6 +172,7 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
+            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge'].should.equal(mf1);
@@ -260,6 +263,45 @@ describe('ModelManager', () => {
             }).should.throw(/Namespace org.acme.base specified in file duplFile is already declared in file origFile/);
         });
 
+    });
+
+    describe('#addModel', () => {
+        it('should throw for a bad metamodel AST in strict mode', () => {
+            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValidation: true });
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme@1.0.0',
+                undeclared: []
+            };
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
+        });
+
+        it('should warn for a bad metamodel AST', () => {
+            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme',
+                undeclared: []
+            };
+            // Displays console warning
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.not.throw();
+        });
+
+        it('should throw when using an unknown metamodel version', () => {
+            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValidation: true });
+            const ast = {
+                $class: 'concerto.metamodel@99.0.0.Model',
+                namespace: 'org.acme@1.0.0',
+                undeclared: []
+            };
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.throw('Model file version 99.0.0 does not match metamodel version 1.0.0');
+        });
     });
 
     describe('#addModelFiles', () => {
@@ -497,6 +539,7 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
+            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -506,6 +549,7 @@ describe('ModelManager', () => {
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.doge');
             mf2.isModelFile.returns(true);
+            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             mf2.$marker = 'mf2';
             res = modelManager.updateModelFile(mf2);
             sinon.assert.calledOnce(mf2.validate);
@@ -527,6 +571,7 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
+            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -574,6 +619,7 @@ describe('ModelManager', () => {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.doge');
             mf1.isModelFile.returns(true);
+            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -810,10 +856,12 @@ concept Bar {
             let mf1 = sinon.createStubInstance(ModelFile);
             mf1.getNamespace.returns('org.wow');
             mf1.isModelFile.returns(true);
+            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             modelManager.addModelFile(mf1);
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.such');
             mf2.isModelFile.returns(true);
+            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             modelManager.addModelFile(mf2);
             let ns = modelManager.getNamespaces();
             ns.should.include('org.wow');

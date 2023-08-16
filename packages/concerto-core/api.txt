@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,processFile?) 
+   + void constructor(object?,boolean?,Object?,boolean?,processFile?) 
    + boolean isModelManager() 
    + boolean isStrict() 
    + Object accept(Object,Object) 
@@ -270,6 +270,9 @@ class ScalarDeclaration extends Declaration {
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string declarationKind() 
+}
+class MetamodelException extends BaseException {
+   + void constructor(string) 
 }
 class Identifiable extends Typed {
    ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string) 

@@ -21,11 +21,14 @@ declare class BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
+     * against the metamodel when they are added to a BaseModelManager
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
         strict?: boolean;
         regExp?: any;
+        metamodelValidation?: boolean;
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
@@ -36,7 +39,9 @@ declare class BaseModelManager {
     options: {
         strict?: boolean;
         regExp?: any;
+        metamodelValidation?: boolean;
     };
+    metamodelModelFile: any;
     /**
      * Returns true
      * @returns {boolean} true
@@ -93,6 +98,14 @@ declare class BaseModelManager {
      * @return {Object} The newly added model file (internal).
      */
     addModelFile(modelFile: ModelFile, cto?: string, fileName?: string, disableValidation?: boolean): any;
+    /**
+     * Check that a modelFile is valid with respect to the metamodel.
+     *
+     * @param {ModelFile} modelFile - Model as a ModelFile object
+     * @throws {MetamodelException} - throws if the ModelFile is invalid
+     * @private
+     */
+    private validateAst;
     /**
      * Adds a model to the ModelManager.
      * Concerto files have a single namespace. If a Concerto file with the

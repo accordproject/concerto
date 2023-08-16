@@ -25,6 +25,7 @@
 const SecurityException = require('./lib/securityexception');
 const IllegalModelException = require('./lib/introspect/illegalmodelexception');
 const TypeNotFoundException = require('./lib/typenotfoundexception');
+const MetamodelException = require('./lib/metamodelexception');
 
 // Decorated
 const Decorator = require('./lib/introspect/decorator');
@@ -104,6 +105,7 @@ module.exports = {
     SecurityException,
     IllegalModelException,
     TypeNotFoundException,
+    MetamodelException,
     Decorator,
     DecoratorFactory,
     DecoratorManager,
