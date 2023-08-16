@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-util",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "description": "Utilities for Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
