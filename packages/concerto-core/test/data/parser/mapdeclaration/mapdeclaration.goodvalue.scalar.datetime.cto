@@ -14,7 +14,9 @@
 
 namespace com.acme@1.0.0
 
+scalar DATE extends DateTime
+
 map Dictionary {
-  o Phase
-  o NONTYPE
+  o String
+  o DATE
 }

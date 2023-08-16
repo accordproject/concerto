@@ -12,9 +12,11 @@
  * limitations under the License.
  */
 
-namespace com.acme@1.0.0
+namespace com.testing@1.0.0
+
+concept Person identified {}
 
 map Dictionary {
-  o Phase
-  o NONTYPE
+  o Person
+  o String
 }

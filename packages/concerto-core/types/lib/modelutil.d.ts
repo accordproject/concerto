@@ -141,4 +141,25 @@ declare class ModelUtil {
      * @private
      */
     private static isPrivateSystemProperty;
+    /**
+     * Returns true if this Key is a valid Map Key.
+     *
+     * @param {Object} key - the Key of the Map Declaration
+     * @return {boolean} true if the Key is a valid Map Key
+    */
+    static isValidMapKey(key: any): boolean;
+    /**
+     * Returns true if this Key is a valid Map Key Scalar Value.
+     *
+     * @param {Object} decl - the Map Key Scalar declaration
+     * @return {boolean} true if the Key is a valid Map Key Scalar type
+    */
+    static isValidMapKeyScalar(decl: any): boolean;
+    /**
+         * Returns true if this Value is a valid Map Value.
+         *
+         * @param {Object} value - the Value of the Map Declaration
+         * @return {boolean} true if the Value is a valid Map Value
+         */
+    static isValidMapValue(value: any): boolean;
 }

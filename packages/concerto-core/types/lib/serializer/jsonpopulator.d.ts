@@ -51,6 +51,16 @@ declare class JSONPopulator {
     private visitMapDeclaration;
     /**
      * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {Object} value - the key or value belonging to the Map Entry.
+     * @param {Object} type - the Type associated with the Key or Value Map Entry.
+     * @return {Object} value - the key or value belonging to the Map Entry.
+     * @private
+     */
+    private processMapType;
+    /**
+     * Visitor design pattern
      * @param {Field} field - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null

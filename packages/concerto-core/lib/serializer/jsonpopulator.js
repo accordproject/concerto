@@ -170,13 +170,62 @@ class JSONPopulator {
      * @private
      */
     visitMapDeclaration(mapDeclaration, parameters) {
-        const jsonObj = parameters.jsonStack.pop();
+        let jsonObj = parameters.jsonStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        // throws if Map contains private reserved properties as keys.
+        // Throws if Map contains reserved properties - a Map containing reserved Properties should not be serialized.
         getAssignableProperties(jsonObj, mapDeclaration);
 
-        return new Map(Object.entries(jsonObj));
+        jsonObj = new Map(Object.entries(jsonObj));
+
+        let map = new Map();
+
+        jsonObj.forEach((value, key) => {
+
+            if (key === '$class') {
+                map.set(key, value);
+                return;
+            }
+
+            if (!ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
+                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
+            }
+
+            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
+                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
+            }
+
+            map.set(key, value);
+        });
+
+        return map;
+    }
+
+    /**
+     * Visitor design pattern
+     * @param {MapDeclaration} mapDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @param {Object} value - the key or value belonging to the Map Entry.
+     * @param {Object} type - the Type associated with the Key or Value Map Entry.
+     * @return {Object} value - the key or value belonging to the Map Entry.
+     * @private
+     */
+    processMapType(mapDeclaration, parameters, value, type) {
+        let decl = mapDeclaration.getModelFile()
+            .getAllDeclarations()
+            .find(decl => decl.name === type);
+
+        // if its a ClassDeclaration, populate the Concept.
+        if (decl?.isClassDeclaration()) {
+            let subResource = parameters.factory.newConcept(decl.getNamespace(),
+                decl.getName(), decl.getIdentifierFieldName() );
+
+            parameters.jsonStack.push(JSON.parse(value));
+            parameters.resourceStack.push(subResource);
+            return decl.accept(this, parameters);
+        }
+        // otherwise its a scalar value, we only need to return the primitve value of the scalar.
+        return value;
     }
 
     /**

@@ -39,14 +39,6 @@ declare class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {MapDeclaration} mapDeclaration - the declaration of the map
-     * @param {Object} value - the value of the field.
-     * @private
-     */
-    private static reportInvalidMap;
-    /**
-     * Throw a new error for a model violation.
-     * @param {string} id - the identifier of this instance.
      * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
@@ -134,10 +126,21 @@ declare class ResourceValidator {
      */
     private visitEnumDeclaration;
     /**
+     * Check a Type that is declared as a Map Type.
+     * @param {Object} type - the type in scope for validation, can be MapTypeKey or MapTypeValue
+     * @param {Object} value - the object being validated
+     * @param {Object} parameters  - the parameter
+     * @param {Map} mapDeclaration - the object being visited
+     * @private
+     */
+    private checkMapType;
+    /**
      * Visitor design pattern
      *
      * @param {MapDeclaration} mapDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     *
      * @private
      */
     private visitMapDeclaration;

@@ -363,7 +363,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in the "TEST" instance. Invalid Type for Map Key or Value - expected String type.');
+            }).should.throw('Model violation in org.acme.map.PhoneBook. Expected Type of String but found \'3\' instead.');
         });
 
         it('should not validate map with bad key', function () {
@@ -374,7 +374,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in the "TEST" instance. Invalid Type for Map Key or Value - expected String type.');
+            }).should.throw('Model violation in org.acme.map.PhoneBook. Expected Type of String but found \'1\' instead');
         });
     });
 

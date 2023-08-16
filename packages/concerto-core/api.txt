@@ -162,7 +162,6 @@ class MapDeclaration extends Declaration {
    + string getName() 
    + string getKey() 
    + string getValue() 
-   + array getProperties() 
    + String toString() 
    + string declarationKind() 
    + boolean isMapDeclaration() 
@@ -174,6 +173,8 @@ class MapKeyType extends Decorated {
    + MapDeclaration getParent() 
    + string getType() 
    + String toString() 
+   + boolean isKey() 
+   + boolean isValue() 
 }
 class MapValueType extends Decorated {
    + void constructor(MapDeclaration,Object) throws IllegalModelException
@@ -182,6 +183,8 @@ class MapValueType extends Decorated {
    + MapDeclaration getParent() 
    + string getType() 
    + String toString() 
+   + boolean isKey() 
+   + boolean isValue() 
 }
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 

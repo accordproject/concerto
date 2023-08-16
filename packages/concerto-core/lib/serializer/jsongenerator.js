@@ -85,7 +85,34 @@ class JSONGenerator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
-        return Object.fromEntries(obj);
+
+        // initialise Map with $class property
+        let map = new Map([['$class',obj.get('$class')]]);
+
+        obj.forEach((value, key) => {
+
+            // don't serialize System Properties, other than $class
+            if(ModelUtil.isSystemProperty(key) && key !== '$class') {
+                return;
+            }
+
+            // Key is always a string, but value might be a ValidatedResource.
+            if (typeof value === 'object') {
+                let decl = mapDeclaration.getModelFile()
+                    .getAllDeclarations()
+                    .find(decl => decl.name === value.getType());
+
+                // convert declaration to JSON representation
+                parameters.stack.push(value);
+                const jsonValue = decl.accept(this, parameters);
+
+                value = JSON.stringify(jsonValue);
+            }
+
+            map.set(key, value);
+        });
+
+        return Object.fromEntries(map);
     }
 
     /**

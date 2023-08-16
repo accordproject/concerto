@@ -14,6 +14,7 @@
 
 'use strict';
 
+const ModelUtil = require('../modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Decorated = require('./decorated');
@@ -46,7 +47,6 @@ class MapKeyType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
-        this.type = this.ast.name;
         this.process();
     }
 
@@ -58,6 +58,7 @@ class MapKeyType extends Decorated {
      */
     process() {
         super.process();
+        this.processType(this.ast);
     }
 
     /**
@@ -67,30 +68,44 @@ class MapKeyType extends Decorated {
      * @protected
      */
     validate() {
-        const declaration = this.getModelFile().getAllDeclarations();
-        const key = declaration.find(decl => decl.name === this.type);
 
-        if (!key?.isConcept?.()           &&
-            !key?.isEnum?.()              &&
-            !key?.isScalarDeclaration?.() &&
-            !['String', 'DateTime'].includes(this.type)) {
-            throw new IllegalModelException(`MapKeyType has invalid Type: ${this.type}`);
+        if (!ModelUtil.isPrimitiveType(this.type)) {
+            let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
+
+            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
+                throw new IllegalModelException(
+                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
+                );
+            }
+
+            if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
+                throw new IllegalModelException(
+                    `Invalid Map key type in MapDeclaration ${this.parent.name}. Only String and DateTime types are supported for Map key types`
+                );
+            }
         }
+    }
 
-        if (key?.isConcept?.() && !key.isIdentified()) {
-            throw new IllegalModelException(
-                `ConceptDeclaration must be identified in context of MapKeyType: ${this.type}`
-            );
+    /**
+     * Sets the Type name for the Map Key
+     *
+     * @param {Object} ast - The AST created by the parser
+     * @private
+     */
+    processType(ast) {
+        let decl;
+        switch(this.ast.$class) {
+        case `${MetaModelNamespace}.DateTimeMapKeyType`:
+            this.type = 'DateTime';
+            break;
+        case `${MetaModelNamespace}.StringMapKeyType`:
+            this.type = 'String';
+            break;
+        case `${MetaModelNamespace}.ObjectMapKeyType`:
+            decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
+            this.type = decl.getName();
+            break;
         }
-
-        if (key?.isScalarDeclaration?.() &&
-            !(key?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
-            !(key?.ast.$class === `${MetaModelNamespace}.DateTimeScalar` )) {
-            throw new IllegalModelException(
-                `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}`
-            );
-        }
-
     }
 
     /**
@@ -128,6 +143,24 @@ class MapKeyType extends Decorated {
      */
     toString() {
         return 'MapKeyType {id=' + this.getType() + '}';
+    }
+
+    /**
+     * Returns true if this class is the definition of a Map Key.
+     *
+     * @return {boolean} true if the class is a Map Key
+     */
+    isKey() {
+        return true;
+    }
+
+    /**
+     * Returns true if this class is the definition of a Map Value.
+     *
+     * @return {boolean} true if the class is a Map Value
+     */
+    isValue() {
+        return false;
     }
 }
 

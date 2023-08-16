@@ -1,33 +1,123 @@
 namespace com.acme@1.0.0
 
-map Dictionary {
+map MapPermutation1 {
   o String
   o String
 }
 
-map Checklist {
+map MapPermutation2 {
   o String
   o Boolean
 }
 
-map Timeline {
+map MapPermutation3 {
+  o String
   o DateTime
-  o Activity
 }
 
-map AddressBook {
-  o GUID
+map MapPermutation4 {
+  o String
+  o Integer
+}
+
+map MapPermutation5 {
+  o String
+  o Long
+}
+
+map MapPermutation6 {
+  o String
+  o Double
+}
+
+map MapPermutation7 {
+  o String
   o Person
 }
 
-map AddressBook2 {
+map MapPermutation8 {
+  o DateTime
+  o Boolean
+}
+
+map MapPermutation9 {
+  o DateTime
+  o DateTime
+}
+
+map MapPermutation10 {
+  o DateTime
+  o String
+}
+
+map MapPermutation11 {
+  o DateTime
+  o Integer
+}
+
+map MapPermutation12 {
+  o DateTime
+  o Long
+}
+
+map MapPermutation13 {
+  o DateTime
+  o Double
+}
+
+map MapPermutation14 {
+  o DateTime
+  o Person
+}
+
+map MapPermutation15 {
+  o Person
+  o String
+}
+
+map MapPermutation16 {
+  o Person
+  o Boolean
+}
+
+map MapPermutation17 {
+  o Person
+  o DateTime
+}
+
+map MapPermutation18 {
+  o Person
+  o Integer
+}
+
+map MapPermutation19 {
+  o Person
+  o Long
+}
+
+map MapPermutation20 {
+  o Person
+  o Double
+}
+
+map MapPermutation21 {
+  o Person
+  o Person
+}
+
+map MapPermutation22 {
   o GUID
   --> Person
 }
 
-map StateMachine {
-  o Phase
+map MapPermutation23 {
   o String
+  --> Person
+}
+
+map MapPermutation24 {
+  o DateTime
+  --> Person
 }
 
 @Foo("Alexandria")
@@ -35,24 +125,33 @@ map Library {
   @Bar()
   o String
   @Baz()
-  o Dictionary
-}
-
-map MarriageRegister {
-  o Person
-  o Person
+  o Book
 }
 
 concept Concept {
-  --> String test
-  o Dictionary dictionary
-  o Checklist checklist
-  o Timeline timeline
-  o AddressBook addressBook
-  o AddressBook remoteEmployees
-  o StateMachine state
-  o Dictionary[] arrayOfRecords
-  o Dictionary optionalRecord optional
+  o MapPermutation1 p1
+  o MapPermutation2 p2
+  o MapPermutation3 p3
+  o MapPermutation4 p4
+  o MapPermutation5 p5
+  o MapPermutation6 p6
+  o MapPermutation7 p7
+  o MapPermutation8 p8
+  o MapPermutation9 p9
+  o MapPermutation10 p10
+  o MapPermutation11 p11
+  o MapPermutation12 p12
+  o MapPermutation13 p13
+  o MapPermutation14 p14
+  o MapPermutation15 p15
+  o MapPermutation16 p16
+  o MapPermutation17 p17
+  o MapPermutation18 p18
+  o MapPermutation19 p19
+  o MapPermutation20 p20
+  o MapPermutation21 p21
+  o MapPermutation22 p22
+  o MapPermutation23 p23
+  o MapPermutation24 p24
   o Library library
-  o MarriageRegister marriages
 }
