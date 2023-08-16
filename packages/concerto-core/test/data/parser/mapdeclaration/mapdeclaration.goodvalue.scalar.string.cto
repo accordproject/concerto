@@ -14,7 +14,9 @@
 
 namespace com.acme@1.0.0
 
+scalar GUID extends String
+
 map Dictionary {
-  o Phase
-  o NONTYPE
+  o String
+  o GUID
 }

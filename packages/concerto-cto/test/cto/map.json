@@ -4,260 +4,598 @@
     "namespace": "com.acme@1.0.0",
     "imports": [],
     "declarations": [
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "Dictionary",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "String"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "String"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "Checklist",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "String"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "Boolean"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "Timeline",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "DateTime"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "Activity"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "AddressBook",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "GUID"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "Person"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "AddressBook2",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "GUID"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateRelationshipValueType",
-            "name": "Person"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "StateMachine",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "Phase"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "String"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "Library",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "String",
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation1",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation2",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.BooleanMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation3",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation4",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.IntegerMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation5",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.LongMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation6",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DoubleMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation7",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation8",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.BooleanMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation9",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation10",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation11",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.IntegerMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation12",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.LongMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation13",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DoubleMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation14",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation15",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.StringMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation16",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.BooleanMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation17",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation18",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.IntegerMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation19",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.LongMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation20",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.DoubleMapValueType"
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation21",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation22",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "GUID"
+                }
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.RelationshipMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation23",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.RelationshipMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "MapPermutation24",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.DateTimeMapKeyType"
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.RelationshipMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Person"
+                }
+            }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+            "name": "Library",
+            "key": {
+                "$class": "concerto.metamodel@1.0.0.StringMapKeyType",
+                "decorators": [
+                    {
+                        "$class": "concerto.metamodel@1.0.0.Decorator",
+                        "name": "Bar",
+                        "arguments": []
+                    }
+                ]
+            },
+            "value": {
+                "$class": "concerto.metamodel@1.0.0.ObjectMapValueType",
+                "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Book"
+                },
+                "decorators": [
+                    {
+                        "$class": "concerto.metamodel@1.0.0.Decorator",
+                        "name": "Baz",
+                        "arguments": []
+                    }
+                ]
+            },
             "decorators": [
-              {
-                "$class": "concerto.metamodel@1.0.0.Decorator",
-                "name": "Bar",
-                "arguments": []
-              }
+                {
+                    "$class": "concerto.metamodel@1.0.0.Decorator",
+                    "name": "Foo",
+                    "arguments": [
+                        {
+                            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                            "value": "Alexandria"
+                        }
+                    ]
+                }
             ]
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "Dictionary",
-            "decorators": [
-              {
-                "$class": "concerto.metamodel@1.0.0.Decorator",
-                "name": "Baz",
-                "arguments": []
-              }
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "Concept",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p1",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation1"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p2",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation2"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p3",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation3"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p4",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation4"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p5",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation5"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p6",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation6"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p7",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation7"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p8",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation8"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p9",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation9"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p10",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation10"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p11",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation11"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p12",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation12"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p13",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation13"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p14",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation14"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p15",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation15"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p16",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation16"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p17",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation17"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p18",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation18"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p19",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation19"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p20",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation20"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p21",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation21"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p22",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation22"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p23",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation23"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "p24",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "MapPermutation24"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "library",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "Library"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                }
             ]
-          }
-        ],
-        "decorators": [
-          {
-            "$class": "concerto.metamodel@1.0.0.Decorator",
-            "name": "Foo",
-            "arguments": [
-              {
-                "$class": "concerto.metamodel@1.0.0.DecoratorString",
-                "value": "Alexandria"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.MapDeclaration",
-        "name": "MarriageRegister",
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.MapKeyType",
-            "name": "Person"
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.AggregateValueType",
-            "name": "Person"
-          }
-        ]
-      },
-      {
-        "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-        "name": "Concept",
-        "isAbstract": false,
-        "properties": [
-          {
-            "$class": "concerto.metamodel@1.0.0.RelationshipProperty",
-            "name": "test",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "String"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "dictionary",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Dictionary"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "checklist",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Checklist"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "timeline",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Timeline"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "addressBook",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "AddressBook"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "remoteEmployees",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "AddressBook"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "state",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "StateMachine"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "arrayOfRecords",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Dictionary"
-            },
-            "isArray": true,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "optionalRecord",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Dictionary"
-            },
-            "isArray": false,
-            "isOptional": true
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "library",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "Library"
-            },
-            "isArray": false,
-            "isOptional": false
-          },
-          {
-            "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-            "name": "marriages",
-            "type": {
-              "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-              "name": "MarriageRegister"
-            },
-            "isArray": false,
-            "isOptional": false
-          }
-        ]
-      }
+        }
     ]
-  }
+}

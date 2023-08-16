@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 
-namespace com.testing@1.0.0 //todo makek sure namesapce is same for all test concepts
+namespace com.testing@1.0.0
 
 concept Person identified {}
 
 map Dictionary {
-  o Person
   o String
+  o Person
 }

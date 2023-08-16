@@ -69,12 +69,6 @@ declare class MapDeclaration {
      */
     getValue(): string;
     /**
-     * Returns the MapDeclaration properties
-     *
-     * @return {array} the MapDeclaration properties
-     */
-    getProperties(): any[];
-    /**
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */

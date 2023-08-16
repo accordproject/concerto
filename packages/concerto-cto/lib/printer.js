@@ -17,6 +17,31 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
+ * Returns true if the metamodel is a MapDeclaration
+ * @param {object} mm - the metamodel
+ * @return {boolean} the string for that model
+ */
+function isMap(mm) {
+    return  mm.$class === `${MetaModelNamespace}.MapDeclaration`;
+}
+
+/**
+ * Returns true if the metamodel is a ScalarDeclaration
+ * @param {object} mm - the metamodel
+ * @return {boolean} the string for that model
+ */
+function isScalar(mm) {
+    return [
+        `${MetaModelNamespace}.BooleanScalar`,
+        `${MetaModelNamespace}.IntegerScalar`,
+        `${MetaModelNamespace}.LongScalar`,
+        `${MetaModelNamespace}.DoubleScalar`,
+        `${MetaModelNamespace}.StringScalar`,
+        `${MetaModelNamespace}.DateTimeScalar`,
+    ].includes(mm.$class);
+}
+
+/**
  * Create decorator argument string from a metamodel
  * @param {object} mm - the metamodel
  * @return {string} the string for the decorator argument
@@ -79,32 +104,43 @@ function typeFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.BooleanScalar`:
     case `${MetaModelNamespace}.BooleanProperty`:
+    case `${MetaModelNamespace}.BooleanMapValueType`:
         result += ' Boolean';
         break;
     case `${MetaModelNamespace}.DateTimeProperty`:
     case `${MetaModelNamespace}.DateTimeScalar`:
+    case `${MetaModelNamespace}.DateTimeMapKeyType`:
+    case `${MetaModelNamespace}.DateTimeMapValueType`:
         result += ' DateTime';
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
     case `${MetaModelNamespace}.DoubleScalar`:
+    case `${MetaModelNamespace}.DoubleMapValueType`:
         result += ' Double';
         break;
     case `${MetaModelNamespace}.IntegerProperty`:
     case `${MetaModelNamespace}.IntegerScalar`:
+    case `${MetaModelNamespace}.IntegerMapValueType`:
         result += ' Integer';
         break;
     case `${MetaModelNamespace}.LongProperty`:
     case `${MetaModelNamespace}.LongScalar`:
+    case `${MetaModelNamespace}.LongMapValueType`:
         result += ' Long';
         break;
     case `${MetaModelNamespace}.StringProperty`:
     case `${MetaModelNamespace}.StringScalar`:
+    case `${MetaModelNamespace}.StringMapKeyType`:
+    case `${MetaModelNamespace}.StringMapValueType`:
         result += ' String';
         break;
     case `${MetaModelNamespace}.ObjectProperty`:
+    case `${MetaModelNamespace}.ObjectMapKeyType`:
+    case `${MetaModelNamespace}.ObjectMapValueType`:
         result += ` ${mm.type.name}`;
         break;
     case `${MetaModelNamespace}.RelationshipProperty`:
+    case `${MetaModelNamespace}.RelationshipMapValueType`:
         result += ` ${mm.type.name}`;
         break;
     }
@@ -212,8 +248,7 @@ function propertyFromMetaModel(prop) {
     if (prop.decorators) {
         result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
-    if (prop.$class === `${MetaModelNamespace}.RelationshipProperty` ||
-        prop.$class === `${MetaModelNamespace}.AggregateRelationshipValueType`) {
+    if (prop.$class === `${MetaModelNamespace}.RelationshipProperty`) {
         result += '-->';
     } else {
         result += 'o';
@@ -231,6 +266,28 @@ function propertyFromMetaModel(prop) {
 }
 
 /**
+ * Create a map type string from a metamodel map
+ * @param {object} entry - the map entry in scope
+ * @return {string} the CML string representation of the property
+ */
+function mapFromMetaModel(entry) {
+    let result = '';
+
+    if (entry.decorators) {
+        result += decoratorsFromMetaModel(entry.decorators, '  ');
+    }
+    if (entry.$class === `${MetaModelNamespace}.RelationshipMapValueType`) {
+        result += '-->';
+    } else {
+        result += 'o';
+    }
+    result += typeFromMetaModel(entry);
+
+    return result;
+}
+
+
+/**
  * Create a declaration string from a metamodel
  * @param {object} mm - the metamodel
  * @return {string} the string for that declaration
@@ -238,32 +295,23 @@ function propertyFromMetaModel(prop) {
 function declFromMetaModel(mm) {
     let result = '';
 
-    const booleanScalar$class = `${MetaModelNamespace}.BooleanScalar`;
-    const integerScalar$class = `${MetaModelNamespace}.IntegerScalar`;
-    const longScalar$class = `${MetaModelNamespace}.LongScalar`;
-    const doubleScalar$class = `${MetaModelNamespace}.DoubleScalar`;
-    const stringScalar$class = `${MetaModelNamespace}.StringScalar`;
-    const dateTimeScalar$class = `${MetaModelNamespace}.DateTimeScalar`;
-    const scalar$classes = [
-        booleanScalar$class,
-        integerScalar$class,
-        longScalar$class,
-        doubleScalar$class,
-        stringScalar$class,
-        dateTimeScalar$class,
-    ];
-    const isScalar = scalar$classes.includes(mm.$class);
-
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '');
     }
 
-    if (isScalar) {
+    if (isScalar(mm)) {
         result += `scalar ${mm.name} extends`;
-
         result += typeFromMetaModel(mm);
         result += modifiersFromMetaModel(mm);
-    } else {
+    } else if (isMap(mm)) {
+        const entries = [mm.key, mm.value];
+        result += `map ${mm.name} {`;
+        entries.forEach(entry => {
+            result += `\n  ${mapFromMetaModel(entry)}`;
+        });
+        result += '\n}';
+    }
+    else {
         if (mm.isAbstract) {
             result += 'abstract ';
         }
@@ -285,9 +333,6 @@ function declFromMetaModel(mm) {
             break;
         case `${MetaModelNamespace}.EnumDeclaration`:
             result += `enum ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.MapDeclaration`:
-            result += `map ${mm.name} `;
             break;
         }
         if (mm.identified) {

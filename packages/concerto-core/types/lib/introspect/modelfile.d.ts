@@ -74,7 +74,8 @@ declare class ModelFile extends Decorated {
     /**
      * Returns the types that have been imported into this ModelFile.
      *
-     * @return {string[]} The array of imports for this ModelFile
+     * @return {string[]} The array of fully-qualified names for types imported by
+     * this ModelFile
      */
     getImports(): string[];
     /**
@@ -278,6 +279,7 @@ declare class ModelFile extends Decorated {
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
+     * @param {string[]} removedDeclarations - an array that will be populated with the FQN of removed declarations
      * @returns {ModelFile?} - the filtered ModelFile
      * @private
      */

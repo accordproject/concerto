@@ -1425,7 +1425,8 @@ MapDeclaration
         const result = {
           $class: "concerto.metamodel@1.0.0.MapDeclaration",
           name:   id.name,
-          properties:  body.declarations,
+          key:  body.declarations[0],
+          value: body.declarations[1],
           ...buildRange(location())
         };
       if (decorators.length > 0) {
@@ -1435,41 +1436,156 @@ MapDeclaration
     }
 
 MapDeclarationBody
-  = key:MapKeyTypeDeclaration __ value:AggregateValueTypeDeclaration {
+  = key:MapKeyType __ value:MapValueType {
       return {
         type: "MapDeclarationBody",
         declarations: optionalList([key, value])
       };
     }
 
-MapKeyTypeDeclaration
-    = decorators:Decorators __ "o"__ id:Identifier __ {
+StringMapKeyTypeDeclaration
+    = decorators:Decorators __ "o"__ StringType __ {
         const result = {
-            $class: "concerto.metamodel@1.0.0.MapKeyType",
-            name: id.name,
+            $class: "concerto.metamodel@1.0.0.StringMapKeyType",
             ...buildRange(location())
         };
+
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
         return result;
     }
 
-AggregateValueTypeDeclaration
-    = decorators:Decorators __ symbol:("o" / "-->") __ id:Identifier __ {
+DateTimeMapKeyTypeDeclaration
+    = decorators:Decorators __ "o"__ DateTimeType __ {
+        const result = {
+            $class: "concerto.metamodel@1.0.0.DateTimeMapKeyType",
+            ...buildRange(location())
+        };
+
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+        return result;
+    }
+
+ObjectMapKeyTypeDeclaration
+    = decorators:Decorators __ "o"__ propertyType:ObjectType __ {
+        const result = {
+            $class: "concerto.metamodel@1.0.0.ObjectMapKeyType",
+            type: propertyType,
+            ...buildRange(location())
+        };
+
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+        return result;
+    }
+
+MapKeyType =
+    StringMapKeyTypeDeclaration
+    / DateTimeMapKeyTypeDeclaration
+    / ObjectMapKeyTypeDeclaration
+
+
+BooleanMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ BooleanType __ {
     	const result = {
-    		$class: "concerto.metamodel@1.0.0.AggregateValueType",
-    		name: id.name,
+    		$class: "concerto.metamodel@1.0.0.BooleanMapValueType",
             ...buildRange(location())
     	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+DateTimeMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ DateTimeType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.DateTimeMapValueType",
+            ...buildRange(location())
+    	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+StringMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ StringType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.StringMapValueType",
+            ...buildRange(location())
+    	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+IntegerMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ IntegerType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.IntegerMapValueType",
+            ...buildRange(location())
+    	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+LongMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ LongType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.LongMapValueType",
+            ...buildRange(location())
+    	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+DoubleMapValueTypeDeclaration
+    = decorators:Decorators __ "o" __ DoubleType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.DoubleMapValueType",
+            ...buildRange(location())
+    	};
+        if (decorators.length > 0) {
+          result.decorators = decorators;
+        }
+      return result;
+    }
+
+ObjectMapValueTypeDeclaration
+    = decorators:Decorators __ symbol:("o" / "-->") __ propertyType:ObjectType __ {
+    	const result = {
+    		$class: "concerto.metamodel@1.0.0.ObjectMapValueType",
+            type: propertyType,
+            ...buildRange(location())
+    	};
+
         if(symbol === "-->") {
-          result.$class = "concerto.metamodel@1.0.0.AggregateRelationshipValueType";
+          result.$class = "concerto.metamodel@1.0.0.RelationshipMapValueType";
         }
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
       return result;
     }
+
+MapValueType =
+    BooleanMapValueTypeDeclaration
+    / DateTimeMapValueTypeDeclaration
+    / StringMapValueTypeDeclaration
+    / IntegerMapValueTypeDeclaration
+    / LongMapValueTypeDeclaration
+    / DoubleMapValueTypeDeclaration
+    / ObjectMapValueTypeDeclaration
 
 EnumDeclaration
     = decorators:Decorators __ EnumToken __ id:Identifier __

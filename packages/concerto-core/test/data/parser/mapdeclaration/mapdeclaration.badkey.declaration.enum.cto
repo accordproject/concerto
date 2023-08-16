@@ -13,7 +13,12 @@
  */
 namespace com.testing@1.0.0
 
+enum Phase {
+  o ONE
+  o TWO
+}
 map Dictionary {
-  o NotDeclared
+  o Phase
   o String
 }
+

@@ -1120,5 +1120,34 @@ concept Bar {
 
             filtered.validateModelFiles();
         });
+
+        it('should remove imports for filtered types', () => {
+            modelManager.addCTOModel(`namespace child@1.0.0
+            concept Used {}
+            concept Unused {}
+            `, 'child.cto', true);
+
+            modelManager.addCTOModel(`namespace cousin@1.0.0
+            concept AlsoUsed {}
+            `, 'cousin.cto', true);
+
+            modelManager.addCTOModel(`namespace orphan@1.0.0
+            concept Orphan {}
+            `, 'orphan.cto', true);
+
+            modelManager.addCTOModel(`namespace test@1.0.0
+            import child@1.0.0.Unused
+            import child@1.0.0.Used
+            import cousin@1.0.0.AlsoUsed
+            import child@1.0.0.{Used,Unused}
+            concept Person {
+                o Used used
+                o AlsoUsed alsoUsed
+            }
+            `, 'test.cto');
+            const filtered = modelManager.filter(declaration =>
+                ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
+            filtered.validateModelFiles();
+        });
     });
 });
