@@ -82,7 +82,7 @@ class MapKeyType extends Decorated {
 
             if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
                 throw new IllegalModelException(
-                    `MapKeyType supports String and DateTime only,for MapDeclaration ${this.parent.name}`
+                    `Invalid Map key type in MapDeclaration ${this.parent.name}. Only String and DateTime types are supported for Map key types`
                 );
             }
         }
