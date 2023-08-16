@@ -303,6 +303,18 @@ class ModelUtil {
     }
 
     /**
+     * Returns true if this Key is a valid Map Key Scalar Value.
+     *
+     * @param {Object} decl - the Map Key Scalar declaration
+     * @return {boolean} true if the Key is a valid Map Key Scalar type
+    */
+    static isValidMapKeyScalar(decl) {
+        return (decl?.isScalarDeclaration?.() &&
+        (decl?.ast.$class !== `${MetaModelNamespace}.StringScalar`  ||
+        decl?.ast.$class !== `${MetaModelNamespace}.DateTimeScalar`));
+    }
+
+    /**
          * Returns true if this Value is a valid Map Value.
          *
          * @param {Object} value - the Value of the Map Declaration

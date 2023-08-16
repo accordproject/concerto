@@ -72,9 +72,7 @@ class MapKeyType extends Decorated {
         if (!ModelUtil.isPrimitiveType(this.type)) {
             let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
 
-            if  (decl?.isScalarDeclaration?.() &&
-                !(decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  &&
-                !(decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`)) {
+            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
                 throw new IllegalModelException(
                     `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
                 );
