@@ -383,8 +383,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 rolodex: {
                     $class: 'org.acme.sample.Rolodex',
-                    'Dublin': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    'London': '{"$class":"org.acme.sample.Person","name":"Alice"}'
+                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
                 }
             });
 
@@ -514,8 +514,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 directory: {
                     $class: 'org.acme.sample.Directory',
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': '{"$class":"org.acme.sample.Person","name":"Alice"}',
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
                 }
             });
 
@@ -805,8 +805,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 rolodex: {
                     $class: 'org.acme.sample.Rolodex',
-                    'Dublin': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    'London': '{"$class":"org.acme.sample.Person","name":"Alice"}'
+                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
                 }
             };
 
@@ -830,8 +830,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 rolodex: {
                     $class: 'org.acme.sample.Rolodex',
-                    'Dublin': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    'London': '{"$class":"org.acme.sample.Person","name":"Alice"}'
+                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
                 }
             });
         });
@@ -941,8 +941,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 directory: {
                     $class: 'org.acme.sample.Directory',
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': '{"$class":"org.acme.sample.Person","name":"Alice"}',
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
                 }
             };
 
@@ -964,8 +964,8 @@ describe('Serializer', () => {
                 $class: 'org.acme.sample.Concepts',
                 directory: {
                     $class: 'org.acme.sample.Directory',
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': '{"$class":"org.acme.sample.Person","name":"Bob"}',
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': '{"$class":"org.acme.sample.Person","name":"Alice"}',
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
                 }
             });
         });

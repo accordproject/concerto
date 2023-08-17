@@ -106,7 +106,7 @@ class JSONGenerator {
                 parameters.stack.push(value);
                 const jsonValue = decl.accept(this, parameters);
 
-                value = JSON.stringify(jsonValue);
+                value = jsonValue;
             }
 
             map.set(key, value);
