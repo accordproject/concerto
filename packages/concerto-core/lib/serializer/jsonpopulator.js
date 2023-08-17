@@ -220,7 +220,7 @@ class JSONPopulator {
             let subResource = parameters.factory.newConcept(decl.getNamespace(),
                 decl.getName(), decl.getIdentifierFieldName() );
 
-            parameters.jsonStack.push(JSON.parse(value));
+            parameters.jsonStack.push(value);
             parameters.resourceStack.push(subResource);
             return decl.accept(this, parameters);
         }
