@@ -185,7 +185,6 @@ class MapValueType extends Decorated {
    + String toString() 
    + boolean isKey() 
    + boolean isValue() 
-   + Object getTypeDeclaration(string) 
 }
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
