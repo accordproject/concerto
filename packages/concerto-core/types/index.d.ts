@@ -14,6 +14,9 @@ import EventDeclaration = require("./lib/introspect/eventdeclaration");
 import ParticipantDeclaration = require("./lib/introspect/participantdeclaration");
 import TransactionDeclaration = require("./lib/introspect/transactiondeclaration");
 import ScalarDeclaration = require("./lib/introspect/scalardeclaration");
+import MapDeclaration = require("./lib/introspect/mapdeclaration");
+import MapKeyType = require("./lib/introspect/mapkeytype");
+import MapValueType = require("./lib/introspect/mapvaluetype");
 import Property = require("./lib/introspect/property");
 import Field = require("./lib/introspect/field");
 import EnumDeclaration = require("./lib/introspect/enumdeclaration");
@@ -41,4 +44,4 @@ export const version: {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
+export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, MapDeclaration, MapKeyType, MapValueType, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, Concerto, MetaModel };
