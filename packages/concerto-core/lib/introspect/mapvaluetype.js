@@ -46,6 +46,7 @@ class MapValueType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
+        this.modelFile = parent.getModelFile();
         this.process();
     }
 
@@ -68,9 +69,9 @@ class MapValueType extends Decorated {
      */
     validate() {
         if (!ModelUtil.isPrimitiveType(this.type)) {
-            let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
+            const decl = this.getTypeDeclaration(this.ast.type.name);
 
-            // All declarations, with the exception of MapDeclarations are valid Values.
+            // All declarations, with the exception of MapDeclarations, are valid Values.
             if(decl.isMapDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapDeclaration as Map Type Value is not supported: ${this.type}`
@@ -89,7 +90,6 @@ class MapValueType extends Decorated {
         let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
-            decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
 
             // ObjectMapValueType must have TypeIdentifier.
             if (!('type' in ast)) {
@@ -106,7 +106,8 @@ class MapValueType extends Decorated {
                 throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
             }
 
-            this.type = decl.getName();
+            this.type = String(this.ast.type.name); // cast for correct type resolution in generated types.
+
             break;
         case `${MetaModelNamespace}.BooleanMapValueType`:
             this.type = 'Boolean';
@@ -182,6 +183,22 @@ class MapValueType extends Decorated {
      */
     isValue() {
         return true;
+    }
+
+    /**
+     * Returns the corresponding ClassDeclaration representation of the Type
+     *
+     * @param {string} type - the Type of the Map Value
+     * @return {Object} the corresponding ClassDeclaration representation
+     * @private
+     */
+    getTypeDeclaration(type) {
+        if (this.modelFile.isLocalType(this.ast.type.name)) {
+            return this.modelFile.getAllDeclarations().find(d => d.name === this.ast.type.name);
+        } else {
+            const fqn = this.modelFile.resolveImport(this.ast.type.name);
+            return this.modelFile.getModelManager().getType(fqn);
+        }
     }
 
 }

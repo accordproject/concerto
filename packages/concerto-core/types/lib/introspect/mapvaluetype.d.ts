@@ -16,6 +16,7 @@ declare class MapValueType extends Decorated {
      */
     constructor(parent: MapDeclaration, ast: any);
     parent: MapDeclaration;
+    modelFile: ModelFile;
     /**
      * Semantic validation of the structure of this class.
      *
@@ -56,6 +57,15 @@ declare class MapValueType extends Decorated {
      * @return {boolean} true if the class is a Map Value
      */
     isValue(): boolean;
+    /**
+     * Returns the corresponding ClassDeclaration representation of the Type
+     *
+     * @param {string} type - the Type of the Map Value
+     * @return {Object} the corresponding ClassDeclaration representation
+     * @private
+     */
+    private getTypeDeclaration;
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
+import ModelFile = require("./modelfile");
