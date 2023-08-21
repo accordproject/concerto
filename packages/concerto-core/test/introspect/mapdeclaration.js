@@ -153,7 +153,32 @@ describe('MapDeclaration', () => {
         });
 
         it('should validate when map value is an identified concept declaration', () => {
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.identified.declaration.concept.cto', MapDeclaration);
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.identified.concept.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is an imported asset declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.root.asset.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is an imported concept declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.root.concept.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is an imported event declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.root.event.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is an imported participant declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.root.participant.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is an imported transaction declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.root.transaction.cto', MapDeclaration);
             decl.validate();
         });
 
