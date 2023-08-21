@@ -62,8 +62,9 @@ declare class MapValueType extends Decorated {
      *
      * @param {string} type - the Type of the Map Value
      * @return {Object} the corresponding ClassDeclaration representation
+     * @private
      */
-    getTypeDeclaration(type: string): any;
+    private getTypeDeclaration;
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");

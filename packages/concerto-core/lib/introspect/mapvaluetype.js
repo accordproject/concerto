@@ -190,6 +190,7 @@ class MapValueType extends Decorated {
      *
      * @param {string} type - the Type of the Map Value
      * @return {Object} the corresponding ClassDeclaration representation
+     * @private
      */
     getTypeDeclaration(type) {
         if (this.modelFile.isLocalType(this.ast.type.name)) {
