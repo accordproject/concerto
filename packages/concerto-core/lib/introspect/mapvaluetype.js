@@ -106,7 +106,7 @@ class MapValueType extends Decorated {
                 throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
             }
 
-            this.type = this.ast.type.name;
+            this.type = String(this.ast.type.name); // cast for correct type resolution in generated types.
 
             break;
         case `${MetaModelNamespace}.BooleanMapValueType`:

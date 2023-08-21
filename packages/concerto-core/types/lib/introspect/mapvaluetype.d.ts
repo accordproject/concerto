@@ -31,7 +31,7 @@ declare class MapValueType extends Decorated {
      * @private
      */
     private processType;
-    type: any;
+    type: string;
     /**
     * Returns the owner of this property
      * @public
