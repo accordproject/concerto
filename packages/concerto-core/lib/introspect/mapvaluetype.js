@@ -71,7 +71,7 @@ class MapValueType extends Decorated {
         if (!ModelUtil.isPrimitiveType(this.type)) {
             const decl = this.getTypeDeclaration(this.ast.type.name);
 
-            // All declarations, with the exception of MapDeclarations are valid Values.
+            // All declarations, with the exception of MapDeclarations, are valid Values.
             if(decl.isMapDeclaration?.()) {
                 throw new IllegalModelException(
                     `MapDeclaration as Map Type Value is not supported: ${this.type}`
@@ -195,7 +195,7 @@ class MapValueType extends Decorated {
     getTypeDeclaration(type) {
         if (this.modelFile.isLocalType(this.ast.type.name)) {
             return this.modelFile.getAllDeclarations().find(d => d.name === this.ast.type.name);
-        } else  {
+        } else {
             const fqn = this.modelFile.resolveImport(this.ast.type.name);
             return this.modelFile.getModelManager().getType(fqn);
         }
