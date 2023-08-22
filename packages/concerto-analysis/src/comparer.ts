@@ -35,7 +35,7 @@ export type Comparer = {
 
     /**
      * Called to compare two map declarations. If a is undefined, but b is defined, then this map declaration was
-     * created in the second model. If a is defined, but b is undefined, then this class declaration was removed in the
+     * created in the second model. If a is defined, but b is undefined, then this map declaration was removed in the
      * second model.
      * @param a The first map declaration for comparision, or undefined if it is undefined in the first model.
      * @param b The second map declaration for comparision, or undefined if it is undefined in the second model.
