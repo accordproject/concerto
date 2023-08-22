@@ -17,7 +17,7 @@ import Declaration from '@accordproject/concerto-core/types/lib/introspect/decla
 
 export function getDeclarationType(declaration: Declaration) {
     if (declaration instanceof ClassDeclaration) {
-        if (declaration?.isAsset?.()) {
+        if (declaration.isAsset()) {
             return 'asset';
         } else if (declaration.isConcept()) {
             return 'concept';
