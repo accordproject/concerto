@@ -68,7 +68,7 @@ test('should detect a change of namespace', async () => {
     expect(results.result).toBe(CompareResult.ERROR);
 });
 
-['asset', 'concept', 'enum', 'event', 'participant', 'transaction'].forEach(type => {
+['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map'].forEach(type => {
     test(`should detect a ${type} being added`, async () => {
         const [a, b] = await getModelFiles('empty.cto', `${type}-added.cto`);
         const results = new Compare().compare(a, b);
@@ -224,6 +224,30 @@ test('should detect an array changing to a scalar', async () => {
         expect.objectContaining({
             key: 'property-type-changed',
             message: 'The array field "bar" in the concept "Thing" changed type from an array field to a scalar field'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a map key type changing from x to y', async () => {
+    const [a, b] = await getModelFiles('map-added.cto', 'map-changed-key.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-key-type-changed',
+            message: 'The map key type was changed to "DateTime"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a map value type changing from x to y', async () => {
+    const [a, b] = await getModelFiles('map-added.cto', 'map-changed-value.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-value-type-changed',
+            message: 'The map value type was changed to "DateTime"'
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
