@@ -14,7 +14,7 @@
 
 import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
 import * as semver from 'semver';
-import { getClassDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
+import { getDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
 const propertyAdded: ComparerFactory = (context) => ({
@@ -22,7 +22,7 @@ const propertyAdded: ComparerFactory = (context) => ({
         if (a || !b) {
             return;
         }
-        const classDeclarationType = getClassDeclarationType(b.getParent());
+        const classDeclarationType = getDeclarationType(b.getParent());
         if (b instanceof EnumValueDeclaration) {
             context.report({
                 key: 'enum-value-added',
@@ -58,7 +58,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
         if (!a || b) {
             return;
         }
-        const classDeclarationType = getClassDeclarationType(a.getParent());
+        const classDeclarationType = getDeclarationType(a.getParent());
         if (a instanceof EnumValueDeclaration) {
             context.report({
                 key: 'enum-value-removed',
@@ -96,7 +96,7 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
         }
         const aType = getPropertyType(a);
         const bType = getPropertyType(b);
-        const classDeclarationType = getClassDeclarationType(a.getParent());
+        const classDeclarationType = getDeclarationType(a.getParent());
         if (aType !== bType) {
             context.report({
                 key: 'property-type-changed',
@@ -197,7 +197,7 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
         }
         const aValidator = a.getValidator();
         const bValidator = b.getValidator();
-        const classDeclarationType = getClassDeclarationType(a.getParent());
+        const classDeclarationType = getDeclarationType(a.getParent());
         if (!aValidator && !bValidator) {
             return;
         } else if (!aValidator && bValidator) {

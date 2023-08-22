@@ -12,15 +12,16 @@
  * limitations under the License.
  */
 
-import { getClassDeclarationType } from '../compare-utils';
+import { getDeclarationType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
 
+// todo rename to declaration.ts , rename all classDeclaration -> declaration
 const classDeclarationAdded: ComparerFactory = (context) => ({
     compareClassDeclaration: (a, b) => {
         if (a || !b) {
             return;
         }
-        const type = getClassDeclarationType(b);
+        const type = getDeclarationType(b);
         context.report({
             key: 'class-declaration-added',
             message: `The ${type} "${b.getName()}" was added`,
@@ -34,7 +35,7 @@ const classDeclarationRemoved: ComparerFactory = (context) => ({
         if (!a || b) {
             return;
         }
-        const type = getClassDeclarationType(a);
+        const type = getDeclarationType(a);
         context.report({
             key: 'class-declaration-removed',
             message: `The ${type} "${a.getName()}" was removed`,
@@ -48,8 +49,8 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
         if (!a || !b) {
             return;
         }
-        const aType = getClassDeclarationType(a);
-        const bType = getClassDeclarationType(b);
+        const aType = getDeclarationType(a);
+        const bType = getDeclarationType(b);
         if (aType === bType) {
             return;
         }

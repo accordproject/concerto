@@ -1,5 +1,5 @@
 import { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field } from '@accordproject/concerto-core';
-import { getClassDeclarationType, getPropertyType, getValidatorType } from '../../src/compare-utils';
+import { getDeclarationType, getPropertyType, getValidatorType } from '../../src/compare-utils';
 
 // This test suite should disappear once we port concerto-core to TypeScript because the error branches will be enforced by the transpiler.
 
@@ -19,7 +19,7 @@ const field = new Field(classDeclaration, propertyAst);
 const validator = new Validator(field, undefined);
 
 test('should throw for unknown class declaration type', () => {
-    expect(() => getClassDeclarationType(classDeclaration)).toThrow('unknown class declaration type "ClassDeclaration {id=foo@1.0.0.undefined super=Concept enum=false abstract=false}"');
+    expect(() => getDeclarationType(classDeclaration)).toThrow('unknown class declaration type "ClassDeclaration {id=foo@1.0.0.undefined super=Concept enum=false abstract=false}"');
 });
 
 test('should throw for unknown class property type', () => {
