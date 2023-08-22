@@ -34,8 +34,6 @@ export function getDeclarationType(declaration: Declaration) {
         }
     } else if (declaration instanceof MapDeclaration) {
         return 'map';
-    } else {
-        throw new Error(`unknown  declaration type "${declaration}"`);
     }
 }
 
