@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.10.1 {399b057614d1178c02b744184b09f845} 2023-08-22
+- Change return type for Mapdeclaration :: MapKeyType MapValueType
+
 Version 3.10.0 {3bba55da8dbb522de132359415eb7eeb} 2023-08-11
 - Add MetamodelException
 
