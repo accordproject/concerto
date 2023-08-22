@@ -15,9 +15,11 @@
 import { classDeclarationComparerFactories } from './class-declarations';
 import { modelFileComparerFactories } from './model-files';
 import { propertyComparerFactories } from './properties';
+import { mapDeclarationComparerFactories } from './map-declarations';
 
 export const comparerFactories = [
     ...classDeclarationComparerFactories,
     ...propertyComparerFactories,
-    ...modelFileComparerFactories
+    ...modelFileComparerFactories,
+    ...mapDeclarationComparerFactories
 ];
