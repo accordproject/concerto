@@ -3,6 +3,7 @@ import { Parser } from '@accordproject/concerto-cto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Compare, CompareResult, compareResultToString } from '../../src';
+import { defaultCompareConfig } from '../../src/compare-config';
 
 async function getModelFile(modelManager: ModelManager, fileName: string) {
     const filePath = path.resolve(__dirname, '..', 'fixtures', fileName);
@@ -478,4 +479,9 @@ test('should detect a string validator being changed on a property (incompatible
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should give a MAJOR CompareResult for Map Type compare config rules)', async () => {
+    expect(defaultCompareConfig.rules['map-key-type-changed']).toBe(CompareResult.MAJOR);
+    expect(defaultCompareConfig.rules['map-value-type-changed']).toBe(CompareResult.MAJOR);
 });
