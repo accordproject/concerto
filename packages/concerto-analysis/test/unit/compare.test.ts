@@ -240,6 +240,7 @@ test('should detect a map key type changing from x to y', async () => {
             message: 'The map key type was changed to "DateTime"'
         })
     ]));
+    expect(results.findings[0].message).toBe('The map key type was changed to "DateTime"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -253,6 +254,7 @@ test('should detect a map value type changing from x to y', async () => {
             message: 'The map value type was changed to "DateTime"'
         })
     ]));
+    expect(results.findings[0].message).toBe('The map value type was changed to "DateTime"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
