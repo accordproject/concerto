@@ -42,6 +42,11 @@ const ParticipantDeclaration = require('./lib/introspect/participantdeclaration'
 const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
 const ScalarDeclaration = require('./lib/introspect/scalardeclaration');
 
+// MapDeclaration
+const MapDeclaration = require('./lib/introspect/mapdeclaration');
+const MapKeyType = require('./lib/introspect/mapkeytype');
+const MapValueType = require('./lib/introspect/mapvaluetype');
+
 // Properties
 const Property = require('./lib/introspect/property');
 const Field = require('./lib/introspect/field');
@@ -118,6 +123,9 @@ module.exports = {
     ParticipantDeclaration,
     TransactionDeclaration,
     ScalarDeclaration,
+    MapDeclaration,
+    MapKeyType,
+    MapValueType,
     Property,
     Field,
     EnumDeclaration,

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, ModelFile, Property } from '@accordproject/concerto-core';
+import { ClassDeclaration, MapDeclaration, ModelFile, Property } from '@accordproject/concerto-core';
 import { CompareContext } from './compare-context';
 
 /**
@@ -34,7 +34,16 @@ export type Comparer = {
     compareClassDeclaration?: (a: ClassDeclaration | undefined, b: ClassDeclaration | undefined) => void;
 
     /**
-     * Called to compare two properties. If a is undefined, but b is defined, then this property was
+     * Called to compare two map declarations. If a is undefined, but b is defined, then this map declaration was
+     * created in the second model. If a is defined, but b is undefined, then this map declaration was removed in the
+     * second model.
+     * @param a The first map declaration for comparision, or undefined if it is undefined in the first model.
+     * @param b The second map declaration for comparision, or undefined if it is undefined in the second model.
+     */
+    compareMapDeclaration?: (a: MapDeclaration | undefined, b: MapDeclaration | undefined) => void;
+
+    /**
+     * Called to compare two properties. If a is undefined, but b is definecd, then this property was
      * created in the second model. If a is defined, but b is undefined, then this property was removed in the
      * second model.
      * @param a The first property for comparision, or undefined if it is undefined in the first model.

@@ -12,23 +12,28 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, EnumValueDeclaration, Field, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
+import { ClassDeclaration, EnumValueDeclaration, Field, MapDeclaration, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
+import Declaration from '@accordproject/concerto-core/types/lib/introspect/declaration';
 
-export function getClassDeclarationType(classDeclaration: ClassDeclaration) {
-    if (classDeclaration.isAsset()) {
-        return 'asset';
-    } else if (classDeclaration.isConcept()) {
-        return 'concept';
-    } else if (classDeclaration.isEnum()) {
-        return 'enum';
-    } else if (classDeclaration.isEvent()) {
-        return 'event';
-    } else if (classDeclaration.isParticipant()) {
-        return 'participant';
-    } else if (classDeclaration.isTransaction()) {
-        return 'transaction';
-    } else {
-        throw new Error(`unknown class declaration type "${classDeclaration}"`);
+export function getDeclarationType(declaration: Declaration) {
+    if (declaration instanceof ClassDeclaration) {
+        if (declaration.isAsset()) {
+            return 'asset';
+        } else if (declaration.isConcept()) {
+            return 'concept';
+        } else if (declaration.isEnum()) {
+            return 'enum';
+        } else if (declaration.isEvent()) {
+            return 'event';
+        } else if (declaration.isParticipant()) {
+            return 'participant';
+        } else if (declaration.isTransaction()) {
+            return 'transaction';
+        } else {
+            throw new Error(`unknown class declaration type "${declaration}"`);
+        }
+    } else if (declaration instanceof MapDeclaration) {
+        return 'map';
     }
 }
 

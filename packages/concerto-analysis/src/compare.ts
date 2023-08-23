@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, ModelFile, Property } from '@accordproject/concerto-core';
+import { ClassDeclaration, MapDeclaration, ModelFile, Property } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
 import { CompareFinding } from './compare-message';
 import { CompareResults } from './compare-results';
@@ -65,6 +65,18 @@ export class Compare {
         removed.forEach(a => comparers.forEach(comparer => comparer.compareProperty?.(a, undefined)));
     }
 
+    private getAddedMapDeclarations(a: MapDeclaration[], b: MapDeclaration[]): MapDeclaration[] {
+        return b.filter(bItem => !a.some(aItem => bItem.getName() === aItem.getName()));
+    }
+
+    private getMatchingMapDeclarations(a: MapDeclaration[], b: MapDeclaration[]): [a: MapDeclaration, b: MapDeclaration][] {
+        return a.map(aItem => [aItem, b.find(bItem => aItem.getName() === bItem.getName())]).filter(([, b]) => !!b) as [MapDeclaration, MapDeclaration][];
+    }
+
+    private getRemovedMapDeclarations(a: MapDeclaration[], b: MapDeclaration[]): MapDeclaration[] {
+        return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
+    }
+
     private getAddedClassDeclarations(a: ClassDeclaration[], b: ClassDeclaration[]): ClassDeclaration[] {
         return b.filter(bItem => !a.some(aItem => bItem.getName() === aItem.getName()));
     }
@@ -77,8 +89,21 @@ export class Compare {
         return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
     }
 
+    private compareMapDeclarations(comparers: Comparer[], a: MapDeclaration[], b: MapDeclaration[]) {
+        const added = this.getAddedMapDeclarations(a, b);
+        const matching = this.getMatchingMapDeclarations(a, b);
+        const removed = this.getRemovedMapDeclarations(a, b);
+        added.forEach(b => comparers.forEach(comparer => comparer.compareMapDeclaration?.(undefined, b)));
+        matching.forEach(([a, b]) => comparers.forEach(comparer => comparer.compareMapDeclaration?.(a, b)));
+        removed.forEach(a => comparers.forEach(comparer => comparer.compareMapDeclaration?.(a, undefined)));
+    }
+
     private compareClassDeclaration(comparers: Comparer[], a: ClassDeclaration, b: ClassDeclaration) {
         comparers.forEach(comparer => comparer.compareClassDeclaration?.(a, b));
+        // MapDeclarations do not contain properties, nothing to compare.
+        if(a instanceof MapDeclaration || b instanceof MapDeclaration) {
+            return;
+        }
         this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
     }
 
@@ -94,6 +119,7 @@ export class Compare {
     private compareModelFiles(comparers: Comparer[], a: ModelFile, b: ModelFile) {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
         this.compareClassDeclarations(comparers, a.getAllDeclarations(), b.getAllDeclarations());
+        this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
     }
 
     private buildResults(findings: CompareFinding[]) {

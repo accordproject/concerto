@@ -126,7 +126,7 @@ class MapDeclaration extends Declaration {
     /**
      * Returns the type of the Map key property.
      *
-     * @return {string} the Map key property
+     * @return {MapKeyType} the Map key property
      */
     getKey() {
         return this.key;
@@ -135,7 +135,7 @@ class MapDeclaration extends Declaration {
     /**
      * Returns the type of the Map Value property.
      *
-     * @return {string} the Map Value property
+     * @return {MapValueType} the Map Value property
      */
     getValue() {
         return this.value;

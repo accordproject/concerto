@@ -59,15 +59,15 @@ declare class MapDeclaration {
     /**
      * Returns the type of the Map key property.
      *
-     * @return {string} the Map key property
+     * @return {MapKeyType} the Map key property
      */
-    getKey(): string;
+    getKey(): MapKeyType;
     /**
      * Returns the type of the Map Value property.
      *
-     * @return {string} the Map Value property
+     * @return {MapValueType} the Map Value property
      */
-    getValue(): string;
+    getValue(): MapValueType;
     /**
      * Returns the string representation of this class
      * @return {String} the string representation of the class
