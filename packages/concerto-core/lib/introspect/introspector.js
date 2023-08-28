@@ -59,11 +59,11 @@ class Introspector {
         const modelFiles = this.modelManager.getModelFiles();
         for(let n=0; n < modelFiles.length; n++) {
             const modelFile = modelFiles[n];
-            result = result.concat(
-                modelFile.getAllDeclarations()
-                    .filter(declaration => !declaration.isScalarDeclaration?.()
-                    )
-            );
+
+            const filteredDeclarations = modelFile.getAllDeclarations()
+                .filter(declaration =>  !declaration.isMapDeclaration?.() && !declaration.isScalarDeclaration?.());
+
+            result = result.concat(filteredDeclarations);
         }
         return result;
     }
