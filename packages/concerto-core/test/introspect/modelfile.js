@@ -37,6 +37,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 const sinon = require('sinon');
 const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
+const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 
 describe('ModelFile', () => {
 
@@ -717,6 +718,15 @@ describe('ModelFile', () => {
             let decls = modelFile.getScalarDeclarations();
             decls.should.all.be.an.instanceOf(ScalarDeclaration);
             decls.length.should.equal(1);
+        });
+    });
+
+    describe('#getClassDeclarations', () => {
+        it('should return the expected number of Class declarations', () => {
+            let modelFile = ParserUtil.newModelFile(modelManager, carLeaseModel);
+            let decls = modelFile.getClassDeclarations();
+            decls.should.all.be.an.instanceOf(ClassDeclaration);
+            decls.length.should.equal(16);
         });
     });
 
