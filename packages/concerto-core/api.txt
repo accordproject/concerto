@@ -211,6 +211,7 @@ class ModelFile extends Decorated {
    + TransactionDeclaration[] getTransactionDeclarations() 
    + EventDeclaration[] getEventDeclarations() 
    + ParticipantDeclaration[] getParticipantDeclarations() 
+   + ClassDeclaration[] getClassDeclarations() 
    + ConceptDeclaration[] getConceptDeclarations() 
    + EnumDeclaration[] getEnumDeclarations() 
    + MapDeclaration[] getMapDeclarations() 

@@ -203,6 +203,11 @@ declare class ModelFile extends Decorated {
      */
     getParticipantDeclarations(): ParticipantDeclaration[];
     /**
+     * Get the ClassDeclarations defined in this ModelFile
+     * @return {ClassDeclaration[]} the ClassDeclarations defined in the model file
+     */
+    getClassDeclarations(): ClassDeclaration[];
+    /**
      * Get the ConceptDeclarations defined in this ModelFile
      * @return {ConceptDeclaration[]} the ParticipantDeclaration defined in the model file
      */
