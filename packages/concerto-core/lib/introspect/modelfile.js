@@ -20,6 +20,7 @@ const packageJson = require('../../package.json');
 const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
+const ClassDeclaration = require('./classdeclaration');
 const ConceptDeclaration = require('./conceptdeclaration');
 const ScalarDeclaration = require('./scalardeclaration');
 const ParticipantDeclaration = require('./participantdeclaration');
@@ -573,6 +574,14 @@ class ModelFile extends Decorated {
      */
     getParticipantDeclarations() {
         return this.getDeclarations(ParticipantDeclaration);
+    }
+
+    /**
+     * Get the ClassDeclarations defined in this ModelFile
+     * @return {ClassDeclaration[]} the ClassDeclarations defined in the model file
+     */
+    getClassDeclarations() {
+        return this.getDeclarations(ClassDeclaration);
     }
 
     /**
