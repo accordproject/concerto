@@ -102,8 +102,7 @@ class MapKeyType extends Decorated {
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectMapKeyType`:
-            decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type.name);
-            this.type = decl.getName();
+            this.type = String(this.ast.type.name);
             break;
         }
     }
