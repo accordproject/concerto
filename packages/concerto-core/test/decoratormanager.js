@@ -23,7 +23,7 @@ require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-describe.only('DecoratorManager', () => {
+describe('DecoratorManager', () => {
 
     beforeEach(() => {
     });
