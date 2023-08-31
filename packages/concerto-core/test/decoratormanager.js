@@ -86,6 +86,19 @@ describe('DecoratorManager', () => {
             decoratorBio.getArguments()[0].should.equal('inputType');
             decoratorBio.getArguments()[1].should.equal('textArea');
         });
+
+        it('should fail with invalid command', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-command.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+            }).should.throw(/Unknown command type INVALID/);
+        });
     });
 
     describe('#validateCommand', function() {
@@ -159,6 +172,20 @@ describe('DecoratorManager', () => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true});
             }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.2.0"/);
+        });
+
+        it('should detect decorator command set with an invalid command type', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-command.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true});
+            }).should.throw(/Model violation in the "concerto.metamodel@1.0.0.Decorator" instance. Invalid enum value of "INVALID" for the field "CommandType"/);
         });
     });
 });
