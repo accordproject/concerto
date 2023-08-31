@@ -22,8 +22,7 @@ declare class BaseModelManager {
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
-     * @param {boolean} [options.addMetamodel] - When true, the metamodel is added to the model manager
-    * against the metamodel when they are added to a BaseModelManager
+     * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
