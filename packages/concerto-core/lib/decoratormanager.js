@@ -15,6 +15,60 @@
 'use strict';
 
 const ModelManager = require('./modelmanager');
+const Serializer = require('./serializer');
+const Factory = require('./factory');
+
+const DCS_MODEL = `concerto version "^3.0.0"
+namespace org.accordproject.decoratorcommands@0.2.0
+
+import concerto.metamodel@1.0.0.Decorator
+
+/**
+ * A reference to an existing named & versioned DecoratorCommandSet
+ */
+concept DecoratorCommandSetReference {
+    o String name
+    o String version
+}
+
+/**
+ * Whether to upsert or append the decorator
+ */
+enum CommandType {
+    o UPSERT
+    o APPEND
+}
+
+/**
+ * Which models elements to add the decorator to. Any null
+ * elements are 'wildcards'. 
+ */
+concept CommandTarget {
+    o String namespace optional
+    o String declaration optional
+    o String property optional
+    o String type optional 
+}
+
+/**
+ * Applies a decorator to a given target
+ */
+concept Command {
+    o CommandTarget target
+    o Decorator decorator
+    o CommandType type
+}
+
+/**
+ * A named and versioned set of commands. Includes are supported for modularity/reuse.
+ */
+concept DecoratorCommandSet {
+    o String name
+    o String version
+    o DecoratorCommandSetReference[] includes optional
+    o Command[] commands
+}
+`;
 
 /**
  * Utility functions to work with
@@ -27,9 +81,27 @@ class DecoratorManager {
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {object} [options] - decorator models options
+     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * the validate option must also be true
      * @returns {ModelManager} a new model manager with the decorations applied
      */
-    static decorateModels(modelManager, decoratorCommandSet) {
+    static decorateModels(modelManager, decoratorCommandSet, options) {
+        if(options?.validate) {
+            const validationModelManager = new ModelManager({strict:true, metamodelValidation: true, addMetamodel: true});
+            validationModelManager.addModelFiles(modelManager.getModelFiles());
+            validationModelManager.addCTOModel(DCS_MODEL, 'decoratorcommands@0.2.0.cto');
+            const factory = new Factory(validationModelManager);
+            const serializer = new Serializer(factory, validationModelManager);
+            serializer.fromJSON(decoratorCommandSet);
+            if(options?.validateCommands) {
+                decoratorCommandSet.commands.forEach(command => {
+                    DecoratorManager.validateCommand(validationModelManager, command);
+                });
+            }
+        }
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach(model => {
@@ -42,6 +114,33 @@ class DecoratorManager {
         const newModelManager = new ModelManager();
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
+    }
+
+    /**
+     * Throws an error if the decoractor command is invalid
+     * @param {ModelManager} validationModelManager the validation model manager
+     * @param {*} command the decorator command
+     */
+    static validateCommand(validationModelManager, command) {
+        if(command.target.type) {
+            validationModelManager.resolveType( 'DecoratorCommand.type', command.target.type);
+        }
+        if(command.target.namespace) {
+            const modelFile = validationModelManager.getModelFile(command.target.namespace);
+            if(!modelFile) {
+                throw new Error(`Decorator Command references namespace "${command.target.namespace}" which does not exist.`);
+            }
+        }
+        if(command.target.namespace && command.target.declaration) {
+            validationModelManager.resolveType( 'DecoratorCommand.target.declaration', `${command.target.namespace}.${command.target.declaration}`);
+        }
+        if(command.target.namespace && command.target.declaration && command.target.property) {
+            const decl = validationModelManager.getType(`${command.target.namespace}.${command.target.declaration}`);
+            const property = decl.getProperty(command.target.property);
+            if(!property) {
+                throw new Error(`Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`);
+            }
+        }
     }
 
     /**

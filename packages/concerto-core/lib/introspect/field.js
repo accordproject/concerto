@@ -145,6 +145,8 @@ class Field extends Property {
         if (this.isPrimitive()) {
             return false;
         } else {
+            this.getParent()
+                .getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.getType());
             const type = this.getParent()
                 .getModelFile()
                 .getType(this.getType());
