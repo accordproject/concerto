@@ -1,4 +1,6 @@
-namespace test
+namespace test@1.0.0
+
+scalar SSN extends String
 
 @Editable
 concept Person {
@@ -6,5 +8,5 @@ concept Person {
     o String firstName
     o String lastName
     o String bio
-    o String ssn
+    o SSN ssn
 }

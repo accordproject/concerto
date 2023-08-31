@@ -65,9 +65,12 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
 
-            const decl = decoratedModelManager.getType('test.Person');
-            decl.should.not.be.null;
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            ssnDecl.getDecorator('PII').should.not.be.null;
 
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.should.not.be.null;
             decl.getDecorator('Editable').should.not.be.null;
 
             const firstNameProperty = decl.getProperty('firstName');

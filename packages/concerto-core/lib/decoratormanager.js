@@ -104,12 +104,15 @@ class DecoratorManager {
                 this.applyDecorator(declaration, type, decorator);
             }
             else {
-                declaration.properties.forEach(property => {
-                    if (this.falsyOrEqual(target.property, property.name) &&
-                        this.falsyOrEqual(target.type, property.$class)) {
-                        this.applyDecorator(property, type, decorator);
-                    }
-                });
+                // scalars are declarations but do not have properties
+                if(declaration.properties) {
+                    declaration.properties.forEach(property => {
+                        if (this.falsyOrEqual(target.property, property.name) &&
+                            this.falsyOrEqual(target.type, property.$class)) {
+                            this.applyDecorator(property, type, decorator);
+                        }
+                    });
+                }
             }
         }
     }
