@@ -61,6 +61,10 @@ export const defaultCompareConfig: CompareConfig = {
         'property-validator-removed': CompareResult.PATCH,
         'property-validator-changed': CompareResult.MAJOR,
         'map-key-type-changed': CompareResult.MAJOR,
-        'map-value-type-changed': CompareResult.MAJOR
+        'map-value-type-changed': CompareResult.MAJOR,
+        'scalar-extends-changed': CompareResult.MAJOR,
+        'scalar-validator-added' : CompareResult.MAJOR,
+        'scalar-validator-removed' : CompareResult.PATCH,
+        'scalar-validator-changed' : CompareResult.MAJOR,
     }
 };
