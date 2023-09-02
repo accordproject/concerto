@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, MapDeclaration, ModelFile, Property } from '@accordproject/concerto-core';
+import { ClassDeclaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
 import { CompareFinding } from './compare-message';
 import { CompareResults } from './compare-results';
@@ -69,11 +69,23 @@ export class Compare {
         return b.filter(bItem => !a.some(aItem => bItem.getName() === aItem.getName()));
     }
 
+    private getAddedScalarDeclarations(a: ScalarDeclaration[], b: ScalarDeclaration[]): ScalarDeclaration[] {
+        return b.filter(bItem => !a.some(aItem => bItem.getName() === aItem.getName()));
+    }
+
     private getMatchingMapDeclarations(a: MapDeclaration[], b: MapDeclaration[]): [a: MapDeclaration, b: MapDeclaration][] {
         return a.map(aItem => [aItem, b.find(bItem => aItem.getName() === bItem.getName())]).filter(([, b]) => !!b) as [MapDeclaration, MapDeclaration][];
     }
 
+    private getMatchingScalarDeclarations(a: ScalarDeclaration[], b: ScalarDeclaration[]): [a: ScalarDeclaration, b: ScalarDeclaration][] {
+        return a.map(aItem => [aItem, b.find(bItem => aItem.getName() === bItem.getName())]).filter(([, b]) => !!b) as [ScalarDeclaration, ScalarDeclaration][];
+    }
+
     private getRemovedMapDeclarations(a: MapDeclaration[], b: MapDeclaration[]): MapDeclaration[] {
+        return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
+    }
+
+    private getRemovedScalarDeclarations(a: ScalarDeclaration[], b: ScalarDeclaration[]): ScalarDeclaration[] {
         return a.filter(aItem => !b.some(bItem => aItem.getName() === bItem.getName()));
     }
 
@@ -98,10 +110,24 @@ export class Compare {
         removed.forEach(a => comparers.forEach(comparer => comparer.compareMapDeclaration?.(a, undefined)));
     }
 
+    private compareScalarDeclarations(comparers: Comparer[], a: ScalarDeclaration[], b: ScalarDeclaration[]) {
+        const added = this.getAddedScalarDeclarations(a, b);
+        const matching = this.getMatchingScalarDeclarations(a, b);
+        const removed = this.getRemovedScalarDeclarations(a, b);
+        added.forEach(b => comparers.forEach(comparer => comparer.compareScalarDeclaration?.(undefined, b)));
+        matching.forEach(([a, b]) => comparers.forEach(comparer => comparer.compareScalarDeclaration?.(a, b)));
+        removed.forEach(a => comparers.forEach(comparer => comparer.compareScalarDeclaration?.(a, undefined)));
+    }
+
+
     private compareClassDeclaration(comparers: Comparer[], a: ClassDeclaration, b: ClassDeclaration) {
         comparers.forEach(comparer => comparer.compareClassDeclaration?.(a, b));
         // MapDeclarations do not contain properties, nothing to compare.
         if(a instanceof MapDeclaration || b instanceof MapDeclaration) {
+            return;
+        }
+        // ScalarDeclarations do not contain properties, nothing to compare.
+        if(a instanceof ScalarDeclaration || b instanceof ScalarDeclaration) {
             return;
         }
         this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
@@ -120,6 +146,7 @@ export class Compare {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
         this.compareClassDeclarations(comparers, a.getAllDeclarations(), b.getAllDeclarations());
         this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
+        this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());
     }
 
     private buildResults(findings: CompareFinding[]) {
