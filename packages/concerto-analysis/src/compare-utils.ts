@@ -38,7 +38,7 @@ export function getDeclarationType(declaration: Declaration) {
         return 'scalar';
     }
     else {
-        throw new Error(`unknown class declaration type "${declaration}"`);
+        throw new Error(`unknown declaration type "${declaration}"`);
     }
 }
 
