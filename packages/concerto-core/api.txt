@@ -69,11 +69,11 @@ class Factory {
    + Resource newTransaction(String,String,String?,Object?,String?,boolean?) 
    + Resource newEvent(String,String,String?,Object?,String?,boolean?) 
 }
-class AssetDeclaration extends IdentifiedDeclaration {
+class AssetDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
 }
 class ClassDeclaration extends Declaration {
+   + void constructor(ModelFile,Object) throws IllegalModelException
    + ClassDeclaration _resolveSuperType() 
    ~ void validate() throws IllegalModelException
    + boolean isAbstract() 
@@ -92,40 +92,19 @@ class ClassDeclaration extends Declaration {
    + Property[] getProperties() 
    + Property getNestedProperty(string) throws IllegalModelException
    + String toString() 
-   + boolean isAsset() 
-   + boolean isParticipant() 
-   + boolean isTransaction() 
-   + boolean isEvent() 
-   + boolean isConcept() 
-   + boolean isEnum() 
-   + boolean isMapDeclaration() 
-   + boolean isClassDeclaration() 
 }
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
 }
 class Declaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
-   + string getName() 
-   + string getNamespace() 
-   + string getFullyQualifiedName() 
-   + Boolean isIdentified() 
-   + Boolean isSystemIdentified() 
-   + string getIdentifierFieldName() 
-   + string getType() 
    + String toString() 
-   + boolean isEnum() 
-   + boolean isClassDeclaration() 
-   + boolean isScalarDeclaration() 
 }
 class Decorator {
-   + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
-   + void getParent() 
+   + void constructor(ModelElement,Object) throws IllegalModelException
+   + ModelElement getParent() 
    + string getName() 
    + object[] getArguments() 
-   + boolean isDecorator() 
 }
 class DecoratorFactory {
    + Decorator newDecorator(ClassDeclaration|Property,Object) 
@@ -133,17 +112,11 @@ class DecoratorFactory {
 class EnumDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + String toString() 
-   + string declarationKind() 
 }
-class EnumValueDeclaration extends Property {
+class EnumValue extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + boolean isEnumValue() 
 }
-class EventDeclaration extends IdentifiedDeclaration {
-   + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
-}
-class IdentifiedDeclaration extends ClassDeclaration {
+class EventDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
 }
 class IllegalModelException extends BaseFileException {
@@ -163,8 +136,6 @@ class MapDeclaration extends Declaration {
    + MapKeyType getKey() 
    + MapValueType getValue() 
    + String toString() 
-   + string declarationKind() 
-   + boolean isMapDeclaration() 
 }
 class MapKeyType extends Decorated {
    + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
@@ -189,7 +160,7 @@ class MapValueType extends Decorated {
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
    + ModelManager modelManagerFromMetaModel() 
-class ModelFile extends Decorated {
+class ModelFile {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
    ~ ModelFile getModelFile() 
    + boolean isModelFile() 
@@ -224,53 +195,38 @@ class ModelFile extends Decorated {
    + void isCompatibleVersion() 
    + void enforceImportVersioning(imp) 
 }
-class ParticipantDeclaration extends IdentifiedDeclaration {
+class ParticipantDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
    + ClassDeclaration getParent() 
    ~ void validate(ClassDeclaration) throws IllegalModelException
-   + string getName() 
    + string getType() 
+   + void getPropertyType() 
    + boolean isOptional() 
    + string getFullyQualifiedTypeName() 
    + string getFullyQualifiedName() 
-   + string getNamespace() 
    + boolean isArray() 
+   + boolean isEnum() 
    + boolean isTypeEnum() 
+   + boolean isPropertyEnum() 
    + boolean isPrimitive() 
 }
-class RelationshipDeclaration extends Property {
+class RelationshipProperty extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    ~ void validate(ClassDeclaration) throws IllegalModelException
    + String toString() 
-   + boolean isRelationship() 
 }
 class ScalarDeclaration extends Declaration {
    ~ void validate() throws IllegalModelException
-   + Boolean isIdentified() 
-   + Boolean isSystemIdentified() 
-   + string getIdentifierFieldName() 
-   + string getType() 
-   + string getSuperType() 
-   + ClassDeclaration getSuperTypeDeclaration() 
+   + string getScalarType() 
    + Validator getValidator() 
    + void getDefaultValue() 
    + String toString() 
-   + boolean isAbstract() 
-   + boolean isScalarDeclaration() 
-   + boolean isAsset() 
-   + boolean isParticipant() 
-   + boolean isTransaction() 
-   + boolean isEvent() 
-   + boolean isConcept() 
 }
-class TransactionDeclaration extends IdentifiedDeclaration {
+class TransactionDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
 }
 class MetamodelException extends BaseException {
    + void constructor(string) 

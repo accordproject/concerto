@@ -15,8 +15,6 @@
 'use strict';
 
 const Decorated = require('./decorated');
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -27,11 +25,9 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 /**
- * Declaration defines the structure (model/schema) of composite data.
- * It is composed of a set of Properties, may have an identifying field, and may
- * have a super-type.
  * A Declaration is conceptually owned by a ModelFile which
- * defines all the classes that are part of a namespace.
+ * defines all the top-level declarations that are part of a namespace.
+ * A declaration has decorators, a name and a type.
  *
  * @abstract
  * @class
@@ -47,8 +43,7 @@ class Declaration extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
-        super(ast);
-        this.modelFile = modelFile;
+        super(modelFile, ast);
         this.process();
     }
 
@@ -60,87 +55,6 @@ class Declaration extends Decorated {
      */
     process() {
         super.process();
-
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
-        }
-
-        this.name = this.ast.name;
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.modelFile;
-    }
-
-    /**
-     * Returns the short name of a class. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.name;
-    }
-
-    /**
-     * Return the namespace of this class.
-     * @return {string} namespace - a namespace.
-     */
-    getNamespace() {
-        return this.modelFile.getNamespace();
-    }
-
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
-    }
-
-    /**
-     * Returns false as scalars are never identified.
-     * @returns {Boolean} false as scalars are never identified
-     */
-    isIdentified() {
-        return false;
-    }
-
-    /**
-     * Returns false as scalars are never identified.
-     * @returns {Boolean} false as scalars are never identified
-     */
-    isSystemIdentified() {
-        return false;
-    }
-
-    /**
-     * Returns the name of the identifying field for this class. Note
-     * that the identifying field may come from a super type.
-     *
-     * @return {string} the name of the id field for this class or null if it does not exist
-     */
-    getIdentifierFieldName() {
-        return null;
-    }
-
-    /**
-     * Returns the FQN of the super type for this class or null if this
-     * class does not have a super type.
-     *
-     * @return {string} the FQN name of the super type or null
-     */
-    getType() {
-        return null;
     }
 
     /**
@@ -149,33 +63,6 @@ class Declaration extends Decorated {
      */
     toString() {
         return null;
-    }
-
-    /**
-     * Returns true if this class is the definition of an enum.
-     *
-     * @return {boolean} true if the class is an enum
-     */
-    isEnum() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a class declaration.
-     *
-     * @return {boolean} true if the class is a class
-     */
-    isClassDeclaration() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a scalar declaration.
-     *
-     * @return {boolean} true if the class is a scalar
-     */
-    isScalarDeclaration() {
-        return false;
     }
 }
 

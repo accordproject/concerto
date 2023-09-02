@@ -61,7 +61,7 @@ class Field extends Property {
 
         this.validator = null;
 
-        switch (this.getType()) {
+        switch (this.getPropertyType()) {
         case 'Integer':
         case 'Double':
         case 'Long':
@@ -126,15 +126,6 @@ class Field extends Property {
             this.optional +
             '}'
         );
-    }
-
-    /**
-     * Returns true if this class is the definition of a field.
-     *
-     * @return {boolean} true if the class is a field
-     */
-    isField() {
-        return true;
     }
 
     /**

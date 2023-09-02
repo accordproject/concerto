@@ -32,7 +32,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class EnumValueDeclaration extends Property {
+class EnumValue extends Property {
     /**
      * Create a EnumValueDeclaration.
      * @param {ClassDeclaration} parent - The owner of this property
@@ -42,25 +42,6 @@ class EnumValueDeclaration extends Property {
     constructor(parent, ast) {
         super(parent, ast);
     }
-
-    /**
-     * Validate the property
-     * @param {ClassDeclaration} classDecl the class declaration of the property
-     * @throws {IllegalModelException}
-     * @private
-     */
-    validate(classDecl) {
-        super.validate(classDecl);
-    }
-
-    /**
-     * Returns true if this class is the definition of a enum value.
-     *
-     * @return {boolean} true if the class is an enum value
-     */
-    isEnumValue() {
-        return true;
-    }
 }
 
-module.exports = EnumValueDeclaration;
+module.exports = EnumValue;

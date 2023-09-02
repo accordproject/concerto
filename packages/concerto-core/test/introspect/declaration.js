@@ -41,24 +41,6 @@ describe('Declaration', () => {
 
     });
 
-    describe('#isIdentified', () => {
-        it('should be false', () => {
-            declaration.isIdentified().should.equal(false);
-        });
-    });
-
-    describe('#isSystemIdentified', () => {
-        it('should be false', () => {
-            declaration.isSystemIdentified().should.equal(false);
-        });
-    });
-
-    describe('#getIdentifierFieldName', () => {
-        it('should be null', () => {
-            should.equal(declaration.getIdentifierFieldName(), null);
-        });
-    });
-
     describe('#getType', () => {
         it('should be null', () => {
             should.equal(declaration.getType(), null);

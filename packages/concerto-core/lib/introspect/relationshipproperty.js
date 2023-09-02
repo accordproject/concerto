@@ -34,7 +34,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class RelationshipDeclaration extends Property {
+class RelationshipProperty extends Property {
     /**
      * Create a Relationship.
      * @param {ClassDeclaration} parent - The owner of this property
@@ -54,14 +54,14 @@ class RelationshipDeclaration extends Property {
     validate(classDecl) {
         super.validate(classDecl);
         // relationship cannot point to primitive types
-        if(!this.getType()) {
+        if(!this.getPropertyType()) {
             throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);
         }
 
         let classDeclaration = null;
 
         // you can't have a relationship with a primitive...
-        if(ModelUtil.isPrimitiveType(this.getType())) {
+        if(ModelUtil.isPrimitiveType(this.getPropertyType())) {
             throw new IllegalModelException('Relationship ' + this.getName() + ' cannot be to the primitive type ' + this.getType(), classDecl.getModelFile(), this.ast.location );
         } else {
             let namespace = this.getParent().getNamespace();
@@ -97,17 +97,8 @@ class RelationshipDeclaration extends Property {
      * @return {String} the string version of the property.
      */
     toString() {
-        return 'RelationshipDeclaration {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() + ', array=' + this.array + ', optional=' + this.optional +'}';
-    }
-
-    /**
-     * Returns true if this class is the definition of a relationship.
-     *
-     * @return {boolean} true if the class is a relationship
-     */
-    isRelationship() {
-        return true;
+        return 'RelationshipProperty {name=' + this.name + ', type=' + this.getFullyQualifiedTypeName() + ', array=' + this.array + ', optional=' + this.optional +'}';
     }
 }
 
-module.exports = RelationshipDeclaration;
+module.exports = RelationshipProperty;

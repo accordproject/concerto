@@ -20,8 +20,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Property = require('./property');
+    const ModelElement = require('./modelelement');
 }
 /* eslint-enable no-unused-vars */
 
@@ -33,7 +32,7 @@ if (global === undefined) {
 class Decorator {
     /**
      * Create a Decorator.
-     * @param {ClassDeclaration | Property} parent - the owner of this property
+     * @param {ModelElement} parent - the owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
@@ -57,7 +56,7 @@ class Decorator {
 
     /**
      * Returns the owner of this property
-     * @return {ClassDeclaration|Property} the parent class or property declaration
+     * @return {ModelElement} the parent model element
      */
     getParent() {
         return this.parent;
@@ -112,15 +111,6 @@ class Decorator {
      */
     getArguments() {
         return this.arguments;
-    }
-
-    /**
-     * Returns true if this class is the definition of a decorator.
-     *
-     * @return {boolean} true if the class is a decorator
-     */
-    isDecorator() {
-        return true;
     }
 }
 

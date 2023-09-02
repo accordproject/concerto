@@ -161,11 +161,12 @@ describe('ClassDeclaration', () => {
         it('should return the class name', () => {
             let clz = new ClassDeclaration(modelFile, {
                 name: 'suchName',
+                $class: 'metamodel@1.0.0.MyType',
                 properties: [
                 ]
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName super=Concept enum=false abstract=false}');
+            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName super=Concept declarationKind=MyType abstract=false id=null}');
         });
 
     });
@@ -292,7 +293,7 @@ describe('ClassDeclaration', () => {
 
         it('toString',()=>{
             const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Participant enum=false abstract=true}');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Participant declarationKind=ParticipantDeclaration abstract=true id=id}');
         });
     });
 

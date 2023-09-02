@@ -14,6 +14,7 @@
 
 'use strict';
 
+const ModelElement = require('./modelelement');
 const Decorator = require('./decorator');
 const IllegalModelException = require('./illegalmodelexception');
 
@@ -33,57 +34,29 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class Decorated {
+class Decorated extends ModelElement {
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
-     *
-     * @param {string} ast - the AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for this decorated
+     * @param {*} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(ast) {
-        if(!ast) {
-            throw new Error('ast not specified');
-        }
-        this.ast = ast;
+    constructor(modelFile, ast) {
+        super(modelFile, ast);
     }
 
     /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @abstract
-     * @protected
-     * @return {ModelFile} the owning ModelFile
+     * Extracts the decorators applied to an AST.
+     * @param {*} ast - the AST created by the parser
+     * @param {ModelManager} modelManager - the ModelManager that supplies decorator factories
+     * @returns {Decorator[]} the decorators
      */
-    getModelFile() {
-        throw new Error('not implemented');
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {Object} visitor - the visitor
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    accept(visitor,parameters) {
-        return visitor.visit(this, parameters);
-    }
-
-    /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        this.decorators = [];
-
-        if(this.ast.decorators) {
-            for(let n=0; n < this.ast.decorators.length; n++ ) {
-                let thing = this.ast.decorators[n];
-                let modelFile = this.getModelFile();
-                let modelManager = modelFile.getModelManager();
+    static processDecorators(ast, modelManager) {
+        const decorators = [];
+        if(ast.decorators) {
+            for(let n=0; n < ast.decorators.length; n++ ) {
+                let thing = ast.decorators[n];
                 let factories = modelManager.getDecoratorFactories();
                 let decorator;
                 for (let factory of factories) {
@@ -95,9 +68,21 @@ class Decorated {
                 if (!decorator) {
                     decorator = new Decorator(this, thing);
                 }
-                this.decorators.push(decorator);
+                decorators.push(decorator);
             }
         }
+
+        return decorators;
+    }
+
+    /**
+     * Process the AST and build the model
+     *
+     * @throws {IllegalModelException}
+     * @private
+     */
+    process() {
+        this.decorators = Decorated.processDecorators(this.ast, this.getModelFile().getModelManager());
     }
 
     /**

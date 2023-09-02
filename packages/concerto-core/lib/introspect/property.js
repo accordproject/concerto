@@ -17,7 +17,6 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
@@ -32,7 +31,7 @@ if (global === undefined) {
 
 /**
  * Property representing an attribute of a class declaration,
- * either a Field or a Relationship.
+ * either a Field or a Relationship. Properties may be array or be optional.
  *
  * @class
  * @memberof module:concerto-core
@@ -45,19 +44,9 @@ class Property extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {
-        super(ast);
+        super(parent.getModelFile(), ast);
         this.parent = parent;
         this.process();
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.parent.getModelFile();
     }
 
     /**
@@ -76,43 +65,35 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.modelFile, this.ast.location);
-        }
-
-        this.name = this.ast.name;
         this.decorator = null;
+        this.propertyType = null;
 
-        if(!this.name) {
-            throw new Error('No name for type ' + JSON.stringify(this.ast));
-        }
-
-        switch (this.ast.$class) {
+        switch (this.getMetaType()) {
         case `${MetaModelNamespace}.EnumProperty`:
             break;
         case `${MetaModelNamespace}.BooleanProperty`:
-            this.type = 'Boolean';
+            this.propertyType = 'Boolean';
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
-            this.type = 'DateTime';
+            this.propertyType = 'DateTime';
             break;
         case `${MetaModelNamespace}.DoubleProperty`:
-            this.type = 'Double';
+            this.propertyType = 'Double';
             break;
         case `${MetaModelNamespace}.IntegerProperty`:
-            this.type = 'Integer';
+            this.propertyType = 'Integer';
             break;
         case `${MetaModelNamespace}.LongProperty`:
-            this.type = 'Long';
+            this.propertyType = 'Long';
             break;
         case `${MetaModelNamespace}.StringProperty`:
-            this.type = 'String';
+            this.propertyType = 'String';
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            this.type = this.ast.type ? this.ast.type.name : null;
+            this.propertyType = this.ast.type ? this.ast.type.name : null;
             break;
         case `${MetaModelNamespace}.RelationshipProperty`:
-            this.type = this.ast.type.name;
+            this.propertyType = this.ast.type.name;
             break;
         }
         this.array = false;
@@ -138,30 +119,35 @@ class Property extends Decorated {
     validate(classDecl) {
         super.validate();
 
-        if(this.type) {
-            classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
+        if(this.propertyType) {
+            classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.propertyType);
         }
     }
 
     /**
-     * Returns the name of a property
-     * @return {string} the name of this field
+     * Returns the type of a property.
+     * @deprecated replaced by getPropertyType()
+     * @return {string} the type of this property
      */
-    getName() {
-        return this.name;
+    getType() {
+        return this.getPropertyType();
     }
 
     /**
-     * Returns the type of a property
-     * @return {string} the type of this field
+     * Returns the type of a property. This will return either: a primitive type
+     * name (String, Boolean, Integer etc) or the name of a non-primitive type,
+     * or will return null if this is an enum property.
+     *
+     * Note this is NOT the same as getMetaType() which returns the meta type for the property.
+     * @return {string|null} the type of this property or null if this is an enum property
      */
-    getType() {
-        return this.type;
+    getPropertyType() {
+        return this.propertyType;
     }
 
     /**
      * Returns true if the field is optional
-     * @return {boolean} true if the field is optional
+     * @return {boolean} true if the property is optional
      */
     isOptional() {
         return this.optional;
@@ -173,7 +159,7 @@ class Property extends Decorated {
      */
     getFullyQualifiedTypeName() {
         if(this.isPrimitive()) {
-            return this.type;
+            return this.propertyType;
         }
 
         const parent = this.getParent();
@@ -184,9 +170,9 @@ class Property extends Decorated {
         if(!modelFile) {
             throw new Error('Parent of property ' + this.name + ' does not have a ModelFile!');
         }
-        const result = modelFile.getFullyQualifiedTypeName(this.type);
+        const result = modelFile.getFullyQualifiedTypeName(this.propertyType);
         if(!result) {
-            throw new Error('Failed to find fully qualified type name for property ' + this.name + ' with type ' + this.type );
+            throw new Error('Failed to find fully qualified type name for property ' + this.name + ' with type ' + this.propertyType );
         }
 
         return result;
@@ -197,15 +183,7 @@ class Property extends Decorated {
      * @return {string} the fully qualified name of this property
      */
     getFullyQualifiedName() {
-        return this.getParent().getFullyQualifiedName() + '.' + this.getName();
-    }
-
-    /**
-     * Returns the namespace of the parent of this property
-     * @return {string} the namespace of the parent of this property
-     */
-    getNamespace() {
-        return this.getParent().getNamespace();
+        return `${this.getParent().getFullyQualifiedName()}.${this.getName()}`;
     }
 
     /**
@@ -216,17 +194,34 @@ class Property extends Decorated {
         return this.array;
     }
 
+    /**
+     * Returns true if the field is declared as an enumerated value
+     * @deprecated replaced by isPropertyEnum()
+     * @return {boolean} true if the property is an enumerated value
+     */
+    isEnum() {
+        return this.isPropertyEnum();
+    }
+
+    /**
+     * Returns true if the field is declared as an enumerated value
+     * @deprecated replaced by isPropertyEnum()
+     * @return {boolean} true if the property is an enumerated value
+     */
+    isTypeEnum() {
+        return this.isPropertyEnum();
+    }
 
     /**
      * Returns true if the field is declared as an enumerated value
      * @return {boolean} true if the property is an enumerated value
      */
-    isTypeEnum() {
+    isPropertyEnum() {
         if(this.isPrimitive()) {
             return false;
         }
         else {
-            const type = this.getParent().getModelFile().getType(this.getType());
+            const type = this.getModelFile().getType(this.getPropertyType());
             return type.isEnum();
         }
     }
@@ -236,7 +231,7 @@ class Property extends Decorated {
      * @return {boolean} true if the property is a primitive type.
      */
     isPrimitive() {
-        return ModelUtil.isPrimitiveType(this.getType());
+        return ModelUtil.isPrimitiveType(this.getPropertyType());
     }
 }
 

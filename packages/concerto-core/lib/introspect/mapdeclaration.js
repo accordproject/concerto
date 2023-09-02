@@ -148,24 +148,6 @@ class MapDeclaration extends Declaration {
     toString() {
         return 'MapDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
-
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind() {
-        return 'MapDeclaration';
-    }
-
-    /**
-     * Returns true if this class is the definition of a class declaration.
-     *
-     * @return {boolean} true if the class is a class
-     */
-    isMapDeclaration() {
-        return true;
-    }
 }
 
 module.exports = MapDeclaration;

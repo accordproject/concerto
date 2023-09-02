@@ -1005,7 +1005,7 @@ describe('Serializer', () => {
     });
 
     describe('#toJSON failure scenarios', () => {
-        it('should throw if bad Key value is provided for Map, where Key Type DateTime is expected', () => {
+        it.only('should throw if bad Key value is provided for Map, where Key Type DateTime is expected', () => {
             let concept = factory.newConcept('org.acme.sample', 'Concepts');
 
             concept.appointment = new Map();

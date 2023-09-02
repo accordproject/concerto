@@ -16,7 +16,7 @@
 
 require('chai').should();
 const ModelManager = require('../../lib/modelmanager');
-const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
+const RelationshipProperty = require('../../lib/introspect/relationshipproperty');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');
@@ -67,7 +67,7 @@ describe('Farm2Fork Model', function() {
             let previousKeeperField = animal.getProperty('previousKeeper');
             previousKeeperField.getName().should.equal('previousKeeper');
             previousKeeperField.isArray().should.be.true;
-            (previousKeeperField instanceof RelationshipDeclaration).should.be.true;
+            (previousKeeperField instanceof RelationshipProperty).should.be.true;
             previousKeeperField.getType().should.equal('MyParticipant');
 
             // test the VehicleTransferredToScrapMerchant class
@@ -84,7 +84,7 @@ describe('Farm2Fork Model', function() {
             let animalField = txDecl.getProperty('animal');
             animalField.should.not.be.null;
             animalField.getType().should.equal('Animal');
-            (animalField instanceof RelationshipDeclaration).should.be.true;
+            (animalField instanceof RelationshipProperty).should.be.true;
         });
     });
 });

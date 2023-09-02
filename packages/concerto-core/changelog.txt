@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.12.2 {fb04a2a4837e759bb8ba1c0c2b99d653} 2023-09-01
+- API refactor
+
 Version 3.12.2 {bb8951ea059e312cd347b715bc9fc8d7} 2023-08-28
 - Adds ModelFile :: getClassDeclarations
 

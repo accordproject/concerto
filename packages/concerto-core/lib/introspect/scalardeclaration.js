@@ -26,7 +26,6 @@ const StringValidator = require('./stringvalidator');
 /* istanbul ignore next */
 if (global === undefined) {
     const Validator = require('./validator');
-    const ClassDeclaration = require('./classdeclaration');
 }
 /* eslint-enable no-unused-vars */
 
@@ -51,30 +50,24 @@ class ScalarDeclaration extends Declaration {
     process() {
         super.process();
 
-        this.superType = null;
-        this.superTypeDeclaration = null;
-        this.idField = null;
-        this.timestamped = false;
-        this.abstract = false;
         this.validator = null;
+        this.scalarType = null;
 
         if (this.ast.$class === `${MetaModelNamespace}.BooleanScalar`) {
-            this.type = 'Boolean';
+            this.scalarType = 'Boolean';
         } else if (this.ast.$class === `${MetaModelNamespace}.IntegerScalar`) {
-            this.type = 'Integer';
+            this.scalarType = 'Integer';
         } else if (this.ast.$class === `${MetaModelNamespace}.LongScalar`) {
-            this.type = 'Long';
+            this.scalarType = 'Long';
         } else if (this.ast.$class === `${MetaModelNamespace}.DoubleScalar`) {
-            this.type = 'Double';
+            this.scalarType = 'Double';
         } else if (this.ast.$class === `${MetaModelNamespace}.StringScalar`) {
-            this.type = 'String';
+            this.scalarType = 'String';
         } else if (this.ast.$class === `${MetaModelNamespace}.DateTimeScalar`) {
-            this.type = 'DateTime';
-        } else {
-            this.type = null;
+            this.scalarType = 'DateTime';
         }
 
-        switch(this.getType()) {
+        switch(this.scalarType) {
         case 'Integer':
         case 'Double':
         case 'Long':
@@ -124,60 +117,12 @@ class ScalarDeclaration extends Declaration {
     }
 
     /**
-     * Returns false as scalars are never identified.
-     * @returns {Boolean} false as scalars are never identified
-     * @deprecated
-     */
-    isIdentified() {
-        return false;
-    }
-
-    /**
-     * Returns false as scalars are never identified.
-     * @returns {Boolean} false as scalars are never identified
-     * @deprecated
-     */
-    isSystemIdentified() {
-        return false;
-    }
-
-    /**
-     * Returns null as scalars are never identified.
-     * @return {string} as scalars are never identified
-     * @deprecated
-     */
-    getIdentifierFieldName() {
-        return null;
-    }
-
-    /**
-     * Returns the FQN of the super type for this class or null if this
-     * class does not have a super type.
+     * Returns the underlying primitive type of this scalar
      *
-     * @return {string} the FQN name of the super type or null
+     * @return {string} the type of the scalar (String, Integer, Long etc.)
      */
-    getType() {
-        return this.type;
-    }
-
-    /**
-     * Returns the FQN of the super type for this class or null if this
-     * class does not have a super type.
-     *
-     * @return {string} the FQN name of the super type or null
-     * @deprecated
-     */
-    getSuperType() {
-        return null;
-    }
-
-    /**
-     * Get the super type class declaration for this class.
-     * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
-     * @deprecated
-     */
-    getSuperTypeDeclaration() {
-        return null;
+    getScalarType() {
+        return this.scalarType;
     }
 
     /**
@@ -206,78 +151,9 @@ class ScalarDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString() {
-        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
+        return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() +
+        ' scalarType=' + this.scalarType + '}';
     }
-
-    /**
-     * Returns true if this class is abstract.
-     *
-     * @return {boolean} true if the class is abstract
-     * @deprecated
-     */
-    isAbstract() {
-        return true;
-    }
-
-    /**
-     * Returns true if this class is the definition of a scalar declaration.
-     *
-     * @return {boolean} true if the class is a scalar
-     */
-    isScalarDeclaration() {
-        return true;
-    }
-
-    /**
-     * Returns true if this class is the definition of an asset.
-     *
-     * @return {boolean} true if the class is an asset
-     * @deprecated
-     */
-    isAsset() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a participant.
-     *
-     * @return {boolean} true if the class is a participant
-     * @deprecated
-     */
-    isParticipant() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a transaction.
-     *
-     * @return {boolean} true if the class is a transaction
-     * @deprecated
-     */
-    isTransaction() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of an event.
-     *
-     * @return {boolean} true if the class is an event
-     * @deprecated
-     */
-    isEvent() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is a concept
-     * @deprecated
-     */
-    isConcept() {
-        return false;
-    }
-
 }
 
 module.exports = ScalarDeclaration;

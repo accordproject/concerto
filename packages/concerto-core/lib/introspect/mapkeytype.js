@@ -45,7 +45,7 @@ class MapKeyType extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {
-        super(ast);
+        super(parent.getModelFile(), ast);
         this.parent = parent;
         this.process();
     }
@@ -93,8 +93,7 @@ class MapKeyType extends Decorated {
      * @private
      */
     processType(ast) {
-        let decl;
-        switch(this.ast.$class) {
+        switch(ast.$class) {
         case `${MetaModelNamespace}.DateTimeMapKeyType`:
             this.type = 'DateTime';
             break;
@@ -104,6 +103,8 @@ class MapKeyType extends Decorated {
         case `${MetaModelNamespace}.ObjectMapKeyType`:
             this.type = String(this.ast.type.name);
             break;
+        default:
+            throw new Error(`Unrecognized map key type: ${ast.$class}`);
         }
     }
 

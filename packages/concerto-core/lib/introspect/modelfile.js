@@ -18,6 +18,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const packageJson = require('../../package.json');
 const semver = require('semver');
+const Decorated = require('./decorated');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
 const ClassDeclaration = require('./classdeclaration');
@@ -30,7 +31,6 @@ const IllegalModelException = require('./illegalmodelexception');
 const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
-const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -49,7 +49,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class ModelFile extends Decorated {
+class ModelFile {
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -61,7 +61,6 @@ class ModelFile extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelManager, ast, definitions, fileName) {
-        super(ast);
         this.modelManager = modelManager;
         this.external = false;
         this.declarations = [];
@@ -95,7 +94,7 @@ class ModelFile extends Decorated {
         }
 
         // Set up the decorators.
-        this.process();
+        this.decorators = Decorated.processDecorators(this.ast, modelManager);
         // Populate from the AST
         this.fromAst(this.ast);
         // Check version compatibility
@@ -219,8 +218,6 @@ class ModelFile extends Decorated {
      * @protected
      */
     validate() {
-        super.validate();
-
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 

@@ -44,7 +44,7 @@ class MapValueType extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(parent, ast) {
-        super(ast);
+        super(parent.getModelFile(), ast);
         this.parent = parent;
         this.modelFile = parent.getModelFile();
         this.process();
@@ -87,8 +87,7 @@ class MapValueType extends Decorated {
      * @private
      */
     processType(ast) {
-        let decl;
-        switch(this.ast.$class) {
+        switch(ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
 
             // ObjectMapValueType must have TypeIdentifier.
@@ -127,6 +126,8 @@ class MapValueType extends Decorated {
         case `${MetaModelNamespace}.DoubleMapValueType`:
             this.type = 'Double';
             break;
+        default:
+            throw new Error(`Unrecognized map value type ${ast.$class}`);
         }
     }
 

@@ -61,7 +61,7 @@ class Introspector {
             const modelFile = modelFiles[n];
 
             const filteredDeclarations = modelFile.getAllDeclarations()
-                .filter(declaration =>  !declaration.isMapDeclaration?.() && !declaration.isScalarDeclaration?.());
+                .filter(declaration =>  !declaration.isMapDeclaration() && !declaration.isScalarDeclaration());
 
             result = result.concat(filteredDeclarations);
         }

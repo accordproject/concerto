@@ -33,10 +33,9 @@ const DecoratorFactory = require('./lib/introspect/decoratorfactory');
 
 // ClassDeclarations
 const ClassDeclaration = require('./lib/introspect/classdeclaration');
-const IdentifiedDeclaration = require('./lib/introspect/identifieddeclaration');
 const AssetDeclaration = require('./lib/introspect/assetdeclaration');
 const ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
-const EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
+const EnumDeclaration = require('./lib/introspect/enumdeclaration');
 const EventDeclaration = require('./lib/introspect/eventdeclaration');
 const ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
@@ -50,8 +49,8 @@ const MapValueType = require('./lib/introspect/mapvaluetype');
 // Properties
 const Property = require('./lib/introspect/property');
 const Field = require('./lib/introspect/field');
-const EnumDeclaration = require('./lib/introspect/enumdeclaration');
-const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
+const RelationshipProperty = require('./lib/introspect/relationshipproperty');
+const EnumValue = require('./lib/introspect/enumvalue');
 
 // Validators
 const Validator = require('./lib/introspect/validator');
@@ -115,10 +114,9 @@ module.exports = {
     DecoratorFactory,
     DecoratorManager,
     ClassDeclaration,
-    IdentifiedDeclaration,
     AssetDeclaration,
     ConceptDeclaration,
-    EnumValueDeclaration,
+    EnumDeclaration,
     EventDeclaration,
     ParticipantDeclaration,
     TransactionDeclaration,
@@ -128,8 +126,8 @@ module.exports = {
     MapValueType,
     Property,
     Field,
-    EnumDeclaration,
-    RelationshipDeclaration,
+    EnumValue,
+    RelationshipProperty,
     Validator,
     NumberValidator,
     StringValidator,

@@ -16,7 +16,7 @@
 
 const Factory = require('../../lib/factory');
 const ModelManager = require('../../lib/modelmanager');
-const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
+const RelationshipProperty = require('../../lib/introspect/relationshipproperty');
 const Serializer = require('../../lib/serializer');
 const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const fs = require('fs');
@@ -294,7 +294,7 @@ describe('Test Model', function(){
             // Nary relationship
             let previousOwnersField = vehicle.getProperty('previousOwners');
             previousOwnersField.isArray().should.be.true;
-            (previousOwnersField instanceof RelationshipDeclaration).should.be.true;
+            (previousOwnersField instanceof RelationshipProperty).should.be.true;
             previousOwnersField.getType().should.equal('MyParticipant');
 
             // test the VehicleTransferredToScrapMerchant class
@@ -311,7 +311,7 @@ describe('Test Model', function(){
             let vehicleField = txDecl.getProperty('vehicle');
             vehicleField.should.not.be.null;
             vehicleField.getType().should.equal('Vehicle');
-            (vehicleField instanceof RelationshipDeclaration).should.be.true;
+            (vehicleField instanceof RelationshipProperty).should.be.true;
         });
     });
 
