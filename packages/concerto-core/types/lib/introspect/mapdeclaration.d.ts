@@ -73,18 +73,6 @@ declare class MapDeclaration {
      * @return {String} the string representation of the class
      */
     toString(): string;
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind(): string;
-    /**
-     * Returns true if this class is the definition of a class declaration.
-     *
-     * @return {boolean} true if the class is a class
-     */
-    isMapDeclaration(): boolean;
 }
 import ModelFile = require("./modelfile");
 import MapKeyType = require("./mapkeytype");

@@ -1,7 +1,7 @@
 export = Property;
 /**
  * Property representing an attribute of a class declaration,
- * either a Field or a Relationship.
+ * either a Field or a Relationship. Properties may be array or be optional.
  *
  * @class
  * @memberof module:concerto-core
@@ -20,9 +20,8 @@ declare class Property extends Decorated {
      * @return {ClassDeclaration} the parent class declaration
      */
     getParent(): ClassDeclaration;
-    name: any;
     decorator: any;
-    type: any;
+    propertyType: any;
     array: boolean;
     optional: boolean;
     /**
@@ -33,18 +32,17 @@ declare class Property extends Decorated {
      */
     protected validate(classDecl: ClassDeclaration): void;
     /**
-     * Returns the name of a property
-     * @return {string} the name of this field
+     * Returns the type of a property. This will return either: a primitive type
+     * name (String, Boolean, Integer etc) or the name of a non-primitive type,
+     * or will return null if this is an enum property.
+     *
+     * Note this is NOT the same as getMetaType() which returns the meta type for the property.
+     * @return {string|null} the type of this property or null if this is an enum property
      */
-    getName(): string;
-    /**
-     * Returns the type of a property
-     * @return {string} the type of this field
-     */
-    getType(): string;
+    getPropertyType(): string | null;
     /**
      * Returns true if the field is optional
-     * @return {boolean} true if the field is optional
+     * @return {boolean} true if the property is optional
      */
     isOptional(): boolean;
     /**
@@ -53,25 +51,21 @@ declare class Property extends Decorated {
      */
     getFullyQualifiedTypeName(): string;
     /**
-     * Returns the fully name of a property (ns + class name + property name)
-     * @return {string} the fully qualified name of this property
-     */
-    getFullyQualifiedName(): string;
-    /**
-     * Returns the namespace of the parent of this property
-     * @return {string} the namespace of the parent of this property
-     */
-    getNamespace(): string;
-    /**
      * Returns true if the field is declared as an array type
      * @return {boolean} true if the property is an array type
      */
     isArray(): boolean;
     /**
      * Returns true if the field is declared as an enumerated value
+     * @deprecated replaced by isPropertyEnum()
      * @return {boolean} true if the property is an enumerated value
      */
     isTypeEnum(): boolean;
+    /**
+     * Returns true if the field is declared as an enumerated value
+     * @return {boolean} true if the property is an enumerated value
+     */
+    isPropertyEnum(): boolean;
     /**
      * Returns true if this property is a primitive type.
      * @return {boolean} true if the property is a primitive type.

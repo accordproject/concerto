@@ -11,13 +11,21 @@ export = ClassDeclaration;
  * @memberof module:concerto-core
  */
 declare class ClassDeclaration extends Declaration {
+    /**
+     * Create a ClassDeclaration from an Abstract Syntax Tree. The AST is the
+     * result of parsing.
+     *
+     * @param {ModelFile} modelFile - the ModelFile for this class
+     * @param {Object} ast - the AST created by the parser
+     * @throws {IllegalModelException}
+     */
+    constructor(modelFile: ModelFile, ast: any);
     properties: any[];
     superType: any;
     superTypeDeclaration: any;
     idField: any;
     timestamped: boolean;
     abstract: boolean;
-    type: any;
     /**
      * Adds a required field named 'timestamp' of type 'DateTime' if this class declaration has the 'concerto.Concept'
      * super type.
@@ -52,10 +60,29 @@ declare class ClassDeclaration extends Declaration {
      */
     isAbstract(): boolean;
     /**
+     * Returns true if this class declaration declares an identifying field
+     * (system or explicit)
+     * @returns {Boolean} true if the class declaration includes an identifier
+     */
+    isIdentified(): boolean;
+    /**
+     * Returns true if this class declaration declares a system identifier
+     * $identifier
+     * @returns {Boolean} true if the class declaration includes a system identifier
+     */
+    isSystemIdentified(): boolean;
+    /**
      * Returns true if this class declaration declares an explicit identifier
      * @returns {Boolean} true if the class declaration includes an explicit identifier
      */
     isExplicitlyIdentified(): boolean;
+    /**
+     * Returns the name of the identifying field for this class. Note
+     * that the identifying field may come from a super type.
+     *
+     * @return {string} the name of the id field for this class or null if it does not exist
+     */
+    getIdentifierFieldName(): string;
     /**
      * Returns the field with a given name or null if it does not exist.
      * The field must be directly owned by this class -- the super-type is
@@ -119,42 +146,6 @@ declare class ClassDeclaration extends Declaration {
      * @throws {IllegalModelException} if the property path is invalid or the property does not exist
      */
     getNestedProperty(propertyPath: string): Property;
-    /**
-     * Returns true if this class is the definition of an asset.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isAsset(): boolean;
-    /**
-     * Returns true if this class is the definition of a participant.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isParticipant(): boolean;
-    /**
-     * Returns true if this class is the definition of a transaction.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isTransaction(): boolean;
-    /**
-     * Returns true if this class is the definition of an event.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isEvent(): boolean;
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isConcept(): boolean;
-    /**
-     * Returns true if this class is the definition of a map.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isMapDeclaration(): boolean;
 }
 import Declaration = require("./declaration");
 import Property = require("./property");

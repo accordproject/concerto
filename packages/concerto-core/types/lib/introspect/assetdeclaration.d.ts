@@ -10,7 +10,7 @@ export = AssetDeclaration;
  * @class
  * @memberof module:concerto-core
  */
-declare class AssetDeclaration {
+declare class AssetDeclaration extends ClassDeclaration {
     /**
      * Create an AssetDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
@@ -18,11 +18,6 @@ declare class AssetDeclaration {
      * @throws {IllegalModelException}
      */
     constructor(modelFile: ModelFile, ast: any);
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind(): string;
 }
+import ClassDeclaration = require("./classdeclaration");
 import ModelFile = require("./modelfile");

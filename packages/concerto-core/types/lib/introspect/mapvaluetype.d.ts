@@ -16,7 +16,6 @@ declare class MapValueType extends Decorated {
      */
     constructor(parent: MapDeclaration, ast: any);
     parent: MapDeclaration;
-    modelFile: ModelFile;
     /**
      * Semantic validation of the structure of this class.
      *
@@ -31,20 +30,12 @@ declare class MapValueType extends Decorated {
      * @private
      */
     private processType;
-    type: string;
     /**
     * Returns the owner of this property
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
     public getParent(): MapDeclaration;
-    /**
-     * Returns the Type of the MapValue. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getType(): string;
     /**
      * Returns true if this class is the definition of a Map Key.
      *
@@ -68,4 +59,3 @@ declare class MapValueType extends Decorated {
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
-import ModelFile = require("./modelfile");

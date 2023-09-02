@@ -7,13 +7,13 @@ export = Decorator;
 declare class Decorator {
     /**
      * Create a Decorator.
-     * @param {ClassDeclaration | Property} parent - the owner of this property
+     * @param {ModelElement} parent - the owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent: Property | ClassDeclaration, ast: any);
+    constructor(parent: ModelElement, ast: any);
     ast: any;
-    parent: Property | ClassDeclaration;
+    parent: ModelElement;
     arguments: any[];
     /**
      * Visitor design pattern
@@ -25,9 +25,9 @@ declare class Decorator {
     private accept;
     /**
      * Returns the owner of this property
-     * @return {ClassDeclaration|Property} the parent class or property declaration
+     * @return {ModelElement} the parent model element
      */
-    getParent(): Property | ClassDeclaration;
+    getParent(): ModelElement;
     /**
      * Process the AST and build the model
      * @throws {IllegalModelException}
@@ -51,12 +51,5 @@ declare class Decorator {
      * @return {object[]} the arguments for this decorator
      */
     getArguments(): object[];
-    /**
-     * Returns true if this class is the definition of a decorator.
-     *
-     * @return {boolean} true if the class is a decorator
-     */
-    isDecorator(): boolean;
 }
-import Property = require("./property");
-import ClassDeclaration = require("./classdeclaration");
+import ModelElement = require("./modelelement");

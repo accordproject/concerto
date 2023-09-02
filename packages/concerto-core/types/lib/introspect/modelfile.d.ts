@@ -6,7 +6,7 @@ export = ModelFile;
  * @class
  * @memberof module:concerto-core
  */
-declare class ModelFile extends Decorated {
+declare class ModelFile {
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -31,6 +31,14 @@ declare class ModelFile extends Decorated {
     version: string;
     ast: any;
     definitions: string;
+    decorators: import("./decorator")[];
+    /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @protected
+     * @return {ModelFile} the owning ModelFile
+     */
+    protected getModelFile(): ModelFile;
     /**
      * Returns true
      * @returns {boolean} true
@@ -65,6 +73,14 @@ declare class ModelFile extends Decorated {
      * @private
      */
     private getExternalImports;
+    /**
+     * Visitor design pattern
+     * @param {Object} visitor - the visitor
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    private accept;
     /**
      * Returns the ModelManager associated with this ModelFile
      *
@@ -290,7 +306,6 @@ declare class ModelFile extends Decorated {
      */
     private filter;
 }
-import Decorated = require("./decorated");
 import ModelManager = require("../modelmanager");
 import ClassDeclaration = require("./classdeclaration");
 import AssetDeclaration = require("./assetdeclaration");

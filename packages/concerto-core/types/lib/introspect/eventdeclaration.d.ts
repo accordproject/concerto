@@ -5,7 +5,7 @@ export = EventDeclaration;
  * @class
  * @memberof module:concerto-core
  */
-declare class EventDeclaration {
+declare class EventDeclaration extends ClassDeclaration {
     /**
      * Create an EventDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
@@ -13,18 +13,6 @@ declare class EventDeclaration {
      * @throws {IllegalModelException}
      */
     constructor(modelFile: ModelFile, ast: any);
-    /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    private process;
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind(): string;
 }
+import ClassDeclaration = require("./classdeclaration");
 import ModelFile = require("./modelfile");

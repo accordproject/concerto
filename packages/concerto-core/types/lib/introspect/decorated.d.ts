@@ -7,32 +7,22 @@ export = Decorated;
  * @class
  * @memberof module:concerto-core
  */
-declare class Decorated {
+declare class Decorated extends ModelElement {
+    /**
+     * Extracts the decorators applied to an AST.
+     * @param {*} ast - the AST created by the parser
+     * @param {ModelManager} modelManager - the ModelManager that supplies decorator factories
+     * @returns {Decorator[]} the decorators
+     */
+    static processDecorators(ast: any, modelManager: ModelManager): Decorator[];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
-     *
-     * @param {string} ast - the AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for this decorated
+     * @param {*} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(ast: string);
-    ast: string;
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @abstract
-     * @protected
-     * @return {ModelFile} the owning ModelFile
-     */
-    protected getModelFile(): ModelFile;
-    /**
-     * Visitor design pattern
-     * @param {Object} visitor - the visitor
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    private accept;
+    constructor(modelFile: ModelFile, ast: any);
     /**
      * Process the AST and build the model
      *
@@ -40,7 +30,7 @@ declare class Decorated {
      * @private
      */
     private process;
-    decorators: any[];
+    decorators: Decorator[];
     /**
      * Semantic validation of the structure of this decorated. Subclasses should
      * override this method to impose additional semantic constraints on the
@@ -64,5 +54,6 @@ declare class Decorated {
      */
     getDecorator(name: string): Decorator;
 }
-import ModelFile = require("./modelfile");
+import ModelElement = require("./modelelement");
 import Decorator = require("./decorator");
+import ModelFile = require("./modelfile");

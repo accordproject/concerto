@@ -31,20 +31,12 @@ declare class MapKeyType extends Decorated {
      * @private
      */
     private processType;
-    type: string;
     /**
     * Returns the owner of this property
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
     public getParent(): MapDeclaration;
-    /**
-     * Returns the Type of the MapKey. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getType(): string;
     /**
      * Returns true if this class is the definition of a Map Key.
      *

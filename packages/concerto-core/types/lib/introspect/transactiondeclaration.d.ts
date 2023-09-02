@@ -6,7 +6,7 @@ export = TransactionDeclaration;
  * @class
  * @memberof module:concerto-core
  */
-declare class TransactionDeclaration {
+declare class TransactionDeclaration extends ClassDeclaration {
     /**
      * Create an TransactionDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
@@ -14,11 +14,6 @@ declare class TransactionDeclaration {
      * @throws {IllegalModelException}
      */
     constructor(modelFile: ModelFile, ast: any);
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind(): string;
 }
+import ClassDeclaration = require("./classdeclaration");
 import ModelFile = require("./modelfile");

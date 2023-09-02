@@ -24,12 +24,6 @@ declare class Field extends Property {
      */
     getDefaultValue(): string | number;
     /**
-     * Returns true if this class is the definition of a field.
-     *
-     * @return {boolean} true if the class is a field
-     */
-    isField(): boolean;
-    /**
      * Returns true if the field's type is a scalar
      * @returns {boolean} true if the field is a scalar type
      */
