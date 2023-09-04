@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace com.testing
+namespace com.testing@1.0.0
 
 abstract asset p1 identified by a1 {
 o String a1

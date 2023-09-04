@@ -15,7 +15,7 @@
 /**
  * Sample business network definition.
  */
-namespace xx.yy.zz
+namespace xx.yy.zz@1.0.0
 
 asset SomeTransmission identified by orderNumber {
   o String orderNumber  //Some order number
@@ -62,8 +62,8 @@ asset Some identified by uuid {
   o String uuid  //Unique identifier
 }
 
-asset AgencyOrder extends Some { 
-    o AXZHDR agyhdr 
+asset AgencyOrder extends Some {
+    o AXZHDR agyhdr
     o AXZDS1 agyds1
     o AXZDS2 agyds2
     o AXZDS3 agyds3
@@ -76,34 +76,34 @@ asset AgencyOrder extends Some {
 }
 
 asset SomeRecord identified by uuid {
-  o String uuid       
-  o String id         
+  o String uuid
+  o String id
   o Long orderNumber  //Some order number
 }
 
-asset SomeModifier extends SomeRecord { 
+asset SomeModifier extends SomeRecord {
     o Par2 tpar2
-    o Par1 tpar1       
-    o String dt       
-    o String sss    
-    o String cn         
-    o String rts        
+    o Par1 tpar1
+    o String dt
+    o String sss
+    o String cn
+    o String rts
 }
 
 asset SomePreviousSssModifier extends SomeModifier {
-  o String previousSssCallLetters 
+  o String previousSssCallLetters
 }
 
 asset SomeMultiple extends SomeRecord {
-  o String continuation 
+  o String continuation
 }
 
 asset SomeComment extends SomeMultiple {
-  o String comment 
+  o String comment
 }
 
 
-asset AXZHDR extends SomePreviousSssModifier { 
+asset AXZHDR extends SomePreviousSssModifier {
     o String version         //Some version number
     o String routingCode
     o String mdaCode
@@ -183,7 +183,7 @@ asset SomeBxbRecord extends SomeRecord {
     o String costQualifier
     o Long prxOneTimeShare
     o String pppName
-    o String scheduleType  
+    o String scheduleType
 }
 
 asset BXBHDR extends SomeBxbRecord {
@@ -199,7 +199,7 @@ asset BXBORB extends SomeMultiple {
     o Long sbxStartDay
     o Long startTime
     o Long endTime
-    o String pppName  
+    o String pppName
 }
 
 asset BXBCOM extends SomeComment {

@@ -62,7 +62,7 @@ describe('EnumDeclaration', () => {
     describe('#toString', () => {
         it('should give the correct value', () => {
             let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
-            declaration.toString().should.equal('EnumDeclaration {id=org.acme.ConcreteEnum}');
+            declaration.toString().should.equal('EnumDeclaration {id=org.acme@1.0.0.ConcreteEnum}');
         });
     });
 

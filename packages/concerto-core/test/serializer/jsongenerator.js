@@ -42,7 +42,7 @@ describe('JSONGenerator', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset1 identified by assetId {
                 o String assetId
             }
@@ -75,14 +75,14 @@ describe('JSONGenerator', () => {
         `);
 
         modelManager.addCTOModel(`
-            namespace org.foo
+            namespace org.foo@1.0.0
             asset AnotherAsset identified by assetId {
                 o String assetId
             }
         `);
 
         modelManager.addCTOModel(`
-            namespace org.acme.sample
+            namespace org.acme.sample@1.0.0
 
             asset SampleAsset identified by assetId {
             o String assetId
@@ -101,10 +101,10 @@ describe('JSONGenerator', () => {
 
         factory = new Factory(modelManager);
 
-        relationshipDeclaration1 = modelManager.getType('org.acme.MyTx1').getProperty('myAsset');
-        relationshipDeclaration2 = modelManager.getType('org.acme.MyTx2').getProperty('myAssets');
-        relationshipDeclaration3 = modelManager.getType('org.acme.SimpleAssetCircle').getProperty('next');
-        relationshipDeclaration4 = modelManager.getType('org.acme.SimpleAssetCircleArray').getProperty('next');
+        relationshipDeclaration1 = modelManager.getType('org.acme@1.0.0.MyTx1').getProperty('myAsset');
+        relationshipDeclaration2 = modelManager.getType('org.acme@1.0.0.MyTx2').getProperty('myAssets');
+        relationshipDeclaration3 = modelManager.getType('org.acme@1.0.0.SimpleAssetCircle').getProperty('next');
+        relationshipDeclaration4 = modelManager.getType('org.acme@1.0.0.SimpleAssetCircleArray').getProperty('next');
     });
 
     beforeEach(() => {
@@ -165,7 +165,7 @@ describe('JSONGenerator', () => {
     describe('#visitRelationshipDeclaration', () => {
 
         it('should generate a relationship', () => {
-            let relationship = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_1');
+            let relationship = factory.newRelationship('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager
@@ -176,7 +176,7 @@ describe('JSONGenerator', () => {
         });
 
         it('should throw when generating a resource by default', () => {
-            let resource = factory.newResource('org.acme', 'MyAsset1', 'DOGE_1');
+            let resource = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager
@@ -189,7 +189,7 @@ describe('JSONGenerator', () => {
 
         it('should generate a resource if option is specified', () => {
             jsonGenerator = new JSONGenerator(false, true);
-            let resource = factory.newResource('org.acme', 'MyAsset1', 'DOGE_1');
+            let resource = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager,
@@ -197,14 +197,14 @@ describe('JSONGenerator', () => {
             };
             options.stack.push(resource);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration1, options);
-            result.should.deep.equal({ '$class': 'org.acme.MyAsset1', $identifier: 'DOGE_1', assetId: 'DOGE_1' });
+            result.should.deep.equal({ '$class': 'org.acme@1.0.0.MyAsset1', $identifier: 'DOGE_1', assetId: 'DOGE_1' });
         });
 
         it('should generate a circular resource if option is specified', () => {
             jsonGenerator = new JSONGenerator(false, true);
-            let resource1 = factory.newResource('org.acme', 'SimpleAssetCircle', 'DOGE_1');
-            let resource2 = factory.newResource('org.acme', 'SimpleAssetCircle', 'DOGE_2');
-            let resource3 = factory.newResource('org.acme', 'SimpleAssetCircle', 'DOGE_3');
+            let resource1 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircle', 'DOGE_1');
+            let resource2 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircle', 'DOGE_2');
+            let resource3 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircle', 'DOGE_3');
             resource1.next = resource2;
             resource2.next = resource3;
             resource3.next = resource1;
@@ -215,24 +215,24 @@ describe('JSONGenerator', () => {
             };
             options.stack.push(resource1);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration3, options);
-            result.should.deep.equal({'$class':'org.acme.SimpleAssetCircle', '$identifier': 'DOGE_1', 'assetId':'DOGE_1','next':{'$class':'org.acme.SimpleAssetCircle','$identifier': 'DOGE_2','assetId':'DOGE_2','next':{'$class':'org.acme.SimpleAssetCircle','$identifier': 'DOGE_3','assetId':'DOGE_3','next':'resource:org.acme.SimpleAssetCircle#DOGE_1'}}});
+            result.should.deep.equal({'$class':'org.acme@1.0.0.SimpleAssetCircle', '$identifier': 'DOGE_1', 'assetId':'DOGE_1','next':{'$class':'org.acme@1.0.0.SimpleAssetCircle','$identifier': 'DOGE_2','assetId':'DOGE_2','next':{'$class':'org.acme@1.0.0.SimpleAssetCircle','$identifier': 'DOGE_3','assetId':'DOGE_3','next':'resource:org.acme@1.0.0.SimpleAssetCircle#DOGE_1'}}});
         });
 
         it('should generate an array of relationships', () => {
-            let relationship1 = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_1');
-            let relationship2 = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_2');
+            let relationship1 = factory.newRelationship('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
+            let relationship2 = factory.newRelationship('org.acme@1.0.0', 'MyAsset1', 'DOGE_2');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager
             };
             options.stack.push([relationship1, relationship2]);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration2, options);
-            result.should.deep.equal(['resource:org.acme.MyAsset1#DOGE_1', 'resource:org.acme.MyAsset1#DOGE_2']);
+            result.should.deep.equal(['resource:org.acme@1.0.0.MyAsset1#DOGE_1', 'resource:org.acme@1.0.0.MyAsset1#DOGE_2']);
         });
 
         it('should throw when generating an array of resources by default', () => {
-            let resource1 = factory.newResource('org.acme', 'MyAsset1', 'DOGE_1');
-            let resource2 = factory.newResource('org.acme', 'MyAsset1', 'DOGE_2');
+            let resource1 = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
+            let resource2 = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_2');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager
@@ -245,8 +245,8 @@ describe('JSONGenerator', () => {
 
         it('should generate an array of resources if option is specified', () => {
             jsonGenerator = new JSONGenerator(false, true);
-            let resource1 = factory.newResource('org.acme', 'MyAsset1', 'DOGE_1');
-            let resource2 = factory.newResource('org.acme', 'MyAsset1', 'DOGE_2');
+            let resource1 = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
+            let resource2 = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_2');
             let options = {
                 stack: new TypedStack({}),
                 modelManager: modelManager,
@@ -254,14 +254,14 @@ describe('JSONGenerator', () => {
             };
             options.stack.push([resource1, resource2]);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration2, options);
-            result.should.deep.equal([{ '$class': 'org.acme.MyAsset1', '$identifier': 'DOGE_1', assetId: 'DOGE_1' }, { '$class': 'org.acme.MyAsset1', '$identifier': 'DOGE_2', assetId: 'DOGE_2' }]);
+            result.should.deep.equal([{ '$class': 'org.acme@1.0.0.MyAsset1', '$identifier': 'DOGE_1', assetId: 'DOGE_1' }, { '$class': 'org.acme@1.0.0.MyAsset1', '$identifier': 'DOGE_2', assetId: 'DOGE_2' }]);
         });
 
         it('should serialize a circular array of resources if option is specified', () => {
             jsonGenerator = new JSONGenerator(false, true);
-            let resource1 = factory.newResource('org.acme', 'SimpleAssetCircleArray', 'DOGE_1');
-            let resource2 = factory.newResource('org.acme', 'SimpleAssetCircleArray', 'DOGE_2');
-            let resource3 = factory.newResource('org.acme', 'SimpleAssetCircleArray', 'DOGE_3');
+            let resource1 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircleArray', 'DOGE_1');
+            let resource2 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircleArray', 'DOGE_2');
+            let resource3 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircleArray', 'DOGE_3');
             resource1.next = [resource2, resource3];
             resource2.next = [resource3, resource1];
             resource3.next = [resource1, resource2];
@@ -272,7 +272,7 @@ describe('JSONGenerator', () => {
             };
             options.stack.push([resource1, resource2, resource3]);
             let result = jsonGenerator.visitRelationshipDeclaration(relationshipDeclaration4, options);
-            result.should.deep.equal([{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']},'resource:org.acme.SimpleAssetCircleArray#DOGE_1']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']},'resource:org.acme.SimpleAssetCircleArray#DOGE_2']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_1','resource:org.acme.SimpleAssetCircleArray#DOGE_2']}]}]},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3','resource:org.acme.SimpleAssetCircleArray#DOGE_1']},'resource:org.acme.SimpleAssetCircleArray#DOGE_3']},{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_3',{'$class':'org.acme.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme.SimpleAssetCircleArray#DOGE_2','resource:org.acme.SimpleAssetCircleArray#DOGE_3']}]}]}]);
+            result.should.deep.equal([{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2']},'resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1']},{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1',{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1']}]}]},{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3']},'resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2']},{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2',{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2']}]}]},{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_3','assetId':'DOGE_3','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':[{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_1']},'resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3']},{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_2','assetId':'DOGE_2','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3',{'$class':'org.acme@1.0.0.SimpleAssetCircleArray','$identifier': 'DOGE_1','assetId':'DOGE_1','next':['resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_2','resource:org.acme@1.0.0.SimpleAssetCircleArray#DOGE_3']}]}]}]);
         });
 
         it('should throw if stack contains something other than a Resource or Concept', () => {
@@ -291,17 +291,17 @@ describe('JSONGenerator', () => {
     describe('#getRelationshipText', () => {
 
         it('should return a relationship string for a relationship', () => {
-            let relationship = factory.newRelationship('org.acme', 'MyAsset1', 'DOGE_1');
-            jsonGenerator.getRelationshipText(relationshipDeclaration1, relationship).should.equal('resource:org.acme.MyAsset1#DOGE_1');
+            let relationship = factory.newRelationship('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
+            jsonGenerator.getRelationshipText(relationshipDeclaration1, relationship).should.equal('resource:org.acme@1.0.0.MyAsset1#DOGE_1');
         });
 
         it('should return a relationship string for a relationship in another namespace', () => {
-            let relationship = factory.newRelationship('org.foo', 'AnotherAsset', 'DOGE_1');
-            jsonGenerator.getRelationshipText(relationshipDeclaration1, relationship).should.equal('resource:org.foo.AnotherAsset#DOGE_1');
+            let relationship = factory.newRelationship('org.foo@1.0.0', 'AnotherAsset', 'DOGE_1');
+            jsonGenerator.getRelationshipText(relationshipDeclaration1, relationship).should.equal('resource:org.foo@1.0.0.AnotherAsset#DOGE_1');
         });
 
         it('should throw an error for a resource if not permitted', () => {
-            let resource1 = factory.newResource('org.acme', 'SimpleAssetCircleArray', 'DOGE_1');
+            let resource1 = factory.newResource('org.acme@1.0.0', 'SimpleAssetCircleArray', 'DOGE_1');
             (() => {
                 jsonGenerator.getRelationshipText(relationshipDeclaration1, resource1);
             }).should.throw(/Did not find a relationship/);
@@ -309,8 +309,8 @@ describe('JSONGenerator', () => {
 
         it('should return a relationship string for a resource if permitted', () => {
             jsonGenerator = new JSONGenerator(true); // true enables convertResourcesToRelationships
-            let resource = factory.newResource('org.acme', 'MyAsset1', 'DOGE_1');
-            jsonGenerator.getRelationshipText(relationshipDeclaration1, resource).should.equal('resource:org.acme.MyAsset1#DOGE_1');
+            let resource = factory.newResource('org.acme@1.0.0', 'MyAsset1', 'DOGE_1');
+            jsonGenerator.getRelationshipText(relationshipDeclaration1, resource).should.equal('resource:org.acme@1.0.0.MyAsset1#DOGE_1');
         });
 
     });
@@ -532,7 +532,7 @@ describe('JSONGenerator', () => {
             };
             isEnumStub.returns(false);
 
-            let concept = factory.newConcept('org.acme.sample','Car');
+            let concept = factory.newConcept('org.acme.sample@1.0.0','Car');
             concept.numberPlate = 'PENGU1N';
             concept.numberOfSeats = '2';
             concept.color = 'GREEN';
@@ -547,7 +547,7 @@ describe('JSONGenerator', () => {
             let spy = sinon.spy(jsonGenerator, 'visitField');
 
             let result = jsonGenerator.visitField(field,parameters);
-            result.should.deep.equal({ '$class': 'org.acme.sample.Car',
+            result.should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Car',
                 color: 'GREEN',
                 numberOfSeats: '2',
                 numberPlate: 'PENGU1N' });
@@ -609,8 +609,8 @@ describe('JSONGenerator', () => {
                 'getParent':function(){return 'vehicle';},
                 'getType':function(){return 'String';}
             };
-            let child1 = factory.newResource('org.acme','MyAsset1','child1');
-            let child2 = factory.newResource('org.acme','MyAsset1','child2');
+            let child1 = factory.newResource('org.acme@1.0.0','MyAsset1','child1');
+            let child2 = factory.newResource('org.acme@1.0.0','MyAsset1','child2');
             let myAssets = [child1, child2];
             let parameters = {
                 stack: new TypedStack({}),
@@ -622,8 +622,8 @@ describe('JSONGenerator', () => {
 
             let result = jsonGenerator.visitField(field,parameters);
             result.should.deep.equal([
-                { '$class': 'org.acme.MyAsset1', '$identifier': 'child1', assetId: 'child1' },
-                { '$class': 'org.acme.MyAsset1', '$identifier': 'child2', assetId: 'child2' } ]);
+                { '$class': 'org.acme@1.0.0.MyAsset1', '$identifier': 'child1', assetId: 'child1' },
+                { '$class': 'org.acme@1.0.0.MyAsset1', '$identifier': 'child2', assetId: 'child2' } ]);
 
             spy.callCount.should.equal(5); // we call it once at the start, the function recurses into it twice
         });

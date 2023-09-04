@@ -16,7 +16,7 @@
   * Pro-forma contract related types
   */
 
-namespace stdlib.proforma
+namespace stdlib.proforma@1.0.0
 
 concept Parameter {
   o String name

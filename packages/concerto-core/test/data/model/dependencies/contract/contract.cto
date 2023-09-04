@@ -16,10 +16,10 @@
   * Contract related types
   */
 
-namespace stdlib.contract
+namespace stdlib.contract@1.0.0
 
-import stdlib.business.Employee
-import stdlib.proforma.ProForma
+import stdlib.business@1.0.0.Employee
+import stdlib.proforma@1.0.0.ProForma
 
 enum ContractStatus {
   o CREATED

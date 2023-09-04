@@ -1,8 +1,8 @@
 {
-    "$class": "org.test.Foo",
-    "c": { "$class": "org.test.C2", "name": "foo" },
-    "t": { "$class": "org.test.T2", "name": "foo" },
-    "p": { "$class": "org.test.P2", "name": "foo" },
-    "e": { "$class": "org.test.E2", "name": "foo" },
-    "a": { "$class": "org.test.A2", "name": "foo" }
+    "$class": "org.test@1.0.0.Foo",
+    "c": { "$class": "org.test@1.0.0.C2", "name": "foo" },
+    "t": { "$class": "org.test@1.0.0.T2", "name": "foo" },
+    "p": { "$class": "org.test@1.0.0.P2", "name": "foo" },
+    "e": { "$class": "org.test@1.0.0.E2", "name": "foo" },
+    "a": { "$class": "org.test@1.0.0.A2", "name": "foo" }
 }

@@ -18,7 +18,7 @@ const ModelManager = require('../lib/modelmanager');
 const Concerto = require('../index').Concerto;
 
 let concertoModel = `
-namespace org.accordproject.test
+namespace org.accordproject.test@1.0.0
 
 enum Department {
     o ENGINEERING
@@ -49,12 +49,12 @@ participant Employee identified by ssn {
 const modelManager = new ModelManager();
 modelManager.addCTOModel( concertoModel, 'test.cto');
 const obj = {
-    $class : 'org.accordproject.test.Employee',
+    $class : 'org.accordproject.test@1.0.0.Employee',
     ssn: '123456789',
     name: 'Dan',
     pets : [
         {
-            $class : 'org.accordproject.test.Cat',
+            $class : 'org.accordproject.test@1.0.0.Cat',
             name : 'Bella'
         }
     ]

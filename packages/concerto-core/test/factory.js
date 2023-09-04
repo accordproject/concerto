@@ -25,7 +25,7 @@ const should = require('chai').should();
 const sinon = require('sinon');
 
 describe('Factory', function() {
-    const namespace = 'org.acme.test';
+    const namespace = 'org.acme.test@1.0.0';
     const assetName = 'MyAsset';
 
     let factory;
@@ -36,7 +36,7 @@ describe('Factory', function() {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-        namespace org.acme.test
+        namespace org.acme.test@1.0.0
         abstract concept AbstractConcept {
             o String newValue
         }
@@ -192,7 +192,7 @@ describe('Factory', function() {
         it('should throw if concept is abstract', () => {
             (() => {
                 factory.newConcept(namespace, 'AbstractConcept');
-            }).should.throw(/Cannot instantiate the abstract type "AbstractConcept" in the "org.acme.test" namespace./);
+            }).should.throw(/Cannot instantiate the abstract type "AbstractConcept" in the "org.acme.test@1.0.0" namespace./);
         });
 
         it('should create a new concept', () => {

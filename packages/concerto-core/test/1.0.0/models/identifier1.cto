@@ -1,4 +1,4 @@
-namespace org.test
+namespace org.test@1.0.0
 
 asset A {
 	o String name
