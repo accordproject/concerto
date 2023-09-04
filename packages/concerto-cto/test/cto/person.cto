@@ -1,7 +1,7 @@
-namespace test.person
+namespace test@1.0.0.Person
 
-import org.accordproject.time.* from https://models.accordproject.org/time@0.2.0.cto
-import org.accordproject.time.TemporalUnit from https://models.accordproject.org/time@0.2.0.cto
+import org.accordproject.time.* from https://models.accordproject.org/time@0.3.0.cto
+import org.accordproject.time.TemporalUnit from https://models.accordproject.org/time@0.3.0.cto
 
 enum Gender {
   o MALE

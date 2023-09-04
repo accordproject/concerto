@@ -63,7 +63,7 @@ test('should detect a change of namespace', async () => {
     expect(results.findings).toEqual(expect.arrayContaining([
         expect.objectContaining({
             key: 'namespace-changed',
-            message: 'The namespace was changed from "org.accordproject.concerto.test.a" to "org.accordproject.concerto.test.b"'
+            message: 'The namespace was changed from "org.accordproject.concerto.test@1.0.0.a" to "org.accordproject.concerto.test@1.0.0.b"'
         })
     ]));
     expect(results.result).toBe(CompareResult.ERROR);

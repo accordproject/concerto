@@ -30,7 +30,7 @@ const defaultProcessFile = (name, data) => {
 describe('HTTPModeFilelLoader', () => {
     let sandbox;
 
-    let model = `namespace test
+    let model = `namespace test@1.0.0
     enum Test {
         o ONE
     }`;

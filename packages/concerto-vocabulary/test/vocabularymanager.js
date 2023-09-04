@@ -75,7 +75,7 @@ describe('VocabularyManager', () => {
     });
 
     it('getVocabulary', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en');
         voc.should.not.be.null;
     });
 
@@ -85,32 +85,32 @@ describe('VocabularyManager', () => {
     });
 
     it('getVocabulary - missing locale', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'foo');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'foo');
         (voc === null).should.be.true;
     });
 
     it('getVocabulary - lookup', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en-us', { localeMatcher: 'lookup' });
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en-us', { localeMatcher: 'lookup' });
         voc.should.not.be.null;
     });
 
     it('getVocabulary - lookup fail case insensitive', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en-US');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en-US');
         (voc === null).should.be.true;
     });
 
     it('getVocabulary - case insensitive', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en-GB');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en-GB');
         voc.should.not.be.null;
     });
 
     it('getVocabulary - lookup fail', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'zh', { localeMatcher: 'lookup' });
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'zh', { localeMatcher: 'lookup' });
         (voc === null).should.be.true;
     });
 
     it('getVocabulariesForNamespace', () => {
-        const voc = vocabularyManager.getVocabulariesForNamespace('org.acme');
+        const voc = vocabularyManager.getVocabulariesForNamespace('org.acme@1.0.0');
         voc.length.should.equal(4); // en, en-gb, fr, zh-cn
     });
 
@@ -124,56 +124,56 @@ describe('VocabularyManager', () => {
     });
 
     it('getTerms - en', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en');
         voc.should.not.be.null;
         const terms = voc.getTerms();
         terms.length.should.equal(3);
     });
 
     it('getTerms - fr', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'fr');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'fr');
         voc.should.not.be.null;
         const terms = voc.getTerms();
         terms.length.should.equal(1);
     });
 
     it('getTerms - lookup declaration', () => {
-        const terms = vocabularyManager.getTerms('org.acme', 'en', 'Truck');
+        const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', 'Truck');
         terms.Truck.should.equal('A truck');
         terms.description.should.equal('A vehicle capable of carrying cargo');
         terms.tooltip.should.equal('Truck');
     });
 
     it('getTerms - lookup property', () => {
-        const terms = vocabularyManager.getTerms('org.acme', 'en', 'Truck', 'weight');
+        const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', 'Truck', 'weight');
         terms.weight.should.equal('The weight of the truck');
         terms.description.should.equal('The weight of the truck in KG');
         terms.tooltip.should.equal('Truck weight');
     });
 
     it('getTerms - lookup unicode', () => {
-        const terms = vocabularyManager.getTerms('org.acme', 'zh-cn', 'Color');
+        const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'zh-cn', 'Color');
         terms.Color.should.equal('颜色');
     });
 
     it('getTerms - lookup unicode property', () => {
-        let terms = vocabularyManager.getTerms('org.acme', 'zh-cn', 'Color', 'RED');
+        let terms = vocabularyManager.getTerms('org.acme@1.0.0', 'zh-cn', 'Color', 'RED');
         terms.RED.should.equal('红色');
 
-        terms = vocabularyManager.getTerms('org.acme', 'zh-cn', 'Color', 'GREEN');
+        terms = vocabularyManager.getTerms('org.acme@1.0.0', 'zh-cn', 'Color', 'GREEN');
         terms.GREEN.should.equal('绿色');
 
-        terms = vocabularyManager.getTerms('org.acme', 'zh-cn', 'Color', 'BLUE');
+        terms = vocabularyManager.getTerms('org.acme@1.0.0', 'zh-cn', 'Color', 'BLUE');
         terms.BLUE.should.equal('蓝色');
     });
 
     it('getTerms - lookup missing property', () => {
-        const terms = vocabularyManager.getTerms('org.acme', 'en-gb', 'Vehicle', 'foo');
+        const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en-gb', 'Vehicle', 'foo');
         (terms === null).should.be.true;
     });
 
     it('getTerms - lookup missing locale', () => {
-        const terms = vocabularyManager.getTerms('org.acme', 'zh', 'Vehicle', 'vin');
+        const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'zh', 'Vehicle', 'vin');
         (terms === null).should.be.true;
     });
 
@@ -181,12 +181,12 @@ describe('VocabularyManager', () => {
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator
         });
-        let terms = vocabularyManager.getTerms('org.acme', 'en', 'Truck', 'grossWeight');
+        let terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', 'Truck', 'grossWeight');
         terms.grossWeight.should.equal('Gross Weight of the Truck');
     });
 
     it('getTerm - en', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en');
         voc.should.not.be.null;
         const term = voc.getTerm('Vehicle');
         term.should.equal('A road vehicle');
@@ -195,7 +195,7 @@ describe('VocabularyManager', () => {
     });
 
     it('getTerm - fr', () => {
-        const voc = vocabularyManager.getVocabulary('org.acme', 'fr');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'fr');
         voc.should.not.be.null;
         const term = voc.getTerm('Vehicle');
         term.should.equal('Véhicule');
@@ -204,58 +204,58 @@ describe('VocabularyManager', () => {
     });
 
     it('findVocabulary', () => {
-        const voc = VocabularyManager.findVocabulary('en-gb', vocabularyManager.getVocabulariesForNamespace('org.acme'));
+        const voc = VocabularyManager.findVocabulary('en-gb', vocabularyManager.getVocabulariesForNamespace('org.acme@1.0.0'));
         voc.should.not.be.null;
     });
 
     it('getTerm - lookup declaration', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Truck');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en-gb', 'Truck');
         term.should.equal('A lorry');
     });
 
     it('getTerm - lookup declaration with identifier', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en', 'Truck', null, 'description');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en', 'Truck', null, 'description');
         term.should.equal('A vehicle capable of carrying cargo');
     });
 
     it('getTerm - lookup declaration', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Color');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en-gb', 'Color');
         term.should.equal('A colour');
     });
 
     it('getTerm - lookup property', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en-gb', 'Vehicle', 'vin');
         term.should.equal('Vehicle Identification Number');
     });
 
     it('getTerm - lookup property with identifier', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'vin', 'tooltip');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en-gb', 'Vehicle', 'vin', 'tooltip');
         term.should.equal('VIN');
     });
 
     it('getTerm - lookup unicode', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'zh-cn', 'Color');
         term.should.equal('颜色');
     });
 
     it('getTerm - lookup unicode property', () => {
-        let term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'RED');
+        let term = vocabularyManager.getTerm('org.acme@1.0.0', 'zh-cn', 'Color', 'RED');
         term.should.equal('红色');
 
-        term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'GREEN');
+        term = vocabularyManager.getTerm('org.acme@1.0.0', 'zh-cn', 'Color', 'GREEN');
         term.should.equal('绿色');
 
-        term = vocabularyManager.getTerm('org.acme', 'zh-cn', 'Color', 'BLUE');
+        term = vocabularyManager.getTerm('org.acme@1.0.0', 'zh-cn', 'Color', 'BLUE');
         term.should.equal('蓝色');
     });
 
     it('getTerm - lookup missing property', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'en-gb', 'Vehicle', 'foo');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en-gb', 'Vehicle', 'foo');
         (term === null).should.be.true;
     });
 
     it('getTerm - lookup missing locale', () => {
-        const term = vocabularyManager.getTerm('org.acme', 'zh', 'Vehicle', 'vin');
+        const term = vocabularyManager.getTerm('org.acme@1.0.0', 'zh', 'Vehicle', 'vin');
         (term === null).should.be.true;
     });
 
@@ -263,42 +263,42 @@ describe('VocabularyManager', () => {
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator
         });
-        let term = vocabularyManager.getTerm('org.acme', 'en', 'Truck', 'grossWeight');
+        let term = vocabularyManager.getTerm('org.acme@1.0.0', 'en', 'Truck', 'grossWeight');
         term.should.equal('Gross Weight of the Truck');
     });
 
     it('resolveTerms - class', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck');
         terms.Truck.should.equal('A lorry');
     });
 
     it('resolveTerms - class with identifier', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck');
         terms.description.should.equal('A heavy goods vehicle');
     });
 
     it('resolveTerms - property', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'weight');
         terms.weight.should.equal('The weight of the truck');
     });
 
     it('resolveTerms - property with identifier', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight', 'description');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'weight', 'description');
         terms.description.should.equal('The weight of the truck in KG');
     });
 
     it('resolveTerms - property on super type', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck', 'vin');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'vin');
         terms.vin.should.equal('Vehicle Identification Number');
     });
 
     it('resolveTerms - missing property', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Truck', 'foo');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'foo');
         (terms === null).should.be.true;
     });
 
     it('resolveTerms - missing class', () => {
-        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme', 'en-gb', 'Dog');
+        const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Dog');
         (terms === null).should.be.true;
     });
 
@@ -308,37 +308,37 @@ describe('VocabularyManager', () => {
     });
 
     it('resolveTerm - class', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck');
         term.should.equal('A lorry');
     });
 
     it('resolveTerm - class with identifier', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', null, 'description');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', null, 'description');
         term.should.equal('A heavy goods vehicle');
     });
 
     it('resolveTerm - property', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'weight');
         term.should.equal('The weight of the truck');
     });
 
     it('resolveTerm - property with identifier', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'weight', 'description');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'weight', 'description');
         term.should.equal('The weight of the truck in KG');
     });
 
     it('resolveTerm - property on super type', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'vin');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'vin');
         term.should.equal('Vehicle Identification Number');
     });
 
     it('resolveTerm - missing property', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Truck', 'foo');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck', 'foo');
         (term === null).should.be.true;
     });
 
     it('resolveTerm - missing class', () => {
-        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme', 'en-gb', 'Dog');
+        const term = vocabularyManager.resolveTerm(modelManager, 'org.acme@1.0.0', 'en-gb', 'Dog');
         (term === null).should.be.true;
     });
 
@@ -349,13 +349,13 @@ describe('VocabularyManager', () => {
 
     it('clear', () => {
         vocabularyManager.clear();
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en');
         (voc === null).should.be.true;
     });
 
     it('removeVocabulary', () => {
-        vocabularyManager.removeVocabulary('org.acme', 'en');
-        const voc = vocabularyManager.getVocabulary('org.acme', 'en');
+        vocabularyManager.removeVocabulary('org.acme@1.0.0', 'en');
+        const voc = vocabularyManager.getVocabulary('org.acme@1.0.0', 'en');
         (voc === null).should.be.true;
     });
 
@@ -385,7 +385,7 @@ describe('VocabularyManager', () => {
         const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-GB');
         expect(commandSet).toMatchSnapshot();
         const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet);
-        const mf = newModelManager.getModelFile('org.acme');
+        const mf = newModelManager.getModelFile('org.acme@1.0.0');
         const vehicleDecl = mf.getAssetDeclaration('Vehicle');
         const decorator = vehicleDecl.getDecorator('Term');
         decorator.getArguments()[0].should.equal('A road vehicle');
