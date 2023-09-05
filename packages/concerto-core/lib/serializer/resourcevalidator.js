@@ -182,14 +182,6 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
-        if (!obj.has('$class')) {
-            throw new Error('Invalid Map. Map must contain a properly formatted $class property');
-        }
-
-        if (obj.get('$class') !== mapDeclaration.getFullyQualifiedName()) {
-            throw new Error(`$class value must match ${mapDeclaration.getFullyQualifiedName()}`);
-        }
-
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
                 // Validate Key

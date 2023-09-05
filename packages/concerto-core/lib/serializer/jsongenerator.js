@@ -87,12 +87,12 @@ class JSONGenerator {
         const obj = parameters.stack.pop();
 
         // initialise Map with $class property
-        let map = new Map([['$class',obj.get('$class')]]);
+        let map = new Map();
 
         obj.forEach((value, key) => {
 
             // don't serialize System Properties, other than $class
-            if(ModelUtil.isSystemProperty(key) && key !== '$class') {
+            if(ModelUtil.isSystemProperty(key)) {
                 return;
             }
 
