@@ -284,7 +284,7 @@ describe('ModelManager', () => {
         });
 
         it('should throw when using an unknown metamodel version', () => {
-            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValidation: true });
+            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
             const ast = {
                 $class: 'concerto.metamodel@99.0.0.Model',
                 namespace: 'org.acme@1.0.0',

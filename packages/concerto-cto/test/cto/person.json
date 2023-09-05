@@ -1,18 +1,13 @@
 {
   "$class": "concerto.metamodel@1.0.0.Model",
   "decorators": [],
-  "namespace": "test@1.0.0.Person",
+  "namespace": "test.Person@1.0.0",
   "imports": [
     {
-      "$class": "concerto.metamodel@1.0.0.ImportAll",
+      "$class": "concerto.metamodel@1.0.0.ImportTypes",
       "namespace": "org.accordproject.time",
-      "uri": "https://models.accordproject.org/time@0.3.0.cto"
-    },
-    {
-      "$class": "concerto.metamodel@1.0.0.ImportType",
-      "name": "TemporalUnit",
-      "namespace": "org.accordproject.time",
-      "uri": "https://models.accordproject.org/time@0.3.0.cto"
+      "uri": "https://models.accordproject.org/time@0.3.0.cto",
+      "types": ["TemporalUnit", "Month"]
     }
   ],
   "declarations": [

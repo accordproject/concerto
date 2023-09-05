@@ -134,7 +134,7 @@ describe('ModelFile', () => {
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.getImports().should.deep.equal(['org.doge@1.0.0.Foo', 'org.freddos@1.0.0.Bar', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
             mf.getImportURI('org.freddos@1.0.0.Bar').should.equal('https://freddos.org/model.cto');
-            mf.getExternalImports()['org.freddos@1.0.0'].should.equal('https://freddos.org/model.cto');
+            mf.getExternalImports()['org.freddos@1.0.0.Bar'].should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
@@ -153,7 +153,7 @@ describe('ModelFile', () => {
         });
 
         it('should throw for a wildcard import ', () => {
-            const strictModelManager = new ModelManager({ strict: true });
+            const strictModelManager = new ModelManager();
 
             const imports = [{
                 $class: `${MetaModelNamespace}.ImportAll`,

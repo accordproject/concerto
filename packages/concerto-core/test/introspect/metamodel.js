@@ -52,24 +52,13 @@ describe('MetaModel (Person)', () => {
             mm1r.should.deep.equal(personMetaModelResolved);
         });
 
-        it('should convert a ModelFile to its metamodel', async () => {
-            const modelManager1 = await ModelLoader.loadModelManager([timeModelPath]);
-            const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
-            const mm1 = mf1.getAst();
-            mm1.should.deep.equal(personMetaModel);
-            const model2 = Printer.toCTO(mm1);
-            const modelManager2 = await ModelLoader.loadModelManager([timeModelPath]);
-            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
-            const mm2 = mf2.getAst();
-            mm2.should.deep.equal(personMetaModel);
-        });
-
         it('should convert and validate a ModelFile to its metamodel', async () => {
             const modelManager1 = await ModelLoader.loadModelManager([timeModelPath]);
             const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
             const mm1 = mf1.getAst();
             mm1.should.deep.equal(personMetaModel);
             const model2 = Printer.toCTO(mm1);
+            personModel.should.equal(model2+'\n');
             const modelManager2 = await ModelLoader.loadModelManager([timeModelPath]);
             const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = mf2.getAst();

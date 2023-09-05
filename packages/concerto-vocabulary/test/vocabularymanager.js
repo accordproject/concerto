@@ -66,7 +66,7 @@ describe('VocabularyManager', () => {
         const enVocString = fs.readFileSync('./test/test.voc', 'utf-8');
         const voc = vocabularyManager.addVocabulary(enVocString);
         voc.should.not.be.null;
-        voc.getNamespace().should.equal('com.test');
+        voc.getNamespace().should.equal('com.test@1.0.0');
     });
 
     it('addVocabulary (duplicate)', () => {
@@ -362,16 +362,16 @@ describe('VocabularyManager', () => {
     it('validate', () => {
         const result = vocabularyManager.validate(modelManager);
         result.missingVocabularies.length.should.equal(1);
-        result.missingVocabularies[0].should.equal('org.accordproject');
+        result.missingVocabularies[0].should.equal('org.accordproject@1.0.0');
         result.additionalVocabularies.length.should.equal(1);
-        result.additionalVocabularies[0].getNamespace().should.equal('com.example');
-        result.vocabularies['org.acme/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
-        result.vocabularies['org.acme/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color']);
-        result.vocabularies['org.acme/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
-        result.vocabularies['org.acme/fr'].missingTerms.should.have.members(['Color', 'SSN', 'Vehicle.color', 'Truck']);
-        result.vocabularies['org.acme/fr'].additionalTerms.should.have.members([]);
-        result.vocabularies['org.acme/zh-cn'].missingTerms.should.have.members(['SSN', 'Truck']);
-        result.vocabularies['org.acme/zh-cn'].additionalTerms.should.have.members([]);
+        result.additionalVocabularies[0].getNamespace().should.equal('com.example@1.0.0');
+        result.vocabularies['org.acme@1.0.0/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
+        result.vocabularies['org.acme@1.0.0/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color']);
+        result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat']);
+        result.vocabularies['org.acme@1.0.0/fr'].missingTerms.should.have.members(['Color', 'SSN', 'Vehicle.color', 'Truck']);
+        result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
+        result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'Truck']);
+        result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
     });
 
     it('decorateModels', () => {
