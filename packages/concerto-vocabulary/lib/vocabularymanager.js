@@ -18,6 +18,8 @@ const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
 
+const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.2.0';
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -278,7 +280,7 @@ class VocabularyManager {
      */
     generateDecoratorCommands(modelManager, locale) {
         const decoratorCommandSet = {
-            '$class': 'org.accordproject.decoratorcommands.DecoratorCommandSet',
+            '$class': `${DC_NAMESPACE}.DecoratorCommandSet`,
             'name': `terms-${locale}`,
             'version': '1.0.0',
             'commands': []
@@ -291,10 +293,10 @@ class VocabularyManager {
                     Object.keys(terms).forEach( term => {
                         if(term === decl.getName()) {
                             decoratorCommandSet.commands.push({
-                                '$class': 'org.accordproject.decoratorcommands.Command',
+                                '$class': `${DC_NAMESPACE}.Command`,
                                 'type': 'UPSERT',
                                 'target': {
-                                    '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
                                     'namespace': model.getNamespace(),
                                     'declaration': decl.getName(),
                                 },
@@ -312,10 +314,10 @@ class VocabularyManager {
                         }
                         else if(term.localeCompare('properties')) {
                             decoratorCommandSet.commands.push({
-                                '$class': 'org.accordproject.decoratorcommands.Command',
+                                '$class': `${DC_NAMESPACE}.Command`,
                                 'type': 'UPSERT',
                                 'target': {
-                                    '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
                                     'namespace': model.getNamespace(),
                                     'declaration': decl.getName(),
                                 },
@@ -340,10 +342,10 @@ class VocabularyManager {
                         Object.keys(propertyTerms).forEach( term => {
                             if(term === property.getName()) {
                                 decoratorCommandSet.commands.push({
-                                    '$class': 'org.accordproject.decoratorcommands.Command',
+                                    '$class': `${DC_NAMESPACE}.Command`,
                                     'type': 'UPSERT',
                                     'target': {
-                                        '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                        '$class': `${DC_NAMESPACE}.CommandTarget`,
                                         'namespace': model.getNamespace(),
                                         'declaration': decl.getName(),
                                         'property': property.getName()
@@ -362,10 +364,10 @@ class VocabularyManager {
                             }
                             else {
                                 decoratorCommandSet.commands.push({
-                                    '$class': 'org.accordproject.decoratorcommands.Command',
+                                    '$class': `${DC_NAMESPACE}.Command`,
                                     'type': 'UPSERT',
                                     'target': {
-                                        '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                                        '$class': `${DC_NAMESPACE}.CommandTarget`,
                                         'namespace': model.getNamespace(),
                                         'declaration': decl.getName(),
                                         'property': property.getName()

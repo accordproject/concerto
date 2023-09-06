@@ -1,13 +1,13 @@
 {
-    "$class" : "org.accordproject.decoratorcommands.DecoratorCommandSet",
+    "$class" : "org.accordproject.decoratorcommands@0.2.0.DecoratorCommandSet",
     "name" : "web",
     "version": "1.0.0",
     "commands" : [
         {
-            "$class" : "org.accordproject.decoratorcommands.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
@@ -26,10 +26,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
             "type" : "APPEND",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
@@ -39,10 +39,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "property" : "bio"
@@ -63,10 +63,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "SSN"
             },

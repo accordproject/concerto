@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,processFile?) 
+   + void constructor(object?,boolean?,Object?,boolean?,boolean?,processFile?) 
    + boolean isModelManager() 
    + boolean isStrict() 
    + Object accept(Object,Object) 
@@ -55,7 +55,8 @@ class Concerto {
 }
    + object setCurrentTime() 
 class DecoratorManager {
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?) 
+   + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string|,string) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command) 

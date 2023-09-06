@@ -51,19 +51,14 @@ describe('DecoratorManager', () => {
 
     describe('#decorateModels', function() {
         it('should add decorator', async function() {
-            const decoratorModelManager = new ModelManager();
-            // validate the decorator model
-            const decoratorModelText = fs.readFileSync('./test/data/decoratorcommands/decorators.cto', 'utf-8');
-            decoratorModelManager.addCTOModel(decoratorModelText, 'decorators.cto', true);
-            decoratorModelManager.updateExternalModels();
-
             // load a model to decorate
-            const testModelManager = new ModelManager();
+            const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
-            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true});
 
             const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
             ssnDecl.should.not.be.null;
@@ -91,6 +86,106 @@ describe('DecoratorManager', () => {
             decoratorBio.getArguments()[0].should.equal('inputType');
             decoratorBio.getArguments()[1].should.equal('textArea');
         });
+
+        it('should fail with invalid command', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-command.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+            }).should.throw(/Unknown command type INVALID/);
+        });
     });
 
+    describe('#validateCommand', function() {
+        it('should detect invalid type', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-type.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/No type "concerto.metamodel@1.0.0.Foo" in namespace "concerto.metamodel@1.0.0" for "DecoratorCommand.type"/);
+        });
+
+        it('should detect invalid target namespace', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-namespace.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references namespace "missing@1.0.0" which does not exist./);
+        });
+
+        it('should detect invalid target declaration', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-declaration.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/No type "test@1.0.0.Missing" in namespace "test@1.0.0" for "DecoratorCommand.target.declaration./);
+        });
+
+        it('should detect invalid target property', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-property.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
+        });
+    });
+
+    describe('#validate', function() {
+        it('should detect decorator command set that is invalid', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-model.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true});
+            }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.2.0"/);
+        });
+
+        it('should detect decorator command set with an invalid command type', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-command.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true});
+            }).should.throw(/Model violation in the "concerto.metamodel@1.0.0.Decorator" instance. Invalid enum value of "INVALID" for the field "CommandType"/);
+        });
+    });
 });

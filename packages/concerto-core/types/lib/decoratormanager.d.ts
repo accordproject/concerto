@@ -10,9 +10,23 @@ declare class DecoratorManager {
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {object} [options] - decorator models options
+     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * the validate option must also be true
      * @returns {ModelManager} a new model manager with the decorations applied
      */
-    static decorateModels(modelManager: ModelManager, decoratorCommandSet: any): ModelManager;
+    static decorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
+        validate?: boolean;
+        validateCommands?: boolean;
+    }): ModelManager;
+    /**
+     * Throws an error if the decoractor command is invalid
+     * @param {ModelManager} validationModelManager the validation model manager
+     * @param {*} command the decorator command
+     */
+    static validateCommand(validationModelManager: ModelManager, command: any): void;
     /**
      * Compares two values. If the first argument is falsy
      * the function returns true.
