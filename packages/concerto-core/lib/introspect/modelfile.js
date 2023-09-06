@@ -324,10 +324,7 @@ class ModelFile extends Decorated {
      * @private
      */
     isImportedType(type) {
-        if (this.importShortNames.has(type)) {
-            return true;
-        }
-        return false;
+        return this.importShortNames.has(type);
     }
 
     /**
