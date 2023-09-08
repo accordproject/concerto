@@ -50,6 +50,35 @@ describe('DecoratorManager', () => {
     });
 
     describe('#decorateModels', function() {
+        it('should support no validation', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should support syntax validation', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true});
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should support semantic validation', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+            decoratedModelManager.should.not.be.null;
+        });
+
         it('should add decorator', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});
@@ -58,7 +87,7 @@ describe('DecoratorManager', () => {
 
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true});
+                {validate: true, validateCommands: true});
 
             const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
             ssnDecl.should.not.be.null;
@@ -85,6 +114,9 @@ describe('DecoratorManager', () => {
             decoratorBio.should.not.be.null;
             decoratorBio.getArguments()[0].should.equal('inputType');
             decoratorBio.getArguments()[1].should.equal('textArea');
+
+            const decoratorUnversionedNamespace = bioProperty.getDecorator('UnversionedNamespace');
+            decoratorUnversionedNamespace.should.not.be.null;
         });
 
         it('should fail with invalid command', async function() {

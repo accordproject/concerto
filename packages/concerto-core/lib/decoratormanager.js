@@ -17,6 +17,7 @@
 const ModelManager = require('./modelmanager');
 const Serializer = require('./serializer');
 const Factory = require('./factory');
+const ModelUtil = require('./modelutil');
 
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.2.0
@@ -69,6 +70,20 @@ concept DecoratorCommandSet {
     o Command[] commands
 }
 `;
+
+
+/**
+ * Returns true if the unversioned namespace for a model
+ * file is equal to a target
+ * @param {ModelFile} modelFile the model file to test
+ * @param {string} unversionedNamespace the unversioned namespace to test against
+ * @returns {boolean} true is the unversioned namespace for the
+ * model file equals unversionedNamespace
+ */
+function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
+    const { name } = ModelUtil.parseNamespace( modelFile.getNamespace() );
+    return name === unversionedNamespace;
+}
 
 /**
  * Utility functions to work with
@@ -125,17 +140,27 @@ class DecoratorManager {
         if(command.target.type) {
             validationModelManager.resolveType( 'DecoratorCommand.type', command.target.type);
         }
+        let modelFile = null;
         if(command.target.namespace) {
-            const modelFile = validationModelManager.getModelFile(command.target.namespace);
+            modelFile = validationModelManager.getModelFile(command.target.namespace);
             if(!modelFile) {
-                throw new Error(`Decorator Command references namespace "${command.target.namespace}" which does not exist.`);
+                const { name, version } = ModelUtil.parseNamespace(command.target.namespace);
+                if(!version) {
+                    // does the model file exist with any version?
+                    modelFile = validationModelManager.getModelFiles()
+                        .find((m) => isUnversionedNamespaceEqual(m, name));
+                }
             }
         }
+        if(command.target.namespace && !modelFile) {
+            throw new Error(`Decorator Command references namespace "${command.target.namespace}" which does not exist: ${JSON.stringify(command, null, 2)}`);
+        }
+
         if(command.target.namespace && command.target.declaration) {
-            validationModelManager.resolveType( 'DecoratorCommand.target.declaration', `${command.target.namespace}.${command.target.declaration}`);
+            validationModelManager.resolveType( 'DecoratorCommand.target.declaration', `${modelFile.getNamespace()}.${command.target.declaration}`);
         }
         if(command.target.namespace && command.target.declaration && command.target.property) {
-            const decl = validationModelManager.getType(`${command.target.namespace}.${command.target.declaration}`);
+            const decl = validationModelManager.getType(`${modelFile.getNamespace()}.${command.target.declaration}`);
             const property = decl.getProperty(command.target.property);
             if(!property) {
                 throw new Error(`Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`);
@@ -147,11 +172,11 @@ class DecoratorManager {
      * Compares two values. If the first argument is falsy
      * the function returns true.
      * @param {string | null} test the value to test (lhs)
-     * @param {string} value the value to compare (rhs)
-     * @returns {Boolean} true if the lhs is falsy or test === value
+     * @param {string[]} values the values to compare (rhs)
+     * @returns {Boolean} true if the lhs is falsy or values.includes(test)
      */
-    static falsyOrEqual(test, value) {
-        return test ? test === value : true;
+    static falsyOrEqual(test, values) {
+        return test ? values.includes(test) : true;
     }
 
     /**
@@ -197,8 +222,9 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        if (this.falsyOrEqual(target.namespace, namespace) &&
-            this.falsyOrEqual(target.declaration, declaration.name)) {
+        const { name } = ModelUtil.parseNamespace( namespace );
+        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])) {
             if (!target.property && !target.type) {
                 this.applyDecorator(declaration, type, decorator);
             }
@@ -206,8 +232,8 @@ class DecoratorManager {
                 // scalars are declarations but do not have properties
                 if(declaration.properties) {
                     declaration.properties.forEach(property => {
-                        if (this.falsyOrEqual(target.property, property.name) &&
-                            this.falsyOrEqual(target.type, property.$class)) {
+                        if (this.falsyOrEqual(target.property, [property.name]) &&
+                            this.falsyOrEqual(target.type, [property.$class])) {
                             this.applyDecorator(property, type, decorator);
                         }
                     });
