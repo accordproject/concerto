@@ -28,13 +28,14 @@ declare class DecoratorManager {
      */
     static validateCommand(validationModelManager: ModelManager, command: any): void;
     /**
-     * Compares two values. If the first argument is falsy
+     * Compares two arrays. If the first argument is falsy
      * the function returns true.
-     * @param {string | null} test the value to test (lhs)
-     * @param {string} value the value to compare (rhs)
-     * @returns {Boolean} true if the lhs is falsy or test === value
+     * @param {string | string[] | null} test the value to test
+     * @param {string[]} values the values to compare
+     * @returns {Boolean} true if the test is falsy or the intersection of
+     * the test and values arrays is not empty (i.e. they have values in common)
      */
-    static falsyOrEqual(test: string | null, value: string): boolean;
+    static falsyOrEqual(test: string | string[] | null, values: string[]): boolean;
     /**
      * Applies a decorator to a decorated model element.
      * @param {*} decorated the type to apply the decorator to
@@ -51,5 +52,13 @@ declare class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executeCommand(namespace: string, declaration: any, command: any): void;
+    /**
+     * Executes a Command against a Property, adding
+     * decorators to the Property as required.
+     * @param {*} property the property
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     */
+    static executePropertyCommand(property: any, command: any): void;
 }
 import ModelManager = require("./modelmanager");
