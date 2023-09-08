@@ -101,19 +101,6 @@ function intersect(a, b) {
 }
 
 /**
- * Returns true if the unversioned namespace for a model
- * file is equal to a target
- * @param {ModelFile} modelFile the model file to test
- * @param {string} unversionedNamespace the unversioned namespace to test against
- * @returns {boolean} true is the unversioned namespace for the
- * model file equals unversionedNamespace
- */
-function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
-    const { name } = ModelUtil.parseNamespace( modelFile.getNamespace() );
-    return name === unversionedNamespace;
-}
-
-/**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core

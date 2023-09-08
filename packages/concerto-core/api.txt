@@ -62,8 +62,8 @@ class DecoratorManager {
    + void executeCommand(string,declaration,command) 
    + void executePropertyCommand(property,command) 
 }
-   + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
+   + string[] intersect() 
 class Factory {
    + string newId() 
    + void constructor(ModelManager) 
