@@ -20,7 +20,7 @@ const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
 
 const DCS_MODEL = `concerto version "^3.0.0"
-namespace org.accordproject.decoratorcommands@0.2.0
+namespace org.accordproject.decoratorcommands@0.3.0
 
 import concerto.metamodel@1.0.0.Decorator
 
@@ -48,6 +48,7 @@ concept CommandTarget {
     o String namespace optional
     o String declaration optional
     o String property optional
+    o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
 }
 
@@ -66,11 +67,24 @@ concept Command {
 concept DecoratorCommandSet {
     o String name
     o String version
-    o DecoratorCommandSetReference[] includes optional
+    o DecoratorCommandSetReference[] includes optional // not yet supported
     o Command[] commands
 }
 `;
 
+/**
+ * Intersection of two string arrays
+ * @param {string[]} a the first array
+ * @param {string[]} b the second array
+ * @returns {string[]} returns the intersection of a and b (i.e. an
+ * array of the elements they have in common)
+ */
+function intersect(a, b) {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    const intersection = new Set([...setA].filter(x => setB.has(x)));
+    return Array.from(intersection);
+}
 
 /**
  * Returns true if the unversioned namespace for a model
@@ -159,6 +173,9 @@ class DecoratorManager {
         if(command.target.namespace && command.target.declaration) {
             validationModelManager.resolveType( 'DecoratorCommand.target.declaration', `${modelFile.getNamespace()}.${command.target.declaration}`);
         }
+        if(command.target.properties && command.target.property) {
+            throw new Error('Decorator Command references both property and properties. You must either reference a single property or a list of properites.');
+        }
         if(command.target.namespace && command.target.declaration && command.target.property) {
             const decl = validationModelManager.getType(`${modelFile.getNamespace()}.${command.target.declaration}`);
             const property = decl.getProperty(command.target.property);
@@ -166,17 +183,30 @@ class DecoratorManager {
                 throw new Error(`Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`);
             }
         }
+        if(command.target.namespace && command.target.declaration && command.target.properties) {
+            const decl = validationModelManager.getType(`${modelFile.getNamespace()}.${command.target.declaration}`);
+            command.target.properties.forEach( commandProperty => {
+                const property = decl.getProperty(commandProperty);
+                if(!property) {
+                    throw new Error(`Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${commandProperty}" which does not exist.`);
+                }
+            });
+        }
     }
 
     /**
-     * Compares two values. If the first argument is falsy
+     * Compares two arrays. If the first argument is falsy
      * the function returns true.
-     * @param {string | null} test the value to test (lhs)
-     * @param {string[]} values the values to compare (rhs)
-     * @returns {Boolean} true if the lhs is falsy or values.includes(test)
+     * @param {string | string[] | null} test the value to test
+     * @param {string[]} values the values to compare
+     * @returns {Boolean} true if the test is falsy or the intersection of
+     * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
-        return test ? values.includes(test) : true;
+        return Array.isArray(test)
+            ? intersect(test,values).length > 0
+            : test ? values.includes(test)
+                : true;
     }
 
     /**
@@ -232,13 +262,25 @@ class DecoratorManager {
                 // scalars are declarations but do not have properties
                 if(declaration.properties) {
                     declaration.properties.forEach(property => {
-                        if (this.falsyOrEqual(target.property, [property.name]) &&
-                            this.falsyOrEqual(target.type, [property.$class])) {
-                            this.applyDecorator(property, type, decorator);
-                        }
+                        DecoratorManager.executePropertyCommand(property, command);
                     });
                 }
             }
+        }
+    }
+
+    /**
+     * Executes a Command against a Property, adding
+     * decorators to the Property as required.
+     * @param {*} property the property
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     */
+    static executePropertyCommand(property, command) {
+        const { target, decorator, type } = command;
+        if (this.falsyOrEqual(target.property ? target.property : target.properties, [property.name]) &&
+        this.falsyOrEqual(target.type, [property.$class])) {
+            this.applyDecorator(property, type, decorator);
         }
     }
 }
