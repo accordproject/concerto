@@ -121,7 +121,7 @@ describe('DecoratorManager', () => {
 
             const decoratorUnversionedNamespace = bioProperty.getDecorator('UnversionedNamespace');
             decoratorUnversionedNamespace.should.not.be.null;
-
+          
             // applied using properties
             const address1Property = decl.getProperty('address1');
             address1Property.should.not.be.null;

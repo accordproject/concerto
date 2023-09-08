@@ -72,6 +72,20 @@ concept DecoratorCommandSet {
 }
 `;
 
+
+/**
+ * Returns true if the unversioned namespace for a model
+ * file is equal to a target
+ * @param {ModelFile} modelFile the model file to test
+ * @param {string} unversionedNamespace the unversioned namespace to test against
+ * @returns {boolean} true is the unversioned namespace for the
+ * model file equals unversionedNamespace
+ */
+function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
+    const { name } = ModelUtil.parseNamespace( modelFile.getNamespace() );
+    return name === unversionedNamespace;
+}
+
 /**
  * Intersection of two string arrays
  * @param {string[]} a the first array
