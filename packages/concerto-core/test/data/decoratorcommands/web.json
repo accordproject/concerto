@@ -67,6 +67,21 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
+                "property" : "bio"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "UnversionedNamespace",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "SSN"
             },
