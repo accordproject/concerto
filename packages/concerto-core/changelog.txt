@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.12.5 {ea967f943046b2792fe3863943a6b2ba} 2023-09-08
+Version 3.12.5 {ced48c7ab94de207be87584468517f3e} 2023-09-08
 - Update DecoratorManager to support multiple value compare
 
 Version 3.12.4 {7738d5490ea8438677e1d21d704bb5aa} 2023-08-31

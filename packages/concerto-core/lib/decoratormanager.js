@@ -172,11 +172,13 @@ class DecoratorManager {
      * Compares two values. If the first argument is falsy
      * the function returns true.
      * @param {string | null} test the value to test (lhs)
-     * @param {string[]} values the values to compare (rhs)
+     * @param {string|string[]} values the values to compare (rhs)
      * @returns {Boolean} true if the lhs is falsy or values.includes(test)
      */
     static falsyOrEqual(test, values) {
-        return test ? values.includes(test) : true;
+        return test
+            ? Array.isArray(values) ? values.includes(test) : test === values
+            : true;
     }
 
     /**

@@ -31,10 +31,10 @@ declare class DecoratorManager {
      * Compares two values. If the first argument is falsy
      * the function returns true.
      * @param {string | null} test the value to test (lhs)
-     * @param {string} value the value to compare (rhs)
-     * @returns {Boolean} true if the lhs is falsy or test === value
+     * @param {string|string[]} values the values to compare (rhs)
+     * @returns {Boolean} true if the lhs is falsy or values.includes(test)
      */
-    static falsyOrEqual(test: string | null, value: string): boolean;
+    static falsyOrEqual(test: string | null, values: string | string[]): boolean;
     /**
      * Applies a decorator to a decorated model element.
      * @param {*} decorated the type to apply the decorator to
