@@ -55,10 +55,6 @@ describe('DecoratorManager', () => {
         it('should not match token', async function() {
             DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
         });
-
-        it('should not match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
-        });
     });
 
     describe('#decorateModels', function() {
