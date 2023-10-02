@@ -57,11 +57,12 @@ class Concerto {
 class DecoratorManager {
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?) 
    + void validateCommand(ModelManager,command) 
-   + Boolean falsyOrEqual(string|,string|) 
+   + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command) 
    + void executePropertyCommand(property,command) 
 }
+   + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
 class Factory {
    + string newId() 
