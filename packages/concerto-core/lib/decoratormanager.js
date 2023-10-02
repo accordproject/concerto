@@ -50,6 +50,7 @@ concept CommandTarget {
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
+    o String element optional
 }
 
 /**
@@ -296,12 +297,58 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace(namespace);
-        if (
-            this.falsyOrEqual(target.namespace, [namespace, name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])
-        ) {
-            if (!target.property && !target.type) {
+        const { name } = ModelUtil.parseNamespace( namespace );
+        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])) {
+
+            if (declaration.$class === 'concerto.metamodel@1.0.0.MapDeclaration') {
+                if (target.element) {
+                    switch(target.element.toLowerCase()) {
+                    case 'key':
+                        if (target.type) {
+                            if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                                this.applyDecorator(declaration.key, type, decorator);
+                            }
+                        } else {
+                            this.applyDecorator(declaration.key, type, decorator);
+                        }
+                        break;
+                    case 'value':
+                        if (target.type) {
+                            if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                                this.applyDecorator(declaration.value, type, decorator);
+                            }
+                        } else {
+                            this.applyDecorator(declaration.key, type, decorator);
+                        }
+                        break;
+                    case '*':
+                        if (target.type) {
+                            if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                                this.applyDecorator(declaration.key, type, decorator);
+                            }
+                            if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                                this.applyDecorator(declaration.value, type, decorator);
+                            }
+                        } else {
+                            this.applyDecorator(declaration.key, type, decorator);
+                            this.applyDecorator(declaration.value, type, decorator);
+                        }
+
+                        break;
+                    default:
+                        throw new Error('Unrecognised Element value found: ' + target.element );
+                    }
+
+                } else if (target.type) {
+                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                        this.applyDecorator(declaration.key, type, decorator);
+                    }
+                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                        this.applyDecorator(declaration.value, type, decorator);
+                    }
+                }
+            } else if (!target.property && !target.type) {
                 this.applyDecorator(declaration, type, decorator);
             } else {
                 // scalars are declarations but do not have properties
