@@ -337,9 +337,8 @@ class DecoratorManager {
 
                         break;
                     default:
-                        throw new Error('Unrecognised Element value found: ' + target.element );
+                        throw new Error('Decorator Command contains invalid target element: ' + target.element );
                     }
-
                 } else if (target.type) {
                     if (this.falsyOrEqual(target.type, declaration.key.$class)) {
                         this.applyDecorator(declaration.key, type, decorator);

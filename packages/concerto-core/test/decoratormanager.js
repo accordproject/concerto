@@ -145,6 +145,107 @@ describe('DecoratorManager', () => {
             (decoratorZipProperty ===null).should.be.true;
         });
 
+        it('should decorate the specified element on the specified Map Declaration (Map Key)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Foo').should.not.be.null;
+        });
+
+        it('should decorate the specified type on the specified Map Declaration (Map Key)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('DecoratesKeyByType').should.not.be.null;
+        });
+
+        it('should decorate the specified element on the specified Map Declaration (Map Value)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.value.getDecorator('Bar').should.not.be.null;
+        });
+
+        it('should decorate the specified type on the specified Map Declaration (Map Value)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.value.getDecorator('DecoratesValueByType').should.not.be.null;
+        });
+
+        it('should decorate both Key and Value elements on the specified Map Declaration', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Baz').should.not.be.null;
+            dictionary.value.getDecorator('Baz').should.not.be.null;
+        });
+
+        it('should decorate all Map Declaration Key and Value elements on the model when a declaration is not specified', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+
+            const dictionary    = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            const rolodex       = decoratedModelManager.getType('test@1.0.0.Rolodex');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('DecoratesAllMapKeys').should.not.be.null;
+            dictionary.value.getDecorator('DecoratesAllMapValues').should.not.be.null;
+
+            rolodex.should.not.be.null;
+            rolodex.key.getDecorator('DecoratesAllMapKeys').should.not.be.null;
+            rolodex.value.getDecorator('DecoratesAllMapValues').should.not.be.null;
+        });
+
         it('should fail with invalid command', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});
@@ -242,6 +343,20 @@ describe('DecoratorManager', () => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references both property and properties. You must either reference a single property or a list of properites./);
+        });
+
+        it('should detect invalid target element', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-element.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command contains invalid target element: INVALID_ELEMENT/);
         });
     });
 
