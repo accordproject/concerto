@@ -144,12 +144,16 @@ class Vocabulary {
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
     validate(modelFile) {
+        const getOwnProperties = (d) => {
+            // ensures we have a valid return, even for scalars
+            return d.getOwnProperties?.() ? d.getOwnProperties?.() : [];
+        };
         const result = {
             missingTerms: modelFile.getAllDeclarations().flatMap( d => this.getTerm(d.getName())
-                ? d.getOwnProperties().flatMap( p => this.getTerm(d.getName(), p.getName()) ? null : `${d.getName()}.${p.getName()}`)
+                ? getOwnProperties(d).flatMap( p => this.getTerm(d.getName(), p.getName()) ? null : `${d.getName()}.${p.getName()}`)
                 : d.getName() ).filter( i => i !== null),
             additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
-                ? k.properties ? k.properties.flatMap( p => modelFile.getLocalType(Object.keys(k)[0]).getOwnProperty(Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
+                ? Array.isArray(k.properties) ? k.properties.flatMap( p => modelFile.getLocalType(Object.keys(k)[0]).getOwnProperty(Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( i => i !== null)
         };
 
