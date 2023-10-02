@@ -159,6 +159,7 @@ describe('DecoratorManager', () => {
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
             dictionary.should.not.be.null;
             dictionary.key.getDecorator('Foo').should.not.be.null;
+            dictionary.key.getDecorator('Qux').should.not.be.null;
         });
 
         it('should decorate the specified type on the specified Map Declaration (Map Key)', async function() {
@@ -190,6 +191,7 @@ describe('DecoratorManager', () => {
 
             dictionary.should.not.be.null;
             dictionary.value.getDecorator('Bar').should.not.be.null;
+            dictionary.value.getDecorator('Quux').should.not.be.null;
         });
 
         it('should decorate the specified type on the specified Map Declaration (Map Value)', async function() {
@@ -222,6 +224,23 @@ describe('DecoratorManager', () => {
             dictionary.should.not.be.null;
             dictionary.key.getDecorator('Baz').should.not.be.null;
             dictionary.value.getDecorator('Baz').should.not.be.null;
+        });
+
+        it('should decorate a Key and Value element on an unspecified Map Declaration when a type is specified (type takes precedence over element value \'*\')', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Bazola').should.not.be.null;
+            dictionary.value.getDecorator('Bongo').should.not.be.null;
         });
 
         it('should decorate all Map Declaration Key and Value elements on the model when a declaration is not specified', async function() {
