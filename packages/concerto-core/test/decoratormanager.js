@@ -211,6 +211,34 @@ describe('DecoratorManager', () => {
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
         });
+
+        it('should detect invalid target properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-properties.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
+        });
+
+        it('should detect target referencing both property and properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-property-properties.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references both property and properties. You must either reference a single property or a list of properites./);
+        });
     });
 
     describe('#validate', function() {
