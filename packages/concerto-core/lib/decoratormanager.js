@@ -87,20 +87,6 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
 }
 
 /**
- * Intersection of two string arrays
- * @param {string[]} a the first array
- * @param {string[]} b the second array
- * @returns {string[]} returns the intersection of a and b (i.e. an
- * array of the elements they have in common)
- */
-function intersect(a, b) {
-    const setA = new Set(a);
-    const setB = new Set(b);
-    const intersection = new Set([...setA].filter(x => setB.has(x)));
-    return Array.from(intersection);
-}
-
-/**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
@@ -198,16 +184,14 @@ class DecoratorManager {
     /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
-     * @param {string | string[] | null} test the value to test
-     * @param {string[]} values the values to compare
-     * @returns {Boolean} true if the test is falsy or the intersection of
-     * the test and values arrays is not empty (i.e. they have values in common)
+     * @param {string | null} test the value to test (lhs)
+     * @param {string|string[]} values the values to compare (rhs)
+     * @returns {Boolean} true if the lhs is falsy or values.includes(test)
      */
     static falsyOrEqual(test, values) {
-        return Array.isArray(test)
-            ? intersect(test,values).length > 0
-            : test ? values.includes(test)
-                : true;
+        return test
+            ? Array.isArray(values) ? values.includes(test) : test === values
+            : true;
     }
 
     /**

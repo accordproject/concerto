@@ -48,6 +48,14 @@ describe('DecoratorManager', () => {
             DecoratorManager.falsyOrEqual( ['one', 'two'], ['one', 'three']).should.be.true;
         });
 
+        it('should match token', async function() {
+            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
+        });
+
+        it('should not match token', async function() {
+            DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
+        });
+
         it('should not match token', async function() {
             DecoratorManager.falsyOrEqual( 'one', ['two']).should.be.false;
         });
