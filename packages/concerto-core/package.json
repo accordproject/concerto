@@ -74,14 +74,14 @@
     "@accordproject/concerto-cto": "3.13.0",
     "@accordproject/concerto-metamodel": "3.8.1",
     "@accordproject/concerto-util": "3.13.0",
-    "dayjs": "1.10.8",
-    "debug": "4.3.1",
-    "lorem-ipsum": "2.0.3",
+    "dayjs": "1.11.10",
+    "debug": "4.3.4",
+    "lorem-ipsum": "2.0.8",
     "randexp": "0.5.3",
     "semver": "7.5.4",
     "slash": "3.0.0",
     "urijs": "1.19.11",
-    "uuid": "8.3.2"
+    "uuid": "9.0.1"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

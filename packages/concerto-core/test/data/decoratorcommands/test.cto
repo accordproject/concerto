@@ -9,4 +9,7 @@ concept Person {
     o String lastName
     o String bio
     o SSN ssn
+    o String address1
+    o String address2
+    o Integer zip
 }

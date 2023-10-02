@@ -20,7 +20,7 @@ const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
 
 const DCS_MODEL = `concerto version "^3.0.0"
-namespace org.accordproject.decoratorcommands@0.2.0
+namespace org.accordproject.decoratorcommands@0.3.0
 
 import concerto.metamodel@1.0.0.Decorator
 
@@ -48,6 +48,7 @@ concept CommandTarget {
     o String namespace optional
     o String declaration optional
     o String property optional
+    o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
 }
 
@@ -66,11 +67,24 @@ concept Command {
 concept DecoratorCommandSet {
     o String name
     o String version
-    o DecoratorCommandSetReference[] includes optional
+    o DecoratorCommandSetReference[] includes optional // not yet supported
     o Command[] commands
 }
 `;
 
+/**
+ * Intersection of two string arrays
+ * @param {string[]} a the first array
+ * @param {string[]} b the second array
+ * @returns {string[]} returns the intersection of a and b (i.e. an
+ * array of the elements they have in common)
+ */
+function intersect(a, b) {
+    const setA = new Set(a);
+    const setB = new Set(b);
+    const intersection = new Set([...setA].filter((x) => setB.has(x)));
+    return Array.from(intersection);
+}
 
 /**
  * Returns true if the unversioned namespace for a model
@@ -81,7 +95,7 @@ concept DecoratorCommandSet {
  * model file equals unversionedNamespace
  */
 function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
-    const { name } = ModelUtil.parseNamespace( modelFile.getNamespace() );
+    const { name } = ModelUtil.parseNamespace(modelFile.getNamespace());
     return name === unversionedNamespace;
 }
 
@@ -104,24 +118,34 @@ class DecoratorManager {
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
-        if(options?.validate) {
-            const validationModelManager = new ModelManager({strict:true, metamodelValidation: true, addMetamodel: true});
+        if (options?.validate) {
+            const validationModelManager = new ModelManager({
+                strict: true,
+                metamodelValidation: true,
+                addMetamodel: true,
+            });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
-            validationModelManager.addCTOModel(DCS_MODEL, 'decoratorcommands@0.2.0.cto');
+            validationModelManager.addCTOModel(
+                DCS_MODEL,
+                'decoratorcommands@0.2.0.cto'
+            );
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
             serializer.fromJSON(decoratorCommandSet);
-            if(options?.validateCommands) {
-                decoratorCommandSet.commands.forEach(command => {
-                    DecoratorManager.validateCommand(validationModelManager, command);
+            if (options?.validateCommands) {
+                decoratorCommandSet.commands.forEach((command) => {
+                    DecoratorManager.validateCommand(
+                        validationModelManager,
+                        command
+                    );
                 });
             }
         }
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
-        decoratedAst.models.forEach(model => {
-            model.declarations.forEach(decl => {
-                decoratorCommandSet.commands.forEach(command => {
+        decoratedAst.models.forEach((model) => {
+            model.declarations.forEach((decl) => {
+                decoratorCommandSet.commands.forEach((command) => {
                     this.executeCommand(model.namespace, decl, command);
                 });
             });
@@ -137,48 +161,96 @@ class DecoratorManager {
      * @param {*} command the decorator command
      */
     static validateCommand(validationModelManager, command) {
-        if(command.target.type) {
-            validationModelManager.resolveType( 'DecoratorCommand.type', command.target.type);
+        if (command.target.type) {
+            validationModelManager.resolveType(
+                'DecoratorCommand.type',
+                command.target.type
+            );
         }
         let modelFile = null;
-        if(command.target.namespace) {
-            modelFile = validationModelManager.getModelFile(command.target.namespace);
-            if(!modelFile) {
-                const { name, version } = ModelUtil.parseNamespace(command.target.namespace);
-                if(!version) {
+        if (command.target.namespace) {
+            modelFile = validationModelManager.getModelFile(
+                command.target.namespace
+            );
+            if (!modelFile) {
+                const { name, version } = ModelUtil.parseNamespace(
+                    command.target.namespace
+                );
+                if (!version) {
                     // does the model file exist with any version?
-                    modelFile = validationModelManager.getModelFiles()
+                    modelFile = validationModelManager
+                        .getModelFiles()
                         .find((m) => isUnversionedNamespaceEqual(m, name));
                 }
             }
         }
-        if(command.target.namespace && !modelFile) {
-            throw new Error(`Decorator Command references namespace "${command.target.namespace}" which does not exist: ${JSON.stringify(command, null, 2)}`);
+        if (command.target.namespace && !modelFile) {
+            throw new Error(
+                `Decorator Command references namespace "${
+                    command.target.namespace
+                }" which does not exist: ${JSON.stringify(command, null, 2)}`
+            );
         }
 
-        if(command.target.namespace && command.target.declaration) {
-            validationModelManager.resolveType( 'DecoratorCommand.target.declaration', `${modelFile.getNamespace()}.${command.target.declaration}`);
+        if (command.target.namespace && command.target.declaration) {
+            validationModelManager.resolveType(
+                'DecoratorCommand.target.declaration',
+                `${modelFile.getNamespace()}.${command.target.declaration}`
+            );
         }
-        if(command.target.namespace && command.target.declaration && command.target.property) {
-            const decl = validationModelManager.getType(`${modelFile.getNamespace()}.${command.target.declaration}`);
+        if (command.target.properties && command.target.property) {
+            throw new Error(
+                'Decorator Command references both property and properties. You must either reference a single property or a list of properites.'
+            );
+        }
+        if (
+            command.target.namespace &&
+            command.target.declaration &&
+            command.target.property
+        ) {
+            const decl = validationModelManager.getType(
+                `${modelFile.getNamespace()}.${command.target.declaration}`
+            );
             const property = decl.getProperty(command.target.property);
-            if(!property) {
-                throw new Error(`Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`);
+            if (!property) {
+                throw new Error(
+                    `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${command.target.property}" which does not exist.`
+                );
             }
+        }
+        if (
+            command.target.namespace &&
+            command.target.declaration &&
+            command.target.properties
+        ) {
+            const decl = validationModelManager.getType(
+                `${modelFile.getNamespace()}.${command.target.declaration}`
+            );
+            command.target.properties.forEach((commandProperty) => {
+                const property = decl.getProperty(commandProperty);
+                if (!property) {
+                    throw new Error(
+                        `Decorator Command references property "${command.target.namespace}.${command.target.declaration}.${commandProperty}" which does not exist.`
+                    );
+                }
+            });
         }
     }
 
     /**
-     * Compares two values. If the first argument is falsy
+     * Compares two arrays. If the first argument is falsy
      * the function returns true.
-     * @param {string | null} test the value to test (lhs)
-     * @param {string|string[]} values the values to compare (rhs)
-     * @returns {Boolean} true if the lhs is falsy or values.includes(test)
+     * @param {string | string[] | null} test the value to test
+     * @param {string[]} values the values to compare
+     * @returns {Boolean} true if the test is falsy or the intersection of
+     * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
-        return test
-            ? Array.isArray(values) ? values.includes(test) : test === values
-            : true;
+        return Array.isArray(test)
+            ? intersect(test, values).length > 0
+            : test
+                ? values.includes(test)
+                : true;
     }
 
     /**
@@ -190,7 +262,7 @@ class DecoratorManager {
     static applyDecorator(decorated, type, newDecorator) {
         if (type === 'UPSERT') {
             let updated = false;
-            if(decorated.decorators) {
+            if (decorated.decorators) {
                 for (let n = 0; n < decorated.decorators.length; n++) {
                     let decorator = decorated.decorators[n];
                     if (decorator.name === newDecorator.name) {
@@ -201,15 +273,15 @@ class DecoratorManager {
             }
 
             if (!updated) {
-                decorated.decorators ? decorated.decorators.push(newDecorator)
-                    : decorated.decorators = [newDecorator];
+                decorated.decorators
+                    ? decorated.decorators.push(newDecorator)
+                    : (decorated.decorators = [newDecorator]);
             }
-        }
-        else if (type === 'APPEND') {
-            decorated.decorators ? decorated.decorators.push(newDecorator)
-                : decorated.decorators = [newDecorator];
-        }
-        else {
+        } else if (type === 'APPEND') {
+            decorated.decorators
+                ? decorated.decorators.push(newDecorator)
+                : (decorated.decorators = [newDecorator]);
+        } else {
             throw new Error(`Unknown command type ${type}`);
         }
     }
@@ -224,23 +296,44 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace( namespace );
-        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])) {
+        const { name } = ModelUtil.parseNamespace(namespace);
+        if (
+            this.falsyOrEqual(target.namespace, [namespace, name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])
+        ) {
             if (!target.property && !target.type) {
                 this.applyDecorator(declaration, type, decorator);
-            }
-            else {
+            } else {
                 // scalars are declarations but do not have properties
-                if(declaration.properties) {
-                    declaration.properties.forEach(property => {
-                        if (this.falsyOrEqual(target.property, [property.name]) &&
-                            this.falsyOrEqual(target.type, [property.$class])) {
-                            this.applyDecorator(property, type, decorator);
-                        }
+                if (declaration.properties) {
+                    declaration.properties.forEach((property) => {
+                        DecoratorManager.executePropertyCommand(
+                            property,
+                            command
+                        );
                     });
                 }
             }
+        }
+    }
+
+    /**
+     * Executes a Command against a Property, adding
+     * decorators to the Property as required.
+     * @param {*} property the property
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     */
+    static executePropertyCommand(property, command) {
+        const { target, decorator, type } = command;
+        if (
+            this.falsyOrEqual(
+                target.property ? target.property : target.properties,
+                [property.name]
+            ) &&
+            this.falsyOrEqual(target.type, [property.$class])
+        ) {
+            this.applyDecorator(property, type, decorator);
         }
     }
 }

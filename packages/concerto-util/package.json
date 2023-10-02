@@ -57,7 +57,7 @@
     "@supercharge/promise-pool": "1.7.0",
     "axios": "0.23.0",
     "colors": "1.4.0",
-    "debug": "4.3.1",
+    "debug": "4.3.4",
     "json-colorizer": "2.2.2",
     "slash": "3.0.0"
   },

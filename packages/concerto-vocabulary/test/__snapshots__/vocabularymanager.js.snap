@@ -2,10 +2,10 @@
 
 exports[`VocabularyManager decorateModels 1`] = `
 Object {
-  "$class": "org.accordproject.decoratorcommands@0.2.0.DecoratorCommandSet",
+  "$class": "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
   "commands": Array [
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -17,14 +17,14 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
         "namespace": "org.acme",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -36,7 +36,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
         "namespace": "org.acme",
         "property": "RED",
@@ -44,7 +44,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -56,7 +56,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
         "namespace": "org.acme",
         "property": "BLUE",
@@ -64,7 +64,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -76,7 +76,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
         "namespace": "org.acme",
         "property": "GREEN",
@@ -84,7 +84,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -96,14 +96,14 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "SSN",
         "namespace": "org.acme",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -115,14 +115,14 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
         "namespace": "org.acme",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -134,7 +134,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
         "namespace": "org.acme",
         "property": "vin",
@@ -142,7 +142,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -154,7 +154,7 @@ Object {
         "name": "Term_tooltip",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
         "namespace": "org.acme",
         "property": "vin",
@@ -162,7 +162,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -174,7 +174,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
         "namespace": "org.acme",
         "property": "color",
@@ -182,7 +182,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -194,7 +194,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
         "namespace": "org.acme",
         "property": "$identifier",
@@ -202,7 +202,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -214,14 +214,14 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -233,14 +233,14 @@ Object {
         "name": "Term_description",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -252,7 +252,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "weight",
@@ -260,7 +260,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -272,7 +272,7 @@ Object {
         "name": "Term_description",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "weight",
@@ -280,7 +280,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -292,7 +292,7 @@ Object {
         "name": "Term_tooltip",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "weight",
@@ -300,7 +300,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -312,7 +312,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "vin",
@@ -320,7 +320,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -332,7 +332,7 @@ Object {
         "name": "Term_tooltip",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "vin",
@@ -340,7 +340,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -352,7 +352,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "color",
@@ -360,7 +360,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -372,7 +372,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
         "namespace": "org.acme",
         "property": "$identifier",
@@ -380,7 +380,7 @@ Object {
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -392,14 +392,14 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Thing",
         "namespace": "org.accordproject",
       },
       "type": "UPSERT",
     },
     Object {
-      "$class": "org.accordproject.decoratorcommands@0.2.0.Command",
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
       "decorator": Object {
         "$class": "concerto.metamodel@1.0.0.Decorator",
         "arguments": Array [
@@ -411,7 +411,7 @@ Object {
         "name": "Term",
       },
       "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Thing",
         "namespace": "org.accordproject",
         "property": "name",

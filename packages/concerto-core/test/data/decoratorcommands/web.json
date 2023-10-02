@@ -1,13 +1,13 @@
 {
-    "$class" : "org.accordproject.decoratorcommands@0.2.0.DecoratorCommandSet",
+    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
     "name" : "web",
     "version": "1.0.0",
     "commands" : [
         {
-            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
@@ -26,10 +26,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "APPEND",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.StringProperty"
             },
             "decorator" : {
@@ -39,10 +39,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "property" : "bio"
@@ -63,10 +63,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test",
                 "declaration" : "Person",
                 "property" : "bio"
@@ -78,10 +78,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.2.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.2.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "SSN"
             },
@@ -90,6 +90,22 @@
                 "name" : "PII",
                 "arguments" : [
                 ]
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
+                "type" : "concerto.metamodel@1.0.0.StringProperty",
+                "properties" : ["address1", "address2", "zip"]
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Address",
+                "arguments" : []
             }
         }
     ]

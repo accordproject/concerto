@@ -1,6 +1,6 @@
 {
     "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
-    "name" : "invalid-target-namespace",
+    "name" : "invalid-target-properties",
     "version": "1.0.0",
     "commands" : [
         {
@@ -9,7 +9,8 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
-                "declaration" : "Missing"
+                "declaration" : "Person",
+                "properties" : ["missing"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",

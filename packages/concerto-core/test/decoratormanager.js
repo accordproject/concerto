@@ -33,23 +33,23 @@ describe('DecoratorManager', () => {
 
     describe('#falsyOrEqual', function() {
         it('should match null', async function() {
-            DecoratorManager.falsyOrEqual( null, 'one').should.be.true;
+            DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;
         });
 
         it('should match undefined', async function() {
-            DecoratorManager.falsyOrEqual( undefined, 'one').should.be.true;
-        });
-
-        it('should match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', 'one').should.be.true;
+            DecoratorManager.falsyOrEqual( undefined, ['one']).should.be.true;
         });
 
         it('should match token', async function() {
             DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
         });
 
-        it('should not match token', async function() {
-            DecoratorManager.falsyOrEqual( 'one', 'two').should.be.false;
+        it('should match token array', async function() {
+            DecoratorManager.falsyOrEqual( ['one', 'two'], ['one', 'three']).should.be.true;
+        });
+
+        it('should match token', async function() {
+            DecoratorManager.falsyOrEqual( 'one', ['one']).should.be.true;
         });
 
         it('should not match token', async function() {
@@ -125,6 +125,24 @@ describe('DecoratorManager', () => {
 
             const decoratorUnversionedNamespace = bioProperty.getDecorator('UnversionedNamespace');
             decoratorUnversionedNamespace.should.not.be.null;
+
+            // applied using properties
+            const address1Property = decl.getProperty('address1');
+            address1Property.should.not.be.null;
+            const decoratorAddress1Property = address1Property.getDecorator('Address');
+            decoratorAddress1Property.should.not.be.null;
+
+            // applied using properties
+            const address2Property = decl.getProperty('address2');
+            address2Property.should.not.be.null;
+            const decoratorAddress2Property = address2Property.getDecorator('Address');
+            decoratorAddress2Property.should.not.be.null;
+
+            // applied using properties, but not a string property
+            const zipProperty = decl.getProperty('zip');
+            zipProperty.should.not.be.null;
+            const decoratorZipProperty = zipProperty.getDecorator('Address');
+            (decoratorZipProperty ===null).should.be.true;
         });
 
         it('should fail with invalid command', async function() {
@@ -197,6 +215,34 @@ describe('DecoratorManager', () => {
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
         });
+
+        it('should detect invalid target properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-properties.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
+        });
+
+        it('should detect target referencing both property and properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-property-properties.json', 'utf-8');
+
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, validateCommands: true});
+            }).should.throw(/Decorator Command references both property and properties. You must either reference a single property or a list of properites./);
+        });
     });
 
     describe('#validate', function() {
@@ -211,7 +257,7 @@ describe('DecoratorManager', () => {
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true});
-            }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.2.0"/);
+            }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.3.0"/);
         });
 
         it('should detect decorator command set with an invalid command type', async function() {
