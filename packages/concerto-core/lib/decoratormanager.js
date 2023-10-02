@@ -319,7 +319,7 @@ class DecoratorManager {
                                 this.applyDecorator(declaration.value, type, decorator);
                             }
                         } else {
-                            this.applyDecorator(declaration.key, type, decorator);
+                            this.applyDecorator(declaration.value, type, decorator);
                         }
                         break;
                     case '*':
