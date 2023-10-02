@@ -26,6 +26,7 @@ chai.use(require('chai-as-promised'));
 describe('DecoratorManager', () => {
 
     beforeEach(() => {
+        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
     });
 
     afterEach(() => {
