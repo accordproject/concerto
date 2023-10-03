@@ -10,7 +10,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
-                "element" : "INVALID_ELEMENT"
+                "mapElement" : "INVALID_ELEMENT"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",

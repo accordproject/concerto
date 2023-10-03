@@ -376,7 +376,7 @@ describe('DecoratorManager', () => {
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
-            }).should.throw(/Decorator Command contains invalid target element: INVALID_ELEMENT/);
+            }).should.throw(/Decorator Command contains invalid target for Map element: INVALID_ELEMENT/);
         });
     });
 

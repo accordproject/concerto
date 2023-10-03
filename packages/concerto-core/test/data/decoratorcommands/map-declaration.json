@@ -11,7 +11,7 @@
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
                 "declaration" : "Dictionary",
-                "element": "KEY"
+                "mapElement": "KEY"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -27,7 +27,7 @@
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
-                "element": "KEY"
+                "mapElement": "KEY"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -42,7 +42,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
-                "element": "KEY"
+                "mapElement": "KEY"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -58,7 +58,7 @@
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType",
-                "element": "VALUE"
+                "mapElement": "VALUE"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -73,7 +73,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
-                "element": "VALUE"
+                "mapElement": "VALUE"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -88,7 +88,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
-                "element": "*"
+                "mapElement": "*"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -104,7 +104,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
-                "element": "*"
+                "mapElement": "*"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -119,7 +119,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType",
-                "element": "*"
+                "mapElement": "*"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",

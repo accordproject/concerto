@@ -50,7 +50,7 @@ concept CommandTarget {
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
-    o String element optional
+    o String mapElement optional
 }
 
 /**
@@ -302,8 +302,8 @@ class DecoratorManager {
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 
             if (declaration.$class === 'concerto.metamodel@1.0.0.MapDeclaration') {
-                if (target.element) {
-                    switch(target.element.toLowerCase()) {
+                if (target.mapElement) {
+                    switch(target.mapElement.toLowerCase()) {
                     case 'key':
                         if (target.type) {
                             if (this.falsyOrEqual(target.type, declaration.key.$class)) {
@@ -337,7 +337,7 @@ class DecoratorManager {
 
                         break;
                     default:
-                        throw new Error('Decorator Command contains invalid target element: ' + target.element );
+                        throw new Error('Decorator Command contains invalid target for Map element: ' + target.mapElement );
                     }
                 } else if (target.type) {
                     if (this.falsyOrEqual(target.type, declaration.key.$class)) {
