@@ -238,6 +238,27 @@ class DecoratorManager {
         }
     }
 
+
+    /**
+     * Applies a new decorator to the Map element
+     * @private
+     * @param {string} element the value to test
+     * @param {string} target the command target
+     * @param {*} declaration the map declaration
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     */
+    static applyDecoaratorForMapElement(element, target, declaration, type, newDecorator ) {
+        const decl = element.toLowerCase() === 'key' ? declaration.key : declaration.value;
+        if (target.type) {
+            if (this.falsyOrEqual(target.type, decl.$class)) {
+                this.applyDecorator(decl, type, newDecorator);
+            }
+        } else {
+            this.applyDecorator(decl, type, newDecorator);
+        }
+    }
+
     /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
@@ -305,35 +326,14 @@ class DecoratorManager {
                 if (target.mapElement) {
                     switch(target.mapElement.toLowerCase()) {
                     case 'key':
-                        if (target.type) {
-                            if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                                this.applyDecorator(declaration.key, type, decorator);
-                            }
-                        } else {
-                            this.applyDecorator(declaration.key, type, decorator);
-                        }
+                        this.applyDecoaratorForMapElement(target.mapElement, target, declaration, type, decorator);
                         break;
                     case 'value':
-                        if (target.type) {
-                            if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                                this.applyDecorator(declaration.value, type, decorator);
-                            }
-                        } else {
-                            this.applyDecorator(declaration.value, type, decorator);
-                        }
+                        this.applyDecoaratorForMapElement(target.mapElement, target, declaration, type, decorator);
                         break;
                     case '*':
-                        if (target.type) {
-                            if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                                this.applyDecorator(declaration.key, type, decorator);
-                            }
-                            if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                                this.applyDecorator(declaration.value, type, decorator);
-                            }
-                        } else {
-                            this.applyDecorator(declaration.key, type, decorator);
-                            this.applyDecorator(declaration.value, type, decorator);
-                        }
+                        this.applyDecoaratorForMapElement('key', target, declaration, type, decorator);
+                        this.applyDecoaratorForMapElement('value', target, declaration, type, decorator);
 
                         break;
                     default:
