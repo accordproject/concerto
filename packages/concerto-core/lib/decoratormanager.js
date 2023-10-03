@@ -19,6 +19,15 @@ const Serializer = require('./serializer');
 const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('./introspect/modelfile');
+}
+/* eslint-enable no-unused-vars */
+
+
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.3.0
 
@@ -105,6 +114,39 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
  * @memberof module:concerto-core
  */
 class DecoratorManager {
+
+    /**
+     * Structural validation of the decoratorCommandSet against the
+     * Decorator Command Set model. Note that this only checks the
+     * structural integrity of the command set, it cannot check
+     * whether the commands are valid with respect to a model manager.
+     * Use the options.validateCommands option with decorateModels
+     * method to perform semantic validation.
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {ModelFile[]} [modelFiles] an optional array of model
+     * files that are added to the validation model manager returned
+     * @returns {ModelManager} the model manager created for validation
+     * @throws {Error} throws an error if the decoratorCommandSet is invalid
+     */
+    static validate(decoratorCommandSet, modelFiles) {
+        const validationModelManager = new ModelManager({
+            strict: true,
+            metamodelValidation: true,
+            addMetamodel: true,
+        });
+        if(modelFiles) {
+            validationModelManager.addModelFiles(modelFiles);
+        }
+        validationModelManager.addCTOModel(
+            DCS_MODEL,
+            'decoratorcommands@0.3.0.cto'
+        );
+        const factory = new Factory(validationModelManager);
+        const serializer = new Serializer(factory, validationModelManager);
+        serializer.fromJSON(decoratorCommandSet);
+        return validationModelManager;
+    }
+
     /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
@@ -119,19 +161,7 @@ class DecoratorManager {
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
         if (options?.validate) {
-            const validationModelManager = new ModelManager({
-                strict: true,
-                metamodelValidation: true,
-                addMetamodel: true,
-            });
-            validationModelManager.addModelFiles(modelManager.getModelFiles());
-            validationModelManager.addCTOModel(
-                DCS_MODEL,
-                'decoratorcommands@0.2.0.cto'
-            );
-            const factory = new Factory(validationModelManager);
-            const serializer = new Serializer(factory, validationModelManager);
-            serializer.fromJSON(decoratorCommandSet);
+            const validationModelManager = DecoratorManager.validate(decoratorCommandSet, modelManager.getModelFiles());
             if (options?.validateCommands) {
                 decoratorCommandSet.commands.forEach((command) => {
                     DecoratorManager.validateCommand(
