@@ -248,7 +248,7 @@ class DecoratorManager {
      * @param {string} type the command type
      * @param {*} newDecorator the decorator to add
      */
-    static applyDecoaratorForMapElement(element, target, declaration, type, newDecorator ) {
+    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
         const decl = element.toLowerCase() === 'key' ? declaration.key : declaration.value;
         if (target.type) {
             if (this.falsyOrEqual(target.type, decl.$class)) {
@@ -326,14 +326,14 @@ class DecoratorManager {
                 if (target.mapElement) {
                     switch(target.mapElement.toLowerCase()) {
                     case 'key':
-                        this.applyDecoaratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
                         break;
                     case 'value':
-                        this.applyDecoaratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
                         break;
                     case '*':
-                        this.applyDecoaratorForMapElement('key', target, declaration, type, decorator);
-                        this.applyDecoaratorForMapElement('value', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('key', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('value', target, declaration, type, decorator);
 
                         break;
                     default:
