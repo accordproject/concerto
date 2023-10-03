@@ -1,5 +1,5 @@
 locale: fr
-namespace: org.acme
+namespace: org.acme@1.0.0
 declarations:
   - Vehicle: Véhicule
     properties:

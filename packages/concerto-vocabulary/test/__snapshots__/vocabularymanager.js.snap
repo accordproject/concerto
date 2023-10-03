@@ -19,7 +19,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -38,7 +38,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "RED",
       },
       "type": "UPSERT",
@@ -58,7 +58,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "BLUE",
       },
       "type": "UPSERT",
@@ -78,7 +78,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Color",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "GREEN",
       },
       "type": "UPSERT",
@@ -98,7 +98,26 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "SSN",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "A vehicle identification number",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "VIN",
+        "namespace": "org.acme@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -117,7 +136,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -136,7 +155,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "vin",
       },
       "type": "UPSERT",
@@ -156,7 +175,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "vin",
       },
       "type": "UPSERT",
@@ -176,7 +195,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "color",
       },
       "type": "UPSERT",
@@ -196,7 +215,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Vehicle",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "$identifier",
       },
       "type": "UPSERT",
@@ -216,7 +235,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -235,7 +254,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -254,7 +273,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "weight",
       },
       "type": "UPSERT",
@@ -274,7 +293,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "weight",
       },
       "type": "UPSERT",
@@ -294,7 +313,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "weight",
       },
       "type": "UPSERT",
@@ -314,7 +333,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "vin",
       },
       "type": "UPSERT",
@@ -334,7 +353,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "vin",
       },
       "type": "UPSERT",
@@ -354,7 +373,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "color",
       },
       "type": "UPSERT",
@@ -374,7 +393,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Truck",
-        "namespace": "org.acme",
+        "namespace": "org.acme@1.0.0",
         "property": "$identifier",
       },
       "type": "UPSERT",
@@ -394,7 +413,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Thing",
-        "namespace": "org.accordproject",
+        "namespace": "org.accordproject@1.0.0",
       },
       "type": "UPSERT",
     },
@@ -413,7 +432,7 @@ Object {
       "target": Object {
         "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
         "declaration": "Thing",
-        "namespace": "org.accordproject",
+        "namespace": "org.accordproject@1.0.0",
         "property": "name",
       },
       "type": "UPSERT",
