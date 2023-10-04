@@ -18,6 +18,7 @@ const ModelManager = require('./modelmanager');
 const Serializer = require('./serializer');
 const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.3.0
@@ -331,7 +332,7 @@ class DecoratorManager {
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 
-            if (declaration.$class === 'concerto.metamodel@1.0.0.MapDeclaration') {
+            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 if (target.mapElement) {
                     switch(target.mapElement) {
                     case 'KEY':
