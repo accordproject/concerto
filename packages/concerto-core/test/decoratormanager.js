@@ -364,20 +364,6 @@ describe('DecoratorManager', () => {
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references both property and properties. You must either reference a single property or a list of properites./);
         });
-
-        it('should detect invalid target element', async function() {
-            // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
-            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-
-            const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-target-element.json', 'utf-8');
-
-            (() => {
-                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                    {validate: true, validateCommands: true});
-            }).should.throw(/Decorator Command contains invalid target for Map element: INVALID_ELEMENT/);
-        });
     });
 
     describe('#validate', function() {

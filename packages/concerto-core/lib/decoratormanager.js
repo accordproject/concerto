@@ -50,7 +50,16 @@ concept CommandTarget {
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
-    o String mapElement optional
+    o MapElement mapElement optional
+}
+
+/**
+ * Map Declaration elements which might be used as a target
+ */
+enum MapElement {
+    o KEY
+    o VALUE
+    o KEY_VALUE
 }
 
 /**
@@ -249,7 +258,7 @@ class DecoratorManager {
      * @param {*} newDecorator the decorator to add
      */
     static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
-        const decl = element.toLowerCase() === 'key' ? declaration.key : declaration.value;
+        const decl = element === 'KEY' ? declaration.key : declaration.value;
         if (target.type) {
             if (this.falsyOrEqual(target.type, decl.$class)) {
                 this.applyDecorator(decl, type, newDecorator);
@@ -324,20 +333,15 @@ class DecoratorManager {
 
             if (declaration.$class === 'concerto.metamodel@1.0.0.MapDeclaration') {
                 if (target.mapElement) {
-                    switch(target.mapElement.toLowerCase()) {
-                    case 'key':
+                    switch(target.mapElement) {
+                    case 'KEY':
+                    case 'VALUE':
                         this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
                         break;
-                    case 'value':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                    case 'KEY_VALUE':
+                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
                         break;
-                    case '*':
-                        this.applyDecoratorForMapElement('key', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('value', target, declaration, type, decorator);
-
-                        break;
-                    default:
-                        throw new Error('Decorator Command contains invalid target for Map element: ' + target.mapElement );
                     }
                 } else if (target.type) {
                     if (this.falsyOrEqual(target.type, declaration.key.$class)) {
