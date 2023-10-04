@@ -55,6 +55,7 @@ class Concerto {
 }
    + object setCurrentTime() 
 class DecoratorManager {
+   + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
