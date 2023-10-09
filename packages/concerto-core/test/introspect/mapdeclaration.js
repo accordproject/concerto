@@ -125,7 +125,7 @@ describe('MapDeclaration', () => {
     });
 
     describe('#validate success scenarios - Map Key', () => {
-        it.only('should validate when map key is primitive type datetime', () => {
+        it('should validate when map key is primitive type datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
             decl.validate();
         });
