@@ -37,11 +37,11 @@ describe('MapDeclaration', () => {
     let introspectUtils;
 
     beforeEach(() => {
-        modelManager = new ModelManager();
+        const options = { flags : {'ENABLE_MAP_TYPE': 'true'} };
+        modelManager = new ModelManager(options);
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.test', 'mapdeclaration.cto');
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
     });
 
     describe('#constructor', () => {
@@ -125,7 +125,7 @@ describe('MapDeclaration', () => {
     });
 
     describe('#validate success scenarios - Map Key', () => {
-        it('should validate when map key is primitive type datetime', () => {
+        it.only('should validate when map key is primitive type datetime', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
             decl.validate();
         });

@@ -93,6 +93,16 @@ class BaseModelManager {
         this.options = options;
         this.addRootModel();
 
+        // TODO remove on full release of Map Type.
+        // Temporarily allow for ENABLE_MAP_TYPE environment variable to be set from options.
+        if (options?.flags) {
+            for (const [key, value] of Object.entries(options.flags)) {
+                if(key === 'ENABLE_MAP_TYPE') {
+                    process.env[key] = value;
+                }
+            }
+        }
+
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 
