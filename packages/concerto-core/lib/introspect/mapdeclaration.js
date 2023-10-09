@@ -45,8 +45,9 @@ class MapDeclaration extends Declaration {
      */
     constructor(modelFile, ast) {
         // TODO remove on full release.
-        if(process.env.ENABLE_MAP_TYPE !== 'true') {
-            throw new Error('MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true" to access this functionality.');
+        const mm = modelFile.getModelManager();
+        if(process.env.ENABLE_MAP_TYPE !== 'true' && !mm.enableMapType) {
+            throw new Error('MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true", or add {enableMapType: true} to the ModelManger options, to access this functionality.');
         }
 
         super(modelFile, ast);

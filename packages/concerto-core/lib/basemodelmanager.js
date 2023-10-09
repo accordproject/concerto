@@ -93,6 +93,10 @@ class BaseModelManager {
         this.options = options;
         this.addRootModel();
 
+        // TODO Remove on release of MapType
+        // Supports both env var and property based flag
+        this.enableMapType = !!options?.enableMapType;
+
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 

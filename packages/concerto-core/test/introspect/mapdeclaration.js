@@ -84,11 +84,29 @@ describe('MapDeclaration', () => {
                         $class: 'concerto.metamodel@1.0.0.StringMapValueType'
                     }
                 });
-            }).should.throw(/MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true" to access this functionality./);
+            }).should.throw(/MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true", or add {enableMapType: true} to the ModelManger options, to access this functionality/);
             process.env.ENABLE_MAP_TYPE = 'true'; // enable after the test run. This is necessary to ensure functioning of other tests.
         });
 
+        it('should throw if Map Type not enabled in ModelManager options', () => {
+            process.env.ENABLE_MAP_TYPE = 'false';
+            const mm = new ModelManager({enableMapType: false});
+            Util.addComposerModel(mm);
+            const introspectUtils = new IntrospectUtils(mm);
+            try {
+                introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
+            } catch (error) {
+                expect(error.message).to.equal('MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true", or add {enableMapType: true} to the ModelManger options, to access this functionality.');
+            }
+        });
 
+        it('should not throw if Map Type is enabled in ModelManager options', () => {
+            const mm = new ModelManager({enableMapType: true});
+            Util.addComposerModel(mm);
+            const introspectUtils = new IntrospectUtils(mm);
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
+            decl.validate();
+        });
 
         it('should throw if invalid $class provided for Map Key', () => {
             (() =>
