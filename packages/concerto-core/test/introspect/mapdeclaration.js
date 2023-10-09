@@ -100,7 +100,7 @@ describe('MapDeclaration', () => {
             }
         });
 
-        it('should not throw if Map Type not enabled in ModelManager options', () => {
+        it('should not throw if Map Type is enabled in ModelManager options', () => {
             const mm = new ModelManager({enableMapType: true});
             Util.addComposerModel(mm);
             const introspectUtils = new IntrospectUtils(mm);
