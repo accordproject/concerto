@@ -81,6 +81,7 @@ class BaseModelManager {
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
+     * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
