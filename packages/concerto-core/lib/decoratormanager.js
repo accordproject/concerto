@@ -185,7 +185,6 @@ class DecoratorManager {
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
             serializer.fromJSON(decoratorCommandSet);
-            const validationModelManager = DecoratorManager.validate(decoratorCommandSet, modelManager.getModelFiles());
             if (options?.validateCommands) {
                 decoratorCommandSet.commands.forEach((command) => {
                     DecoratorManager.validateCommand(
