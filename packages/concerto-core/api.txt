@@ -323,7 +323,7 @@ class ModelLoader {
    + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?,boolean?,Object?) 
+   + void constructor(object?,boolean?,Object?,boolean?) 
    + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
    + object getRootModel() 
