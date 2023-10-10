@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,boolean?,processFile?) 
+   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,processFile?) 
    + boolean isModelManager() 
    + boolean isStrict() 
    + Object accept(Object,Object) 
