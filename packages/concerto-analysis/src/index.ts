@@ -13,6 +13,6 @@
  */
 
 export { Compare } from './compare';
-export { CompareConfig, CompareResult, compareResultToString } from './compare-config';
+export { CompareConfig, CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config';
 export { CompareFinding, CompareResults } from './compare-results';
 
