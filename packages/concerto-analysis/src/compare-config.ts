@@ -144,7 +144,7 @@ export class CompareConfigBuilder {
    *
    * @param {ComparerFactory} f - A {@link ComparerFactory} that should reference the rules in the configuration
    */
-    public addCompareFactory(f: ComparerFactory) {
+    public addComparerFactory(f: ComparerFactory) {
         this._config.comparerFactories = [...this._config.comparerFactories, f];
     }
 }

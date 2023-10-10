@@ -47,7 +47,7 @@ describe('CompareConfigBuilder', () => {
     it('Should add a new comparer factory', () => {
         const builder = new CompareConfigBuilder();
         builder.default();
-        builder.addCompareFactory(() => ({}));
+        builder.addComparerFactory(() => ({}));
 
         const actual = builder.build();
 
