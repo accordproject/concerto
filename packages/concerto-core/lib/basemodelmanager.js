@@ -81,6 +81,7 @@ class BaseModelManager {
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
+     * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -92,6 +93,10 @@ class BaseModelManager {
         this.strict = !!options?.strict;
         this.options = options;
         this.addRootModel();
+
+        // TODO Remove on release of MapType
+        // Supports both env var and property based flag
+        this.enableMapType = !!options?.enableMapType;
 
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);

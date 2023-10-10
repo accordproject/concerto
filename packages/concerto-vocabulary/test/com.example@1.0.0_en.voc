@@ -1,5 +1,5 @@
 locale: en
-namespace: com.example
+namespace: com.example@1.0.0
 declarations:
   - Person: A person
     properties:

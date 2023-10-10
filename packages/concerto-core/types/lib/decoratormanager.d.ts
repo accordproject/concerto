@@ -6,6 +6,20 @@ export = DecoratorManager;
  */
 declare class DecoratorManager {
     /**
+     * Structural validation of the decoratorCommandSet against the
+     * Decorator Command Set model. Note that this only checks the
+     * structural integrity of the command set, it cannot check
+     * whether the commands are valid with respect to a model manager.
+     * Use the options.validateCommands option with decorateModels
+     * method to perform semantic validation.
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {ModelFile[]} [modelFiles] an optional array of model
+     * files that are added to the validation model manager returned
+     * @returns {ModelManager} the model manager created for validation
+     * @throws {Error} throws an error if the decoratorCommandSet is invalid
+     */
+    static validate(decoratorCommandSet: any, modelFiles?: ModelFile[]): ModelManager;
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
@@ -71,4 +85,5 @@ declare class DecoratorManager {
      */
     static executePropertyCommand(property: any, command: any): void;
 }
+import ModelFile = require("./introspect/modelfile");
 import ModelManager = require("./modelmanager");

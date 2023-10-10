@@ -58,6 +58,36 @@ describe('DecoratorManager', () => {
         });
     });
 
+    describe('#validate', function() {
+        it('should support syntax validation', async function() {
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            const validationModelManager = DecoratorManager.validate( JSON.parse(dcs));
+            validationModelManager.should.not.be.null;
+        });
+
+        it('should support syntax validation with model files', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            const validationModelManager = DecoratorManager.validate(JSON.parse(dcs), testModelManager.getModelFiles());
+            validationModelManager.should.not.be.null;
+            validationModelManager.getType('test@1.0.0.Person').should.not.be.null;
+        });
+
+        it('should fail syntax validation', async function() {
+            (() => {
+                DecoratorManager.validate( { $class: 'invalid' });
+            }).should.throw(/Namespace is not defined for type/);
+        });
+
+        it('should fail syntax validation', async function() {
+            (() => {
+                DecoratorManager.validate( { invalid: true });
+            }).should.throw(/Invalid JSON data/);
+        });
+    });
+
     describe('#decorateModels', function() {
         it('should support no validation', async function() {
             const testModelManager = new ModelManager({strict:true});
