@@ -138,7 +138,7 @@ class DecoratorManager {
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
                 DCS_MODEL,
-                'decoratorcommands@0.2.0.cto'
+                'decoratorcommands@0.3.0.cto'
             );
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);

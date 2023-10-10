@@ -226,7 +226,7 @@ describe('DecoratorManager', () => {
             dictionary.value.getDecorator('Baz').should.not.be.null;
         });
 
-        it('should decorate a Key and Value element on an unspecified Map Declaration when a type is specified (type takes precedence over element value \'*\')', async function() {
+        it('should decorate a Key and Value element on an unspecified Map Declaration when a type is specified (type takes precedence over element value KEY_VALUE)', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');

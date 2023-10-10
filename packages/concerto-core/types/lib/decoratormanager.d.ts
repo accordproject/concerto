@@ -28,6 +28,16 @@ declare class DecoratorManager {
      */
     static validateCommand(validationModelManager: ModelManager, command: any): void;
     /**
+     * Applies a new decorator to the Map element
+     * @private
+     * @param {string} element the element to apply the decorator to
+     * @param {string} target the command target
+     * @param {*} declaration the map declaration
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     */
+    private static applyDecoratorForMapElement;
+    /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
      * @param {string | string[] | null} test the value to test
