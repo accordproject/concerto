@@ -75,7 +75,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.build();
 
         expect(actual.comparerFactories.length).toEqual(11);
-        expect(Object.keys(actual.rules).length).toEqual(20);
+        expect(Object.keys(actual.rules).length).toEqual(19);
         expect(actual.rules['optional-property-added']).toBeFalsy();
     });
 

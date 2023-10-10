@@ -91,14 +91,21 @@ export class CompareConfigBuilder {
      * @returns {CompareConfig} Resulting CompareConfig object.
      */
     public build(): CompareConfig {
-        return { ...this._config };
+        return {
+            comparerFactories: [...this._config.comparerFactories],
+            rules: { ...this._config.rules },
+        };
     }
 
     /**
-      * Sets default comparer configuration.
+      * Adds default comparer configuration onto the configuration
+      * baing built.
       */
     public default() {
-        this._config = { ...defaultCompareConfig };
+        this._config = {
+            comparerFactories: [...this._config.comparerFactories, ...defaultCompareConfig.comparerFactories],
+            rules: { ...this._config.rules, ...defaultCompareConfig.rules },
+        };
     }
 
     /**
