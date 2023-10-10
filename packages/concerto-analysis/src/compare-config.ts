@@ -76,37 +76,37 @@ const EmptyConfig: CompareConfig = {
 
 export class CompareConfigBuilder {
     /**
-   * A utility to build CompareConfig to be used in Compare class.
-   * A new compare config can be edited with provided functions and finally
-   * resulting config can be used by calling `build`.
-   *
-   * By default, it starts with an emoty configuration.
-   */
+     * A utility to build CompareConfig to be used in Compare class.
+     * A new compare config can be edited with provided functions and finally
+     * resulting config can be used by calling `build`.
+     *
+     * By default, it starts with an emoty configuration.
+     */
 
     private _config: CompareConfig = EmptyConfig;
 
     /**
-   * Final step of the builder
-   *
-   * @returns {CompareConfig} Resulting CompareConfig object.
-   */
+     * Final step of the builder
+     *
+     * @returns {CompareConfig} Resulting CompareConfig object.
+     */
     public build(): CompareConfig {
         return { ...this._config };
     }
 
     /**
-   * Sets default comparer configuration.
-   */
+      * Sets default comparer configuration.
+      */
     public default() {
         this._config = { ...defaultCompareConfig };
     }
 
     /**
-   * Extends existing configuration tha't built up to this point
-   * with the provided config.
-   *
-   * @param {CompareConfig} config - The configuration to extend with
-   */
+     * Extends existing configuration tha't built up to this point
+     * with the provided config.
+     *
+     * @param {CompareConfig} config - The configuration to extend with
+     */
     public extend(config: CompareConfig) {
         this._config = {
             comparerFactories: [...this._config.comparerFactories, ...config.comparerFactories],
@@ -115,22 +115,22 @@ export class CompareConfigBuilder {
     }
 
     /**
-   * Adds a comparison outcome rule to the configuration
-   *
-   * @param {string} ruleKey - A key that is referenced from one of the comparer factories
-   * @param {CompareResult} result - A version diff outcome based on this rule
-   */
+     * Adds a comparison outcome rule to the configuration
+     *
+     * @param {string} ruleKey - A key that is referenced from one of the comparer factories
+     * @param {CompareResult} result - A version diff outcome based on this rule
+     */
     public addRule(ruleKey: string, result: CompareResult) {
         this._config.rules[ruleKey] = result;
     }
 
     /**
-   * Removes a comparison outcome rule from the configuration
-   *
-   * @param {string} ruleKey - A key that is referenced from one of the comparer factories
-   * @throws {ReferenceError}
-   * Thrown if the `ruleKey` does not exist in the configuration
-   */
+     * Removes a comparison outcome rule from the configuration
+     *
+     * @param {string} ruleKey - A key that is referenced from one of the comparer factories
+     * @throws {ReferenceError}
+     * Thrown if the `ruleKey` does not exist in the configuration
+     */
     public removeRule(ruleKey: string) {
         if (!this._config.rules[ruleKey]) {
             throw new ReferenceError(`ruleKey '${ruleKey}' does not exist`);
@@ -140,10 +140,10 @@ export class CompareConfigBuilder {
     }
 
     /**
-   * Add a {@link ComparerFactory} to the configuration.
-   *
-   * @param {ComparerFactory} f - A {@link ComparerFactory} that should reference the rules in the configuration
-   */
+     * Add a {@link ComparerFactory} to the configuration.
+     *
+     * @param {ComparerFactory} f - A {@link ComparerFactory} that should reference the rules in the configuration
+     */
     public addComparerFactory(f: ComparerFactory) {
         this._config.comparerFactories = [...this._config.comparerFactories, f];
     }
