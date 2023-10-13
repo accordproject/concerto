@@ -76,11 +76,11 @@ const EmptyConfig: CompareConfig = {
 
 export class CompareConfigBuilder {
     /**
-     * A utility to build CompareConfig to be used in Compare class.
+     * A utility to build {@link CompareConfig} to be used in {@link Compare} class.
      * A new compare config can be edited with provided functions and finally
      * resulting config can be used by calling `build`.
      *
-     * By default, it starts with an emoty configuration.
+     * By default, it starts with an empty configuration.
      */
 
     private _config: CompareConfig = EmptyConfig;
@@ -98,9 +98,9 @@ export class CompareConfigBuilder {
     }
 
     /**
-      * Adds default comparer configuration onto the configuration
-      * baing built.
-      */
+     * Adds default comparer configuration onto the configuration
+     * being built.
+     */
     public default() {
         this._config = {
             comparerFactories: [...this._config.comparerFactories, ...defaultCompareConfig.comparerFactories],
@@ -109,7 +109,7 @@ export class CompareConfigBuilder {
     }
 
     /**
-     * Extends existing configuration tha't built up to this point
+     * Extends existing configuration that's built upto this point
      * with the provided config.
      *
      * @param {CompareConfig} config - The configuration to extend with
