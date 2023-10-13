@@ -12,9 +12,8 @@ describe('CompareConfigBuilder', () => {
 
     it('Should add default config with `default`', () => {
         const builder = new CompareConfigBuilder();
-        builder.default();
 
-        const actual = builder.build();
+        const actual = builder.default().build();
 
         expect(actual.comparerFactories.length).toEqual(11);
         expect(Object.keys(actual.rules).length).toEqual(20);
@@ -34,10 +33,8 @@ describe('CompareConfigBuilder', () => {
             rules: newRules
         };
         const builder = new CompareConfigBuilder();
-        builder.default();
-        builder.extend(toExtend);
 
-        const actual = builder.build();
+        const actual = builder.default().extend(toExtend).build();
 
         expect(actual.comparerFactories.length).toEqual(12);
         expect(Object.keys(actual.rules).length).toEqual(21);
@@ -46,10 +43,8 @@ describe('CompareConfigBuilder', () => {
 
     it('Should add a new comparer factory', () => {
         const builder = new CompareConfigBuilder();
-        builder.default();
-        builder.addComparerFactory(() => ({}));
 
-        const actual = builder.build();
+        const actual = builder.default().addComparerFactory(() => ({})).build();
 
         expect(actual.comparerFactories.length).toEqual(12);
         expect(Object.keys(actual.rules).length).toEqual(20);
@@ -57,10 +52,8 @@ describe('CompareConfigBuilder', () => {
 
     it('Should add a new rule', () => {
         const builder = new CompareConfigBuilder();
-        builder.default();
-        builder.addRule('a-new-rule', CompareResult.MAJOR);
 
-        const actual = builder.build();
+        const actual = builder.default().addRule('a-new-rule', CompareResult.MAJOR).build();
 
         expect(actual.comparerFactories.length).toEqual(11);
         expect(Object.keys(actual.rules).length).toEqual(21);
@@ -69,10 +62,8 @@ describe('CompareConfigBuilder', () => {
 
     it('Should remove an existing rule', () => {
         const builder = new CompareConfigBuilder();
-        builder.default();
-        builder.removeRule('optional-property-added');
 
-        const actual = builder.build();
+        const actual = builder.default().removeRule('optional-property-added').build();
 
         expect(actual.comparerFactories.length).toEqual(11);
         expect(Object.keys(actual.rules).length).toEqual(19);
@@ -81,7 +72,6 @@ describe('CompareConfigBuilder', () => {
 
     it('Should throw while removing a rule that does not exist', () => {
         const builder = new CompareConfigBuilder();
-        builder.default();
-        expect(() => builder.removeRule('does-not-exist')).toThrow('ruleKey \'does-not-exist\' does not exist');
+        expect(() => builder.default().removeRule('does-not-exist')).toThrow('ruleKey \'does-not-exist\' does not exist');
     });
 });

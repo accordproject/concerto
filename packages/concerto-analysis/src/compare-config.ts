@@ -100,12 +100,16 @@ export class CompareConfigBuilder {
     /**
      * Adds default comparer configuration onto the configuration
      * being built.
+     *
+     * @returns {CompareConfigBuilder} A reference to the builder object to chain
      */
-    public default() {
+    public default(): CompareConfigBuilder {
         this._config = {
             comparerFactories: [...this._config.comparerFactories, ...defaultCompareConfig.comparerFactories],
             rules: { ...this._config.rules, ...defaultCompareConfig.rules },
         };
+
+        return this;
     }
 
     /**
@@ -113,12 +117,15 @@ export class CompareConfigBuilder {
      * with the provided config.
      *
      * @param {CompareConfig} config - The configuration to extend with
+     * @returns {CompareConfigBuilder} A reference to the builder object to chain
      */
-    public extend(config: CompareConfig) {
+    public extend(config: CompareConfig): CompareConfigBuilder {
         this._config = {
             comparerFactories: [...this._config.comparerFactories, ...config.comparerFactories],
             rules: { ...this._config.rules, ...config.rules },
         };
+
+        return this;
     }
 
     /**
@@ -126,32 +133,41 @@ export class CompareConfigBuilder {
      *
      * @param {string} ruleKey - A key that is referenced from one of the comparer factories
      * @param {CompareResult} result - A version diff outcome based on this rule
+     * @returns {CompareConfigBuilder} A reference to the builder object to chain
      */
-    public addRule(ruleKey: string, result: CompareResult) {
+    public addRule(ruleKey: string, result: CompareResult): CompareConfigBuilder {
         this._config.rules[ruleKey] = result;
+
+        return this;
     }
 
     /**
      * Removes a comparison outcome rule from the configuration
      *
      * @param {string} ruleKey - A key that is referenced from one of the comparer factories
+     * @returns {CompareConfigBuilder} A reference to the builder object to chain
      * @throws {ReferenceError}
      * Thrown if the `ruleKey` does not exist in the configuration
      */
-    public removeRule(ruleKey: string) {
+    public removeRule(ruleKey: string): CompareConfigBuilder {
         if (!this._config.rules[ruleKey]) {
             throw new ReferenceError(`ruleKey '${ruleKey}' does not exist`);
         }
 
         delete this._config.rules[ruleKey];
+
+        return this;
     }
 
     /**
      * Add a {@link ComparerFactory} to the configuration.
      *
      * @param {ComparerFactory} f - A {@link ComparerFactory} that should reference the rules in the configuration
+     * @returns {CompareConfigBuilder} A reference to the builder object to chain
      */
-    public addComparerFactory(f: ComparerFactory) {
+    public addComparerFactory(f: ComparerFactory): CompareConfigBuilder {
         this._config.comparerFactories = [...this._config.comparerFactories, f];
+
+        return this;
     }
 }
