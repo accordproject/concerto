@@ -19,6 +19,7 @@ const Serializer = require('./serializer');
 const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const semver = require('semver');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -28,6 +29,7 @@ if (global === undefined) {
 }
 /* eslint-enable no-unused-vars */
 
+const DCS_VERSION = '0.3.0';
 
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.3.0
@@ -159,6 +161,30 @@ class DecoratorManager {
     }
 
     /**
+     * Rewrites the $class property on decoratorCommandSet classes.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {string} replacement the DCS version upgrade target
+     * @returns {object} the migrated DecoratorCommandSet object
+
+     */
+    static upMigrateMinorVersion(decoratorCommandSet, replacement) {
+        if (decoratorCommandSet instanceof Object) {
+            for (let key in decoratorCommandSet) {
+                if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
+                    // match on semver pattern
+                    const versionPattern = /\d+\.\d+\.\d+/;
+                    decoratorCommandSet[key] = decoratorCommandSet[key].replace(versionPattern, DCS_VERSION);
+                }
+                if (decoratorCommandSet[key] instanceof Object || decoratorCommandSet[key] instanceof Array) {
+                    this.upMigrateMinorVersion(decoratorCommandSet[key], replacement);
+                }
+            }
+        }
+        return decoratorCommandSet;
+    }
+
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
@@ -171,6 +197,15 @@ class DecoratorManager {
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
+
+        // get the version of the input decoratorCommandSet from its $class property
+        const inputVersion = ModelUtil.parseNamespace(decoratorCommandSet.$class.replace(/\.([^.]*)$/, '')).version;
+
+        // if its < the currect DCS_Version, rewrite the $class version to match the supported DCS_VERSION
+        if (semver.lt(inputVersion, DCS_VERSION)) {
+            decoratorCommandSet = this.upMigrateMinorVersion(decoratorCommandSet, DCS_VERSION);
+        }
+
         if (options?.validate) {
             const validationModelManager = new ModelManager({
                 strict: true,
