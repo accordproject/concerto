@@ -166,7 +166,6 @@ class DecoratorManager {
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {string} replacement the DCS version upgrade target
      * @returns {object} the migrated DecoratorCommandSet object
-
      */
     static upMigrateMinorVersion(decoratorCommandSet, replacement) {
         if (decoratorCommandSet instanceof Object) {
