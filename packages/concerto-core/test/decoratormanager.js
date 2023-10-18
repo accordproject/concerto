@@ -200,7 +200,7 @@ describe('DecoratorManager', () => {
 
             const dcs = fs.readFileSync('./test/data/decoratorcommands/incompatible_version_dcs.json', 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true, validateCommands: true});
+                {validate: true, validateCommands: true, migrate: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
             dictionary.should.not.be.null;
