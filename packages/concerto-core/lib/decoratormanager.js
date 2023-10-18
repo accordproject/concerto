@@ -194,16 +194,19 @@ class DecoratorManager {
      * with respect to to decorator command set model
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
 
-        // get the version of the input decoratorCommandSet from its $class property
-        const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
+        if (options?.migrate) {
+            // get the version of the decoratorCommandSet from its $class property
+            const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
 
-        // if its < the currect DCS_Version, rewrite the $class version to match the supported DCS_VERSION
-        if (semver.lt(inputVersion, DCS_VERSION)) {
-            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
+            // if its < the currect DCS_Version, rewrite the $class version to match the supported DCS_VERSION
+            if (semver.lt(inputVersion, DCS_VERSION)) {
+                decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
+            }
         }
 
         if (options?.validate) {
