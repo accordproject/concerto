@@ -20,6 +20,14 @@ declare class DecoratorManager {
      */
     static validate(decoratorCommandSet: any, modelFiles?: ModelFile[]): ModelManager;
     /**
+     * Rewrites the $class property on decoratorCommandSet classes.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {string} version the DCS version upgrade target
+     * @returns {object} the migrated DecoratorCommandSet object
+     */
+    private static migrateTo;
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
@@ -29,11 +37,13 @@ declare class DecoratorManager {
      * with respect to to decorator command set model
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
         validate?: boolean;
         validateCommands?: boolean;
+        migrate?: boolean;
     }): ModelManager;
     /**
      * Throws an error if the decoractor command is invalid
