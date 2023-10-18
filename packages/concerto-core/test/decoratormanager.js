@@ -216,7 +216,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             let dcs = fs.readFileSync('./test/data/decoratorcommands/incompatible_version_dcs.json', 'utf-8');
-            dcs = DecoratorManager.upMigrateMinorVersion(JSON.parse(dcs), '0.3.0');
+            dcs = DecoratorManager.migrateTo(JSON.parse(dcs), '0.3.0');
 
             dcs.$class.should.equal('org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet');
             dcs.commands[0].$class.should.equal('org.accordproject.decoratorcommands@0.3.0.Command');
