@@ -199,7 +199,7 @@ class DecoratorManager {
     static decorateModels(modelManager, decoratorCommandSet, options) {
 
         // get the version of the input decoratorCommandSet from its $class property
-        const inputVersion = ModelUtil.parseNamespace(decoratorCommandSet.$class.replace(/\.([^.]*)$/, '')).version;
+        const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
 
         // if its < the currect DCS_Version, rewrite the $class version to match the supported DCS_VERSION
         if (semver.lt(inputVersion, DCS_VERSION)) {
