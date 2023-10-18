@@ -171,9 +171,10 @@ class DecoratorManager {
         if (decoratorCommandSet instanceof Object) {
             for (let key in decoratorCommandSet) {
                 if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
-                    // match on semver pattern
-                    const versionPattern = /\d+\.\d+\.\d+/;
-                    decoratorCommandSet[key] = decoratorCommandSet[key].replace(versionPattern, DCS_VERSION);
+                    const ns = ModelUtil.getNamespace(decoratorCommandSet.$class);
+                    decoratorCommandSet[key] = decoratorCommandSet[key].replace(
+                        ModelUtil.parseNamespace(ns).version,
+                        DCS_VERSION);
                 }
                 if (decoratorCommandSet[key] instanceof Object || decoratorCommandSet[key] instanceof Array) {
                     this.migrateTo(decoratorCommandSet[key], version);
