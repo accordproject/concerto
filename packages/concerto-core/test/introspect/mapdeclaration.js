@@ -25,6 +25,7 @@ const ParserUtil = require('./parserutility');
 
 const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
+const fs = require('fs');
 
 const sinon = require('sinon');
 const expect = require('chai').expect;
@@ -46,7 +47,7 @@ describe('MapDeclaration', () => {
 
     describe('#constructor', () => {
 
-        it('should throw if ast contains no Map Key Property', () => {
+        it('should throw if ast contains no Map Key Type', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -162,6 +163,13 @@ describe('MapDeclaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.scalar.string.cto', MapDeclaration);
             decl.validate();
         });
+
+        it('should validate when map key is imported and is of valid map key type', () => {
+            const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
+            introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.imported.scalar.cto', MapDeclaration);
+            decl.validate();
+        });
     });
 
     describe('#validate success scenarios - Map Value', () => {
@@ -254,11 +262,18 @@ describe('MapDeclaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.primitive.long.cto', MapDeclaration);
             decl.validate();
         });
+
+        it('should validate when map value is imported and is of valid map key type', () => {
+            const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
+            introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.imported.thing.cto', MapDeclaration);
+            decl.validate();
+        });
     });
 
     describe('#validate failure scenarios - Map Key', () => {
 
-        it('should throw if ast contains illegal Map Key Property', () => {
+        it('should throw if ast contains illegal Map Key Type', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -273,42 +288,42 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains illegal Map Key Property - Concept', () => {
+        it('should throw if ast contains illegal Map Key Type - Concept', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
                 decl.validate().should.throw(IllegalModelException);
             });
         });
 
-        it('should throw if ast contains illegal Map Key Property - Scalar Long', () => {
+        it('should throw if ast contains illegal Map Key Type - Scalar Long', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
                 decl.validate();
             });
         });
 
-        it('should throw if ast contains illegal Map Key Property - Scalar Integer', () => {
+        it('should throw if ast contains illegal Map Key Type - Scalar Integer', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
                 decl.validate().should.throw(IllegalModelException);
             });
         });
 
-        it('should throw if ast contains illegal Map Key Property - Scalar Double', () => {
+        it('should throw if ast contains illegal Map Key Type - Scalar Double', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
                 decl.validate().should.throw(IllegalModelException);
             });
         });
 
-        it('should throw if ast contains illegal Map Key Property - Scalar Boolean', () => {
+        it('should throw if ast contains illegal Map Key Type - Scalar Boolean', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
                 decl.validate().should.throw(IllegalModelException);
             });
         });
 
-        it('should throw if ast contains illegal Map Key Property - Boolean', () => {
+        it('should throw if ast contains illegal Map Key Type - Boolean', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -323,7 +338,7 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains illegal Map Key Property - Integer', () => {
+        it('should throw if ast contains illegal Map Key Type - Integer', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -338,7 +353,7 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains illegal Map Key Property - Long', () => {
+        it('should throw if ast contains illegal Map Key Type - Long', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -353,7 +368,7 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains illegal Map Key Property - Double', () => {
+        it('should throw if ast contains illegal Map Key Type - Double', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -368,7 +383,7 @@ describe('MapDeclaration', () => {
             }).should.throw(IllegalModelException);
         });
 
-        it('should throw if ast contains illegal Map Key Property - Enum', () => {
+        it('should throw if ast contains illegal Map Key Type - Enum', () => {
             (() => {
                 new MapDeclaration(modelFile, {
                     $class: 'concerto.metamodel@1.0.0.MapDeclaration',
@@ -385,6 +400,15 @@ describe('MapDeclaration', () => {
                     }
                 });
             }).should.throw(IllegalModelException);
+        });
+
+        it('should throw when map key is imported and is an illegal Map Key Type', () => {
+            (() =>  {
+                const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
+                introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.imported.thing.cto', MapDeclaration);
+                decl.validate().should.throw(IllegalModelException);
+            });
         });
     });
 
@@ -489,7 +513,7 @@ describe('MapDeclaration', () => {
     });
 
     describe('#getKey', () => {
-        it('should return the map key property', () => {
+        it('should return the Map Key Type', () => {
             let clz = new MapDeclaration(modelFile, {
                 $class: 'concerto.metamodel@1.0.0.MapDeclaration',
                 name: 'MapPermutation1',
