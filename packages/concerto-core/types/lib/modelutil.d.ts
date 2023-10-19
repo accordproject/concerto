@@ -156,10 +156,17 @@ declare class ModelUtil {
     */
     static isValidMapKeyScalar(decl: any): boolean;
     /**
-         * Returns true if this Value is a valid Map Value.
-         *
-         * @param {Object} value - the Value of the Map Declaration
-         * @return {boolean} true if the Value is a valid Map Value
-         */
+     * Returns true if this Value is a valid Map Value.
+     *
+     * @param {Object} value - the Value of the Map Declaration
+     * @return {boolean} true if the Value is a valid Map Value
+     */
     static isValidMapValue(value: any): boolean;
+    /**
+     * Returns the corresponding ClassDeclaration representation of the Map Type
+     * @param {string} type - the Type of the Map Value
+     * @param {Object} modelFile - the ModelFile that owns the Property
+     * @return {Object} the corresponding ClassDeclaration representation
+     */
+    static getTypeDeclaration(type: string, modelFile: any): any;
 }
