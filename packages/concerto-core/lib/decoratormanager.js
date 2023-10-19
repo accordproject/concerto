@@ -212,10 +212,8 @@ class DecoratorManager {
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
 
-        if (options?.migrate) {
-            if (this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
-                decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
-            }
+        if (options?.migrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
+            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
         }
 
         if (options?.validate) {
