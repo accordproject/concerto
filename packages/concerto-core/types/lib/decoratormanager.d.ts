@@ -28,6 +28,15 @@ declare class DecoratorManager {
      */
     private static migrateTo;
     /**
+     * Checks if the supplied decoratorCommandSet can be migrated.
+     * Migrations should only take place across minor versions of the same major version.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} DCS_VERSION the DecoratorCommandSet version
+     * @returns {boolean} returns true if major versions are equal
+     */
+    private static canMigrate;
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager

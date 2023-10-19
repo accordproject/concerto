@@ -17,6 +17,7 @@ declare class MapKeyType extends Decorated {
      */
     constructor(parent: MapDeclaration, ast: any);
     parent: MapDeclaration;
+    modelFile: ModelFile;
     /**
      * Semantic validation of the structure of this class.
      *
@@ -60,3 +61,4 @@ declare class MapKeyType extends Decorated {
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
+import ModelFile = require("./modelfile");
