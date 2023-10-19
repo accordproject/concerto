@@ -47,6 +47,7 @@ class MapKeyType extends Decorated {
     constructor(parent, ast) {
         super(ast);
         this.parent = parent;
+        this.modelFile = parent.getModelFile();
         this.process();
     }
 
@@ -70,7 +71,7 @@ class MapKeyType extends Decorated {
     validate() {
 
         if (!ModelUtil.isPrimitiveType(this.type)) {
-            let decl = this.parent.getModelFile().getAllDeclarations().find(d => d.name === this.ast.type?.name);
+            const decl = ModelUtil.getTypeDeclaration(this.ast.type.name, this.modelFile);
 
             if  (!ModelUtil.isValidMapKeyScalar(decl)) {
                 throw new IllegalModelException(
