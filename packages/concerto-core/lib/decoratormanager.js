@@ -185,6 +185,19 @@ class DecoratorManager {
     }
 
     /**
+     * Checks if the supplied decoratorCommandSet can be migrated.
+     * Migrations should only take place across minor versions of the same major version.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} DCS_VERSION the DecoratorCommandSet version
+     * @returns {boolean} returns true if major versions are equal
+     */
+    static canMigrate(decoratorCommandSet, DCS_VERSION) {
+        const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
+        return (semver.major(inputVersion) === semver.major(DCS_VERSION) && (semver.minor(inputVersion) < semver.minor(DCS_VERSION)));
+    }
+
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
@@ -200,11 +213,7 @@ class DecoratorManager {
     static decorateModels(modelManager, decoratorCommandSet, options) {
 
         if (options?.migrate) {
-            // get the version of the decoratorCommandSet from its $class property
-            const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-
-            // if its < the currect DCS_Version, rewrite the $class version to match the supported DCS_VERSION
-            if (semver.lt(inputVersion, DCS_VERSION)) {
+            if (this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
                 decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
             }
         }
