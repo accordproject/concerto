@@ -26,6 +26,7 @@ chai.use(require('chai-as-promised'));
 describe('DecoratorManager', () => {
 
     beforeEach(() => {
+        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
     });
 
     afterEach(() => {
@@ -173,6 +174,159 @@ describe('DecoratorManager', () => {
             zipProperty.should.not.be.null;
             const decoratorZipProperty = zipProperty.getDecorator('Address');
             (decoratorZipProperty ===null).should.be.true;
+        });
+
+        it('should decorate the specified element on the specified Map Declaration (Map Key)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Foo').should.not.be.null;
+            dictionary.key.getDecorator('Qux').should.not.be.null;
+        });
+
+        it('should auto upgrade decoratorcommands $class minor version if it is below DCS_VERSION (asserts decorators are correctly applied)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/incompatible_version_dcs.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true, migrate: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Foo').should.not.be.null;
+            dictionary.key.getDecorator('Qux').should.not.be.null;
+        });
+
+
+        it('should auto upgrade decoratorcommands $class minor version if it is below DCS_VERSION (asserts correct upgrade on DCS $class properties)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            let dcs = fs.readFileSync('./test/data/decoratorcommands/incompatible_version_dcs.json', 'utf-8');
+            dcs = DecoratorManager.migrateTo(JSON.parse(dcs), '0.3.0');
+
+            dcs.$class.should.equal('org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet');
+            dcs.commands[0].$class.should.equal('org.accordproject.decoratorcommands@0.3.0.Command');
+            dcs.commands[0].target.$class.should.equal('org.accordproject.decoratorcommands@0.3.0.CommandTarget');
+            dcs.commands[0].target.type.should.equal('concerto.metamodel@1.0.0.StringMapKeyType'); // concerto metamodel $class does not change
+            dcs.commands[0].decorator.$class.should.equal('concerto.metamodel@1.0.0.Decorator'); // concerto metamodel $class does not change
+        });
+
+        it('should decorate the specified type on the specified Map Declaration (Map Key)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('DecoratesKeyByType').should.not.be.null;
+        });
+
+        it('should decorate the specified element on the specified Map Declaration (Map Value)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.value.getDecorator('Bar').should.not.be.null;
+            dictionary.value.getDecorator('Quux').should.not.be.null;
+        });
+
+        it('should decorate the specified type on the specified Map Declaration (Map Value)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.value.getDecorator('DecoratesValueByType').should.not.be.null;
+        });
+
+        it('should decorate both Key and Value elements on the specified Map Declaration', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Baz').should.not.be.null;
+            dictionary.value.getDecorator('Baz').should.not.be.null;
+        });
+
+        it('should decorate a Key and Value element on an unspecified Map Declaration when a type is specified (type takes precedence over element value KEY_VALUE)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('Bazola').should.not.be.null;
+            dictionary.value.getDecorator('Bongo').should.not.be.null;
+        });
+
+        it('should decorate all Map Declaration Key and Value elements on the model when a declaration is not specified', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+
+            const dictionary    = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            const rolodex       = decoratedModelManager.getType('test@1.0.0.Rolodex');
+
+            dictionary.should.not.be.null;
+            dictionary.key.getDecorator('DecoratesAllMapKeys').should.not.be.null;
+            dictionary.value.getDecorator('DecoratesAllMapValues').should.not.be.null;
+
+            rolodex.should.not.be.null;
+            rolodex.key.getDecorator('DecoratesAllMapKeys').should.not.be.null;
+            rolodex.value.getDecorator('DecoratesAllMapValues').should.not.be.null;
         });
 
         it('should fail with invalid command', async function() {
