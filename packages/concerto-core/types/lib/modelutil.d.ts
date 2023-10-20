@@ -162,12 +162,4 @@ declare class ModelUtil {
      * @return {boolean} true if the Value is a valid Map Value
      */
     static isValidMapValue(value: any): boolean;
-    /**
-     * Returns the corresponding ClassDeclaration representation of the Map Type
-     * @param {string} type - the Type of the Map Value
-     * @param {ModelFile} modelFile - the ModelFile that owns the Property
-     * @return {Object} the corresponding ClassDeclaration representation
-     */
-    static getTypeDeclaration(type: string, modelFile: ModelFile): any;
 }
-import ModelFile = require("../lib/introspect/modelfile");
