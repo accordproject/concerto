@@ -11,15 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace com.testing.base@1.0.0
+namespace com.testing@1.0.0
 
-concept Thing {
-    o String name
-}
+import com.testing.base@1.0.0.Time
 
-scalar Time extends DateTime
-
-enum Stuff {
-    o Thing
-    o Foo
+map Dictionary {
+  o String
+  o Time
 }
