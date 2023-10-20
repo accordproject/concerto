@@ -165,8 +165,9 @@ declare class ModelUtil {
     /**
      * Returns the corresponding ClassDeclaration representation of the Map Type
      * @param {string} type - the Type of the Map Value
-     * @param {Object} modelFile - the ModelFile that owns the Property
+     * @param {ModelFile} modelFile - the ModelFile that owns the Property
      * @return {Object} the corresponding ClassDeclaration representation
      */
-    static getTypeDeclaration(type: string, modelFile: any): any;
+    static getTypeDeclaration(type: string, modelFile: ModelFile): any;
 }
+import ModelFile = require("../lib/introspect/modelfile");
