@@ -13,11 +13,11 @@
  */
 namespace com.testing@1.0.0
 
-participant Customer identified by email {
+participant CustomerParticipant identified by email {
   o String email
 }
 
 map Customer {
   o String
-  o Customer
+  o CustomerParticipant
 }
