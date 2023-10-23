@@ -171,7 +171,7 @@ describe('Scalars', () => {
             p.getScalarField().getType().should.equal('DateTime');
         });
 
-        it("should handle arrays correctly", () => {
+        it('should handle arrays correctly', () => {
             const p = new Field(mockClassDeclaration, {
                 $class: `${MetaModelNamespace}.StringProperty`,
                 name: "property",
@@ -180,7 +180,7 @@ describe('Scalars', () => {
             p.getScalarField().isArray().should.equal(true);
         });
 
-        it("should handle non-arrays correctly", () => {
+        it('should handle non-arrays correctly', () => {
             const p = new Field(mockClassDeclaration, {
                 $class: `${MetaModelNamespace}.StringProperty`,
                 name: "property",
