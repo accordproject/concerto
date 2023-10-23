@@ -174,7 +174,7 @@ describe('Scalars', () => {
         it('should handle arrays correctly', () => {
             const p = new Field(mockClassDeclaration, {
                 $class: `${MetaModelNamespace}.StringProperty`,
-                name: "property",
+                name: 'property',
                 array: true
             });
             p.getScalarField().isArray().should.equal(true);
@@ -183,7 +183,7 @@ describe('Scalars', () => {
         it('should handle non-arrays correctly', () => {
             const p = new Field(mockClassDeclaration, {
                 $class: `${MetaModelNamespace}.StringProperty`,
-                name: "property",
+                name: 'property',
             });
             p.getScalarField().isArray().should.equal(false);
         });
