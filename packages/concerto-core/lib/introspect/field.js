@@ -199,6 +199,7 @@ class Field extends Property {
 
         fieldAst.name = this.ast.name;
         this.scalarField = new Field(this.getParent(), fieldAst);
+        this.scalarField.array = this.isArray();
         return this.scalarField;
     }
 }
