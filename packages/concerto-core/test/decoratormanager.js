@@ -157,13 +157,19 @@ describe('DecoratorManager', () => {
             const decoratorUnversionedNamespace = bioProperty.getDecorator('UnversionedNamespace');
             decoratorUnversionedNamespace.should.not.be.null;
 
-            // applied using properties
+            // applied using property, no type
             const address1Property = decl.getProperty('address1');
             address1Property.should.not.be.null;
             const decoratorAddress1Property = address1Property.getDecorator('Address');
             decoratorAddress1Property.should.not.be.null;
 
-            // applied using properties
+            // applied using property, string type
+            const countryProperty = decl.getProperty('country');
+            countryProperty.should.not.be.null;
+            const decoratorCountryProperty = countryProperty.getDecorator('Address');
+            decoratorCountryProperty.should.not.be.null;
+
+            // applied using properties, string types only
             const address2Property = decl.getProperty('address2');
             address2Property.should.not.be.null;
             const decoratorAddress2Property = address2Property.getDecorator('Address');
@@ -174,6 +180,12 @@ describe('DecoratorManager', () => {
             zipProperty.should.not.be.null;
             const decoratorZipProperty = zipProperty.getDecorator('Address');
             (decoratorZipProperty ===null).should.be.true;
+
+            // applied using properties, no type
+            const cityProperty = decl.getProperty('city');
+            cityProperty.should.not.be.null;
+            const decoratorCity2Property = cityProperty.getDecorator('Address');
+            decoratorCity2Property.should.not.be.null;
         });
 
         it('should decorate the specified element on the specified Map Declaration (Map Key)', async function() {
