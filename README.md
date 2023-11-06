@@ -60,7 +60,7 @@ Infer models from other formats:
 
 ## Getting Started
 
-- Install the [Command Line Tool](https://docs.accordproject.org/docs/ref-concerto-cli.html)
+- Install the [Command Line Tool](https://concerto.accordproject.org/docs/tools/ref-concerto-cli)
 - Read the [Concerto specification](https://docs.accordproject.org/docs/model-concerto.html)
 
 ```console

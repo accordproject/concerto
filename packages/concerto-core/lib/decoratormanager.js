@@ -18,6 +18,8 @@ const ModelManager = require('./modelmanager');
 const Serializer = require('./serializer');
 const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const semver = require('semver');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -27,6 +29,7 @@ if (global === undefined) {
 }
 /* eslint-enable no-unused-vars */
 
+const DCS_VERSION = '0.3.0';
 
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.3.0
@@ -59,6 +62,16 @@ concept CommandTarget {
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
     o String type optional 
+    o MapElement mapElement optional
+}
+
+/**
+ * Map Declaration elements which might be used as a target
+ */
+enum MapElement {
+    o KEY
+    o VALUE
+    o KEY_VALUE
 }
 
 /**
@@ -148,6 +161,43 @@ class DecoratorManager {
     }
 
     /**
+     * Rewrites the $class property on decoratorCommandSet classes.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {string} version the DCS version upgrade target
+     * @returns {object} the migrated DecoratorCommandSet object
+     */
+    static migrateTo(decoratorCommandSet, version) {
+        if (decoratorCommandSet instanceof Object) {
+            for (let key in decoratorCommandSet) {
+                if (key === '$class' && decoratorCommandSet[key].includes('org.accordproject.decoratorcommands')) {
+                    const ns = ModelUtil.getNamespace(decoratorCommandSet.$class);
+                    decoratorCommandSet[key] = decoratorCommandSet[key].replace(
+                        ModelUtil.parseNamespace(ns).version,
+                        DCS_VERSION);
+                }
+                if (decoratorCommandSet[key] instanceof Object || decoratorCommandSet[key] instanceof Array) {
+                    this.migrateTo(decoratorCommandSet[key], version);
+                }
+            }
+        }
+        return decoratorCommandSet;
+    }
+
+    /**
+     * Checks if the supplied decoratorCommandSet can be migrated.
+     * Migrations should only take place across minor versions of the same major version.
+     * @private
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} DCS_VERSION the DecoratorCommandSet version
+     * @returns {boolean} returns true if major versions are equal
+     */
+    static canMigrate(decoratorCommandSet, DCS_VERSION) {
+        const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
+        return (semver.major(inputVersion) === semver.major(DCS_VERSION) && (semver.minor(inputVersion) < semver.minor(DCS_VERSION)));
+    }
+
+    /**
      * Applies all the decorator commands from the DecoratorCommandSet
      * to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
@@ -157,11 +207,29 @@ class DecoratorManager {
      * with respect to to decorator command set model
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
+
+        if (options?.migrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
+            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
+        }
+
         if (options?.validate) {
-            const validationModelManager = DecoratorManager.validate(decoratorCommandSet, modelManager.getModelFiles());
+            const validationModelManager = new ModelManager({
+                strict: true,
+                metamodelValidation: true,
+                addMetamodel: true,
+            });
+            validationModelManager.addModelFiles(modelManager.getModelFiles());
+            validationModelManager.addCTOModel(
+                DCS_MODEL,
+                'decoratorcommands@0.3.0.cto'
+            );
+            const factory = new Factory(validationModelManager);
+            const serializer = new Serializer(factory, validationModelManager);
+            serializer.fromJSON(decoratorCommandSet);
             if (options?.validateCommands) {
                 decoratorCommandSet.commands.forEach((command) => {
                     DecoratorManager.validateCommand(
@@ -448,6 +516,27 @@ class DecoratorManager {
         }
     }
 
+
+    /**
+     * Applies a new decorator to the Map element
+     * @private
+     * @param {string} element the element to apply the decorator to
+     * @param {string} target the command target
+     * @param {*} declaration the map declaration
+     * @param {string} type the command type
+     * @param {*} newDecorator the decorator to add
+     */
+    static applyDecoratorForMapElement(element, target, declaration, type, newDecorator ) {
+        const decl = element === 'KEY' ? declaration.key : declaration.value;
+        if (target.type) {
+            if (this.falsyOrEqual(target.type, decl.$class)) {
+                this.applyDecorator(decl, type, newDecorator);
+            }
+        } else {
+            this.applyDecorator(decl, type, newDecorator);
+        }
+    }
+
     /**
      * Compares two arrays. If the first argument is falsy
      * the function returns true.
@@ -507,12 +596,31 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command) {
         const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace(namespace);
-        if (
-            this.falsyOrEqual(target.namespace, [namespace, name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])
-        ) {
-            if (!target.property && !target.type) {
+        const { name } = ModelUtil.parseNamespace( namespace );
+        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])) {
+
+            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                if (target.mapElement) {
+                    switch(target.mapElement) {
+                    case 'KEY':
+                    case 'VALUE':
+                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        break;
+                    case 'KEY_VALUE':
+                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
+                        break;
+                    }
+                } else if (target.type) {
+                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                        this.applyDecorator(declaration.key, type, decorator);
+                    }
+                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                        this.applyDecorator(declaration.value, type, decorator);
+                    }
+                }
+            } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);
             } else {
                 // scalars are declarations but do not have properties

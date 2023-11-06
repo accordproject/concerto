@@ -23,8 +23,11 @@
 #
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
-Version 3.13.2 {58af214d962348c5b97ad8388bfa2bb6} 2023-11-03
+Version 3.14.2 {895e3b58681c2fa4f70c20f1c3c8f029} 2023-11-03
 - Add JSDoc for enableMapType option on ModelManager
+
+Version 3.13.1 {f5a9a1ea6a64865843a3abb77798cbb0} 2023-10-18
+- Add migrate option to DecoratorManager options
 
 Version 3.13.1 {f435a20a00712e49c5cd32bc73ecb06a} 2023-10-03
 - Add JSDoc for enableMapType option on ModelManager

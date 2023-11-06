@@ -11,8 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace com.testing@1.0.0
 
-export { Compare } from './compare';
-export { CompareConfig, CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config';
-export { CompareFinding, CompareResults } from './compare-results';
+import com.testing.base@1.0.0.{Thing}
 
+map Dictionary {
+  o Thing
+  o String
+}

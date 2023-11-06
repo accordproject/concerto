@@ -56,7 +56,7 @@ class Concerto {
    + object setCurrentTime() 
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 
    + void addToDict(Object,string,any,string,string) 
    + Object extractDecorators(ModelManager,object?) 
    + Object[] parseDecorators(Object) 

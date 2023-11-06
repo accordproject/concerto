@@ -19,6 +19,13 @@ const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const Globalize = require('./globalize');
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelFile = require('../lib/introspect/modelfile');
+}
+
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 const privateReservedProperties = [
@@ -315,11 +322,11 @@ class ModelUtil {
     }
 
     /**
-         * Returns true if this Value is a valid Map Value.
-         *
-         * @param {Object} value - the Value of the Map Declaration
-         * @return {boolean} true if the Value is a valid Map Value
-         */
+     * Returns true if this Value is a valid Map Value.
+     *
+     * @param {Object} value - the Value of the Map Declaration
+     * @return {boolean} true if the Value is a valid Map Value
+     */
     static isValidMapValue(value) {
         return [
             `${MetaModelNamespace}.BooleanMapValueType`,
@@ -330,6 +337,21 @@ class ModelUtil {
             `${MetaModelNamespace}.DoubleMapValueType`,
             `${MetaModelNamespace}.ObjectMapValueType`
         ].includes(value.$class);
+    }
+
+    /**
+     * Returns the corresponding ClassDeclaration representation of the Map Type
+     * @param {string} type - the Type of the Map Value
+     * @param {ModelFile} modelFile - the ModelFile that owns the Property
+     * @return {Object} the corresponding ClassDeclaration representation
+     */
+    static getTypeDeclaration(type, modelFile) {
+        if (modelFile.isLocalType(type)) {
+            return modelFile.getAllDeclarations().find(d => d.name === type);
+        } else {
+            const fqn = modelFile.resolveImport(type);
+            return modelFile.getModelManager().getType(fqn);
+        }
     }
 }
 

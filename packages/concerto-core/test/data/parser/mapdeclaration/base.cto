@@ -11,8 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace com.testing.base@1.0.0
 
-export { Compare } from './compare';
-export { CompareConfig, CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config';
-export { CompareFinding, CompareResults } from './compare-results';
+concept Thing {
+    o String name
+}
 
+scalar Time extends DateTime
