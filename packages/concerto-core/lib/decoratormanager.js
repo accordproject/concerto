@@ -441,7 +441,7 @@ class DecoratorManager {
                 } else {
                     this.applyDecorator(declaration, type, decorator);
                 }
-            } else if (!target.property && !target.type) {
+            } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);
             } else {
                 // scalars are declarations but do not have properties

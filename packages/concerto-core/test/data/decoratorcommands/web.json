@@ -99,8 +99,54 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test",
                 "declaration" : "Person",
+                "property" : "address1"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Address",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
+                "property" : "country",
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Address",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
                 "type" : "concerto.metamodel@1.0.0.StringProperty",
-                "properties" : ["address1", "address2", "zip"]
+                "properties" : ["address2", "zip"]
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Address",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test",
+                "declaration" : "Person",
+                "properties" : ["city"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
