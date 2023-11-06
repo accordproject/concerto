@@ -34,7 +34,7 @@ let vocabularyManager = null;
 
 describe('VocabularyManager', () => {
     beforeEach(() => {
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({ enableMapType: true});
         const model = fs.readFileSync('./test/org.acme@1.0.0.cto', 'utf-8');
         modelManager.addCTOModel(model);
         const model2 = fs.readFileSync('./test/org.accordproject@1.0.0.cto', 'utf-8');
