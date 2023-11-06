@@ -304,4 +304,32 @@ describe('DecoratorManager', () => {
             }).should.throw(/Model violation in the "concerto.metamodel@1.0.0.Decorator" instance. Invalid enum value of "INVALID" for the field "CommandType"/);
         });
     });
+
+    describe('#extractDecorators', function() {
+        it('should be able to extract decorators and vocabs from a model', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test-decorated-model.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            let resp = DecoratorManager.extractDecorators( testModelManager, options);
+            resp.should.not.be.null;
+        });
+        it('should be able to extract decorators and vocabs from a model without namespace', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test-decorated-model.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const modelTextWithoutNamespace = fs.readFileSync('./test/data/decoratorcommands/test-decorator-without-version.cto', 'utf-8');
+            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test2.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            let resp = DecoratorManager.extractDecorators( testModelManager, options);
+            resp.should.not.be.null;
+        });
+    });
+
 });

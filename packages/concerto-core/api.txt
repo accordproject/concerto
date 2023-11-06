@@ -57,11 +57,17 @@ class Concerto {
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?) 
+   + void addToDict(Object,string,any,string,string) 
+   + Object extractDecorators(ModelManager,object?) 
+   + Object[] parseDecorators(Object) 
+   + Object[] parseVocabs(Object,String) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command) 
    + void executePropertyCommand(property,command) 
+   + void extractDecoratorFromModel(String,declaration,Object,boolean) 
+   + void processDecorators(string,string[],Object,boolean,string,string) 
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
