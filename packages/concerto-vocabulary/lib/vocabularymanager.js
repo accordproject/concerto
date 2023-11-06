@@ -205,7 +205,18 @@ class VocabularyManager {
     resolveTerms(modelManager, namespace, locale, declarationName, propertyName) {
         const modelFile = modelManager.getModelFile(namespace);
         const classDecl = modelFile ? modelFile.getType(declarationName) : null;
-        const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
+        let property;
+        if(classDecl && !classDecl.isScalarDeclaration()) {
+            if(classDecl.isMapDeclaration()) {
+                if(propertyName === 'KEY') {
+                    property = classDecl.getKey();
+                } else if(propertyName === 'VALUE') {
+                    property = classDecl.getValue();
+                }
+            } else {
+                property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
+            }
+        }
         return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName);
     }
 
@@ -336,11 +347,13 @@ class VocabularyManager {
                     });
                 }
 
-                decl.getProperties?.().forEach(property => {
-                    const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), property.getName());
+                const propertyNames = decl.getProperties ? decl.getProperties().map(property => property.getName()) : decl.isMapDeclaration ? decl.isMapDeclaration() ? ['KEY', 'VALUE'] : [] : [];
+                propertyNames.forEach(propertyName => {
+                    const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), propertyName);
                     if (propertyTerms) {
                         Object.keys(propertyTerms).forEach( term => {
-                            if(term === property.getName()) {
+                            const propertyType = !propertyName.localeCompare('KEY') || !propertyName.localeCompare('VALUE')  ? 'mapElement' : 'property';
+                            if(term === propertyName) {
                                 decoratorCommandSet.commands.push({
                                     '$class': `${DC_NAMESPACE}.Command`,
                                     'type': 'UPSERT',
@@ -348,7 +361,7 @@ class VocabularyManager {
                                         '$class': `${DC_NAMESPACE}.CommandTarget`,
                                         'namespace': model.getNamespace(),
                                         'declaration': decl.getName(),
-                                        'property': property.getName()
+                                        [propertyType]: propertyName
                                     },
                                     'decorator': {
                                         '$class': `${MetaModelNamespace}.Decorator`,
@@ -370,7 +383,7 @@ class VocabularyManager {
                                         '$class': `${DC_NAMESPACE}.CommandTarget`,
                                         'namespace': model.getNamespace(),
                                         'declaration': decl.getName(),
-                                        'property': property.getName()
+                                        [propertyType]: propertyName
                                     },
                                     'decorator': {
                                         '$class': `${MetaModelNamespace}.Decorator`,

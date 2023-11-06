@@ -162,6 +162,14 @@ class MapKeyType extends Decorated {
     isValue() {
         return false;
     }
+
+    /**
+     * Return the namespace of this map key.
+     * @return {string} namespace - a namespace.
+     */
+    getNamespace() {
+        return this.modelFile.getNamespace();
+    }
 }
 
 module.exports = MapKeyType;

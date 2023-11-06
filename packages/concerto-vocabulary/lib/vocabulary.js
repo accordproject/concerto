@@ -145,15 +145,42 @@ class Vocabulary {
      */
     validate(modelFile) {
         const getOwnProperties = (d) => {
-            // ensures we have a valid return, even for scalars
-            return d.getOwnProperties?.() ? d.getOwnProperties?.() : [];
+            // ensures we have a valid return, even for scalars and map-declarations
+            return d.isMapDeclaration() ? [d.getKey(), d.getValue()] :  d.getOwnProperties?.() ? d.getOwnProperties?.() : [];
+        };
+
+        const getPropertyName = (p) => {
+            if(p.isKey?.()) {
+                return 'KEY';
+            } else if(p.isValue?.()) {
+                return 'VALUE';
+            } else {
+                return p.getName();
+            }
+        };
+
+        const checkProperties = (k, p) => {
+            const declaration = modelFile.getLocalType(Object.keys(k)[0]);
+            const property = Object.keys(p)[0];
+            if(declaration.isMapDeclaration()) {
+                if (!property.localeCompare('KEY')) {
+                    return true;
+                } else if(!property.localeCompare('VALUE')) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return declaration.getOwnProperty(Object.keys(p)[0]);
+            }
+
         };
         const result = {
             missingTerms: modelFile.getAllDeclarations().flatMap( d => this.getTerm(d.getName())
-                ? getOwnProperties(d).flatMap( p => this.getTerm(d.getName(), p.getName()) ? null : `${d.getName()}.${p.getName()}`)
+                ? getOwnProperties(d).flatMap( p => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
                 : d.getName() ).filter( i => i !== null),
             additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
-                ? Array.isArray(k.properties) ? k.properties.flatMap( p => modelFile.getLocalType(Object.keys(k)[0]).getOwnProperty(Object.keys(p)[0]) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
+                ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkProperties(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( i => i !== null)
         };
 

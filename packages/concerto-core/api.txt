@@ -180,6 +180,7 @@ class MapKeyType extends Decorated {
    + String toString() 
    + boolean isKey() 
    + boolean isValue() 
+   + string getNamespace() 
 }
 class MapValueType extends Decorated {
    + void constructor(MapDeclaration,Object) throws IllegalModelException
@@ -190,6 +191,7 @@ class MapValueType extends Decorated {
    + String toString() 
    + boolean isKey() 
    + boolean isValue() 
+   + string getNamespace() 
 }
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
@@ -272,6 +274,7 @@ class ScalarDeclaration extends Declaration {
    + boolean isTransaction() 
    + boolean isEvent() 
    + boolean isConcept() 
+   + boolean isMapDeclaration() 
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
