@@ -300,8 +300,7 @@ class DecoratorManager {
         return {
             modelManager:newModelManager,
             decoratorCommandSet:dcms,
-            vocabularies:vocab,
-            decoractorDict
+            vocabularies:vocab
         };
     }
 
@@ -680,9 +679,11 @@ class DecoratorManager {
     * @param {string} property - property on which decorator has been applied
     */
     static processDecorators(namespace, decorators, decoratorDict, shouldRemoveDecorators,decl,property) {
-        this.addToDict(decoratorDict, namespace, decorators,decl,property);
-        if (shouldRemoveDecorators && decorators) {
-            decorators.length = 0; // Clears the array in an efficient way
+        if (decorators){
+            this.addToDict(decoratorDict, namespace, decorators,decl,property);
+            if (shouldRemoveDecorators && decorators) {
+                decorators.length = 0; // Clears the array in an efficient way
+            }
         }
     }
 }
