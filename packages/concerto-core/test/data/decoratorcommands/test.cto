@@ -11,6 +11,8 @@ concept Person {
     o SSN ssn
     o String address1
     o String address2
+    o String city
+    o String country
     o Integer zip
     o Dictionary dictionary
 }
