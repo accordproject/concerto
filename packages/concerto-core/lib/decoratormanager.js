@@ -309,7 +309,7 @@ class DecoratorManager {
         };
         const newModelManager = new ModelManager();
         newModelManager.fromAst(processedAST);
-        let dcms=(this.parseDecorators(extractionDictionary));
+        let dcms=(this.parseNonVocabularyDecorators(extractionDictionary));
         let vocab = this.parseVocabularies(extractionDictionary,options.locale);
         return {
             modelManager:newModelManager,
@@ -323,13 +323,14 @@ class DecoratorManager {
      * @returns {Array<Object>} the parsed decorator command set array
      * @private
      */
-    static parseDecorators(decoratorDict){
+    static parseNonVocabularyDecorators(decoratorDict){
         let data = [];
         Object.keys(decoratorDict).forEach((namespace)=>{
-            let nameOfDcs=namespace.split('@')[0];
-            let versionOfDcs=namespace.includes('@')?namespace.split('@')[1]:'1.0.0';
+            const {name, version} = ModelUtil.parseNamespace(namespace);
+            const nameOfDcs=name;
+            const versionOfDcs=version;
             let dcsObjects=[];
-            let jsonData=decoratorDict[namespace];
+            const jsonData=decoratorDict[namespace];
             const patternToDetermineVocab = /^Term_/i;
             jsonData.forEach((obj)=>{
                 let decos=JSON.parse(obj.dcs);
