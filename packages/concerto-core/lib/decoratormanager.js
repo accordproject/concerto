@@ -256,7 +256,7 @@ class DecoratorManager {
     /**
      * Extracts all the decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {object} [options] - decorator models options
+     * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {Object} a new model manager with the decorations removed and a list of extracted decorator jsons
