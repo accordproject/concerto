@@ -18,3 +18,8 @@ concept Thing {
 }
 
 scalar Time extends DateTime
+
+enum Stuff {
+    o Thing
+    o Foo
+}

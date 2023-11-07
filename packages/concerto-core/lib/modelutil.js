@@ -338,21 +338,6 @@ class ModelUtil {
             `${MetaModelNamespace}.ObjectMapValueType`
         ].includes(value.$class);
     }
-
-    /**
-     * Returns the corresponding ClassDeclaration representation of the Map Type
-     * @param {string} type - the Type of the Map Value
-     * @param {ModelFile} modelFile - the ModelFile that owns the Property
-     * @return {Object} the corresponding ClassDeclaration representation
-     */
-    static getTypeDeclaration(type, modelFile) {
-        if (modelFile.isLocalType(type)) {
-            return modelFile.getAllDeclarations().find(d => d.name === type);
-        } else {
-            const fqn = modelFile.resolveImport(type);
-            return modelFile.getModelManager().getType(fqn);
-        }
-    }
 }
 
 module.exports = ModelUtil;

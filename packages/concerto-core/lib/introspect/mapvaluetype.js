@@ -69,7 +69,8 @@ class MapValueType extends Decorated {
      */
     validate() {
         if (!ModelUtil.isPrimitiveType(this.type)) {
-            const decl = ModelUtil.getTypeDeclaration(this.ast.type.name, this.modelFile);
+
+            const decl = this.modelFile.getType(this.ast.type.name);
 
             // All declarations, with the exception of MapDeclarations, are valid Values.
             if(decl.isMapDeclaration?.()) {
