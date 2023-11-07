@@ -34,25 +34,16 @@ concept PersonMain {
     o String ssn
 }
 
-@Term("A driver of a vehicle")
-@Term_description("some driver")
 concept Driver extends Person {
-  @Term("favourite colour")
-  @Term_description("some color")
   o String favoriteColor
 }
 
-@Term("Employee")
 concept Employee {
-  @Term("Ssn of the Employee")
   o String ssn
 }
 
-@Term("Car")
 concept Car identified by vin {
-  @Term("Vin of the Car")
   o String vin
-  @Term("Owner of the Car")
   @Hide("object")
   o Person owner
 }

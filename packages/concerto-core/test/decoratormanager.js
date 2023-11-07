@@ -476,25 +476,30 @@ describe('DecoratorManager', () => {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test-decorated-model.cto', 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
-            const options = {
-                removeDecoratorsFromModel:true,
-                locale:'en'
-            };
-            let resp = DecoratorManager.extractDecorators( testModelManager, options);
-            resp.should.not.be.null;
+            let resp = DecoratorManager.extractDecorators( testModelManager);
+            let dcs = resp.decoratorCommandSet;
+            const validationModelResult = dcs.map((decoractor)=>{
+                return DecoratorManager.validate((decoractor));
+            });
+            validationModelResult.should.not.be.null;
         });
-        it('should be able to extract decorators and vocabs from a model without namespace', async function() {
+        it('should be able to extract decorators and vocabs from a model without namespace version', async function() {
             const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync('./test/data/decoratorcommands/test-decorated-model.cto', 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
             const modelTextWithoutNamespace = fs.readFileSync('./test/data/decoratorcommands/test-decorator-without-version.cto', 'utf-8');
-            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test2.cto');
+            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test.cto');
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en'
             };
             let resp = DecoratorManager.extractDecorators( testModelManager, options);
-            resp.should.not.be.null;
+            let dcs = resp.decoratorCommandSet;
+            let modelManager = resp.modelManager;
+            dcs.forEach((decorator)=>{
+                modelManager=DecoratorManager.decorateModels( modelManager, decorator);
+            });
+            let updatedModels = modelManager.getNamespaces();
+            let testModels = testModelManager.getNamespaces();
+            updatedModels.should.deep.equal(testModels);
         });
     });
 

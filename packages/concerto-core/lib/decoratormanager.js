@@ -252,62 +252,76 @@ class DecoratorManager {
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
     }
-    /**
-    * Adds a key-value pair to a dictionary (object) if the key exists,
-    * or creates a new key with the provided value.
-    *
-    * @param {Object} dictionary - The dictionary (object) to which to add the key-value pair.
-    * @param {string} key - The key to add or update.
-    * @param {any} value - The value to add or update.
-    * @param {string} declaration - The target decl.
-    * @param {string} property The target property.
-    */
-    static addToDict(dictionary, key, value, declaration,property) {
-        const val = {
-            declaration,
-            property,
-            dcs: JSON.stringify(value),
-        };
-        if (dictionary[key]) {
-            dictionary[key].push(val);
-        } else {
-            dictionary[key] = [val];
-        }
-    }
 
     /**
      * Extracts all the decorator commands from all the models in modelManager
      * @param {ModelManager} modelManager the input model manager
      * @param {object} [options] - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {Object} a new model manager with the decorations removed and a list of extracted decorator jsons
      */
     static extractDecorators(modelManager,options) {
+        options = {
+            ...{
+                removeDecoratorsFromModel: false,
+                locale:'en'
+            },
+            ...options || {}
+        };
         const ast = modelManager.getAst(true);
-        const unDecoratedAst = JSON.parse(JSON.stringify(ast));
-        let decoractorDict={};
-        unDecoratedAst.models.forEach((model) => {
+        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        let extractionDictionary={};
+        let processedModels = decoratedAst.models.map((model)=>{
             if (model.decorators && model.decorators.length>0){
-                this.processDecorators(model.namespace, model.decorators, decoractorDict, options.removeDecoratorsFromModel,'','');
+                extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, model.decorators,'','');
+                if (options.removeDecoratorsFromModel){
+                    model.decorators=undefined;
+                }
             }
-            model.declarations.forEach((decl) => {
-                this.extractDecoratorFromModel(model.namespace,decl,decoractorDict,options.removeDecoratorsFromModel);
+            let processedDecl = model.declarations.map((decl)=>{
+                if (decl.decorators) {
+                    extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.decorators,decl.name,'');
+                }
+                if (options.removeDecoratorsFromModel){
+                    decl.decorators=undefined;
+                }
+                if (decl.properties) {
+                    let processedProperties = decl.properties.map((property) => {
+                        if (property.decorators){
+                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, property.decorators,decl.name,property.name);
+                        }
+                        if (options.removeDecoratorsFromModel){
+                            property.decorators=undefined;
+                        }
+                        return property;
+                    });
+                    decl.properties=processedProperties;
+                }
+                return decl;
             });
+            model.declarations=processedDecl;
+            return model;
         });
+        let processedAST={
+            ...decoratedAst,
+            models:processedModels,
+        };
         const newModelManager = new ModelManager();
-        newModelManager.fromAst(unDecoratedAst);
-        let dcms=this.parseDecorators(decoractorDict);
-        let vocab = this.parseVocabs(decoractorDict,options.locale);
+        newModelManager.fromAst(processedAST);
+        let dcms=(this.parseDecorators(extractionDictionary));
+        let vocab = this.parseVocabularies(extractionDictionary,options.locale);
         return {
             modelManager:newModelManager,
             decoratorCommandSet:dcms,
             vocabularies:vocab
         };
     }
-
     /**
      * Parses the dict data into an array of decorator jsons
      * @param {Object} decoratorDict the input dict
      * @returns {Array<Object>} the parsed decorator command set array
+     * @private
      */
     static parseDecorators(decoratorDict){
         let data = [];
@@ -316,10 +330,11 @@ class DecoratorManager {
             let versionOfDcs=namespace.includes('@')?namespace.split('@')[1]:'1.0.0';
             let dcsObjects=[];
             let jsonData=decoratorDict[namespace];
+            const patternToDetermineVocab = /^Term_/i;
             jsonData.forEach((obj)=>{
                 let decos=JSON.parse(obj.dcs);
                 let target={
-                    '$class': 'org.accordproject.decoratorcommands.CommandTarget',
+                    '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
                     'namespace':namespace
                 };
                 if (obj.declaration && obj.declaration!==''){
@@ -329,7 +344,7 @@ class DecoratorManager {
                     target.property=obj.property;
                 }
                 decos.forEach((dcs)=>{
-                    if (dcs.name!=='Term' && dcs.name!=='Term_description'){
+                    if (dcs.name!=='Term' && patternToDetermineVocab.test(dcs.name)){
                         let decotatorObj={
                             '$class': 'concerto.metamodel@1.0.0.Decorator',
                             'name': dcs.name,
@@ -344,7 +359,7 @@ class DecoratorManager {
                             decotatorObj.arguments=args;
                         }
                         let dcsObject = {
-                            '$class': 'org.accordproject.decoratorcommands.Command',
+                            '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
                             'type': 'UPSERT',
                             'target': target,
                             'decorator': decotatorObj,
@@ -354,7 +369,7 @@ class DecoratorManager {
                 });
             });
             let dcmsForNamespace={
-                '$class': 'org.accordproject.decoratorcommands.DecoratorCommandSet',
+                '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.DecoratorCommandSet`,
                 'name': nameOfDcs,
                 'version': versionOfDcs,
                 'commands': dcsObjects
@@ -368,9 +383,11 @@ class DecoratorManager {
      * @param {Object} decoratorDict the input dict
      * @param {String} locale locale for target vocab
      * @returns {Array<Object>} the parsed decorator command set array
+     * @private
      */
-    static parseVocabs(decoratorDict,locale){
+    static parseVocabularies(decoratorDict,locale){
         let data = [];
+        const patternToDetermineVocab = /^Term_/i;
         Object.keys(decoratorDict).forEach((namespace)=>{
             let strVoc='';
             strVoc=strVoc+`locale: ${locale}\n`;
@@ -387,7 +404,7 @@ class DecoratorManager {
                 }
                 let decos=JSON.parse(obj.dcs);
                 decos.forEach((dcs)=>{
-                    if (dcs.name==='Term' || dcs.name==='Term_description'){
+                    if (dcs.name==='Term' || patternToDetermineVocab.test(dcs.name)){
                         if (obj.property!==''){
                             if(!dictVoc[obj.declaration].propertyVocabs[obj.property]){
                                 dictVoc[obj.declaration].propertyVocabs[obj.property]={};
@@ -396,7 +413,8 @@ class DecoratorManager {
                                 dictVoc[obj.declaration].propertyVocabs[obj.property].term=dcs.arguments[0].value;
                             }
                             else{
-                                dictVoc[obj.declaration].propertyVocabs[obj.property].term=dcs.arguments[0].value;
+                                let extensionKey = dcs.name.split('Term_')[1];
+                                dictVoc[obj.declaration].propertyVocabs[obj.property][extensionKey]=dcs.arguments[0].value;
                             }
                         }
                         else{
@@ -404,7 +422,8 @@ class DecoratorManager {
                                 dictVoc[obj.declaration].term=dcs.arguments[0].value;
                             }
                             else{
-                                dictVoc[obj.declaration].term_desc=dcs.arguments[0].value;
+                                let extensionKey = dcs.name.split('Term_')[1];
+                                dictVoc[obj.declaration][extensionKey]=dcs.arguments[0].value;
                             }
                         }
                     }
@@ -414,16 +433,18 @@ class DecoratorManager {
             Object.keys(dictVoc).forEach((decl)=>{
                 if (dictVoc[decl].term){
                     strVoc+=`  - ${decl}: ${dictVoc[decl].term}\n`;
-                    if (dictVoc[decl].term_desc){
-                        strVoc+=`    description: ${dictVoc[decl].term_desc}\n`;
-                    }
+                    let otherProps = Object.keys(dictVoc[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
+                    otherProps.forEach((key)=>{
+                        strVoc+=`    ${key}: ${dictVoc[decl][key]}\n`;
+                    });
                     if (dictVoc[decl].propertyVocabs){
                         strVoc+='    properties:\n';
                         Object.keys(dictVoc[decl].propertyVocabs).forEach((prop)=>{
                             strVoc+=`      - ${prop}: ${dictVoc[decl].propertyVocabs[prop].term}\n`;
-                            if (dictVoc[decl].term_desc){
-                                strVoc+=`        description: ${dictVoc[decl].propertyVocabs[prop].term_desc}\n`;
-                            }
+                            let otherProps = Object.keys(dictVoc[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
+                            otherProps.forEach((key)=>{
+                                strVoc+=`        ${key}: ${dictVoc[decl].propertyVocabs[prop][key]}\n`;
+                            });
                         });
                     }
                 }
@@ -431,6 +452,31 @@ class DecoratorManager {
             data.push(strVoc);
         });
         return data;
+    }
+    /**
+    * Adds a key-value pair to a dictionary (object) if the key exists,
+    * or creates a new key with the provided value.
+    *
+    * @param {Object} dictionary - The dictionary (object) to which to add the key-value pair.
+    * @param {string} key - The key to add or update.
+    * @param {any} value - The value to add or update.
+    * @param {string} declaration - The target decl.
+    * @param {string} property The target property.
+    * @returns {Object} - constructed DCS Dict
+    * @private
+    */
+    static constructDCSDictionary(dictionary, key, value, declaration,property) {
+        const val = {
+            declaration,
+            property,
+            dcs: JSON.stringify(value),
+        };
+        if (dictionary[key] && Array.isArray( dictionary[key])) {
+            dictionary[key].push(val);
+        } else {
+            dictionary[key] = [val];
+        }
+        return dictionary;
     }
 
     /**
@@ -652,38 +698,6 @@ class DecoratorManager {
             this.falsyOrEqual(target.type, [property.$class])
         ) {
             this.applyDecorator(property, type, decorator);
-        }
-    }
-    /**
-     * extracts a Command from a ClassDeclaration or its properties, as required.
-     * @param {String} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {Object} decoratorDict the dictionary with extracted decorators
-     * @param {boolean} shouldRemoveDecorators whether to remove decorators from base model
-     */
-    static extractDecoratorFromModel(namespace, declaration, decoratorDict, shouldRemoveDecorators) {
-        this.processDecorators(namespace, declaration.decorators, decoratorDict, shouldRemoveDecorators,declaration.name,'');
-        if (declaration.properties) {
-            declaration.properties.forEach((property) => {
-                this.processDecorators(namespace, property.decorators, decoratorDict, shouldRemoveDecorators,declaration.name,property.name);
-            });
-        }
-    }
-    /**
-    * Process decorators for a given set of decorators.
-    * @param {string} namespace - The namespace to associate with the decorators.
-    * @param {Array<string>} decorators - The array of decorators to process.
-    * @param {Object} decoratorDict - The decorator dictionary to store the decorators.
-    * @param {boolean} shouldRemoveDecorators - A flag to indicate whether decorators hould be removed.
-    * @param {string} decl - declaration on which decorator has been applied
-    * @param {string} property - property on which decorator has been applied
-    */
-    static processDecorators(namespace, decorators, decoratorDict, shouldRemoveDecorators,decl,property) {
-        if (decorators){
-            this.addToDict(decoratorDict, namespace, decorators,decl,property);
-            if (shouldRemoveDecorators && decorators) {
-                decorators.length = 0; // Clears the array in an efficient way
-            }
         }
     }
 }
