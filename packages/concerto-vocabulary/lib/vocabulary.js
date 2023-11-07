@@ -144,28 +144,32 @@ class Vocabulary {
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
     validate(modelFile) {
-        const getOwnProperties = (d) => {
+        const getOwnProperties = (declaration) => {
             // ensures we have a valid return, even for scalars and map-declarations
-            return d.isMapDeclaration() ? [d.getKey(), d.getValue()] :  d.getOwnProperties?.() ? d.getOwnProperties?.() : [];
-        };
-
-        const getPropertyName = (p) => {
-            if(p.isKey?.()) {
-                return 'KEY';
-            } else if(p.isValue?.()) {
-                return 'VALUE';
+            if(declaration.isMapDeclaration()) {
+                return [declaration.getKey(), declaration.getValue()];
             } else {
-                return p.getName();
+                return declaration.getOwnProperties?.() ? declaration.getOwnProperties?.() : [];
             }
         };
 
-        const checkProperties = (k, p) => {
+        const getPropertyName = (property) => {
+            if(property.isKey?.()) {
+                return 'KEY';
+            } else if(property.isValue?.()) {
+                return 'VALUE';
+            } else {
+                return property.getName();
+            }
+        };
+
+        const checkPropertyExists = (k, p) => {
             const declaration = modelFile.getLocalType(Object.keys(k)[0]);
             const property = Object.keys(p)[0];
             if(declaration.isMapDeclaration()) {
-                if (!property.localeCompare('KEY')) {
+                if (property === 'KEY') {
                     return true;
-                } else if(!property.localeCompare('VALUE')) {
+                } else if(property === 'VALUE') {
                     return true;
                 } else {
                     return false;
@@ -173,14 +177,14 @@ class Vocabulary {
             } else {
                 return declaration.getOwnProperty(Object.keys(p)[0]);
             }
-
         };
+
         const result = {
             missingTerms: modelFile.getAllDeclarations().flatMap( d => this.getTerm(d.getName())
                 ? getOwnProperties(d).flatMap( p => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
                 : d.getName() ).filter( i => i !== null),
             additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
-                ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkProperties(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
+                ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( i => i !== null)
         };
 

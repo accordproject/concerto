@@ -297,6 +297,16 @@ class VocabularyManager {
             'commands': []
         };
 
+        const getPropertyNames = (declaration) => {
+            if (declaration.getProperties) {
+                return declaration.getProperties().map(property => property.getName());
+            } else if(declaration.isMapDeclaration?.()) {
+                return ['KEY', 'VALUE'];
+            } else {
+                return [];
+            }
+        };
+
         modelManager.getModelFiles().forEach(model => {
             model.getAllDeclarations().forEach(decl => {
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
@@ -347,12 +357,12 @@ class VocabularyManager {
                     });
                 }
 
-                const propertyNames = decl.getProperties ? decl.getProperties().map(property => property.getName()) : decl.isMapDeclaration ? decl.isMapDeclaration() ? ['KEY', 'VALUE'] : [] : [];
+                const propertyNames = getPropertyNames(decl);
                 propertyNames.forEach(propertyName => {
                     const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), propertyName);
                     if (propertyTerms) {
                         Object.keys(propertyTerms).forEach( term => {
-                            const propertyType = !propertyName.localeCompare('KEY') || !propertyName.localeCompare('VALUE')  ? 'mapElement' : 'property';
+                            const propertyType = propertyName === 'KEY' || propertyName === 'VALUE'  ? 'mapElement' : 'property';
                             if(term === propertyName) {
                                 decoratorCommandSet.commands.push({
                                     '$class': `${DC_NAMESPACE}.Command`,
