@@ -171,5 +171,35 @@ describe('Scalars', () => {
             p.getScalarField().getType().should.equal('DateTime');
         });
 
+        it('should handle arrays correctly', () => {
+            mockScalarDeclaration.ast = {
+                $class: `${MetaModelNamespace}.StringScalar`,
+                name: 'MyScalar',
+            };
+            const p = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'property',
+                type: {
+                    name: 'MyScalar',
+                },
+                isArray: true
+            });
+            p.getScalarField().isArray().should.equal(true);
+        });
+
+        it('should handle non-arrays correctly', () => {
+            mockScalarDeclaration.ast = {
+                $class: `${MetaModelNamespace}.StringScalar`,
+                name: 'MyScalar',
+            };
+            const p = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'property',
+                type: {
+                    name: 'MyScalar',
+                },
+            });
+            p.getScalarField().isArray().should.equal(false);
+        });
     });
 });

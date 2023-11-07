@@ -136,6 +136,11 @@ describe('ClassDeclaration', () => {
             const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalaridentifier.cto', ConceptDeclaration);
             clazz.validate();
         });
+
+        it('should not throw when a scalar array is used as an identifier', () => {
+            const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalararray.cto', ConceptDeclaration);
+            clazz.validate();
+        });
     });
 
     describe('#accept', () => {
