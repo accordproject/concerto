@@ -25,7 +25,7 @@
 #
 
 Version 3.13.2 {8aa6c0e12fe380d694604e3edd965730} 2023-10-18
-- Add getNamespace method to kep type and value type of maps
+- Add getNamespace method to key type and value type of maps
 
 Version 3.13.1 {f5a9a1ea6a64865843a3abb77798cbb0} 2023-10-18
 - Add migrate option to DecoratorManager options

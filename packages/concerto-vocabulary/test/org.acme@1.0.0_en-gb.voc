@@ -9,4 +9,4 @@ declarations:
     description: Registered address of the vehicle owner
     tooltip: View Address of vehicle owner
     properties:
-      - keyy: mispelled KEY spelling
+      - BAD_KEY: mispelled KEY spelling

@@ -368,7 +368,7 @@ describe('VocabularyManager', () => {
         result.additionalVocabularies[0].getNamespace().should.equal('com.example@1.0.0');
         result.vocabularies['org.acme@1.0.0/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
         result.vocabularies['org.acme@1.0.0/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color']);
-        result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat', 'Address.keyy']);
+        result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat', 'Address.BAD_KEY']);
         result.vocabularies['org.acme@1.0.0/fr'].missingTerms.should.have.members(['Color', 'SSN', 'VIN', 'Vehicle.color', 'Address.VALUE', 'Truck']);
         result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
         result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'VIN', 'Address', 'Truck']);

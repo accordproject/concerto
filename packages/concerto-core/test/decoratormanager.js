@@ -188,6 +188,21 @@ describe('DecoratorManager', () => {
             decoratorCity2Property.should.not.be.null;
         });
 
+        it('should decorate the specified element on the specified Map Declaration (Map Declaration)', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/map-declaration.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
+            dictionary.should.not.be.null;
+            dictionary.getDecorator('MapDeclarationDecorator').should.not.be.null;
+        });
+
         it('should decorate the specified element on the specified Map Declaration (Map Key)', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
@@ -284,7 +299,7 @@ describe('DecoratorManager', () => {
             dictionary.value.getDecorator('DecoratesValueByType').should.not.be.null;
         });
 
-        it('should decorate both Key and Value elements on the specified Map Declaration', async function() {
+        it('should decorate Declaration, Key and Value elements on the specified Map Declaration', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
@@ -297,6 +312,7 @@ describe('DecoratorManager', () => {
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
 
             dictionary.should.not.be.null;
+            dictionary.getDecorator('MapDeclarationDecorator').should.not.be.null;
             dictionary.key.getDecorator('Baz').should.not.be.null;
             dictionary.value.getDecorator('Baz').should.not.be.null;
         });
