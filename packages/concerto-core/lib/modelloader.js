@@ -60,11 +60,10 @@ class ModelLoader {
      * @param {string[]} ctoFiles - the CTO files (can be local file paths or URLs)
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
-     * @param {boolean} [options.strict] - disallow unversioned namespaces
     * @param {number} [options.utcOffset] - UTC Offset for this execution
      * @return {Promise<ModelManager>} the model manager
      */
-    static async loadModelManager(ctoFiles, options = { offline: false, strict: false }) {
+    static async loadModelManager(ctoFiles, options = { offline: false }) {
         let modelManager = new ModelManager(options);
         // How to create a modelfile from the external content
         const processFile = (name, data) => {
@@ -95,11 +94,10 @@ class ModelLoader {
      * @param {string[]} [fileNames] - An optional array of file names to associate with the model files
      * @param {object} options - optional parameters
      * @param {boolean} [options.offline] - do not resolve external models
-     * @param {boolean} [options.strict] - disallow unversioned namespaces
      * @param {number} [options.utcOffset] - UTC Offset for this execution
      * @return {Promise<ModelManager>} the model manager
      */
-    static async loadModelManagerFromModelFiles(modelFiles, fileNames, options = { offline: false, strict: false }) {
+    static async loadModelManagerFromModelFiles(modelFiles, fileNames, options = { offline: false }) {
         let modelManager = new ModelManager(options);
 
         // Load system model

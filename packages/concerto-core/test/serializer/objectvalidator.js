@@ -30,7 +30,7 @@ describe('ObjectValidator', function () {
 
     before(function () {
         modelManager = new ModelManager();
-        modelManager.addCTOModel(`namespace test
+        modelManager.addCTOModel(`namespace test@1.0.0
 
         concept Wheel {
             o String brand
@@ -84,7 +84,7 @@ describe('ObjectValidator', function () {
     describe('#checkEnum', () => {
         it('should fail if instance is not an array', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 testEnums : 'ONE'
             };
             const parameters = {};
@@ -97,10 +97,10 @@ describe('ObjectValidator', function () {
 
         it('should pass', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 color: 'red',
                 wheels : [{
-                    $class : 'test.Wheel',
+                    $class : 'test@1.0.0.Wheel',
                     brand : 'Michelin'
                 }]
             };
@@ -113,7 +113,7 @@ describe('ObjectValidator', function () {
     describe('#checkItem', () => {
         it('should fail if property not a number', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 integerProperty: 'bad',
             };
             const parameters = {};
@@ -126,7 +126,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if property not a string', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 stringProperty: 1,
             };
             const parameters = {};
@@ -139,7 +139,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if item is symbol', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 wheels: [Symbol('wheel')],
             };
             const parameters = {};
@@ -152,7 +152,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if property type is symbol', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 stringProperty: Symbol('foo'),
             };
             const parameters = {};
@@ -165,7 +165,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if property not a boolean', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 booleanProperty: 'false',
             };
             const parameters = {};
@@ -178,7 +178,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if property not a DateTime', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 dateTimeProperty: true,
             };
             const parameters = {};
@@ -191,7 +191,7 @@ describe('ObjectValidator', function () {
 
         it('should fail if property fails field validator', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 validatedStringProperty: 'bad',
             };
             const parameters = {};
@@ -204,9 +204,9 @@ describe('ObjectValidator', function () {
 
         it('should fail if complex property is not compatible', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 owner: {
-                    $class: 'test.Wheel',
+                    $class: 'test@1.0.0.Wheel',
                     brand: 'Michelin'
                 },
             };
@@ -215,14 +215,14 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Instance "undefined" has a property "owner" with type "test.Wheel" that is not derived from "test.Person".');
+            }).should.throw('Instance "undefined" has a property "owner" with type "test@1.0.0.Wheel" that is not derived from "test@1.0.0.Person".');
         });
 
         it('should fail complex property that references a missing type', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 owner: {
-                    $class: 'test.Missing',
+                    $class: 'test@1.0.0.Missing',
                     brand: 'Michelin'
                 },
             };
@@ -231,12 +231,12 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Type "Missing" is not defined in namespace "test".');
+            }).should.throw('Type "Missing" is not defined in namespace "test@1.0.0".');
         });
 
         it('should fail for an undeclared field', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 manufacturer: 'Ford',
             };
             const parameters = {};
@@ -244,14 +244,14 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Instance "undefined" has a property named "manufacturer", which is not declared in "test.Vehicle"');
+            }).should.throw('Instance "undefined" has a property named "manufacturer", which is not declared in "test@1.0.0.Vehicle"');
         });
     });
 
     describe('#visitRelationshipDeclaration', () => {
         it('should fail if property not an array of relationships', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 previousOwners: 'bad',
             };
             const parameters = {};
@@ -259,16 +259,16 @@ describe('ObjectValidator', function () {
 
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Instance "undefined" has a property "previousOwners" with type "undefined" that is not derived from "test.Person[]".');
+            }).should.throw('Instance "undefined" has a property "previousOwners" with type "undefined" that is not derived from "test@1.0.0.Person[]".');
         });
     });
 
     describe('#visitRelationship', () => {
         it('should pass with instance if convertResourcesToRelationships is set', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 lastOwner: {
-                    $class : 'test.Person',
+                    $class : 'test@1.0.0.Person',
                     email : 'test@example.com'
                 },
             };
@@ -280,9 +280,9 @@ describe('ObjectValidator', function () {
 
         it('should fail with instance if convertResourcesToRelationships is not set', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 lastOwner: {
-                    $class : 'test.Person',
+                    $class : 'test@1.0.0.Person',
                     email : 'test@example.com'
                 },
             };
@@ -290,14 +290,14 @@ describe('ObjectValidator', function () {
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Model violation in the "undefined" instance. Class "test.Person" has a value of "[object Object]". Expected a "Relationship".');
+            }).should.throw('Model violation in the "undefined" instance. Class "test@1.0.0.Person" has a value of "[object Object]". Expected a "Relationship".');
         });
 
         it('should fail with non-identifiable instance if convertResourcesToRelationships is not set', () => {
             const data = {
-                $class : 'test.Vehicle',
+                $class : 'test@1.0.0.Vehicle',
                 lastOwner: {
-                    $class : 'test.Wheel',
+                    $class : 'test@1.0.0.Wheel',
                     brand : 'test@example.com'
                 },
             };
@@ -305,13 +305,13 @@ describe('ObjectValidator', function () {
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Model violation in the "undefined" instance. Class "test.Person" has a value of "[object Object]". Expected a "Relationship".');
+            }).should.throw('Model violation in the "undefined" instance. Class "test@1.0.0.Person" has a value of "[object Object]". Expected a "Relationship".');
         });
 
         it('should fail with a relationship to a non identifiable type', () => {
             const data = {
-                $class : 'test.Vehicle',
-                lastOwner: 'resource:test.Wheel#Michelin',
+                $class : 'test@1.0.0.Vehicle',
+                lastOwner: 'resource:test@1.0.0.Wheel#Michelin',
             };
             const parameters = {};
             parameters.stack = new TypedStack(data);
@@ -322,21 +322,21 @@ describe('ObjectValidator', function () {
 
         it('should fail with a non assignable relationship', () => {
             const data = {
-                $class : 'test.Vehicle',
-                lastOwner: 'resource:test.Manager#Dan',
+                $class : 'test@1.0.0.Vehicle',
+                lastOwner: 'resource:test@1.0.0.Manager#Dan',
             };
             const parameters = {};
             parameters.stack = new TypedStack(data);
             (function () {
                 objectValidator.visit(concerto.getTypeDeclaration(data), parameters);
-            }).should.throw('Instance "undefined" has a property "lastOwner" with type "undefined" that is not derived from "test.Person".');
+            }).should.throw('Instance "undefined" has a property "lastOwner" with type "undefined" that is not derived from "test@1.0.0.Person".');
         });
     });
 
     describe('#reportFieldTypeViolation', () => {
         it('should report violation for identifiable concerto object', () => {
             const data = {
-                $class: 'test.Person',
+                $class: 'test@1.0.0.Person',
                 email: 'matt@example',
             };
             const field = concerto.getTypeDeclaration(data).getProperties()[0];
@@ -347,7 +347,7 @@ describe('ObjectValidator', function () {
 
         it('should report violation for field value for cyclical object', () => {
             const data = {
-                $class: 'test.Manager',
+                $class: 'test@1.0.0.Manager',
             };
             data.name = data;
             const field = concerto.getTypeDeclaration(data).getProperties()[1];

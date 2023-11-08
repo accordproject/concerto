@@ -28,7 +28,7 @@ chai.use(require('chai-as-promised'));
 describe('ModelLoader', () => {
 
     const modelBase = __dirname + '/data/model/model-base.cto';
-    const modelUrl = 'https://models.accordproject.org/patents/patent.cto';
+    const modelUrl = 'https://models.accordproject.org/concerto/scalar.cto';
 
     beforeEach(() => {
     });
@@ -61,20 +61,20 @@ describe('ModelLoader', () => {
         it('should throw an error for a type that does not exist', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
             (function() {
-                modelManager.getType('org.acme.base.NoSuchAsset');
+                modelManager.getType('org.acme.base@1.0.0.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should return the class declaration for a valid type', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
-            const declaration = modelManager.getType('org.acme.base.AbstractAsset');
-            declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+            const declaration = modelManager.getType('org.acme.base@1.0.0.AbstractAsset');
+            declaration.getFullyQualifiedName().should.equal('org.acme.base@1.0.0.AbstractAsset');
         });
 
         it('should load models when offline', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase], { offline: true });
-            const declaration = modelManager.getType('org.acme.base.AbstractAsset');
-            declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+            const declaration = modelManager.getType('org.acme.base@1.0.0.AbstractAsset');
+            declaration.getFullyQualifiedName().should.equal('org.acme.base@1.0.0.AbstractAsset');
         });
     });
 
@@ -115,14 +115,14 @@ describe('ModelLoader', () => {
                 .map(f => f.definitions);
             const modelManager2 = await ModelLoader.loadModelManagerFromModelFiles(files);
             (function() {
-                modelManager2.getType('org.acme.base.NoSuchAsset');
+                modelManager2.getType('org.acme.base@1.0.0.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should return the class declaration for a valid type', async function() {
             const modelManager = await ModelLoader.loadModelManager([modelBase]);
-            const declaration = modelManager.getType('org.acme.base.AbstractAsset');
-            declaration.getFullyQualifiedName().should.equal('org.acme.base.AbstractAsset');
+            const declaration = modelManager.getType('org.acme.base@1.0.0.AbstractAsset');
+            declaration.getFullyQualifiedName().should.equal('org.acme.base@1.0.0.AbstractAsset');
         });
 
         it('should load models when offline', async function() {

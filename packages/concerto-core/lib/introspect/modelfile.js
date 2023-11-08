@@ -244,8 +244,6 @@ class ModelFile extends Decorated {
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
 
-            // This check is needed because we automatically add both versioned and unversioned versions of
-            // the root namespace for backwards compatibillity unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
 
             const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
@@ -259,11 +257,6 @@ class ModelFile extends Decorated {
             }
             importsMap.set(name, importVersion);
 
-            if (importFqn.endsWith('*')) {
-                // This is a wildcard import, org.acme.*
-                // Doesn't matter if 0 or 100 types in the namespace.
-                return;
-            }
             if (!modelFile.isLocalType(importShortName)) {
                 let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
                 throw new IllegalModelException(formatter({
@@ -331,18 +324,7 @@ class ModelFile extends Decorated {
      * @private
      */
     isImportedType(type) {
-        if (this.importShortNames.has(type)) {
-            return true;
-        } else {
-            for(let index in this.importWildcardNamespaces) {
-                let wildcardNamespace = this.importWildcardNamespaces[index];
-                const modelFile = this.getModelManager().getModelFile(wildcardNamespace);
-                if (modelFile && modelFile.isLocalType(type)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return this.importShortNames.has(type);
     }
 
     /**
@@ -355,14 +337,6 @@ class ModelFile extends Decorated {
     resolveImport(type) {
         if (this.importShortNames.has(type)) {
             return this.importShortNames.get(type);
-        } else {
-            for(let index in this.importWildcardNamespaces) {
-                let wildcardNamespace = this.importWildcardNamespaces[index];
-                const modelFile = this.getModelManager().getModelFile(wildcardNamespace);
-                if (modelFile && modelFile.isLocalType(type)) {
-                    return wildcardNamespace + '.' + type;
-                }
-            }
         }
 
         let formatter = Globalize('en').messageFormatter('modelfile-resolveimport-failfindimp');
@@ -682,13 +656,12 @@ class ModelFile extends Decorated {
      * Verifies that an import is versioned if the strict
      * option has been set on the Model Manager
      * @param {*} imp - the import to validate
+     * @private
      */
     enforceImportVersioning(imp) {
-        if(this.getModelManager().isStrict()) {
-            const nsInfo = ModelUtil.parseNamespace(imp.namespace);
-            if(!nsInfo.version) {
-                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`);
-            }
+        const nsInfo = ModelUtil.parseNamespace(imp.namespace);
+        if(!nsInfo.version) {
+            throw new Error(`Cannot use an unversioned import ${imp.namespace}.`);
         }
     }
 
@@ -728,12 +701,7 @@ class ModelFile extends Decorated {
             this.enforceImportVersioning(imp);
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
-                if (this.getModelManager().isStrict()){
-                    throw new Error('Wilcard Imports are not permitted in strict mode.');
-                }
-                console.warn('DEPRECATED: Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.');
-                this.importWildcardNamespaces.push(imp.namespace);
-                break;
+                throw new Error('Wilcard Imports are not permitted.');
             case `${MetaModelNamespace}.ImportTypes`:
                 imp.types.forEach( type => {
                     this.importShortNames.set(type, `${imp.namespace}.${type}`);

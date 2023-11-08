@@ -16,11 +16,11 @@
   * Business and employee related types
   */
 
-namespace stdlib.business
+namespace stdlib.business@1.0.0
 
-import stdlib.base.Person
-import stdlib.base.Address
-import stdlib.base.SSN
+import stdlib.base@1.0.0.Person
+import stdlib.base@1.0.0.Address
+import stdlib.base@1.0.0.SSN
 
 /**
  * An abstract participant type in this business network

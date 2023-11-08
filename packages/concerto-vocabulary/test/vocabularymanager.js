@@ -67,7 +67,7 @@ describe('VocabularyManager', () => {
         const enVocString = fs.readFileSync('./test/test.voc', 'utf-8');
         const voc = vocabularyManager.addVocabulary(enVocString);
         voc.should.not.be.null;
-        voc.getNamespace().should.equal('com.test');
+        voc.getNamespace().should.equal('com.test@1.0.0');
     });
 
     it('addVocabulary (duplicate)', () => {

@@ -37,7 +37,7 @@ describe('EventDeclaration', () => {
 
         it('Check the system type',()=>{
             let model = `
-            namespace com.test
+            namespace com.test@1.0.0
 
             event E {
                 o String euid
@@ -64,18 +64,18 @@ describe('EventDeclaration', () => {
             const modelFile = modelManager.addCTOModel(modelDefinitions, fileName );
 
             const abstractEvent = modelFile.getEventDeclaration('AbstractEvent');
-            abstractEvent.getFullyQualifiedName().should.equal('org.acme.AbstractEvent');
+            abstractEvent.getFullyQualifiedName().should.equal('org.acme@1.0.0.AbstractEvent');
             abstractEvent.isAbstract().should.be.true;
             abstractEvent.isEvent().should.be.true;
             abstractEvent.validate();
             abstractEvent.declarationKind().should.equal('EventDeclaration');
 
             const concreteEvent = modelFile.getEventDeclaration('ConcreteEvent');
-            concreteEvent.getFullyQualifiedName().should.equal('org.acme.ConcreteEvent');
+            concreteEvent.getFullyQualifiedName().should.equal('org.acme@1.0.0.ConcreteEvent');
             concreteEvent.isAbstract().should.be.false;
 
             const derivedEvent = modelFile.getEventDeclaration('DerivedEvent');
-            derivedEvent.getFullyQualifiedName().should.equal('org.acme.DerivedEvent');
+            derivedEvent.getFullyQualifiedName().should.equal('org.acme@1.0.0.DerivedEvent');
             derivedEvent.isAbstract().should.be.false;
         });
     });

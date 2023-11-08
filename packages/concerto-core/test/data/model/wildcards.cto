@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace org.acme.wildcards
+namespace org.acme.wildcards@1.0.0
 
-import stdlib.base.*
+import stdlib.base@1.0.0.{Gender, Person}
 
 concept MyConcept {
   o Gender gender
