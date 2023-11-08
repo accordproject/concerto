@@ -261,8 +261,9 @@ declare class ModelFile extends Decorated {
      * Verifies that an import is versioned if the strict
      * option has been set on the Model Manager
      * @param {*} imp - the import to validate
+     * @private
      */
-    enforceImportVersioning(imp: any): void;
+    private enforceImportVersioning;
     /**
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser

@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 4.0.0 {3f40d54eaa27c50b304634848b802935} 2023-09-04
+- Strict mode becomes default behaviour
+
 Version 3.12.2 {bb8951ea059e312cd347b715bc9fc8d7} 2023-08-28
 - Adds ModelFile :: getClassDeclarations
 

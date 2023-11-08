@@ -43,7 +43,7 @@ describe('ModelFile type parsing', () => {
 
         it('should be invalid due to decimal default', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             concept Address {
                 o Integer foo default=104.0
@@ -57,7 +57,7 @@ describe('ModelFile type parsing', () => {
 
         it('should be invalid due to no decimal default', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             concept Address {
                 o Double foo default=104
@@ -71,7 +71,7 @@ describe('ModelFile type parsing', () => {
 
         it('should be invalid due to decimal range', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             concept Address {
                 o Integer foo range=[0.1, 0.2]
@@ -85,7 +85,7 @@ describe('ModelFile type parsing', () => {
 
         it('should be invalid due to decimal default', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             concept Address {
                 o Integer foo default=104.0
@@ -99,7 +99,7 @@ describe('ModelFile type parsing', () => {
 
         it('should be invalid due to no decimal range', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             concept Address {
                 o Double foo range=[0, 1]

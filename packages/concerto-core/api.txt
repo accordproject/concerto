@@ -2,9 +2,8 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,processFile?) 
+   + void constructor(object?,Object?,boolean?,processFile?) 
    + boolean isModelManager() 
-   + boolean isStrict() 
    + Object accept(Object,Object) 
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(ModelFile,string?,string?,boolean?) throws IllegalModelException
@@ -222,7 +221,6 @@ class ModelFile extends Decorated {
    + object getAst() 
    + string getConcertoVersion() 
    + void isCompatibleVersion() 
-   + void enforceImportVersioning(imp) 
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
@@ -314,11 +312,11 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + ModelManager[] loadModelManager(string[],object,boolean?,boolean?,number?) 
-   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,number?) 
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?,boolean?,Object?) 
+   + void constructor(object?,Object?) 
    + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
    + object getRootModel() 

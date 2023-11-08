@@ -31,7 +31,7 @@ const COMPOSER_MODEL =
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace system
+namespace system@1.0.0
 
 event Event {
 }

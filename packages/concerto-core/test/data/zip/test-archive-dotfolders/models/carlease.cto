@@ -22,7 +22,7 @@
  */
 
 // define the namespace for this model
-namespace org.acme
+namespace org.acme@1.0.0
 
 // import a type from another namespace
 import composer.MyParticipant
@@ -75,7 +75,7 @@ participant Regulator extends MyParticipant {
 // defines a Vehicle transaction type
 transaction VehicleTransaction  {
 	--> Vehicle vehicle // a VehicleTransaction is related to a Vehicle
-  
+
 }
 
 transaction VehicleCreated extends VehicleTransaction {

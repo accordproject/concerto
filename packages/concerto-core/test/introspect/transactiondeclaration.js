@@ -43,7 +43,7 @@ describe('TransactionDeclaration', () => {
 
         it('should cover the other error paths', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             transaction T {}
             `;
 
