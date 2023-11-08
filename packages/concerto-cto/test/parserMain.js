@@ -211,7 +211,7 @@ describe('parser', () => {
         });
         rejectedIdentifiers.forEach(id => {
             it(`Should not parse identifier '${id}' for concept`, () => {
-                const content = `namespace com.test
+                const content = `namespace com.test@1.0.0
             concept ${id} {}`;
                 (() => {
                     Parser.parse(content);
@@ -219,7 +219,7 @@ describe('parser', () => {
             });
 
             it(`Should not parse identifier '${id}' for property`, () => {
-                const content = `namespace com.test
+                const content = `namespace com.test@1.0.0
             concept Test {
                 o String ${id}
             }`;

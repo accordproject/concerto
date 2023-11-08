@@ -19,7 +19,6 @@ declare class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
@@ -28,7 +27,6 @@ declare class BaseModelManager {
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
-        strict?: boolean;
         regExp?: any;
         metamodelValidation?: boolean;
         addMetamodel?: boolean;
@@ -40,9 +38,7 @@ declare class BaseModelManager {
     factory: any;
     serializer: any;
     decoratorFactories: any[];
-    strict: boolean;
     options: {
-        strict?: boolean;
         regExp?: any;
         metamodelValidation?: boolean;
         addMetamodel?: boolean;
@@ -57,16 +53,6 @@ declare class BaseModelManager {
      * @returns {boolean} true
      */
     isModelManager(): boolean;
-    /**
-     * Returns the value of the strict option
-     * @returns {boolean} true if the strict has been set
-     */
-    isStrict(): boolean;
-    /**
-     * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} true if the enableAliasedType has been set
-     */
-    isAliasedTypeEnabled(): boolean;
     /**
      * Adds root types
      * @private

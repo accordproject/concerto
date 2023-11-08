@@ -1,328 +1,322 @@
 class AstModelManager extends BaseModelManager {
-   + void constructor(object?) 
+   + void constructor(object?)
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,boolean?,processFile?) 
-   + boolean isModelManager() 
-   + boolean isStrict() 
-   + boolean isAliasedTypeEnabled() 
-   + Object accept(Object,Object) 
+   + void constructor(object?,Object?,boolean?,processFile?)
+   + boolean isModelManager()
+   + Object accept(Object,Object)
    + void validateModelFile(string|ModelFile,string?) throws IllegalModelException
    + Object addModelFile(ModelFile,string?,string?,boolean?) throws IllegalModelException
    + ModelFile addModel(modelInput,string?,string?,boolean?) throws IllegalModelException
    + Object updateModelFile(string|ModelFile,string?,boolean?) throws IllegalModelException
-   + void deleteModelFile(string) 
-   + Object[] addModelFiles(|,string[],boolean?) 
-   + void validateModelFiles() 
+   + void deleteModelFile(string)
+   + Object[] addModelFiles(|,string[],boolean?)
+   + void validateModelFiles()
    + Promise updateExternalModels(Object?,FileDownloader?) throws IllegalModelException
-   + void writeModelsToFileSystem(string,Object?,boolean) 
-   + Object[] getModels(Object?,boolean) 
-   + void clearModelFiles() 
-   + ModelFile getModelFile(string) 
-   + string[] getNamespaces() 
+   + void writeModelsToFileSystem(string,Object?,boolean)
+   + Object[] getModels(Object?,boolean)
+   + void clearModelFiles()
+   + ModelFile getModelFile(string)
+   + string[] getNamespaces()
    + ClassDeclaration getType(string) throws TypeNotFoundException
-   + AssetDeclaration[] getAssetDeclarations() 
-   + TransactionDeclaration[] getTransactionDeclarations() 
-   + EventDeclaration[] getEventDeclarations() 
-   + ParticipantDeclaration[] getParticipantDeclarations() 
-   + MapDeclaration[] getMapDeclarations() 
-   + EnumDeclaration[] getEnumDeclarations() 
-   + ConceptDeclaration[] getConceptDeclarations() 
-   + Factory getFactory() 
-   + Serializer getSerializer() 
-   + DecoratorFactory[] getDecoratorFactories() 
-   + void addDecoratorFactory(DecoratorFactory) 
-   + boolean derivesFrom(string,string) 
-   + object resolveMetaModel(object) 
-   + void fromAst(ast) 
-   + void getAst(boolean?) 
-   + BaseModelManager filter(FilterFunction) 
+   + AssetDeclaration[] getAssetDeclarations()
+   + TransactionDeclaration[] getTransactionDeclarations()
+   + EventDeclaration[] getEventDeclarations()
+   + ParticipantDeclaration[] getParticipantDeclarations()
+   + MapDeclaration[] getMapDeclarations()
+   + EnumDeclaration[] getEnumDeclarations()
+   + ConceptDeclaration[] getConceptDeclarations()
+   + Factory getFactory()
+   + Serializer getSerializer()
+   + DecoratorFactory[] getDecoratorFactories()
+   + void addDecoratorFactory(DecoratorFactory)
+   + boolean derivesFrom(string,string)
+   + object resolveMetaModel(object)
+   + void fromAst(ast)
+   + void getAst(boolean?)
+   + BaseModelManager filter(FilterFunction)
 }
 class Concerto {
-   + void constructor(ModelManager) 
+   + void constructor(ModelManager)
    + void validate(obj,options?) throws Error
-   + ModelManager getModelManager() 
-   + boolean isObject(obj) 
-   + void getTypeDeclaration(obj) 
-   + string getIdentifier(obj) 
-   + boolean isIdentifiable(obj) 
-   + boolean isRelationship(obj) 
-   + void setIdentifier(obj,string) 
-   + string getFullyQualifiedIdentifier(obj) 
-   + string toURI(obj) 
+   + ModelManager getModelManager()
+   + boolean isObject(obj)
+   + void getTypeDeclaration(obj)
+   + string getIdentifier(obj)
+   + boolean isIdentifiable(obj)
+   + boolean isRelationship(obj)
+   + void setIdentifier(obj,string)
+   + string getFullyQualifiedIdentifier(obj)
+   + string toURI(obj)
    + void fromURI(string) throws Error
-   + string getType(obj) 
-   + string getNamespace(obj) 
+   + string getType(obj)
+   + string getNamespace(obj)
 }
-   + object setCurrentTime() 
+   + object setCurrentTime()
 class DecoratorExtractor {
-   + void constructor(boolean,string,string,Object) 
+   + void constructor(boolean,string,string,Object)
 }
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?) 
-   + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
-   + void validateCommand(ModelManager,command) 
-   + Boolean falsyOrEqual(string||,string[]) 
-   + void applyDecorator(decorated,string,newDecorator) 
-   + void executeCommand(string,declaration,command,boolean?) 
-   + void executePropertyCommand(property,command) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?)
+   + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string)
+   + void validateCommand(ModelManager,command)
+   + Boolean falsyOrEqual(string||,string[])
+   + void applyDecorator(decorated,string,newDecorator)
+   + void executeCommand(string,declaration,command)
+   + void executePropertyCommand(property,command)
 }
-   + string[] intersect() 
-   + boolean isUnversionedNamespaceEqual() 
+   + string[] intersect()
+   + boolean isUnversionedNamespaceEqual()
 class Factory {
-   + string newId() 
-   + void constructor(ModelManager) 
+   + string newId()
+   + void constructor(ModelManager)
    + Resource newResource(String,String,String?,Object?,boolean?,String?,boolean?) throws TypeNotFoundException
    + Resource newConcept(String,String,String?,Object?,boolean?,String?,boolean?) throws TypeNotFoundException
    + Relationship newRelationship(String,String,String) throws TypeNotFoundException
-   + Resource newTransaction(String,String,String?,Object?,String?,boolean?) 
-   + Resource newEvent(String,String,String?,Object?,String?,boolean?) 
+   + Resource newTransaction(String,String,String?,Object?,String?,boolean?)
+   + Resource newEvent(String,String,String?,Object?,String?,boolean?)
 }
 class AssetDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
+   + string declarationKind()
 }
 class ClassDeclaration extends Declaration {
-   + ClassDeclaration _resolveSuperType() 
+   + ClassDeclaration _resolveSuperType()
    ~ void validate() throws IllegalModelException
-   + boolean isAbstract() 
-   + Boolean isIdentified() 
-   + Boolean isSystemIdentified() 
-   + Boolean isExplicitlyIdentified() 
-   + string getIdentifierFieldName() 
-   + Property getOwnProperty(string) 
-   + Property[] getOwnProperties() 
-   + string getSuperType() 
-   + ClassDeclaration getSuperTypeDeclaration() 
-   + ClassDeclaration[] getAssignableClassDeclarations() 
-   + ClassDeclaration[] getDirectSubclasses() 
-   + ClassDeclaration[] getAllSuperTypeDeclarations() 
-   + Property getProperty(string) 
-   + Property[] getProperties() 
+   + boolean isAbstract()
+   + Boolean isIdentified()
+   + Boolean isSystemIdentified()
+   + Boolean isExplicitlyIdentified()
+   + string getIdentifierFieldName()
+   + Property getOwnProperty(string)
+   + Property[] getOwnProperties()
+   + string getSuperType()
+   + ClassDeclaration getSuperTypeDeclaration()
+   + ClassDeclaration[] getAssignableClassDeclarations()
+   + ClassDeclaration[] getDirectSubclasses()
+   + ClassDeclaration[] getAllSuperTypeDeclarations()
+   + Property getProperty(string)
+   + Property[] getProperties()
    + Property getNestedProperty(string) throws IllegalModelException
-   + String toString() 
-   + boolean isAsset() 
-   + boolean isParticipant() 
-   + boolean isTransaction() 
-   + boolean isEvent() 
-   + boolean isConcept() 
-   + boolean isEnum() 
-   + boolean isMapDeclaration() 
-   + boolean isClassDeclaration() 
+   + String toString()
+   + boolean isAsset()
+   + boolean isParticipant()
+   + boolean isTransaction()
+   + boolean isEvent()
+   + boolean isConcept()
+   + boolean isEnum()
+   + boolean isMapDeclaration()
+   + boolean isClassDeclaration()
 }
 class ConceptDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
+   + string declarationKind()
 }
 class Declaration extends Decorated {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
-   + string getName() 
-   + string getNamespace() 
-   + string getFullyQualifiedName() 
-   + Boolean isIdentified() 
-   + Boolean isSystemIdentified() 
-   + string getIdentifierFieldName() 
-   + string getType() 
-   + String toString() 
-   + boolean isEnum() 
-   + boolean isClassDeclaration() 
-   + boolean isScalarDeclaration() 
-   + boolean isMapDeclaration() 
+   + ModelFile getModelFile()
+   + string getName()
+   + string getNamespace()
+   + string getFullyQualifiedName()
+   + Boolean isIdentified()
+   + Boolean isSystemIdentified()
+   + string getIdentifierFieldName()
+   + string getType()
+   + String toString()
+   + boolean isEnum()
+   + boolean isClassDeclaration()
+   + boolean isScalarDeclaration()
+   + boolean isMapDeclaration()
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
-   + Object accept(Object,Object) 
-   + void getParent() 
-   + string getName() 
-   + object[] getArguments() 
-   + boolean isDecorator() 
+   + void getParent()
+   + string getName()
+   + object[] getArguments()
+   + boolean isDecorator()
 }
 class DecoratorFactory {
-   + Decorator newDecorator(ClassDeclaration|Property,Object) 
+   + Decorator newDecorator(ClassDeclaration|Property,Object)
 }
 class EnumDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + String toString() 
-   + string declarationKind() 
+   + String toString()
+   + string declarationKind()
 }
 class EnumValueDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + boolean isEnumValue() 
+   + boolean isEnumValue()
 }
 class EventDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
+   + string declarationKind()
 }
 class IdentifiedDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
 }
 class IllegalModelException extends BaseFileException {
-   + void constructor(string,ModelFile?,Object?,number,number,number,number,string?) 
+   + void constructor(string,ModelFile?,Object?,number,number,number,number,string?)
 }
 class Introspector {
-   + void constructor(ModelManager) 
-   + Object accept(Object,Object) 
-   + ClassDeclaration[] getClassDeclarations() 
+   + void constructor(ModelManager)
+   + ClassDeclaration[] getClassDeclarations()
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
 class MapDeclaration extends Declaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + string getFullyQualifiedName() 
-   + ModelFile getModelFile() 
-   + string getName() 
-   + MapKeyType getKey() 
-   + MapValueType getValue() 
-   + String toString() 
-   + string declarationKind() 
-   + boolean isMapDeclaration() 
+   + string getFullyQualifiedName()
+   + ModelFile getModelFile()
+   + string getName()
+   + MapKeyType getKey()
+   + MapValueType getValue()
+   + String toString()
+   + string declarationKind()
+   + boolean isMapDeclaration()
 }
 class MapKeyType extends Decorated {
    + void constructor(MapDeclaration,Object,ModelFile) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + ModelFile getModelFile() 
-   + MapDeclaration getParent() 
-   + string getType() 
-   + String toString() 
-   + boolean isKey() 
-   + boolean isValue() 
-   + string getNamespace() 
+   + ModelFile getModelFile()
+   + MapDeclaration getParent()
+   + string getType()
+   + String toString()
+   + boolean isKey()
+   + boolean isValue()
+   + string getNamespace()
 }
 class MapValueType extends Decorated {
    + void constructor(MapDeclaration,Object) throws IllegalModelException
    ~ void validate() throws IllegalModelException
-   + ModelFile getModelFile() 
-   + MapDeclaration getParent() 
-   + string getType() 
-   + String toString() 
-   + boolean isKey() 
-   + boolean isValue() 
-   + string getNamespace() 
+   + ModelFile getModelFile()
+   + MapDeclaration getParent()
+   + string getType()
+   + String toString()
+   + boolean isKey()
+   + boolean isValue()
+   + string getNamespace()
 }
-   + ModelManager newMetaModelManager() 
-   + object validateMetaModel() 
-   + ModelManager modelManagerFromMetaModel() 
+   + ModelManager newMetaModelManager()
+   + object validateMetaModel()
+   + ModelManager modelManagerFromMetaModel()
 class ModelFile extends Decorated {
    + void constructor(ModelManager,object,string?,string?) throws IllegalModelException
-   ~ ModelFile getModelFile() 
-   + boolean isModelFile() 
-   + string getVersion() 
-   + Boolean isSystemModelFile() 
-   + boolean isExternal() 
-   + Object accept(Object,Object) 
-   + ModelManager getModelManager() 
-   + string[] getImports() 
+   ~ ModelFile getModelFile()
+   + boolean isModelFile()
+   + string getVersion()
+   + Boolean isSystemModelFile()
+   + boolean isExternal()
+   + ModelManager getModelManager()
+   + string[] getImports()
    ~ void validate() throws IllegalModelException
-   + boolean isDefined(string) 
-   + ClassDeclaration getLocalType(string) 
-   + AssetDeclaration getAssetDeclaration(string) 
-   + TransactionDeclaration getTransactionDeclaration(string) 
-   + EventDeclaration getEventDeclaration(string) 
-   + ParticipantDeclaration getParticipantDeclaration(string) 
-   + string getNamespace() 
-   + string getName() 
-   + AssetDeclaration[] getAssetDeclarations() 
-   + TransactionDeclaration[] getTransactionDeclarations() 
-   + EventDeclaration[] getEventDeclarations() 
-   + ParticipantDeclaration[] getParticipantDeclarations() 
-   + ClassDeclaration[] getClassDeclarations() 
-   + ConceptDeclaration[] getConceptDeclarations() 
-   + EnumDeclaration[] getEnumDeclarations() 
-   + MapDeclaration[] getMapDeclarations() 
-   + ScalarDeclaration[] getScalarDeclarations() 
-   + Object[] getDeclarations(Function) 
-   + ClassDeclaration[] getAllDeclarations() 
-   + string getDefinitions() 
-   + object getAst() 
-   + string getConcertoVersion() 
-   + void isCompatibleVersion() 
-   + void enforceImportVersioning(imp) 
+   + boolean isDefined(string)
+   + ClassDeclaration getLocalType(string)
+   + AssetDeclaration getAssetDeclaration(string)
+   + TransactionDeclaration getTransactionDeclaration(string)
+   + EventDeclaration getEventDeclaration(string)
+   + ParticipantDeclaration getParticipantDeclaration(string)
+   + string getNamespace()
+   + string getName()
+   + AssetDeclaration[] getAssetDeclarations()
+   + TransactionDeclaration[] getTransactionDeclarations()
+   + EventDeclaration[] getEventDeclarations()
+   + ParticipantDeclaration[] getParticipantDeclarations()
+   + ClassDeclaration[] getClassDeclarations()
+   + ConceptDeclaration[] getConceptDeclarations()
+   + EnumDeclaration[] getEnumDeclarations()
+   + MapDeclaration[] getMapDeclarations()
+   + ScalarDeclaration[] getScalarDeclarations()
+   + Object[] getDeclarations(Function)
+   + ClassDeclaration[] getAllDeclarations()
+   + string getDefinitions()
+   + object getAst()
+   + string getConcertoVersion()
+   + void isCompatibleVersion()
 }
 class ParticipantDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
+   + string declarationKind()
 }
 class Property extends Decorated {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
-   + ModelFile getModelFile() 
-   + ClassDeclaration getParent() 
+   + ModelFile getModelFile()
+   + ClassDeclaration getParent()
    ~ void validate(ClassDeclaration) throws IllegalModelException
-   + string getName() 
-   + string getType() 
-   + boolean isOptional() 
-   + string getFullyQualifiedTypeName() 
-   + string getFullyQualifiedName() 
-   + string getNamespace() 
-   + boolean isArray() 
-   + boolean isTypeEnum() 
-   + boolean isPrimitive() 
+   + string getName()
+   + string getType()
+   + boolean isOptional()
+   + string getFullyQualifiedTypeName()
+   + string getFullyQualifiedName()
+   + string getNamespace()
+   + boolean isArray()
+   + boolean isTypeEnum()
+   + boolean isPrimitive()
 }
 class RelationshipDeclaration extends Property {
    + void constructor(ClassDeclaration,Object) throws IllegalModelException
    ~ void validate(ClassDeclaration) throws IllegalModelException
-   + String toString() 
-   + boolean isRelationship() 
+   + String toString()
+   + boolean isRelationship()
 }
 class ScalarDeclaration extends Declaration {
    ~ void validate() throws IllegalModelException
-   + Boolean isIdentified() 
-   + Boolean isSystemIdentified() 
-   + string getIdentifierFieldName() 
-   + string getType() 
-   + string getSuperType() 
-   + ClassDeclaration getSuperTypeDeclaration() 
-   + Validator getValidator() 
-   + void getDefaultValue() 
-   + String toString() 
-   + boolean isAbstract() 
-   + boolean isScalarDeclaration() 
-   + boolean isAsset() 
-   + boolean isParticipant() 
-   + boolean isTransaction() 
-   + boolean isEvent() 
-   + boolean isConcept() 
+   + Boolean isIdentified()
+   + Boolean isSystemIdentified()
+   + string getIdentifierFieldName()
+   + string getType()
+   + string getSuperType()
+   + ClassDeclaration getSuperTypeDeclaration()
+   + Validator getValidator()
+   + void getDefaultValue()
+   + String toString()
+   + boolean isAbstract()
+   + boolean isScalarDeclaration()
+   + boolean isAsset()
+   + boolean isParticipant()
+   + boolean isTransaction()
+   + boolean isEvent()
+   + boolean isConcept()
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
-   + string declarationKind() 
+   + string declarationKind()
 }
 class MetamodelException extends BaseException {
-   + void constructor(string) 
+   + void constructor(string)
 }
 class Identifiable extends Typed {
-   ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string) 
-   + string getTimestamp() 
-   + string getIdentifier() 
-   + void setIdentifier(string) 
-   + string getFullyQualifiedIdentifier() 
-   + String toString() 
-   + boolean isRelationship() 
-   + boolean isResource() 
-   + String toURI() 
+   ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string)
+   + string getTimestamp()
+   + string getIdentifier()
+   + void setIdentifier(string)
+   + string getFullyQualifiedIdentifier()
+   + String toString()
+   + boolean isRelationship()
+   + boolean isResource()
+   + String toURI()
 }
 class Relationship extends Identifiable {
-   + String toString() 
-   + boolean isRelationship() 
-   + Relationship fromURI(ModelManager,String,String?,String?) 
+   + String toString()
+   + boolean isRelationship()
+   + Relationship fromURI(ModelManager,String,String?,String?)
 }
 class Resource extends Identifiable {
-   + String toString() 
-   + boolean isResource() 
-   + boolean isConcept() 
-   + boolean isIdentifiable() 
-   + Object toJSON() 
+   + String toString()
+   + boolean isResource()
+   + boolean isConcept()
+   + boolean isIdentifiable()
+   + Object toJSON()
 }
 class Typed {
-   ~ void constructor(ModelManager,ClassDeclaration,string,string) 
-   + string getType() 
-   + string getFullyQualifiedType() 
-   + string getNamespace() 
-   + void setPropertyValue(string,string) 
-   + void addArrayValue(string,string) 
-   + boolean instanceOf(String) 
-   ~ void toJSON() 
+   ~ void constructor(ModelManager,ClassDeclaration,string,string)
+   + string getType()
+   + string getFullyQualifiedType()
+   + string getNamespace()
+   + void setPropertyValue(string,string)
+   + void addArrayValue(string,string)
+   + boolean instanceOf(String)
+   ~ void toJSON()
 }
 class ValidatedResource extends Resource {
    + void setPropertyValue(string,string) throws Error
@@ -330,24 +324,24 @@ class ValidatedResource extends Resource {
    + void validate() throws Error
 }
 class ModelLoader {
-   + ModelManager[] loadModelManager(string[],object,boolean?,boolean?,number?) 
-   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
+   + ModelManager[] loadModelManager(string[],object,boolean?,number?)
+   + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,number?)
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?) 
+   + void constructor(object?,Object?)
    + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
-   + object getRootModel() 
+   + object getRootModel()
 class SecurityException extends BaseException {
-   + void constructor(string) 
+   + void constructor(string)
 }
 class Serializer {
-   + void constructor(Factory,ModelManager,object?) 
-   + void setDefaultOptions(Object) 
+   + void constructor(Factory,ModelManager,object?)
+   + void setDefaultOptions(Object)
    + Object toJSON(Resource,Object?,boolean?,boolean?,boolean?,boolean?,boolean?,number?) throws Error
-   + Resource fromJSON(Object,Object?,boolean,boolean,number?,boolean?) 
+   + Resource fromJSON(Object,Object?,boolean,boolean,number?)
 }
 class TypeNotFoundException extends BaseException {
-   + void constructor(string,string|,string,string) 
-   + string getTypeName() 
+   + void constructor(string,string|,string)
+   + string getTypeName()
 }

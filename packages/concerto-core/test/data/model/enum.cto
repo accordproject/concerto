@@ -15,7 +15,7 @@
 /*
  * Test file for enums
  */
-namespace org.acme
+namespace org.acme@1.0.0
 
 
 /**

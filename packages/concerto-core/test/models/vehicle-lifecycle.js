@@ -47,15 +47,15 @@ describe('Vehicle-Lifecycle Model', function() {
 
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
-            const vehicle = factory.newResource('org.gov.uk.dvla', 'Vehicle', 'ABC');
-            const vehicleDetails = factory.newConcept('org.gov.uk.dvla', 'VehicleDetails');
+            const vehicle = factory.newResource('org.gov.uk.dvla@1.0.0', 'Vehicle', 'ABC');
+            const vehicleDetails = factory.newConcept('org.gov.uk.dvla@1.0.0', 'VehicleDetails');
             vehicleDetails.make = 'Mercedes';
             vehicleDetails.modelType = 'C220';
             vehicleDetails.colour = 'Dark Blue';
             vehicle.vehicleDetails = vehicleDetails;
             vehicle.vehicleStatus = 'ACTIVE';
 
-            const privateOwner = factory.newRelationship('org.acme.vehicle.lifecycle', 'PrivateOwner', 'dan');
+            const privateOwner = factory.newRelationship('org.acme.vehicle.lifecycle@1.0.0', 'PrivateOwner', 'dan');
             vehicle.owner = privateOwner;
 
             vehicle.validate();

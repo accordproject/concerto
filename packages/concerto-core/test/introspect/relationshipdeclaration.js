@@ -29,7 +29,7 @@ describe('RelationshipDeclaration', function () {
     let modelManager;
     let mockClassDeclaration;
 
-    const levelOneModel = `namespace org.acme.l1
+    const levelOneModel = `namespace org.acme.l1@1.0.0
     participant Person identified by ssn {
       o String ssn
     }
@@ -50,7 +50,7 @@ describe('RelationshipDeclaration', function () {
     describe('#validate', function() {
         it('should detect relationships with no type', function () {
             modelManager.addCTOModel(levelOneModel);
-            const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
             // stub the getType method to return null
@@ -62,14 +62,14 @@ describe('RelationshipDeclaration', function () {
 
         it('should throw if relationship points to a missing type', () => {
             const model = `
-            namespace org.acme.l1
+            namespace org.acme.l1@1.0.0
             participant Person identified by ssn {
             o String ssn
             }
             `;
             const model2 = `
-            namespace org.acme.l2
-            import org.acme.l1.*
+            namespace org.acme.l2@1.0.0
+            import org.acme.l1@1.0.0.Person
 
             asset Car identified by vin {
             o String vin
@@ -79,19 +79,19 @@ describe('RelationshipDeclaration', function () {
 
             modelManager.addCTOModel(model);
             modelManager.addCTOModel(model2);
-            const vehicleDeclaration = modelManager.getType('org.acme.l2.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l2@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
             modelManager.getType = () => { return null; };
 
             (function () {
                 field.validate(vehicleDeclaration);
-            }).should.throw(/Relationship owner points to a missing type org.acme.l1./);
+            }).should.throw(/Relationship owner points to a missing type org.acme.l1@1.0.0./);
         });
 
         it('should throw if relationship is not a relationship target', () => {
             const model = `
-            namespace org.acme.l1
+            namespace org.acme.l1@1.0.0
             participant Person identified by ssn {
             o String ssn
             }
@@ -102,7 +102,7 @@ describe('RelationshipDeclaration', function () {
             }
             `;
             modelManager.addCTOModel(model);
-            const vehicleDeclaration = modelManager.getType('org.acme.l1.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             (field instanceof RelationshipDeclaration).should.be.true;
             field.getParent().getModelFile().getType = () => {return mockClassDeclaration;};

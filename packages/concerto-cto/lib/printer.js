@@ -383,27 +383,8 @@ function toCTO(metaModel) {
             case `${MetaModelNamespace}.ImportTypeFrom`:
                 result += `\nimport ${imp.namespace}.${imp.name}`;
                 break;
-            case `${MetaModelNamespace}.ImportAll`:
-            case `${MetaModelNamespace}.ImportAllFrom`:
-                result += `\nimport ${imp.namespace}.*`;
-                break;
-            case `${MetaModelNamespace}.ImportTypes`: {
-                const aliasedTypes = imp.aliasedTypes
-                    ? new Map(
-                        imp.aliasedTypes.map(({ name, aliasedName }) => [
-                            name,
-                            aliasedName,
-                        ])
-                    )
-                    : new Map();
-                const commaSeparatedTypesString = imp.types
-                    .map((type) =>
-                        aliasedTypes.has(type)
-                            ? `${type} as ${aliasedTypes.get(type)}`
-                            : type
-                    )
-                    .join(',');
-                result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
+            case `${MetaModelNamespace}.ImportTypes`:
+                result += `\nimport ${imp.namespace}.{${imp.types.join(',')}}`;
                 break;
             }
             default:

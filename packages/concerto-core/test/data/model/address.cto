@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace org.accordproject.address
+namespace org.accordproject.address@1.0.0
 
-import org.accordproject.Thing from github://accordproject/models/master/base.cto
+import org.accordproject@1.0.0.Thing from github://accordproject/models/master/base.cto
 
 /**
  * Based on http://schema.org/PostalAddress

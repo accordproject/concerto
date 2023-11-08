@@ -96,14 +96,14 @@ const negative = [{
     name: 'root hierarchy',
     sample: './data/hierarchy2err.json',
     ctoFiles: ['./models/hierarchy2.cto'],
-    error: 'Unexpected properties for type org.test.C: c, t',
-    errorFunctional: 'Instance "undefined" has a property named "c", which is not declared in "org.test.C".'
+    error: 'Unexpected properties for type org.test@1.0.0.C: c, t',
+    errorFunctional: 'Instance "undefined" has a property named "c", which is not declared in "org.test@1.0.0.C".'
 }, {
     name: 'user defined identifier',
     sample: './data/identifier1err.json',
     ctoFiles: ['./models/identifier1.cto'],
-    error: 'Invalid or missing identifier for Type "A1" in namespace "org.test".',
-    errorFunctional: 'Instance "org.test.A1#undefined" has an empty identifier.',
+    error: 'Invalid or missing identifier for Type "A1" in namespace "org.test@1.0.0".',
+    errorFunctional: 'Instance "org.test@1.0.0.A1#undefined" has an empty identifier.',
 }];
 
 describe('Validation (1.0.0)', () => {

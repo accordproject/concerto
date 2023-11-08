@@ -42,7 +42,7 @@ describe('ResourceValidator', function () {
 
     let sandbox;
 
-    const enumModelString = `namespace org.acme.enumerations
+    const enumModelString = `namespace org.acme.enumerations@1.0.0
     enum AnimalType {
       o SHEEP_GOAT
       o CATTLE
@@ -50,7 +50,7 @@ describe('ResourceValidator', function () {
       o DEER_OTHER
     }`;
 
-    const mapModelString = `namespace org.acme.map
+    const mapModelString = `namespace org.acme.map@1.0.0
     map PhoneBook {
       o String
       o String
@@ -59,7 +59,7 @@ describe('ResourceValidator', function () {
         o PhoneBook numbers
     }`;
 
-    const levelOneModel = `namespace org.acme.l1
+    const levelOneModel = `namespace org.acme.l1@1.0.0
     enum VehicleType {
       o CAR
       o TRUCK
@@ -79,9 +79,9 @@ describe('ResourceValidator', function () {
     }
     `;
 
-    const levelTwoModel = `namespace org.acme.l2
-    import org.acme.l1.Base
-    import org.acme.l1.Person
+    const levelTwoModel = `namespace org.acme.l2@1.0.0
+    import org.acme.l1@1.0.0.Base
+    import org.acme.l1@1.0.0.Person
     asset Vehicle extends Base  {
       o Integer numberOfWheels
       o Double milage
@@ -91,10 +91,10 @@ describe('ResourceValidator', function () {
     }
     `;
 
-    const levelThreeModel = `namespace org.acme.l3
-    import org.acme.l2.Vehicle
-    import org.acme.l1.VehicleType
-    import org.acme.l1.Person
+    const levelThreeModel = `namespace org.acme.l3@1.0.0
+    import org.acme.l2@1.0.0.Vehicle
+    import org.acme.l1@1.0.0.VehicleType
+    import org.acme.l1@1.0.0.Person
     concept TestConcept {
       o String name
     }
@@ -108,8 +108,8 @@ describe('ResourceValidator', function () {
       o Person singlePerson optional
     }`;
 
-    const abstractLevelThreeModel = `namespace org.acme.l3
-    import org.acme.l2.Vehicle
+    const abstractLevelThreeModel = `namespace org.acme.l3@1.0.0
+    import org.acme.l2@1.0.0.Vehicle
     abstract asset Car extends Vehicle  {
       o String model
     }`;
@@ -163,90 +163,90 @@ describe('ResourceValidator', function () {
 
     describe('#visitRelationshipDeclaration', function() {
         it('should detect assigning a resource to a relationship', function () {
-            const employee = factory.newResource('org.acme.l1', 'Employee', 'DAN');
+            const employee = factory.newResource('org.acme.l1@1.0.0', 'Employee', 'DAN');
             const typedStack = new TypedStack( employee );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in the "TEST" instance. Class "org.acme.l1.Person" has a value of "Resource {id=org.acme.l1.Employee#DAN}". Expected a "Relationship".');
+            }).should.throw('Model violation in the "TEST" instance. Class "org.acme.l1@1.0.0.Person" has a value of "Resource {id=org.acme.l1@1.0.0.Employee#DAN}". Expected a "Relationship".');
         });
         it('should allow assigning a relationship to a derived type', function () {
-            const baseRel = factory.newRelationship('org.acme.l2', 'PrivateOwner', 'DAN');
+            const baseRel = factory.newRelationship('org.acme.l2@1.0.0', 'PrivateOwner', 'DAN');
             const typedStack = new TypedStack( baseRel );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters );
         });
 
         it('should reject a relationship to a concept', function () {
-            const car = factory.newResource('org.acme.l3', 'Car', '123');
+            const car = factory.newResource('org.acme.l3@1.0.0', 'Car', '123');
             (function () {
-                car.owner = factory.newRelationship('org.acme.l3', 'TestConcept');
-            }).should.throw(/Cannot create a relationship to org.acme.l3.TestConcept, it is not identifiable./);
+                car.owner = factory.newRelationship('org.acme.l3@1.0.0', 'TestConcept');
+            }).should.throw(/Cannot create a relationship to org.acme.l3@1.0.0.TestConcept, it is not identifiable./);
         });
 
         it('should detect a relationship to a non array', function () {
-            const car = factory.newResource('org.acme.l3', 'Car', '123');
-            car.owners = factory.newRelationship('org.acme.l1', 'Person', '123');
+            const car = factory.newResource('org.acme.l3@1.0.0', 'Car', '123');
+            car.owners = factory.newRelationship('org.acme.l1@1.0.0', 'Person', '123');
             car.model = 'FOO';
 
             const typedStack = new TypedStack( car );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 vehicleDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Instance "org.acme.l3.Car#123" has a property "owners" with type "org.acme.l1.Person" that is not derived from "org.acme.l1.Person[]".');
+            }).should.throw('Instance "org.acme.l3@1.0.0.Car#123" has a property "owners" with type "org.acme.l1@1.0.0.Person" that is not derived from "org.acme.l1@1.0.0.Person[]".');
         });
     });
 
     describe('#visitField', function() {
         it('should allow assigning a resource type', function () {
-            const employee = factory.newResource('org.acme.l1', 'Employee', 'DAN');
+            const employee = factory.newResource('org.acme.l1@1.0.0', 'Employee', 'DAN');
             employee.ssn = 'abc';
             const typedStack = new TypedStack( [employee] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('containment');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters );
         });
 
         it('should detect assigning an incompatible resource type', function () {
-            const base = factory.newResource('org.acme.l1', 'Base', 'DAN');
+            const base = factory.newResource('org.acme.l1@1.0.0', 'Base', 'DAN');
             const typedStack = new TypedStack( [base] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('containment');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw('Instance "TEST" has a property "containment" with type "org.acme.l1.Base" that is not derived from "org.acme.l1.Person[]".');
+            }).should.throw('Instance "TEST" has a property "containment" with type "org.acme.l1@1.0.0.Base" that is not derived from "org.acme.l1@1.0.0.Person[]".');
         });
 
         it('should allow assigning a derived type', function () {
-            const employeeRel = factory.newRelationship('org.acme.l1', 'Employee', 'DAN');
+            const employeeRel = factory.newRelationship('org.acme.l1@1.0.0', 'Employee', 'DAN');
             const typedStack = new TypedStack( employeeRel );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters );
         });
 
         it('should fail assigning an incompatible type', function () {
-            const baseRel = factory.newRelationship('org.acme.l1', 'Base', 'DAN');
+            const baseRel = factory.newRelationship('org.acme.l1@1.0.0', 'Base', 'DAN');
             const typedStack = new TypedStack( baseRel );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             (function () {
                 field.accept(resourceValidator,parameters );
-            }).should.throw('Instance "TEST" has a property "owner" with type "org.acme.l1.Base" that is not derived from "org.acme.l1.Person".');
+            }).should.throw('Instance "TEST" has a property "owner" with type "org.acme.l1@1.0.0.Base" that is not derived from "org.acme.l1@1.0.0.Person".');
         });
 
         it('should detect using a number type for a string field', function () {
             const typedStack = new TypedStack( 123 );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('model');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -257,7 +257,7 @@ describe('ResourceValidator', function () {
 
         it('should detect using a date type for a string field', function () {
             const typedStack = new TypedStack( dayjs.utc('2016-10-13T14:49:47.971Z') );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('model');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -268,7 +268,7 @@ describe('ResourceValidator', function () {
 
         it('should detect using a boolean type for a string field', function () {
             const typedStack = new TypedStack( false );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('model');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -279,7 +279,7 @@ describe('ResourceValidator', function () {
 
         it('should detect using an array type for string field', function () {
             const typedStack = new TypedStack( ['FOO'] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('model');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -290,7 +290,7 @@ describe('ResourceValidator', function () {
 
         it('should detect using an invalid array for string[] field', function () {
             const typedStack = new TypedStack( ['FOO', 1] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('serviceHistory');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -301,7 +301,7 @@ describe('ResourceValidator', function () {
 
         it('should detect using an invalid array for enum field', function () {
             const typedStack = new TypedStack( ['CAR', '1'] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('vehicleTypes');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
@@ -312,7 +312,7 @@ describe('ResourceValidator', function () {
 
         it('should allow using an valid array for enum field', function () {
             const typedStack = new TypedStack( ['CAR', 'TRUCK'] );
-            const vehicleDeclaration = modelManager.getType('org.acme.l3.Car');
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('vehicleTypes');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters);
@@ -330,7 +330,7 @@ describe('ResourceValidator', function () {
     describe('#visitEnumDeclaration', function() {
         it('should detect using an invalid enum', function () {
             const typedStack = new TypedStack('MISSING');
-            const enumDeclaration = modelManager.getType('org.acme.enumerations.AnimalType');
+            const enumDeclaration = modelManager.getType('org.acme.enumerations@1.0.0.AnimalType');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (function () {
@@ -340,7 +340,7 @@ describe('ResourceValidator', function () {
 
         it('should validate enum', function () {
             const typedStack = new TypedStack('PIG');
-            const enumDeclaration = modelManager.getType('org.acme.enumerations.AnimalType');
+            const enumDeclaration = modelManager.getType('org.acme.enumerations@1.0.0.AnimalType');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             enumDeclaration.accept(resourceValidator,parameters );
         });
@@ -348,33 +348,33 @@ describe('ResourceValidator', function () {
 
     describe('#visitMapDeclaration', function() {
         it('should validate map', function () {
-            const map = new Map([['$class', 'org.acme.map.PhoneBook'], ['Lorem', 'Ipsum']]);
+            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 'Ipsum']]);
             const typedStack = new TypedStack(map);
-            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             mapDeclaration.accept(resourceValidator,parameters );
         });
 
         it('should not validate map with bad value', function () {
-            const map = new Map([['$class', 'org.acme.map.PhoneBook'], ['Lorem', 3]]);
+            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 3]]);
             const typedStack = new TypedStack(map);
-            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map.PhoneBook. Expected Type of String but found \'3\' instead.');
+            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'3\' instead.');
         });
 
         it('should not validate map with bad key', function () {
-            const map = new Map([['$class', 'org.acme.map.PhoneBook'], [1, 'Ipsum']]);
+            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], [1, 'Ipsum']]);
             const typedStack = new TypedStack(map);
-            const mapDeclaration = modelManager.getType('org.acme.map.PhoneBook');
+            const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map.PhoneBook. Expected Type of String but found \'1\' instead');
+            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'1\' instead');
         });
     });
 
@@ -382,22 +382,22 @@ describe('ResourceValidator', function () {
 
         it('should detect visiting a non resource', function () {
             const typedStack = new TypedStack('Invalid');
-            const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
+            const assetDeclaration = modelManager.getType('org.acme.l2@1.0.0.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in the "ABC" instance. Class "org.acme.l2.Vehicle" has the value of "Invalid". Expected a "Resource" or a "Concept".');
+            }).should.throw('Model violation in the "ABC" instance. Class "org.acme.l2@1.0.0.Vehicle" has the value of "Invalid". Expected a "Resource" or a "Concept".');
         });
 
         it('should detect using a missing super type', function () {
-            const vehicle = factory.newResource('org.acme.l2', 'Vehicle', 'ABC');
+            const vehicle = factory.newResource('org.acme.l2@1.0.0', 'Vehicle', 'ABC');
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
+            const assetDeclaration = modelManager.getType('org.acme.l2@1.0.0.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             // Nuke the org.acme.l1 namespace -- contains Base!!
-            modelManager.deleteModelFile('org.acme.l1');
+            modelManager.deleteModelFile('org.acme.l1@1.0.0');
 
             (function () {
                 assetDeclaration.accept(resourceValidator, parameters);
@@ -405,56 +405,56 @@ describe('ResourceValidator', function () {
         });
 
         it('should detect assigning to a missing type', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'ABC');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'ABC');
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
+            const assetDeclaration = modelManager.getType('org.acme.l2@1.0.0.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             // Nuke the org.acme.removable namespace -- which contains Car!!
-            modelManager.deleteModelFile('org.acme.l3');
+            modelManager.deleteModelFile('org.acme.l3@1.0.0');
 
             (function () {
                 assetDeclaration.accept(resourceValidator, parameters);
-            }).should.throw(TypeNotFoundException, /org.acme.l3/);
+            }).should.throw(TypeNotFoundException, /org.acme.l3@1.0.0/);
         });
 
         it('should detect assigning to an abstract type', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'ABC');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'ABC');
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
+            const assetDeclaration = modelManager.getType('org.acme.l2@1.0.0.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             // Nuke the org.acme.removable namespace -- which contains Car!!
-            modelManager.deleteModelFile('org.acme.l3');
+            modelManager.deleteModelFile('org.acme.l3@1.0.0');
 
             // replace with the same class declared abstract
             modelManager.addCTOModel(abstractLevelThreeModel);
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('The class "org.acme.l3.Car" is abstract and should not contain an instance.');
+            }).should.throw('The class "org.acme.l3@1.0.0.Car" is abstract and should not contain an instance.');
         });
 
         it('should detect additional field', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'ABC');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'ABC');
             vehicle.foo = 'Baz'; // additional field
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l2.Vehicle');
+            const assetDeclaration = modelManager.getType('org.acme.l2@1.0.0.Vehicle');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (function () {
                 assetDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Instance "ABC" has a property named "foo", which is not declared in "org.acme.l3.Car".');
+            }).should.throw('Instance "ABC" has a property named "foo", which is not declared in "org.acme.l3@1.0.0.Car".');
         });
 
         it('should detect an empty identifier', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'foo');
             vehicle.setIdentifier('');
             vehicle.model = 'Ford';
             vehicle.numberOfWheels = 4;
             vehicle.milage = 3.14;
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const assetDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (function () {
@@ -463,13 +463,13 @@ describe('ResourceValidator', function () {
         });
 
         it('should normalize a shadowed identifier to the value from the indentified field', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'foo');
             vehicle.$identifier = ''; // empty the identifier
             vehicle.model = 'Ford';
             vehicle.numberOfWheels = 4;
             vehicle.milage = 3.14;
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const assetDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             assetDeclaration.accept(resourceValidator, parameters);
@@ -477,44 +477,44 @@ describe('ResourceValidator', function () {
         });
 
         it('should reject a Double which is not finite', function () {
-            const vehicle = factory.newResource('org.acme.l3', 'Car', 'foo');
+            const vehicle = factory.newResource('org.acme.l3@1.0.0', 'Car', 'foo');
             vehicle.$identifier = '42';
             vehicle.model = 'Ford';
             vehicle.numberOfWheels = 4;
             vehicle.milage = NaN; // NaN
             const typedStack = new TypedStack(vehicle);
-            const assetDeclaration = modelManager.getType('org.acme.l3.Car');
+            const assetDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (() => {
                 assetDeclaration.accept(resourceValidator,parameters);
-            }).should.throw('Model violation in the "org.acme.l3.Car#foo" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
+            }).should.throw('Model violation in the "org.acme.l3@1.0.0.Car#foo" instance. The field "milage" has a value of "NaN" (type of value: "number"). Expected type of value: "Double".');
         });
 
         it('should report undeclared field if not identifiable', () => {
-            const data = factory.newConcept('org.acme.l1', 'Data');
+            const data = factory.newConcept('org.acme.l1@1.0.0', 'Data');
             data.name = 'name';
             data.numberOfWipers = 2;
             const typedStack = new TypedStack(data);
-            const conceptDeclaration = modelManager.getType('org.acme.l1.Data');
+            const conceptDeclaration = modelManager.getType('org.acme.l1@1.0.0.Data');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (() => {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
-            }).should.throw('Instance "undefined" has a property named "numberOfWipers", which is not declared in "org.acme.l1.Data".');
+            }).should.throw('Instance "undefined" has a property named "numberOfWipers", which is not declared in "org.acme.l1@1.0.0.Data".');
         });
 
         it('should report undeclared field with a $ prefix', () => {
-            const data = factory.newConcept('org.acme.l1', 'Data');
+            const data = factory.newConcept('org.acme.l1@1.0.0', 'Data');
             data.name = 'name';
             data.$numberOfWipers = 2;
             const typedStack = new TypedStack(data);
-            const conceptDeclaration = modelManager.getType('org.acme.l1.Data');
+            const conceptDeclaration = modelManager.getType('org.acme.l1@1.0.0.Data');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'ABC' };
 
             (() => {
                 resourceValidator.visitClassDeclaration(conceptDeclaration,parameters);
-            }).should.throw('Instance "undefined" has a property named "$numberOfWipers", which is not declared in "org.acme.l1.Data".');
+            }).should.throw('Instance "undefined" has a property named "$numberOfWipers", which is not declared in "org.acme.l1@1.0.0.Data".');
         });
     });
 

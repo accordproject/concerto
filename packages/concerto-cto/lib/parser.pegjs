@@ -1693,16 +1693,6 @@ FromUri
     return u;
   }
 
-ImportAll
-    = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
-    	const result = {
-            $class: "concerto.metamodel@1.0.0.ImportAll",
-            namespace: ns,
-        };
-        u && (result.uri = u);
-        return result;
-    }
-
 ImportType
     = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
         const { namespace, name } = fullyQualifiedName(ns);
@@ -1758,7 +1748,6 @@ commaSeparatedTypes
     }
 Import
     =  ImportTypes /
-       ImportAll /
        ImportType
 
 Version

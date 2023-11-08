@@ -38,7 +38,7 @@ describe('Serializer', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-        namespace org.acme.sample
+        namespace org.acme.sample@1.0.0
 
         scalar PostalCode extends String
 
@@ -115,83 +115,83 @@ describe('Serializer', () => {
 
         it('should throw if the class declaration cannot be found', () => {
             let mockResource = sinon.createStubInstance(Resource);
-            mockResource.getFullyQualifiedType.returns('org.acme.sample.NoSuchAsset');
+            mockResource.getFullyQualifiedType.returns('org.acme.sample@1.0.0.NoSuchAsset');
             (() => {
                 serializer.toJSON(mockResource);
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
         it('should generate a JSON object and validate if the validate flag is set to true', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
-            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample@1.0.0', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = 'the value';
             resource.doubleValue = 3.14;
             let json = serializer.toJSON(resource, {
                 validate: true
             });
             json.should.deep.equal({
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 $identifier: '1',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com',
                 stringValue: 'the value',
                 doubleValue: 3.14
             });
         });
 
         it('should throw validation errors during JSON object generation if Double is NaN', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
-            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample@1.0.0', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = 'the value';
             resource.doubleValue = NaN;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "NaN"./);
+            }).should.throw(/Model violation in the "org.acme.sample@1.0.0.SampleAsset#1" instance. The field "doubleValue" has a value of "NaN"./);
         });
 
         it('should throw validation errors during JSON object generation if Double is Infinity', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
-            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample@1.0.0', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = 'the value';
             resource.doubleValue = Infinity;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "Infinity"./);
+            }).should.throw(/Model violation in the "org.acme.sample@1.0.0.SampleAsset#1" instance. The field "doubleValue" has a value of "Infinity"./);
         });
 
         it('should throw validation errors during JSON object generation if Double is -Infinity', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
-            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample@1.0.0', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = 'the value';
             resource.doubleValue = -Infinity;
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw(/Model violation in the "org.acme.sample.SampleAsset#1" instance. The field "doubleValue" has a value of "-Infinity"./);
+            }).should.throw(/Model violation in the "org.acme.sample@1.0.0.SampleAsset#1" instance. The field "doubleValue" has a value of "-Infinity"./);
         });
 
         it('should throw validation errors during JSON object generation if the validate flag is not specified and errors are present', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
             (() => {
                 serializer.toJSON(resource);
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should throw validation errors during JSON object generation if the validate flag is set to true and errors are present', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
             (() => {
                 serializer.toJSON(resource, {
                     validate: true
                 });
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should generate a JSON object if errors are present but the validate flag is set to false', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
             let json = serializer.toJSON(resource, {
                 validate: false
             });
             json.should.deep.equal({
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 $identifier: '1',
                 assetId: '1'
             });
@@ -199,10 +199,10 @@ describe('Serializer', () => {
 
         it('should not validate during JSON object generation if the default options specifies the validate flag set to false', () => {
             serializer.setDefaultOptions({ validate: false });
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
             let json = serializer.toJSON(resource);
             json.should.deep.equal({
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 $identifier: '1',
                 assetId: '1'
             });
@@ -210,23 +210,23 @@ describe('Serializer', () => {
 
         it('should validate during JSON object generation if the default options specifies the validate flag set to false but the input options specify true', () => {
             serializer.setDefaultOptions({ validate: false });
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
             (() => {
                 serializer.toJSON(resource, {
                     validate: true
                 });
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "owner".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "owner".');
         });
 
         it('should generate a concept', () => {
-            let address = factory.newConcept('org.acme.sample', 'Address');
+            let address = factory.newConcept('org.acme.sample@1.0.0', 'Address');
             address.city = 'Winchester';
             address.country = 'UK';
             address.elevation = 3.14;
             address.postcode = 'SO21 2JN';
             const json = serializer.toJSON(address);
             json.should.deep.equal({
-                $class: 'org.acme.sample.Address',
+                $class: 'org.acme.sample@1.0.0.Address',
                 country: 'UK',
                 elevation: 3.14,
                 city: 'Winchester',
@@ -237,18 +237,18 @@ describe('Serializer', () => {
         });
 
         it('should generate a field if an empty string is specififed', () => {
-            let resource = factory.newResource('org.acme.sample', 'SampleAsset', '1');
-            resource.owner = factory.newRelationship('org.acme.sample', 'SampleParticipant', 'alice@email.com');
+            let resource = factory.newResource('org.acme.sample@1.0.0', 'SampleAsset', '1');
+            resource.owner = factory.newRelationship('org.acme.sample@1.0.0', 'SampleParticipant', 'alice@email.com');
             resource.stringValue = '';
             resource.doubleValue = 3.14;
             let json = serializer.toJSON(resource, {
                 validate: true
             });
             json.should.deep.equal({
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 $identifier: '1',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com',
                 stringValue: '',
                 doubleValue: 3.14
             });
@@ -266,7 +266,7 @@ describe('Serializer', () => {
 
         it('should throw if the class declaration cannot be found', () => {
             let mockResource = sinon.createStubInstance(Resource);
-            mockResource.$class = 'org.acme.sample.NoSuchAsset';
+            mockResource.$class = 'org.acme.sample@1.0.0.NoSuchAsset';
             let serializer = new Serializer(factory, modelManager);
             (() => {
                 serializer.fromJSON(mockResource);
@@ -275,9 +275,9 @@ describe('Serializer', () => {
 
         it('should deserialize a valid asset', () => {
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com',
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com',
                 stringValue: 'the value',
                 doubleValue: 3.14
             };
@@ -292,9 +292,9 @@ describe('Serializer', () => {
 
         it('should deserialize a valid transaction', () => {
             let json = {
-                $class: 'org.acme.sample.SampleTransaction',
+                $class: 'org.acme.sample@1.0.0.SampleTransaction',
                 transactionId: '111',
-                asset: 'resource:org.acme.sample.SampleAsset#1',
+                asset: 'resource:org.acme.sample@1.0.0.SampleAsset#1',
                 newValue: 'the value'
             };
             let resource = serializer.fromJSON(json);
@@ -307,9 +307,9 @@ describe('Serializer', () => {
 
         it('should deserialize a valid event', () => {
             let json = {
-                $class: 'org.acme.sample.SampleEvent',
+                $class: 'org.acme.sample@1.0.0.SampleEvent',
                 eventId: '111',
-                asset: 'resource:org.acme.sample.SampleAsset#1',
+                asset: 'resource:org.acme.sample@1.0.0.SampleAsset#1',
                 newValue: 'the value'
             };
             let resource = serializer.fromJSON(json);
@@ -322,7 +322,7 @@ describe('Serializer', () => {
 
         it('should deserialize a valid concept', () => {
             let json = {
-                $class: 'org.acme.sample.Address',
+                $class: 'org.acme.sample@1.0.0.Address',
                 city: 'Winchester',
                 country: 'UK',
                 elevation: 3.14,
@@ -339,31 +339,31 @@ describe('Serializer', () => {
 
         it('should throw validation errors if the validate flag is not specified', () => {
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com'
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com'
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should throw validation errors if the validate flag is set to true', () => {
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com'
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com'
             };
             (() => {
                 serializer.fromJSON(json, { validate: true });
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should not validate if the validate flag is set to false', () => {
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com'
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com'
             };
             let resource = serializer.fromJSON(json, { validate: false });
             resource.should.be.an.instanceOf(Resource);
@@ -376,9 +376,9 @@ describe('Serializer', () => {
         it('should not validate if the default options specifies the validate flag set to false', () => {
             serializer.setDefaultOptions({ validate: false });
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com'
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com'
             };
             let resource = serializer.fromJSON(json);
             resource.should.be.an.instanceOf(Resource);
@@ -391,18 +391,18 @@ describe('Serializer', () => {
         it('should validate if the default options specifies the validate flag set to false but the input options specify true', () => {
             serializer.setDefaultOptions({ validate: false });
             let json = {
-                $class: 'org.acme.sample.SampleAsset',
+                $class: 'org.acme.sample@1.0.0.SampleAsset',
                 assetId: '1',
-                owner: 'resource:org.acme.sample.SampleParticipant#alice@email.com'
+                owner: 'resource:org.acme.sample@1.0.0.SampleParticipant#alice@email.com'
             };
             (() => {
                 serializer.fromJSON(json, { validate: true });
-            }).should.throw('The instance "org.acme.sample.SampleAsset#1" is missing the required field "stringValue".');
+            }).should.throw('The instance "org.acme.sample@1.0.0.SampleAsset#1" is missing the required field "stringValue".');
         });
 
         it('should error on unexpected properties', () => {
             const json = {
-                $class: 'org.acme.sample.SampleParticipant',
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
                 firstName: 'Block',
                 lastName: 'Norris',
@@ -414,7 +414,7 @@ describe('Serializer', () => {
 
         it('should error on unexpected properties that start with $', () => {
             const json = {
-                $class: 'org.acme.sample.SampleParticipant',
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
                 firstName: 'Block',
                 lastName: 'Norris',
@@ -422,12 +422,12 @@ describe('Serializer', () => {
             };
             (() =>
                 serializer.fromJSON(json)
-            ).should.throw(/Unexpected properties for type org.acme.sample.SampleParticipant: \$WRONG/);
+            ).should.throw(/Unexpected properties for type org.acme.sample@1.0.0.SampleParticipant: \$WRONG/);
         });
 
         it('should error on unexpected properties that start with reserved keywords', () => {
             const json = {
-                $class: 'org.acme.sample.SampleParticipant',
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
                 firstName: 'Block',
                 lastName: 'Norris',
@@ -435,12 +435,12 @@ describe('Serializer', () => {
             };
             (() =>
                 serializer.fromJSON(json)
-            ).should.throw(/Unexpected reserved properties for type org.acme.sample.SampleParticipant: \$validator/);
+            ).should.throw(/Unexpected reserved properties for type org.acme.sample@1.0.0.SampleParticipant: \$validator/);
         });
 
         it('should error on unexpected $timestamp property when the model doesn\'t require them', () => {
             const json = {
-                $class: 'org.acme.sample.Address',
+                $class: 'org.acme.sample@1.0.0.Address',
                 country: 'UK',
                 elevation: 3.14,
                 city: 'Winchester',
@@ -449,14 +449,14 @@ describe('Serializer', () => {
             };
             (() =>
                 serializer.fromJSON(json)
-            ).should.throw(/Unexpected property for type org.acme.sample.Address: \$timestamp/);
+            ).should.throw(/Unexpected property for type org.acme.sample@1.0.0.Address: \$timestamp/);
         });
 
         it('should not error on unexpected $identifier property when the model doesn\'t require them', () => {
             const json = {
-                $class: 'org.acme.sample.SampleEvent',
+                $class: 'org.acme.sample@1.0.0.SampleEvent',
                 eventId: '111',
-                asset: 'resource:org.acme.sample.SampleAsset#1',
+                asset: 'resource:org.acme.sample@1.0.0.SampleAsset#1',
                 newValue: 'the value',
                 $timestamp: '2022-11-28T01:02:03.987Z',
                 $identifier: '111',
@@ -467,9 +467,9 @@ describe('Serializer', () => {
 
         it('should not error when shadowed $identifier does not match explicit identifier value', () => {
             const json = {
-                $class: 'org.acme.sample.SampleEvent',
+                $class: 'org.acme.sample@1.0.0.SampleEvent',
                 eventId: '111',
-                asset: 'resource:org.acme.sample.SampleAsset#1',
+                asset: 'resource:org.acme.sample@1.0.0.SampleAsset#1',
                 newValue: 'the value',
                 $timestamp: '2022-11-28T01:02:03.987Z',
                 $identifier: '222',
@@ -481,7 +481,7 @@ describe('Serializer', () => {
 
         it('should not error on unexpected properties if their value is undefined', () => {
             const json = {
-                $class: 'org.acme.sample.SampleParticipant',
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
                 firstName: 'Block',
                 lastName: 'Norris',
@@ -508,7 +508,7 @@ describe('Serializer', () => {
         });
 
         const json = {
-            $class : 'org.acme.sample.DateTimeTest',
+            $class : 'org.acme.sample@1.0.0.DateTimeTest',
         };
 
         const DEFAULT_EXPECTED_VALUE =  '2022-11-28T01:02:03.987Z';

@@ -77,7 +77,6 @@ class BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
@@ -91,7 +90,6 @@ class BaseModelManager {
         this.factory = new Factory(this);
         this.serializer = new Serializer(this.factory, this, options);
         this.decoratorFactories = [];
-        this.strict = !!options?.strict;
         this.options = options;
         this.addRootModel();
 
@@ -117,43 +115,16 @@ class BaseModelManager {
     }
 
     /**
-     * Returns the value of the strict option
-     * @returns {boolean} true if the strict has been set
-     */
-    isStrict() {
-        return this.strict;
-    }
-
-    /**
-     * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} true if the enableAliasedType has been set
-     */
-    isAliasedTypeEnabled() {
-        return this.enableAliasedType;
-    }
-
-    /**
      * Adds root types
      * @private
      */
     addRootModel() {
         // create the versioned concerto namespace
-        const {rootModelAst, rootModelCto, rootModelFile} = getRootModel(true);
+        const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
-        if(this.strict ) {
-            // add the versioned concerto namespace
-            this.addModelFile(m, rootModelCto, rootModelFile, true);
-        }
-        else {
-            // add the versioned concerto namespace
-            this.addModelFile(m, rootModelCto, rootModelFile, true);
-
-            // create the unversioned concerto namespace and add
-            const unversioned = getRootModel(false);
-            const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
-            this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile, true);
-        }
+        // add the versioned concerto namespace
+        this.addModelFile(m, rootModelCto, rootModelFile, true);
     }
 
     /**
@@ -219,8 +190,8 @@ class BaseModelManager {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
-        if(this.isStrict() && !modelFile.getVersion()) {
-            throw new Error('Cannot add an unversioned namespace when \'strict\' is true');
+        if(!modelFile.getVersion()) {
+            throw new Error(`Cannot add an unversioned namespace: ${modelFile.getNamespace()}`);
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
@@ -265,12 +236,7 @@ class BaseModelManager {
             // Use deserialization to validate the AST
             this.getSerializer().fromJSON(modelFile.getAst());
         } catch (err) {
-            // Rethrow as a MetamodelException
-            if (this.isStrict()) {
-                throw new MetamodelException(err.message);
-            } else {
-                console.warn('Invalid metamodel found. This will throw an exception in a future release. ', err.message);
-            }
+            throw new MetamodelException(err.message);
         }
 
         if (!alreadyHasMetamodel) {
