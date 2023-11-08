@@ -144,6 +144,15 @@ class Decorated {
     getDecorators() {
         return this.decorators;
     }
+    /**
+     * Returns the decorators for this class.
+     *
+     */
+    removeDecorators() {
+        this.ast.decorators=null;
+        this.process();
+    }
+
 
     /**
      * Returns the decorator for this class with a given name.
