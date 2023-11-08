@@ -36,7 +36,7 @@ describe('ModelUtil', function () {
 
     describe('#isPrimitiveType', function() {
         it('check isPrimitiveType', function() {
-            ModelUtil.isPrimitiveType('org.acme.baz.Foo').should.equal(false);
+            ModelUtil.isPrimitiveType('org.acme.baz@1.0.0.Foo').should.equal(false);
             ModelUtil.isPrimitiveType('Boolean').should.equal(true);
             ModelUtil.isPrimitiveType('Integer').should.equal(true);
             ModelUtil.isPrimitiveType('Long').should.equal(true);
@@ -48,7 +48,7 @@ describe('ModelUtil', function () {
     describe('#getShortName', function() {
 
         it('should handle a name with a namespace', function() {
-            ModelUtil.getShortName('org.acme.baz.Foo').should.equal('Foo');
+            ModelUtil.getShortName('org.acme.baz@1.0.0.Foo').should.equal('Foo');
         });
 
         it('should handle a name without a namespace', function() {
@@ -59,7 +59,7 @@ describe('ModelUtil', function () {
 
     describe('#getNamespace', function() {
         it('check getNamespace', function() {
-            ModelUtil.getNamespace('org.acme.baz.Foo').should.equal('org.acme.baz');
+            ModelUtil.getNamespace('org.acme.baz@1.0.0.Foo').should.equal('org.acme.baz@1.0.0');
             ModelUtil.getNamespace('Foo').should.equal('');
         });
     });
@@ -163,12 +163,6 @@ describe('ModelUtil', function () {
     });
 
     describe('#parseNamespace', function() {
-        it('valid, no version', function() {
-            const nsInfo = ModelUtil.parseNamespace('org.acme');
-            nsInfo.name.should.equal('org.acme');
-            nsInfo.escapedNamespace.should.equal('org.acme');
-        });
-
         it('valid, with version', function() {
             const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.0');
             nsInfo.name.should.equal('org.acme');

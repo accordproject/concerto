@@ -17,12 +17,10 @@ declare class ModelManager extends BaseModelManager {
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
-     * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      */
     constructor(options?: {
-        strict?: boolean;
         regExp?: any;
         enableMapType?: boolean;
     });

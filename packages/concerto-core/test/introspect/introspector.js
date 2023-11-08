@@ -78,7 +78,7 @@ describe('Introspector', () => {
 
             modelManager.addCTOModel(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
-            introspector.getClassDeclaration('org.acme.base.Person').should.not.be.null;
+            introspector.getClassDeclaration('org.acme.base@1.0.0.Person').should.not.be.null;
         });
     });
 

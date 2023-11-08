@@ -43,7 +43,7 @@ describe('concerto', () => {
 
         it('should return the identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -53,7 +53,7 @@ describe('concerto', () => {
 
         it('should not return the identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Product',
+                $class : 'org.accordproject.test@1.0.0.Product',
                 sku: '001',
                 description: 'Widgets'
             };
@@ -67,7 +67,7 @@ describe('concerto', () => {
 
         it('should return the identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -78,7 +78,7 @@ describe('concerto', () => {
 
         it('should not return the identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Product',
+                $class : 'org.accordproject.test@1.0.0.Product',
                 sku: '001',
                 description: 'Widgets'
             };
@@ -90,14 +90,14 @@ describe('concerto', () => {
 
         it('should throw for undeclared type', () => {
             const obj = {
-                $class : 'org.accordproject.test.BadProduct',
+                $class : 'org.accordproject.test@1.0.0.BadProduct',
                 sku: '001',
                 description: 'Widgets'
             };
 
             (() => {
                 concerto.getIdentifier(obj);
-            }).should.throw(/Type "BadProduct" is not defined in namespace "org.accordproject.test"/);
+            }).should.throw(/Type "BadProduct" is not defined in namespace "org.accordproject.test@1.0.0"/);
         });
 
     });
@@ -106,7 +106,7 @@ describe('concerto', () => {
 
         it('should set the identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -120,13 +120,13 @@ describe('concerto', () => {
 
         it('should get the fully qualified identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
 
             const fgid = concerto.getFullyQualifiedIdentifier(obj);
-            fgid.should.equal('org.accordproject.test.Person#123456789');
+            fgid.should.equal('org.accordproject.test@1.0.0.Person#123456789');
         });
     });
 
@@ -134,13 +134,13 @@ describe('concerto', () => {
 
         it('should get a URI', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
 
             const uri = concerto.toURI(obj);
-            uri.should.equal('resource:org.accordproject.test.Person#123456789');
+            uri.should.equal('resource:org.accordproject.test@1.0.0.Person#123456789');
         });
     });
 
@@ -148,7 +148,7 @@ describe('concerto', () => {
 
         it('should be able to roundtrip toURI and fromURI', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -182,7 +182,7 @@ describe('concerto', () => {
 
         it('should get type declaration', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -218,11 +218,11 @@ describe('concerto', () => {
     describe('#isRelationship', () => {
 
         it('should identify a relationship', () => {
-            concerto.isRelationship('resource:org.accordproject.test.Person#001').should.be.true;
+            concerto.isRelationship('resource:org.accordproject.test@1.0.0.Person#001').should.be.true;
         });
 
         it('should not identify a relationship with wrong scheme', () => {
-            concerto.isRelationship('foo:org.accordproject.test.Person#001').should.be.false;
+            concerto.isRelationship('foo:org.accordproject.test@1.0.0.Person#001').should.be.false;
         });
 
         it('should not identify a relationship with wrong type', () => {
@@ -234,7 +234,7 @@ describe('concerto', () => {
 
         it('should get type', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
@@ -248,13 +248,13 @@ describe('concerto', () => {
 
         it('should get namespace', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 name: 'Dan Selman'
             };
 
             const ns = concerto.getNamespace(obj);
-            ns.should.equal('org.accordproject.test');
+            ns.should.equal('org.accordproject.test@1.0.0');
         });
     });
 
@@ -262,7 +262,7 @@ describe('concerto', () => {
 
         it('should validate data that conforms to model', () => {
             const obj = {
-                $class : 'org.accordproject.test.Customer',
+                $class : 'org.accordproject.test@1.0.0.Customer',
                 ssn: '123456789',
                 customerId: '001',
                 department: 'ENGINEERING'
@@ -273,10 +273,10 @@ describe('concerto', () => {
 
         it('should validate data that conforms to model (types)', () => {
             const obj = {
-                $class : 'org.accordproject.test.TestAsset',
+                $class : 'org.accordproject.test@1.0.0.TestAsset',
                 id: '001',
                 types: {
-                    $class : 'org.accordproject.test.Types',
+                    $class : 'org.accordproject.test@1.0.0.Types',
                     stringValue: 'a',
                     stringArrayValue : ['a', 'b', 'c'],
                     longValue: 1,
@@ -285,11 +285,11 @@ describe('concerto', () => {
                     booleanValue: true,
                     departmentValue : 'ENGINEERING',
                     departmentArrayValue : ['ENGINEERING', 'HR'],
-                    relationshipValue: 'resource:org.accordproject.test.Person#ABC',
-                    relationshipArrayValue: ['resource:org.accordproject.test.Person#ABC', 'resource:org.accordproject.test.Person#DEF'],
+                    relationshipValue: 'resource:org.accordproject.test@1.0.0.Person#ABC',
+                    relationshipArrayValue: ['resource:org.accordproject.test@1.0.0.Person#ABC', 'resource:org.accordproject.test@1.0.0.Person#DEF'],
                     dateTimeValue: '2020-03-31',
                     conceptValue : {
-                        $class : 'org.accordproject.test.Product',
+                        $class : 'org.accordproject.test@1.0.0.Product',
                         sku: 'abc',
                         description: 'widget'
                     }
@@ -301,7 +301,7 @@ describe('concerto', () => {
 
         it('should fail with extra property', () => {
             const obj = {
-                $class : 'org.accordproject.test.Customer',
+                $class : 'org.accordproject.test@1.0.0.Customer',
                 ssn: '123456789',
                 name: 'Dan',
                 department: 'ENGINEERING'
@@ -309,12 +309,12 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance "123456789" has a property named "name", which is not declared in "org.accordproject.test.Customer"./);
+            }).should.throw(/Instance "123456789" has a property named "name", which is not declared in "org.accordproject.test@1.0.0.Customer"./);
         });
 
         it('should fail with extra property (concept)', () => {
             const obj = {
-                $class : 'org.accordproject.test.Product',
+                $class : 'org.accordproject.test@1.0.0.Product',
                 sku: '001',
                 description: 'Widget',
                 price: 100
@@ -322,12 +322,12 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance "undefined" has a property named "price", which is not declared in "org.accordproject.test.Product"./);
+            }).should.throw(/Instance "undefined" has a property named "price", which is not declared in "org.accordproject.test@1.0.0.Product"./);
         });
 
         it('should fail with invalid enum', () => {
             const obj = {
-                $class : 'org.accordproject.test.Customer',
+                $class : 'org.accordproject.test@1.0.0.Customer',
                 ssn: '123456789',
                 department: 'FOO',
                 customerId: 'A'
@@ -335,12 +335,12 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Model violation in the "org.accordproject.test.Customer#123456789" instance. Invalid enum value of "FOO" for the field "Department"./);
+            }).should.throw(/Model violation in the "org.accordproject.test@1.0.0.Customer#123456789" instance. Invalid enum value of "FOO" for the field "Department"./);
         });
 
         it('should fail with empty identifier', () => {
             const obj = {
-                $class : 'org.accordproject.test.Customer',
+                $class : 'org.accordproject.test@1.0.0.Customer',
                 ssn: '',
                 department: 'HR',
                 customerId: 'A'
@@ -348,24 +348,24 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Instance "org.accordproject.test.Customer#" has an empty identifier./);
+            }).should.throw(/Instance "org.accordproject.test@1.0.0.Customer#" has an empty identifier./);
         });
 
         it('should fail with missing required property', () => {
             const obj = {
-                $class : 'org.accordproject.test.Customer',
+                $class : 'org.accordproject.test@1.0.0.Customer',
                 ssn: '001',
                 customerId: 'A'
             };
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/The instance "org.accordproject.test.Customer#001" is missing the required field "department"./);
+            }).should.throw(/The instance "org.accordproject.test@1.0.0.Customer#001" is missing the required field "department"./);
         });
 
         it('should fail with string used for string[]', () => {
             const obj = {
-                $class : 'org.accordproject.test.Employee',
+                $class : 'org.accordproject.test@1.0.0.Employee',
                 ssn: '001',
                 department: 'ENGINEERING',
                 pets: 'cat'
@@ -373,19 +373,19 @@ describe('concerto', () => {
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/Model violation in the "org.accordproject.test.Employee#001" instance. The field "pets" has a value of ""cat"" \(type of value: "string"\). Expected type of value: "String\[\]"./);
+            }).should.throw(/Model violation in the "org.accordproject.test@1.0.0.Employee#001" instance. The field "pets" has a value of ""cat"" \(type of value: "string"\). Expected type of value: "String\[\]"./);
         });
 
         it('should fail with abstract type', () => {
             const obj = {
-                $class : 'org.accordproject.test.Person',
+                $class : 'org.accordproject.test@1.0.0.Person',
                 ssn: '123456789',
                 department: 'ENGINEERING',
             };
 
             (() => {
                 concerto.validate(obj);
-            }).should.throw(/The class "org.accordproject.test.Person" is abstract and should not contain an instance./);
+            }).should.throw(/The class "org.accordproject.test@1.0.0.Person" is abstract and should not contain an instance./);
         });
     });
 });

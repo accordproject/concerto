@@ -382,10 +382,6 @@ function toCTO(metaModel) {
             case `${MetaModelNamespace}.ImportTypeFrom`:
                 result += `\nimport ${imp.namespace}.${imp.name}`;
                 break;
-            case `${MetaModelNamespace}.ImportAll`:
-            case `${MetaModelNamespace}.ImportAllFrom`:
-                result += `\nimport ${imp.namespace}.*`;
-                break;
             case `${MetaModelNamespace}.ImportTypes`:
                 result += `\nimport ${imp.namespace}.{${imp.types.join(',')}}`;
                 break;

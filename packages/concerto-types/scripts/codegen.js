@@ -12,9 +12,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * Generate TypeScript files from the metamodel.
  */
 async function main() {
-    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([MetaModelUtil.metaModelCto], {strict: true});
-    const visitor = new CodeGen.TypescriptVisitor();
-
+    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([metaModelCto]);
+    const visitor = new TypescriptVisitor();
     const fileWriter = new FileWriter(path.resolve(__dirname, '..', 'src', 'generated'));
     modelManager.accept(visitor, { fileWriter });
 

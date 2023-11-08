@@ -19,12 +19,11 @@ const rootModelAst = require('./rootmodel.json');
 
 /**
  * Gets the root 'concerto' model
- * @param {boolean} versioned if true the concerto namespace is versioned
  * @returns {object} rootModelFile, rootModelCto and rootModelAst
  */
-function getRootModel(versioned) {
-    const rootModelFile = versioned ? 'concerto_1.0.0.cto' : 'concerto.cto';
-    const ns = versioned ? 'concerto@1.0.0' : 'concerto';
+function getRootModel() {
+    const rootModelFile ='concerto_1.0.0.cto';
+    const ns = 'concerto@1.0.0';
     const rootModelCto = `@DotNetNamespace("AccordProject.Concerto")
     namespace ${ns}
     abstract concept Concept {}

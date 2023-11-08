@@ -45,9 +45,9 @@ describe('Dependencies2 Model', function() {
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
 
-            // const participant = factory.newResource('org.acme.base', 'ClientAdminMember', 'testadmin');
-            const transaction = factory.newTransaction('org.acme.core', 'BaseTransaction', 'testing');
-            transaction.invoker = factory.newRelationship('org.acme.base', 'ClientAdminMember', 'testadmin');
+            // const participant = factory.newResource('org.acme.base@1.0.0', 'ClientAdminMember', 'testadmin');
+            const transaction = factory.newTransaction('org.acme.core@1.0.0', 'BaseTransaction', 'testing');
+            transaction.invoker = factory.newRelationship('org.acme.base@1.0.0', 'ClientAdminMember', 'testadmin');
             transaction.validate();
             const jsonObj = serializer.toJSON(transaction);
             //console.log(JSON.stringify(jsonObj));

@@ -24,29 +24,8 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.13.3 {8f59b43e6071c4d3ae42e94476142f7a} 2023-11-07
-- Added DCS and vocabulary extraction support for decoratorManager
-- Added errortype to BaseException and used that to define error types in introspect 
-
-Version 3.13.2 {dccc690753912cf87e7ceec56d949058} 2023-10-18
-- Add getNamespace method to key type and value type of maps
-
-Version 3.13.1 {f5a9a1ea6a64865843a3abb77798cbb0} 2023-10-18
-- Add migrate option to DecoratorManager options
-
-Version 3.13.1 {f435a20a00712e49c5cd32bc73ecb06a} 2023-10-03
-- Add JSDoc for enableMapType option on ModelManager
-
-Version 3.13.1 {6b09c1c58abcc77eecbb44e375c2efb8} 2023-10-03
-- Add enableMapType option to BaseModelManager options
-
-Version 3.13.0 {125b7f97f8740628b2629b2793384cc7} 2023-10-03
-- Update DecoratorManager to support multiple value compare
-- Create DecoratorManager.validate method to validate structure of decorator command set
-
-Version 3.12.4 {7738d5490ea8438677e1d21d704bb5aa} 2023-08-31
-- Adds validate and validateCommands options to DecoratorManager.decorateModels
-- Adds addMetamodel option to BaseModelManager
+Version 4.0.0 {3f40d54eaa27c50b304634848b802935} 2023-09-04
+- Strict mode becomes default behaviour
 
 Version 3.12.2 {bb8951ea059e312cd347b715bc9fc8d7} 2023-08-28
 - Adds ModelFile :: getClassDeclarations
