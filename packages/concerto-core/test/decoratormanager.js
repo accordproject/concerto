@@ -188,7 +188,7 @@ describe('DecoratorManager', () => {
             decoratorCity2Property.should.not.be.null;
         });
 
-        it('should decorate the specified element on the specified Map Declaration (Map Declaration)', async function() {
+        it('should decorate the specified MapDeclaration', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
