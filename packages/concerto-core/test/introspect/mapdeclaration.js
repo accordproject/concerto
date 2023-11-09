@@ -263,10 +263,17 @@ describe('MapDeclaration', () => {
             decl.validate();
         });
 
-        it('should validate when map value is imported and is of valid map key type', () => {
+        it('should validate when map value is imported and is of valid map key type (Concept import)', () => {
             const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
             introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.imported.thing.cto', MapDeclaration);
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.imported.concept.cto', MapDeclaration);
+            decl.validate();
+        });
+
+        it('should validate when map value is imported and is of valid map key type (Scalar Import)', () => {
+            const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
+            introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.imported.scalar.cto', MapDeclaration);
             decl.validate();
         });
     });
