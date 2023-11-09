@@ -267,14 +267,66 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const extractionDictionary={};
-        const data = modelManager.accept(this, {options,extractionDictionary,extractDecorators:true});
-        const decoratorCommandSet=(this.parseNonVocabularyDecorators(data.extractionDictionary));
-        const vocabularies = this.parseVocabularies(data.extractionDictionary,options.locale);
+        const ast = modelManager.getAst(true);
+        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        let extractionDictionary={};
+        const processedModels = decoratedAst.models.map((model)=>{
+            if (model.decorators && model.decorators.length>0){
+                extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, model.decorators,'','');
+                if (options.removeDecoratorsFromModel){
+                    model.decorators=null;
+                }
+            }
+            const processedDecl = model.declarations.map((decl)=>{
+                if (decl.decorators) {
+                    extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.decorators,decl.name,'');
+                }
+                if (options.removeDecoratorsFromModel){
+                    decl.decorators=null;
+                }
+                if (decl.$class.endsWith('.MapDeclaration')) {
+                    if (decl.key){
+                        if (decl.key.decorators){
+                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.key.decorators,decl.name,'','KEY');
+                            decl.key.decorators=null;
+                        }
+                    }
+                    if (decl.value){
+                        if (decl.value.decorators){
+                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.value.decorators,decl.name,'','VALUE');
+                            decl.value.decorators=null;
+                        }
+                    }
+                }
+                if (decl.properties) {
+                    const processedProperties = decl.properties.map((property) => {
+                        if (property.decorators){
+                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, property.decorators,decl.name,property.name);
+                        }
+                        if (options.removeDecoratorsFromModel){
+                            property.decorators=null;
+                        }
+                        return property;
+                    });
+                    decl.properties=processedProperties;
+                }
+                return decl;
+            });
+            model.declarations=processedDecl;
+            return model;
+        });
+        const processedAST={
+            ...decoratedAst,
+            models:processedModels,
+        };
+        const newModelManager = new ModelManager();
+        newModelManager.fromAst(processedAST);
+        const decoratorCommandSet=(this.parseNonVocabularyDecorators(extractionDictionary));
+        const vocabularies = this.parseVocabularies(extractionDictionary,options.locale);
         return {
+            modelManager:newModelManager,
             decoratorCommandSet,
-            vocabularies,
-            modelManager:data.modelManager
+            vocabularies
         };
     }
     /**
@@ -293,7 +345,7 @@ class DecoratorManager {
             const jsonData=decoratorDict[namespace];
             const patternToDetermineVocab = /^Term_/i;
             jsonData.forEach((obj)=>{
-                const dcs=(obj.dcs);
+                const decos=JSON.parse(obj.dcs);
                 const target={
                     '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
                     'namespace':namespace
@@ -304,28 +356,33 @@ class DecoratorManager {
                 if (obj.property && obj.property!==''){
                     target.property=obj.property;
                 }
-                if (dcs.name!=='Term' && !patternToDetermineVocab.test(dcs.name)){
-                    const decotatorObj={
-                        '$class': 'concerto.metamodel@1.0.0.Decorator',
-                        'name': dcs.name,
-                    };
-                    if (dcs.arguments){
-                        const args=dcs.arguments.map(arg=>{
-                            return {
-                                '$class':arg.$class,
-                                'value':arg.value
-                            };
-                        });
-                        decotatorObj.arguments=args;
-                    }
-                    const dcsObject = {
-                        '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
-                        'type': 'UPSERT',
-                        'target': target,
-                        'decorator': decotatorObj,
-                    };
-                    dcsObjects.push(dcsObject);
+                if (obj.mapElement && obj.mapElement!==''){
+                    target.mapElement=obj.mapElement;
                 }
+                decos.forEach((dcs)=>{
+                    if (dcs.name!=='Term' && !patternToDetermineVocab.test(dcs.name)){
+                        const decotatorObj={
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': dcs.name,
+                        };
+                        if (dcs.arguments){
+                            const args=dcs.arguments.map((arg)=>{
+                                return {
+                                    '$class':arg.$class,
+                                    'value':arg.value
+                                };
+                            });
+                            decotatorObj.arguments=args;
+                        }
+                        let dcsObject = {
+                            '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
+                            'type': 'UPSERT',
+                            'target': target,
+                            'decorator': decotatorObj,
+                        };
+                        dcsObjects.push(dcsObject);
+                    }
+                });
             });
             const dcmsForNamespace={
                 '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.DecoratorCommandSet`,
@@ -353,38 +410,40 @@ class DecoratorManager {
             strVoc=strVoc+`namespace: ${namespace}\n`;
             strVoc=strVoc+'declarations:\n';
             const jsonData=decoratorDict[namespace];
-            let dictVoc={};
+            const dictVoc={};
             jsonData.forEach((obj)=>{
-                // check if obj.decl already in dictVoc
                 if (!dictVoc[obj.declaration]){
                     dictVoc[obj.declaration]={
                         propertyVocabs:{}
                     };
                 }
-                const dcs=(obj.dcs);
-                if (dcs.name==='Term' || patternToDetermineVocab.test(dcs.name)){
-                    if (obj.property!==''){
-                        if(!dictVoc[obj.declaration].propertyVocabs[obj.property]){
-                            dictVoc[obj.declaration].propertyVocabs[obj.property]={};
-                        }
-                        if (dcs.name==='Term'){
-                            dictVoc[obj.declaration].propertyVocabs[obj.property].term=dcs.arguments[0].value;
-                        }
-                        else{
-                            const extensionKey = dcs.name.split('Term_')[1];
-                            dictVoc[obj.declaration].propertyVocabs[obj.property][extensionKey]=dcs.arguments[0].value;
-                        }
-                    }
-                    else{
-                        if (dcs.name==='Term'){
-                            dictVoc[obj.declaration].term=dcs.arguments[0].value;
+                const decos=JSON.parse(obj.dcs);
+                decos.forEach((dcs)=>{
+                    if (dcs.name==='Term' || patternToDetermineVocab.test(dcs.name)){
+                        if (obj.property!==''){
+                            if(!dictVoc[obj.declaration].propertyVocabs[obj.property]){
+                                dictVoc[obj.declaration].propertyVocabs[obj.property]={};
+                            }
+                            if (dcs.name==='Term'){
+                                dictVoc[obj.declaration].propertyVocabs[obj.property].term=dcs.arguments[0].value;
+                            }
+                            else{
+                                const extensionKey = dcs.name.split('Term_')[1];
+                                dictVoc[obj.declaration].propertyVocabs[obj.property][extensionKey]=dcs.arguments[0].value;
+                            }
                         }
                         else{
-                            const extensionKey = dcs.name.split('Term_')[1];
-                            dictVoc[obj.declaration][extensionKey]=dcs.arguments[0].value;
+                            if (dcs.name==='Term'){
+                                dictVoc[obj.declaration].term=dcs.arguments[0].value;
+                            }
+                            else{
+                                const extensionKey = dcs.name.split('Term_')[1];
+                                dictVoc[obj.declaration][extensionKey]=dcs.arguments[0].value;
+                            }
                         }
                     }
-                }
+                });
+
             });
             Object.keys(dictVoc).forEach((decl)=>{
                 if (dictVoc[decl].term){
@@ -413,203 +472,30 @@ class DecoratorManager {
         return data;
     }
     /**
-     * Visitor design pattern
-     * @param {Object} thing - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Boolean} the result of visiting or null
-     * @private
-     */
-    static visit(thing, parameters = {}) {
-        if (thing.isModelManager?.()) {
-            return this.visitModelManager(thing, parameters);
-        } else if (thing.isModelFile?.()) {
-            return this.visitModelFile(thing, parameters);
-        } else if (thing.isEnum?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isClassDeclaration?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isMapDeclaration?.()) {
-            return;
-        } else if (thing.isScalarDeclaration?.()) {
-            return this.visitScalarDeclaration(thing, parameters);
-        }else if (thing.isParticipant?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isTransaction?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isEvent?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isAsset?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitDeclaration(thing, parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitField(thing, parameters);
-        } else if (thing.isEnumValue?.()) {
-            return this.visitField(thing, parameters);
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
-        }
-    }
-
-
-    /**
-     * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    static visitModelManager(modelManager, parameters) {
-        if (parameters.extractDecorators){
-            let updatedModelManager=modelManager;
-            updatedModelManager.modelFiles=modelManager.getModelFiles().map((modelFile) => {
-                if (modelFile.decorators && modelFile.decorators.length>0){
-                    parameters.extractionDictionary=this.constructDCSDictionary(parameters.extractionDictionary,modelFile.namespace, modelFile.decorators,'','');
-                    if (parameters.options.removeDecoratorsFromModel){
-                        modelFile.removeDecorators();
-                    }
-                }
-                parameters.namespace=modelFile.namespace;
-                const data=modelFile.accept(this, parameters);
-                parameters.extractionDictionary=data.extractionDictionary;
-                modelFile=data.modelFile;
-                return modelFile;
-            });
-            return {extractionDictionary:parameters.extractionDictionary,modelManager:updatedModelManager};
-        }
-        else{
-            return null;
-        }
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    static visitModelFile(modelFile, parameters) {
-        if (parameters.extractDecorators){
-            let updatedModelFile=modelFile;
-            updatedModelFile.declarations=modelFile.getAllDeclarations()
-                .map((decl) => {
-                    if (decl.decorators && decl.decorators.length>0){
-                        parameters.extractionDictionary=this.constructDCSDictionary(parameters.extractionDictionary,parameters.namespace, decl.decorators,decl.name,'');
-                        if (parameters.options.removeDecoratorsFromModel){
-                            decl.removeDecorators();
-                        }
-                    }
-                    parameters.declaration= decl.name;
-                    const data=decl.accept(this, parameters);
-                    parameters.extractionDictionary=data.extractionDictionary;
-                    decl=data.declaration;
-                    return decl;
-                });
-            return {extractionDictionary:parameters.extractionDictionary,modelFile:updatedModelFile};
-        }
-        else{
-            return null;
-        }
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ClassDeclaration} classDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @param {string} type  - the type of the declaration
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    static visitDeclaration(classDeclaration, parameters) {
-        if (parameters.extractDecorators){
-            let updatedDeclaration=classDeclaration;
-            updatedDeclaration.properties=classDeclaration.getOwnProperties().map((property) => {
-                if (property.decorators && property.decorators.length>0){
-                    parameters.extractionDictionary=this.constructDCSDictionary(parameters.extractionDictionary,parameters.namespace, property.decorators,parameters.declaration,property.name);
-                    if (parameters.options.removeDecoratorsFromModel){
-                        property.removeDecorators();
-                    }
-                }
-                return property;
-            });
-            return {extractionDictionary:parameters.extractionDictionary,declaration:updatedDeclaration};
-        }
-        else{
-            return null;
-        }
-    }
-    /**
-     * Visitor design pattern
-     * @param {Field} field - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-    */
-    static visitField(field, parameters) {
-        if (parameters.extractDecorators){
-            return parameters.extractionDictionary;
-        }
-        else{
-            return null;
-        }
-    }
-    /**
-     * Visitor design pattern
-     * @param {ScalarDeclaration} scalarDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @protected
-     */
-    static visitScalarDeclaration(scalarDeclaration, parameters) {
-        if (parameters.extractDecorators){
-            let updatedScalarDeclaration=scalarDeclaration;
-            const scalarDeclarationName = scalarDeclaration.getName();
-            const decos = scalarDeclaration.getDecorators();
-            if (decos){
-                if (decos.decorators && decos.decorators.length>0){
-                    parameters.extractionDictionary=this.constructDCSDictionary(parameters.extractionDictionary,parameters.namespace, decos,scalarDeclarationName,'');
-                    if (parameters.options.removeDecoratorsFromModel){
-                        updatedScalarDeclaration.removeDecorators();
-                    }
-                }
-            }
-            return {extractionDictionary:parameters.extractionDictionary,declaration:updatedScalarDeclaration};
-        }
-        else{
-            return null;
-        }
-    }
-
-    /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
     * or creates a new key with the provided value.
     *
     * @param {Object} dictionary - The dictionary (object) to which to add the key-value pair.
     * @param {string} key - The key to add or update.
-    * @param {any} decorators - The value to add or update.
+    * @param {any} value - The value to add or update.
     * @param {string} declaration - The target decl.
-    * @param {string} property The target property.
+    * @param {string} property - The target property.
+    * @param {string} mapElement - The target mapElement.
     * @returns {Object} - constructed DCS Dict
     * @private
     */
-    static constructDCSDictionary(dictionary, key, decorators, declaration,property) {
-        decorators.forEach(deco=>{
-            const val = {
-                declaration,
-                property,
-                dcs: {name: deco.name,
-                    arguments:deco.ast.arguments
-                },
-            };
-            if (dictionary[key] && Array.isArray( dictionary[key])) {
-                dictionary[key].push(val);
-            } else {
-                dictionary[key] = [val];
-            }
-        });
+    static constructDCSDictionary(dictionary, key, value, declaration,property,mapElement='') {
+        const val = {
+            declaration,
+            property,
+            mapElement,
+            dcs: JSON.stringify(value),
+        };
+        if (dictionary[key] && Array.isArray( dictionary[key])) {
+            dictionary[key].push(val);
+        } else {
+            dictionary[key] = [val];
+        }
         return dictionary;
     }
 

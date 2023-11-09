@@ -58,7 +58,6 @@ class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 
    + Object extractDecorators(ModelManager,object,boolean,string) 
-   ~ Object visitScalarDeclaration(ScalarDeclaration,Object) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 

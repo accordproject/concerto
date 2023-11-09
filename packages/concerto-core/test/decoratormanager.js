@@ -17,6 +17,8 @@
 const fs = require('fs');
 const DecoratorManager = require('../lib/decoratormanager');
 const ModelManager = require('../lib/modelmanager');
+const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanager');
+const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
 require('chai').should();
@@ -472,16 +474,13 @@ describe('DecoratorManager', () => {
     });
 
     describe('#extractDecorators', function() {
-        it('should be able to extract decorators and vocabs from a model', async function() {
-            const testModelManager = new ModelManager({strict:true});
-            const modelText = fs.readFileSync('./test/data/decoratorcommands/test-decorated-model.cto', 'utf-8');
+        it('should be able to extract decorators and vocabs from a model withoup options', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/extract-test.cto', 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
-            let resp = DecoratorManager.extractDecorators( testModelManager);
-            let dcs = resp.decoratorCommandSet;
-            const validationModelResult = dcs.map((decoractor)=>{
-                return DecoratorManager.validate((decoractor));
-            });
-            validationModelResult.should.not.be.null;
+            const resp = DecoratorManager.extractDecorators( testModelManager);
+            const dcs = resp.decoratorCommandSet;
+            dcs.should.not.be.null;
         });
         it('should be able to extract decorators and vocabs from a model without namespace version', async function() {
             const testModelManager = new ModelManager();
@@ -491,9 +490,55 @@ describe('DecoratorManager', () => {
                 removeDecoratorsFromModel:true,
                 locale:'en'
             };
-            let resp = DecoratorManager.extractDecorators( testModelManager, options);
-            let dcs = resp.decoratorCommandSet;
-            dcs.should.not.be.null;
+            const resp = DecoratorManager.extractDecorators( testModelManager, options);
+            const vocabs = resp.vocabularies;
+            vocabs.should.not.be.null;
+        });
+        it('should ensure that extraction and re-application of decorators and vocabs from a model is an identity operation', async function() {
+            const testModelManager = new ModelManager();
+            const sourceCTO = [];
+            const updatedCTO = [];
+            const modelTextWithoutNamespace = fs.readFileSync('./test/data/decoratorcommands/extract-test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const namespaceSource = testModelManager.getNamespaces().filter(namespace=>namespace!=='concerto@1.0.0' && namespace!=='concerto');
+            namespaceSource.forEach(name=>{
+                let model = testModelManager.getModelFile(name);
+                let modelAst=model.getAst();
+                let data =  Printer.toCTO(modelAst);
+                sourceCTO.push(data);
+            });
+            const resp = DecoratorManager.extractDecorators( testModelManager, options);
+            const dcs = resp.decoratorCommandSet;
+            const vocabs= resp.vocabularies;
+            let newModelManager=resp.modelManager;
+            const vocManager = new VocabularyManager();
+            vocabs.forEach(content => {
+                vocManager.addVocabulary(content);
+            });
+            const vocabKeySet=[];
+            const namespaceUpdated = newModelManager.getNamespaces().filter(namespace=>namespace!=='concerto@1.0.0' && namespace!=='concerto');
+            namespaceUpdated.forEach(name=>{
+                let vocab = vocManager.getVocabulariesForNamespace(name);
+                vocab.forEach(voc=>vocabKeySet.push(voc.getLocale()));
+            });
+            vocabKeySet.map(voc=>{
+                let commandSet = vocManager.generateDecoratorCommands(newModelManager, voc);
+                newModelManager = DecoratorManager.decorateModels(newModelManager, commandSet);
+            });
+            dcs.forEach(content => {
+                newModelManager = DecoratorManager.decorateModels(newModelManager, (content));
+            });
+            namespaceUpdated.forEach(name=>{
+                let model = newModelManager.getModelFile(name);
+                let modelAst=model.getAst();
+                let data =  Printer.toCTO(modelAst);
+                updatedCTO.push(data);
+            });
+            sourceCTO.should.be.deep.equal(updatedCTO);
         });
     });
 
