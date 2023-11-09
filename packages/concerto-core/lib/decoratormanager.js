@@ -147,7 +147,7 @@ class DecoratorManager {
             metamodelValidation: true,
             addMetamodel: true,
         });
-        if(modelFiles) {
+        if (modelFiles) {
             validationModelManager.addModelFiles(modelFiles);
         }
         validationModelManager.addCTOModel(
@@ -267,52 +267,51 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const ast = modelManager.getAst(true);
-        const decoratedAst = JSON.parse(JSON.stringify(ast));
-        let extractionDictionary={};
+        const decoratedAst = modelManager.getAst(true);
+        let extractionDictionary = {};
         const processedModels = decoratedAst.models.map((model)=>{
-            if (model.decorators && model.decorators.length>0){
-                extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, model.decorators,'','');
+            if ((model?.decorators.length > 0)){
+                extractionDictionary = this.constructDCSDictionary(extractionDictionary,model.namespace,model.decorators,'','');
                 if (options.removeDecoratorsFromModel){
-                    model.decorators=null;
+                    model.decorators = undefined;
                 }
             }
-            const processedDecl = model.declarations.map((decl)=>{
+            const processedDecl = model.declarations.map(decl => {
                 if (decl.decorators) {
-                    extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.decorators,decl.name,'');
+                    extractionDictionary = this.constructDCSDictionary(extractionDictionary,model.namespace,decl.decorators,decl.name,'');
                 }
                 if (options.removeDecoratorsFromModel){
-                    decl.decorators=null;
+                    decl.decorators = undefined;
                 }
                 if (decl.$class.endsWith('.MapDeclaration')) {
                     if (decl.key){
                         if (decl.key.decorators){
-                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.key.decorators,decl.name,'','KEY');
-                            decl.key.decorators=null;
+                            extractionDictionary = this.constructDCSDictionary(extractionDictionary,model.namespace,decl.key.decorators,decl.name,'','KEY');
+                            decl.key.decorators = undefined;
                         }
                     }
                     if (decl.value){
                         if (decl.value.decorators){
-                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace,decl.value.decorators,decl.name,'','VALUE');
-                            decl.value.decorators=null;
+                            extractionDictionary = this.constructDCSDictionary(extractionDictionary,model.namespace,decl.value.decorators,decl.name,'','VALUE');
+                            decl.value.decorators = undefined;
                         }
                     }
                 }
                 if (decl.properties) {
                     const processedProperties = decl.properties.map((property) => {
                         if (property.decorators){
-                            extractionDictionary=this.constructDCSDictionary(extractionDictionary,model.namespace, property.decorators,decl.name,property.name);
+                            extractionDictionary = this.constructDCSDictionary(extractionDictionary,model.namespace, property.decorators,decl.name,property.name);
                         }
                         if (options.removeDecoratorsFromModel){
-                            property.decorators=null;
+                            property.decorators = undefined;
                         }
                         return property;
                     });
-                    decl.properties=processedProperties;
+                    decl.properties = processedProperties;
                 }
                 return decl;
             });
-            model.declarations=processedDecl;
+            model.declarations = processedDecl;
             return model;
         });
         const processedAST={
@@ -321,7 +320,7 @@ class DecoratorManager {
         };
         const newModelManager = new ModelManager();
         newModelManager.fromAst(processedAST);
-        const decoratorCommandSet=(this.parseNonVocabularyDecorators(extractionDictionary));
+        const decoratorCommandSet = this.parseNonVocabularyDecorators(extractionDictionary);
         const vocabularies = this.parseVocabularies(extractionDictionary,options.locale);
         return {
             modelManager:newModelManager,
@@ -339,40 +338,40 @@ class DecoratorManager {
         const data = [];
         Object.keys(decoratorDict).forEach((namespace)=>{
             const {name, version} = ModelUtil.parseNamespace(namespace);
-            const nameOfDcs=name;
-            const versionOfDcs=version;
-            const dcsObjects=[];
-            const jsonData=decoratorDict[namespace];
+            const nameOfDcs = name;
+            const versionOfDcs = version;
+            const dcsObjects = [];
+            const jsonData = decoratorDict[namespace];
             const patternToDetermineVocab = /^Term_/i;
             jsonData.forEach((obj)=>{
-                const decos=JSON.parse(obj.dcs);
-                const target={
+                const decos = JSON.parse(obj.dcs);
+                const target = {
                     '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
                     'namespace':namespace
                 };
                 if (obj.declaration && obj.declaration!==''){
-                    target.declaration=obj.declaration;
+                    target.declaration = obj.declaration;
                 }
                 if (obj.property && obj.property!==''){
-                    target.property=obj.property;
+                    target.property = obj.property;
                 }
                 if (obj.mapElement && obj.mapElement!==''){
-                    target.mapElement=obj.mapElement;
+                    target.mapElement = obj.mapElement;
                 }
                 decos.forEach((dcs)=>{
-                    if (dcs.name!=='Term' && !patternToDetermineVocab.test(dcs.name)){
-                        const decotatorObj={
+                    if (dcs.name !== 'Term' && !patternToDetermineVocab.test(dcs.name)){
+                        const decotatorObj = {
                             '$class': 'concerto.metamodel@1.0.0.Decorator',
                             'name': dcs.name,
                         };
                         if (dcs.arguments){
-                            const args=dcs.arguments.map((arg)=>{
+                            const args = dcs.arguments.map((arg)=>{
                                 return {
                                     '$class':arg.$class,
                                     'value':arg.value
                                 };
                             });
-                            decotatorObj.arguments=args;
+                            decotatorObj.arguments = args;
                         }
                         let dcsObject = {
                             '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
@@ -384,7 +383,7 @@ class DecoratorManager {
                     }
                 });
             });
-            const dcmsForNamespace={
+            const dcmsForNamespace = {
                 '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.DecoratorCommandSet`,
                 'name': nameOfDcs,
                 'version': versionOfDcs,
@@ -405,40 +404,40 @@ class DecoratorManager {
         const data = [];
         const patternToDetermineVocab = /^Term_/i;
         Object.keys(decoratorDict).forEach((namespace)=>{
-            let strVoc='';
-            strVoc=strVoc+`locale: ${locale}\n`;
-            strVoc=strVoc+`namespace: ${namespace}\n`;
-            strVoc=strVoc+'declarations:\n';
-            const jsonData=decoratorDict[namespace];
-            const dictVoc={};
+            let strVoc = '';
+            strVoc = strVoc+`locale: ${locale}\n`;
+            strVoc = strVoc+`namespace: ${namespace}\n`;
+            strVoc = strVoc+'declarations:\n';
+            const jsonData = decoratorDict[namespace];
+            const dictVoc = {};
             jsonData.forEach((obj)=>{
                 if (!dictVoc[obj.declaration]){
-                    dictVoc[obj.declaration]={
-                        propertyVocabs:{}
+                    dictVoc[obj.declaration] = {
+                        propertyVocabs: {}
                     };
                 }
-                const decos=JSON.parse(obj.dcs);
+                const decos = JSON.parse(obj.dcs);
                 decos.forEach((dcs)=>{
-                    if (dcs.name==='Term' || patternToDetermineVocab.test(dcs.name)){
-                        if (obj.property!==''){
-                            if(!dictVoc[obj.declaration].propertyVocabs[obj.property]){
-                                dictVoc[obj.declaration].propertyVocabs[obj.property]={};
+                    if (dcs.name === 'Term' || patternToDetermineVocab.test(dcs.name)){
+                        if (obj.property !== ''){
+                            if (!dictVoc[obj.declaration].propertyVocabs[obj.property]){
+                                dictVoc[obj.declaration].propertyVocabs[obj.property] = {};
                             }
-                            if (dcs.name==='Term'){
-                                dictVoc[obj.declaration].propertyVocabs[obj.property].term=dcs.arguments[0].value;
+                            if (dcs.name === 'Term'){
+                                dictVoc[obj.declaration].propertyVocabs[obj.property].term = dcs.arguments[0].value;
                             }
-                            else{
+                            else {
                                 const extensionKey = dcs.name.split('Term_')[1];
-                                dictVoc[obj.declaration].propertyVocabs[obj.property][extensionKey]=dcs.arguments[0].value;
+                                dictVoc[obj.declaration].propertyVocabs[obj.property][extensionKey] = dcs.arguments[0].value;
                             }
                         }
-                        else{
-                            if (dcs.name==='Term'){
-                                dictVoc[obj.declaration].term=dcs.arguments[0].value;
+                        else {
+                            if (dcs.name === 'Term'){
+                                dictVoc[obj.declaration].term = dcs.arguments[0].value;
                             }
-                            else{
+                            else {
                                 const extensionKey = dcs.name.split('Term_')[1];
-                                dictVoc[obj.declaration][extensionKey]=dcs.arguments[0].value;
+                                dictVoc[obj.declaration][extensionKey] = dcs.arguments[0].value;
                             }
                         }
                     }
@@ -447,22 +446,22 @@ class DecoratorManager {
             });
             Object.keys(dictVoc).forEach((decl)=>{
                 if (dictVoc[decl].term){
-                    strVoc+=`  - ${decl}: ${dictVoc[decl].term}\n`;
+                    strVoc += `  - ${decl}: ${dictVoc[decl].term}\n`;
                     const otherProps = Object.keys(dictVoc[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
                     otherProps.forEach((key)=>{
-                        strVoc+=`    ${key}: ${dictVoc[decl][key]}\n`;
+                        strVoc += `    ${key}: ${dictVoc[decl][key]}\n`;
                     });
                 }
                 if (dictVoc[decl].propertyVocabs && Object.keys(dictVoc[decl].propertyVocabs).length>0){
                     if (!dictVoc[decl].term){
-                        strVoc+=`  - ${decl}: ${decl}\n`;
+                        strVoc += `  - ${decl}: ${decl}\n`;
                     }
-                    strVoc+='    properties:\n';
+                    strVoc += '    properties:\n';
                     Object.keys(dictVoc[decl].propertyVocabs).forEach((prop)=>{
-                        strVoc+=`      - ${prop}: ${dictVoc[decl].propertyVocabs[prop].term}\n`;
+                        strVoc += `      - ${prop}: ${dictVoc[decl].propertyVocabs[prop].term}\n`;
                         const otherProps = Object.keys(dictVoc[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
                         otherProps.forEach((key)=>{
-                            strVoc+=`        ${key}: ${dictVoc[decl].propertyVocabs[prop][key]}\n`;
+                            strVoc += `        ${key}: ${dictVoc[decl].propertyVocabs[prop][key]}\n`;
                         });
                     });
                 }
@@ -667,7 +666,7 @@ class DecoratorManager {
 
             if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 if (target.mapElement) {
-                    switch(target.mapElement) {
+                    switch (target.mapElement) {
                     case 'KEY':
                     case 'VALUE':
                         this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
