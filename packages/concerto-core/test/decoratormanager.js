@@ -540,6 +540,14 @@ describe('DecoratorManager', () => {
             });
             sourceCTO.should.be.deep.equal(updatedCTO);
         });
+        it('should give proper response in there is no vocabulary on any model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/model-without-vocab.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const resp = DecoratorManager.extractDecorators( testModelManager);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal([]);
+        });
     });
 
 });
