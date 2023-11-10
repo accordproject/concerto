@@ -305,17 +305,4 @@ describe('ScalarDeclaration', () => {
             testClass.isClassDeclaration().should.be.false;
         });
     });
-
-    describe('#isMapDeclaration', () => {
-        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
-
-        beforeEach(() => {
-            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
-            modelManager.addModelFiles(modelFiles);
-        });
-        it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
-            testClass.isMapDeclaration().should.be.false;
-        });
-    });
 });

@@ -278,16 +278,6 @@ class ScalarDeclaration extends Declaration {
         return false;
     }
 
-    /**
-     * Returns true if this class is the definition of a map-declaration.
-     *
-     * @return {boolean} true if the class is a map-declaration
-     * @deprecated
-     */
-    isMapDeclaration() {
-        return false;
-    }
-
 }
 
 module.exports = ScalarDeclaration;

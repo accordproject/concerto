@@ -124,6 +124,7 @@ class Declaration extends Decorated {
    + boolean isEnum() 
    + boolean isClassDeclaration() 
    + boolean isScalarDeclaration() 
+   + boolean isMapDeclaration() 
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
@@ -274,7 +275,6 @@ class ScalarDeclaration extends Declaration {
    + boolean isTransaction() 
    + boolean isEvent() 
    + boolean isConcept() 
-   + boolean isMapDeclaration() 
 }
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
