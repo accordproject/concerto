@@ -254,6 +254,10 @@ class DecoratorManager {
         return newModelManager;
     }
     /**
+     * @typedef decoratorCommandSet
+     * @type {object}
+     * @typedef vocabularies
+     * @type {string}
      * @typedef ExtractDecoratorsResult
      * @type {object}
      * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
