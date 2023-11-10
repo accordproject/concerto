@@ -276,9 +276,9 @@ class DecoratorManager {
         };
         const decoratedAst = modelManager.getAst(true);
         let extractionDictionary = {};
-        const processedModels = decoratedAst.models.map((model)=>{
+        const processedModels = decoratedAst.models.map(model =>{
             if ((model?.decorators.length > 0)){
-                extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary,model.namespace,model.decorators, {});
+                extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, model.decorators, {});
                 if (options.removeDecoratorsFromModel){
                     model.decorators = undefined;
                 }
@@ -288,7 +288,7 @@ class DecoratorManager {
                     const constructOptions = {
                         declaration: decl.name,
                     };
-                    extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary,model.namespace,decl.decorators,constructOptions);
+                    extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.decorators, constructOptions);
                 }
                 if (options.removeDecoratorsFromModel){
                     decl.decorators = undefined;
@@ -300,7 +300,7 @@ class DecoratorManager {
                                 declaration: decl.name,
                                 mapElement: 'KEY'
                             };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary,model.namespace,decl.key.decorators,constructOptions);
+                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.key.decorators, constructOptions);
                             decl.key.decorators = undefined;
                         }
                     }
@@ -310,19 +310,19 @@ class DecoratorManager {
                                 declaration: decl.name,
                                 mapElement: 'VALUE'
                             };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary,model.namespace,decl.value.decorators,constructOptions);
+                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.value.decorators, constructOptions);
                             decl.value.decorators = undefined;
                         }
                     }
                 }
                 if (decl.properties) {
-                    const processedProperties = decl.properties.map((property) => {
+                    const processedProperties = decl.properties.map(property => {
                         if (property.decorators){
                             const constructOptions = {
                                 declaration: decl.name,
                                 property: property.name
                             };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary ,model.namespace, property.decorators, constructOptions );
+                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, property.decorators, constructOptions );
                         }
                         if (options.removeDecoratorsFromModel){
                             property.decorators = undefined;
@@ -342,10 +342,10 @@ class DecoratorManager {
         };
         const newModelManager = new ModelManager();
         newModelManager.fromAst(processedAST);
-        const decoratorCommandSet = DecoratorUtil.parseNonVocabularyDecorators(extractionDictionary,DCS_VERSION);
-        const vocabularies = DecoratorUtil.parseVocabularies(extractionDictionary,options.locale);
+        const decoratorCommandSet = DecoratorUtil.parseNonVocabularyDecorators(extractionDictionary, DCS_VERSION);
+        const vocabularies = DecoratorUtil.parseVocabularies(extractionDictionary, options.locale);
         return {
-            modelManager:newModelManager,
+            modelManager: newModelManager,
             decoratorCommandSet,
             vocabularies
         };

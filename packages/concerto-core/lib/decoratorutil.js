@@ -31,14 +31,14 @@ class DecoratorUtil {
      */
     static parseNonVocabularyDecorators(decoratorDict, DCS_VERSION){
         const data = [];
-        Object.keys(decoratorDict).forEach((namespace)=>{
+        Object.keys(decoratorDict).forEach(namespace =>{
             const {name, version} = ModelUtil.parseNamespace(namespace);
             const nameOfDcs = name;
             const versionOfDcs = version;
             const dcsObjects = [];
             const jsonData = decoratorDict[namespace];
             const patternToDetermineVocab = /^Term_/i;
-            jsonData.forEach((obj)=>{
+            jsonData.forEach(obj =>{
                 const decos = JSON.parse(obj.dcs);
                 const target = {
                     '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
@@ -53,7 +53,7 @@ class DecoratorUtil {
                 if (obj.mapElement && obj.mapElement!==''){
                     target.mapElement = obj.mapElement;
                 }
-                decos.forEach((dcs)=>{
+                decos.forEach(dcs =>{
                     if (dcs.name !== 'Term' && !patternToDetermineVocab.test(dcs.name)){
                         const decotatorObj = {
                             '$class': 'concerto.metamodel@1.0.0.Decorator',
@@ -107,14 +107,14 @@ class DecoratorUtil {
                 strVoc = strVoc+'declarations:\n';
                 const jsonData = decoratorDict[namespace];
                 const dictVoc = {};
-                jsonData.forEach((obj)=>{
+                jsonData.forEach(obj =>{
                     if (!dictVoc[obj.declaration]){
                         dictVoc[obj.declaration] = {
                             propertyVocabs: {}
                         };
                     }
                     const decos = JSON.parse(obj.dcs);
-                    decos.forEach((dcs)=>{
+                    decos.forEach(dcs =>{
                         if (dcs.name === 'Term' || patternToDetermineVocab.test(dcs.name)){
                             if (obj.property !== ''){
                                 if (!dictVoc[obj.declaration].propertyVocabs[obj.property]){
@@ -141,11 +141,11 @@ class DecoratorUtil {
                     });
 
                 });
-                Object.keys(dictVoc).forEach((decl)=>{
+                Object.keys(dictVoc).forEach(decl =>{
                     if (dictVoc[decl].term){
                         strVoc += `  - ${decl}: ${dictVoc[decl].term}\n`;
                         const otherProps = Object.keys(dictVoc[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
-                        otherProps.forEach((key)=>{
+                        otherProps.forEach(key =>{
                             strVoc += `    ${key}: ${dictVoc[decl][key]}\n`;
                         });
                     }
@@ -154,10 +154,10 @@ class DecoratorUtil {
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         strVoc += '    properties:\n';
-                        Object.keys(dictVoc[decl].propertyVocabs).forEach((prop)=>{
+                        Object.keys(dictVoc[decl].propertyVocabs).forEach(prop =>{
                             strVoc += `      - ${prop}: ${dictVoc[decl].propertyVocabs[prop].term}\n`;
                             const otherProps = Object.keys(dictVoc[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
-                            otherProps.forEach((key)=>{
+                            otherProps.forEach(key =>{
                                 strVoc += `        ${key}: ${dictVoc[decl].propertyVocabs[prop][key]}\n`;
                             });
                         });
