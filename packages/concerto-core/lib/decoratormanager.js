@@ -274,80 +274,11 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const decoratedAst = modelManager.getAst(true);
-        let extractionDictionary = {};
-        const processedModels = decoratedAst.models.map(model =>{
-            if ((model?.decorators.length > 0)){
-                extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, model.decorators, {});
-                if (options.removeDecoratorsFromModel){
-                    model.decorators = undefined;
-                }
-            }
-            const processedDecl = model.declarations.map(decl => {
-                if (decl.decorators) {
-                    const constructOptions = {
-                        declaration: decl.name,
-                    };
-                    extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.decorators, constructOptions);
-                }
-                if (options.removeDecoratorsFromModel){
-                    decl.decorators = undefined;
-                }
-                if (decl.$class.endsWith('.MapDeclaration')) {
-                    if (decl.key){
-                        if (decl.key.decorators){
-                            const constructOptions = {
-                                declaration: decl.name,
-                                mapElement: 'KEY'
-                            };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.key.decorators, constructOptions);
-                            decl.key.decorators = undefined;
-                        }
-                    }
-                    if (decl.value){
-                        if (decl.value.decorators){
-                            const constructOptions = {
-                                declaration: decl.name,
-                                mapElement: 'VALUE'
-                            };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, decl.value.decorators, constructOptions);
-                            decl.value.decorators = undefined;
-                        }
-                    }
-                }
-                if (decl.properties) {
-                    const processedProperties = decl.properties.map(property => {
-                        if (property.decorators){
-                            const constructOptions = {
-                                declaration: decl.name,
-                                property: property.name
-                            };
-                            extractionDictionary = DecoratorUtil.constructDCSDictionary(extractionDictionary, model.namespace, property.decorators, constructOptions );
-                        }
-                        if (options.removeDecoratorsFromModel){
-                            property.decorators = undefined;
-                        }
-                        return property;
-                    });
-                    decl.properties = processedProperties;
-                }
-                return decl;
-            });
-            model.declarations = processedDecl;
-            return model;
-        });
-        const processedAST={
-            ...decoratedAst,
-            models:processedModels,
-        };
-        const newModelManager = new ModelManager();
-        newModelManager.fromAst(processedAST);
-        const decoratorCommandSet = DecoratorUtil.parseNonVocabularyDecorators(extractionDictionary, DCS_VERSION);
-        const vocabularies = DecoratorUtil.parseVocabularies(extractionDictionary, options.locale);
+        const collectionResp = DecoratorUtil.collectExtractedDecoratorsAndProcessedModels(modelManager, options.removeDecoratorsFromModel, options.locale, DCS_VERSION);
         return {
-            modelManager: newModelManager,
-            decoratorCommandSet,
-            vocabularies
+            modelManager: collectionResp.updatedModelManager,
+            decoratorCommandSet: collectionResp.decoratorCommandSet,
+            vocabularies: collectionResp.vocabularies
         };
     }
 
