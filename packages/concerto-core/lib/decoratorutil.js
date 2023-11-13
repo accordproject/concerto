@@ -181,6 +181,30 @@ class DecoratorUtil {
         return vocabData;
     }
     /**
+     * Constructs Target object for a given model
+     * @param {string} DCS_VERSION - the version string
+     * @param {string} namespace - the current namespace
+     * @param {Object} obj - the ast of the model
+     * @returns {Object} - the target object
+     * @private
+     */
+    static constructTarget(DCS_VERSION, namespace, obj){
+        const target ={
+            '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
+            'namespace':namespace
+        };
+        if (obj.declaration && obj.declaration!==''){
+            target.declaration = obj.declaration;
+        }
+        if (obj.property && obj.property!==''){
+            target.property = obj.property;
+        }
+        if (obj.mapElement && obj.mapElement!==''){
+            target.mapElement = obj.mapElement;
+        }
+        return target;
+    }
+    /**
     * parses the extracted decorators and generates arrays of decorator command set and vocabularies
     *
     * @param {Object} extractionDictionary - extracted decorators and vocabularies
@@ -199,19 +223,7 @@ class DecoratorUtil {
             let vocabObject = {};
             jsonData.forEach(obj =>{
                 const decos = JSON.parse(obj.dcs);
-                const target = {
-                    '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.CommandTarget`,
-                    'namespace':namespace
-                };
-                if (obj.declaration && obj.declaration!==''){
-                    target.declaration = obj.declaration;
-                }
-                if (obj.property && obj.property!==''){
-                    target.property = obj.property;
-                }
-                if (obj.mapElement && obj.mapElement!==''){
-                    target.mapElement = obj.mapElement;
-                }
+                const target = this.constructTarget(DCS_VERSION, namespace, obj);
                 decos.forEach(dcs =>{
                     if (dcs.name !== 'Term' && !patternToDetermineVocab.test(dcs.name)){
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, DCS_VERSION, target);
