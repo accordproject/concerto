@@ -116,6 +116,71 @@ class DecoratorUtil {
         return dictionary;
     }
     /**
+     * Transforms the collected decorators into proper decorator command sets
+     * @param {Array<Object>} dcsObjects - the collection of collected decorators
+     * @param {string} DCS_VERSION - the version string
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} decoratorData - the collection of existing decorator command sets
+     * @returns {Array<Object>} - the collection of decorator command sets
+     * @private
+     */
+    static transformNonVoabularyDecorators(dcsObjects, DCS_VERSION, namespace, decoratorData){
+        const {name, version} = ModelUtil.parseNamespace(namespace);
+        const nameOfDcs = name;
+        const versionOfDcs = version;
+        if (dcsObjects?.length > 0){
+            const dcmsForNamespace = {
+                '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.DecoratorCommandSet`,
+                'name': nameOfDcs,
+                'version': versionOfDcs,
+                'commands': dcsObjects
+            };
+            decoratorData.push(dcmsForNamespace);
+        }
+        return decoratorData;
+    }
+    /**
+     * Transforms the collected vocabularies into proper vocabulary command sets
+     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
+     * @param {string} locale - the locale of vocabulary
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
+     * @returns {Array<Object>} - the collection of vocabularies command sets
+     * @private
+     */
+    static transformVoabularyDecorators(vocabObject, locale, namespace, vocabData){
+        if (Object.keys(vocabObject).length > 0 ){
+            let strVoc = '';
+            strVoc = strVoc+`locale: ${locale}\n`;
+            strVoc = strVoc+`namespace: ${namespace}\n`;
+            strVoc = strVoc+'declarations:\n';
+            Object.keys(vocabObject).forEach(decl =>{
+                if (vocabObject[decl].term){
+                    strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
+                    const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
+                    otherProps.forEach(key =>{
+                        strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
+                    });
+                }
+                if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length>0){
+                    if (!vocabObject[decl].term){
+                        strVoc += `  - ${decl}: ${decl}\n`;
+                    }
+                    strVoc += '    properties:\n';
+                    Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
+                        strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term}\n`;
+                        const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
+                        otherProps.forEach(key =>{
+                            strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
+                        });
+                    });
+                }
+            });
+            vocabData.push(strVoc);
+        }
+        return vocabData;
+    }
+    /**
     * parses the extracted decorators and generates arrays of decorator command set and vocabularies
     *
     * @param {Object} extractionDictionary - extracted decorators and vocabularies
@@ -125,12 +190,9 @@ class DecoratorUtil {
     * @private
     */
     static parseDecosAndVocabs(extractionDictionary, DCS_VERSION, locale){
-        const decoratorData = [];
-        const vocabData = [];
+        let decoratorData = [];
+        let vocabData = [];
         Object.keys(extractionDictionary).forEach(namespace => {
-            const {name, version} = ModelUtil.parseNamespace(namespace);
-            const nameOfDcs = name;
-            const versionOfDcs = version;
             const jsonData = extractionDictionary[namespace];
             const patternToDetermineVocab = /^Term_/i;
             let dcsObjects = [];
@@ -159,44 +221,8 @@ class DecoratorUtil {
                     }
                 });
             });
-            if (dcsObjects?.length > 0){
-                const dcmsForNamespace = {
-                    '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.DecoratorCommandSet`,
-                    'name': nameOfDcs,
-                    'version': versionOfDcs,
-                    'commands': dcsObjects
-                };
-                decoratorData.push(dcmsForNamespace);
-            }
-            if (Object.keys(vocabObject).length > 0 ){
-                let strVoc = '';
-                strVoc = strVoc+`locale: ${locale}\n`;
-                strVoc = strVoc+`namespace: ${namespace}\n`;
-                strVoc = strVoc+'declarations:\n';
-                Object.keys(vocabObject).forEach(decl =>{
-                    if (vocabObject[decl].term){
-                        strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
-                        const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
-                        otherProps.forEach(key =>{
-                            strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
-                        });
-                    }
-                    if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length>0){
-                        if (!vocabObject[decl].term){
-                            strVoc += `  - ${decl}: ${decl}\n`;
-                        }
-                        strVoc += '    properties:\n';
-                        Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
-                            strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term}\n`;
-                            const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
-                            otherProps.forEach(key =>{
-                                strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
-                            });
-                        });
-                    }
-                });
-                vocabData.push(strVoc);
-            }
+            decoratorData = this.transformNonVoabularyDecorators(dcsObjects, DCS_VERSION, namespace, decoratorData);
+            vocabData = this.transformVoabularyDecorators(vocabObject, locale, namespace, vocabData);
         });
         return {
             decoratorCommandSet: decoratorData,
