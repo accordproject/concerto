@@ -84,6 +84,12 @@ declare class Declaration extends Decorated {
      * @return {boolean} true if the class is a scalar
      */
     isScalarDeclaration(): boolean;
+    /**
+     * Returns true if this class is the definition of a map-declaration.
+     *
+     * @return {boolean} true if the class is a map-declaration
+     */
+    isMapDeclaration(): boolean;
 }
 import Decorated = require("./decorated");
 import ModelFile = require("./modelfile");
