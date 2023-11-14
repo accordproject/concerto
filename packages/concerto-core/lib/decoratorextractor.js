@@ -98,25 +98,25 @@ class DecoratorExtractor {
     transformVocabularyDecorators(vocabObject, namespace, vocabData){
         if (Object.keys(vocabObject).length > 0 ){
             let strVoc = '';
-            strVoc = strVoc+`locale: ${this.locale}\n`;
-            strVoc = strVoc+`namespace: ${namespace}\n`;
-            strVoc = strVoc+'declarations:\n';
+            strVoc = strVoc + `locale: ${this.locale}\n`;
+            strVoc = strVoc + `namespace: ${namespace}\n`;
+            strVoc = strVoc + 'declarations:\n';
             Object.keys(vocabObject).forEach(decl =>{
                 if (vocabObject[decl].term){
                     strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
-                    const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str!=='term' && str!=='propertyVocabs');
+                    const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
                     otherProps.forEach(key =>{
                         strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
                     });
                 }
-                if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length>0){
+                if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length > 0){
                     if (!vocabObject[decl].term){
                         strVoc += `  - ${decl}: ${decl}\n`;
                     }
                     strVoc += '    properties:\n';
                     Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
                         strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term}\n`;
-                        const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str!=='term');
+                        const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
                         otherProps.forEach(key =>{
                             strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
                         });
@@ -135,17 +135,17 @@ class DecoratorExtractor {
      * @private
      */
     constructTarget(namespace, obj){
-        const target ={
+        const target = {
             '$class': `org.accordproject.decoratorcommands@${this.dcs_version}.CommandTarget`,
             'namespace':namespace
         };
-        if (obj.declaration && obj.declaration!==''){
+        if (obj.declaration && obj.declaration !== ''){
             target.declaration = obj.declaration;
         }
-        if (obj.property && obj.property!==''){
+        if (obj.property && obj.property !== ''){
             target.property = obj.property;
         }
-        if (obj.mapElement && obj.mapElement!==''){
+        if (obj.mapElement && obj.mapElement !== ''){
             target.mapElement = obj.mapElement;
         }
         return target;
@@ -236,7 +236,7 @@ class DecoratorExtractor {
                     if (dcs.name !== 'Term' && !patternToDetermineVocab.test(dcs.name)){
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
-                    else{
+                    else {
                         vocabObject = this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
@@ -296,7 +296,7 @@ class DecoratorExtractor {
     * @private
     */
     processProperties(sourceProperties, declarationName, namespace){
-        const processedProperties=sourceProperties.map(property => {
+        const processedProperties = sourceProperties.map(property => {
             if (property.decorators){
                 const constructOptions = {
                     declaration: declarationName,
