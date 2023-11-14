@@ -57,6 +57,11 @@ declare class MapValueType extends Decorated {
      * @return {boolean} true if the class is a Map Value
      */
     isValue(): boolean;
+    /**
+     * Return the namespace of this map value.
+     * @return {string} namespace - a namespace.
+     */
+    getNamespace(): string;
 }
 import Decorated = require("./decorated");
 import MapDeclaration = require("./mapdeclaration");
