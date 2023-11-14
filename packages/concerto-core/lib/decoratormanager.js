@@ -473,6 +473,8 @@ class DecoratorManager {
                     if (this.falsyOrEqual(target.type, declaration.value.$class)) {
                         this.applyDecorator(declaration.value, type, decorator);
                     }
+                } else {
+                    this.applyDecorator(declaration, type, decorator);
                 }
             } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);

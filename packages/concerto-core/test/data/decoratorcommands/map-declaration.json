@@ -5,6 +5,20 @@
     "commands" : [
         {
             "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test@1.0.0",
+                "declaration" : "Dictionary"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "MapDeclarationDecorator",
+                "arguments" : []
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
             "type" : "APPEND",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",

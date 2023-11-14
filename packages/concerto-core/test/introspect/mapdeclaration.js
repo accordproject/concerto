@@ -757,4 +757,12 @@ describe('MapDeclaration', () => {
             declaration.getValue().getParent().should.equal(declaration);
         });
     });
+
+    describe('#getNamespace', () => {
+        it('should return the correct namespace for a Map Declaration Key and Value', () => {
+            let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
+            declaration.getKey().getNamespace().should.equal('com.acme@1.0.0');
+            declaration.getValue().getNamespace().should.equal('com.acme@1.0.0');
+        });
+    });
 });

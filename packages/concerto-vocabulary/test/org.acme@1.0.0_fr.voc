@@ -4,3 +4,6 @@ declarations:
   - Vehicle: Véhicule
     properties:
       - vin: Le numéro d'identification du véhicule (NIV)
+  - Address: Adresse
+    properties:
+      - KEY: NIV du véhicule

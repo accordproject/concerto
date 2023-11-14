@@ -128,6 +128,7 @@ class Declaration extends Decorated {
    + boolean isEnum() 
    + boolean isClassDeclaration() 
    + boolean isScalarDeclaration() 
+   + boolean isMapDeclaration() 
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
@@ -184,6 +185,7 @@ class MapKeyType extends Decorated {
    + String toString() 
    + boolean isKey() 
    + boolean isValue() 
+   + string getNamespace() 
 }
 class MapValueType extends Decorated {
    + void constructor(MapDeclaration,Object) throws IllegalModelException
@@ -194,6 +196,7 @@ class MapValueType extends Decorated {
    + String toString() 
    + boolean isKey() 
    + boolean isValue() 
+   + string getNamespace() 
 }
    + ModelManager newMetaModelManager() 
    + object validateMetaModel() 
