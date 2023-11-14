@@ -1,0 +1,49 @@
+namespace test
+
+@Editable
+concept Person {
+    @Custom
+    @Form("inputType", "text")
+    @New
+    o String firstName
+    @Form("inputType", "text")
+    @New
+    o String lastName
+    @Form("inputType", "textArea")
+    @New
+    o String bio
+    @Form("inputType", "text")
+    @New
+    o String ssn
+}
+
+@Editable
+concept PersonMain {
+    @Custom
+    @Form("inputType", "text")
+    @New
+    o String firstName
+    @Form("inputType", "text")
+    @New
+    o String lastName
+    @Form("inputType", "textArea")
+    @New
+    o String bio
+    @Form("inputType", 0)
+    @New
+    o String ssn
+}
+
+concept Driver extends Person {
+  o String favoriteColor
+}
+
+concept Employee {
+  o String ssn
+}
+
+concept Car identified by vin {
+  o String vin
+  @Hide("object")
+  o Person owner
+}

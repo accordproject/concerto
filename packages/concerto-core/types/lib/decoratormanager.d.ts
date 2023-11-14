@@ -55,6 +55,38 @@ declare class DecoratorManager {
         migrate?: boolean;
     }): ModelManager;
     /**
+     * @typedef decoratorCommandSet
+     * @type {object}
+     * @typedef vocabularies
+     * @type {string}
+     * @typedef ExtractDecoratorsResult
+     * @type {object}
+     * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
+     * @property {decoratorCommandSet} object[] - Stripped out decorators, formed into decorator command sets
+     * @property {vocabularies} object[] - Stripped out vocabularies, formed into vocabulary files
+    */
+    /**
+     * Extracts all the decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
+     */
+    static extractDecorators(modelManager: ModelManager, options: {
+        removeDecoratorsFromModel: boolean;
+        locale: string;
+    }): {
+        /**
+         * - A model manager containing models stripped without decorators
+         */
+        modelManager: ModelManager;
+        /**
+         * - Stripped out decorators, formed into decorator command sets
+         */
+        object: {};
+    };
+    /**
      * Throws an error if the decoractor command is invalid
      * @param {ModelManager} validationModelManager the validation model manager
      * @param {*} command the decorator command
