@@ -16,6 +16,7 @@
 
 const ModelManager = require('./modelmanager');
 const ModelUtil = require('./modelutil');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
  * Utility functions to work with
@@ -331,7 +332,7 @@ class DecoratorExtractor {
             if (this.removeDecoratorsFromModel){
                 decl.decorators = undefined;
             }
-            if (decl.$class.endsWith('.MapDeclaration')) {
+            if (decl.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 const processedMapDecl = this.processMapDeclaration(decl, namespace);
                 decl = processedMapDecl;
             }
