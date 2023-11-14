@@ -18,3 +18,7 @@ declarations:
       - horsePower: The horse power of the truck
         description: The horse power of the truck
         tooltip: Truck HP
+  - Address: Registered address of the vehicle
+    properties:
+      - KEY: vin of the vehicle
+      - VALUE: address of the vehicle

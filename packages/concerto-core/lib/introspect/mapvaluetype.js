@@ -185,6 +185,14 @@ class MapValueType extends Decorated {
     isValue() {
         return true;
     }
+
+    /**
+     * Return the namespace of this map value.
+     * @return {string} namespace - a namespace.
+     */
+    getNamespace() {
+        return this.modelFile.getNamespace();
+    }
 }
 
 module.exports = MapValueType;

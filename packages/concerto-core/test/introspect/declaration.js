@@ -47,6 +47,12 @@ describe('Declaration', () => {
         });
     });
 
+    describe('#isMapDeclaration', () => {
+        it('should be false', () => {
+            declaration.isMapDeclaration().should.equal(false);
+        });
+    });
+
     describe('#isSystemIdentified', () => {
         it('should be false', () => {
             declaration.isSystemIdentified().should.equal(false);

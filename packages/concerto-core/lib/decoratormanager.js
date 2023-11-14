@@ -54,14 +54,14 @@ enum CommandType {
 
 /**
  * Which models elements to add the decorator to. Any null
- * elements are 'wildcards'. 
+ * elements are 'wildcards'.
  */
 concept CommandTarget {
     o String namespace optional
     o String declaration optional
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
-    o String type optional 
+    o String type optional
     o MapElement mapElement optional
 }
 
@@ -438,6 +438,8 @@ class DecoratorManager {
                     if (this.falsyOrEqual(target.type, declaration.value.$class)) {
                         this.applyDecorator(declaration.value, type, decorator);
                     }
+                } else {
+                    this.applyDecorator(declaration, type, decorator);
                 }
             } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);

@@ -14,6 +14,11 @@ asset Vehicle identified by vin {
     o Color color
 }
 
+map Address {
+    o String
+    o String
+}
+
 asset Truck extends Vehicle {
     o Double weight
 }

@@ -5,3 +5,8 @@ declarations:
     description: A heavy goods vehicle
   - Color: A colour
   - Milkfloat
+  - Address: Address of the vehicle
+    description: Registered address of the vehicle owner
+    tooltip: View Address of vehicle owner
+    properties:
+      - BAD_KEY: mispelled KEY spelling

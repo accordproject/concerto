@@ -227,6 +227,103 @@ Object {
         "arguments": Array [
           Object {
             "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Address of the vehicle",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Address",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Registered address of the vehicle owner",
+          },
+        ],
+        "name": "Term_description",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Address",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "View Address of vehicle owner",
+          },
+        ],
+        "name": "Term_tooltip",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Address",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "vin of the vehicle",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Address",
+        "mapElement": "KEY",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "address of the vehicle",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Address",
+        "mapElement": "VALUE",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
             "value": "A lorry",
           },
         ],
