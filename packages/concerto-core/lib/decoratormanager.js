@@ -20,7 +20,7 @@ const Factory = require('./factory');
 const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
-const DecoratorUtil = require('./decoratorutil');
+const DecoratorExtractor = require('./decoratorextractor');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -55,14 +55,14 @@ enum CommandType {
 
 /**
  * Which models elements to add the decorator to. Any null
- * elements are 'wildcards'. 
+ * elements are 'wildcards'.
  */
 concept CommandTarget {
     o String namespace optional
     o String declaration optional
     o String property optional
     o String[] properties optional // property and properties are mutually exclusive
-    o String type optional 
+    o String type optional
     o MapElement mapElement optional
 }
 
@@ -278,7 +278,9 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const collectionResp = DecoratorUtil.collectExtractedDecoratorsAndProcessedModels(modelManager, options.removeDecoratorsFromModel, options.locale, DCS_VERSION);
+        const sourceAst = modelManager.getAst(true);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst);
+        const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
             decoratorCommandSet: collectionResp.decoratorCommandSet,

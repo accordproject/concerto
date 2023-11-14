@@ -54,6 +54,9 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
+class DecoratorExtractor {
+   + void constructor(boolean,string,string,Object) 
+}
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 

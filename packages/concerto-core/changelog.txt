@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.14.2 {c8e20253a3695fcaed97472d697e282d} 2023-11-07
+Version 3.14.2 {4db54a25a7d712dc7e311c7c424bbe0e} 2023-11-07
 - Added DCS and vocabulary extraction support for decoratorManager
 
 Version 3.13.1 {f5a9a1ea6a64865843a3abb77798cbb0} 2023-10-18
