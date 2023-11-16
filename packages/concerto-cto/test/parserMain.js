@@ -23,7 +23,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const parser = require('../lib/parser');
+const parser = require('../dist/parser');
 const Parser = require('..').Parser;
 const ParseException = require('..').ParseException;
 

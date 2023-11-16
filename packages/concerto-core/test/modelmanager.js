@@ -41,7 +41,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const tmp = require('tmp-promise');
-const BaseModelManager = require('../lib/basemodelmanager');
+const BaseModelManager = require('../dist/basemodelmanager');
 
 describe('ModelManager', () => {
 

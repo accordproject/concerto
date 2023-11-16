@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DecoratorFactory = require('../../lib/introspect/decoratorfactory');
+const DecoratorFactory = require('../../dist/introspect/decoratorfactory');
 
 require('chai').should();
 

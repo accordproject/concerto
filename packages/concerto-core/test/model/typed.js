@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Typed = require('../../lib/model/typed');
+const ModelManager = require('../../dist/modelmanager');
+const Typed = require('../../dist/model/typed');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 

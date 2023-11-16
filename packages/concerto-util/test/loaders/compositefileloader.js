@@ -14,8 +14,8 @@
 
 'use strict';
 
-const CompositeFileLoader = require('../../lib/loaders/compositefileloader');
-const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
+const CompositeFileLoader = require('../../dist/loaders/compositefileloader');
+const HTTPFileLoader = require('../../dist/loaders/httpfileloader');
 
 require('chai').should();
 const sinon = require('sinon');

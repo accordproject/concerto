@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Logger = require('../lib/logger');
+const Logger = require('../dist/logger');
 const Chai = require('chai');
 
 Chai.should();

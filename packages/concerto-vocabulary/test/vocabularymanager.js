@@ -26,8 +26,8 @@ chai.use(require('chai-as-promised'));
 chai.use(jestSnapshotPlugin());
 
 const { VocabularyManager } = require('..');
-const ModelManager = require('../../concerto-core/lib/modelmanager');
-const DecoratorManager = require('../../concerto-core/lib/decoratormanager');
+const ModelManager = require('../../concerto-coresrc/modelmanager');
+const DecoratorManager = require('../../concerto-coresrc/decoratormanager');
 
 let modelManager = null;
 let vocabularyManager = null;

@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Introspector = require('../../lib/introspect/introspector');
+const ModelManager = require('../../dist/modelmanager');
+const Introspector = require('../../dist/introspect/introspector');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');

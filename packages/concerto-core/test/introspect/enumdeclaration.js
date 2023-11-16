@@ -14,8 +14,8 @@
 
 'use strict';
 
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const EnumDeclaration = require('../../dist/introspect/enumdeclaration');
+const ModelManager = require('../../dist/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 

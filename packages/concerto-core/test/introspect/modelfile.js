@@ -16,14 +16,14 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const ModelFile = require('../../lib/introspect/modelfile');
-const ModelManager = require('../../lib/modelmanager');
+const AssetDeclaration = require('../../dist/introspect/assetdeclaration');
+const ParticipantDeclaration = require('../../dist/introspect/participantdeclaration');
+const TransactionDeclaration = require('../../dist/introspect/transactiondeclaration');
+const EventDeclaration = require('../../dist/introspect/eventdeclaration');
+const EnumDeclaration = require('../../dist/introspect/enumdeclaration');
+const IllegalModelException = require('../../dist/introspect/illegalmodelexception');
+const ModelFile = require('../../dist/introspect/modelfile');
+const ModelManager = require('../../dist/modelmanager');
 
 const fs = require('fs');
 const path = require('path');
@@ -36,8 +36,8 @@ const chai = require('chai');
 const should = chai.should();
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
+const ScalarDeclaration = require('../../dist/introspect/scalardeclaration');
+const ClassDeclaration = require('../../dist/introspect/classdeclaration');
 
 describe('ModelFile', () => {
 

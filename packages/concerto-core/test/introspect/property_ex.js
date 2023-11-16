@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../dist/modelmanager');
 const sinon = require('sinon');
 const Util = require('../composer/composermodelutility');
 

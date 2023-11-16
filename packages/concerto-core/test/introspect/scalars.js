@@ -16,10 +16,10 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const Field = require('../../lib/introspect/field');
-const ModelFile = require('../../lib/introspect/modelfile');
+const ClassDeclaration = require('../../dist/introspect/classdeclaration');
+const ScalarDeclaration = require('../../dist/introspect/scalardeclaration');
+const Field = require('../../dist/introspect/field');
+const ModelFile = require('../../dist/introspect/modelfile');
 
 // eslint-disable-next-line no-unused-vars
 const should = require('chai').should();

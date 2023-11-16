@@ -59,7 +59,7 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                include: [path.join(__dirname, 'lib')],
+                include: [path.join(__dirname, 'dist')],
                 use: ['babel-loader']
             },
             {

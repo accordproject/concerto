@@ -14,7 +14,7 @@
 
 'use strict';
 
-const TypeNotFoundException = require('../lib/typenotfoundexception');
+const TypeNotFoundException = require('../dist/typenotfoundexception');
 
 const chai = require('chai');
 chai.should();

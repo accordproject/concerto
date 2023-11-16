@@ -14,12 +14,12 @@
 
 'use strict';
 
-const Field = require('../../lib/introspect/field');
-const StringValidator = require('../../lib/introspect/stringvalidator');
+const Field = require('../../dist/introspect/field');
+const StringValidator = require('../../dist/introspect/stringvalidator');
 
 require('chai').should();
 const sinon = require('sinon');
-const NumberValidator = require('../../lib/introspect/numbervalidator');
+const NumberValidator = require('../../dist/introspect/numbervalidator');
 
 const XRegExp = require('xregexp');
 

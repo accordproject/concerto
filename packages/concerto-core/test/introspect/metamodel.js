@@ -14,12 +14,12 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const ModelLoader = require('../../lib/modelloader');
+const ModelManager = require('../../dist/modelmanager');
+const ModelLoader = require('../../dist/modelloader');
 const {
     validateMetaModel,
     modelManagerFromMetaModel
-} = require('../../lib/introspect/metamodel');
+} = require('../../dist/introspect/metamodel');
 const ParserUtil = require('./parserutility');
 
 const { Parser, Printer } = require('@accordproject/concerto-cto');

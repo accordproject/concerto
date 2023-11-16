@@ -16,11 +16,11 @@
 
 //const assert = require('assert');
 require('chai').should();
-const Factory = require('../../lib/factory');
-const ModelManager = require('../../lib/modelmanager');
-const Relationship = require('../../lib/model/relationship');
-const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
-const Serializer = require('../../lib/serializer');
+const Factory = require('../../dist/factory');
+const ModelManager = require('../../dist/modelmanager');
+const Relationship = require('../../dist/model/relationship');
+const RelationshipDeclaration = require('../../dist/introspect/relationshipdeclaration');
+const Serializer = require('../../dist/serializer');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 

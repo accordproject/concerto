@@ -15,7 +15,7 @@
 'use strict';
 
 const BaseException = require('@accordproject/concerto-util').BaseException;
-const SecurityException = require('../lib/securityexception');
+const SecurityException = require('../dist/securityexception');
 
 require('chai').should();
 

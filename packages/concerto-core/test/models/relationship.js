@@ -17,7 +17,7 @@
 const assert = require('assert');
 require('chai').should();
 const fs = require('fs');
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../dist/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 describe('Test Relationships', function(){

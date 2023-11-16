@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Factory = require('../../../lib/factory');
-const ModelManager = require('../../../lib/modelmanager');
-const Serializer = require('../../../lib/serializer');
+const Factory = require('../../../dist/factory');
+const ModelManager = require('../../../dist/modelmanager');
+const Serializer = require('../../../dist/serializer');
 const fs = require('fs');
 const Util = require('../../composer/composermodelutility');
 const dayjs = require('dayjs');

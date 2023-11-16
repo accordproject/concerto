@@ -13,7 +13,7 @@
  */
 
 'use strict';
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../dist/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { normalizeIdentifier } = require('../lib/identifiers');
+const { normalizeIdentifier } = require('../dist/identifiers');
 
 require('chai').should();
 

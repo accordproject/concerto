@@ -14,7 +14,7 @@
 
 'use strict';
 
-const messages = require('../messages/en.json');
+const messages = require('./messages/en.json');
 
 /**
  * Dummy globalize replacement.

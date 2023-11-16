@@ -23,8 +23,8 @@ const sinon = require('sinon');
 const fs = require('fs');
 const path = require('path');
 
-const Writer = require('../lib/writer');
-const FileWriter = require('../lib/filewriter');
+const Writer = require('../dist/writer');
+const FileWriter = require('../dist/filewriter');
 
 describe('FileWriter', function () {
 

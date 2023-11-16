@@ -15,9 +15,9 @@
 'use strict';
 
 require('chai').should();
-const ModelManager = require('../../lib/modelmanager');
-const Factory = require('../../lib/factory');
-const Serializer = require('../../lib/serializer');
+const ModelManager = require('../../dist/modelmanager');
+const Factory = require('../../dist/factory');
+const Serializer = require('../../dist/serializer');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 

@@ -16,7 +16,6 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const packageJson = require('../../package.json');
 const semver = require('semver');
 const AssetDeclaration = require('./assetdeclaration');
 const EnumDeclaration = require('./enumdeclaration');
@@ -644,10 +643,10 @@ class ModelFile extends Decorated {
      */
     isCompatibleVersion() {
         if (this.ast.concertoVersion) {
-            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
+            if (semver.satisfies(process.env.npm_package_version, this.ast.concertoVersion, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
+                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${process.env.npm_package_version}`);
             }
         }
     }

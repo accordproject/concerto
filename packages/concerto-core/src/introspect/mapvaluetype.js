@@ -16,7 +16,7 @@
 
 const Decorated = require('./decorated');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
+const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 
 

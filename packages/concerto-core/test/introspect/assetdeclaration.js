@@ -14,9 +14,9 @@
 
 'use strict';
 
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const IllegalModelException = require('../../dist/introspect/illegalmodelexception');
+const AssetDeclaration = require('../../dist/introspect/assetdeclaration');
+const ModelManager = require('../../dist/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 

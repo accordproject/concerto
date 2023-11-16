@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DefaultFileLoader = require('../../lib/loaders/defaultfileloader');
+const DefaultFileLoader = require('../../dist/loaders/defaultfileloader');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -14,11 +14,11 @@
 
 'use strict';
 
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
+const ScalarDeclaration = require('../../dist/introspect/scalardeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../dist/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();

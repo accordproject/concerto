@@ -16,17 +16,17 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const ConceptDeclaration = require('../../lib/introspect/conceptdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
+const IllegalModelException = require('../../dist/introspect/illegalmodelexception');
+const ClassDeclaration = require('../../dist/introspect/classdeclaration');
+const AssetDeclaration = require('../../dist/introspect/assetdeclaration');
+const EnumDeclaration = require('../../dist/introspect/enumdeclaration');
+const ConceptDeclaration = require('../../dist/introspect/conceptdeclaration');
+const ParticipantDeclaration = require('../../dist/introspect/participantdeclaration');
+const TransactionDeclaration = require('../../dist/introspect/transactiondeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../dist/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();

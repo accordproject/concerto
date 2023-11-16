@@ -7,10 +7,12 @@
     "node": ">=16",
     "npm": ">=8"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
   "browser": "dist/concerto-core.js",
-  "typings": "types/index.d.ts",
+  "typings": "dist/index.d.ts",
   "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
     "prepublishOnly": "npm run webpack",
     "pretest": "npm run lint",
     "lint": "eslint .",
@@ -22,7 +24,7 @@
     "test:watch": "cross-env TZ=UTC nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
+    "build": "tsc -p tsconfig.build.json && npm run build:types",
     "postbuild": "npm run webpack",
     "webpack": "webpack --config webpack.config.js --mode production",
     "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
@@ -41,6 +43,10 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-env": "7.16.11",
+    "@types/jest": "28.1.1",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
     "acorn": "8.5.0",
     "acorn-walk": "8.2.0",
     "babel-loader": "8.2.3",
@@ -68,7 +74,9 @@
     "webpack": "5.76.0",
     "webpack-cli": "4.9.1",
     "xregexp": "5.1.1",
-    "yargs": "17.3.1"
+    "yargs": "17.3.1",
+    "rimraf": "3.0.2",
+    "ts-jest": "28.0.4"
   },
   "dependencies": {
     "@accordproject/concerto-cto": "^4.0.0-alpha.0",
@@ -85,7 +93,7 @@
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
-    "folder": "./lib",
+    "folder": "./src",
     "license": "HEADER",
     "exact_paths_method": "EXCLUDE",
     "exact_paths": [
@@ -110,7 +118,7 @@
     ],
     "insert_license": false,
     "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {

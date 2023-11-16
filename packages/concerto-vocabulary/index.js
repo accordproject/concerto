@@ -21,8 +21,8 @@
  * @module concerto-vocabulary
  */
 
-const VocabularyManager = require('./lib/vocabularymanager');
-const Vocabulary = require('./lib/vocabulary');
+const VocabularyManager = require('.src/vocabularymanager');
+const Vocabulary = require('.src/vocabulary');
 
 module.exports = {
     VocabularyManager,
