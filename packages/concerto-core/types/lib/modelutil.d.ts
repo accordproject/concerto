@@ -28,9 +28,9 @@ declare class ModelUtil {
      * @property {object} versionParsed the parsed semantic version of the namespace
      */
     /**
-     * Parses a potentially versioned namespace into
+     * Parses a versioned namespace into
      * its name and version parts. The version of the namespace
-     * (if present) is parsed using semver.parse.
+     * is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @returns {ParseNamespaceResult} the result of parsing
      */

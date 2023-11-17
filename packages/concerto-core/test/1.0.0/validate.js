@@ -33,7 +33,6 @@ const mockTimestamp = dayjs(0);
 const ModelLoader = require('../..').ModelLoader;
 const Factory = require('../..').Factory;
 const Serializer = require('../..').Serializer;
-const Concerto = require('../..').Concerto;
 
 const loadJson = (file) => JSON.parse(fs.readFileSync(path.join(__dirname,file), 'utf8'));
 const validateClassic = async (sample, ctoFiles, options) => {
@@ -45,14 +44,6 @@ const validateClassic = async (sample, ctoFiles, options) => {
 
     const object = serializer.fromJSON(json, { utcOffset: 0 });
     return serializer.toJSON(object, { utcOffset: 0 });
-};
-const validateFunctional = async (sample, ctoFiles, options) => {
-    const json = loadJson(sample);
-
-    const modelManager = await ModelLoader.loadModelManager(ctoFiles.map((file) => path.join(__dirname,file)), options);
-    const concerto = new Concerto(modelManager);
-
-    return concerto.validate(json);
 };
 
 const positive = [{
@@ -127,11 +118,6 @@ describe('Validation (1.0.0)', () => {
                     const resultExpected = loadJson(expected);
                     resultActual.should.deep.equal(resultExpected);
                 });
-
-                it(`should validate - functional (${name})`, async function() {
-                    const resultActual = await validateFunctional(sample, ctoFiles);
-                    (typeof resultActual === 'undefined').should.equal(true);
-                });
             });
     });
 
@@ -144,15 +130,6 @@ describe('Validation (1.0.0)', () => {
                     } catch (errorActual) {
                         //errorActual.name.should.equal('ValidationException');
                         errorActual.message.should.deep.equal(error);
-                    }
-                });
-
-                it(`should not validate - functional (${name})`, async function() {
-                    try {
-                        await validateFunctional(sample, ctoFiles);
-                    } catch (errorActual) {
-                        // errorActual.name.should.equal('ValidationException');
-                        errorActual.message.should.deep.equal(errorFunctional);
                     }
                 });
             });
