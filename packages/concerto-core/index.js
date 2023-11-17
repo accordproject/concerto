@@ -96,9 +96,6 @@ const DecoratorManager = require('./lib/decoratormanager');
 // DateTimeUtil
 const DateTimeUtil = require('./lib/datetimeutil');
 
-// Concerto
-const Concerto = require('./lib/concerto');
-
 // MetaModel
 const MetaModel = require('./lib/introspect/metamodel');
 
@@ -146,7 +143,6 @@ module.exports = {
     ModelUtil,
     ModelLoader,
     DateTimeUtil,
-    Concerto,
     MetaModel,
     version
 };
