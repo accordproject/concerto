@@ -36,26 +36,7 @@ class BaseModelManager {
    + void getAst(boolean?)
    + BaseModelManager filter(FilterFunction)
 }
-class Concerto {
-   + void constructor(ModelManager)
-   + void validate(obj,options?) throws Error
-   + ModelManager getModelManager()
-   + boolean isObject(obj)
-   + void getTypeDeclaration(obj)
-   + string getIdentifier(obj)
-   + boolean isIdentifiable(obj)
-   + boolean isRelationship(obj)
-   + void setIdentifier(obj,string)
-   + string getFullyQualifiedIdentifier(obj)
-   + string toURI(obj)
-   + void fromURI(string) throws Error
-   + string getType(obj)
-   + string getNamespace(obj)
-}
    + object setCurrentTime()
-class DecoratorExtractor {
-   + void constructor(boolean,string,string,Object)
-}
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?)

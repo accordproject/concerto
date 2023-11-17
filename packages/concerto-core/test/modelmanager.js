@@ -30,7 +30,6 @@ const ModelFile = require('../lib/introspect/modelfile');
 const ModelManager = require('../lib/modelmanager');
 const ParticipantDeclaration = require('../lib/introspect/participantdeclaration');
 const Serializer = require('../lib/serializer');
-const Concerto = require('../lib/concerto');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
@@ -208,8 +207,11 @@ describe('ModelManager', () => {
                 $class : 'org.acme@1.0.0.Bar',
                 foo : '😊'
             };
-            const concerto = new Concerto(modelManagerWithOptions);
-            concerto.validate(bar);
+
+            const factory = new Factory(modelManagerWithOptions);
+            const serializer = new Serializer(factory, modelManagerWithOptions);
+            const object = serializer.fromJSON(bar, { utcOffset: 0 });
+            return serializer.toJSON(object, { utcOffset: 0 });
         });
 
         it('should return error for duplicate namespaces for a string', () => {
