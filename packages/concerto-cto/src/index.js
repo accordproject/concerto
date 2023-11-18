@@ -22,16 +22,16 @@
  */
 
 // Exceptions
-const ParseException = require('./lib/parseexception');
+const ParseException = require('./parseexception');
 
 // Parser
-const Parser = require('./lib/parserMain');
+const Parser = require('./parserMain');
 
 // Printer
-const Printer = require('./lib/printer');
+const Printer = require('./printer');
 
 // External models resolution
-const External = require('./lib/external');
+const External = require('./external');
 
 module.exports = {
     ParseException,

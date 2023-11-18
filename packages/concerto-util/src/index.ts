@@ -22,35 +22,35 @@
  */
 
 // Exceptions
-const BaseException = require('./lib/baseexception');
-const BaseFileException = require('./lib/basefileexception');
+const BaseException = require('./baseexception');
+const BaseFileException = require('./basefileexception');
 
 // Transitive closure downloader
-const FileDownloader = require('./lib/filedownloader');
+const FileDownloader = require('./filedownloader');
 
 // File Loaders
-const CompositeFileLoader = require('./lib/loaders/compositefileloader');
-const DefaultFileLoader = require('./lib/loaders/defaultfileloader');
-const GitHubFileLoader = require('./lib/loaders/githubfileloader');
-const HTTPFileLoader = require('./lib/loaders/httpfileloader');
+const CompositeFileLoader = require('./loaders/compositefileloader');
+const DefaultFileLoader = require('./loaders/defaultfileloader');
+const GitHubFileLoader = require('./loaders/githubfileloader');
+const HTTPFileLoader = require('./loaders/httpfileloader');
 
 // Writers
-const Writer = require('./lib/writer');
-const FileWriter = require('./lib/filewriter');
-const ModelWriter = require('./lib/modelwriter');
-const InMemoryWriter = require('./lib/inmemorywriter');
+const Writer = require('./writer');
+const FileWriter = require('./filewriter');
+const ModelWriter = require('./modelwriter');
+const InMemoryWriter = require('./inmemorywriter');
 
 // Logger
-const Logger = require('./lib/logger');
+const Logger = require('./logger');
 
 // TypedStack
-const TypedStack = require('./lib/typedstack');
+const TypedStack = require('./typedstack');
 
 // Label
-const Label = require('./lib/label');
+const Label = require('./label');
 
 // Identifiers
-const Identifiers = require('./lib/identifiers');
+const Identifiers = require('./identifiers');
 
 module.exports = {
     BaseException,

@@ -14,8 +14,6 @@
 
 'use strict';
 
-const packageJson = require('../package.json');
-
 /**
 * A base class for all Concerto exceptions
 * @extends Error
@@ -30,7 +28,7 @@ class BaseException extends Error {
      */
     constructor(message, component) {
         super(message);
-        this.component = component || packageJson.name;
+        this.component = component || process.env.npm_package_name;
         this.name = this.constructor.name;
         this.message = message;
         if (typeof Error.captureStackTrace === 'function') {

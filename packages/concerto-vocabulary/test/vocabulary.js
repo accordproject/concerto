@@ -21,7 +21,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Vocabulary } = require('..');
+const { Vocabulary } = require('../src');
 
 describe('Vocabulary', () => {
 

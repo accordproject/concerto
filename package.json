@@ -12,8 +12,8 @@
     "semver": "7.5.4"
   },
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=9"
   },
   "name": "concerto",
   "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",

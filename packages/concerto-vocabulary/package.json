@@ -4,12 +4,14 @@
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=9"
   },
-  "main": "index.js",
-  "typings": "types/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
@@ -21,8 +23,7 @@
     "test:watch": "nyc mocha --watch --recursive -t 10000",
     "mocha": "mocha --recursive -t 10000",
     "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "build": "tsc -p tsconfig.build.json"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,10 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@accordproject/concerto-core": "^4.0.0-alpha.0",
+    "@types/jest": "28.1.1",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -49,7 +54,10 @@
     "nyc": "15.1.0",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
-    "typescript": "4.6.3"
+    "typescript": "4.6.3",
+    "rimraf": "3.0.2",
+    "ts-jest": "28.0.4",
+    "npm-run-all": "^4.1.5"
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.8.1",
@@ -57,7 +65,7 @@
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
-    "folder": "./lib",
+    "folder": "./src",
     "license": "HEADER",
     "exact_paths_method": "EXCLUDE",
     "exact_paths": [
@@ -80,7 +88,7 @@
     ],
     "insert_license": false,
     "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {

@@ -24,8 +24,8 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
 const parser = require('../dist/parser');
-const Parser = require('..').Parser;
-const ParseException = require('..').ParseException;
+const Parser = require('../dist').Parser;
+const ParseException = require('../dist').ParseException;
 
 /**
  * Get the name and content of all cto files
