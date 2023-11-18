@@ -87,8 +87,5 @@
                 "file": "./HEADER.md"
             }
         }
-    },
-    "dependencies": {
-        "npm-run-all": "^4.1.5"
     }
 }
