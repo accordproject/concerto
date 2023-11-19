@@ -15,14 +15,14 @@
 'use strict';
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const Factory = require('../../lib/factory');
-const Field = require('../../lib/introspect/field');
-const JSONPopulator = require('../../lib/serializer/jsonpopulator');
-const ModelManager = require('../../lib/modelmanager');
-const Relationship = require('../../lib/model/relationship');
-const Resource = require('../../lib/model/resource');
-const ValidationException = require('../../lib/serializer/validationexception');
-const TypeNotFoundException = require('../../lib/typenotfoundexception');
+const Factory = require('../../src/factory');
+const Field = require('../../src/introspect/field');
+const JSONPopulator = require('../../src/serializer/jsonpopulator');
+const ModelManager = require('../../src/modelmanager');
+const Relationship = require('../../src/model/relationship');
+const Resource = require('../../src/model/resource');
+const ValidationException = require('../../src/serializer/validationexception');
+const TypeNotFoundException = require('../../src/typenotfoundexception');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');

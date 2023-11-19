@@ -16,13 +16,13 @@
 
 require('chai').should();
 const expect = require('chai').expect;
-const Globalize = require('./../../lib/globalize');
+const Globalize = require('../../src/globalize');
 const fs = require('fs');
-const IllegalModelException = require('./../../lib/introspect/illegalmodelexception');
-const Factory = require('./../../lib/factory');
-const Serializer = require('./../../lib/serializer');
-const ModelManager = require('./../../lib/modelmanager');
-const ModelUtil = require('./../../lib/modelutil');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const Factory = require('../../src/factory');
+const Serializer = require('../../src/serializer');
+const ModelManager = require('../../src/modelmanager');
+const ModelUtil = require('../../src/modelutil');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('../introspect/parserutility');
 const dayjs = require('dayjs');

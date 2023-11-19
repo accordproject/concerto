@@ -15,15 +15,15 @@
 'use strict';
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const ModelManager = require('../../lib/modelmanager');
-const Factory = require('../../lib/factory');
-const TypeNotFoundException = require('../../lib/typenotfoundexception');
-const ResourceValidator = require('../../lib/serializer/resourcevalidator');
-const Identifiable = require('../../lib/model/identifiable');
-const Field = require('../../lib/introspect/field');
-const Resource = require('../../lib/model/resource');
-const ModelUtil = require('../../lib/modelutil');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
+const ModelManager = require('../../src/modelmanager');
+const Factory = require('../../src/factory');
+const TypeNotFoundException = require('../../src/typenotfoundexception');
+const ResourceValidator = require('../../src/serializer/resourcevalidator');
+const Identifiable = require('../../src/model/identifiable');
+const Field = require('../../src/introspect/field');
+const Resource = require('../../src/model/resource');
+const ModelUtil = require('../../src/modelutil');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');

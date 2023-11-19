@@ -14,10 +14,10 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const sinon = require('sinon');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
 const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');

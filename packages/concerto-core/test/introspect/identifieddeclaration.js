@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const IdentifiedDeclaration = require('../../lib/introspect/identifieddeclaration');
+const ModelManager = require('../../src/modelmanager');
+const IdentifiedDeclaration = require('../../src/introspect/identifieddeclaration');
 
 require('chai').should();
 

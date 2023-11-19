@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 require('chai').should();

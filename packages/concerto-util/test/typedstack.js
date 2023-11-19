@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const TypedStack = require('../lib/typedstack');
+const TypedStack = require('../src/typedstack');
 
 require('chai').should();
 

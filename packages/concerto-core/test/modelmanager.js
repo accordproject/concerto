@@ -19,18 +19,18 @@ const XRegExp = require('xregexp');
 
 const FileDownloader = require('@accordproject/concerto-util').FileDownloader;
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const AssetDeclaration = require('../lib/introspect/assetdeclaration');
-const ConceptDeclaration = require('../lib/introspect/conceptdeclaration');
-const DecoratorFactory = require('../lib/introspect/decoratorfactory');
-const EnumDeclaration = require('../lib/introspect/enumdeclaration');
-const MapDeclaration = require('../lib/introspect/mapdeclaration');
-const EventDeclaration = require('../lib/introspect/eventdeclaration');
-const Factory = require('../lib/factory');
-const ModelFile = require('../lib/introspect/modelfile');
-const ModelManager = require('../lib/modelmanager');
-const ParticipantDeclaration = require('../lib/introspect/participantdeclaration');
-const Serializer = require('../lib/serializer');
-const TypeNotFoundException = require('../lib/typenotfoundexception');
+const AssetDeclaration = require('../src/introspect/assetdeclaration');
+const ConceptDeclaration = require('../src/introspect/conceptdeclaration');
+const DecoratorFactory = require('../src/introspect/decoratorfactory');
+const EnumDeclaration = require('../src/introspect/enumdeclaration');
+const MapDeclaration = require('../src/introspect/mapdeclaration');
+const EventDeclaration = require('../src/introspect/eventdeclaration');
+const Factory = require('../src/factory');
+const ModelFile = require('../src/introspect/modelfile');
+const ModelManager = require('../src/modelmanager');
+const ParticipantDeclaration = require('../src/introspect/participantdeclaration');
+const Serializer = require('../src/serializer');
+const TypeNotFoundException = require('../src/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 const COMPOSER_MODEL = require('./composer/composermodel');
 const ParserUtil = require('./introspect/parserutility');
@@ -41,7 +41,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const tmp = require('tmp-promise');
-const BaseModelManager = require('../lib/basemodelmanager');
+const BaseModelManager = require('../src/basemodelmanager');
 
 describe('ModelManager', () => {
 
