@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 
-const { writeModelsToFileSystem } = require('../lib/modelwriter');
+const { writeModelsToFileSystem } = require('../src/modelwriter');
 
 const chai = require('chai');
 chai.should();

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const TypeNotFoundException = require('../lib/typenotfoundexception');
+const TypeNotFoundException = require('../src/typenotfoundexception');
 
 const chai = require('chai');
 chai.should();
@@ -25,14 +25,14 @@ describe('TypeNotFoundException', function() {
             const typeName = 'namespace.TypeName';
             const obj = new TypeNotFoundException(typeName);
             obj.toString().should.include(typeName);
-            obj.component.should.equal('@accordproject/concerto-util');
+            obj.component.should.equal('@accordproject/concerto-core');
         });
 
         it('with two arguments', function() {
             const message = 'MESSAGE_TEXT';
             const obj = new TypeNotFoundException('namespace.TypeName', message);
             obj.toString().should.include(message);
-            obj.component.should.equal('@accordproject/concerto-util');
+            obj.component.should.equal('@accordproject/concerto-core');
         });
 
         it('with three arguments', function() {

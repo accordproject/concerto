@@ -14,10 +14,10 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Resource = require('../../lib/model/resource');
-const Serializer = require('../../lib/serializer');
-const Factory = require('../../lib/factory');
+const ModelManager = require('../../src/modelmanager');
+const Resource = require('../../src/model/resource');
+const Serializer = require('../../src/serializer');
+const Factory = require('../../src/factory');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');

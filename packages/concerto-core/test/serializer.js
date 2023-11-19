@@ -14,12 +14,12 @@
 
 'use strict';
 
-const Factory = require('../lib/factory');
-const ModelManager = require('../lib/modelmanager');
-const Relationship = require('../lib/model/relationship');
-const Resource = require('../lib/model/resource');
-const Serializer = require('../lib/serializer');
-const TypeNotFoundException = require('../lib/typenotfoundexception');
+const Factory = require('../src/factory');
+const ModelManager = require('../src/modelmanager');
+const Relationship = require('../src/model/relationship');
+const Resource = require('../src/model/resource');
+const Serializer = require('../src/serializer');
+const TypeNotFoundException = require('../src/typenotfoundexception');
 const Util = require('./composer/composermodelutility');
 
 const should = require('chai').should();

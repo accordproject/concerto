@@ -16,15 +16,14 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const ModelFile = require('../../lib/introspect/modelfile');
-const ModelManager = require('../../lib/modelmanager');
-const IntrospectUtils = require('./introspectutils');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const ParticipantDeclaration = require('../../src/introspect/participantdeclaration');
+const TransactionDeclaration = require('../../src/introspect/transactiondeclaration');
+const EventDeclaration = require('../../src/introspect/eventdeclaration');
+const EnumDeclaration = require('../../src/introspect/enumdeclaration');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const ModelFile = require('../../src/introspect/modelfile');
+const ModelManager = require('../../src/modelmanager');
 
 const fs = require('fs');
 const path = require('path');
@@ -37,8 +36,8 @@ const chai = require('chai');
 const should = chai.should();
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
+const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
 
 describe('ModelFile', () => {
 
@@ -529,7 +528,7 @@ describe('ModelFile', () => {
             const model2 = `
             namespace org.acme
             import org.saluja.{Student as stud}
-            
+
             map StudMap{
             o DateTime
             o stud
@@ -544,7 +543,7 @@ describe('ModelFile', () => {
         it('should not throw if declaration is extended on a aliased type declaration', () => {
             const model1 = `
             namespace org.saluja
-            
+
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
@@ -552,9 +551,9 @@ describe('ModelFile', () => {
             const model2 = `
             namespace org.acme
             import org.saluja.{Vehicle as V,nickname as nk}
-            
+
             asset Car extends V{
-                o String company 
+                o String company
                 o nk shortname
             }`;
             modelManager.enableMapType = true;

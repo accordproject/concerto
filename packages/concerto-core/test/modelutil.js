@@ -14,10 +14,10 @@
 
 'use strict';
 
-const ModelFile = require('../lib/introspect/modelfile');
-const Property = require('../lib/introspect/property');
-const ModelManager = require('../lib/modelmanager');
-const ModelUtil = require('../lib/modelutil');
+const ModelFile = require('../src/introspect/modelfile');
+const Property = require('../src/introspect/property');
+const ModelManager = require('../src/modelmanager');
+const ModelUtil = require('../src/modelutil');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -33,7 +33,7 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@accordproject/concerto-codegen": "3.14.0",
+        "@accordproject/concerto-codegen": "^3.16.2",
         "@accordproject/concerto-core": "^4.0.0-alpha.0",
         "@accordproject/concerto-metamodel": "3.8.1",
         "@accordproject/concerto-util": "^4.0.0-alpha.0",
