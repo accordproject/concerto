@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
 

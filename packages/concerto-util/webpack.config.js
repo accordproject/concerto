@@ -21,7 +21,7 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const packageJson = require('./package.json');
 
 module.exports = {
-    entry: './index.js',
+    entry: './dist/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-util.js',

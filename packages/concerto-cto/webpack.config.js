@@ -20,7 +20,7 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 
 module.exports = {
-    entry: './index.js',
+    entry: './dist/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-cto.js',
@@ -64,7 +64,9 @@ module.exports = {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
             // see https://webpack.js.org/configuration/resolve/#resolvefallback
             // for the list of Node.js core module polyfills.
-            'path': 'path-browserify'
+            os: false,
+            path: require.resolve('path-browserify'),
+            fs: false,
         }
     }
 };

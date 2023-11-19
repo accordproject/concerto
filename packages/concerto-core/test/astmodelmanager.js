@@ -14,7 +14,7 @@
 
 'use strict';
 
-const AstModelManager = require('../lib/astmodelmanager');
+const AstModelManager = require('../src/astmodelmanager');
 
 const chai = require('chai');
 chai.should();

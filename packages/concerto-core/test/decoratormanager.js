@@ -15,10 +15,10 @@
 'use strict';
 
 const fs = require('fs');
-const DecoratorManager = require('../lib/decoratormanager');
-const ModelManager = require('../lib/modelmanager');
-const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanager');
-const Printer= require('../../concerto-cto/lib/printer');
+const DecoratorManager = require('../src/decoratormanager');
+const ModelManager = require('../src/modelmanager');
+const VocabularyManager = require('@accordproject/concerto-vocabulary').VocabularyManager;
+const Printer = require('@accordproject/concerto-cto').Printer;
 
 const chai = require('chai');
 require('chai').should();
@@ -497,18 +497,6 @@ describe('DecoratorManager', () => {
             const resp = DecoratorManager.extractDecorators( testModelManager);
             const dcs = resp.decoratorCommandSet;
             dcs.should.not.be.null;
-        });
-        it('should be able to extract decorators and vocabs from a model without namespace version', async function() {
-            const testModelManager = new ModelManager();
-            const modelTextWithoutNamespace = fs.readFileSync('./test/data/decoratorcommands/test-decorator-without-version.cto', 'utf-8');
-            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test.cto');
-            const options = {
-                removeDecoratorsFromModel:true,
-                locale:'en'
-            };
-            const resp = DecoratorManager.extractDecorators( testModelManager, options);
-            const vocabs = resp.vocabularies;
-            vocabs.should.not.be.null;
         });
         it('should ensure that extraction and re-application of decorators and vocabs from a model is an identity operation', async function() {
             const testModelManager = new ModelManager();

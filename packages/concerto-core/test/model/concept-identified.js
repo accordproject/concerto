@@ -14,9 +14,9 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Factory = require('../../lib/factory');
-const Identifiable = require('../../lib/model/identifiable');
+const ModelManager = require('../../src/modelmanager');
+const Factory = require('../../src/factory');
+const Identifiable = require('../../src/model/identifiable');
 
 const dayjs = require('dayjs');
 const chai = require('chai');

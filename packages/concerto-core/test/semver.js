@@ -16,9 +16,9 @@
 
 const fs = require('fs');
 
-const ModelManager = require('../lib/modelmanager');
-const Serializer = require('../lib/serializer');
-const Factory = require('../lib/factory');
+const ModelManager = require('../src/modelmanager');
+const Serializer = require('../src/serializer');
+const Factory = require('../src/factory');
 
 const chai = require('chai');
 chai.should();
