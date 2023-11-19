@@ -14,8 +14,8 @@
 
 'use strict';
 
-const Declaration = require('../../dist/introspect/declaration');
-const ModelFile = require('../../dist/introspect/modelfile');
+const Declaration = require('../../src/introspect/declaration');
+const ModelFile = require('../../src/introspect/modelfile');
 
 require('chai').should();
 const should = require('chai').should();

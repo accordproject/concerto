@@ -15,8 +15,8 @@
 'use strict';
 
 const fs = require('fs');
-const DecoratorManager = require('../dist/decoratormanager');
-const ModelManager = require('../dist/modelmanager');
+const DecoratorManager = require('../src/decoratormanager');
+const ModelManager = require('../src/modelmanager');
 
 const chai = require('chai');
 require('chai').should();

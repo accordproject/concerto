@@ -14,10 +14,10 @@
 
 'use strict';
 
-const Decorator = require('../../dist/introspect/decorator');
-const DecoratorFactory = require('../../dist/introspect/decoratorfactory');
-const ModelManager = require('../../dist/modelmanager');
-const Introspector = require('../../dist/introspect/introspector');
+const Decorator = require('../../src/introspect/decorator');
+const DecoratorFactory = require('../../src/introspect/decoratorfactory');
+const ModelManager = require('../../src/modelmanager');
+const Introspector = require('../../src/introspect/introspector');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 

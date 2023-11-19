@@ -25,7 +25,7 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 chai.use(jestSnapshotPlugin());
 
-const { VocabularyManager } = require('../dist');
+const { VocabularyManager } = require('../src');
 const ModelManager = require('@accordproject/concerto-core').ModelManager;
 const DecoratorManager = require('@accordproject/concerto-core').DecoratorManager;
 

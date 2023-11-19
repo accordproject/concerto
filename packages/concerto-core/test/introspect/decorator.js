@@ -16,8 +16,8 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const AssetDeclaration = require('../../dist/introspect/assetdeclaration');
-const Decorator = require('../../dist/introspect/decorator');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const Decorator = require('../../src/introspect/decorator');
 
 require('chai').should();
 const sinon = require('sinon');

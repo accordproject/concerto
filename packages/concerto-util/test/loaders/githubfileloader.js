@@ -14,7 +14,7 @@
 
 'use strict';
 
-const GitHubFileLoader = require('../../dist/loaders/githubfileloader');
+const GitHubFileLoader = require('../../src/loaders/githubfileloader');
 
 const moxios = require('moxios');
 const chai = require('chai');

@@ -14,10 +14,10 @@
 
 'use strict';
 
-const Factory = require('../../dist/factory');
+const Factory = require('../../src/factory');
 const fs = require('fs');
-const ModelManager = require('../../dist/modelmanager');
-const Serializer = require('../../dist/serializer');
+const ModelManager = require('../../src/modelmanager');
+const Serializer = require('../../src/serializer');
 const Util = require('../composer/composermodelutility');
 
 require('chai').should();

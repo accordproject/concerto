@@ -21,12 +21,9 @@
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "nyc mocha --recursive -t 10000",
-    "test:watch": "nyc mocha --watch --recursive -t 10000",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run parser && npm run build:types",
-    "build:types": "tsc -p tsconfig.build.json",
+    "test": "nyc mocha -r ts-node/register --recursive -t 10000",
+    "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
+    "build": "npm run parser && tsc -p tsconfig.build.json",
     "postbuild": "npm run webpack",
     "webpack": "webpack --config webpack.config.js --mode production"
   },
@@ -62,7 +59,9 @@
     "typescript": "4.6.3",
     "rimraf": "3.0.2",
     "ts-jest": "28.0.4",
-    "npm-run-all": "4.1.5"
+    "npm-run-all": "4.1.5",
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "ts-node": "10.9.1"
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.8.1",
@@ -112,8 +111,8 @@
     }
   },
   "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",
-    "sourceMap": "inline",
     "reporter": [
       "lcov",
       "text-summary",
@@ -121,16 +120,17 @@
       "json"
     ],
     "include": [
-      "lib/**/*.js"
+      "src/**/*.js",
+      "src/**/*.ts"
     ],
     "exclude": [
-      "lib/parser.js"
+      "src/parser.js"
     ],
     "all": true,
     "check-coverage": true,
-    "statements": 54,
-    "branches": 41,
-    "functions": 70,
-    "lines": 55
+    "statements": 100,
+    "branches": 98.85,
+    "functions": 100,
+    "lines": 100
   }
 }

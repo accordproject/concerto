@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../dist/modelmanager');
-const Identifiable = require('../../dist/model/identifiable');
+const ModelManager = require('../../src/modelmanager');
+const Identifiable = require('../../src/model/identifiable');
 const sinon = require('sinon');
 const chai = require('chai');
 chai.should();

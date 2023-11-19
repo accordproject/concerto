@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../dist/modelmanager');
-const Relationship = require('../../dist/model/relationship');
+const ModelManager = require('../../src/modelmanager');
+const Relationship = require('../../src/model/relationship');
 const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');

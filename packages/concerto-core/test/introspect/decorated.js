@@ -14,8 +14,8 @@
 
 'use strict';
 
-const Decorated = require('../../dist/introspect/decorated');
-const ModelFile = require('../../dist/introspect/modelfile');
+const Decorated = require('../../src/introspect/decorated');
+const ModelFile = require('../../src/introspect/modelfile');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ValueGeneratorFactory = require('../../dist/serializer/valuegenerator');
+const ValueGeneratorFactory = require('../../src/serializer/valuegenerator');
 
 const chai = require('chai');
 const expect = chai.expect;

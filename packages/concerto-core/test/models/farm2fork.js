@@ -15,8 +15,8 @@
 'use strict';
 
 require('chai').should();
-const ModelManager = require('../../dist/modelmanager');
-const RelationshipDeclaration = require('../../dist/introspect/relationshipdeclaration');
+const ModelManager = require('../../src/modelmanager');
+const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');

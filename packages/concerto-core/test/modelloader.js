@@ -14,11 +14,11 @@
 
 'use strict';
 
-const Factory = require('../dist/factory');
-const ModelLoader = require('../dist/modelloader');
-const ModelManager = require('../dist/modelmanager');
-const TypeNotFoundException = require('../dist/typenotfoundexception');
-const Serializer = require('../dist/serializer');
+const Factory = require('../src/factory');
+const ModelLoader = require('../src/modelloader');
+const ModelManager = require('../src/modelmanager');
+const TypeNotFoundException = require('../src/typenotfoundexception');
+const Serializer = require('../src/serializer');
 
 const chai = require('chai');
 require('chai').should();

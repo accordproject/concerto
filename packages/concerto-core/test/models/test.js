@@ -14,11 +14,11 @@
 
 'use strict';
 
-const Factory = require('../../dist/factory');
-const ModelManager = require('../../dist/modelmanager');
-const RelationshipDeclaration = require('../../dist/introspect/relationshipdeclaration');
-const Serializer = require('../../dist/serializer');
-const TypeNotFoundException = require('../../dist/typenotfoundexception');
+const Factory = require('../../src/factory');
+const ModelManager = require('../../src/modelmanager');
+const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
+const Serializer = require('../../src/serializer');
+const TypeNotFoundException = require('../../src/typenotfoundexception');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');

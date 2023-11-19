@@ -14,7 +14,7 @@
 
 'use strict';
 
-const HTTPFileLoader = require('../../dist/loaders/httpfileloader');
+const HTTPFileLoader = require('../../src/loaders/httpfileloader');
 const moxios = require('moxios');
 
 const chai = require('chai');

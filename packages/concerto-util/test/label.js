@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { labelToSentence, sentenceToLabel } = require('../dist/label');
+const { labelToSentence, sentenceToLabel } = require('../src/label');
 
 require('chai').should();
 

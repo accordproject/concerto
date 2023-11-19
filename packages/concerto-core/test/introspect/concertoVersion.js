@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../dist/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');

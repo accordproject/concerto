@@ -15,8 +15,8 @@
 'use strict';
 
 const BaseFileException = require('@accordproject/concerto-util').BaseFileException;
-const IllegalModelException = require('../../dist/introspect/illegalmodelexception');
-const ModelFile = require('../../dist/introspect/modelfile');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const ModelFile = require('../../src/introspect/modelfile');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../dist/modelmanager');
-const Resource = require('../../dist/model/resource');
+const ModelManager = require('../../src/modelmanager');
+const Resource = require('../../src/model/resource');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');

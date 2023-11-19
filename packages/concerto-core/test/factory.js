@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Factory = require('../dist/factory');
-const ModelManager = require('../dist/modelmanager');
-const TypeNotFoundException = require('../dist/typenotfoundexception');
+const Factory = require('../src/factory');
+const ModelManager = require('../src/modelmanager');
+const TypeNotFoundException = require('../src/typenotfoundexception');
 const uuid = require('uuid');
 const Util = require('./composer/composermodelutility');
 const dayjs = require('dayjs');

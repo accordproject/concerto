@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DateTimeUtil = require('../dist/datetimeutil');
+const DateTimeUtil = require('../src/datetimeutil');
 
 const chai = require('chai');
 

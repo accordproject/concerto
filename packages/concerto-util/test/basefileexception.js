@@ -14,8 +14,7 @@
 
 'use strict';
 
-const BaseException = require('../dist/baseexception');
-const BaseFileException = require('../dist/basefileexception');
+const { BaseException, BaseFileException } = require('../src/');
 
 require('chai').should();
 
