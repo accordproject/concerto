@@ -14,9 +14,9 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Factory = require('../../lib/factory');
-const Identifiable = require('../../lib/model/identifiable');
+const ModelManager = require('../../src/modelmanager');
+const Factory = require('../../src/factory');
+const Identifiable = require('../../src/model/identifiable');
 
 const dayjs = require('dayjs');
 const chai = require('chai');
@@ -29,7 +29,7 @@ describe('Concept Identifiers', function () {
     let classDecl;
     before(function () {
         modelManager = new ModelManager();
-        modelManager.addCTOModel(`namespace org.accordproject
+        modelManager.addCTOModel(`namespace org.accordproject@1.0.0
         concept Address {
             o String country
         }
@@ -44,7 +44,7 @@ describe('Concept Identifiers', function () {
         transaction Request {}
         event Event {}
         `, 'test.cto');
-        classDecl = modelManager.getType('org.accordproject.Order');
+        classDecl = modelManager.getType('org.accordproject@1.0.0.Order');
     });
 
     beforeEach(function () {
@@ -57,29 +57,29 @@ describe('Concept Identifiers', function () {
         it('should not parse a model with a relationship to a concept without an identifier', function () {
             const temp = new ModelManager();
             (function () {
-                temp.addCTOModel(`namespace org.accordproject
+                temp.addCTOModel(`namespace org.accordproject@1.0.0
                 concept Address {
                     o String country
                 }
                 concept Order identified {
                     --> Address address
                 }`, 'invalid.cto');
-            }).should.throw(/Relationship address must be to a class that has an identifier, but this is to org.accordproject.Address/);
+            }).should.throw(/Relationship address must be to a class that has an identifier, but this is to org.accordproject@1.0.0.Address/);
         });
     });
 
     describe('#factory', function() {
         it('should be able to create a relationship to a concept with an id', function () {
             const factory = new Factory(modelManager);
-            const order = factory.newRelationship('org.accordproject', 'Order', '123');
+            const order = factory.newRelationship('org.accordproject@1.0.0', 'Order', '123');
             order.getIdentifier().should.equal('123');
         });
 
         it('should not be able to create a relationship to a concept without an id', function () {
             const factory = new Factory(modelManager);
             (function () {
-                factory.newRelationship('org.accordproject', 'Address', '123');
-            }).should.throw(/Cannot create a relationship to org.accordproject.Address, it is not identifiable./);
+                factory.newRelationship('org.accordproject@1.0.0', 'Address', '123');
+            }).should.throw(/Cannot create a relationship to org.accordproject@1.0.0.Address, it is not identifiable./);
         });
 
     });
@@ -87,23 +87,23 @@ describe('Concept Identifiers', function () {
 
     describe('#toString', function() {
         it('should be able to call toString', function () {
-            const id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
-            id.toString().should.equal('Identifiable {id=org.accordproject.Order#123}');
+            const id = new Identifiable(modelManager, classDecl, 'org.accordproject@1.0.0', 'Order', '123' );
+            id.toString().should.equal('Identifiable {id=org.accordproject@1.0.0.Order#123}');
         });
     });
 
     describe('#getTimestamp', function() {
         it('should be able to call getTimestamp', function () {
             const factory = new Factory(modelManager);
-            const txn = factory.newResource('org.accordproject', 'Request');
+            const txn = factory.newResource('org.accordproject@1.0.0', 'Request');
             dayjs(txn.getTimestamp()).isValid().should.be.true;
 
-            const event = factory.newResource('org.accordproject', 'Event');
+            const event = factory.newResource('org.accordproject@1.0.0', 'Event');
             dayjs(event.getTimestamp()).isValid().should.be.true;
         });
 
         it('should be able to call getTimestamp for an identifiable without a $timestamp property', function () {
-            const id = new Identifiable(modelManager, classDecl, 'org.accordproject', 'Order', '123' );
+            const id = new Identifiable(modelManager, classDecl, 'org.accordproject@1.0.0', 'Order', '123' );
             should.equal(id.getTimestamp(), undefined);
         });
     });
@@ -111,7 +111,7 @@ describe('Concept Identifiers', function () {
     describe('#setIdentifier', () => {
         it('should be able to set system identifier', function () {
             const factory = new Factory(modelManager);
-            const order = factory.newResource('org.accordproject', 'Order', '123');
+            const order = factory.newResource('org.accordproject@1.0.0', 'Order', '123');
             order.getIdentifier().should.equal('123');
             order.$identifier.should.equal('123');
             order.setIdentifier('321');
@@ -122,7 +122,7 @@ describe('Concept Identifiers', function () {
 
         it('should be able to set explicit identifier', function () {
             const factory = new Factory(modelManager);
-            const product = factory.newResource('org.accordproject', 'Product', '123');
+            const product = factory.newResource('org.accordproject@1.0.0', 'Product', '123');
             product.getIdentifier().should.equal('123');
             product.sku.should.equal('123');
             product.setIdentifier('321');

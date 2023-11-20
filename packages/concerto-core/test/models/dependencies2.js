@@ -15,9 +15,9 @@
 'use strict';
 
 require('chai').should();
-const ModelManager = require('../../lib/modelmanager');
-const Factory = require('../../lib/factory');
-const Serializer = require('../../lib/serializer');
+const ModelManager = require('../../src/modelmanager');
+const Factory = require('../../src/factory');
+const Serializer = require('../../src/serializer');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 
@@ -45,9 +45,9 @@ describe('Dependencies2 Model', function() {
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
 
-            // const participant = factory.newResource('org.acme.base', 'ClientAdminMember', 'testadmin');
-            const transaction = factory.newTransaction('org.acme.core', 'BaseTransaction', 'testing');
-            transaction.invoker = factory.newRelationship('org.acme.base', 'ClientAdminMember', 'testadmin');
+            // const participant = factory.newResource('org.acme.base@1.0.0', 'ClientAdminMember', 'testadmin');
+            const transaction = factory.newTransaction('org.acme.core@1.0.0', 'BaseTransaction', 'testing');
+            transaction.invoker = factory.newRelationship('org.acme.base@1.0.0', 'ClientAdminMember', 'testadmin');
             transaction.validate();
             const jsonObj = serializer.toJSON(transaction);
             //console.log(JSON.stringify(jsonObj));

@@ -1,0 +1,24 @@
+namespace org.acme@1.0.0
+
+enum Color {
+    o RED
+    o BLUE
+    o GREEN
+}
+
+scalar SSN extends String default="000-00-0000"
+scalar VIN extends String
+
+asset Vehicle identified by vin {
+    o VIN vin
+    o Color color
+}
+
+map Address {
+    o String
+    o String
+}
+
+asset Truck extends Vehicle {
+    o Double weight
+}

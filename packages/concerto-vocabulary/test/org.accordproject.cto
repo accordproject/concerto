@@ -1,5 +1,0 @@
-namespace org.accordproject
-
-concept Thing {
-    o String name
-}

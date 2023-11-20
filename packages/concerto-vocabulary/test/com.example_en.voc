@@ -1,6 +1,0 @@
-locale: en
-namespace: com.example
-declarations:
-  - Person: A person
-    properties:
-      - email: Email address

@@ -14,14 +14,14 @@
 
 'use strict';
 
-const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
-const moxios = require('moxios');
+const HTTPFileLoader = require('../../src/loaders/httpfileloader');
 
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
+const nock = require('nock');
 
 const defaultProcessFile = (name, data) => {
     return { name, data };
@@ -30,19 +30,17 @@ const defaultProcessFile = (name, data) => {
 describe('HTTPModeFilelLoader', () => {
     let sandbox;
 
-    let model = `namespace test
+    let model = `namespace test@1.0.0
     enum Test {
         o ONE
     }`;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        moxios.install();
     });
 
     afterEach(() => {
         sandbox.restore();
-        moxios.uninstall();
     });
 
     describe('#accept', () => {
@@ -67,18 +65,15 @@ describe('HTTPModeFilelLoader', () => {
         it('should load https URIs', () => {
 
             // Match against an exact URL value
-            const url = 'https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto';
-
-            moxios.stubRequest(url, {
-                status: 200,
-                responseText: model
-            });
+            nock('https://raw.githubusercontent.com')
+                .get('/accordproject/models/main/src/usa/business.cto')
+                .reply(200, model);
 
             const ml = new HTTPFileLoader(defaultProcessFile);
-            return ml.load(url)
+            return ml.load('https://raw.githubusercontent.com/accordproject/models/main/src/usa/business.cto')
                 .then((mf) => {
                     mf.should.be.deep.equal({
-                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        name: '@raw.githubusercontent.com.accordproject.models.main.src.usa.business.cto',
                         data: model
                     });
                 });

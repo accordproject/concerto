@@ -1,0 +1,9 @@
+locale: fr
+namespace: org.acme@1.0.0
+declarations:
+  - Vehicle: Véhicule
+    properties:
+      - vin: Le numéro d'identification du véhicule (NIV)
+  - Address: Adresse
+    properties:
+      - KEY: NIV du véhicule

@@ -14,11 +14,11 @@
 
 'use strict';
 
-const Factory = require('../../lib/factory');
-const ModelManager = require('../../lib/modelmanager');
-const RelationshipProperty = require('../../lib/introspect/relationshipproperty');
-const Serializer = require('../../lib/serializer');
-const TypeNotFoundException = require('../../lib/typenotfoundexception');
+const Factory = require('../../src/factory');
+const ModelManager = require('../../src/modelmanager');
+const RelationshipProperty = require('../../src/introspect/relationshipproperty');
+const Serializer = require('../../src/serializer');
+const TypeNotFoundException = require('../../src/typenotfoundexception');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -53,7 +53,7 @@ describe('Test Model', function(){
 
             // create a new instance
             let cObject = factory.newResource(
-                'org.acme', 'Vehicle', 'YVBVLSFXXAL342374' );
+                'org.acme@1.0.0', 'Vehicle', 'YVBVLSFXXAL342374' );
 
             // model is defined as a string
             // set model to a number
@@ -61,10 +61,10 @@ describe('Test Model', function(){
             cObject.model.should.equal('CAPRI');
 
             // now try some invalid values
-            ( function() {cObject.setPropertyValue('model', 1);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
-            ( function() {cObject.setPropertyValue('model', true);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', 1);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', true);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
             ( function() {cObject.setPropertyValue('model', dayjs.utc());}).should.throw(/.+Expected type of value: "String"./);
-            ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "[1,2,3]" (type of value: "object"). Expected type of value: "String".');
+            ( function() {cObject.setPropertyValue('model', [1,2,3]);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "[1,2,3]" (type of value: "object"). Expected type of value: "String".');
         });
     });
 
@@ -87,20 +87,20 @@ describe('Test Model', function(){
             file.should.not.be.null;
             modelManager.addCTOModel(file,fileName);
 
-            let modelFile = modelManager.getModelFile('org.acme');
-            modelFile.getNamespace().should.equal('org.acme');
+            let modelFile = modelManager.getModelFile('org.acme@1.0.0');
+            modelFile.getNamespace().should.equal('org.acme@1.0.0');
 
             // declare an asset registry
             let factory = new Factory(modelManager);
 
             // create a new instance
             let cObject =  factory.newResource(
-                'org.acme', 'Vehicle', 'AAAAAAAAXBB123456' );
+                'org.acme@1.0.0', 'Vehicle', 'AAAAAAAAXBB123456' );
 
-            const customer = factory.newConcept('org.acme', 'Customer');
+            const customer = factory.newConcept('org.acme@1.0.0', 'Customer');
             customer.firstName = 'Dan';
             customer.lastName = 'Selman';
-            customer.address = factory.newConcept('org.acme', 'Address');
+            customer.address = factory.newConcept('org.acme@1.0.0', 'Address');
             cObject.customer = customer;
 
             cObject.make = 'Renault';
@@ -118,7 +118,7 @@ describe('Test Model', function(){
             cObject.LeaseContractID = 'foo';
             cObject.scrapped = false;
             cObject.owner = factory.newRelationship(
-                'composer', 'MyParticipant', 'CUST_1');
+                'composer@1.0.0', 'MyParticipant', 'CUST_1');
             cObject.previousOwners = null;
             // serialize the instance to JSON using a Serializer
             let serializer = new Serializer(factory, modelManager);
@@ -155,18 +155,18 @@ describe('Test Model', function(){
             file.should.not.be.null;
             modelManager.addCTOModel(file,fileName);
 
-            let modelFile = modelManager.getModelFile('org.acme');
-            modelFile.getNamespace().should.equal('org.acme');
+            let modelFile = modelManager.getModelFile('org.acme@1.0.0');
+            modelFile.getNamespace().should.equal('org.acme@1.0.0');
 
             // create a new instance
             let factory = new Factory(modelManager);
             let cObject =  factory.newResource(
-                'org.acme', 'Vehicle', 'YVBVLSFXXAL342374' );
+                'org.acme@1.0.0', 'Vehicle', 'YVBVLSFXXAL342374' );
 
             // vin is the identifying field for Vehicles, so should have been
             // set during object creation
             cObject.vin.should.equal('YVBVLSFXXAL342374');
-            cObject.getFullyQualifiedIdentifier().should.equal('org.acme.Vehicle#YVBVLSFXXAL342374');
+            cObject.getFullyQualifiedIdentifier().should.equal('org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374');
 
             cObject.make = 'Renault';
 
@@ -190,15 +190,15 @@ describe('Test Model', function(){
             // model is defined as a string
             // set model to a number
             cObject.model = 1;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "1" (type of value: "number"). Expected type of value: "String".');
 
             // set model to a double
             cObject.model = 42.05;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "42.05" (type of value: "number"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "42.05" (type of value: "number"). Expected type of value: "String".');
 
             // set model to a Boolean
             cObject.model = true;
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "true" (type of value: "boolean"). Expected type of value: "String".');
 
             // set model to a DateTime
             cObject.model = dayjs.utc();
@@ -206,19 +206,19 @@ describe('Test Model', function(){
 
             // set model to an object
             cObject.model = { 'foo' : 'bar' };
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
 
             // set model to null
             cObject.model = null;
-            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme.Vehicle#YVBVLSFXXAL342374" is missing the required field "model".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" is missing the required field "model".');
 
             // set model to an array
             cObject.model = ['1','2'];
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "["1","2"]" (type of value: "object"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "["1","2"]" (type of value: "object"). Expected type of value: "String".');
 
             // set model to a function
             cObject.model = function() {throw new Error('OOps');};
-            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "undefined" (type of value: "function"). Expected type of value: "String".');
+            ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "undefined" (type of value: "function"). Expected type of value: "String".');
         });
     });
 
@@ -239,8 +239,8 @@ describe('Test Model', function(){
             file.should.not.be.null;
             modelManager.addCTOModel(file,fileName2);
 
-            let modelFile = modelManager.getModelFile('org.acme');
-            modelFile.getNamespace().should.equal('org.acme');
+            let modelFile = modelManager.getModelFile('org.acme@1.0.0');
+            modelFile.getNamespace().should.equal('org.acme@1.0.0');
 
             // check the clear
             modelManager.clearModelFiles();
@@ -252,12 +252,12 @@ describe('Test Model', function(){
             modelManager.addCTOModel(file);
 
             // getType
-            let vehicleDecl = modelManager.getType('org.acme.Vehicle');
+            let vehicleDecl = modelManager.getType('org.acme@1.0.0.Vehicle');
             vehicleDecl.should.not.be.null;
-            vehicleDecl.getFullyQualifiedName().should.equal('org.acme.Vehicle');
+            vehicleDecl.getFullyQualifiedName().should.equal('org.acme@1.0.0.Vehicle');
             (() => { modelManager.getType('String'); }).should.throw(TypeNotFoundException);
-            modelManager.getType('org.acme.Base').getFullyQualifiedName().should.equal('org.acme.Base');
-            modelManager.getType('composer.MyParticipant').getName().should.equal('MyParticipant');
+            modelManager.getType('org.acme@1.0.0.Base').getFullyQualifiedName().should.equal('org.acme@1.0.0.Base');
+            modelManager.getType('composer@1.0.0.MyParticipant').getName().should.equal('MyParticipant');
 
             modelFile.getAssetDeclarations().length.should.equal(2);
             modelFile.getTransactionDeclarations().length.should.equal(8);
@@ -332,7 +332,7 @@ describe('Test Model', function(){
             file.should.not.be.null;
             modelManager.addCTOModel(file,fileName);
 
-            let modelFile = modelManager.getModelFile('org.acme');
+            let modelFile = modelManager.getModelFile('org.acme@1.0.0');
             modelFile.isLocalType('MyParticipant').should.equal(false);
             modelFile.isImportedType('MyParticipant').should.equal(true);
             let imprts = modelFile.getImports().filter((element) => {
@@ -342,7 +342,7 @@ describe('Test Model', function(){
                 return modelManager.getModelFile(importNamespace);
             });
             imprts.length.should.equal(6); // XXX Now includes all concerto.* classes
-            modelFile.getImports().includes('composer.MyParticipant').should.equal(true);
+            modelFile.getImports().includes('composer@1.0.0.MyParticipant').should.equal(true);
         });
     });
 
@@ -373,7 +373,7 @@ describe('Test Model', function(){
             contractModel.should.not.be.null;
             modelManager.addCTOModel(contractModel,fileName);
 
-            let modelFile = modelManager.getModelFile('stdlib.business');
+            let modelFile = modelManager.getModelFile('stdlib.business@1.0.0');
             modelFile.isLocalType('Business').should.equal(true);
             modelFile.isImportedType('Person').should.equal(true);
             modelFile.isImportedType('SSN').should.equal(true);

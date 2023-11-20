@@ -16,11 +16,11 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
+const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
@@ -36,7 +36,7 @@ describe('ScalarDeclaration', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
-        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
+        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing@1.0.0', 'org.acme.cto');
     });
 
     describe('#validate', () => {
@@ -70,7 +70,7 @@ describe('ScalarDeclaration', () => {
                 $class: `${MetaModelNamespace}.BooleanScalar`
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ScalarDeclaration {id=com.hyperledger.testing.suchName scalarType=Boolean}');
+            clz.toString().should.equal('ScalarDeclaration {id=com.hyperledger.testing@1.0.0.suchName scalarType=Boolean}');
         });
 
     });
@@ -83,8 +83,8 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return null', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
-            should.equal(testClass.getNamespace(), 'com.testing');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            should.equal(testClass.getNamespace(), 'com.testing@1.0.0');
         });
     });
 
@@ -93,9 +93,35 @@ describe('ScalarDeclaration', () => {
             let clz = new ScalarDeclaration(modelFile, {
                 name: 'suchName',
             });
-            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing.suchName');
+            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing@1.0.0.suchName');
         });
 
+    });
+
+    describe('#getSuperType', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return null', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            should.equal(testClass.getSuperType(), null);
+        });
+    });
+
+    describe('#getSuperTypeDeclaration', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return null', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            should.equal(testClass.getSuperTypeDeclaration(), null);
+        });
     });
 
     describe('#getValidator', () => {
@@ -106,7 +132,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return the validator', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             should.equal(testClass.getValidator().validator.pattern, '\\d{3}-\\d{2}-\\{4}+');
         });
     });
@@ -115,19 +141,19 @@ describe('ScalarDeclaration', () => {
         it('should return the default value', () => {
             const modelFiles = introspectUtils.loadModelFiles(['test/data/parser/scalardeclaration.ssn.cto'], modelManager);
             modelManager.addModelFiles(modelFiles);
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             should.equal(testClass.getDefaultValue(), '000-00-0000');
         });
 
         it('should return null', () => {
             const modelFiles = introspectUtils.loadModelFiles(['test/data/parser/scalardeclaration.permutations.cto'], modelManager);
             modelManager.addModelFiles(modelFiles);
-            const testClass = modelManager.getType('com.testing.StringScalar');
+            const testClass = modelManager.getType('com.testing@1.0.0.StringScalar');
             should.equal(testClass.getDefaultValue(), null);
         });
     });
 
-    describe('#isAsset', () => {
+    describe('#isIdentified', () => {
         const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
 
         beforeEach(() => {
@@ -135,8 +161,8 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
-            testClass.isAsset().should.be.false;
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            testClass.isIdentified().should.be.false;
         });
     });
 
@@ -148,7 +174,59 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            testClass.isAsset().should.be.false;
+        });
+    });
+
+    describe('#isSystemIdentified', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return false', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            testClass.isSystemIdentified().should.be.false;
+        });
+    });
+
+    describe('#getIdentifierFieldName', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return null', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            should.equal(testClass.getIdentifierFieldName(), null);
+        });
+    });
+
+    describe('#isAbstract', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return true', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
+            testClass.isAbstract().should.be.true;
+        });
+    });
+
+    describe('#isAsset', () => {
+        const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+        it('should return false', () => {
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isAsset().should.be.false;
         });
     });
@@ -161,7 +239,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isParticipant().should.be.false;
         });
     });
@@ -174,7 +252,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isTransaction().should.be.false;
         });
     });
@@ -187,7 +265,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isEvent().should.be.false;
         });
     });
@@ -200,7 +278,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isConcept().should.be.false;
         });
     });
@@ -213,7 +291,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isEnum().should.be.false;
         });
     });
@@ -226,7 +304,7 @@ describe('ScalarDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.SSN');
+            const testClass = modelManager.getType('com.testing@1.0.0.SSN');
             testClass.isClassDeclaration().should.be.false;
         });
     });

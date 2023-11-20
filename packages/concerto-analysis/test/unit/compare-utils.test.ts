@@ -16,10 +16,15 @@ const modelFile = new ModelFile(modelManager, modelAst);
 const classDeclaration = new ClassDeclaration(modelFile, modelAst);
 const property = new Property(classDeclaration, propertyAst);
 const field = new Field(classDeclaration, propertyAst);
-const validator = new Validator(field, undefined);
+const validator = new Validator(field, {});
 
 test('should throw for unknown class declaration type', () => {
     expect(() => getDeclarationType(classDeclaration)).toThrow('unknown class declaration type "ClassDeclaration {id=foo@1.0.0.undefined super=Concept enum=false abstract=false}"');
+});
+
+test('should throw for unknown thing', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(() => getDeclarationType('thing' as any)).toThrow('unknown declaration type "thing"');
 });
 
 test('should throw for unknown class property type', () => {

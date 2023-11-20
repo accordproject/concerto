@@ -1,0 +1,21 @@
+{
+    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+    "name" : "invalid-target-properties",
+    "version": "1.0.0",
+    "commands" : [
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test@1.0.0",
+                "declaration" : "Person",
+                "properties" : ["missing"]
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Test"
+            }
+        }
+    ]
+}

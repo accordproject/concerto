@@ -1,0 +1,12 @@
+locale: zh-cn
+namespace: org.acme@1.0.0
+declarations:
+  - Color: 颜色
+    properties:
+    - RED: 红色
+    - GREEN: 绿色
+    - BLUE: 蓝色
+  - Vehicle: 车辆
+    properties:
+      - vin: 车辆识别代号
+      - color: 颜色

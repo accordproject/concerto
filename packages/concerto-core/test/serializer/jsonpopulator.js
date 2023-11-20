@@ -15,14 +15,14 @@
 'use strict';
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const Factory = require('../../lib/factory');
-const Field = require('../../lib/introspect/field');
-const JSONPopulator = require('../../lib/serializer/jsonpopulator');
-const ModelManager = require('../../lib/modelmanager');
-const Relationship = require('../../lib/model/relationship');
-const Resource = require('../../lib/model/resource');
-const ValidationException = require('../../lib/serializer/validationexception');
-const TypeNotFoundException = require('../../lib/typenotfoundexception');
+const Factory = require('../../src/factory');
+const Field = require('../../src/introspect/field');
+const JSONPopulator = require('../../src/serializer/jsonpopulator');
+const ModelManager = require('../../src/modelmanager');
+const Relationship = require('../../src/model/relationship');
+const Resource = require('../../src/model/resource');
+const ValidationException = require('../../src/serializer/validationexception');
+const TypeNotFoundException = require('../../src/typenotfoundexception');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -45,7 +45,7 @@ describe('JSONPopulator', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset1 identified by assetId {
                 o String assetId
                 o Integer assetValue optional
@@ -70,14 +70,14 @@ describe('JSONPopulator', () => {
             }
         `);
         modelManager.addCTOModel(`
-            namespace org.acme.different
+            namespace org.acme.different@1.0.0
             asset MyAsset1 identified by assetId {
                 o String assetId
             }
         `);
-        assetDeclaration1 = modelManager.getType('org.acme.MyContainerAsset1').getProperty('myAsset');
-        relationshipDeclaration1 = modelManager.getType('org.acme.MyTx1').getProperty('myAsset');
-        relationshipDeclaration2 = modelManager.getType('org.acme.MyTx2').getProperty('myAssets');
+        assetDeclaration1 = modelManager.getType('org.acme@1.0.0.MyContainerAsset1').getProperty('myAsset');
+        relationshipDeclaration1 = modelManager.getType('org.acme@1.0.0.MyTx1').getProperty('myAsset');
+        relationshipDeclaration2 = modelManager.getType('org.acme@1.0.0.MyTx2').getProperty('myAssets');
     });
 
     beforeEach(() => {
@@ -331,10 +331,10 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             (() => {
                 jsonPopulator.convertItem(assetDeclaration1, {
-                    $class: 'org.acme.NOTAREALTYPE',
+                    $class: 'org.acme@1.0.0.NOTAREALTYPE',
                     assetId: 'asset1'
                 }, options);
             }).should.throw(TypeNotFoundException, /NOTAREALTYPE/);
@@ -348,13 +348,13 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset1',
+                $class: 'org.acme@1.0.0.MyAsset1',
                 assetId: 'asset1'
             }, options);
             resource.should.be.an.instanceOf(Resource);
-            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme@1.0.0', 'MyAsset1', 'asset1');
         });
 
         it('should create a new resource from an object using a $class value that matches the model with optional integer', () => {
@@ -365,14 +365,14 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset1',
+                $class: 'org.acme@1.0.0.MyAsset1',
                 assetId: 'asset1',
                 assetValue: 1
             }, options);
             resource.should.be.an.instanceOf(Resource);
-            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme@1.0.0', 'MyAsset1', 'asset1');
         });
 
         it('should create a new resource from an object using a $class value that matches the model with optional integer (null)', () => {
@@ -383,14 +383,14 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset1',
+                $class: 'org.acme@1.0.0.MyAsset1',
                 assetId: 'asset1',
                 assetValue: null
             }, options);
             resource.should.be.an.instanceOf(Resource);
-            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme@1.0.0', 'MyAsset1', 'asset1');
         });
 
         it('should create a new resource from an object using a $class value even if it does not match the model', () => {
@@ -401,13 +401,13 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset2', 'asset2').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset2', 'asset2').returns(mockResource);
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
-                $class: 'org.acme.MyAsset2',
+                $class: 'org.acme@1.0.0.MyAsset2',
                 assetId: 'asset2'
             }, options);
             resource.should.be.an.instanceOf(Resource);
-            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset2', 'asset2');
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme@1.0.0', 'MyAsset2', 'asset2');
         });
 
         it('should create a new resource from an object using the model if no $class value is specified', () => {
@@ -418,12 +418,12 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             let resource = jsonPopulator.convertItem(assetDeclaration1, {
                 assetId: 'asset1'
             }, options);
             resource.should.be.an.instanceOf(Resource);
-            sinon.assert.calledWith(mockFactory.newResource, 'org.acme', 'MyAsset1', 'asset1');
+            sinon.assert.calledWith(mockFactory.newResource, 'org.acme@1.0.0', 'MyAsset1', 'asset1');
         });
 
     });
@@ -432,10 +432,10 @@ describe('JSONPopulator', () => {
         it('should throw if the type of a nested field is invalid', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyContainerAsset2',
+                    $class: 'org.acme@1.0.0.MyContainerAsset2',
                     assetId: 'assetContainer1',
                     myAssets: [{
-                        $class: 'org.acme.MyAsset1',
+                        $class: 'org.acme@1.0.0.MyAsset1',
                         assetId: 'asset1',
                         assetValue: 'string' // this is invalid
                     }]
@@ -446,21 +446,21 @@ describe('JSONPopulator', () => {
             };
 
             let mockResource1 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource1);
             let mockResource2 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset2').returns(mockResource2);
             (() => {
-                jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
+                jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyContainerAsset2'), options);
             }).should.throw(/Expected value at path `\$.myAssets\[0\].assetValue` to be of type `Integer`/);
         });
 
         it('should allow injection of a root object path', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyContainerAsset2',
+                    $class: 'org.acme@1.0.0.MyContainerAsset2',
                     assetId: 'assetContainer1',
                     myAssets: [{
-                        $class: 'org.acme.MyAsset1',
+                        $class: 'org.acme@1.0.0.MyAsset1',
                         assetId: 'asset1',
                         assetValue: 'string' // this is invalid
                     }]
@@ -472,11 +472,11 @@ describe('JSONPopulator', () => {
             };
 
             let mockResource1 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource1);
             let mockResource2 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset2').returns(mockResource2);
             (() => {
-                jsonPopulator.visit(modelManager.getType('org.acme.MyContainerAsset2'), options);
+                jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyContainerAsset2'), options);
             }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
         });
     });
@@ -520,20 +520,20 @@ describe('JSONPopulator', () => {
         it('should visit a ClassDeclaration resource', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }),
                 resourceStack: new TypedStack({}),
                 factory: mockFactory,
                 modelManager: modelManager
             };
-            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme@1.0.0.MyAsset1'), options);
         });
 
         it('should allow injection of a root object path', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }),
                 path: new TypedStack('$.rootObj'),
@@ -541,7 +541,7 @@ describe('JSONPopulator', () => {
                 factory: mockFactory,
                 modelManager: modelManager
             };
-            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme.MyAsset1'), options);
+            jsonPopulator.visitClassDeclaration(modelManager.getType('org.acme@1.0.0.MyAsset1'), options);
         });
     });
 
@@ -556,7 +556,7 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockRelationship = sinon.createStubInstance(Relationship);
-            mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockRelationship);
+            mockFactory.newRelationship.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockRelationship);
             let relationship = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
             relationship.should.be.an.instanceOf(Relationship);
         });
@@ -569,9 +569,9 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             sandbox.stub(relationshipDeclaration1, 'getFullyQualifiedTypeName').returns('MyAsset1');
-            sandbox.stub(relationshipDeclaration1, 'getNamespace').returns('org.acme.different');
+            sandbox.stub(relationshipDeclaration1, 'getNamespace').returns('org.acme.different@1.0.0');
             let mockRelationship = sinon.createStubInstance(Relationship);
-            mockFactory.newRelationship.withArgs('org.acme.different', 'MyAsset1', 'asset1').returns(mockRelationship);
+            mockFactory.newRelationship.withArgs('org.acme.different@1.0.0', 'MyAsset1', 'asset1').returns(mockRelationship);
             let relationship = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
             relationship.should.be.an.instanceOf(Relationship);
         });
@@ -579,7 +579,7 @@ describe('JSONPopulator', () => {
         it('should not create a new relationship from an object if not permitted', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }),
                 resourceStack: new TypedStack({}),
@@ -587,7 +587,7 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             (() => {
                 jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
             }).should.throw(/Invalid JSON data/);
@@ -597,7 +597,7 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }),
                 resourceStack: new TypedStack({}),
@@ -605,7 +605,7 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource);
             let subResource = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
             subResource.should.be.an.instanceOf(Resource);
         });
@@ -639,7 +639,7 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.NoSuchClass'
+                    $class: 'org.acme@1.0.0.NoSuchClass'
                 }),
                 resourceStack: new TypedStack({}),
                 factory: mockFactory,
@@ -654,13 +654,13 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.NoSuchClass'
+                    $class: 'org.acme@1.0.0.NoSuchClass'
                 }),
                 resourceStack: new TypedStack({}),
                 factory: mockFactory,
                 modelManager: modelManager
             };
-            sandbox.stub(modelManager, 'getType').withArgs('org.acme.NoSuchClass').throws(new TypeNotFoundException('org.acme.NoSuchClass'));
+            sandbox.stub(modelManager, 'getType').withArgs('org.acme@1.0.0.NoSuchClass').throws(new TypeNotFoundException('org.acme@1.0.0.NoSuchClass'));
             (() => {
                 jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration1, options);
             }).should.throw(TypeNotFoundException, /NoSuchClass/);
@@ -674,9 +674,9 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockRelationship1 = sinon.createStubInstance(Relationship);
-            mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockRelationship1);
+            mockFactory.newRelationship.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockRelationship1);
             let mockRelationship2 = sinon.createStubInstance(Relationship);
-            mockFactory.newRelationship.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockRelationship2);
+            mockFactory.newRelationship.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset2').returns(mockRelationship2);
             let relationships = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
             relationships.should.have.lengthOf(2);
             relationships[0].should.be.an.instanceOf(Relationship);
@@ -686,10 +686,10 @@ describe('JSONPopulator', () => {
         it('should not create a new relationship from an array of objects if not permitted', () => {
             let options = {
                 jsonStack: new TypedStack([{
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }, {
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset2'
                 }]),
                 resourceStack: new TypedStack({}),
@@ -697,9 +697,9 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource1 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource1);
             let mockResource2 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset2').returns(mockResource2);
             (() => {
                 jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
             }).should.throw(/Invalid JSON data/);
@@ -709,10 +709,10 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack([{
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset1'
                 }, {
-                    $class: 'org.acme.MyAsset1',
+                    $class: 'org.acme@1.0.0.MyAsset1',
                     assetId: 'asset2'
                 }]),
                 resourceStack: new TypedStack({}),
@@ -720,9 +720,9 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             let mockResource1 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset1').returns(mockResource1);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset1').returns(mockResource1);
             let mockResource2 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme', 'MyAsset1', 'asset2').returns(mockResource2);
+            mockFactory.newResource.withArgs('org.acme@1.0.0', 'MyAsset1', 'asset2').returns(mockResource2);
             let subResources = jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
             subResources.should.have.lengthOf(2);
             subResources[0].should.be.an.instanceOf(Resource);
@@ -758,7 +758,7 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack([{
-                    $class: 'org.acme.NoSuchClass'
+                    $class: 'org.acme@1.0.0.NoSuchClass'
                 }]),
                 resourceStack: new TypedStack({}),
                 factory: mockFactory,
@@ -773,13 +773,13 @@ describe('JSONPopulator', () => {
             jsonPopulator = new JSONPopulator(true); // true to enable acceptResourcesForRelationships
             let options = {
                 jsonStack: new TypedStack([{
-                    $class: 'org.acme.NoSuchClass'
+                    $class: 'org.acme@1.0.0.NoSuchClass'
                 }]),
                 resourceStack: new TypedStack({}),
                 factory: mockFactory,
                 modelManager: modelManager
             };
-            sandbox.stub(modelManager, 'getType').withArgs('org.acme.NoSuchClass').throws(new TypeNotFoundException('org.acme.NoSuchClass'));
+            sandbox.stub(modelManager, 'getType').withArgs('org.acme@1.0.0.NoSuchClass').throws(new TypeNotFoundException('org.acme@1.0.0.NoSuchClass'));
             (() => {
                 jsonPopulator.visitRelationshipDeclaration(relationshipDeclaration2, options);
             }).should.throw(TypeNotFoundException, /NoSuchClass/);

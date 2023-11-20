@@ -14,7 +14,8 @@
             "namespace": "test"
         },
         {
-            "$class": "concerto.metamodel@1.0.0.ImportAll",
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "Foo",
             "namespace": "test",
             "uri": "github://foo"
         },
@@ -29,7 +30,8 @@
             "namespace": "test@1.0.0"
         },
         {
-            "$class": "concerto.metamodel@1.0.0.ImportAll",
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "Foo",
             "namespace": "test@1.0.0",
             "uri": "github://foo"
         }

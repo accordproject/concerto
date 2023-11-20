@@ -1,0 +1,5 @@
+namespace org.accordproject@1.0.0
+
+concept Thing {
+    o String name
+}

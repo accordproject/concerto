@@ -1,0 +1,19 @@
+{
+    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+    "name" : "invalid-command",
+    "version": "1.0.0",
+    "commands" : [
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "INVALID",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Test"
+            }
+        }
+    ]
+}

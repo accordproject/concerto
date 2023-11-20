@@ -16,10 +16,10 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const Field = require('../../lib/introspect/field');
-const ModelFile = require('../../lib/introspect/modelfile');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
+const Field = require('../../src/introspect/field');
+const ModelFile = require('../../src/introspect/modelfile');
 
 // eslint-disable-next-line no-unused-vars
 const should = require('chai').should();
@@ -171,5 +171,35 @@ describe('Scalars', () => {
             p.getScalarField().getType().should.equal('DateTime');
         });
 
+        it('should handle arrays correctly', () => {
+            mockScalarDeclaration.ast = {
+                $class: `${MetaModelNamespace}.StringScalar`,
+                name: 'MyScalar',
+            };
+            const p = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'property',
+                type: {
+                    name: 'MyScalar',
+                },
+                isArray: true
+            });
+            p.getScalarField().isArray().should.equal(true);
+        });
+
+        it('should handle non-arrays correctly', () => {
+            mockScalarDeclaration.ast = {
+                $class: `${MetaModelNamespace}.StringScalar`,
+                name: 'MyScalar',
+            };
+            const p = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.ObjectProperty`,
+                name: 'property',
+                type: {
+                    name: 'MyScalar',
+                },
+            });
+            p.getScalarField().isArray().should.equal(false);
+        });
     });
 });

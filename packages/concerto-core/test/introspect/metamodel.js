@@ -14,12 +14,12 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const ModelLoader = require('../../lib/modelloader');
+const ModelManager = require('../../src/modelmanager');
+const ModelLoader = require('../../src/modelloader');
 const {
     validateMetaModel,
     modelManagerFromMetaModel
-} = require('../../lib/introspect/metamodel');
+} = require('../../src/introspect/metamodel');
 const ParserUtil = require('./parserutility');
 
 const { Parser, Printer } = require('@accordproject/concerto-cto');
@@ -33,6 +33,7 @@ chai.use(require('chai-things'));
 
 describe('MetaModel (Person)', () => {
     const personModelPath = path.resolve(__dirname, '../data/model/person.cto');
+    const timeModelPath = path.resolve(__dirname, '../data/model/@models.accordproject.org.time@0.3.0.cto');
     const personModel = fs.readFileSync(personModelPath, 'utf8');
     const personMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/person.json'), 'utf8'));
     const personMetaModelResolved = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/personResolved.json'), 'utf8'));
@@ -43,38 +44,22 @@ describe('MetaModel (Person)', () => {
             mm1.should.deep.equal(personMetaModel);
         });
 
-        it('should convert and validate a CTO model to its metamodel', () => {
-            const mm1 = Parser.parse(personModel);
-            mm1.should.deep.equal(personMetaModel);
-        });
-
         it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
-            const modelManager = await ModelLoader.loadModelManager([personModelPath]);
+            const modelManager = await ModelLoader.loadModelManager([personModelPath,timeModelPath], { offline: true });
             const mm1 = Parser.parse(personModel);
             validateMetaModel(mm1);
             const mm1r = modelManager.resolveMetaModel(mm1);
             mm1r.should.deep.equal(personMetaModelResolved);
         });
 
-        it('should convert a ModelFile to its metamodel', () => {
-            const modelManager1 = new ModelManager();
+        it('should convert and validate a ModelFile to its metamodel', async () => {
+            const modelManager1 = await ModelLoader.loadModelManager([timeModelPath]);
             const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
             const mm1 = mf1.getAst();
             mm1.should.deep.equal(personMetaModel);
             const model2 = Printer.toCTO(mm1);
-            const modelManager2 = new ModelManager();
-            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
-            const mm2 = mf2.getAst();
-            mm2.should.deep.equal(personMetaModel);
-        });
-
-        it('should convert and validate a ModelFile to its metamodel', () => {
-            const modelManager1 = new ModelManager();
-            const mf1 = ParserUtil.newModelFile(modelManager1, personModel);
-            const mm1 = mf1.getAst();
-            mm1.should.deep.equal(personMetaModel);
-            const model2 = Printer.toCTO(mm1);
-            const modelManager2 = new ModelManager();
+            personModel.should.equal(model2+'\n');
+            const modelManager2 = await ModelLoader.loadModelManager([timeModelPath]);
             const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = mf2.getAst();
             mm2.should.deep.equal(personMetaModel);

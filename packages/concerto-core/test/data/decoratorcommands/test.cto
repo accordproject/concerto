@@ -9,4 +9,20 @@ concept Person {
     o String lastName
     o String bio
     o SSN ssn
+    o String address1
+    o String address2
+    o String city
+    o String country
+    o Integer zip
+    o Dictionary dictionary
+}
+
+map Dictionary {
+    o String 
+    o String
+}
+
+map Rolodex {
+    o String 
+    o String
 }

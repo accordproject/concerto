@@ -16,7 +16,7 @@ async function getModelFiles(
     aFileName: string,
     bFileName: string,
 ): Promise<[a: ModelFile, b: ModelFile]> {
-    const modelManager = new ModelManager({ strict: true });
+    const modelManager = new ModelManager();
     const a = await getModelFile(modelManager, aFileName);
     const b = await getModelFile(modelManager, bFileName);
     return [a, b];
@@ -41,22 +41,6 @@ test('should detect no changes between two identical files', async () => {
     expect(results.result).toBe(CompareResult.NONE);
 });
 
-test('should reject a non-strict modelManager, a', async () => {
-    const modelManager = new ModelManager({ strict: false });
-    const strictModelManager = new ModelManager({ strict: true });
-    const a = await getModelFile(modelManager, 'identical.cto');
-    const b = await getModelFile(strictModelManager, 'identical.cto');
-    expect(() => new Compare().compare(a, b)).toThrow('model file "org.accordproject.concerto.test@1.2.3" does not have strict versioned namespaces');
-});
-
-test('should reject a non-strict modelManager, b', async () => {
-    const modelManager = new ModelManager({ strict: true });
-    const strictModelManager = new ModelManager({ strict: false });
-    const a = await getModelFile(modelManager, 'identical.cto');
-    const b = await getModelFile(strictModelManager, 'identical.cto');
-    expect(() => new Compare().compare(a, b)).toThrow('model file "org.accordproject.concerto.test@1.2.3" does not have strict versioned namespaces');
-});
-
 test('should detect a change of namespace', async () => {
     const [a, b] = await getModelFiles('namespace-changed-a.cto', 'namespace-changed-b.cto');
     const results = new Compare().compare(a, b);
@@ -69,7 +53,7 @@ test('should detect a change of namespace', async () => {
     expect(results.result).toBe(CompareResult.ERROR);
 });
 
-['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map'].forEach(type => {
+['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map', 'scalar'].forEach(type => {
     test(`should detect a ${type} being added`, async () => {
         process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
         const [a, b] = await getModelFiles('empty.cto', `${type}-added.cto`);
@@ -207,7 +191,7 @@ test('should detect a relationship changing to a field', async () => {
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
-test('should detect a scalar changing to an array', async () => {
+test('should detect a property changing to an array', async () => {
     const [a, b] = await getModelFiles('scalar-to-array-a.cto', 'scalar-to-array-b.cto');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
@@ -219,7 +203,7 @@ test('should detect a scalar changing to an array', async () => {
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
-test('should detect an array changing to a scalar', async () => {
+test('should detect an array changing to a property', async () => {
     const [a, b] = await getModelFiles('scalar-to-array-b.cto', 'scalar-to-array-a.cto');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
@@ -256,6 +240,19 @@ test('should detect a map value type changing from x to y', async () => {
         })
     ]));
     expect(results.findings[0].message).toBe('The map value type was changed to "DateTime"');
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a scalar extends changing from x to y', async () => {
+    const [a, b] = await getModelFiles('scalar-added.cto', 'scalar-changed-extends.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-extends-changed',
+            message: 'The scalar extends was changed from "String" to "Integer"'
+        })
+    ]));
+    expect(results.findings[0].message).toBe('The scalar extends was changed from "String" to "Integer"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -476,6 +473,166 @@ test('should detect a string validator being changed on a property (incompatible
         expect.objectContaining({
             key: 'property-validator-changed',
             message: 'A string validator for the field "string" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a number validator being added to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-number-validators.cto', 'scalar-number-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-added',
+            message: 'A number validator was added to the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a number validator being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-number-validator-added.cto', 'scalar-number-validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-removed',
+            message: 'A number validator was removed from the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should not detect a number validator being changed on a scalar (compatible lower bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-number-validator-added.cto', 'scalar-number-validator-changed-lowercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a number validator being changed on a property (incompatible lower bound)', async () => {
+    const [a, b] = await getModelFiles('number-validator-added.cto', 'number-validator-changed-lowerincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-changed',
+            message: 'A number validator for the field "number" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not detect a number validator being changed on a scalar (compatible upper bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-number-validator-added.cto', 'scalar-number-validator-changed-uppercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a number validator being changed on a property (incompatible upper bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-number-validator-added.cto', 'scalar-number-validator-changed-upperincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-changed',
+            message: 'A number validator for the scalar "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string validator being added to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validators.cto', 'scalar-string-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-added',
+            message: 'A string validator was added to the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string validator being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-added.cto', 'scalar-string-validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-removed',
+            message: 'A string validator was removed from the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a string validator being changed on a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-added.cto', 'scalar-string-validator-changed.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-changed',
+            message: 'A string validator for the scalar "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string length validator being added to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validators.cto', 'scalar-string-validator-length-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-added',
+            message: 'A string validator was added to the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a string length validator being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-length-added.cto', 'scalar-string-validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-removed',
+            message: 'A string validator was removed from the scalar "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should not detect a string length validator being changed on a property (compatible minLength bound)', async () => {
+    const [a, b] = await getModelFiles('string-validator-length-added.cto', 'string-validator-length-changed-lowercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a string length validator being changed on a scalar (incompatible minLength bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-length-added.cto', 'scalar-string-validator-length-changed-lowerincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-changed',
+            message: 'A string validator for the scalar "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not detect a string validator being changed on a scalar (compatible maxLength bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-length-added.cto', 'scalar-string-validator-length-changed-uppercompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should detect a string validator being changed on a scalar (incompatible maxLength bound)', async () => {
+    const [a, b] = await getModelFiles('scalar-string-validator-length-added.cto', 'scalar-string-validator-length-changed-upperincompat.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-validator-changed',
+            message: 'A string validator for the scalar "Thing" was changed and is no longer compatible'
         })
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);

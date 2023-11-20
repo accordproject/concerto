@@ -21,7 +21,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Vocabulary } = require('..');
+const { Vocabulary } = require('../src');
 
 describe('Vocabulary', () => {
 
@@ -62,7 +62,7 @@ describe('Vocabulary', () => {
         const voc = {
             declarations: [],
             locale: 'en_US',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
     });
@@ -72,7 +72,7 @@ describe('Vocabulary', () => {
         const voc = {
             declarations: [],
             locale: 'en-US',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
     });
@@ -82,7 +82,7 @@ describe('Vocabulary', () => {
         const obj = {
             declarations: [],
             locale: 'en-us',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         const voc = new Vocabulary(vocabularyManager, obj);
         voc.should.not.be.null;
@@ -93,7 +93,7 @@ describe('Vocabulary', () => {
         const obj = {
             declarations: [],
             locale: 'en',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         const voc = new Vocabulary(vocabularyManager, obj);
         const json = voc.toJSON();

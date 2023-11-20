@@ -1,0 +1,46 @@
+namespace test@1.0.0
+@deco
+enum Dummy {
+  @one
+  o One
+}
+@scc
+scalar SSN extends String default="000-00-0000"
+
+@M1
+participant participantName identified by participantKey {
+  @M3
+  o String participantKey
+}
+
+@Dummy("term1",2)
+asset assetName identified by assetKey {
+    o String assetKey
+}
+
+map mapName {
+    @deco(1)
+    o String
+    o String
+}
+
+@Term("Person Class")
+@Editable
+concept Person {
+    @Term("HI")
+    @Custom
+    @Form("inputType", "text")
+    @New
+    o String firstName
+    @Form("inputType", "text")
+    @New
+    o String lastName
+    @Term("some")
+    @Term_cus("con")
+    @Form("inputType", "textArea")
+    @New
+    o String bio
+    @Form("inputType", "text")
+    @New
+    o String ssn
+}
