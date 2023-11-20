@@ -348,7 +348,7 @@ describe('ResourceValidator', function () {
 
     describe('#visitMapDeclaration', function() {
         it('should validate map', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 'Ipsum']]);
+            const map = new Map([['Lorem', 'Ipsum']]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
@@ -356,7 +356,7 @@ describe('ResourceValidator', function () {
         });
 
         it('should not validate map with bad value', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 3]]);
+            const map = new Map([['Lorem', 3]]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
@@ -367,14 +367,14 @@ describe('ResourceValidator', function () {
         });
 
         it('should not validate map with bad key', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], [1, 'Ipsum']]);
+            const map = new Map([[1, 'Ipsum']]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'1\' instead');
+            }).should.throw('Model violation in the "TEST" instance. Class "org.acme.map@1.0.0.PhoneBook" has the value of "[object Map]". Expected Type of String but found \'1\' instead');
         });
     });
 

@@ -140,7 +140,6 @@ describe('Concept', function () {
                 invCount:10,
                 invType:'NEWBATCH',
                 dictionary: {
-                    $class: 'org.acme.biznet@1.0.0.Dictionary',
                     key1: 'value1',
                     key2: 'value2',
                 }
