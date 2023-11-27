@@ -205,7 +205,7 @@ class ClassDeclaration extends Declaration {
             if (
                 this.superType === this.name &&
                 ![
-                    'Concept', 'Asset', 'Participant', 'Transaction', 'Event'
+                    'Asset', 'Concept', 'Event', 'Participant', 'Transaction',
                 ].includes(this.superType)
             ) {
                 let formatter = Globalize('en').messageFormatter('classdeclaration-validate-selfextending');
