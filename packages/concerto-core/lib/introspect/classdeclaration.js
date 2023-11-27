@@ -200,6 +200,19 @@ class ClassDeclaration extends Declaration {
 
         // if we have a super type make sure it exists
         if (this.superType !== null) {
+            // and make sure that the class isn't extending itself
+            // (an exemption is made for the core classes)
+            if (
+                this.superType === this.name &&
+                ![
+                    'Concept', 'Asset', 'Participant', 'Transaction', 'Event'
+                ].includes(this.superType)
+            ) {
+                let formatter = Globalize('en').messageFormatter('classdeclaration-validate-selfextending');
+                throw new IllegalModelException(formatter({
+                    'class': this.name,
+                }), this.modelFile, this.ast.location);
+            }
             this._resolveSuperType();
         }
 
