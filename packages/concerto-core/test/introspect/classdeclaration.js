@@ -20,7 +20,6 @@ const IllegalModelException = require('../../lib/introspect/illegalmodelexceptio
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
 const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
 const ConceptDeclaration = require('../../lib/introspect/conceptdeclaration');
 const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
 const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
