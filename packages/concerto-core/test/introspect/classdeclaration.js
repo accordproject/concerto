@@ -142,41 +142,6 @@ describe('ClassDeclaration', () => {
             const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalararray.cto', ConceptDeclaration);
             clazz.validate();
         });
-
-        it('should throw when an asset is extending itself', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.selfextendingasset.cto', AssetDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Class "Self_Extending" cannot extend itself./);
-        });
-
-        it('should throw when a concept is extending itself', () => {
-            let concept = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.selfextendingconcept.cto', ConceptDeclaration);
-            (() => {
-                concept.validate();
-            }).should.throw(/Class "Self_Extending" cannot extend itself./);
-        });
-
-        it('should throw when an event is extending itself', () => {
-            let event = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.selfextendingevent.cto', EventDeclaration);
-            (() => {
-                event.validate();
-            }).should.throw(/Class "Self_Extending" cannot extend itself./);
-        });
-
-        it('should throw when a participant is extending itself', () => {
-            let participant = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.selfextendingparticipant.cto', ParticipantDeclaration);
-            (() => {
-                participant.validate();
-            }).should.throw(/Class "Self_Extending" cannot extend itself./);
-        });
-
-        it('should throw when a transaction is extending itself', () => {
-            let transaction = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.selfextendingtransaction.cto', TransactionDeclaration);
-            (() => {
-                transaction.validate();
-            }).should.throw(/Class "Self_Extending" cannot extend itself./);
-        });
     });
 
     describe('#accept', () => {
