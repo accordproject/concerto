@@ -67,6 +67,23 @@ describe('ClassDeclaration', () => {
             }).should.throw(/Invalid class name '2nd'/);
         });
 
+        it('should throw when ast properties is null', () => {
+            (() => {
+                new ClassDeclaration(modelFile, {
+                    name: 'aconcept',
+                    properties: null,
+                });
+            }).should.throw(/Properties of Class/);
+        });
+
+        it('should throw when ast properties is undefined', () => {
+            (() => {
+                new ClassDeclaration(modelFile, {
+                    name: 'aconcept',
+                    properties: undefined,
+                });
+            }).should.throw(/Properties of Class/);
+        });
     });
 
     describe('#validate', () => {
