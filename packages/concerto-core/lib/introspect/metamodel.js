@@ -34,6 +34,23 @@ function newMetaModelManager() {
         'concerto.metamodel',
         true
     );
+
+    // Extend the metamodel to include length and key count validation
+    const lengthValidation = {
+        'concerto.base.Validator': {
+            'length': 'Integer'
+        }
+    };
+
+    const keyCountValidation = {
+        'concerto.base.Validator': {
+            'keyCount': 'Integer'
+        }
+    };
+
+    // Merge the existing metamodel with length and key count validation
+    Object.assign(mf.getNamespace(), lengthValidation, keyCountValidation);
+
     metaModelManager.addModelFile(mf, MetaModelUtil.metaModelCto, 'concerto.metamodel');
     return metaModelManager;
 }
