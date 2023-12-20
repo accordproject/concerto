@@ -14,7 +14,7 @@
 
 'use strict';
 
-const StringValidationException = require('./stringvalidatorexception');
+const StringValidatorException = require('./stringvalidatorexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -52,7 +52,7 @@ class Validator {
      * @throws {Error} throws an error to report the message
      */
     reportError(id, msg, errorType='ValidatorError') {
-        throw new StringValidationException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg ,errorType);
+        throw new StringValidatorException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg ,errorType);
     }
 
     /**

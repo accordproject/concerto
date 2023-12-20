@@ -15,15 +15,15 @@
 'use strict';
 
 /**
-* Class representing an validation error related to anykind of string validatoin in introspect
+* Class representing an validation error related to anykind of string validation in introspect
 * @class
 * @memberof module:concerto-core
 */
-class StringValidationException extends Error {
+class StringValidatorException extends Error {
     /**
      * Create error related to string validation.
      * @param {string} errormessage - The exception message.
-     * @param {string} errorType - conditional parameter which denoted the kind of string
+     * @param {string} errorType - conditional parameter which  denotes/represents the kind of string
      * error , defaults to StringValidationError if not provided
      */
     constructor(errormessage,errorType) {
@@ -34,5 +34,5 @@ class StringValidationException extends Error {
 
 }
 
-module.exports = StringValidationException;
+module.exports = StringValidatorException;
 

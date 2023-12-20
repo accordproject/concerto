@@ -24,8 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.13.3 {b286dfdeeb654d25be7c5f9cc6305e38} 2023-11-07
+Version 3.13.3 {1df986a8e13fe0d984069b9637c0a1c4} 2023-11-07
 - Added DCS and vocabulary extraction support for decoratorManager
+- Added StringValidatorException class to support error type 
 
 Version 3.13.2 {dccc690753912cf87e7ceec56d949058} 2023-10-18
 - Add getNamespace method to key type and value type of maps
