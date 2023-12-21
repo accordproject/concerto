@@ -82,6 +82,13 @@ class ClassDeclaration extends Declaration {
             }
         }
 
+        if (!Array.isArray(this.ast.properties)) {
+            let formatter = Globalize.messageFormatter('classdeclaration-validate-undefined-properties');
+            throw new IllegalModelException(formatter({
+                'class':this.name
+            }), this.modelFile, this.ast.location);
+        }
+
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
