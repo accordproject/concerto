@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { ErrorCodes } = require('@accordproject/concerto-util');
 const { isNull } = require('../util');
 const Validator = require('./validator');
 
@@ -70,7 +71,7 @@ class StringValidator extends Validator{
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
             catch(exception) {
-                this.reportError(field.getName(), exception.message,'RegexValidatorException');
+                this.reportError(field.getName(), exception.message,ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }
     }

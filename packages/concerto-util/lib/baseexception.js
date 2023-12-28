@@ -14,7 +14,10 @@
 
 'use strict';
 
+
+
 const packageJson = require('../package.json');
+const ErrorCodes  = require('./errorcodes');
 
 /**
 * A base class for all Concerto exceptions
@@ -27,12 +30,14 @@ class BaseException extends Error {
      * Create the BaseException.
      * @param {string} message - The exception message.
      * @param {string} component - The optional component which throws this error.
+     * @param {string} errorType - The optional error code regarding the error
      */
-    constructor(message, component) {
+    constructor(message, component, errorType) {
         super(message);
         this.component = component || packageJson.name;
         this.name = this.constructor.name;
         this.message = message;
+        this.errorType = errorType || ErrorCodes.DEFAULT_BASE_EXCEPTION;
         if (typeof Error.captureStackTrace === 'function') {
             Error.captureStackTrace(this, this.constructor);
         }

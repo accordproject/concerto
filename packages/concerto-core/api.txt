@@ -280,9 +280,6 @@ class ScalarDeclaration extends Declaration {
    + boolean isEvent() 
    + boolean isConcept() 
 }
-class StringValidatorException extends Error {
-   + void constructor(string,string) 
-}
 class TransactionDeclaration extends IdentifiedDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
    + string declarationKind() 
