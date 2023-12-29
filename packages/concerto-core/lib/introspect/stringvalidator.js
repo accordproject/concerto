@@ -71,7 +71,7 @@ class StringValidator extends Validator{
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
             catch(exception) {
-                this.reportError(field.getName(), exception.message,ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
+                this.reportError(field.getName(), exception.message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }
     }

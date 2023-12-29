@@ -51,7 +51,7 @@ class Validator {
      * @throws {Error} throws an error to report the message
      */
     reportError(id, msg, errorType=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION) {
-        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg ,undefined,errorType);
+        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
     }
 
     /**
