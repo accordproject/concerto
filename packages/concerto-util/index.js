@@ -52,6 +52,9 @@ const Label = require('./lib/label');
 // Identifiers
 const Identifiers = require('./lib/identifiers');
 
+//errorcodes
+const ErrorCodes = require('./lib/errorcodes');
+
 module.exports = {
     BaseException,
     BaseFileException,
@@ -67,5 +70,6 @@ module.exports = {
     Logger,
     TypedStack,
     Label,
-    Identifiers
+    Identifiers,
+    ErrorCodes
 };

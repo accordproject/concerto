@@ -20,9 +20,10 @@ declare class Validator {
     /**
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
+     * @param {string} errorType the type of error
      * @throws {Error} throws an error to report the message
      */
-    reportError(id: string, msg: string): void;
+    reportError(id: string, msg: string, errorType?: string): void;
     /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
