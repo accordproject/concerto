@@ -344,6 +344,6 @@ class Serializer {
    + Resource fromJSON(Object,Object?,boolean,boolean,number?) 
 }
 class TypeNotFoundException extends BaseException {
-   + void constructor(string,string|,string) 
+   + void constructor(string,string|,string,string) 
    + string getTypeName() 
 }
