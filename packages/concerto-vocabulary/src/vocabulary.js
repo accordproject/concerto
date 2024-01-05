@@ -146,7 +146,7 @@ class Vocabulary {
     validate(modelFile) {
         const getOwnProperties = (declaration) => {
             // ensures we have a valid return, even for scalars and map-declarations
-            if(declaration.isMapDeclaration()) {
+            if(declaration.isMap()) {
                 return [declaration.getKey(), declaration.getValue()];
             } else {
                 return declaration.getOwnProperties?.() ? declaration.getOwnProperties?.() : [];
@@ -154,9 +154,9 @@ class Vocabulary {
         };
 
         const getPropertyName = (property) => {
-            if(property.isKey?.()) {
+            if(property.isMapKey?.()) {
                 return 'KEY';
-            } else if(property.isValue?.()) {
+            } else if(property.isMapValue?.()) {
                 return 'VALUE';
             } else {
                 return property.getName();
@@ -166,7 +166,7 @@ class Vocabulary {
         const checkPropertyExists = (k, p) => {
             const declaration = modelFile.getLocalType(Object.keys(k)[0]);
             const property = Object.keys(p)[0];
-            if(declaration.isMapDeclaration()) {
+            if(declaration.isMap()) {
                 if (property === 'KEY') {
                     return true;
                 } else if(property === 'VALUE') {

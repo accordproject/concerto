@@ -31,7 +31,7 @@ test('should throw for unknown thing', () => {
 });
 
 test('should throw for unknown class property type', () => {
-    expect(() => getPropertyType(property)).toThrow('unknown property type "[object Object]');
+    expect(() => getPropertyType(property)).toThrow('unknown property type "BooleanProperty {id=foo@1.0.0.Unknown.myProp}"');
 });
 
 test('should throw for unknown validator type', () => {
