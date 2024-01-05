@@ -21,18 +21,18 @@ const mapDeclarationTypeChanged: ComparerFactory = (context) => ({
             return;
         }
 
-        if(a.getKey().getType() !== b.getKey().getType()) {
+        if(a.getKey().getMapKeyType() !== b.getKey().getMapKeyType()) {
             context.report({
                 key: 'map-key-type-changed',
-                message: `The map key type was changed to "${b.getKey().getType()}"`,
+                message: `The map key type was changed to "${b.getKey().getMapKeyType()}"`,
                 element: b
             });
         }
 
-        if(a.getValue().getType() !== b.getValue().getType()) {
+        if(a.getValue().getMapValueType() !== b.getValue().getMapValueType()) {
             context.report({
                 key: 'map-value-type-changed',
-                message: `The map value type was changed to "${b.getValue().getType()}"`,
+                message: `The map value type was changed to "${b.getValue().getMapValueType()}"`,
                 element: b
             });
         }
