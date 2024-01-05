@@ -14,11 +14,11 @@
 
 'use strict';
 
-const Decorated = require('./decorated');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const IllegalModelException = require('./illegalmodelexception');
+const Field = require('./field');
 const ModelUtil = require('../modelutil');
 
+const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -29,7 +29,7 @@ if (global === undefined) {
 }
 
 /**
- * MapValueType defines a Value type of MapDeclaration.
+ * MapValueType defines a value type of an MapDeclaration.
  *
  * @extends Decorated
  * @see See {@link Decorated}
@@ -39,26 +39,15 @@ if (global === undefined) {
 class MapValueType extends Decorated {
     /**
      * Create an MapValueType.
-     * @param {MapDeclaration} parent - The owner of this property
+     * @param {MapDeclaration} map - The map for the map value
      * @param {Object} ast - The AST created by the parser
+     * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        super(parent.getModelFile(), ast);
-        this.parent = parent;
-        this.modelFile = parent.getModelFile();
+    constructor(map, ast) {
+        super(map.getModelFile(), ast);
+        this.map = map;
         this.process();
-    }
-
-    /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        super.process();
-        this.processType(this.ast);
     }
 
     /**
@@ -68,131 +57,36 @@ class MapValueType extends Decorated {
      * @protected
      */
     validate() {
-        if (!ModelUtil.isPrimitiveType(this.type)) {
-
-            const decl = this.modelFile.getType(this.ast.type.name);
-
-            // All declarations, with the exception of MapDeclarations, are valid Values.
-            if(decl.isMapDeclaration?.()) {
-                throw new IllegalModelException(
-                    `MapDeclaration as Map Type Value is not supported: ${this.type}`
-                );
-            }
+        let mapvalueType = this.getMapValueType();
+        if (!ModelUtil.isPrimitiveType(mapvalueType)) {
+            this.getModelFile().resolveType( 'map value ' + this.map.getFullyQualifiedName(), mapvalueType);
         }
     }
 
     /**
-     * Sets the Type name for the Map Value
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast) {
-        switch(ast.$class) {
-        case `${MetaModelNamespace}.ObjectMapValueType`:
-
-            // ObjectMapValueType must have TypeIdentifier.
-            if (!('type' in ast)) {
-                throw new IllegalModelException(`ObjectMapValueType must contain property 'type', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // ObjectMapValueType TypeIdentifier must be properly formed.
-            if (!('$class' in ast.type) || !('name' in ast.type)) {
-                throw new IllegalModelException(`ObjectMapValueType type must contain property '$class' and property 'name', for MapDeclaration named ${this.parent.name}`);
-            }
-
-            // And the $class must be valid.
-            if (ast.type.$class !== 'concerto.metamodel@1.0.0.TypeIdentifier') {
-                throw new IllegalModelException(`ObjectMapValueType type $class must be of TypeIdentifier for MapDeclaration named ${this.parent.name}`);
-            }
-
-            this.type = String(this.ast.type.name); // cast for correct type resolution in generated types.
-
-            break;
-        case `${MetaModelNamespace}.BooleanMapValueType`:
-            this.type = 'Boolean';
-            break;
-        case `${MetaModelNamespace}.DateTimeMapValueType`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.StringMapValueType`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.IntegerMapValueType`:
-            this.type = 'Integer';
-            break;
-        case `${MetaModelNamespace}.LongMapValueType`:
-            this.type = 'Long';
-            break;
-        case `${MetaModelNamespace}.DoubleMapValueType`:
-            this.type = 'Double';
-            break;
-        default:
-            throw new Error(`Unrecognized map value type ${ast.$class}`);
-        }
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.parent.getModelFile();
-    }
-
-    /**
-    * Returns the owner of this property
+    * Returns the map for the map value
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
     getParent() {
-        return this.parent;
+        return this.map;
     }
 
     /**
-     * Returns the Type of the MapValue. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
+     * Converts the MapValueType to a synthetic field
+     * @returns {Field} the synthetic field for the map value
      */
-    getType() {
-        return this.type;
-    }
-
-    /**
-     * Returns the string representation of this class
-     * @return {String} the string representation of the class
-     */
-    toString() {
-        return 'MapValueType {id=' + this.getType() + '}';
-    }
-
-    /**
-     * Returns true if this class is the definition of a Map Key.
-     *
-     * @return {boolean} true if the class is a Map Key
-     */
-    isKey() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a Map Value.
-     *
-     * @return {boolean} true if the class is a Map Value
-     */
-    isValue() {
-        return true;
-    }
-
-    /**
-     * Return the namespace of this map value.
-     * @return {string} namespace - a namespace.
-     */
-    getNamespace() {
-        return this.modelFile.getNamespace();
+    toField() {
+        const mapValueType = this.getMapValueType();
+        const mapValueFieldType = ModelUtil.isPrimitiveType(mapValueType) ? mapValueType : 'Object';
+        // create a synthetic field for the map value
+        const mapKeyField = new Field(this.getParent(), {
+            $class: `${MetaModelNamespace}.${mapValueFieldType}Property`,
+            name: `${this.getParent().getName()}_map_value`,
+            type: ModelUtil.isPrimitiveType(mapValueType) ? mapValueType
+                : {name: mapValueType}
+        });
+        return mapKeyField;
     }
 }
 

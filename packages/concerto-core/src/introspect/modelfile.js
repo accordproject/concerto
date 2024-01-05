@@ -38,6 +38,7 @@ if (global === undefined) {
     const ClassDeclaration = require('./classdeclaration');
     const ModelManager = require('../modelmanager');
     const Declaration = require('./declaration');
+    const Decorator = require('./decorator');
 }
 /* eslint-enable no-unused-vars */
 
@@ -62,6 +63,7 @@ class ModelFile {
     constructor(modelManager, ast, definitions, fileName) {
         this.modelManager = modelManager;
         this.external = false;
+        this.decorated = null;
         this.declarations = [];
         this.localTypes = null;
         this.imports = [];
@@ -92,8 +94,6 @@ class ModelFile {
             this.external = fileName.startsWith('@');
         }
 
-        // Set up the decorators.
-        this.decorators = Decorated.processDecorators(this.ast, modelManager);
         // Populate from the AST
         this.fromAst(this.ast);
         // Check version compatibility
@@ -106,6 +106,24 @@ class ModelFile {
             let localType = this.getNamespace() + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
+    }
+
+    /**
+     * Returns the decorators for this model file.
+     *
+     * @return {Decorator[]} the decorators for the model file
+     */
+    getDecorators() {
+        return this.decorated ? this.decorated.getDecorators() : [];
+    }
+
+    /**
+     * Returns the decorator for this model file with a given name.
+     * @param {string} name  - the name of the decorator
+     * @return {Decorator} the decorator attached to this model file with the given name, or null if it does not exist.
+     */
+    getDecorator(name) {
+        return this.decorated ? this.decorated.getDecorator(name) : null;
     }
 
     /**
@@ -267,6 +285,11 @@ class ModelFile {
             let classDeclaration = this.declarations[n];
             classDeclaration.validate();
         }
+
+        // Set up the decorators, we fake a name for the model element
+        this.decorated = new Decorated(this, this.ast);
+        this.decorated.process();
+        this.decorated.validate();
     }
 
     /**
@@ -358,7 +381,6 @@ class ModelFile {
      * For primitive types the type name is returned.
      * @param {string} type - a FQN or short type name
      * @return {string | ClassDeclaration} the class declaration for the type or null.
-     * @private
      */
     getType(type) {
         // is the type a primitive?
@@ -588,15 +610,22 @@ class ModelFile {
 
     /**
      * Get the instances of a given type in this ModelFile
-     * @param {Function} type - the type of the declaration
+     * @param {Function|string} type - the type of the declaration
+     * (either a short metamodel name or a constructor function for a type)
      * @return {Object[]} the ClassDeclaration defined in the model file
      */
     getDeclarations(type) {
         let result = [];
         for(let n=0; n < this.declarations.length; n++) {
             let declaration = this.declarations[n];
-            if(declaration instanceof type) {
-                result.push(declaration);
+            if(type instanceof Function) {
+                if(declaration instanceof type) {
+                    result.push(declaration);
+                }
+            } else {
+                if(declaration.declarationKind() === type) {
+                    result.push(declaration);
+                }
             }
         }
 

@@ -69,7 +69,7 @@ class RelationshipProperty extends Property {
             // we first try to get the type from our own model file
             // because during validate we have not yet been added to the model manager
             if(namespace === ModelUtil.getNamespace(this.getFullyQualifiedTypeName())) {
-                classDeclaration = this.getParent().getModelFile().getType(this.getType());
+                classDeclaration = this.getParent().getModelFile().getType(this.getPropertyType());
             }
             else {
                 // otherwise we have to use the modelmanager to try to load

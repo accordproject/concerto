@@ -95,7 +95,7 @@ describe('JSONPopulator', () => {
         it('should throw an error for an unrecognized type', () => {
             (() => {
                 jsonPopulator.visit(3.142, {});
-            }).should.throw(/Unrecognised/);
+            }).should.throw(/Model element is invalid/);
         });
 
     });

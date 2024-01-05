@@ -34,7 +34,7 @@ if (global === undefined) {
  */
 class EnumValue extends Property {
     /**
-     * Create a EnumValueDeclaration.
+     * Create a EnumValue.
      * @param {ClassDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}

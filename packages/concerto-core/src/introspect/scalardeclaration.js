@@ -17,7 +17,6 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Declaration = require('./declaration');
-const IllegalModelException = require('./illegalmodelexception');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 
@@ -86,33 +85,6 @@ class ScalarDeclaration extends Declaration {
             this.defaultValue = this.ast.defaultValue;
         } else {
             this.defaultValue = null;
-        }
-    }
-
-    /**
-     * Semantic validation of the structure of this class. Subclasses should
-     * override this method to impose additional semantic constraints on the
-     * contents/relations of fields.
-     *
-     * @throws {IllegalModelException}
-     * @protected
-     */
-    validate() {
-        super.validate();
-
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
         }
     }
 

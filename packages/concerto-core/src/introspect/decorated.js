@@ -30,7 +30,6 @@ if (global === undefined) {
  * Decorated defines a model element that may have decorators attached.
  *
  * @private
- * @abstract
  * @class
  * @memberof module:concerto-core
  */
@@ -44,35 +43,7 @@ class Decorated extends ModelElement {
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-    }
-
-    /**
-     * Extracts the decorators applied to an AST.
-     * @param {*} ast - the AST created by the parser
-     * @param {ModelManager} modelManager - the ModelManager that supplies decorator factories
-     * @returns {Decorator[]} the decorators
-     */
-    static processDecorators(ast, modelManager) {
-        const decorators = [];
-        if(ast.decorators) {
-            for(let n=0; n < ast.decorators.length; n++ ) {
-                let thing = ast.decorators[n];
-                let factories = modelManager.getDecoratorFactories();
-                let decorator;
-                for (let factory of factories) {
-                    decorator = factory.newDecorator(this, thing);
-                    if (decorator) {
-                        break;
-                    }
-                }
-                if (!decorator) {
-                    decorator = new Decorator(this, thing);
-                }
-                decorators.push(decorator);
-            }
-        }
-
-        return decorators;
+        this.decorators = [];
     }
 
     /**
@@ -82,7 +53,25 @@ class Decorated extends ModelElement {
      * @private
      */
     process() {
-        this.decorators = Decorated.processDecorators(this.ast, this.getModelFile().getModelManager());
+        if(this.ast.decorators) {
+            this.decorators = [];
+            const modelManager = this.modelFile.getModelManager();
+            for(let n=0; n < this.ast.decorators.length; n++ ) {
+                let thing = this.ast.decorators[n];
+                let factories = modelManager.getDecoratorFactories();
+                let decorator;
+                for (let factory of factories) {
+                    decorator = factory.newDecorator(this.modelFile, this, thing);
+                    if (decorator) {
+                        break;
+                    }
+                }
+                if (!decorator) {
+                    decorator = new Decorator(this.modelFile, this, thing);
+                }
+                this.decorators.push(decorator);
+            }
+        }
     }
 
     /**
@@ -90,11 +79,10 @@ class Decorated extends ModelElement {
      * override this method to impose additional semantic constraints on the
      * contents/relations of fields.
      *
-     * @param {...*} args the validation arguments
      * @throws {IllegalModelException}
      * @protected
      */
-    validate(...args) {
+    validate() {
         if (this.decorators && this.decorators.length > 0) {
             for(let n=0; n < this.decorators.length; n++) {
                 this.decorators[n].validate();

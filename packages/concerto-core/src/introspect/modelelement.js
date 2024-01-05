@@ -59,7 +59,7 @@ class ModelElement {
             );
         }
         const { name } = ModelUtil.parseNamespace(MetaModelNamespace);
-        if(!ast.$class.startsWith(name)) {
+        if (!ast.$class.startsWith(name)) {
             throw new Error(
                 `Invalid ModelElement; must have a $class attribute that is in the metamodel namespace. Found ${name}.`
             );
@@ -74,18 +74,14 @@ class ModelElement {
             );
         }
 
-        // if(!this.ast.name) {
-        //     throw new Error('No name for type ' + JSON.stringify(this.ast));
-        // }
-
-        if(this.ast.name) {
+        if (this.ast.name) {
             this.name = this.ast.name;
             this.fqn = ModelUtil.getFullyQualifiedName(
                 this.modelFile.getNamespace(),
                 this.name
             );
-        }
-        else {
+        } else {
+            // anonymous model elements include: model file, map key and map value
             this.name = null;
             this.fqn = null;
         }
@@ -175,7 +171,7 @@ class ModelElement {
 
     /**
      * Returns true if this model element is the definition of a class declaration,
-     * one of: concept, enum, asset, participant, event, transaction, scalar.
+     * one of: concept, enum, asset, participant, event, transaction, scalar, map.
      * @return {boolean} true if this is an instance of a declaration
      */
     isDeclaration() {
@@ -216,6 +212,72 @@ class ModelElement {
      */
     isAsset() {
         return this.type === `${MetaModelNamespace}.AssetDeclaration`;
+    }
+
+    /**
+     * Returns true if this model element is a map key.
+     *
+     * @return {boolean} true if the model element is a map key
+     */
+    isMapKey() {
+        return this.declarationKind().endsWith('MapKeyType');
+    }
+
+    /**
+     * Returns true if this model element is a map value.
+     *
+     * @return {boolean} true if the model element is a map value
+     */
+    isMapValue() {
+        return this.declarationKind().endsWith('MapValueType');
+    }
+
+    /**
+     * Gets the type of a map key
+     * @returns {string} the type of the map key
+     */
+    getMapKeyType() {
+        if (!this.isMapKey()) {
+            throw new Error(`${this.getMetaType()} is not a map key. AST ${JSON.stringify(this.ast, null, 2)}`);
+        }
+        switch (this.getMetaType()) {
+        case `${MetaModelNamespace}.DateTimeMapKeyType`:
+            return 'DateTime';
+        case `${MetaModelNamespace}.StringMapKeyType`:
+            return 'String';
+        case `${MetaModelNamespace}.ObjectMapKeyType`:
+            return String(this.ast.type.name);
+        default:
+            throw new Error(`Unrecognized map key type: ${this.getMetaType()}`);
+        }
+    }
+
+    /**
+     * Gets the type of a map value
+     * @returns {string} the type of the map value
+     */
+    getMapValueType() {
+        if (!this.isMapValue()) {
+            throw new Error(`${this.getMetaType()} is not a map value. AST ${JSON.stringify(this.ast, null, 2)}`);
+        }
+        switch (this.getMetaType()) {
+        case `${MetaModelNamespace}.BooleanMapValueType`:
+            return 'Boolean';
+        case `${MetaModelNamespace}.DateTimeMapValueType`:
+            return 'DateTime';
+        case `${MetaModelNamespace}.StringMapValueType`:
+            return 'String';
+        case `${MetaModelNamespace}.IntegerMapValueType`:
+            return 'Integer';
+        case `${MetaModelNamespace}.LongMapValueType`:
+            return 'Long';
+        case `${MetaModelNamespace}.DoubleMapValueType`:
+            return 'Double';
+        case `${MetaModelNamespace}.ObjectMapValueType`:
+            return String(this.ast.type.name);
+        default:
+            throw new Error(`Unrecognized map value type: ${this.getMetaType()}`);
+        }
     }
 
     /**
@@ -315,6 +377,14 @@ class ModelElement {
      */
     isDecorator() {
         return this.declarationKind() === 'Decorator';
+    }
+
+    /**
+     * Returns the string representation of this model element
+     * @return {String} the string representation of the model element
+     */
+    toString() {
+        return `${this.declarationKind()} {id=${this.getFullyQualifiedName()}}`;
     }
 }
 

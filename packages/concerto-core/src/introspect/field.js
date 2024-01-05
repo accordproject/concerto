@@ -147,7 +147,7 @@ class Field extends Property {
 
     /**
      * Unboxes a field that references a scalar type to an
-     * underlying Field definition.
+     * underlying primitive Field definition.
      * @throws {Error} throws an error if this field is not a scalar type.
      * @returns {Field} the primitive field for this scalar
      */

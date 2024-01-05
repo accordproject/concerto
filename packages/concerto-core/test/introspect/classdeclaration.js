@@ -47,9 +47,21 @@ describe('ClassDeclaration', () => {
 
     describe('#constructor', () => {
 
-        it('should throw if ast contains invalid type', () => {
+        it('should throw if ast does not contain $class', () => {
             (() => {
                 new ClassDeclaration(modelFile, {
+                    name: 'suchName',
+                    properties: [{
+                        $class: 'noSuchType'
+                    }]
+                });
+            }).should.throw(/Invalid ModelElement; must have a \$class/);
+        });
+
+        it('should throw if ast contains invalid property type', () => {
+            (() => {
+                new ClassDeclaration(modelFile, {
+                    $class: `${MetaModelNamespace}.ConceptDeclaration`,
                     name: 'suchName',
                     properties: [{
                         $class: 'noSuchType'
@@ -61,10 +73,11 @@ describe('ClassDeclaration', () => {
         it('should throw for a bad identifier', () => {
             (() => {
                 new ClassDeclaration(modelFile, {
+                    $class: `${MetaModelNamespace}.ConceptDeclaration`,
                     name: '2nd',
                     properties: []
                 });
-            }).should.throw(/Invalid class name '2nd'/);
+            }).should.throw(/Invalid model element name '2nd'/);
         });
 
     });
@@ -74,21 +87,21 @@ describe('ClassDeclaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeassetname.cto', AssetDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Duplicate declaration/);
         });
 
         it('should throw when transaction name is duplicted in a modelfile', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupetransactionname.cto', TransactionDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Duplicate declaration/);
         });
 
         it('should throw when participant name is duplicted in a modelfile', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeparticipantname.cto', ParticipantDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Duplicate declaration/);
         });
 
         it('should throw when an super type identifier is redeclared', () => {
@@ -110,14 +123,14 @@ describe('ClassDeclaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeconceptname.cto', ConceptDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Duplicate declaration/);
         });
 
         it('should throw when enum name is duplicted in a modelfile', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeenumname.cto', EnumDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Duplicate declaration/);
         });
 
         it('should throw when not abstract, not enum and not concept without an identifier', () => {
@@ -147,6 +160,7 @@ describe('ClassDeclaration', () => {
 
         it('should call the visitor', () => {
             let clz = new ClassDeclaration(modelFile, {
+                $class: `${MetaModelNamespace}.ConceptDeclaration`,
                 name: 'suchName',
                 properties: [
                 ]
@@ -165,13 +179,13 @@ describe('ClassDeclaration', () => {
 
         it('should return the class name', () => {
             let clz = new ClassDeclaration(modelFile, {
+                $class: `${MetaModelNamespace}.ConceptDeclaration`,
                 name: 'suchName',
-                $class: 'metamodel@1.0.0.MyType',
                 properties: [
                 ]
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing@1.0.0.suchName super=Concept enum=false abstract=false}');
+            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing@1.0.0.suchName super=Concept declarationKind=ConceptDeclaration abstract=false idField=null}');
         });
 
     });
@@ -255,6 +269,7 @@ describe('ClassDeclaration', () => {
 
         it('should return the fully qualified name if function is in a namespace', () => {
             let clz = new ClassDeclaration(modelFile, {
+                $class: `${MetaModelNamespace}.ConceptDeclaration`,
                 name: 'suchName',
                 properties: [
                 ]
@@ -297,8 +312,8 @@ describe('ClassDeclaration', () => {
         });
 
         it('toString',()=>{
-            const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent@1.0.0.Base super=Participant declarationKind=ParticipantDeclaration abstract=true id=id}');
+            const baseclass = modelManager.getType('com.testing.parent@1.0.0.Base');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent@1.0.0.Base super=Participant declarationKind=ParticipantDeclaration abstract=true idField=id}');
         });
     });
 

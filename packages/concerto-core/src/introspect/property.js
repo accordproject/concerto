@@ -24,7 +24,6 @@ const Decorated = require('./decorated');
 /* istanbul ignore next */
 if (global === undefined) {
     const ClassDeclaration = require('./classdeclaration');
-    const ModelFile = require('./modelfile');
 }
 /* eslint-enable no-unused-vars */
 
@@ -65,7 +64,6 @@ class Property extends Decorated {
     process() {
         super.process();
 
-        this.decorator = null;
         this.propertyType = null;
 
         switch (this.getMetaType()) {
@@ -107,6 +105,10 @@ class Property extends Decorated {
         }
         else {
             this.optional = false;
+        }
+
+        if(!this.ast.name) {
+            throw new Error(`Property of type ${this.propertyType} must have a name.`);
         }
     }
 
@@ -192,15 +194,6 @@ class Property extends Decorated {
      */
     isArray() {
         return this.array;
-    }
-
-    /**
-     * Returns true if the field is declared as an enumerated value
-     * @deprecated replaced by isPropertyEnum()
-     * @return {boolean} true if the property is an enumerated value
-     */
-    isEnum() {
-        return this.isPropertyEnum();
     }
 
     /**

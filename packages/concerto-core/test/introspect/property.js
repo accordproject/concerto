@@ -42,7 +42,7 @@ describe('Property', () => {
                     $class: `${MetaModelNamespace}.StringProperty`,
                     name: null
                 });
-            }).should.throw(/No name for type/);
+            }).should.throw(/Property of type String must have a name/);
         });
 
         it('should not throw for an identifier named null', () => {
@@ -62,7 +62,7 @@ describe('Property', () => {
                     name: 'suchType',
                 }
             });
-            p.type.should.equal('suchType');
+            p.getPropertyType().should.equal('suchType');
         });
 
         it('should handle a missing incoming property type', () => {
@@ -70,7 +70,7 @@ describe('Property', () => {
                 $class: `${MetaModelNamespace}.ObjectProperty`,
                 name: 'property',
             });
-            should.equal(p.type, null);
+            should.equal(p.getPropertyType(), null);
         });
 
         it('should not be an array by default', () => {
@@ -96,7 +96,7 @@ describe('Property', () => {
                     $class: `${MetaModelNamespace}.StringProperty`,
                     name: '1st',
                 });
-            }).should.throw(/Invalid property name '1st'/);
+            }).should.throw(/Invalid model element name '1st'/);
         });
 
     });

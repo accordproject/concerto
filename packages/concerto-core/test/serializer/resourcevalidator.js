@@ -117,7 +117,7 @@ describe('ResourceValidator', function () {
     before(function () {
         sandbox = sinon.createSandbox();
         resourceValidator = new ResourceValidator();
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({enableMapType: true});
         Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
     });
@@ -133,32 +133,6 @@ describe('ResourceValidator', function () {
     afterEach(function () {
         modelManager.clearModelFiles();
         sandbox.restore();
-    });
-
-    describe('#visit', () => {
-        it('should do nothing if unknown object given', () => {
-            const parameters = {
-                stack: new TypedStack({})
-            };
-
-            const thing = {
-                toString: () => {
-                    return 'testing';
-                }
-            };
-            sandbox.stub(resourceValidator, 'visitEnumDeclaration');
-            sandbox.stub(resourceValidator, 'visitClassDeclaration');
-            sandbox.stub(resourceValidator, 'visitRelationshipDeclaration');
-            sandbox.stub(resourceValidator, 'visitField');
-
-            resourceValidator.visit(thing, parameters);
-
-            sinon.assert.notCalled(resourceValidator.visitEnumDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitClassDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitRelationshipDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitField);
-
-        });
     });
 
     describe('#visitRelationshipDeclaration', function() {
@@ -363,7 +337,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'3\' instead.');
+            }).should.throw('Model violation in the "TEST" instance. The field "PhoneBook_map_value" has a value of "3" (type of value: "number"). Expected type of value: "String".');
         });
 
         it('should not validate map with bad key', function () {
@@ -374,7 +348,7 @@ describe('ResourceValidator', function () {
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in the "TEST" instance. Class "org.acme.map@1.0.0.PhoneBook" has the value of "[object Map]". Expected Type of String but found \'1\' instead');
+            }).should.throw('Model violation in the "TEST" instance. The field "PhoneBook_map_key" has a value of "1" (type of value: "number"). Expected type of value: "String".');
         });
     });
 

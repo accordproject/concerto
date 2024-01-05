@@ -599,15 +599,15 @@ class ClassDeclaration extends Declaration {
     }
 
     /**
-     * Returns the string representation of this class
-     * @return {String} the string representation of the class
+     * Returns the string representation of this class declaration
+     * @return {String} the string representation of the class declaration
      */
     toString() {
         let superType = '';
         if (this.superType) {
             superType = ' super=' + this.superType;
         }
-        return 'ClassDeclaration {id=' + this.getFullyQualifiedName() + superType + ' declarationKind=' + this.declarationKind() + ' abstract=' + this.isAbstract() + ' id=' + this.idField + '}';
+        return 'ClassDeclaration {id=' + this.getFullyQualifiedName() + superType + ' declarationKind=' + this.declarationKind() + ' abstract=' + this.isAbstract() + ' idField=' + this.idField + '}';
     }
 }
 

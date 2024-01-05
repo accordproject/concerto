@@ -67,19 +67,7 @@ class ResourceValidator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing.isEnum?.()) {
-            return this.visitEnumDeclaration(thing, parameters);
-        } else if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isMapDeclaration?.()) {
-            return this.visitMapDeclaration(thing, parameters);
-        }else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        }
+        return ModelUtil.dispatch(thing, parameters, this);
     }
 
     /**
@@ -110,61 +98,6 @@ class ResourceValidator {
         return null;
     }
 
-
-    /**
-     * Check a Type that is declared as a Map Type.
-     * @param {Object} type - the type in scope for validation, can be MapTypeKey or MapTypeValue
-     * @param {Object} value - the object being validated
-     * @param {Object} parameters  - the parameter
-     * @param {Map} mapDeclaration - the object being visited
-     * @private
-     */
-    checkMapType(type, value, parameters, mapDeclaration, ) {
-
-        if (!ModelUtil.isPrimitiveType(type.getType())) {
-
-            // thing might be a Concept, Scalar String, Scalar DateTime
-            let thing = mapDeclaration.getModelFile()
-                .getAllDeclarations()
-                .find(decl => decl.name === type.getType());
-
-            // if Key or Value is Scalar, get the Base Type of the Scalar for primitive validation.
-            if (ModelUtil.isScalar(mapDeclaration.getKey())) {
-                type = thing.getType();
-            }
-
-            if (thing?.isClassDeclaration?.()) {
-                parameters.stack.push(value);
-                thing.accept(this, parameters);
-                return;
-            }
-        } else {
-            // otherwise its a primitive
-            type = type.getType();
-
-        }
-
-        // validate the primitive
-        switch(type) {
-        case 'String':
-            if (typeof value !== 'string') {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
-            }
-            break;
-        case 'DateTime':
-            if (!dayjs.utc(value).isValid()) {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
-            }
-            break;
-        case 'Boolean':
-            if (typeof value !== 'boolean') {
-                const type = typeof value;
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${type} instead, for value '${value}'.`);
-            }
-            break;
-        }
-    }
-
     /**
      * Visitor design pattern
      *
@@ -182,12 +115,17 @@ class ResourceValidator {
             throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
         }
 
+        const mapKeyField = mapDeclaration.getKey().toField();
+        const mapValueField = mapDeclaration.getValue().toField();
+
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
-                // Validate Key
-                this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
-                // Validate Value
-                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                // validate key
+                parameters.stack.push(key);
+                mapKeyField.accept(this,parameters);
+                // validate value
+                parameters.stack.push(value);
+                mapValueField.accept(this,parameters);
             }
         });
 
@@ -302,7 +240,7 @@ class ResourceValidator {
             ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
         }
 
-        if(field.isTypeEnum()) {
+        if(field.isPropertyEnum()) {
             this.checkEnum(obj, field,parameters);
         }
         else {
@@ -444,7 +382,7 @@ class ResourceValidator {
 
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {RelationshipProperty} relationshipDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -556,7 +494,7 @@ class ResourceValidator {
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
-     * @param {RelationshipDeclaration} relationshipDeclaration - the declaration of the class
+     * @param {RelationshipProperty} relationshipDeclaration - the declaration of the class
      * @param {Object} value - the value of the field.
      * @private
      */

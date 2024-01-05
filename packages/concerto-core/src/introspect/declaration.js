@@ -14,6 +14,7 @@
 
 'use strict';
 
+const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
@@ -48,13 +49,30 @@ class Declaration extends Decorated {
     }
 
     /**
-     * Process the AST and build the model
+     * Semantic validation of the declaration. Subclasses should
+     * override this method to impose additional semantic constraints on the
+     * contents/relations of declarations.
      *
      * @throws {IllegalModelException}
-     * @private
+     * @protected
      */
-    process() {
-        super.process();
+    validate() {
+        super.validate();
+
+        const declarations = this.getModelFile().getAllDeclarations();
+        const declarationNames = declarations.map(
+            d => d.getFullyQualifiedName()
+        );
+        const uniqueNames = new Set(declarationNames);
+
+        if (uniqueNames.size !== declarations.length) {
+            const duplicateElements = declarationNames.filter(
+                (item, index) => declarationNames.indexOf(item) !== index
+            );
+            throw new IllegalModelException(
+                `Duplicate declaration name ${duplicateElements[0]}`
+            );
+        }
     }
 
     /**

@@ -14,6 +14,8 @@
 
 'use strict';
 
+const dayjs = require('dayjs');
+
 const Factory = require('../../../src/factory');
 const ModelManager = require('../../../src/modelmanager');
 const Resource = require('../../../src/model/resource');
@@ -292,8 +294,8 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.birthday = new Map();
-            concept.birthday.set('Bob', '2023-10-28T01:02:03Z');
-            concept.birthday.set('Alice', '2024-10-28T01:02:03Z');
+            concept.birthday.set('Bob', dayjs('2023-10-28T01:02:03Z'));
+            concept.birthday.set('Alice', dayjs('2024-10-28T01:02:03Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
@@ -301,8 +303,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: '2023-10-28T01:02:03.000Z',
+                    Alice: '2024-10-28T01:02:03.000Z'
                 }
             });
 
@@ -311,8 +313,8 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.birthday.should.be.an.instanceOf(Map);
-            resource.birthday.get('Bob').should.equal('2023-10-28T01:02:03Z');
-            resource.birthday.get('Alice').should.equal('2024-10-28T01:02:03Z');
+            resource.birthday.get('Bob').unix().should.equal(dayjs('2023-10-28T01:02:03Z').unix());
+            resource.birthday.get('Alice').unix().should.equal(dayjs('2024-10-28T01:02:03Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <String, Scalar>', () => {
@@ -320,8 +322,8 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.celebration = new Map();
-            concept.celebration.set('BobBirthday', '2022-11-28T01:02:03Z');
-            concept.celebration.set('AliceAnniversary', '2023-10-28T01:02:03Z');
+            concept.celebration.set('BobBirthday', dayjs('2022-11-28T01:02:03Z'));
+            concept.celebration.set('AliceAnniversary', dayjs('2023-10-28T01:02:03Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
@@ -329,8 +331,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': '2022-11-28T01:02:03.000Z',
+                    'AliceAnniversary': '2023-10-28T01:02:03.000Z',
                 }
             });
 
@@ -339,8 +341,8 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.celebration.should.be.an.instanceOf(Map);
-            resource.celebration.get('BobBirthday').should.equal('2022-11-28T01:02:03Z');
-            resource.celebration.get('AliceAnniversary').should.equal('2023-10-28T01:02:03Z');
+            resource.celebration.get('BobBirthday').unix().should.equal(dayjs('2022-11-28T01:02:03Z').unix());
+            resource.celebration.get('AliceAnniversary').unix().should.equal(dayjs('2023-10-28T01:02:03Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <String, Concept>', () => {
@@ -383,8 +385,8 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.appointment = new Map();
-            concept.appointment.set('2023-11-28T01:02:03Z', 'BobBirthday');
-            concept.appointment.set('2024-10-28T01:02:03Z', 'AliceAnniversary');
+            concept.appointment.set(dayjs('2023-11-28T01:02:03Z'), 'BobBirthday');
+            concept.appointment.set(dayjs('2024-10-28T01:02:03Z'), 'AliceAnniversary');
 
             // serialize and assert
             const json = serializer.toJSON(concept);
@@ -392,8 +394,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 appointment: {
-                    '2023-11-28T01:02:03Z': 'BobBirthday',
-                    '2024-10-28T01:02:03Z': 'AliceAnniversary'
+                    '2023-11-28T01:02:03.000Z': 'BobBirthday',
+                    '2024-10-28T01:02:03.000Z': 'AliceAnniversary'
                 }
             });
 
@@ -402,8 +404,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.appointment.should.be.an.instanceOf(Map);
-            resource.appointment.get('2023-11-28T01:02:03Z').should.equal('BobBirthday');
-            resource.appointment.get('2024-10-28T01:02:03Z').should.equal('AliceAnniversary');
+            const keyIt = resource.appointment.keys();
+            resource.appointment.get(keyIt.next().value).should.equal('BobBirthday');
+            resource.appointment.get(keyIt.next().value).should.equal('AliceAnniversary');
         });
 
         it('should serialize -> deserialize with a Map <Scalar, String> : Scalar extends String', () => {
@@ -439,8 +442,8 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.stopwatch = new Map();
-            concept.stopwatch.set('2023-10-28T00:00:00Z', '2023-10-28T11:12:13Z');
-            concept.stopwatch.set('2024-11-28T00:00:00Z', '2024-11-28T11:12:13Z');
+            concept.stopwatch.set(dayjs('2023-10-28T00:00:00Z'), dayjs('2023-10-28T11:12:13Z'));
+            concept.stopwatch.set(dayjs('2024-11-28T00:00:00Z'), dayjs('2024-11-28T11:12:13Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
@@ -448,8 +451,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 stopwatch: {
-                    '2023-10-28T00:00:00Z': '2023-10-28T11:12:13Z',
-                    '2024-11-28T00:00:00Z': '2024-11-28T11:12:13Z',
+                    '2023-10-28T00:00:00.000Z': '2023-10-28T11:12:13.000Z',
+                    '2024-11-28T00:00:00.000Z': '2024-11-28T11:12:13.000Z',
                 }
             });
 
@@ -458,8 +461,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.stopwatch.should.be.an.instanceOf(Map);
-            resource.stopwatch.get('2023-10-28T00:00:00Z').should.equal('2023-10-28T11:12:13Z');
-            resource.stopwatch.get('2024-11-28T00:00:00Z').should.equal('2024-11-28T11:12:13Z');
+            const keyIt = resource.stopwatch.keys();
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2023-10-28T11:12:13Z').unix());
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2024-11-28T11:12:13Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <Scalar, Concept>', () => {
@@ -503,8 +507,8 @@ describe('Serializer', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.diary = new Map();
-            concept.diary.set('2023-10-28T01:02:03Z', 'Birthday');
-            concept.diary.set('2024-10-28T01:02:03Z', 'Anniversary');
+            concept.diary.set(dayjs('2023-10-28T01:02:03Z'), 'Birthday');
+            concept.diary.set(dayjs('2024-10-28T01:02:03Z'), 'Anniversary');
 
             // serialize and assert
             const json = serializer.toJSON(concept);
@@ -512,8 +516,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 diary: {
-                    '2023-10-28T01:02:03Z': 'Birthday',
-                    '2024-10-28T01:02:03Z': 'Anniversary'
+                    '2023-10-28T01:02:03.000Z': 'Birthday',
+                    '2024-10-28T01:02:03.000Z': 'Anniversary'
                 }
             });
 
@@ -522,8 +526,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.diary.should.be.an.instanceOf(Map);
-            resource.diary.get('2023-10-28T01:02:03Z').should.equal('Birthday');
-            resource.diary.get('2024-10-28T01:02:03Z').should.equal('Anniversary');
+            const keyIt = resource.diary.keys();
+            resource.diary.get(keyIt.next().value).should.equal('Birthday');
+            resource.diary.get(keyIt.next().value).should.equal('Anniversary');
         });
     });
 
@@ -679,12 +684,16 @@ describe('Serializer', () => {
         });
 
         it('should deserialize -> serialize with a Map <String, DateTime>', () => {
+
+            const bobBirthday = dayjs('2023-10-28T01:02:03Z');
+            const aliceBirthday = dayjs('2024-10-28T01:02:03Z');
+
             // setup
             let json = {
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: bobBirthday.utc(),
+                    Alice: aliceBirthday.utc()
                 }
             };
 
@@ -693,8 +702,8 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.birthday.should.be.an.instanceOf(Map);
-            resource.birthday.get('Bob').should.equal('2023-10-28T01:02:03Z');
-            resource.birthday.get('Alice').should.equal('2024-10-28T01:02:03Z');
+            resource.birthday.get('Bob').unix().should.equal(bobBirthday.unix());
+            resource.birthday.get('Alice').unix().should.equal(aliceBirthday.unix());
 
             // serialize and assert
             json = serializer.toJSON(resource);
@@ -702,19 +711,23 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: '2023-10-28T01:02:03.000Z',
+                    Alice: '2024-10-28T01:02:03.000Z'
                 }
             });
         });
 
         it('should deserialize -> serialize with a Map <String, Scalar>', () => {
+
+            const bobBirthday = dayjs('2022-11-28T01:02:03.000Z');
+            const aliceAnniversary = dayjs('2023-10-28T01:02:03.000Z');
+
             // setup
             let json = {
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': bobBirthday.utc(),
+                    'AliceAnniversary': aliceAnniversary.utc(),
                 }
             };
 
@@ -723,8 +736,8 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.celebration.should.be.an.instanceOf(Map);
-            resource.celebration.get('BobBirthday').should.equal('2022-11-28T01:02:03Z');
-            resource.celebration.get('AliceAnniversary').should.equal('2023-10-28T01:02:03Z');
+            resource.celebration.get('BobBirthday').unix().should.equal(bobBirthday.unix());
+            resource.celebration.get('AliceAnniversary').unix().should.equal(aliceAnniversary.unix());
 
             // serialize and assert
             json = serializer.toJSON(resource);
@@ -732,8 +745,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': '2022-11-28T01:02:03.000Z',
+                    'AliceAnniversary': '2023-10-28T01:02:03.000Z',
                 }
             });
 
@@ -788,8 +801,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.appointment.should.be.an.instanceOf(Map);
-            resource.appointment.get('2023-11-28T01:02:03Z').should.equal('Lorem');
-            resource.appointment.get('2024-10-28T01:02:03Z').should.equal('Ipsum');
+            const keyIt = resource.appointment.keys();
+            resource.appointment.get(keyIt.next().value).should.equal('Lorem');
+            resource.appointment.get(keyIt.next().value).should.equal('Ipsum');
 
             // serialize & assert
             json = serializer.toJSON(resource);
@@ -797,8 +811,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 appointment: {
-                    '2023-11-28T01:02:03Z': 'Lorem',
-                    '2024-10-28T01:02:03Z': 'Ipsum'
+                    '2023-11-28T01:02:03.000Z': 'Lorem',
+                    '2024-10-28T01:02:03.000Z': 'Ipsum'
                 }
             });
         });
@@ -848,8 +862,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.stopwatch.should.be.an.instanceOf(Map);
-            resource.stopwatch.get('2023-10-28T00:00:00Z').should.equal('2023-10-28T11:12:13Z');
-            resource.stopwatch.get('2024-11-28T00:00:00Z').should.equal('2024-11-28T11:12:13Z');
+            const keyIt = resource.stopwatch.keys();
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2023-10-28T11:12:13Z').unix());
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2024-11-28T11:12:13Z').unix());
 
             // serialize & assert
             json = serializer.toJSON(resource);
@@ -857,8 +872,8 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 stopwatch: {
-                    '2023-10-28T00:00:00Z': '2023-10-28T11:12:13Z',
-                    '2024-11-28T00:00:00Z': '2024-11-28T11:12:13Z',
+                    '2023-10-28T00:00:00.000Z': '2023-10-28T11:12:13.000Z',
+                    '2024-11-28T00:00:00.000Z': '2024-11-28T11:12:13.000Z',
                 }
             });
         });
@@ -910,8 +925,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.diary.should.be.an.instanceOf(Map);
-            resource.diary.get('2023-10-28T01:02:03Z').should.equal('Birthday');
-            resource.diary.get('2024-10-28T01:02:03Z').should.equal('Anniversary');
+            const keyIt = resource.diary.keys();
+            resource.diary.get(keyIt.next().value).should.equal('Birthday');
+            resource.diary.get(keyIt.next().value).should.equal('Anniversary');
 
             // serialize and assert
             json = serializer.toJSON(resource);
@@ -919,80 +935,14 @@ describe('Serializer', () => {
             json.should.deep.equal({
                 $class: 'org.acme.sample@1.0.0.Concepts',
                 diary: {
-                    '2023-10-28T01:02:03Z': 'Birthday',
-                    '2024-10-28T01:02:03Z': 'Anniversary'
+                    '2023-10-28T01:02:03.000Z': 'Birthday',
+                    '2024-10-28T01:02:03.000Z': 'Anniversary'
                 }
             });
         });
     });
 
     describe('#toJSON failure scenarios', () => {
-        it('should throw if bad Key value is provided for Map, where Key Type DateTime is expected', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.appointment = new Map();
-            concept.appointment.set('BAD-DATE-28T01:02:03Z', 'Lorem'); // Bad DateTime
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Appointment. Expected Type of DateTime but found \'BAD-DATE-28T01:02:03Z\' instead.');
-        });
-
-        it('should throw if bad Key value is provided for Map, where Key Type String is expected', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.dict = new Map();
-            concept.dict.set(1234, 'Lorem'); // Bad key
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
-        });
-
-        it('should throw if a bad Value is Supplied for Map, where Value type Boolean is expected', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.rsvp = new Map();
-            concept.rsvp.set('Lorem', true);
-            concept.rsvp.set('Ipsum', 'false');
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.RSVP. Expected Type of Boolean but found string instead, for value \'false\'.');
-        });
-
-        it('should throw if a bad Value is Supplied for Map, where Value type String is expected', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.dict = new Map();
-            concept.dict.set('Lorem', 1234);
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Dictionary. Expected Type of String but found \'1234\' instead.');
-        });
-
-        it('should throw if a bad value is Supplied for Map - where Value type Boolean is expected', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.timer = new Map();
-            concept.timer.set('2023-10-28T01:02:03Z', '2023-10-28T01:02:03Z');
-            concept.timer.set('2023-10-28T01:02:03Z', 'BAD-DATE-VALUE');
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample@1.0.0.Timer. Expected Type of DateTime but found \'BAD-DATE-VALUE\' instead.');
-        });
-
-        it('should throw if the value of a Map is not a Map instance', () => {
-            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
-
-            concept.dict = 'xyz'; // bad value
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw(`Expected a Map, but found ${JSON.stringify(concept.dict)}`);
-        });
 
         it('should ignore system properties', () => {
             let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');

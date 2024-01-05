@@ -42,7 +42,7 @@ describe('Concept', function () {
     let classDecl = null;
 
     before(function () {
-        modelManager = new ModelManager();
+        modelManager = new ModelManager( {enableMapType: true} );
         Util.addComposerModel(modelManager);
     });
 

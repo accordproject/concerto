@@ -14,6 +14,7 @@
 
 'use strict';
 
+const ModelElement = require('./modelelement');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 // Types needed for TypeScript generation.
@@ -25,19 +26,20 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 /**
- * Decorator encapsulates a decorator (annotation) on a class or property.
+ * Decorator encapsulates a decorator (annotation) on a declaration or property.
  * @class
  * @memberof module:concerto-core
  */
-class Decorator {
+class Decorator extends ModelElement {
     /**
      * Create a Decorator.
-     * @param {ModelElement} parent - the owner of this property
+     * @param {ModelFile} modelFile - the model file for this decorator
+     * @param {ModelElement} [parent] - the owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        this.ast = ast;
+    constructor(modelFile, parent, ast) {
+        super(modelFile, ast);
         this.parent = parent;
         this.arguments = null;
         this.process();
@@ -96,14 +98,6 @@ class Decorator {
      * @private
      */
     validate() { }
-
-    /**
-     * Returns the name of a decorator
-     * @return {string} the name of this decorator
-     */
-    getName() {
-        return this.name;
-    }
 
     /**
      * Returns the arguments for this decorator

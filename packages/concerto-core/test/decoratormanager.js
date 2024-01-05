@@ -63,7 +63,7 @@ describe('DecoratorManager', () => {
     describe('#validate', function() {
         it('should support syntax validation', async function() {
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
-            const validationModelManager = DecoratorManager.validate( JSON.parse(dcs));
+            const validationModelManager = DecoratorManager.validate(JSON.parse(dcs));
             validationModelManager.should.not.be.null;
         });
 
