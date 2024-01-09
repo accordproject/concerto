@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 import { ModelManager, ModelFile, Concerto } from '@accordproject/concerto-core';
-const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { createGenerator } from "ts-json-schema-generator";
 import Ajv from "ajv";
 import path from "path";
@@ -51,7 +51,7 @@ test('Chained TypeScript and JSONSchema conversion respects inheritance when fla
 
     // Validate the instance with Concerto
     const modelManager = new ModelManager();
-    modelManager.addModelFile(new ModelFile(modelManager, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace));
+    modelManager.addModelFile(new ModelFile(modelManager, MetaModelUtil.metaModelAst as object, undefined, MetaModelNamespace));
     const concerto = new Concerto(modelManager);
     expect(() => concerto.validate(data)).not.toThrow();
 });
