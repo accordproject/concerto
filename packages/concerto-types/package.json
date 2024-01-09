@@ -7,8 +7,9 @@
         "node": ">=14",
         "npm": ">=6"
     },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
+    "type": "module",
+    "exports": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "clean": "rimraf src/generated dist",
         "codegen": "node scripts/codegen.js",
@@ -17,8 +18,8 @@
         "pretest": "npm-run-all licchk lint",
         "lint": "eslint .",
         "licchk": "license-check-and-add",
-        "test": "jest",
-        "test:watch": "jest --watchAll"
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "test:watch": "NODE_OPTIONS=--experimental-vm-modules npx jest --watchAll"
     },
     "repository": {
         "type": "git",
