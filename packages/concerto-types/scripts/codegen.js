@@ -1,17 +1,19 @@
-'use strict';
+import { CodeGen } from '@accordproject/concerto-codegen';
+import { MetaModelUtil }  from '@accordproject/concerto-metamodel';
+import { ModelLoader } from '@accordproject/concerto-core';
+import { FileWriter } from '@accordproject/concerto-util';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const { CodeGen: { TypescriptVisitor }} = require('@accordproject/concerto-codegen');
-const { MetaModelUtil: {metaModelCto} } = require('@accordproject/concerto-metamodel');
-const { ModelLoader } = require('@accordproject/concerto-core');
-const { FileWriter } = require('@accordproject/concerto-util');
-const path = require('path');
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Generate TypeScript files from the metamodel.
  */
 async function main() {
-    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([metaModelCto], {strict: true});
-    const visitor = new TypescriptVisitor();
+    const modelManager = await ModelLoader.loadModelManagerFromModelFiles([MetaModelUtil.metaModelCto], {strict: true});
+    const visitor = new CodeGen.TypescriptVisitor();
 
     const fileWriter = new FileWriter(path.resolve(__dirname, '..', 'src', 'generated'));
     modelManager.accept(visitor, { fileWriter });
@@ -21,6 +23,7 @@ async function main() {
 }
 
 main().catch(error => {
+    // eslint-disable-next-line no-console
     console.error(error);
     process.exit(1);
 });
