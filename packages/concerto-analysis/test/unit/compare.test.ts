@@ -1,9 +1,12 @@
 import { ModelFile, ModelManager } from '@accordproject/concerto-core';
 import { Parser } from '@accordproject/concerto-cto';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { Compare, CompareResult, compareResultToString } from '../../src';
+import fs from 'fs/promises';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { Compare, CompareResult, compareResultToString } from '../../src/index';
 import { defaultCompareConfig } from '../../src/compare-config';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 async function getModelFile(modelManager: ModelManager, fileName: string) {
     const filePath = path.resolve(__dirname, '..', 'fixtures', fileName);
