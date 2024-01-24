@@ -12,11 +12,13 @@
  * limitations under the License.
  */
 import { ModelManager, ModelFile, Concerto } from '@accordproject/concerto-core';
-import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import ConcertoMetaModel from '@accordproject/concerto-metamodel';
 import { createGenerator } from "ts-json-schema-generator";
 import Ajv from "ajv";
 import path from "path";
 import fs from 'fs';
+
+const { MetaModelUtil, MetaModelNamespace } = ConcertoMetaModel;
 
 test('Chained TypeScript and JSONSchema conversion respects inheritance when flattening subclasses to a union type', () => {
 
