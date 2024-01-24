@@ -4,7 +4,7 @@
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
-        "node": ">=14",
+        "node": ">=16",
         "npm": ">=6"
     },
     "type": "module",
@@ -94,7 +94,7 @@
         }
     },
     "jest": {
-        "preset": "ts-jest",
+        "preset": "ts-jest/presets/default-esm",
         "testEnvironment": "node",
         "testPathIgnorePatterns": [
             "<rootDir>/dist/",
@@ -103,6 +103,16 @@
         "collectCoverage": true,
         "collectCoverageFrom": [
             "src/**/*.ts"
-        ]
+        ],
+        "extensionsToTreatAsEsm": [".ts"],
+        "globals": {
+            "ts-jest": {
+                "useESM": true
+            }
+        },
+        "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1"
+        },
+        "modulePathIgnorePatterns": ["<rootDir>/dist/"]
     }
 }
