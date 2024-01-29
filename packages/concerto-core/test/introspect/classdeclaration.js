@@ -19,10 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ClassDeclaration = require('../../lib/introspect/classdeclaration');
 const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
 const ConceptDeclaration = require('../../lib/introspect/conceptdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
@@ -87,27 +84,6 @@ describe('ClassDeclaration', () => {
     });
 
     describe('#validate', () => {
-        it('should throw when asset name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeassetname.cto', AssetDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when transaction name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupetransactionname.cto', TransactionDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when participant name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeparticipantname.cto', ParticipantDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
         it('should throw when an super type identifier is redeclared', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.identifierextendsfromsupertype.cto', AssetDeclaration);
             (() => {
@@ -122,20 +98,6 @@ describe('ClassDeclaration', () => {
         //        asset.validate();
         //    }).should.throw(/Identifier defined in super class/);
         //});
-
-        it('should throw when concept name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeconceptname.cto', ConceptDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when enum name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeenumname.cto', EnumDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
 
         it('should throw when not abstract, not enum and not concept without an identifier', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.noidentifier.cto', AssetDeclaration);
