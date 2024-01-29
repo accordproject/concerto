@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-cto",
-  "version": "3.16.3",
+  "version": "3.16.4",
   "description": "Parser for Concerto CTO files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.9.1",
-    "@accordproject/concerto-util": "3.16.3",
+    "@accordproject/concerto-util": "3.16.4",
     "path-browserify": "1.0.1"
   },
   "browserslist": "> 0.25%, not dead",
