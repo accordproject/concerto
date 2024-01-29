@@ -201,21 +201,6 @@ class ClassDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
-        }
-
         // if we have a super type make sure it exists
         if (this.superType !== null) {
             // and make sure that the class isn't extending itself

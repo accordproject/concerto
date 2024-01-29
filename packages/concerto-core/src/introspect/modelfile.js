@@ -281,6 +281,22 @@ class ModelFile {
         });
 
         // Validate all of the types in this model file.
+        // Check if names of the declarations are unique.
+        const declarationNames = this.declarations.map(
+            d => d.getFullyQualifiedName()
+        );
+        const uniqueNames = new Set(declarationNames);
+
+        if (uniqueNames.size !== this.declarations.length) {
+            const duplicateElements = declarationNames.filter(
+                (item, index) => declarationNames.indexOf(item) !== index
+            );
+            throw new IllegalModelException(
+                `Duplicate class name ${duplicateElements[0]}`
+            );
+        }
+
+        // Run validations on class declarations
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
             classDeclaration.validate();
