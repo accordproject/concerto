@@ -14,12 +14,12 @@
 
 namespace com.testing@1.0.0
 
-asset Asset identified by id {
+asset MyAsset identified by id {
   o String id
   o String newValue
 }
 
-asset Asset identified by id {
+asset MyAsset identified by id {
   o String id
   o String newValue
 }

@@ -112,16 +112,6 @@ describe('AssetDeclaration', () => {
                 asset.validate();
             }).should.throw(/more than one field named/);
         });
-
-        it('should throw an an IllegalModelException if its not a System Type and is called Asset', () => {
-            let asset = loadLastAssetDeclaration('test/data/parser/assetdeclaration.systypename.cto');
-            try {
-                asset.validate();
-            } catch (err) {
-                err.should.be.an.instanceOf(IllegalModelException);
-                err.message.should.match(/Asset is a reserved type name./);
-            }
-        });
     });
 
     describe('#getProperty', () => {

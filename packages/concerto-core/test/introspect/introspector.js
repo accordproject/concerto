@@ -58,7 +58,7 @@ describe('Introspector', () => {
             let classDecl = introspector.getClassDeclarations();
             const scalarDecl = classDecl.filter(declaration =>  declaration.isScalarDeclaration?.());
             const mapDecl = classDecl.filter(declaration =>  declaration.isMapDeclaration?.());
-            classDecl.length.should.equal(44);
+            classDecl.length.should.equal(40);
             scalarDecl.length.should.equal(0);
             mapDecl.length.should.equal(0);
         });
