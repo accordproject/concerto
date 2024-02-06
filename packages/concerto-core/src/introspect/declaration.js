@@ -70,6 +70,24 @@ class Declaration extends Decorated {
     }
 
     /**
+     * Semantic validation of the structure of this decorated. Subclasses should
+     * override this method to impose additional semantic constraints on the
+     * contents/relations of fields.
+     *
+     * @param {...*} args the validation arguments
+     * @throws {IllegalModelException}
+     * @protected
+     */
+    validate(...args) {
+        super.validate(...args);
+
+        // #648 - check for clashes against imported types
+        if (this.getModelFile().isImportedType(this.getName())){
+            throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
+        }
+    }
+
+    /**
      * Returns the ModelFile that defines this class.
      *
      * @public

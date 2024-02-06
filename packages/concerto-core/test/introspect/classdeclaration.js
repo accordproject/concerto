@@ -374,7 +374,7 @@ describe('ClassDeclaration', () => {
     describe('#_resolveSuperType', () => {
 
         it('should return Asset if no super type', () => {
-            let classDecl = modelManager.getType('system@1.0.0.Asset');
+            let classDecl = modelManager.getType('concerto@1.0.0.Asset');
             classDecl._resolveSuperType().should.not.be.null;
         });
 
@@ -411,7 +411,7 @@ describe('ClassDeclaration', () => {
     describe('#getSuperTypeDeclaration', () => {
 
         it('should return Concept if no super type', () => {
-            let classDecl = modelManager.getType('system@1.0.0.Asset');
+            let classDecl = modelManager.getType('concerto@1.0.0.Asset');
             classDecl.getSuperTypeDeclaration().should.not.be.null;
         });
     });
