@@ -33,18 +33,6 @@ const COMPOSER_MODEL =
  */
 namespace system@1.0.0
 
-event Event {
-}
-
-participant Participant {
-}
-
-asset Asset {
-}
-
-transaction Transaction {
-}
-
 /**
  * Abstract system participant that all participants extend.
  * Has no properties, and is soley used as a basis to model other assets.

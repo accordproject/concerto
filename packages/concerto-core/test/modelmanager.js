@@ -882,11 +882,11 @@ concept Bar {
     });
 
     describe('#getDeclarations', () => {
-        const numberModelBaseAssets = 13;
+        const numberModelBaseAssets = 12;
         const numberModelBaseEnums = 2;
-        const numberModelBaseParticipants = 5;
-        const numberModelBaseEvents = 1;
-        const numberModelBaseTransactions = 21;
+        const numberModelBaseParticipants = 4;
+        const numberModelBaseEvents = 0;
+        const numberModelBaseTransactions = 20;
         const numberModelBaseConcepts = 2;
 
         describe('#getAssetDeclarations', () => {
@@ -1122,7 +1122,7 @@ concept Bar {
             modelManager.addModelFiles([composerModel, modelBase, farm2fork, concertoModel]);
 
             modelManager.getModelFiles().length.should.equal(5);
-            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(69);
+            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(65);
 
             const filtered = modelManager.filter(declaration => declaration.getFullyQualifiedName() === 'org.accordproject.test@1.0.0.Product');
 
