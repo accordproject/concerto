@@ -274,24 +274,21 @@ class ClassDeclaration extends Declaration {
         }
         // we also have to check fields defined in super classes
         const properties = this.getProperties();
-        const propertyFieldNames = properties.map(
-            d => d.getName()
-        );
-        const uniquePropertyFieldNames = new Set(propertyFieldNames);
-
-        if (uniquePropertyFieldNames.size !== properties.length) {
-            const duplicateElements = propertyFieldNames
-                .filter(
-                    (item, index) => propertyFieldNames.indexOf(item) !== index
+        const uniquePropertyNames = new Set();
+        properties.forEach(p => {
+            const propertyName = p.getName();
+            if (!uniquePropertyNames.has(propertyName)) {
+                uniquePropertyNames.add(propertyName);
+            } else {
+                const formatter = Globalize('en').messageFormatter(
+                    'classdeclaration-validate-duplicatefieldname'
                 );
-            const formatter = Globalize('en').messageFormatter(
-                'classdeclaration-validate-duplicatefieldname'
-            );
-            throw new IllegalModelException(formatter({
-                'class': this.name,
-                'fieldName': duplicateElements[0]
-            }), this.modelFile, this.ast.location);
-        }
+                throw new IllegalModelException(formatter({
+                    'class': this.name,
+                    'fieldName': propertyName
+                }), this.modelFile, this.ast.location);
+            }
+        });
 
         for (let n = 0; n < properties.length; n++) {
             let field = properties[n];

@@ -206,6 +206,13 @@ describe('ModelFile', () => {
 
     describe('#validate', () => {
 
+        it('should throw when scalar name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/scalardeclaration.dupeboolean.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
         it('should throw when asset name is duplicted in a modelfile', () => {
             let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupeassetname.cto');
             (() => {

@@ -89,23 +89,20 @@ class Decorated extends ModelElement {
             }
 
             // check we don't have this decorator twice
-            const decoratorNames = this.decorators.map(
-                d => d.getName()
-            );
-            const uniqueDecoratorNames = new Set(decoratorNames);
-
-            if (uniqueDecoratorNames.size !== this.decorators.length) {
-                const duplicateElements = decoratorNames
-                    .filter(
-                        (item, index) => decoratorNames.indexOf(item) !== index
+            const uniqueDecoratorNames = new Set();
+            this.decorators.forEach(d => {
+                const decoratorName = d.getName();
+                if(!uniqueDecoratorNames.has(decoratorName)) {
+                    uniqueDecoratorNames.add(decoratorName);
+                } else {
+                    const modelFile = this.getModelFile();
+                    throw new IllegalModelException(
+                        `Duplicate decorator ${decoratorName}`,
+                        modelFile,
+                        this.ast.location,
                     );
-                const modelFile = this.getModelFile();
-                throw new IllegalModelException(
-                    `Duplicate decorator ${duplicateElements[0]}`,
-                    modelFile,
-                    this.ast.location,
-                );
-            }
+                }
+            });
         }
     }
 
