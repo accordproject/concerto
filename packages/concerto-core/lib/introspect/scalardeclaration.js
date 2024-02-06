@@ -17,7 +17,6 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Declaration = require('./declaration');
-const IllegalModelException = require('./illegalmodelexception');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 
@@ -106,21 +105,6 @@ class ScalarDeclaration extends Declaration {
      */
     validate() {
         super.validate();
-
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
-        }
     }
 
     /**

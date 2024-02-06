@@ -37,15 +37,6 @@ describe('ScalarDeclaration', () => {
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
     });
 
-    describe('#validate', () => {
-        it('should throw when scalar name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/scalardeclaration.dupeboolean.cto', ScalarDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-    });
-
     describe('#accept', () => {
         it('should call the visitor', () => {
             let clz = new ScalarDeclaration(modelFile, {
