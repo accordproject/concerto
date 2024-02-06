@@ -31,7 +31,7 @@ describe('ParticipantDeclaration', () => {
     describe('#getParticipantDeclarations', () => {
         it('should get participants', () => {
             let participants = modelManager.getParticipantDeclarations();
-            participants.should.have.lengthOf(3);
+            participants.should.have.lengthOf(2);
             participants[0].declarationKind().should.equal('ParticipantDeclaration');
         });
     });
