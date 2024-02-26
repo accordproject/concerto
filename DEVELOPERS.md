@@ -22,8 +22,7 @@ cd concerto
 git remote add upstream "https://github.com/accordproject/concerto.git"
 
 # Install node.js dependencies:
-npm install -g lerna
-lerna bootstrap
+npx lerna bootstrap
 ```
 
 [apdev]: https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md
