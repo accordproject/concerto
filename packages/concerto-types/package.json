@@ -1,6 +1,6 @@
 {
     "name": "@accordproject/concerto-types",
-    "version": "3.16.1",
+    "version": "4.0.0-alpha.0",
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
@@ -33,12 +33,10 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@accordproject/concerto-codegen": "3.17.0",
-        "@accordproject/concerto-core": "3.16.1",
-        "@accordproject/concerto-metamodel": "3.9.0",
-        "@accordproject/concerto-util": "3.16.1",
-        "@types/jest": "28.1.1",
-        "ajv": "8.12.0",
+        "@accordproject/concerto-codegen": "^3.16.2",
+        "@accordproject/concerto-core": "^4.0.0-alpha.0",
+        "@accordproject/concerto-metamodel": "3.8.1",
+        "@accordproject/concerto-util": "^4.0.0-alpha.0",
         "eslint": "8.2.0",
         "jest": "28.1.1",
         "license-check-and-add": "2.3.6",

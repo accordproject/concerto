@@ -14,10 +14,10 @@
 
 'use strict';
 
-const Factory = require('../../lib/factory');
+const Factory = require('../../src/factory');
 const fs = require('fs');
-const ModelManager = require('../../lib/modelmanager');
-const Serializer = require('../../lib/serializer');
+const ModelManager = require('../../src/modelmanager');
+const Serializer = require('../../src/serializer');
 const Util = require('../composer/composermodelutility');
 
 require('chai').should();
@@ -49,23 +49,23 @@ describe('Wildcards Model', function () {
 
     it('should parse a resource using types from a wildcard import', () => {
         const json = {
-            $class: 'org.acme.wildcards.MyAsset',
+            $class: 'org.acme.wildcards@1.0.0.MyAsset',
             assetId: '1',
             concept: {
-                $class: 'org.acme.wildcards.MyConcept',
+                $class: 'org.acme.wildcards@1.0.0.MyConcept',
                 gender: 'FEMALE'
             },
             participant: {
-                $class: 'org.acme.wildcards.MyParticipant',
+                $class: 'org.acme.wildcards@1.0.0.MyParticipant',
                 personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',
                 contactDetails: {
-                    $class: 'stdlib.base.ContactDetails',
+                    $class: 'stdlib.base@1.0.0.ContactDetails',
                     email: 'alice@email.com'
                 }
             },
-            person: 'resource:stdlib.base.Person#ALICE_1'
+            person: 'resource:stdlib.base@1.0.0.Person#ALICE_1'
         };
         const resource = serializer.fromJSON(json);
         resource.assetId.should.equal('1');
@@ -75,41 +75,41 @@ describe('Wildcards Model', function () {
         resource.participant.firstName.should.equal('Alice');
         resource.participant.lastName.should.equal('A');
         resource.participant.contactDetails.email.should.equal('alice@email.com');
-        resource.person.getFullyQualifiedIdentifier().should.equal('stdlib.base.Person#ALICE_1');
+        resource.person.getFullyQualifiedIdentifier().should.equal('stdlib.base@1.0.0.Person#ALICE_1');
     });
 
     it('should serialize a resource using types from a wildcard import', () => {
-        const resource = factory.newResource('org.acme.wildcards', 'MyAsset', '1');
+        const resource = factory.newResource('org.acme.wildcards@1.0.0', 'MyAsset', '1');
         resource.assetId = '1';
-        resource.concept = factory.newConcept('org.acme.wildcards', 'MyConcept');
+        resource.concept = factory.newConcept('org.acme.wildcards@1.0.0', 'MyConcept');
         resource.concept.gender = 'FEMALE';
-        resource.participant = factory.newResource('org.acme.wildcards', 'MyParticipant', '1');
+        resource.participant = factory.newResource('org.acme.wildcards@1.0.0', 'MyParticipant', '1');
         resource.participant.firstName = 'Alice';
         resource.participant.lastName = 'A';
-        resource.participant.contactDetails = factory.newConcept('stdlib.base', 'ContactDetails');
+        resource.participant.contactDetails = factory.newConcept('stdlib.base@1.0.0', 'ContactDetails');
         resource.participant.contactDetails.email = 'alice@email.com';
-        resource.person = factory.newRelationship('stdlib.base', 'Person', 'ALICE_1');
+        resource.person = factory.newRelationship('stdlib.base@1.0.0', 'Person', 'ALICE_1');
         const json = serializer.toJSON(resource);
         json.should.deep.equal({
-            $class: 'org.acme.wildcards.MyAsset',
+            $class: 'org.acme.wildcards@1.0.0.MyAsset',
             assetId: '1',
             $identifier: '1',
             concept: {
-                $class: 'org.acme.wildcards.MyConcept',
+                $class: 'org.acme.wildcards@1.0.0.MyConcept',
                 gender: 'FEMALE'
             },
             participant: {
-                $class: 'org.acme.wildcards.MyParticipant',
+                $class: 'org.acme.wildcards@1.0.0.MyParticipant',
                 $identifier: '1',
                 personId: '1',
                 firstName: 'Alice',
                 lastName: 'A',
                 contactDetails: {
-                    $class: 'stdlib.base.ContactDetails',
+                    $class: 'stdlib.base@1.0.0.ContactDetails',
                     email: 'alice@email.com'
                 }
             },
-            person: 'resource:stdlib.base.Person#ALICE_1'
+            person: 'resource:stdlib.base@1.0.0.Person#ALICE_1'
         });
     });
 

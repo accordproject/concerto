@@ -16,17 +16,17 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const ConceptDeclaration = require('../../lib/introspect/conceptdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const EnumDeclaration = require('../../src/introspect/enumdeclaration');
+const ConceptDeclaration = require('../../src/introspect/conceptdeclaration');
+const ParticipantDeclaration = require('../../src/introspect/participantdeclaration');
+const TransactionDeclaration = require('../../src/introspect/transactiondeclaration');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
@@ -42,7 +42,7 @@ describe('ClassDeclaration', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
-        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
+        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing@1.0.0', 'org.acme.cto');
     });
 
     describe('#constructor', () => {
@@ -112,7 +112,7 @@ describe('ClassDeclaration', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.identifierextendsfromsupertype.cto', AssetDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Super class com.testing.p1 has an explicit identifier a1 that cannot be redeclared/);
+            }).should.throw(/Super class com.testing@1.0.0.p1 has an explicit identifier a1 that cannot be redeclared/);
         });
 
         // TODO: This has been disabled pending major version bump and/or confirmation that this is illegal
@@ -187,7 +187,7 @@ describe('ClassDeclaration', () => {
                 ]
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing.suchName super=Concept enum=false abstract=false}');
+            clz.toString().should.equal('ClassDeclaration {id=com.hyperledger.testing@1.0.0.suchName super=Concept enum=false abstract=false}');
         });
 
     });
@@ -275,7 +275,7 @@ describe('ClassDeclaration', () => {
                 properties: [
                 ]
             });
-            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing.suchName');
+            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing@1.0.0.suchName');
         });
 
     });
@@ -292,29 +292,29 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return superclass when one exists in the same model file', function() {
-            const subclass = modelManager.getType('com.testing.parent.Super');
+            const subclass = modelManager.getType('com.testing.parent@1.0.0.Super');
             should.exist(subclass);
             const superclassName = subclass.getSuperType();
-            superclassName.should.equal('com.testing.parent.Base');
+            superclassName.should.equal('com.testing.parent@1.0.0.Base');
         });
 
         it('should return superclass when one exists in a different model file', function() {
-            const subclass = modelManager.getType('com.testing.child.Sub');
+            const subclass = modelManager.getType('com.testing.child@1.0.0.Sub');
             should.exist(subclass);
             const superclassName = subclass.getSuperType();
-            superclassName.should.equal('com.testing.parent.Super');
+            superclassName.should.equal('com.testing.parent@1.0.0.Super');
         });
 
         it('should return concerto.Participant when no super type exists', function() {
-            const baseclass = modelManager.getType('com.testing.parent.Base');
+            const baseclass = modelManager.getType('com.testing.parent@1.0.0.Base');
             should.exist(baseclass);
             const superclassName = baseclass.getSuperType();
             should.equal(superclassName,'concerto@1.0.0.Participant');
         });
 
         it('toString',()=>{
-            const baseclass = modelManager.getType('com.testing.parent.Base');
-            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent.Base super=Participant enum=false abstract=true}');
+            const baseclass = modelManager.getType('com.testing.parent@1.0.0.Base');
+            baseclass.toString().should.equal('ClassDeclaration {id=com.testing.parent@1.0.0.Base super=Participant enum=false abstract=true}');
         });
     });
 
@@ -329,15 +329,15 @@ describe('ClassDeclaration', () => {
         });
 
         it('get nested happy path', function() {
-            let extremeOuter = modelManager.getType('com.hyperledger.testing.ExtremeOuter');
+            let extremeOuter = modelManager.getType('com.hyperledger.testing@1.0.0.ExtremeOuter');
             should.exist(extremeOuter.getNestedProperty('outerAsset.innerAsset'));
         });
         it('get error with missing propertyname', function() {
-            let extremeOuter = modelManager.getType('com.hyperledger.testing.ExtremeOuter');
-            (()=>{extremeOuter.getNestedProperty('outerAsset.missing');}).should.throw(/Property missing does not exist on com.hyperledger.testing.Outer/);
+            let extremeOuter = modelManager.getType('com.hyperledger.testing@1.0.0.ExtremeOuter');
+            (()=>{extremeOuter.getNestedProperty('outerAsset.missing');}).should.throw(/Property missing does not exist on com.hyperledger.testing@1.0.0.Outer/);
         });
         it('get error with primitives', function() {
-            let extremeOuter = modelManager.getType('com.hyperledger.testing.ExtremeOuter');
+            let extremeOuter = modelManager.getType('com.hyperledger.testing@1.0.0.ExtremeOuter');
             (()=>{extremeOuter.getNestedProperty('outerAsset.int.innerAsset');}).should.throw(/Property int is a primitive or enum/);
         });
     });
@@ -354,14 +354,14 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return itself only if there are no subclasses', function() {
-            const baseclass = modelManager.getType('com.testing.child.Sub');
+            const baseclass = modelManager.getType('com.testing.child@1.0.0.Sub');
             should.exist(baseclass);
             const subclasses = baseclass.getAssignableClassDeclarations();
             subclasses.should.have.same.members([baseclass]);
         });
 
         it('should return all subclass definitions', function() {
-            const baseclass = modelManager.getType('com.testing.parent.Base');
+            const baseclass = modelManager.getType('com.testing.parent@1.0.0.Base');
             should.exist(baseclass);
             const subclasses = baseclass.getAssignableClassDeclarations();
             const subclassNames = subclasses.map(classDef => classDef.getName());
@@ -374,36 +374,36 @@ describe('ClassDeclaration', () => {
     describe('#_resolveSuperType', () => {
 
         it('should return Asset if no super type', () => {
-            let classDecl = modelManager.getType('system.Asset');
+            let classDecl = modelManager.getType('concerto@1.0.0.Asset');
             classDecl._resolveSuperType().should.not.be.null;
         });
 
         it('should return Concept for a super class', () => {
-            modelManager.addCTOModel(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
             asset TestAsset identified by assetId { o String assetId }`);
-            let classDecl = modelManager.getType('org.acme.TestAsset');
+            let classDecl = modelManager.getType('org.acme@1.0.0.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
             should.equal(superClassDecl.getName(), 'Asset');
         });
 
         it('should return the super class declaration for a super class in the same file', () => {
-            modelManager.addCTOModel(`namespace org.acme
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
             abstract asset BaseAsset { }
             asset TestAsset identified by assetId extends BaseAsset { o String assetId }`);
-            let classDecl = modelManager.getType('org.acme.TestAsset');
+            let classDecl = modelManager.getType('org.acme@1.0.0.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            superClassDecl.getFullyQualifiedName().should.equal('org.acme.BaseAsset');
+            superClassDecl.getFullyQualifiedName().should.equal('org.acme@1.0.0.BaseAsset');
         });
 
         it('should return the super class declaration for a super class in another file', () => {
-            modelManager.addCTOModel(`namespace org.base
+            modelManager.addCTOModel(`namespace org.base@1.0.0
             abstract asset BaseAsset { }`);
-            modelManager.addCTOModel(`namespace org.acme
-            import org.base.BaseAsset
+            modelManager.addCTOModel(`namespace org.acme@1.0.0
+            import org.base@1.0.0.BaseAsset
             asset TestAsset identified by assetId extends BaseAsset { o String assetId }`);
-            let classDecl = modelManager.getType('org.acme.TestAsset');
+            let classDecl = modelManager.getType('org.acme@1.0.0.TestAsset');
             let superClassDecl = classDecl._resolveSuperType();
-            superClassDecl.getFullyQualifiedName().should.equal('org.base.BaseAsset');
+            superClassDecl.getFullyQualifiedName().should.equal('org.base@1.0.0.BaseAsset');
         });
 
     });
@@ -411,7 +411,7 @@ describe('ClassDeclaration', () => {
     describe('#getSuperTypeDeclaration', () => {
 
         it('should return Concept if no super type', () => {
-            let classDecl = modelManager.getType('system.Asset');
+            let classDecl = modelManager.getType('concerto@1.0.0.Asset');
             classDecl.getSuperTypeDeclaration().should.not.be.null;
         });
     });
@@ -456,7 +456,7 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return an array with Concept and Participant if there are no superclasses', function() {
-            const testClass = modelManager.getType('com.testing.parent.Base');
+            const testClass = modelManager.getType('com.testing.parent@1.0.0.Base');
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
@@ -464,7 +464,7 @@ describe('ClassDeclaration', () => {
         });
 
         it('should return all superclass definitions', function() {
-            const testClass = modelManager.getType('com.testing.child.Sub');
+            const testClass = modelManager.getType('com.testing.child@1.0.0.Sub');
             should.exist(testClass);
             const superclasses = testClass.getAllSuperTypeDeclarations();
             const superclassNames = superclasses.map(classDef => classDef.getName());
@@ -482,7 +482,7 @@ describe('ClassDeclaration', () => {
             const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
             modelManager.addModelFiles(modelFiles);
 
-            const testClass = modelManager.getType('com.testing.parent.Super');
+            const testClass = modelManager.getType('com.testing.parent@1.0.0.Super');
             should.exist(testClass);
             const subclasses = testClass.getDirectSubclasses();
             const subclassNames = subclasses.map(classDef => classDef.getName());
@@ -498,7 +498,7 @@ describe('ClassDeclaration', () => {
             const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
             modelManager.addModelFiles(modelFiles);
 
-            const testClass = modelManager.getType('com.testing.parent.Super');
+            const testClass = modelManager.getType('com.testing.parent@1.0.0.Super');
             should.exist(testClass);
             const subclasses = testClass.getDirectSubclasses();
 
@@ -517,7 +517,7 @@ describe('ClassDeclaration', () => {
             modelManager.addModelFiles(modelFiles);
         });
         it('should return false', () => {
-            const testClass = modelManager.getType('com.testing.child.Sub');
+            const testClass = modelManager.getType('com.testing.child@1.0.0.Sub');
             testClass.isEvent().should.be.false;
 
         });

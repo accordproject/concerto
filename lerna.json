@@ -1,7 +1,0 @@
-{
-  "packages": [
-    "packages/*"
-  ],
-  "version": "3.16.1",
-  "hoist": true
-}

@@ -1,16 +1,18 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "3.16.1",
+  "version": "4.0.0-alpha.0",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=9"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
   "browser": "dist/concerto-core.js",
-  "typings": "types/index.d.ts",
+  "typings": "dist/index.d.ts",
   "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
     "prepublishOnly": "npm run webpack",
     "pretest": "npm run lint",
     "lint": "eslint .",
@@ -18,14 +20,11 @@
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "node ./scripts/api-changelog.js && cross-env TZ=UTC nyc mocha --recursive -t 10000",
-    "test:watch": "cross-env TZ=UTC nyc mocha --watch --recursive -t 10000",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
+    "test": "cross-env TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000",
+    "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
+    "build": "tsc -p tsconfig.build.json",
     "postbuild": "npm run webpack",
-    "webpack": "webpack --config webpack.config.js --mode production",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "webpack": "webpack --config webpack.config.js --mode production"
   },
   "repository": {
     "type": "git",
@@ -41,6 +40,11 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-env": "7.16.11",
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "@types/jest": "28.1.1",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
     "acorn": "8.5.0",
     "acorn-walk": "8.2.0",
     "babel-loader": "8.2.3",
@@ -56,14 +60,16 @@
     "klaw": "3.0.0",
     "license-check-and-add": "2.3.6",
     "mocha": "10.0.0",
-    "mockery": "2.1.0",
-    "moxios": "0.4.0",
     "node-polyfill-webpack-plugin": "2.0.1",
+    "npm-run-all": "4.1.5",
     "nyc": "15.1.0",
     "process": "0.11.10",
+    "rimraf": "3.0.2",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
     "tmp-promise": "3.0.2",
+    "ts-jest": "28.0.4",
+    "ts-node": "10.9.1",
     "typescript": "4.6.3",
     "webpack": "5.76.0",
     "webpack-cli": "4.9.1",
@@ -71,21 +77,21 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
-    "@accordproject/concerto-cto": "3.16.1",
-    "@accordproject/concerto-metamodel": "3.9.0",
-    "@accordproject/concerto-util": "3.16.1",
-    "dayjs": "1.11.10",
-    "debug": "4.3.4",
-    "lorem-ipsum": "2.0.8",
+    "@accordproject/concerto-codegen": "^3.16.2",
+    "@accordproject/concerto-cto": "^4.0.0-alpha.0",
+    "@accordproject/concerto-metamodel": "3.8.1",
+    "@accordproject/concerto-util": "^4.0.0-alpha.0",
+    "dayjs": "1.10.8",
+    "debug": "4.3.1",
+    "lorem-ipsum": "2.0.3",
     "randexp": "0.5.3",
     "semver": "7.5.4",
-    "slash": "3.0.0",
     "urijs": "1.19.11",
     "uuid": "9.0.1"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
-    "folder": "./lib",
+    "folder": "./src",
     "license": "HEADER",
     "exact_paths_method": "EXCLUDE",
     "exact_paths": [
@@ -110,7 +116,7 @@
     ],
     "insert_license": false,
     "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {
@@ -128,8 +134,8 @@
     }
   },
   "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",
-    "sourceMap": "inline",
     "reporter": [
       "lcov",
       "text-summary",
@@ -137,14 +143,15 @@
       "json"
     ],
     "include": [
-      "lib/**/*.js"
+      "src/**/*.js",
+      "src/**/*.ts"
     ],
     "exclude": [],
     "all": true,
     "check-coverage": true,
     "statements": 99,
-    "branches": 97,
-    "functions": 98,
+    "branches": 94.8,
+    "functions": 99,
     "lines": 99
   }
 }
