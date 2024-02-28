@@ -16,6 +16,7 @@
 
 const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
+const ModelUtil = require('../modelutil');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -73,6 +74,88 @@ class Declaration extends Decorated {
                 `Duplicate declaration name ${duplicateElements[0]}`
             );
         }
+
+        // #648 - check for clashes against imported types
+        if (this.getModelFile().isImportedType(this.getName())){
+            throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
+        }
+
+        this.name = this.ast.name;
+        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
+    }
+
+    /**
+     * Returns the ModelFile that defines this class.
+     *
+     * @public
+     * @return {ModelFile} the owning ModelFile
+     */
+    getModelFile() {
+        return this.modelFile;
+    }
+
+    /**
+     * Returns the short name of a class. This name does not include the
+     * namespace from the owning ModelFile.
+     *
+     * @return {string} the short name of this class
+     */
+    getName() {
+        return this.name;
+    }
+
+    /**
+     * Return the namespace of this class.
+     * @return {string} namespace - a namespace.
+     */
+    getNamespace() {
+        return this.modelFile.getNamespace();
+    }
+
+    /**
+     * Returns the fully qualified name of this class.
+     * The name will include the namespace if present.
+     *
+     * @return {string} the fully-qualified name of this class
+     */
+    getFullyQualifiedName() {
+        return this.fqn;
+    }
+
+    /**
+     * Returns false as scalars are never identified.
+     * @returns {Boolean} false as scalars are never identified
+     */
+    isIdentified() {
+        return false;
+    }
+
+    /**
+     * Returns false as scalars are never identified.
+     * @returns {Boolean} false as scalars are never identified
+     */
+    isSystemIdentified() {
+        return false;
+    }
+
+    /**
+     * Returns the name of the identifying field for this class. Note
+     * that the identifying field may come from a super type.
+     *
+     * @return {string} the name of the id field for this class or null if it does not exist
+     */
+    getIdentifierFieldName() {
+        return null;
+    }
+
+    /**
+     * Returns the FQN of the super type for this class or null if this
+     * class does not have a super type.
+     *
+     * @return {string} the FQN name of the super type or null
+     */
+    getType() {
+        return null;
     }
 
     /**

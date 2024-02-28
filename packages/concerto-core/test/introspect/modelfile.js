@@ -282,6 +282,46 @@ describe('ModelFile', () => {
             }).should.throw('Importing types from different versions ("1.0.0", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
         });
 
+        it('should throw when declaring an ambiguous type', () => {
+            const myModelManager = new ModelManager();
+
+            const model1 = `namespace A@1.0.0
+
+            concept B {
+                o String name
+            }`;
+
+            const model2 = `namespace B@1.0.0
+
+            import A@1.0.0.{B}
+
+            concept B {
+            }`;
+
+
+            let modelFile1 = ParserUtil.newModelFile(myModelManager, model1);
+            myModelManager.addModelFile(modelFile1);
+
+            let modelFile2 = ParserUtil.newModelFile(myModelManager, model2);
+
+            (() => {
+                myModelManager.addModelFile(modelFile2);
+            }).should.throw('Type \'B\' clashes with an imported type with the same name.');
+        });
+
+        it('should recognise a user-space type with the same name as a Prototype', () => {
+            const model1 = `
+            namespace A@1.0.0
+            concept Transaction {}
+            `;
+
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+
+            (() => {
+                modelManager.addModelFile(modelFile1);
+            }).should.throw('Type \'Transaction\' clashes with an imported type with the same name.');
+        });
+
     });
 
     describe('#getDefinitions', () => {
