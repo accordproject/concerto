@@ -62,4 +62,30 @@ describe('parser', () => {
             declarations: [],
         })).should.throw(Error, 'Unrecognized import');
     });
+
+    it('Should throw error for a self-extending declaration', () => {
+        (() => Printer.toCTO({
+            '$class': 'concerto.metamodel@1.0.0.Model',
+            'namespace': 'com.acme@1.0.0',
+            'declarations': [
+                {
+                    '$class': 'concerto.metamodel@1.0.0.AssetDeclaration',
+                    'name': 'Self_Extending',
+                    'isAbstract': false,
+                    'properties': [
+                        {
+                            '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                            'name': 'foo',
+                            'isArray': false,
+                            'isOptional': true
+                        }
+                    ],
+                    'superType': {
+                        '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
+                        'name': 'Self_Extending'
+                    }
+                }
+            ]
+        })).should.throw(Error, 'The declaration "Self_Extending" cannot extend itself.');
+    });
 });

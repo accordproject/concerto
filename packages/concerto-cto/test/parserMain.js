@@ -81,6 +81,24 @@ describe('parser', () => {
         });
     });
 
+    describe('self-extending', () => {
+        const declarationTypes = [
+            'asset',
+            'participant',
+            'transaction',
+            'event',
+            'concept',
+        ];
+        declarationTypes.forEach(declarationType => {
+            it(`Should not parse a self-extending ${declarationType}`, () => {
+                let content = fs.readFileSync(`./test/cto/bad/self-extending-${declarationType}.bad.cto`, 'utf8');
+                (() => {
+                    Parser.parse(content);
+                }).should.throw(new RegExp(`The ${declarationType} ".+" cannot extend itself.`));
+            });
+        });
+    });
+
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [

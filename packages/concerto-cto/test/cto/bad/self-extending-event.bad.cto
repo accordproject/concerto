@@ -1,0 +1,5 @@
+namespace com.acme@1.0.0
+
+event Self_Extending extends Self_Extending {
+  o String foo optional
+}

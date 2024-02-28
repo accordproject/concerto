@@ -82,6 +82,13 @@ class ClassDeclaration extends Declaration {
             }
         }
 
+        if (!Array.isArray(this.ast.properties)) {
+            let formatter = Globalize.messageFormatter('classdeclaration-validate-undefined-properties');
+            throw new IllegalModelException(formatter({
+                'class':this.name
+            }), this.modelFile, this.ast.location);
+        }
+
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
@@ -200,6 +207,19 @@ class ClassDeclaration extends Declaration {
 
         // if we have a super type make sure it exists
         if (this.superType !== null) {
+            // and make sure that the class isn't extending itself
+            // (an exemption is made for the core classes)
+            if (
+                this.superType === this.name &&
+                ![
+                    'Asset', 'Concept', 'Event', 'Participant', 'Transaction',
+                ].includes(this.superType)
+            ) {
+                let formatter = Globalize('en').messageFormatter('classdeclaration-validate-selfextending');
+                throw new IllegalModelException(formatter({
+                    'class': this.name,
+                }), this.modelFile, this.ast.location);
+            }
             this._resolveSuperType();
         }
 

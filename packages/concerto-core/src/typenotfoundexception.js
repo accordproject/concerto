@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { BaseException } = require('@accordproject/concerto-util');
+const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
 const Globalize = require('./globalize');
 
 /**
@@ -31,8 +31,9 @@ class TypeNotFoundException extends BaseException {
      * @param {string} typeName - fully qualified type name.
      * @param {string|undefined} message - error message.
      * @param {string} component - the optional component which throws this error
+     * @param {string} errorType - the error code related to the error
      */
-    constructor(typeName, message, component) {
+    constructor(typeName, message, component, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
         if (!message) {
             const formatter = Globalize.messageFormatter('typenotfounderror-defaultmessage');
             message = formatter({
@@ -40,7 +41,7 @@ class TypeNotFoundException extends BaseException {
             });
         }
 
-        super(message, component);
+        super(message, component, errorType);
         this.typeName = typeName;
     }
 

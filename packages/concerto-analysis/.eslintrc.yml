@@ -11,7 +11,7 @@ plugins:
  - '@typescript-eslint'
 parserOptions:
     ecmaVersion: 13
-    sourceType: script
+    sourceType: module
 rules:
     indent:
         - error
