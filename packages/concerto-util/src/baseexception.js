@@ -14,6 +14,8 @@
 
 'use strict';
 
+const ErrorCodes = require('./errorcodes');
+
 /**
 * A base class for all Concerto exceptions
 * @extends Error

@@ -53,7 +53,7 @@ const Label = require('./label');
 const Identifiers = require('./identifiers');
 
 //errorcodes
-const ErrorCodes = require('./lib/errorcodes');
+const ErrorCodes = require('./errorcodes');
 
 module.exports = {
     BaseException,
