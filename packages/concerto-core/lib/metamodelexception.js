@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { BaseException } = require('@accordproject/concerto-util');
+const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
 
 /**
 * Class representing an invalid Metamodel instance (JSON AST)
@@ -27,9 +27,13 @@ class MetamodelException extends BaseException {
     /**
      * Create the MetamodelException.
      * @param {string} message - The exception message.
+     * @param {string} [code] - the optional code of the error
+     * @param {string} [status] - the optional status of the error
      */
-    constructor(message) {
-        super(message);
+    constructor(message, code, status) {
+        code = code || ErrorCodes.METAMODEL_EXCEPTION.code;
+        status = status || ErrorCodes.METAMODEL_EXCEPTION.status;
+        super(message,'',code, status);
     }
 
 }

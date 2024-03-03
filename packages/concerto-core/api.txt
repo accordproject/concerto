@@ -157,7 +157,7 @@ class IdentifiedDeclaration extends ClassDeclaration {
    + void constructor(ModelFile,Object) throws IllegalModelException
 }
 class IllegalModelException extends BaseFileException {
-   + void constructor(string,ModelFile?,Object?,number,number,number,number,string?) 
+   + void constructor(string,ModelFile?,Object?,number,number,number,number,string?,string?,string?) 
 }
 class Introspector {
    + void constructor(ModelManager) 
@@ -285,7 +285,7 @@ class TransactionDeclaration extends IdentifiedDeclaration {
    + string declarationKind() 
 }
 class MetamodelException extends BaseException {
-   + void constructor(string) 
+   + void constructor(string,string?,string?) 
 }
 class Identifiable extends Typed {
    ~ void constructor(ModelManager,ClassDeclaration,string,string,string,string) 
@@ -335,7 +335,7 @@ class ModelManager extends BaseModelManager {
 }
    + object getRootModel() 
 class SecurityException extends BaseException {
-   + void constructor(string) 
+   + void constructor(string,string?,string?) 
 }
 class Serializer {
    + void constructor(Factory,ModelManager,object?) 
@@ -344,6 +344,6 @@ class Serializer {
    + Resource fromJSON(Object,Object?,boolean,boolean,number?) 
 }
 class TypeNotFoundException extends BaseException {
-   + void constructor(string,string|,string,string) 
+   + void constructor(string,string|,string,string,string?) 
    + string getTypeName() 
 }

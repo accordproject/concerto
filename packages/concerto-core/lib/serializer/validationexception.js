@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { ErrorCodes } = require('@accordproject/concerto-util');
+
 const BaseException = require('@accordproject/concerto-util').BaseException;
 
 /**
@@ -30,9 +32,13 @@ class ValidationException extends BaseException {
      * Create a ValidationException
      * @param {string} message - the message for the exception
      * @param {string} component - the optional component which throws this error
+     * @param {string} [code] - the optional code of the error
+     * @param {string} [status] - the optional status of the error
      */
-    constructor(message, component) {
-        super(message, component);
+    constructor(message, component,code, status) {
+        code = code || ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION.code;
+        status = status || ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION.status;
+        super(message, component, code, status);
     }
 }
 

@@ -47,11 +47,12 @@ class Validator {
     /**
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
-     * @param {string} errorType the type of error
+     * @param {string} [errorType] the type of error
+     * @param {string} [errorStatus] the status of error
      * @throws {Error} throws an error to report the message
      */
-    reportError(id, msg, errorType=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION) {
-        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
+    reportError(id, msg, errorType=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION.code, errorStatus=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION.status) {
+        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType,errorStatus);
     }
 
     /**

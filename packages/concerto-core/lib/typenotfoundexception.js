@@ -32,8 +32,9 @@ class TypeNotFoundException extends BaseException {
      * @param {string|undefined} message - error message.
      * @param {string} component - the optional component which throws this error
      * @param {string} errorType - the error code related to the error
+     * @param {string} [status] - the error status related to the error
      */
-    constructor(typeName, message, component, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
+    constructor(typeName, message, component, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION.code, status = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION.status ) {
         if (!message) {
             const formatter = Globalize.messageFormatter('typenotfounderror-defaultmessage');
             message = formatter({
@@ -41,7 +42,7 @@ class TypeNotFoundException extends BaseException {
             });
         }
 
-        super(message, component, errorType);
+        super(message, component, errorType, status);
         this.typeName = typeName;
     }
 

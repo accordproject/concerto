@@ -14,8 +14,9 @@ declare class TypeNotFoundException extends BaseException {
      * @param {string|undefined} message - error message.
      * @param {string} component - the optional component which throws this error
      * @param {string} errorType - the error code related to the error
+     * @param {string} [status] - the error status related to the error
      */
-    constructor(typeName: string, message: string | undefined, component: string, errorType?: string);
+    constructor(typeName: string, message: string | undefined, component: string, errorType?: string, status?: string);
     typeName: string;
     /**
      * Get the name of the type that was not found.

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { BaseException } = require('@accordproject/concerto-util');
+const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
 
 /**
 * Class representing a security exception
@@ -27,9 +27,13 @@ class SecurityException extends BaseException {
     /**
      * Create the SecurityException.
      * @param {string} message - The exception message.
+     * @param {string} [status] - the optional status of the error
+     * @param {string} [code] - the optional code of the error
      */
-    constructor(message) {
-        super(message);
+    constructor(message, status, code) {
+        status = status || ErrorCodes.SECURITY_EXCEPTION.status;
+        code = code || ErrorCodes.SECURITY_EXCEPTION.code;
+        super(message, '', '', status, code);
     }
 
 }
