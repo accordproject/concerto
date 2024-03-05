@@ -79,6 +79,10 @@ class Decorator {
                 if (thing) {
                     if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
                         // XXX Is this really what we want?
+                        if (!MetaModelNamespace[thing.type.name]) {
+                            const errorMessage = `Type '${thing.type.name}' not found within the namespace '${MetaModelNamespace}'.`;
+                            throw new IllegalModelException(errorMessage);
+                        }
                         this.arguments.push({
                             type: 'Identifier',
                             name: thing.type.name,
