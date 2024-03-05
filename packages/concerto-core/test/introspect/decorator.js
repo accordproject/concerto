@@ -21,6 +21,7 @@ const Decorator = require('../../lib/introspect/decorator');
 
 require('chai').should();
 const sinon = require('sinon');
+const { IllegalModelException } = require('../../lib/introspect/illegalmodelexception');
 
 describe('Decorator', () => {
 
@@ -59,6 +60,24 @@ describe('Decorator', () => {
             d.getArguments().should.deep.equal(['one','two','three']);
             d.isDecorator().should.equal(true);
 
+        });
+        it('should throw an error for invalid type reference', () => {
+            const parent = null; // Placeholder, you need to provide a valid parent object
+            const ast = {
+                name: 'TestDecorator',
+                arguments: [
+                    {
+                        $class: `${MetaModelNamespace}.DecoratorTypeReference`,
+                        type: {
+                            name: 'NonExistentType',
+                            isArray: false
+                        }
+                    }
+                ]
+            };
+
+            const errorMessage=`Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
+            (() => new Decorator(parent, ast)).should.throw(IllegalModelException,errorMessage );
         });
     });
 
