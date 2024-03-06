@@ -1,4 +1,4 @@
 {
-    "$class": "org.test.T",
+    "$class": "org.test@1.0.0.T",
     "$timestamp": "1970-01-01T00:00:00.000Z"
 }

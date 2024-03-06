@@ -1,28 +1,27 @@
 {
   "name": "@accordproject/concerto-vocabulary",
-  "version": "3.16.5",
+  "version": "4.0.0-alpha.0",
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=9"
   },
-  "main": "index.js",
-  "typings": "types/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "postlint": "npm run licchk",
     "licchk": "license-check-and-add",
     "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "nyc mocha --recursive -t 10000",
-    "test:updateSnapshots": "UPDATE_SNAPSHOT=1 nyc mocha --recursive -t 10000",
-    "test:watch": "nyc mocha --watch --recursive -t 10000",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "test": "nyc mocha -r ts-node/register --recursive -t 10000",
+    "test:updateSnapshots": "UPDATE_SNAPSHOT=1 nyc mocha -r ts-node/register  --recursive -t 10000",
+    "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
+    "build": "tsc -p tsconfig.build.json"
   },
   "repository": {
     "type": "git",
@@ -37,7 +36,12 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@accordproject/concerto-core": "3.16.5",
+    "@accordproject/concerto-core": "^4.0.0-alpha.0",
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "@types/jest": "28.1.1",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -46,18 +50,23 @@
     "license-check-and-add": "2.3.6",
     "mocha": "10.0.0",
     "mocha-chai-jest-snapshot": "1.1.4",
+    "npm-run-all": "4.1.5",
     "nyc": "15.1.0",
+    "rimraf": "3.0.2",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
+    "ts-jest": "28.0.4",
+    "ts-node": "10.9.1",
     "typescript": "4.6.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.9.1",
+    "@accordproject/concerto-codegen": "^3.16.2",
+    "@accordproject/concerto-metamodel": "3.8.1",
     "yaml": "2.2.2"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
-    "folder": "./lib",
+    "folder": "./src",
     "license": "HEADER",
     "exact_paths_method": "EXCLUDE",
     "exact_paths": [
@@ -80,7 +89,7 @@
     ],
     "insert_license": false,
     "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {
@@ -98,8 +107,8 @@
     }
   },
   "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",
-    "sourceMap": "inline",
     "reporter": [
       "lcov",
       "text-summary",
@@ -107,14 +116,15 @@
       "json"
     ],
     "include": [
-      "lib/**/*.js"
+      "src/**/*.js",
+      "src/**/*.ts"
     ],
     "exclude": [],
     "all": true,
     "check-coverage": true,
-    "statements": 54,
-    "branches": 41,
-    "functions": 70,
-    "lines": 55
+    "statements": 100,
+    "branches": 93,
+    "functions": 100,
+    "lines": 100
   }
 }

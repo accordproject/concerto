@@ -14,14 +14,14 @@
 
 'use strict';
 
-const GitHubFileLoader = require('../../lib/loaders/githubfileloader');
+const GitHubFileLoader = require('../../src/loaders/githubfileloader');
 
-const moxios = require('moxios');
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
+const nock = require('nock');
 
 const defaultProcessFile = (name, data) => {
     return { name, data };
@@ -51,12 +51,10 @@ describe('GitHubFileLoader', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        moxios.install();
     });
 
     afterEach(() => {
         sandbox.restore();
-        moxios.uninstall();
     });
 
     describe('#accept', () => {
@@ -76,16 +74,15 @@ describe('GitHubFileLoader', () => {
 
         it('should load github URIs', () => {
             // Match against an exact URL value
-            moxios.stubRequest('https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto', {
-                status: 200,
-                responseText: model
-            });
+            nock('https://raw.githubusercontent.com')
+                .get('/accordproject/models/main/src/usa/business.cto')
+                .reply(200, model);
 
             const ml = new GitHubFileLoader(defaultProcessFile);
-            return ml.load( 'github://accordproject/models/master/src/usa/business.cto', {foo: 'bar' })
+            return ml.load( 'github://accordproject/models/main/src/usa/business.cto', {foo: 'bar' })
                 .then((mf) => {
                     mf.should.be.deep.equal({
-                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        name: '@raw.githubusercontent.com.accordproject.models.main.src.usa.business.cto',
                         data: model
                     });
                 });

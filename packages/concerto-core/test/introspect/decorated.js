@@ -14,8 +14,8 @@
 
 'use strict';
 
-const Decorated = require('../../lib/introspect/decorated');
-const ModelFile = require('../../lib/introspect/modelfile');
+const Decorated = require('../../src/introspect/decorated');
+const ModelFile = require('../../src/introspect/modelfile');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -23,31 +23,23 @@ const sinon = require('sinon');
 describe('Decorated', () => {
 
     let modelFile;
-    let decorated;
 
     beforeEach(() => {
         modelFile = sinon.createStubInstance(ModelFile);
-        decorated = new Decorated(modelFile, { ast: true });
     });
 
     describe('#constructor', () => {
 
-        it('should throw if ast not specified', () => {
+        it('should throw if ModelFile not specified', () => {
             (() => {
                 new Decorated(null);
+            }).should.throw(/ModelFile not specified/);
+        });
+
+        it('should throw if ast not specified', () => {
+            (() => {
+                new Decorated(modelFile, null);
             }).should.throw(/ast not specified/);
         });
-
     });
-
-    describe('#getModelFile', () => {
-
-        it('should throw as abstract', () => {
-            (() => {
-                decorated.getModelFile();
-            }).should.throw(/not implemented/);
-        });
-
-    });
-
 });

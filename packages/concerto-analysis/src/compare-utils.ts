@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, EnumValueDeclaration, Field, MapDeclaration, ScalarDeclaration, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
-import Declaration from '@accordproject/concerto-core/types/lib/introspect/declaration';
+import { ClassDeclaration, Declaration, EnumValue, Field, MapDeclaration, ScalarDeclaration, NumberValidator, Property, RelationshipProperty, StringValidator, Validator } from '@accordproject/concerto-core';
 
 export function getDeclarationType(declaration: Declaration) {
     if (declaration instanceof ClassDeclaration) {
@@ -45,9 +44,9 @@ export function getDeclarationType(declaration: Declaration) {
 export function getPropertyType(property: Property) {
     if (property instanceof Field) {
         return 'field';
-    } else if (property instanceof RelationshipDeclaration) {
+    } else if (property instanceof RelationshipProperty) {
         return 'relationship';
-    } else if (property instanceof EnumValueDeclaration) {
+    } else if (property instanceof EnumValue) {
         return 'enum value';
     } else {
         throw new Error(`unknown property type "${property}"`);

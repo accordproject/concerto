@@ -16,5 +16,5 @@ coverage
 dist
 node_modules
 out
-lib/parser.js
+src/parser.js
 test/data

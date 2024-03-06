@@ -5,10 +5,13 @@ import { getDeclarationType, getPropertyType, getValidatorType } from '../../src
 
 const modelManager = new ModelManager();
 const propertyAst = {
+    $class: 'concerto.metamodel@1.0.0.BooleanProperty',
     name: 'myProp',
     type: 'Boolean'
 };
 const modelAst = {
+    $class: 'concerto.metamodel@1.0.0.UnknownDeclaration',
+    name: 'Unknown',
     namespace: 'foo@1.0.0',
     properties: []
 };
@@ -16,10 +19,10 @@ const modelFile = new ModelFile(modelManager, modelAst);
 const classDeclaration = new ClassDeclaration(modelFile, modelAst);
 const property = new Property(classDeclaration, propertyAst);
 const field = new Field(classDeclaration, propertyAst);
-const validator = new Validator(field, undefined);
+const validator = new Validator(field, {});
 
 test('should throw for unknown class declaration type', () => {
-    expect(() => getDeclarationType(classDeclaration)).toThrow('unknown class declaration type "ClassDeclaration {id=foo@1.0.0.undefined super=Concept enum=false abstract=false}"');
+    expect(() => getDeclarationType(classDeclaration)).toThrow('unknown class declaration type "ClassDeclaration {id=foo@1.0.0.Unknown super=Concept declarationKind=UnknownDeclaration abstract=false idField=null}"');
 });
 
 test('should throw for unknown thing', () => {
@@ -28,7 +31,7 @@ test('should throw for unknown thing', () => {
 });
 
 test('should throw for unknown class property type', () => {
-    expect(() => getPropertyType(property)).toThrow('unknown property type "[object Object]');
+    expect(() => getPropertyType(property)).toThrow('unknown property type "BooleanProperty {id=foo@1.0.0.Unknown.myProp}"');
 });
 
 test('should throw for unknown validator type', () => {

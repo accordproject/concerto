@@ -14,10 +14,10 @@
 
 'use strict';
 
-const Decorator = require('../../lib/introspect/decorator');
-const DecoratorFactory = require('../../lib/introspect/decoratorfactory');
-const ModelManager = require('../../lib/modelmanager');
-const Introspector = require('../../lib/introspect/introspector');
+const Decorator = require('../../src/introspect/decorator');
+const DecoratorFactory = require('../../src/introspect/decoratorfactory');
+const ModelManager = require('../../src/modelmanager');
+const Introspector = require('../../src/introspect/introspector');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
 
@@ -92,10 +92,10 @@ describe('Decorators', () => {
             modelFile.getDecorator('parens').should.not.be.null;
             modelFile.getDecorator('parens').getArguments().length.should.equal(0);
 
-            const car = introspector.getClassDeclaration('org.acme.Car');
+            const car = introspector.getClassDeclaration('org.acme@1.0.0.Car');
             checkAll(car, 'asset');
 
-            const driver = introspector.getClassDeclaration('org.acme.Driver');
+            const driver = introspector.getClassDeclaration('org.acme@1.0.0.Driver');
             driver.getDecorator('bar').getArguments()[0].should.equal('participant');
 
             const email = driver.getProperty('email');
@@ -122,48 +122,48 @@ describe('Decorators', () => {
             const myRegulator = driver.getProperty('myRegulator');
             myRegulator.getDecorator('bar').getArguments()[0].should.equal('relationship');
 
-            const transaction = introspector.getClassDeclaration('org.acme.MyTransaction');
+            const transaction = introspector.getClassDeclaration('org.acme@1.0.0.MyTransaction');
             transaction.getDecorator('bar').getArguments()[0].should.equal('transaction');
 
-            const event = introspector.getClassDeclaration('org.acme.MyEvent');
+            const event = introspector.getClassDeclaration('org.acme@1.0.0.MyEvent');
             event.getDecorator('bar').getArguments()[0].should.equal('event');
 
-            const concept = introspector.getClassDeclaration('org.acme.MyConcept');
+            const concept = introspector.getClassDeclaration('org.acme@1.0.0.MyConcept');
             concept.getDecorator('bar').getArguments()[0].should.equal('concept');
 
-            const enm = introspector.getClassDeclaration('org.acme.MyEnum');
+            const enm = introspector.getClassDeclaration('org.acme@1.0.0.MyEnum');
             enm.getDecorator('bar').getArguments()[0].should.equal('enum');
             enm.getProperty('VALUE').getDecorator('bar').getArguments()[0].should.equal('enumValue');
 
-            const tx1 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier1');
+            const tx1 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier1');
             tx1.getDecorator('returns').getArguments()[0].should.deep.equal({
                 name: 'MyConcept',
                 type: 'Identifier',
                 array: false
             });
 
-            const tx2 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier2');
+            const tx2 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier2');
             tx2.getDecorator('returns').getArguments()[0].should.deep.equal({
                 name: 'MyConcept',
                 type: 'Identifier',
                 array: true
             });
 
-            const tx3 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier3');
+            const tx3 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier3');
             tx3.getDecorator('returns').getArguments()[0].should.deep.equal({
                 name: 'String',
                 type: 'Identifier',
                 array: false
             });
 
-            const tx4 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier4');
+            const tx4 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier4');
             tx4.getDecorator('returns').getArguments()[0].should.deep.equal({
                 name: 'String',
                 type: 'Identifier',
                 array: true
             });
 
-            const tx5 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier5');
+            const tx5 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier5');
             tx5.getDecorator('returns').getArguments()[0].should.be.true;
         });
     });
@@ -190,23 +190,25 @@ describe('Decorators', () => {
                  * Process the decorator, and return a specific implementation class for that
                  * decorator, or return null if this decorator is not handled by this processor.
                  * @abstract
+                 * @param {ModelFile} modelFile - the modelFile for the decorator
                  * @param {ClassDeclaration | Property} parent - the owner of this property
                  * @param {Object} ast - The AST created by the parser
                  * @return {Decorator} The decorator.
                  */
-                newDecorator(parent, ast) {
+                newDecorator(modelFile, parent, ast) {
                     if (ast.name !== 'bar') {
                         return null;
                     }
                     return new(class MyDecorator extends Decorator {
                         /**
                          * Create a Decorator.
+                         * @param {ModelFile} modelFile - the modelFile for the decorator
                          * @param {ClassDeclaration | Property} parent - the owner of this property
                          * @param {Object} ast - The AST created by the parser
                          * @throws {IllegalModelException}
                          */
-                        constructor(parent, ast) {
-                            super(parent, ast);
+                        constructor(modelFile, parent, ast) {
+                            super(modelFile, parent, ast);
                         }
                         /**
                          * My method.
@@ -215,7 +217,7 @@ describe('Decorators', () => {
                         myMethod() {
                             return 'woop';
                         }
-                    })(parent, ast);
+                    })(modelFile, parent, ast);
                 }
             });
 
@@ -226,10 +228,10 @@ describe('Decorators', () => {
             modelManager.addCTOModel(modelDefinitions);
             const introspector = new Introspector(modelManager);
 
-            const driver = introspector.getClassDeclaration('org.acme.Driver');
+            const driver = introspector.getClassDeclaration('org.acme@1.0.0.Driver');
             driver.getDecorator('bar').myMethod().should.equal('woop');
 
-            const tx1 = introspector.getClassDeclaration('org.acme.MyTransactionIdentifier1');
+            const tx1 = introspector.getClassDeclaration('org.acme@1.0.0.MyTransactionIdentifier1');
             should.equal(tx1.getDecorator('returns').myMethod, undefined);
 
         });

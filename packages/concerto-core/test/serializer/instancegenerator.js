@@ -15,10 +15,10 @@
 'use strict';
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const Factory = require('../../lib/factory');
-const InstanceGenerator = require('../../lib/serializer/instancegenerator');
-const ModelManager = require('../../lib/modelmanager');
-const ValueGenerator = require('../../lib/serializer/valuegenerator');
+const Factory = require('../../src/factory');
+const InstanceGenerator = require('../../src/serializer/instancegenerator');
+const ModelManager = require('../../src/modelmanager');
+const ValueGenerator = require('../../src/serializer/valuegenerator');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -42,7 +42,7 @@ describe('InstanceGenerator', () => {
     };
 
     beforeEach(() => {
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({enableMapType: true});
         Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
         parameters = {
@@ -55,7 +55,7 @@ describe('InstanceGenerator', () => {
 
     const test = (modelFile) => {
         modelManager.addCTOModel(modelFile);
-        let resource = factory.newResource('org.acme.test', 'MyAsset', 'asset1');
+        let resource = factory.newResource('org.acme.test@1.0.0', 'MyAsset', 'asset1');
         parameters.stack = new TypedStack(resource);
         parameters.seen = [resource.getFullyQualifiedType()];
         let classDeclaration = resource.getClassDeclaration();
@@ -67,11 +67,11 @@ describe('InstanceGenerator', () => {
         it('should throw on unrecognized thing', () => {
             (() => {
                 visitor.visit(dayjs.utc(), {});
-            }).should.throw(/Unrecognised/);
+            }).should.throw(/Model element is invalid/);
         });
 
         it('should generate a default value for a string property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String theValue
@@ -80,7 +80,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a string property with a regex', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String theValue regex = /foo/
@@ -89,7 +89,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate default value for a Map', function () {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
 
             map Foo {
                 o String
@@ -111,9 +111,9 @@ describe('InstanceGenerator', () => {
             values[1].should.be.a('string');
         });
 
-        it('should generate a value with specified lentgh constraint for a string property', () => {
+        it('should generate a value with specified length constraint for a string property', () => {
             useSampleGenerator();
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String valueWithRegexAndLength regex = /^[a-zA-Z0-9_]*$/ length=[1,100]
@@ -135,7 +135,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should not throw a recursion error', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             participant MyParticipant identified by participantId{
                 o String participantId
                 o String value
@@ -151,7 +151,7 @@ describe('InstanceGenerator', () => {
 
         it('should generate empty array value for array property with empty generator ', () => {
             useEmptyGenerator();
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String[] theValues
@@ -160,7 +160,7 @@ describe('InstanceGenerator', () => {
         });
         it('should return null for optional recursive field ', () => {
             parameters.includeOptionalFields = true;
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o MyAsset theValues optional
@@ -170,7 +170,7 @@ describe('InstanceGenerator', () => {
 
         it('should generate one default value for a string array property with sample generator ', () => {
             useSampleGenerator();
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String[] theValues
@@ -180,7 +180,7 @@ describe('InstanceGenerator', () => {
         });
         it('should return an empty array with sample generator, when empty array is recursive ', () => {
             useSampleGenerator();
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o MyAsset[] theValues
@@ -190,7 +190,7 @@ describe('InstanceGenerator', () => {
         it('should throw an error when field is recursive ', () => {
             try {
 
-                test(`namespace org.acme.test
+                test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o MyAsset theValues
@@ -202,7 +202,7 @@ describe('InstanceGenerator', () => {
 
         });
         it('should generate a default value for a date/time property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o DateTime theValue
@@ -211,7 +211,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate one default value for a date/time array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o DateTime[] theValues
@@ -221,7 +221,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for an integer property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Integer theValue
@@ -230,7 +230,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for an integer property with a range', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Integer theValue range = [-1,1]
@@ -239,7 +239,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for an integer array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Integer[] theValues
@@ -249,7 +249,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a long property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Long theValue
@@ -258,7 +258,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a long property with a range', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Long theValue range = [-1,1]
@@ -267,7 +267,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a long array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Long[] theValues
@@ -277,7 +277,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a double property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Double theValue
@@ -286,7 +286,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a double property with a range', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Double theValue range = [-3.142, 3.143]
@@ -295,7 +295,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a double array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Double[] theValues
@@ -305,7 +305,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a boolean property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Boolean theValue
@@ -314,7 +314,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a boolean array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o Boolean[] theValues
@@ -324,7 +324,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for an enum property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             enum MyEnum {
                 o ENUM_VAL1
                 o ENUM_VAL2
@@ -338,7 +338,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for an enum array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             enum MyEnum {
                 o ENUM_VAL1
                 o ENUM_VAL2
@@ -353,7 +353,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a relationship property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 --> MyAsset theValue
@@ -362,7 +362,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a relationship array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 --> MyAsset[] theValues
@@ -372,7 +372,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a resource property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyInnerAsset identified by innerAssetId {
                 o String innerAssetId
                 o String theValue
@@ -386,7 +386,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for a resource array property', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             asset MyInnerAsset identified by innerAssetId {
                 o String innerAssetId
                 o String theValue
@@ -401,7 +401,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a default value for base class properties', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             abstract asset BaseAsset {
                 o String inheritedValue
             }
@@ -412,7 +412,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate a concrete class for an abstract type if one is available', () => {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             abstract concept BaseConcept {
                 o String inheritedValue
             }
@@ -428,7 +428,7 @@ describe('InstanceGenerator', () => {
 
         it('should throw an error when trying to generate a resource from a model that uses an Abstract type with no concrete Implementing type', () => {
             try {
-                test(`namespace org.acme.test
+                test(`namespace org.acme.test@1.0.0
                     abstract concept BaseConcept {
                         o String inheritedValue
                     }
@@ -437,13 +437,13 @@ describe('InstanceGenerator', () => {
                         o BaseConcept aConcept
                     }`);
             } catch (error) {
-                error.should.match(/^Error: No concrete extending type for "org.acme.test.BaseConcept".$/);
+                error.should.match(/^Error: No concrete extending type for "org.acme.test@1.0.0.BaseConcept".$/);
             }
         });
 
         it('should not generate default value for optional property if not requested', () => {
             parameters.includeOptionalFields = false;
-            const resource = test(`namespace org.acme.test
+            const resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String theValue optional
@@ -453,7 +453,7 @@ describe('InstanceGenerator', () => {
 
         it('should generate default value for optional property if requested', () => {
             parameters.includeOptionalFields = true;
-            const resource = test(`namespace org.acme.test
+            const resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
                 o String theValue optional
@@ -462,7 +462,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate concrete subclass for abstract reference', function () {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
             event MyEvent identified by eventId {
                 o String eventId
             }
@@ -474,7 +474,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate default value for a Scalar field', function () {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
 
             scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
             scalar ScalarWithDefault extends String default="000-00-0000"
@@ -491,7 +491,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should generate with appropritate string length value for a Scalar field', function () {
-            let resource = test(`namespace org.acme.test
+            let resource = test(`namespace org.acme.test@1.0.0
 
             scalar ScalarValueWithRegexAndLength extends String regex=/^[a-zA-Z0-9_]*$/ length=[1,100]
             scalar ScalarValueWthLength extends String length=[1,100]
@@ -521,7 +521,7 @@ describe('InstanceGenerator', () => {
         });
 
         it('should throw an error when id provided does not match regex on id field', function () {
-            (() => test(`namespace org.acme.test
+            (() => test(`namespace org.acme.test@1.0.0
 
             scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
 

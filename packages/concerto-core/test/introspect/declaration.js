@@ -14,66 +14,32 @@
 
 'use strict';
 
-const Declaration = require('../../lib/introspect/declaration');
-const ModelFile = require('../../lib/introspect/modelfile');
+const Declaration = require('../../src/introspect/declaration');
+const ModelFile = require('../../src/introspect/modelfile');
 
 require('chai').should();
-const should = require('chai').should();
 const sinon = require('sinon');
 
 describe('Declaration', () => {
 
     let modelFile;
-    let declaration;
 
     beforeEach(() => {
         modelFile = sinon.createStubInstance(ModelFile);
-        declaration = new Declaration(modelFile, { ast: true });
     });
 
     describe('#constructor', () => {
 
-        it('should throw if ast not specified', () => {
+        it('should throw if model file not specified', () => {
             (() => {
                 new Declaration(null);
+            }).should.throw(/ModelFile not specified/);
+        });
+
+        it('should throw if ast not specified', () => {
+            (() => {
+                new Declaration(modelFile, null);
             }).should.throw(/ast not specified/);
-        });
-
-    });
-
-    describe('#isIdentified', () => {
-        it('should be false', () => {
-            declaration.isIdentified().should.equal(false);
-        });
-    });
-
-    describe('#isMapDeclaration', () => {
-        it('should be false', () => {
-            declaration.isMapDeclaration().should.equal(false);
-        });
-    });
-
-    describe('#isSystemIdentified', () => {
-        it('should be false', () => {
-            declaration.isSystemIdentified().should.equal(false);
-        });
-    });
-
-    describe('#getIdentifierFieldName', () => {
-        it('should be null', () => {
-            should.equal(declaration.getIdentifierFieldName(), null);
-        });
-    });
-
-    describe('#getType', () => {
-        it('should be null', () => {
-            should.equal(declaration.getType(), null);
-        });
-    });
-
-    describe('#toString', () => {
-        it('should be null', () => {
-            should.equal(declaration.toString(), null);
         });
     });
 });

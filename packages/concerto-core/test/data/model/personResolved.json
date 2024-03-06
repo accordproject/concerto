@@ -1,18 +1,16 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
     "decorators": [],
-    "namespace": "test.person",
+    "namespace": "test.person@1.0.0",
     "imports": [
         {
-            "$class": "concerto.metamodel@1.0.0.ImportAll",
-            "namespace": "org.accordproject.time",
-            "uri": "https://models.accordproject.org/time@0.2.0.cto"
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ImportType",
-            "name": "TemporalUnit",
-            "namespace": "org.accordproject.time",
-            "uri": "https://models.accordproject.org/time@0.2.0.cto"
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.accordproject.time@0.3.0",
+            "types": [
+                "TemporalUnit",
+                "Month"
+            ],
+            "uri": "https://models.accordproject.org/time@0.3.0.cto"
         }
     ],
     "declarations": [
@@ -26,14 +24,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 221,
-                            "line": 7,
+                            "offset": 156,
+                            "line": 6,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 230,
-                            "line": 8,
+                            "offset": 165,
+                            "line": 7,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -45,14 +43,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 230,
-                            "line": 8,
+                            "offset": 165,
+                            "line": 7,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 241,
-                            "line": 9,
+                            "offset": 176,
+                            "line": 8,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -64,14 +62,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 241,
-                            "line": 9,
+                            "offset": 176,
+                            "line": 8,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 249,
-                            "line": 10,
+                            "offset": 184,
+                            "line": 9,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -81,14 +79,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 205,
-                    "line": 6,
+                    "offset": 140,
+                    "line": 5,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 250,
-                    "line": 10,
+                    "offset": 185,
+                    "line": 9,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -102,14 +100,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 252,
-                    "line": 12,
+                    "offset": 187,
+                    "line": 11,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 287,
-                    "line": 13,
+                    "offset": 222,
+                    "line": 12,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -128,14 +126,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 331,
-                            "line": 16,
+                            "offset": 266,
+                            "line": 15,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 371,
-                            "line": 17,
+                            "offset": 306,
+                            "line": 16,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -154,14 +152,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 371,
-                            "line": 17,
+                            "offset": 306,
+                            "line": 16,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 391,
-                            "line": 18,
+                            "offset": 326,
+                            "line": 17,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -173,21 +171,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Address",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 391,
-                            "line": 18,
+                            "offset": 326,
+                            "line": 17,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 411,
-                            "line": 19,
+                            "offset": 346,
+                            "line": 18,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -199,21 +197,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Address",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 411,
-                            "line": 19,
+                            "offset": 346,
+                            "line": 18,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 452,
-                            "line": 20,
+                            "offset": 387,
+                            "line": 19,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -226,21 +224,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Address",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 452,
-                            "line": 20,
+                            "offset": 387,
+                            "line": 19,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 475,
-                            "line": 21,
+                            "offset": 410,
+                            "line": 20,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -252,21 +250,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Address",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": true,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 475,
-                            "line": 21,
+                            "offset": 410,
+                            "line": 20,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 500,
-                            "line": 22,
+                            "offset": 435,
+                            "line": 21,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -278,21 +276,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Address",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": false,
                     "isOptional": true,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 500,
-                            "line": 22,
+                            "offset": 435,
+                            "line": 21,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 532,
-                            "line": 23,
+                            "offset": 467,
+                            "line": 22,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -304,21 +302,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Gender",
-                        "namespace": "test.person"
+                        "namespace": "test.person@1.0.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 532,
-                            "line": 23,
+                            "offset": 467,
+                            "line": 22,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 550,
-                            "line": 24,
+                            "offset": 485,
+                            "line": 23,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -332,14 +330,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 550,
-                            "line": 24,
+                            "offset": 485,
+                            "line": 23,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 574,
-                            "line": 25,
+                            "offset": 509,
+                            "line": 24,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -349,14 +347,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 289,
-                    "line": 15,
+                    "offset": 224,
+                    "line": 14,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 575,
-                    "line": 25,
+                    "offset": 510,
+                    "line": 24,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -364,7 +362,7 @@
             "superType": {
                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                 "name": "Individual",
-                "namespace": "test.person"
+                "namespace": "test.person@1.0.0"
             }
         },
         {
@@ -380,14 +378,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 617,
-                            "line": 28,
+                            "offset": 552,
+                            "line": 27,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 636,
-                            "line": 29,
+                            "offset": 571,
+                            "line": 28,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -401,14 +399,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 636,
-                            "line": 29,
+                            "offset": 571,
+                            "line": 28,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 654,
-                            "line": 30,
+                            "offset": 589,
+                            "line": 29,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -418,14 +416,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 577,
-                    "line": 27,
+                    "offset": 512,
+                    "line": 26,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 655,
-                    "line": 30,
+                    "offset": 590,
+                    "line": 29,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -433,7 +431,7 @@
             "superType": {
                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                 "name": "Person",
-                "namespace": "test.person"
+                "namespace": "test.person@1.0.0"
             }
         },
         {
@@ -449,14 +447,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 688,
-                            "line": 33,
+                            "offset": 623,
+                            "line": 32,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 718,
-                            "line": 34,
+                            "offset": 653,
+                            "line": 33,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -471,14 +469,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 718,
-                            "line": 34,
+                            "offset": 653,
+                            "line": 33,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 746,
-                            "line": 35,
+                            "offset": 681,
+                            "line": 34,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -493,14 +491,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 746,
-                            "line": 35,
+                            "offset": 681,
+                            "line": 34,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 778,
-                            "line": 36,
+                            "offset": 713,
+                            "line": 35,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -515,14 +513,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 778,
-                            "line": 36,
+                            "offset": 713,
+                            "line": 35,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 808,
-                            "line": 37,
+                            "offset": 743,
+                            "line": 36,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -537,14 +535,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 808,
-                            "line": 37,
+                            "offset": 743,
+                            "line": 36,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 841,
-                            "line": 38,
+                            "offset": 776,
+                            "line": 37,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -559,14 +557,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 841,
-                            "line": 38,
+                            "offset": 776,
+                            "line": 37,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 861,
-                            "line": 39,
+                            "offset": 796,
+                            "line": 38,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -580,14 +578,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 861,
-                            "line": 39,
+                            "offset": 796,
+                            "line": 38,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 900,
-                            "line": 40,
+                            "offset": 835,
+                            "line": 39,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -602,14 +600,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 900,
-                            "line": 40,
+                            "offset": 835,
+                            "line": 39,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 934,
-                            "line": 41,
+                            "offset": 869,
+                            "line": 40,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -620,14 +618,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 657,
-                    "line": 32,
+                    "offset": 592,
+                    "line": 31,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 935,
-                    "line": 41,
+                    "offset": 870,
+                    "line": 40,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -649,14 +647,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1054,
-                            "line": 47,
+                            "offset": 989,
+                            "line": 46,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1139,
-                            "line": 51,
+                            "offset": 1074,
+                            "line": 50,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -668,14 +666,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 1054,
-                                    "line": 47,
+                                    "offset": 989,
+                                    "line": 46,
                                     "column": 3,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 1084,
-                                    "line": 47,
+                                    "offset": 1019,
+                                    "line": 46,
                                     "column": 33,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -687,14 +685,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1059,
-                                            "line": 47,
+                                            "offset": 994,
+                                            "line": 46,
                                             "column": 8,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1062,
-                                            "line": 47,
+                                            "offset": 997,
+                                            "line": 46,
                                             "column": 11,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -706,14 +704,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1063,
-                                            "line": 47,
+                                            "offset": 998,
+                                            "line": 46,
                                             "column": 12,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1064,
-                                            "line": 47,
+                                            "offset": 999,
+                                            "line": 46,
                                             "column": 13,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -725,14 +723,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1065,
-                                            "line": 47,
+                                            "offset": 1000,
+                                            "line": 46,
                                             "column": 14,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1068,
-                                            "line": 47,
+                                            "offset": 1003,
+                                            "line": 46,
                                             "column": 17,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -744,14 +742,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1069,
-                                            "line": 47,
+                                            "offset": 1004,
+                                            "line": 46,
                                             "column": 18,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1074,
-                                            "line": 47,
+                                            "offset": 1009,
+                                            "line": 46,
                                             "column": 23,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -763,14 +761,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1075,
-                                            "line": 47,
+                                            "offset": 1010,
+                                            "line": 46,
                                             "column": 24,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1078,
-                                            "line": 47,
+                                            "offset": 1013,
+                                            "line": 46,
                                             "column": 27,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -782,14 +780,14 @@
                                     "location": {
                                         "$class": "concerto.metamodel@1.0.0.Range",
                                         "start": {
-                                            "offset": 1079,
-                                            "line": 47,
+                                            "offset": 1014,
+                                            "line": 46,
                                             "column": 28,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         },
                                         "end": {
-                                            "offset": 1083,
-                                            "line": 47,
+                                            "offset": 1018,
+                                            "line": 46,
                                             "column": 32,
                                             "$class": "concerto.metamodel@1.0.0.Position"
                                         }
@@ -803,14 +801,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 1087,
-                                    "line": 48,
+                                    "offset": 1022,
+                                    "line": 47,
                                     "column": 3,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 1094,
-                                    "line": 48,
+                                    "offset": 1029,
+                                    "line": 47,
                                     "column": 10,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -823,14 +821,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 1097,
-                                    "line": 49,
+                                    "offset": 1032,
+                                    "line": 48,
                                     "column": 3,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 1102,
-                                    "line": 49,
+                                    "offset": 1037,
+                                    "line": 48,
                                     "column": 8,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -851,14 +849,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1139,
-                            "line": 51,
+                            "offset": 1074,
+                            "line": 50,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1170,
-                            "line": 52,
+                            "offset": 1105,
+                            "line": 51,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -876,14 +874,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1170,
-                            "line": 52,
+                            "offset": 1105,
+                            "line": 51,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1202,
-                            "line": 53,
+                            "offset": 1137,
+                            "line": 52,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -901,14 +899,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1202,
-                            "line": 53,
+                            "offset": 1137,
+                            "line": 52,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1233,
-                            "line": 54,
+                            "offset": 1168,
+                            "line": 53,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -927,14 +925,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1233,
-                            "line": 54,
+                            "offset": 1168,
+                            "line": 53,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1261,
-                            "line": 55,
+                            "offset": 1196,
+                            "line": 54,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -952,14 +950,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1261,
-                            "line": 55,
+                            "offset": 1196,
+                            "line": 54,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1290,
-                            "line": 56,
+                            "offset": 1225,
+                            "line": 55,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -977,14 +975,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1290,
-                            "line": 56,
+                            "offset": 1225,
+                            "line": 55,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1325,
-                            "line": 57,
+                            "offset": 1260,
+                            "line": 56,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1003,14 +1001,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1325,
-                            "line": 57,
+                            "offset": 1260,
+                            "line": 56,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1357,
-                            "line": 58,
+                            "offset": 1292,
+                            "line": 57,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1028,14 +1026,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1357,
-                            "line": 58,
+                            "offset": 1292,
+                            "line": 57,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1386,
-                            "line": 59,
+                            "offset": 1321,
+                            "line": 58,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1049,14 +1047,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 937,
-                    "line": 43,
+                    "offset": 872,
+                    "line": 42,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 1387,
-                    "line": 59,
+                    "offset": 1322,
+                    "line": 58,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -1064,7 +1062,7 @@
             "superType": {
                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                 "name": "Address",
-                "namespace": "test.person"
+                "namespace": "test.person@1.0.0"
             },
             "decorators": [
                 {
@@ -1073,14 +1071,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 937,
-                            "line": 43,
+                            "offset": 872,
+                            "line": 42,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 993,
-                            "line": 43,
+                            "offset": 928,
+                            "line": 42,
                             "column": 57,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1092,14 +1090,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 946,
-                                    "line": 43,
+                                    "offset": 881,
+                                    "line": 42,
                                     "column": 10,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 949,
-                                    "line": 43,
+                                    "offset": 884,
+                                    "line": 42,
                                     "column": 13,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1111,14 +1109,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 950,
-                                    "line": 43,
+                                    "offset": 885,
+                                    "line": 42,
                                     "column": 14,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 951,
-                                    "line": 43,
+                                    "offset": 886,
+                                    "line": 42,
                                     "column": 15,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1130,14 +1128,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 952,
-                                    "line": 43,
+                                    "offset": 887,
+                                    "line": 42,
                                     "column": 16,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 955,
-                                    "line": 43,
+                                    "offset": 890,
+                                    "line": 42,
                                     "column": 19,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1149,14 +1147,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 956,
-                                    "line": 43,
+                                    "offset": 891,
+                                    "line": 42,
                                     "column": 20,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 961,
-                                    "line": 43,
+                                    "offset": 896,
+                                    "line": 42,
                                     "column": 25,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1168,14 +1166,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 962,
-                                    "line": 43,
+                                    "offset": 897,
+                                    "line": 42,
                                     "column": 26,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 965,
-                                    "line": 43,
+                                    "offset": 900,
+                                    "line": 42,
                                     "column": 29,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1187,14 +1185,14 @@
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 966,
-                                    "line": 43,
+                                    "offset": 901,
+                                    "line": 42,
                                     "column": 30,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 970,
-                                    "line": 43,
+                                    "offset": 905,
+                                    "line": 42,
                                     "column": 34,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1205,20 +1203,20 @@
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                                 "name": "Gender",
-                                "namespace": "test.person"
+                                "namespace": "test.person@1.0.0"
                             },
                             "isArray": false,
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 971,
-                                    "line": 43,
+                                    "offset": 906,
+                                    "line": 42,
                                     "column": 35,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 977,
-                                    "line": 43,
+                                    "offset": 912,
+                                    "line": 42,
                                     "column": 41,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1229,20 +1227,20 @@
                             "type": {
                                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                                 "name": "TemporalUnit",
-                                "namespace": "org.accordproject.time"
+                                "namespace": "org.accordproject.time@0.3.0"
                             },
                             "isArray": true,
                             "location": {
                                 "$class": "concerto.metamodel@1.0.0.Range",
                                 "start": {
-                                    "offset": 978,
-                                    "line": 43,
+                                    "offset": 913,
+                                    "line": 42,
                                     "column": 42,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 },
                                 "end": {
-                                    "offset": 992,
-                                    "line": 43,
+                                    "offset": 927,
+                                    "line": 42,
                                     "column": 56,
                                     "$class": "concerto.metamodel@1.0.0.Position"
                                 }
@@ -1256,14 +1254,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 994,
-                            "line": 44,
+                            "offset": 929,
+                            "line": 43,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1005,
-                            "line": 44,
+                            "offset": 940,
+                            "line": 43,
                             "column": 12,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1276,14 +1274,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1006,
-                            "line": 45,
+                            "offset": 941,
+                            "line": 44,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1015,
-                            "line": 45,
+                            "offset": 950,
+                            "line": 44,
                             "column": 10,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1299,14 +1297,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 1389,
-                    "line": 61,
+                    "offset": 1324,
+                    "line": 60,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 1400,
-                    "line": 62,
+                    "offset": 1335,
+                    "line": 61,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -1320,14 +1318,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 1402,
-                    "line": 64,
+                    "offset": 1337,
+                    "line": 63,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 1413,
-                    "line": 65,
+                    "offset": 1348,
+                    "line": 64,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }
@@ -1346,14 +1344,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1450,
-                            "line": 68,
+                            "offset": 1385,
+                            "line": 67,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1464,
-                            "line": 69,
+                            "offset": 1399,
+                            "line": 68,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1365,21 +1363,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "TemporalUnit",
-                        "namespace": "org.accordproject.time"
+                        "namespace": "org.accordproject.time@0.3.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1464,
-                            "line": 69,
+                            "offset": 1399,
+                            "line": 68,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1484,
-                            "line": 70,
+                            "offset": 1419,
+                            "line": 69,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1391,21 +1389,21 @@
                     "type": {
                         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                         "name": "Month",
-                        "namespace": "org.accordproject.time"
+                        "namespace": "org.accordproject.time@0.3.0"
                     },
                     "isArray": false,
                     "isOptional": false,
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1484,
-                            "line": 70,
+                            "offset": 1419,
+                            "line": 69,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1500,
-                            "line": 71,
+                            "offset": 1435,
+                            "line": 70,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1424,14 +1422,14 @@
                     "location": {
                         "$class": "concerto.metamodel@1.0.0.Range",
                         "start": {
-                            "offset": 1500,
-                            "line": 71,
+                            "offset": 1435,
+                            "line": 70,
                             "column": 3,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         },
                         "end": {
-                            "offset": 1516,
-                            "line": 72,
+                            "offset": 1451,
+                            "line": 71,
                             "column": 1,
                             "$class": "concerto.metamodel@1.0.0.Position"
                         }
@@ -1441,14 +1439,14 @@
             "location": {
                 "$class": "concerto.metamodel@1.0.0.Range",
                 "start": {
-                    "offset": 1415,
-                    "line": 67,
+                    "offset": 1350,
+                    "line": 66,
                     "column": 1,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 },
                 "end": {
-                    "offset": 1517,
-                    "line": 72,
+                    "offset": 1452,
+                    "line": 71,
                     "column": 2,
                     "$class": "concerto.metamodel@1.0.0.Position"
                 }

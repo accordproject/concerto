@@ -16,8 +16,9 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const Decorator = require('../../lib/introspect/decorator');
+const ModelFile = require('../../src/introspect/modelfile');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const Decorator = require('../../src/introspect/decorator');
 
 require('chai').should();
 const sinon = require('sinon');
@@ -25,6 +26,7 @@ const sinon = require('sinon');
 describe('Decorator', () => {
 
     let mockAssetDeclaration;
+    let mockModelFile;
 
     const ast = {
         $class: `${MetaModelNamespace}.Decorator`,
@@ -47,13 +49,14 @@ describe('Decorator', () => {
 
     beforeEach(() => {
         mockAssetDeclaration = sinon.createStubInstance(AssetDeclaration);
+        mockModelFile = sinon.createStubInstance(ModelFile);
     });
 
     describe('#constructor', () => {
 
         it('should store values', () => {
 
-            const d = new Decorator(mockAssetDeclaration, ast);
+            const d = new Decorator(mockModelFile, mockAssetDeclaration, ast);
             d.getParent().should.equal(mockAssetDeclaration);
             d.getName().should.equal('Test');
             d.getArguments().should.deep.equal(['one','two','three']);
@@ -65,7 +68,7 @@ describe('Decorator', () => {
     describe('#accept', () => {
 
         it('should call the visitor', () => {
-            const d = new Decorator(mockAssetDeclaration, ast);
+            const d = new Decorator(mockModelFile, mockAssetDeclaration, ast);
             let visitor = {
                 visit: sinon.stub()
             };

@@ -22,10 +22,10 @@ const scalarDeclarationExtendsChanged: ComparerFactory = (context) => ({
             return;
         }
 
-        if(a.getType() !== b.getType()) {
+        if(a.getScalarType() !== b.getScalarType()) {
             context.report({
                 key: 'scalar-extends-changed',
-                message: `The scalar extends was changed from "${a.getType()}" to "${b.getType()}"`,
+                message: `The scalar extends was changed from "${a.getScalarType()}" to "${b.getScalarType()}"`,
                 element: b.getName()
             });
         }

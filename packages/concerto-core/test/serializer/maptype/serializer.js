@@ -14,10 +14,12 @@
 
 'use strict';
 
-const Factory = require('../../../lib/factory');
-const ModelManager = require('../../../lib/modelmanager');
-const Resource = require('../../../lib/model/resource');
-const Serializer = require('../../../lib/serializer');
+const dayjs = require('dayjs');
+
+const Factory = require('../../../src/factory');
+const ModelManager = require('../../../src/modelmanager');
+const Resource = require('../../../src/model/resource');
+const Serializer = require('../../../src/serializer');
 const Util = require('../../composer/composermodelutility');
 
 require('chai').should();
@@ -37,7 +39,7 @@ describe('Serializer', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-        namespace org.acme.sample
+        namespace org.acme.sample@1.0.0
 
         concept Concepts {
             o Dictionary dict optional
@@ -149,7 +151,7 @@ describe('Serializer', () => {
     describe('# toJSON <> fromJSON', () => {
         it('should serialize -> deserialize with a Map <String, String>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.dict = new Map();
             concept.dict.set('Lorem', 'Ipsum');
@@ -159,7 +161,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 dict: {
                     Lorem: 'Ipsum',
                     Ipsum: 'Lorem'
@@ -177,7 +179,7 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <String, Integer>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.score = new Map();
             concept.score.set('Bob', 1);
@@ -187,7 +189,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 score: {
                     Bob: 1,
                     Alice: 1
@@ -205,7 +207,7 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <String, Long>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.points = new Map();
             concept.points.set('Bob', -398741129664271);
@@ -215,7 +217,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 points: {
                     Bob: -398741129664271,
                     Alice: 8999999125356546
@@ -233,7 +235,7 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <String, Double>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.balance = new Map();
             concept.balance.set('Bob', 99999.99);
@@ -243,7 +245,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 balance: {
                     Bob: 99999.99,
                     Alice: 1000000.00
@@ -261,7 +263,7 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <String, Boolean>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.rsvp = new Map();
             concept.rsvp.set('Bob', true);
@@ -271,7 +273,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rsvp: {
                     Bob: true,
                     Alice: false
@@ -289,20 +291,20 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <String, DateTime>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.birthday = new Map();
-            concept.birthday.set('Bob', '2023-10-28T01:02:03Z');
-            concept.birthday.set('Alice', '2024-10-28T01:02:03Z');
+            concept.birthday.set('Bob', dayjs('2023-10-28T01:02:03Z'));
+            concept.birthday.set('Alice', dayjs('2024-10-28T01:02:03Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: '2023-10-28T01:02:03.000Z',
+                    Alice: '2024-10-28T01:02:03.000Z'
                 }
             });
 
@@ -311,26 +313,26 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.birthday.should.be.an.instanceOf(Map);
-            resource.birthday.get('Bob').should.equal('2023-10-28T01:02:03Z');
-            resource.birthday.get('Alice').should.equal('2024-10-28T01:02:03Z');
+            resource.birthday.get('Bob').unix().should.equal(dayjs('2023-10-28T01:02:03Z').unix());
+            resource.birthday.get('Alice').unix().should.equal(dayjs('2024-10-28T01:02:03Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <String, Scalar>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.celebration = new Map();
-            concept.celebration.set('BobBirthday', '2022-11-28T01:02:03Z');
-            concept.celebration.set('AliceAnniversary', '2023-10-28T01:02:03Z');
+            concept.celebration.set('BobBirthday', dayjs('2022-11-28T01:02:03Z'));
+            concept.celebration.set('AliceAnniversary', dayjs('2023-10-28T01:02:03Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': '2022-11-28T01:02:03.000Z',
+                    'AliceAnniversary': '2023-10-28T01:02:03.000Z',
                 }
             });
 
@@ -339,16 +341,16 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.celebration.should.be.an.instanceOf(Map);
-            resource.celebration.get('BobBirthday').should.equal('2022-11-28T01:02:03Z');
-            resource.celebration.get('AliceAnniversary').should.equal('2023-10-28T01:02:03Z');
+            resource.celebration.get('BobBirthday').unix().should.equal(dayjs('2022-11-28T01:02:03Z').unix());
+            resource.celebration.get('AliceAnniversary').unix().should.equal(dayjs('2023-10-28T01:02:03Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <String, Concept>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
-            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
-            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
+            const bob = factory.newConcept('org.acme.sample@1.0.0', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample@1.0.0', 'Person', 'Alice');
 
             concept.rolodex = new Map();
             concept.rolodex.set('Dublin', bob);
@@ -358,10 +360,10 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rolodex: {
-                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
+                    'Dublin': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'}
                 }
             });
 
@@ -374,26 +376,26 @@ describe('Serializer', () => {
             resource.rolodex.get('Dublin').should.be.an.instanceOf(Resource);
             resource.rolodex.get('London').should.be.an.instanceOf(Resource);
 
-            resource.rolodex.get('Dublin').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Bob' });
-            resource.rolodex.get('London').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Alice' });
+            resource.rolodex.get('Dublin').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Bob' });
+            resource.rolodex.get('London').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Alice' });
         });
 
         it('should serialize -> deserialize with a Map <Scalar, String> : Scalar extends DateTime', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.appointment = new Map();
-            concept.appointment.set('2023-11-28T01:02:03Z', 'BobBirthday');
-            concept.appointment.set('2024-10-28T01:02:03Z', 'AliceAnniversary');
+            concept.appointment.set(dayjs('2023-11-28T01:02:03Z'), 'BobBirthday');
+            concept.appointment.set(dayjs('2024-10-28T01:02:03Z'), 'AliceAnniversary');
 
             // serialize and assert
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 appointment: {
-                    '2023-11-28T01:02:03Z': 'BobBirthday',
-                    '2024-10-28T01:02:03Z': 'AliceAnniversary'
+                    '2023-11-28T01:02:03.000Z': 'BobBirthday',
+                    '2024-10-28T01:02:03.000Z': 'AliceAnniversary'
                 }
             });
 
@@ -402,13 +404,14 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.appointment.should.be.an.instanceOf(Map);
-            resource.appointment.get('2023-11-28T01:02:03Z').should.equal('BobBirthday');
-            resource.appointment.get('2024-10-28T01:02:03Z').should.equal('AliceAnniversary');
+            const keyIt = resource.appointment.keys();
+            resource.appointment.get(keyIt.next().value).should.equal('BobBirthday');
+            resource.appointment.get(keyIt.next().value).should.equal('AliceAnniversary');
         });
 
         it('should serialize -> deserialize with a Map <Scalar, String> : Scalar extends String', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.database = new Map();
             concept.database.set('D4F45017-AD2B-416B-AD9F-3B74F7DEA291', 'Bob');
@@ -418,7 +421,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 database: {
                     'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': 'Bob',
                     'E17B69D9-9B57-4C4A-957E-8B202D7B6C5A': 'Alice'
@@ -436,20 +439,20 @@ describe('Serializer', () => {
 
         it('should serialize -> deserialize with a Map <Scalar, Scalar>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.stopwatch = new Map();
-            concept.stopwatch.set('2023-10-28T00:00:00Z', '2023-10-28T11:12:13Z');
-            concept.stopwatch.set('2024-11-28T00:00:00Z', '2024-11-28T11:12:13Z');
+            concept.stopwatch.set(dayjs('2023-10-28T00:00:00Z'), dayjs('2023-10-28T11:12:13Z'));
+            concept.stopwatch.set(dayjs('2024-11-28T00:00:00Z'), dayjs('2024-11-28T11:12:13Z'));
 
             // serialize and assert
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 stopwatch: {
-                    '2023-10-28T00:00:00Z': '2023-10-28T11:12:13Z',
-                    '2024-11-28T00:00:00Z': '2024-11-28T11:12:13Z',
+                    '2023-10-28T00:00:00.000Z': '2023-10-28T11:12:13.000Z',
+                    '2024-11-28T00:00:00.000Z': '2024-11-28T11:12:13.000Z',
                 }
             });
 
@@ -458,16 +461,17 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.stopwatch.should.be.an.instanceOf(Map);
-            resource.stopwatch.get('2023-10-28T00:00:00Z').should.equal('2023-10-28T11:12:13Z');
-            resource.stopwatch.get('2024-11-28T00:00:00Z').should.equal('2024-11-28T11:12:13Z');
+            const keyIt = resource.stopwatch.keys();
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2023-10-28T11:12:13Z').unix());
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2024-11-28T11:12:13Z').unix());
         });
 
         it('should serialize -> deserialize with a Map <Scalar, Concept>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
-            const bob = factory.newConcept('org.acme.sample', 'Person', 'Bob');
-            const alice = factory.newConcept('org.acme.sample', 'Person', 'Alice');
+            const bob = factory.newConcept('org.acme.sample@1.0.0', 'Person', 'Bob');
+            const alice = factory.newConcept('org.acme.sample@1.0.0', 'Person', 'Alice');
 
             concept.directory = new Map();
             concept.directory.set('D4F45017-AD2B-416B-AD9F-3B74F7DEA291', bob);
@@ -477,10 +481,10 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 directory: {
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'},
                 }
             });
 
@@ -490,29 +494,30 @@ describe('Serializer', () => {
             resource.should.be.an.instanceOf(Resource);
             resource.directory.should.be.an.instanceOf(Map);
 
+
             resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').should.be.an.instanceOf(Resource);
             resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').should.be.an.instanceOf(Resource);
 
-            resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Bob' });
-            resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Alice' });
+            resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Bob' });
+            resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Alice' });
         });
 
         it('should serialize -> deserialize with a Map <DateTime, String>', () => {
             // setup
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.diary = new Map();
-            concept.diary.set('2023-10-28T01:02:03Z', 'Birthday');
-            concept.diary.set('2024-10-28T01:02:03Z', 'Anniversary');
+            concept.diary.set(dayjs('2023-10-28T01:02:03Z'), 'Birthday');
+            concept.diary.set(dayjs('2024-10-28T01:02:03Z'), 'Anniversary');
 
             // serialize and assert
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 diary: {
-                    '2023-10-28T01:02:03Z': 'Birthday',
-                    '2024-10-28T01:02:03Z': 'Anniversary'
+                    '2023-10-28T01:02:03.000Z': 'Birthday',
+                    '2024-10-28T01:02:03.000Z': 'Anniversary'
                 }
             });
 
@@ -521,8 +526,9 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.diary.should.be.an.instanceOf(Map);
-            resource.diary.get('2023-10-28T01:02:03Z').should.equal('Birthday');
-            resource.diary.get('2024-10-28T01:02:03Z').should.equal('Anniversary');
+            const keyIt = resource.diary.keys();
+            resource.diary.get(keyIt.next().value).should.equal('Birthday');
+            resource.diary.get(keyIt.next().value).should.equal('Anniversary');
         });
     });
 
@@ -530,7 +536,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, String>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 dict: {
                     Bob: 'Ipsum',
                     Alice: 'Lorem'
@@ -549,7 +555,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 dict: {
                     Bob: 'Ipsum',
                     Alice: 'Lorem'
@@ -560,7 +566,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, Integer>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 score: {
                     Bob: 1,
                     Alice: 1
@@ -579,7 +585,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 score: {
                     Bob: 1,
                     Alice: 1
@@ -590,7 +596,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, Long>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 points: {
                     Bob: -398741129664271,
                     Alice: 8999999125356546
@@ -609,7 +615,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 points: {
                     Bob: -398741129664271,
                     Alice: 8999999125356546
@@ -620,7 +626,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, Double>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 balance: {
                     Bob: 99999.99,
                     Alice: 1000000.00
@@ -639,7 +645,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 balance: {
                     Bob: 99999.99,
                     Alice: 1000000.00
@@ -650,7 +656,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, Boolean>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rsvp: {
                     Bob: true,
                     Alice: false
@@ -669,7 +675,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rsvp: {
                     Bob: true,
                     Alice: false
@@ -678,12 +684,16 @@ describe('Serializer', () => {
         });
 
         it('should deserialize -> serialize with a Map <String, DateTime>', () => {
+
+            const bobBirthday = dayjs('2023-10-28T01:02:03Z');
+            const aliceBirthday = dayjs('2024-10-28T01:02:03Z');
+
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: bobBirthday.utc(),
+                    Alice: aliceBirthday.utc()
                 }
             };
 
@@ -692,28 +702,32 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.birthday.should.be.an.instanceOf(Map);
-            resource.birthday.get('Bob').should.equal('2023-10-28T01:02:03Z');
-            resource.birthday.get('Alice').should.equal('2024-10-28T01:02:03Z');
+            resource.birthday.get('Bob').unix().should.equal(bobBirthday.unix());
+            resource.birthday.get('Alice').unix().should.equal(aliceBirthday.unix());
 
             // serialize and assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 birthday: {
-                    Bob: '2023-10-28T01:02:03Z',
-                    Alice: '2024-10-28T01:02:03Z'
+                    Bob: '2023-10-28T01:02:03.000Z',
+                    Alice: '2024-10-28T01:02:03.000Z'
                 }
             });
         });
 
         it('should deserialize -> serialize with a Map <String, Scalar>', () => {
+
+            const bobBirthday = dayjs('2022-11-28T01:02:03.000Z');
+            const aliceAnniversary = dayjs('2023-10-28T01:02:03.000Z');
+
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': bobBirthday.utc(),
+                    'AliceAnniversary': aliceAnniversary.utc(),
                 }
             };
 
@@ -722,17 +736,17 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.celebration.should.be.an.instanceOf(Map);
-            resource.celebration.get('BobBirthday').should.equal('2022-11-28T01:02:03Z');
-            resource.celebration.get('AliceAnniversary').should.equal('2023-10-28T01:02:03Z');
+            resource.celebration.get('BobBirthday').unix().should.equal(bobBirthday.unix());
+            resource.celebration.get('AliceAnniversary').unix().should.equal(aliceAnniversary.unix());
 
             // serialize and assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 celebration: {
-                    'BobBirthday': '2022-11-28T01:02:03Z',
-                    'AliceAnniversary': '2023-10-28T01:02:03Z',
+                    'BobBirthday': '2022-11-28T01:02:03.000Z',
+                    'AliceAnniversary': '2023-10-28T01:02:03.000Z',
                 }
             });
 
@@ -741,10 +755,10 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <String, Concept>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rolodex: {
-                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
+                    'Dublin': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'}
                 }
             };
 
@@ -757,17 +771,17 @@ describe('Serializer', () => {
             resource.rolodex.get('Dublin').should.be.an.instanceOf(Resource);
             resource.rolodex.get('London').should.be.an.instanceOf(Resource);
 
-            resource.rolodex.get('Dublin').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Bob' });
-            resource.rolodex.get('London').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Alice' });
+            resource.rolodex.get('Dublin').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Bob' });
+            resource.rolodex.get('London').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Alice' });
 
             // serialize & assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 rolodex: {
-                    'Dublin': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    'London': {'$class':'org.acme.sample.Person','name':'Alice'}
+                    'Dublin': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    'London': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'}
                 }
             });
         });
@@ -775,7 +789,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <Scalar, String> - Scalar extends DateTime', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 appointment: {
                     '2023-11-28T01:02:03Z': 'Lorem',
                     '2024-10-28T01:02:03Z': 'Ipsum'
@@ -787,17 +801,18 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.appointment.should.be.an.instanceOf(Map);
-            resource.appointment.get('2023-11-28T01:02:03Z').should.equal('Lorem');
-            resource.appointment.get('2024-10-28T01:02:03Z').should.equal('Ipsum');
+            const keyIt = resource.appointment.keys();
+            resource.appointment.get(keyIt.next().value).should.equal('Lorem');
+            resource.appointment.get(keyIt.next().value).should.equal('Ipsum');
 
             // serialize & assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 appointment: {
-                    '2023-11-28T01:02:03Z': 'Lorem',
-                    '2024-10-28T01:02:03Z': 'Ipsum'
+                    '2023-11-28T01:02:03.000Z': 'Lorem',
+                    '2024-10-28T01:02:03.000Z': 'Ipsum'
                 }
             });
         });
@@ -805,7 +820,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <Scalar, String> - Scalar extends String', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 database: {
                     'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': 'Lorem',
                     'E17B69D9-9B57-4C4A-957E-8B202D7B6C5A': 'Ipsum'
@@ -824,7 +839,7 @@ describe('Serializer', () => {
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 database: {
                     'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': 'Lorem',
                     'E17B69D9-9B57-4C4A-957E-8B202D7B6C5A': 'Ipsum'
@@ -835,7 +850,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <Scalar, Scalar>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 stopwatch: {
                     '2023-10-28T00:00:00Z': '2023-10-28T11:12:13Z',
                     '2024-11-28T00:00:00Z': '2024-11-28T11:12:13Z',
@@ -847,17 +862,18 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.stopwatch.should.be.an.instanceOf(Map);
-            resource.stopwatch.get('2023-10-28T00:00:00Z').should.equal('2023-10-28T11:12:13Z');
-            resource.stopwatch.get('2024-11-28T00:00:00Z').should.equal('2024-11-28T11:12:13Z');
+            const keyIt = resource.stopwatch.keys();
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2023-10-28T11:12:13Z').unix());
+            resource.stopwatch.get(keyIt.next().value).unix().should.equal(dayjs('2024-11-28T11:12:13Z').unix());
 
             // serialize & assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 stopwatch: {
-                    '2023-10-28T00:00:00Z': '2023-10-28T11:12:13Z',
-                    '2024-11-28T00:00:00Z': '2024-11-28T11:12:13Z',
+                    '2023-10-28T00:00:00.000Z': '2023-10-28T11:12:13.000Z',
+                    '2024-11-28T00:00:00.000Z': '2024-11-28T11:12:13.000Z',
                 }
             });
         });
@@ -865,10 +881,10 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <Scalar, Concept>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 directory: {
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'},
                 }
             };
 
@@ -879,17 +895,17 @@ describe('Serializer', () => {
             resource.directory.should.be.an.instanceOf(Map);
             resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').should.be.an.instanceOf(Resource);
             resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').should.be.an.instanceOf(Resource);
-            resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Bob' });
-            resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').toJSON().should.deep.equal({ '$class': 'org.acme.sample.Person', name: 'Alice' });
+            resource.directory.get('D4F45017-AD2B-416B-AD9F-3B74F7DEA291').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Bob' });
+            resource.directory.get('9FAE34BF-18C3-4770-A6AA-6F7656C356B8').toJSON().should.deep.equal({ '$class': 'org.acme.sample@1.0.0.Person', name: 'Alice' });
 
             // serialize & assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 directory: {
-                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample.Person','name':'Bob'},
-                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample.Person','name':'Alice'},
+                    'D4F45017-AD2B-416B-AD9F-3B74F7DEA291': {'$class':'org.acme.sample@1.0.0.Person','name':'Bob'},
+                    '9FAE34BF-18C3-4770-A6AA-6F7656C356B8': {'$class':'org.acme.sample@1.0.0.Person','name':'Alice'},
                 }
             });
         });
@@ -897,7 +913,7 @@ describe('Serializer', () => {
         it('should deserialize -> serialize with a Map <DateTime, String>', () => {
             // setup
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 diary: {
                     '2023-10-28T01:02:03Z': 'Birthday',
                     '2024-10-28T01:02:03Z': 'Anniversary'
@@ -909,92 +925,27 @@ describe('Serializer', () => {
 
             resource.should.be.an.instanceOf(Resource);
             resource.diary.should.be.an.instanceOf(Map);
-            resource.diary.get('2023-10-28T01:02:03Z').should.equal('Birthday');
-            resource.diary.get('2024-10-28T01:02:03Z').should.equal('Anniversary');
+            const keyIt = resource.diary.keys();
+            resource.diary.get(keyIt.next().value).should.equal('Birthday');
+            resource.diary.get(keyIt.next().value).should.equal('Anniversary');
 
             // serialize and assert
             json = serializer.toJSON(resource);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 diary: {
-                    '2023-10-28T01:02:03Z': 'Birthday',
-                    '2024-10-28T01:02:03Z': 'Anniversary'
+                    '2023-10-28T01:02:03.000Z': 'Birthday',
+                    '2024-10-28T01:02:03.000Z': 'Anniversary'
                 }
             });
         });
     });
 
     describe('#toJSON failure scenarios', () => {
-        it('should throw if bad Key value is provided for Map, where Key Type DateTime is expected', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.appointment = new Map();
-            concept.appointment.set('BAD-DATE-28T01:02:03Z', 'Lorem'); // Bad DateTime
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample.Appointment. Expected Type of DateTime but found \'BAD-DATE-28T01:02:03Z\' instead.');
-        });
-
-        it('should throw if bad Key value is provided for Map, where Key Type String is expected', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.dict = new Map();
-            concept.dict.set(1234, 'Lorem'); // Bad key
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample.Dictionary. Expected Type of String but found \'1234\' instead.');
-        });
-
-        it('should throw if a bad Value is Supplied for Map, where Value type Boolean is expected', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.rsvp = new Map();
-            concept.rsvp.set('Lorem', true);
-            concept.rsvp.set('Ipsum', 'false');
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample.RSVP. Expected Type of Boolean but found string instead, for value \'false\'.');
-        });
-
-        it('should throw if a bad Value is Supplied for Map, where Value type String is expected', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.dict = new Map();
-            concept.dict.set('Lorem', 1234);
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample.Dictionary. Expected Type of String but found \'1234\' instead.');
-        });
-
-        it('should throw if a bad value is Supplied for Map - where Value type Boolean is expected', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.timer = new Map();
-            concept.timer.set('2023-10-28T01:02:03Z', '2023-10-28T01:02:03Z');
-            concept.timer.set('2023-10-28T01:02:03Z', 'BAD-DATE-VALUE');
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw('Model violation in org.acme.sample.Timer. Expected Type of DateTime but found \'BAD-DATE-VALUE\' instead.');
-        });
-
-        it('should throw if the value of a Map is not a Map instance', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
-
-            concept.dict = 'xyz'; // bad value
-
-            (() => {
-                serializer.toJSON(concept);
-            }).should.throw(`Expected a Map, but found ${JSON.stringify(concept.dict)}`);
-        });
 
         it('should ignore system properties', () => {
-            let concept = factory.newConcept('org.acme.sample', 'Concepts');
+            let concept = factory.newConcept('org.acme.sample@1.0.0', 'Concepts');
 
             concept.dict = new Map();
             concept.dict.set('$type', 'foo');
@@ -1004,7 +955,7 @@ describe('Serializer', () => {
             const json = serializer.toJSON(concept);
 
             json.should.deep.equal({
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 dict: {
                     Lorem: 'Ipsum',
                     Ipsum: 'Lorem'
@@ -1014,24 +965,9 @@ describe('Serializer', () => {
     });
 
     describe('#fromJSON failure scenarios', () => {
-
-
-        it('should throw an error when deserializing a Map using a reserved Identifier as a Key property', () => {
-            let json = {
-                $class: 'org.acme.sample.Concepts',
-                dict: {
-                    '$namespace': 'com.reserved.property',
-                    'Lorem': 'Ipsum'
-                }
-            };
-            (() => {
-                serializer.fromJSON(json);
-            }).should.throw('Unexpected reserved properties for type org.acme.sample.Dictionary: $namespace');
-        });
-
         it('should throw for Enums as Map key types', () => {
             let json = {
-                $class: 'org.acme.sample.Concepts',
+                $class: 'org.acme.sample@1.0.0.Concepts',
                 stateLog: {
                     'ON': '2000-01-01T00:00:00.000Z',
                     'OFF': '2000-01-01T00:00:00.000Z',
@@ -1039,7 +975,7 @@ describe('Serializer', () => {
             };
             (() => {
                 serializer.fromJSON(json);
-            }).should.throw('Unexpected properties for type org.acme.sample.Concepts: stateLog');
+            }).should.throw('Unexpected properties for type org.acme.sample@1.0.0.Concepts: stateLog');
         });
     });
 });

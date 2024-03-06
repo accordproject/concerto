@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const sinon = require('sinon');
 const Util = require('../composer/composermodelutility');
 
@@ -26,7 +26,7 @@ describe('Property', function () {
 
     let modelManager;
 
-    const levelOneModel = `namespace org.acme.l1
+    const levelOneModel = `namespace org.acme.l1@1.0.0
     participant Person identified by ssn {
       o String ssn
     }
@@ -51,7 +51,7 @@ describe('Property', function () {
 
     describe('#getFullyQualifiedTypeName', function() {
         it('should throw if no parent', function () {
-            const person = modelManager.getType('org.acme.l1.Car');
+            const person = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
             sinon.stub(field, 'getParent').callsFake(function(){return null;});
@@ -61,7 +61,7 @@ describe('Property', function () {
             }).should.throw(/Property owner does not have a parent./);
         });
         it('should throw if parent has no ModelFile', function () {
-            const person = modelManager.getType('org.acme.l1.Car');
+            const person = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
             sinon.stub(person, 'getModelFile').callsFake(function(){return null;});
@@ -71,7 +71,7 @@ describe('Property', function () {
             }).should.throw(/Parent of property owner does not have a ModelFile!/);
         });
         it('should throw if ModelFile fails to find type', function () {
-            const person = modelManager.getType('org.acme.l1.Car');
+            const person = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = person.getProperty('owner');
             // stub the getType method to return null
             sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(function(){return null;});
@@ -81,9 +81,9 @@ describe('Property', function () {
             }).should.throw(/Failed to find fully qualified type name for property owner with type Person/);
         });
         it('toString works', function () {
-            const person = modelManager.getType('org.acme.l1.Car');
+            const person = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = person.getProperty('owner');
-            field.toString().should.equal('RelationshipDeclaration {name=owner, type=org.acme.l1.Person, array=false, optional=false}');
+            field.toString().should.equal('RelationshipProperty {name=owner, type=org.acme.l1@1.0.0.Person, array=false, optional=false}');
         });
     });
 });

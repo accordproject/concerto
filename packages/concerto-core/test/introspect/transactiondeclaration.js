@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
 
@@ -43,7 +43,7 @@ describe('TransactionDeclaration', () => {
 
         it('should cover the other error paths', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             transaction T {}
             `;
 
