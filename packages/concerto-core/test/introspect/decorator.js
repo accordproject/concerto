@@ -61,7 +61,8 @@ describe('Decorator', () => {
             d.isDecorator().should.equal(true);
 
         });
-
+    });
+    describe('#check DecoratorTypeReference', () => {
         it('should throw an error for invalid DecoratorTypeReference', () => {
             const ast = {
                 name: 'TestDecorator',
@@ -96,7 +97,6 @@ describe('Decorator', () => {
             const errorMessage = `Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
             (() => new Decorator(mockAssetDeclaration, ast)).should.not.throw(IllegalModelException, errorMessage);
         });
-
     });
 
     describe('#accept', () => {
