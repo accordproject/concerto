@@ -65,6 +65,8 @@
         "resourcevalidator-fieldtypeviolation": "Model violation in the \"{resourceId}\" instance. The field \"{propertyName}\" has a value of \"{value}\" (type of value: \"{typeOfValue}\"). Expected type of value: \"{fieldType}\".",
         "resourcevalidator-missingrequiredproperty": "The instance \"{resourceId}\" is missing the required field \"{fieldName}\".",
         "resourcevalidator-invalidenumvalue": "Model violation in the \"{resourceId}\" instance. Invalid enum value of \"{value}\" for the field \"{fieldName}\".",
+        "resourcevalidator-invalidmapkey": "Model violation in the \"{resourceId}\" instance. Invalid map key of \"{value}\".",
+        "resourcevalidator-invalidmapvalue": "Model violation in the \"{resourceId}\" instance. Invalid map value of \"{value}\".",
         "resourcevalidator-abstractclass": "The class \"{className}\" is abstract and should not contain an instance.",
         "resourcevalidator-undeclaredfield": "Instance \"{resourceId}\" has a property named \"{propertyName}\", which is not declared in \"{fullyQualifiedTypeName}\".",
         "resourcevalidator-invalidfieldassignment": "Instance \"{resourceId}\" has a property \"{propertyName}\" with type \"{objectType}\" that is not derived from \"{fieldType}\".",

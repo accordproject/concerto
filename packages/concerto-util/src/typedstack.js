@@ -43,7 +43,7 @@ class TypedStack {
         }
 
         this.stack.push(obj);
-        //console.log('Push depth is: ' + this.stack.length + ', contents: ' + this.stack.toString() );
+        // console.log('Push depth is: ' + this.stack.length + ', contents: ' + this.stack.toString() );
     }
 
     /**
@@ -63,7 +63,7 @@ class TypedStack {
      */
     peek(expectedType) {
 
-        //console.log( 'pop ' );
+        // console.log( 'pop ' );
 
         if(this.stack.length < 1) {
             throw new Error('Stack is empty!');

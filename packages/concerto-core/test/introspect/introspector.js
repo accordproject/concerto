@@ -56,8 +56,8 @@ describe('Introspector', () => {
             modelManager.addCTOModel(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
             let classDecl = introspector.getClassDeclarations();
-            const scalarDecl = classDecl.filter(declaration =>  declaration.isScalarDeclaration?.());
-            const mapDecl = classDecl.filter(declaration =>  declaration.isMapDeclaration?.());
+            const scalarDecl = classDecl.filter(declaration =>  declaration.isScalar());
+            const mapDecl = classDecl.filter(declaration =>  declaration.isMap());
             classDecl.length.should.equal(40);
             scalarDecl.length.should.equal(0);
             mapDecl.length.should.equal(0);

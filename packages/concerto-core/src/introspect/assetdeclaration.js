@@ -14,7 +14,7 @@
 
 'use strict';
 
-const IdentifiedDeclaration = require('./identifieddeclaration');
+const ClassDeclaration = require('./classdeclaration');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -35,7 +35,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class AssetDeclaration extends IdentifiedDeclaration {
+class AssetDeclaration extends ClassDeclaration {
     /**
      * Create an AssetDeclaration.
      * @param {ModelFile} modelFile the ModelFile for this class
@@ -44,15 +44,6 @@ class AssetDeclaration extends IdentifiedDeclaration {
      */
     constructor(modelFile, ast) {
         super(modelFile, ast);
-    }
-
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind() {
-        return 'AssetDeclaration';
     }
 }
 

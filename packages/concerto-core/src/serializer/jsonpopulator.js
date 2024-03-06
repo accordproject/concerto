@@ -29,6 +29,14 @@ dayjs.extend(minMax);
 const duration = require('dayjs/plugin/duration');
 dayjs.extend(duration);
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+/* istanbul ignore next */
+if (global === undefined) {
+    const ModelElement = require('../introspect/modelelement');
+}
+/* eslint-enable no-unused-vars */
+
 /**
  * Get all properties on a resource object that both have a value and are not system properties.
  * @param {Object} resourceData JSON object representation of a resource.
@@ -94,12 +102,11 @@ class JSONPopulator {
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
      * place of relationships, false by default.
-     * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
      * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
 
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
+    constructor(acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes;
@@ -111,27 +118,14 @@ class JSONPopulator {
 
     /**
      * Visitor design pattern
-     * @param {Object} thing - the object being visited
+     * @param {ModelElement} modelElement - the model element being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing, parameters = {}) {
+    visit(modelElement, parameters = {}) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
-
-        if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isMapDeclaration?.()) {
-            return this.visitMapDeclaration(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
-        }
+        return ModelUtil.dispatch(modelElement, parameters, this);
     }
 
     /**
@@ -177,55 +171,24 @@ class JSONPopulator {
         getAssignableProperties(jsonObj, mapDeclaration);
 
         jsonObj = new Map(Object.entries(jsonObj));
-
-        let map = new Map();
+        const map = new Map();
+        const mapKeyField = mapDeclaration.getKey().toField();
+        const mapValueField = mapDeclaration.getValue().toField();
 
         jsonObj.forEach((value, key) => {
+            // convert the key
+            parameters.jsonStack.push(key);
+            parameters.path.push(key);
+            const keyJson = mapKeyField.accept(this, parameters);
 
-            if (key === '$class') {
-                map.set(key, value);
-                return;
-            }
-
-            if (!ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
-                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
-            }
-
-            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
-                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
-            }
-
-            map.set(key, value);
+            // convert the value
+            parameters.jsonStack.push(value);
+            parameters.path.push(key);
+            const valueJson = mapValueField.accept(this, parameters);
+            map.set(keyJson, valueJson);
         });
 
         return map;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {MapDeclaration} mapDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @param {Object} value - the key or value belonging to the Map Entry.
-     * @param {Object} type - the Type associated with the Key or Value Map Entry.
-     * @return {Object} value - the key or value belonging to the Map Entry.
-     * @private
-     */
-    processMapType(mapDeclaration, parameters, value, type) {
-        let decl = mapDeclaration.getModelFile()
-            .getAllDeclarations()
-            .find(decl => decl.name === type);
-
-        // if its a ClassDeclaration, populate the Concept.
-        if (decl?.isClassDeclaration()) {
-            let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                decl.getName(), decl.getIdentifierFieldName() );
-
-            parameters.jsonStack.push(value);
-            parameters.resourceStack.push(subResource);
-            return decl.accept(this, parameters);
-        }
-        // otherwise its a scalar value, we only need to return the primitve value of the scalar.
-        return value;
     }
 
     /**
@@ -383,7 +346,7 @@ class JSONPopulator {
 
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {RelationshipProperty} relationshipDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private

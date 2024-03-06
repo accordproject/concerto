@@ -60,7 +60,7 @@ describe('ModelFile', () => {
         it('should throw when null ast provided', () => {
             (() => {
                 new ModelFile(modelManager, null);
-            }).should.throw(/ast not specified/);
+            }).should.throw(/ModelFile expects a Concerto model AST as input./);
         });
 
         it('should throw when non object ast provided', () => {

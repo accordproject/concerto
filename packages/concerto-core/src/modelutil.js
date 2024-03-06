@@ -338,6 +338,34 @@ class ModelUtil {
             `${MetaModelNamespace}.ObjectMapValueType`
         ].includes(value.$class);
     }
+
+    /**
+     * Visits the model element.
+     * @param {ModelElement} modelElement the model element
+     * @param {*} parameters the visitor params
+     * @param {*} visitor the visitor
+     * @returns {*} result of visit
+     */
+    static dispatch(modelElement, parameters, visitor) {
+        if(!modelElement.isMap) {
+            throw new Error('Model element is invalid.');
+        }
+        if (modelElement.isMap()) {
+            return visitor.visitMapDeclaration(modelElement, parameters);
+        } else if (modelElement.isEnum()) {
+            return visitor.visitEnumDeclaration(modelElement, parameters);
+        } else if (modelElement.isDeclaration()) {
+            return visitor.visitClassDeclaration(modelElement, parameters);
+        } else if (modelElement.isRelationship()) {
+            return visitor.visitRelationshipDeclaration(modelElement, parameters);
+        } else if (modelElement.isField()) {
+            const field  = modelElement.isTypeScalar?.() ? modelElement.getScalarField() : modelElement;
+            return visitor.visitField(field, parameters);
+        } else {
+            throw new Error(`Unrecognised model element: ${modelElement.toString()}` );
+        }
+    }
 }
+
 
 module.exports = ModelUtil;

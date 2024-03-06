@@ -17,12 +17,12 @@
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const Declaration = require('./declaration');
-const EnumValueDeclaration = require('./enumvaluedeclaration');
+const EnumValue = require('./enumvalue');
 const Field = require('./field');
 const Globalize = require('../globalize');
 const IllegalModelException = require('./illegalmodelexception');
 const Introspector = require('./introspector');
-const RelationshipDeclaration = require('./relationshipdeclaration');
+const Relationship = require('./relationshipproperty');
 const ModelUtil = require('../modelutil');
 
 // Types needed for TypeScript generation.
@@ -46,6 +46,18 @@ if (global === undefined) {
  */
 class ClassDeclaration extends Declaration {
     /**
+     * Create a ClassDeclaration from an Abstract Syntax Tree. The AST is the
+     * result of parsing.
+     *
+     * @param {ModelFile} modelFile - the ModelFile for this class
+     * @param {Object} ast - the AST created by the parser
+     * @throws {IllegalModelException}
+     */
+    constructor(modelFile, ast) {
+        super(modelFile, ast);
+    }
+
+    /**
      * Process the AST and build the model
      *
      * @throws {IllegalModelException}
@@ -60,7 +72,6 @@ class ClassDeclaration extends Declaration {
         this.idField = null;
         this.timestamped = false;
         this.abstract = false;
-        this.type = this.ast.$class;
 
         if (this.ast.isAbstract) {
             this.abstract = true;
@@ -90,9 +101,9 @@ class ClassDeclaration extends Declaration {
             }
 
             if (thing.$class === `${MetaModelNamespace}.RelationshipProperty`) {
-                this.properties.push(new RelationshipDeclaration(this, thing));
+                this.properties.push(new Relationship(this, thing));
             } else if (thing.$class === `${MetaModelNamespace}.EnumProperty`) {
-                this.properties.push(new EnumValueDeclaration(this, thing));
+                this.properties.push(new EnumValue(this, thing));
             } else if (
                 thing.$class === `${MetaModelNamespace}.BooleanProperty` ||
                     thing.$class === `${MetaModelNamespace}.StringProperty` ||
@@ -212,13 +223,21 @@ class ClassDeclaration extends Declaration {
                     'idField': this.idField
                 }), this.modelFile, this.ast.location);
             } else {
-                // check that identifiers are strings
-                const isPrimitiveString = idField.getType() === 'String';
-                const modelFile = idField.getParent().getModelFile();
-                const declaration = modelFile.getType(idField.getType());
-                const isScalarString = declaration !== null && declaration.isScalarDeclaration?.() && declaration.getType?.() === 'String';
+                // check that identifiers are strings or string scalars
+                let identifierValid = false;
+                if(!ModelUtil.isPrimitiveType(idField.getPropertyType())) {
+                    const modelFile = idField.getParent().getModelFile();
+                    const declaration = modelFile.getType(idField.getPropertyType());
+                    if(!declaration) {
+                        throw new Error(`Failed to find ${idField}`);
+                    }
+                    identifierValid = declaration.isScalar() && declaration.getScalarType() === 'String';
+                }
+                else {
+                    identifierValid = idField.getPropertyType() === 'String';
+                }
 
-                if (!isPrimitiveString && !isScalarString) {
+                if (!identifierValid) {
                     let formatter = Globalize('en').messageFormatter('classdeclaration-validate-identifiernotstring');
                     throw new IllegalModelException(formatter({
                         'class': this.name,
@@ -580,87 +599,15 @@ class ClassDeclaration extends Declaration {
     }
 
     /**
-     * Returns the string representation of this class
-     * @return {String} the string representation of the class
+     * Returns the string representation of this class declaration
+     * @return {String} the string representation of the class declaration
      */
     toString() {
         let superType = '';
         if (this.superType) {
             superType = ' super=' + this.superType;
         }
-        return 'ClassDeclaration {id=' + this.getFullyQualifiedName() + superType + ' enum=' + this.isEnum() + ' abstract=' + this.isAbstract() + '}';
-    }
-
-    /**
-     * Returns true if this class is the definition of an asset.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isAsset() {
-        return this.type === `${MetaModelNamespace}.AssetDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a participant.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isParticipant() {
-        return this.type === `${MetaModelNamespace}.ParticipantDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a transaction.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isTransaction() {
-        return this.type === `${MetaModelNamespace}.TransactionDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of an event.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isEvent() {
-        return this.type === `${MetaModelNamespace}.EventDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a concept.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isConcept() {
-        return this.type === `${MetaModelNamespace}.ConceptDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a enum.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isEnum() {
-        return this.type === `${MetaModelNamespace}.EnumDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a map.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isMapDeclaration() {
-        return this.type === `${MetaModelNamespace}.MapDeclaration`;
-    }
-
-    /**
-     * Returns true if this class is the definition of a enum.
-     *
-     * @return {boolean} true if the class is an asset
-     */
-    isClassDeclaration() {
-        return true;
+        return 'ClassDeclaration {id=' + this.getFullyQualifiedName() + superType + ' declarationKind=' + this.declarationKind() + ' abstract=' + this.isAbstract() + ' idField=' + this.idField + '}';
     }
 }
 

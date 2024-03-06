@@ -14,9 +14,9 @@
 
 'use strict';
 
+const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
 const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -27,11 +27,9 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 /**
- * Declaration defines the structure (model/schema) of composite data.
- * It is composed of a set of Properties, may have an identifying field, and may
- * have a super-type.
  * A Declaration is conceptually owned by a ModelFile which
- * defines all the classes that are part of a namespace.
+ * defines all the top-level declarations that are part of a namespace.
+ * A declaration has decorators, a name and a type.
  *
  * @abstract
  * @class
@@ -47,44 +45,43 @@ class Declaration extends Decorated {
      * @throws {IllegalModelException}
      */
     constructor(modelFile, ast) {
-        super(ast);
-        this.modelFile = modelFile;
+        super(modelFile, ast);
         this.process();
     }
 
     /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        super.process();
-
-        if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
-        }
-
-        this.name = this.ast.name;
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
-    }
-
-    /**
-     * Semantic validation of the structure of this decorated. Subclasses should
+     * Semantic validation of the declaration. Subclasses should
      * override this method to impose additional semantic constraints on the
-     * contents/relations of fields.
+     * contents/relations of declarations.
      *
-     * @param {...*} args the validation arguments
      * @throws {IllegalModelException}
      * @protected
      */
-    validate(...args) {
-        super.validate(...args);
+    validate() {
+        super.validate();
+
+        const declarations = this.getModelFile().getAllDeclarations();
+        const declarationNames = declarations.map(
+            d => d.getFullyQualifiedName()
+        );
+        const uniqueNames = new Set(declarationNames);
+
+        if (uniqueNames.size !== declarations.length) {
+            const duplicateElements = declarationNames.filter(
+                (item, index) => declarationNames.indexOf(item) !== index
+            );
+            throw new IllegalModelException(
+                `Duplicate declaration name ${duplicateElements[0]}`
+            );
+        }
 
         // #648 - check for clashes against imported types
         if (this.getModelFile().isImportedType(this.getName())){
             throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
         }
+
+        this.name = this.ast.name;
+        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
     }
 
     /**
@@ -167,42 +164,6 @@ class Declaration extends Decorated {
      */
     toString() {
         return null;
-    }
-
-    /**
-     * Returns true if this class is the definition of an enum.
-     *
-     * @return {boolean} true if the class is an enum
-     */
-    isEnum() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a class declaration.
-     *
-     * @return {boolean} true if the class is a class
-     */
-    isClassDeclaration() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a scalar declaration.
-     *
-     * @return {boolean} true if the class is a scalar
-     */
-    isScalarDeclaration() {
-        return false;
-    }
-
-    /**
-     * Returns true if this class is the definition of a map-declaration.
-     *
-     * @return {boolean} true if the class is a map-declaration
-     */
-    isMapDeclaration() {
-        return false;
     }
 }
 

@@ -19,7 +19,7 @@ require('chai').should();
 const Factory = require('../../src/factory');
 const ModelManager = require('../../src/modelmanager');
 const Relationship = require('../../src/model/relationship');
-const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
+const RelationshipProperty = require('../../src/introspect/relationshipproperty');
 const Serializer = require('../../src/serializer');
 const fs = require('fs');
 const Util = require('../composer/composermodelutility');
@@ -77,7 +77,7 @@ describe('animaltracking Model', function(){
             incomingAnimals.should.not.be.null;
             incomingAnimals.getType().should.equal('Animal');
             incomingAnimals.isArray().should.be.true;
-            (incomingAnimals instanceof RelationshipDeclaration).should.be.true;
+            (incomingAnimals instanceof RelationshipProperty).should.be.true;
         });
 
         it('create and serialize instance', function() {

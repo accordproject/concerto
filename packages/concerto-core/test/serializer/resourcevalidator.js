@@ -117,7 +117,7 @@ describe('ResourceValidator', function () {
     before(function () {
         sandbox = sinon.createSandbox();
         resourceValidator = new ResourceValidator();
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({enableMapType: true});
         Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
     });
@@ -133,32 +133,6 @@ describe('ResourceValidator', function () {
     afterEach(function () {
         modelManager.clearModelFiles();
         sandbox.restore();
-    });
-
-    describe('#visit', () => {
-        it('should do nothing if unknown object given', () => {
-            const parameters = {
-                stack: new TypedStack({})
-            };
-
-            const thing = {
-                toString: () => {
-                    return 'testing';
-                }
-            };
-            sandbox.stub(resourceValidator, 'visitEnumDeclaration');
-            sandbox.stub(resourceValidator, 'visitClassDeclaration');
-            sandbox.stub(resourceValidator, 'visitRelationshipDeclaration');
-            sandbox.stub(resourceValidator, 'visitField');
-
-            resourceValidator.visit(thing, parameters);
-
-            sinon.assert.notCalled(resourceValidator.visitEnumDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitClassDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitRelationshipDeclaration);
-            sinon.assert.notCalled(resourceValidator.visitField);
-
-        });
     });
 
     describe('#visitRelationshipDeclaration', function() {
@@ -348,7 +322,7 @@ describe('ResourceValidator', function () {
 
     describe('#visitMapDeclaration', function() {
         it('should validate map', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 'Ipsum']]);
+            const map = new Map([['Lorem', 'Ipsum']]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
@@ -356,25 +330,25 @@ describe('ResourceValidator', function () {
         });
 
         it('should not validate map with bad value', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['Lorem', 3]]);
+            const map = new Map([['Lorem', 3]]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'3\' instead.');
+            }).should.throw('Model violation in the "TEST" instance. The field "PhoneBook_map_value" has a value of "3" (type of value: "number"). Expected type of value: "String".');
         });
 
         it('should not validate map with bad key', function () {
-            const map = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], [1, 'Ipsum']]);
+            const map = new Map([[1, 'Ipsum']]);
             const typedStack = new TypedStack(map);
             const mapDeclaration = modelManager.getType('org.acme.map@1.0.0.PhoneBook');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
 
             (() => {
                 mapDeclaration.accept(resourceValidator,parameters );
-            }).should.throw('Model violation in org.acme.map@1.0.0.PhoneBook. Expected Type of String but found \'1\' instead');
+            }).should.throw('Model violation in the "TEST" instance. The field "PhoneBook_map_key" has a value of "1" (type of value: "number"). Expected type of value: "String".');
         });
     });
 

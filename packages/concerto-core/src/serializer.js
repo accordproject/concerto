@@ -173,7 +173,7 @@ class Serializer {
             resource = this.factory.newConcept(classDeclaration.getNamespace(),
                 classDeclaration.getName(),
                 jsonObject[classDeclaration.getIdentifierFieldName()] );
-        } else if (classDeclaration.isMapDeclaration?.()) {
+        } else if (classDeclaration.isMap()) {
             throw new Error('Attempting to create a Map declaration is not supported.');
         } else if (classDeclaration.isEnum()) {
             throw new Error('Attempting to create an ENUM declaration is not supported.');
@@ -190,7 +190,7 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
+        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, options.utcOffset, options.strictQualifiedDateTimes === true);
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model

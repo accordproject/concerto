@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
+import { EnumValue, Field, ModelUtil } from '@accordproject/concerto-core';
 import * as semver from 'semver';
 import { getDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
 import { ComparerFactory } from '../comparer';
@@ -23,7 +23,7 @@ const propertyAdded: ComparerFactory = (context) => ({
             return;
         }
         const classDeclarationType = getDeclarationType(b.getParent());
-        if (b instanceof EnumValueDeclaration) {
+        if (b instanceof EnumValue) {
             context.report({
                 key: 'enum-value-added',
                 message: `The enum value "${b.getName()}" was added to the ${classDeclarationType} "${b.getParent().getName()}"`,
@@ -59,7 +59,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
             return;
         }
         const classDeclarationType = getDeclarationType(a.getParent());
-        if (a instanceof EnumValueDeclaration) {
+        if (a instanceof EnumValue) {
             context.report({
                 key: 'enum-value-removed',
                 message: `The enum value "${a.getName()}" was removed from the ${classDeclarationType} "${a.getParent().getName()}"`,
@@ -104,7 +104,7 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
                 element: a
             });
             return;
-        } else if (a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+        } else if (a instanceof EnumValue || b instanceof EnumValue) {
             return;
         }
         const aIsArray = a.isArray();
