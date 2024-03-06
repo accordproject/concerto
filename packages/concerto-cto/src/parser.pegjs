@@ -966,9 +966,6 @@ AssetDeclaration
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-            throw new Error(`The asset "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -992,9 +989,6 @@ ParticipantDeclaration
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The participant "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -1018,9 +1012,6 @@ TransactionDeclaration
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The transaction "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -1044,9 +1035,6 @@ EventDeclaration
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The event "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -1070,9 +1058,6 @@ ConceptDeclaration
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The concept "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {

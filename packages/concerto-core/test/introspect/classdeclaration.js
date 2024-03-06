@@ -97,14 +97,13 @@ describe('ClassDeclaration', () => {
             }).should.throw(/Duplicate declaration/);
         });
 
-        it('should throw when ast properties is undefined', () => {
+        it('should throw when participant name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeparticipantname.cto', ParticipantDeclaration);
             (() => {
                 asset.validate();
             }).should.throw(/Duplicate declaration/);
         });
-    });
 
-    describe('#validate', () => {
         it('should throw when an super type identifier is redeclared', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.identifierextendsfromsupertype.cto', AssetDeclaration);
             (() => {

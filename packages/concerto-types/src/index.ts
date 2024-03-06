@@ -14,6 +14,3 @@
 
 export * from './generated/concerto@1.0.0';
 export * from './generated/concerto.metamodel@1.0.0';
-export * as concertoWithUnions from './generated/unions/concerto@1.0.0';
-export * as concertoMetamodelWithUnions from './generated/unions/concerto.metamodel@1.0.0';
-

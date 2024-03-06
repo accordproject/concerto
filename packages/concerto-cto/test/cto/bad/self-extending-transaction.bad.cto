@@ -1,5 +1,0 @@
-namespace com.acme@1.0.0
-
-transaction Self_Extending extends Self_Extending {
-  o String foo optional
-}

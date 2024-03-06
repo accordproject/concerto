@@ -12,12 +12,9 @@ const path = require('path');
 async function main() {
     const modelManager = await ModelLoader.loadModelManagerFromModelFiles([metaModelCto]);
     const visitor = new TypescriptVisitor();
-
     const fileWriter = new FileWriter(path.resolve(__dirname, '..', 'src', 'generated'));
-    modelManager.accept(visitor, { fileWriter });
-
-    const fileWriter2 = new FileWriter(path.resolve(__dirname, '..', 'src', 'generated/unions'));
-    modelManager.accept(visitor, { fileWriter: fileWriter2, flattenSubclassesToUnion: true });
+    const parameters = { fileWriter };
+    modelManager.accept(visitor, parameters);
 }
 
 main().catch(error => {

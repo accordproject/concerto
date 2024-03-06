@@ -624,9 +624,6 @@ function peg$parse(input, options) {
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-            throw new Error(`The asset "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -646,9 +643,6 @@ function peg$parse(input, options) {
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The participant "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -668,9 +662,6 @@ function peg$parse(input, options) {
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The transaction "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -690,9 +681,6 @@ function peg$parse(input, options) {
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The event "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
@@ -712,9 +700,6 @@ function peg$parse(input, options) {
         ...buildRange(location())
       };
       if (classExtension) {
-        if (classExtension.name === id.name) {
-          throw new Error(`The concept "${id.name}" cannot extend itself.`);
-        }
         result.superType = classExtension;
       }
       if (idField) {
