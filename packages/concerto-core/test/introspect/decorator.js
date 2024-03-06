@@ -61,24 +61,42 @@ describe('Decorator', () => {
             d.isDecorator().should.equal(true);
 
         });
-        it('should throw an error for invalid type reference', () => {
-            const parent = null; // Placeholder, you need to provide a valid parent object
+
+        it('should throw an error for invalid DecoratorTypeReference', () => {
             const ast = {
                 name: 'TestDecorator',
                 arguments: [
                     {
-                        $class: `${MetaModelNamespace}.DecoratorTypeReference`,
+                        $class: 'DifferentMetaModelNamespace.DecoratorTypeReference',
                         type: {
-                            name: 'NonExistentType',
+                            name: 'Color',
                             isArray: false
                         }
                     }
                 ]
             };
 
-            const errorMessage=`Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
-            (() => new Decorator(parent, ast)).should.throw(IllegalModelException,errorMessage );
+            const errorMessage = `Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
+            (() => new Decorator(mockAssetDeclaration, ast)).should.throw(IllegalModelException, errorMessage);
         });
+        it('should work fine for valid DecoratorTypeReference ', () => {
+            const ast = {
+                name: 'TestDecorator',
+                arguments: [
+                    {
+                        $class: `${MetaModelNamespace}.DecoratorTypeReference`,
+                        type: {
+                            name: 'Color',
+                            isArray: false
+                        }
+                    }
+                ]
+            };
+
+            const errorMessage = `Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
+            (() => new Decorator(mockAssetDeclaration, ast)).should.not.throw(IllegalModelException, errorMessage);
+        });
+
     });
 
     describe('#accept', () => {
