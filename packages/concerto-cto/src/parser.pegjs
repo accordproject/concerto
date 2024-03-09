@@ -763,6 +763,35 @@ build
     return [head, ...tail];
   }
 
+semverWithTrailingPeriod
+  = versionCore:versionCore
+    pre:('-' @preRelease)?
+    build:('+' @buildWithTrailingPeriod)
+  {
+    return { versionCore, pre, build };
+  }
+  / versionCore:versionCore
+    pre:('-' @preReleaseWithTrailingPeriod)
+  {
+    return { versionCore, pre };
+  }
+  / versionCore:versionCore '.'
+  {
+    return { versionCore };
+  }
+
+preReleaseWithTrailingPeriod
+  = head:$preReleaseIdentifier '.' tail:( @$preReleaseIdentifier '.')*
+  {
+    return [head, ...tail];
+  }
+
+buildWithTrailingPeriod
+  = head:$buildIdentifier '.' tail:( @$buildIdentifier '.')*
+  {
+    return [head, ...tail];
+  }
+
 preReleaseIdentifier
   = alphanumericIdentifier
   / numericIdentifier
@@ -1646,8 +1675,9 @@ QualifiedName
   }
 
 VersionedQualifiedName
-  = ns:QualifiedName '@' version:$semver '.' name:$Identifier {
-  	return `${ns}@${version}.${name}`;
+  = ns:QualifiedName '@' version:$semverWithTrailingPeriod name:$Identifier
+   {
+  	return `${ns}@${version}${name}`;
   }
 
 VersionedQualifiedNamespace
