@@ -29,6 +29,7 @@ const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
+const IntrospectUtils = require('./introspectutils');
 
 const { Parser } = require('@accordproject/concerto-cto');
 
