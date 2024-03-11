@@ -266,6 +266,22 @@ class ModelFile extends Decorated {
         });
 
         // Validate all of the types in this model file.
+        // Check if names of the declarations are unique.
+        const uniqueNames = new Set();
+        this.declarations.forEach(
+            d => {
+                const fqn = d.getFullyQualifiedName();
+                if (!uniqueNames.has(fqn)) {
+                    uniqueNames.add(fqn);
+                } else {
+                    throw new IllegalModelException(
+                        `Duplicate class name ${fqn}`
+                    );
+                }
+            }
+        );
+
+        // Run validations on class declarations
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
             classDeclaration.validate();

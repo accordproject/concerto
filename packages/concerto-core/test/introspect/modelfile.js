@@ -29,6 +29,7 @@ const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
+const IntrospectUtils = require('./introspectutils');
 
 const { Parser } = require('@accordproject/concerto-cto');
 
@@ -44,10 +45,12 @@ describe('ModelFile', () => {
     const carLeaseModel = fs.readFileSync(path.resolve(__dirname, '../data/model/carlease.cto'), 'utf8');
     let modelManager;
     let sandbox;
+    let introspectUtils;
 
     beforeEach(() => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
+        introspectUtils = new IntrospectUtils(modelManager);
         sandbox = sinon.createSandbox();
     });
 
@@ -203,6 +206,48 @@ describe('ModelFile', () => {
     });
 
     describe('#validate', () => {
+
+        it('should throw when scalar name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/scalardeclaration.dupeboolean.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
+        it('should throw when asset name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupeassetname.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
+        it('should throw when transaction name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupetransactionname.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
+        it('should throw when participant name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupeparticipantname.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
+        it('should throw when concept name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupeconceptname.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
+
+        it('should throw when enum name is duplicted in a modelfile', () => {
+            let asset = introspectUtils.loadModelFile('test/data/parser/classdeclaration.dupeenumname.cto');
+            (() => {
+                asset.validate();
+            }).should.throw(/Duplicate class/);
+        });
 
         it('should throw if an import exists for an invalid namespace', () => {
             const model = `

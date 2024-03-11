@@ -14,6 +14,7 @@
 
 'use strict';
 
+const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -46,10 +47,11 @@ class Validator {
     /**
      * @param {string} id the identifier of the instance
      * @param {string} msg the exception message
+     * @param {string} errorType the type of error
      * @throws {Error} throws an error to report the message
      */
-    reportError(id, msg) {
-        throw new Error( 'Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg );
+    reportError(id, msg, errorType=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION) {
+        throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
     }
 
     /**

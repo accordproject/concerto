@@ -66,7 +66,6 @@ describe('ClassDeclaration', () => {
                 });
             }).should.throw(/Invalid class name '2nd'/);
         });
-
     });
 
     describe('#validate', () => {
