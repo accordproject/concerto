@@ -343,6 +343,9 @@ function declFromMetaModel(mm) {
             }
         }
         if (mm.superType) {
+            if (mm.superType.name === mm.name) {
+                throw new Error(`The declaration "${mm.name}" cannot extend itself.`);
+            }
             result += `extends ${mm.superType.name} `;
         }
         result += '{';

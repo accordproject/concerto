@@ -79,7 +79,6 @@ describe('ClassDeclaration', () => {
                 });
             }).should.throw(/Invalid model element name '2nd'/);
         });
-
     });
 
     describe('#validate', () => {

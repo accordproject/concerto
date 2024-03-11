@@ -93,6 +93,13 @@ class ClassDeclaration extends Declaration {
             }
         }
 
+        if (!Array.isArray(this.ast.properties)) {
+            let formatter = Globalize.messageFormatter('classdeclaration-validate-undefined-properties');
+            throw new IllegalModelException(formatter({
+                'class':this.name
+            }), this.modelFile, this.ast.location);
+        }
+
         for (let n = 0; n < this.ast.properties.length; n++) {
             let thing = this.ast.properties[n];
 
@@ -194,23 +201,21 @@ class ClassDeclaration extends Declaration {
     validate() {
         super.validate();
 
-        const declarations = this.getModelFile().getAllDeclarations();
-        const declarationNames = declarations.map(
-            d => d.getFullyQualifiedName()
-        );
-        const uniqueNames = new Set(declarationNames);
-
-        if (uniqueNames.size !== declarations.length) {
-            const duplicateElements = declarationNames.filter(
-                (item, index) => declarationNames.indexOf(item) !== index
-            );
-            throw new IllegalModelException(
-                `Duplicate class name ${duplicateElements[0]}`
-            );
-        }
-
         // if we have a super type make sure it exists
         if (this.superType !== null) {
+            // and make sure that the class isn't extending itself
+            // (an exemption is made for the core classes)
+            if (
+                this.superType === this.name &&
+                ![
+                    'Asset', 'Concept', 'Event', 'Participant', 'Transaction',
+                ].includes(this.superType)
+            ) {
+                let formatter = Globalize('en').messageFormatter('classdeclaration-validate-selfextending');
+                throw new IllegalModelException(formatter({
+                    'class': this.name,
+                }), this.modelFile, this.ast.location);
+            }
             this._resolveSuperType();
         }
 
@@ -269,24 +274,21 @@ class ClassDeclaration extends Declaration {
         }
         // we also have to check fields defined in super classes
         const properties = this.getProperties();
-        const propertyFieldNames = properties.map(
-            d => d.getName()
-        );
-        const uniquePropertyFieldNames = new Set(propertyFieldNames);
-
-        if (uniquePropertyFieldNames.size !== properties.length) {
-            const duplicateElements = propertyFieldNames
-                .filter(
-                    (item, index) => propertyFieldNames.indexOf(item) !== index
+        const uniquePropertyNames = new Set();
+        properties.forEach(p => {
+            const propertyName = p.getName();
+            if (!uniquePropertyNames.has(propertyName)) {
+                uniquePropertyNames.add(propertyName);
+            } else {
+                const formatter = Globalize('en').messageFormatter(
+                    'classdeclaration-validate-duplicatefieldname'
                 );
-            const formatter = Globalize('en').messageFormatter(
-                'classdeclaration-validate-duplicatefieldname'
-            );
-            throw new IllegalModelException(formatter({
-                'class': this.name,
-                'fieldName': duplicateElements[0]
-            }), this.modelFile, this.ast.location);
-        }
+                throw new IllegalModelException(formatter({
+                    'class': this.name,
+                    'fieldName': propertyName
+                }), this.modelFile, this.ast.location);
+            }
+        });
 
         for (let n = 0; n < properties.length; n++) {
             let field = properties[n];
