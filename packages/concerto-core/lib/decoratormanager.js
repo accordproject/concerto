@@ -21,7 +21,7 @@ const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
-const illegalmodelexception = require("./introspect/illegalmodelexception")
+const IllegalModelException = require("./introspect/illegalmodelexception")
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -434,7 +434,7 @@ class DecoratorManager {
             }
         } else if (type === 'APPEND') {
             decorated.decorators.forEach((d)=>{
-                if(d === newDecorator){
+                if(d.name === newDecorator.name){
                     throw new IllegalModelException(
                         `Duplicate decorator ${newDecorator}`,
                         this.ast.location,

@@ -21,6 +21,7 @@ const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanage
 const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
+const Decorator = require('../lib/introspect/decorator');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
@@ -566,4 +567,11 @@ describe('DecoratorManager', () => {
         });
     });
 
+    describe("#applyDecorator",async function(){
+        const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/model-without-vocab.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const resp1 = DecoratorManager.applyDecorator(testModelManager,'APPEND',new Decorator(this,'decoratorOne'));
+            DecoratorManager.applyDecorator(testModelManager,'APPEND',new Decorator(this,'decoratorOne').should.throw(/Duplicate decorator decoratorOne /)
+    })
 });
