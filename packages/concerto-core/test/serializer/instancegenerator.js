@@ -42,7 +42,7 @@ describe('InstanceGenerator', () => {
     };
 
     beforeEach(() => {
-        modelManager = new ModelManager();
+        modelManager = new ModelManager({enableMapType: true});
         Util.addComposerModel(modelManager);
         factory = new Factory(modelManager);
         parameters = {
@@ -67,7 +67,7 @@ describe('InstanceGenerator', () => {
         it('should throw on unrecognized thing', () => {
             (() => {
                 visitor.visit(dayjs.utc(), {});
-            }).should.throw(/Unrecognised/);
+            }).should.throw(/Model element is invalid/);
         });
 
         it('should generate a default value for a string property', () => {
@@ -111,7 +111,7 @@ describe('InstanceGenerator', () => {
             values[1].should.be.a('string');
         });
 
-        it('should generate a value with specified lentgh constraint for a string property', () => {
+        it('should generate a value with specified length constraint for a string property', () => {
             useSampleGenerator();
             let resource = test(`namespace org.acme.test@1.0.0
             asset MyAsset identified by assetId {

@@ -15,6 +15,7 @@
 'use strict';
 
 const Util = require('../util');
+const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 
 /**
@@ -35,19 +36,7 @@ class InstanceGenerator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isMapDeclaration?.()) {
-            return this.visitMapDeclaration(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
-        }
+        return ModelUtil.dispatch(thing, parameters, this);
     }
 
     /**
@@ -213,7 +202,7 @@ class InstanceGenerator {
 
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {RelationshipProperty} relationshipDeclaration - the object being visited
      * @param {Object} parameters - the parameter
      * @return {Relationship} the result of visiting
      * @private

@@ -61,19 +61,7 @@ class JSONGenerator {
      * @private
      */
     visit(thing, parameters) {
-        if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
-        } else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
-        }else if (thing.isMapDeclaration?.()) {
-            return this.visitMapDeclaration(thing, parameters);
-        } else if (thing.isTypeScalar?.()) {
-            return this.visitField(thing.getScalarField(), parameters);
-        } else if (thing.isField?.()) {
-            return this.visitField(thing, parameters);
-        } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing));
-        }
+        return ModelUtil.dispatch(thing, parameters, this);
     }
 
     /**
@@ -86,30 +74,24 @@ class JSONGenerator {
     visitMapDeclaration(mapDeclaration, parameters) {
         const obj = parameters.stack.pop();
 
-        // initialise Map with $class property
-        let map = new Map();
+        const map = new Map();
+        const mapKeyField = mapDeclaration.getKey().toField();
+        const mapValueField = mapDeclaration.getValue().toField();
 
         obj.forEach((value, key) => {
-
             // don't serialize System Properties, other than $class
             if(ModelUtil.isSystemProperty(key)) {
                 return;
             }
 
-            // Key is always a string, but value might be a ValidatedResource.
-            if (typeof value === 'object') {
-                let decl = mapDeclaration.getModelFile()
-                    .getAllDeclarations()
-                    .find(decl => decl.name === value.getType());
+            // convert the key
+            parameters.stack.push(key);
+            const keyJson = mapKeyField.accept(this, parameters);
 
-                // convert declaration to JSON representation
-                parameters.stack.push(value);
-                const jsonValue = decl.accept(this, parameters);
-
-                value = jsonValue;
-            }
-
-            map.set(key, value);
+            // convert the value
+            parameters.stack.push(value);
+            const valueJson = mapValueField.accept(this, parameters);
+            map.set(keyJson, valueJson);
         });
 
         return Object.fromEntries(map);
@@ -195,6 +177,7 @@ class JSONGenerator {
             result = mapDeclaration.accept(this, parameters);
         }
         else {
+            // concepts
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
             result = classDeclaration.accept(this, parameters);
@@ -233,7 +216,7 @@ class JSONGenerator {
 
     /**
      * Visitor design pattern
-     * @param {RelationshipDeclaration} relationshipDeclaration - the object being visited
+     * @param {RelationshipProperty} relationshipDeclaration - the object being visited
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      * @private
@@ -286,7 +269,7 @@ class JSONGenerator {
 
     /**
      * Returns the persistent format for a relationship.
-     * @param {RelationshipDeclaration} relationshipDeclaration - the relationship being persisted
+     * @param {RelationshipProperty} relationshipDeclaration - the relationship being persisted
      * @param {Identifiable} relationshipOrResource - the relationship or the resource
      * @returns {string} the text to use to persist the relationship
      */

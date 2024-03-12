@@ -14,8 +14,9 @@
 
 'use strict';
 
-const ModelUtil = require('../modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const Field = require('./field');
+const ModelUtil = require('../modelutil');
 
 const Decorated = require('./decorated');
 const IllegalModelException = require('./illegalmodelexception');
@@ -28,6 +29,8 @@ if (global === undefined) {
     const MapDeclaration = require('./mapdeclaration');
 }
 
+const VALID_KEY_TYPES = ['String', 'DateTime'];
+
 /**
  * MapKeyType defines a Key type of an MapDeclaration.
  *
@@ -39,27 +42,15 @@ if (global === undefined) {
 class MapKeyType extends Decorated {
     /**
      * Create an MapKeyType.
-     * @param {MapDeclaration} parent - The owner of this property
+     * @param {MapDeclaration} map - The map for the map key
      * @param {Object} ast - The AST created by the parser
      * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        super(ast);
-        this.parent = parent;
-        this.modelFile = parent.getModelFile();
+    constructor(map, ast) {
+        super(map.getModelFile(), ast);
+        this.map = map;
         this.process();
-    }
-
-    /**
-     * Process the AST and build the model
-     *
-     * @throws {IllegalModelException}
-     * @private
-     */
-    process() {
-        super.process();
-        this.processType(this.ast);
     }
 
     /**
@@ -69,107 +60,44 @@ class MapKeyType extends Decorated {
      * @protected
      */
     validate() {
-
-        if (!ModelUtil.isPrimitiveType(this.type)) {
-
-            const decl = this.modelFile.getType(this.ast.type.name);
-
-            if  (!ModelUtil.isValidMapKeyScalar(decl)) {
-                throw new IllegalModelException(
-                    `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
-                );
+        let mapkeyType = this.getMapKeyType();
+        if (!ModelUtil.isPrimitiveType(mapkeyType)) {
+            this.getModelFile().resolveType( 'map key ' + this.map.getFullyQualifiedName(), mapkeyType);
+            const mapkeyDecl = this.getModelFile().getType(mapkeyType);
+            if(mapkeyDecl && mapkeyDecl.isScalar()) {
+                mapkeyType = mapkeyDecl.getScalarType();
             }
+        }
 
-            if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
-                throw new IllegalModelException(
-                    `Invalid Map key type in MapDeclaration ${this.parent.name}. Only String and DateTime types are supported for Map key types`
-                );
-            }
+        if(!VALID_KEY_TYPES.includes(mapkeyType)) {
+            throw new IllegalModelException(`A map key must be one of ${VALID_KEY_TYPES}, or a scalar thereof. Invalid type: ${mapkeyType}, for map ${this.map.getFullyQualifiedName()}`);
         }
     }
 
     /**
-     * Sets the Type name for the Map Key
-     *
-     * @param {Object} ast - The AST created by the parser
-     * @private
-     */
-    processType(ast) {
-        let decl;
-        switch(this.ast.$class) {
-        case `${MetaModelNamespace}.DateTimeMapKeyType`:
-            this.type = 'DateTime';
-            break;
-        case `${MetaModelNamespace}.StringMapKeyType`:
-            this.type = 'String';
-            break;
-        case `${MetaModelNamespace}.ObjectMapKeyType`:
-            this.type = String(this.ast.type.name);
-            break;
-        }
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.parent.getModelFile();
-    }
-
-    /**
-    * Returns the owner of this property
+    * Returns the map for the map key
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
     getParent() {
-        return this.parent;
+        return this.map;
     }
 
     /**
-     * Returns the Type of the MapKey. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
+     * Converts the MapKeyType to a synthetic field
+     * @returns {Field} the synthetic field for the map key
      */
-    getType() {
-        return this.type;
-    }
-
-    /**
-     * Returns the string representation of this class
-     * @return {String} the string representation of the class
-     */
-    toString() {
-        return 'MapKeyType {id=' + this.getType() + '}';
-    }
-
-    /**
-     * Returns true if this class is the definition of a Map Key.
-     *
-     * @return {boolean} true if the class is a Map Key
-     */
-    isKey() {
-        return true;
-    }
-
-    /**
-     * Returns true if this class is the definition of a Map Value.
-     *
-     * @return {boolean} true if the class is a Map Value
-     */
-    isValue() {
-        return false;
-    }
-
-    /**
-     * Return the namespace of this map key.
-     * @return {string} namespace - a namespace.
-     */
-    getNamespace() {
-        return this.modelFile.getNamespace();
+    toField() {
+        const mapKeyType = this.getMapKeyType();
+        const mapKeyFieldType = ModelUtil.isPrimitiveType(mapKeyType) ? mapKeyType : 'Object';
+        // create a synthetic field for the map key
+        const mapKeyField = new Field(this.getParent(), {
+            $class: `${MetaModelNamespace}.${mapKeyFieldType}Property`,
+            name: `${this.getParent().getName()}_map_key`,
+            type: ModelUtil.isPrimitiveType(mapKeyType) ? mapKeyType
+                : {name: mapKeyType}
+        });
+        return mapKeyField;
     }
 }
 

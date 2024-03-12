@@ -83,7 +83,7 @@ describe('Property', function () {
         it('toString works', function () {
             const person = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = person.getProperty('owner');
-            field.toString().should.equal('RelationshipDeclaration {name=owner, type=org.acme.l1@1.0.0.Person, array=false, optional=false}');
+            field.toString().should.equal('RelationshipProperty {name=owner, type=org.acme.l1@1.0.0.Person, array=false, optional=false}');
         });
     });
 });

@@ -121,7 +121,7 @@ describe('JSONGenerator', () => {
         it('should throw an error for an unrecognized type', () => {
             (() => {
                 jsonGenerator.visit(3.142, {});
-            }).should.throw(/Unrecognised/);
+            }).should.throw(/Model element is invalid/);
         });
 
     });

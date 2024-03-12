@@ -190,23 +190,25 @@ describe('Decorators', () => {
                  * Process the decorator, and return a specific implementation class for that
                  * decorator, or return null if this decorator is not handled by this processor.
                  * @abstract
+                 * @param {ModelFile} modelFile - the modelFile for the decorator
                  * @param {ClassDeclaration | Property} parent - the owner of this property
                  * @param {Object} ast - The AST created by the parser
                  * @return {Decorator} The decorator.
                  */
-                newDecorator(parent, ast) {
+                newDecorator(modelFile, parent, ast) {
                     if (ast.name !== 'bar') {
                         return null;
                     }
                     return new(class MyDecorator extends Decorator {
                         /**
                          * Create a Decorator.
+                         * @param {ModelFile} modelFile - the modelFile for the decorator
                          * @param {ClassDeclaration | Property} parent - the owner of this property
                          * @param {Object} ast - The AST created by the parser
                          * @throws {IllegalModelException}
                          */
-                        constructor(parent, ast) {
-                            super(parent, ast);
+                        constructor(modelFile, parent, ast) {
+                            super(modelFile, parent, ast);
                         }
                         /**
                          * My method.
@@ -215,7 +217,7 @@ describe('Decorators', () => {
                         myMethod() {
                             return 'woop';
                         }
-                    })(parent, ast);
+                    })(modelFile, parent, ast);
                 }
             });
 

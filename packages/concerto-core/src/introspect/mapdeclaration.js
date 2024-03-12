@@ -18,7 +18,6 @@ const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const MapValueType = require('./mapvaluetype');
 const MapKeyType = require('./mapkeytype');
-const ModelUtil = require('../modelutil');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -31,8 +30,8 @@ if (global === undefined) {
  * MapDeclaration defines a Map data structure, which allows storage of a collection
  * of values, where each value is associated and indexed with a unique key.
  *
- * @extends Decorated
- * @see See {@link Decorated}
+ * @extends Declaration
+ * @see See {@link Declaration}
  * @class
  * @memberof module:concerto-core
  */
@@ -68,18 +67,8 @@ class MapDeclaration extends Declaration {
             throw new IllegalModelException(`MapDeclaration must contain Key & Value properties ${this.ast.name}`, this.modelFile, this.ast.location);
         }
 
-        if (!ModelUtil.isValidMapKey(this.ast.key)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapKeyType  ${this.ast.name}`, this.modelFile, this.ast.location);
-        }
-
-        if (!ModelUtil.isValidMapValue(this.ast.value)) {
-            throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
-        }
-
-        this.name = this.ast.name;
         this.key = new MapKeyType(this, this.ast.key);
         this.value = new MapValueType(this, this.ast.value);
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
     /**
@@ -92,36 +81,6 @@ class MapDeclaration extends Declaration {
         super.validate();
         this.key.validate();
         this.value.validate();
-    }
-
-    /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.modelFile;
-    }
-
-    /**
-     * Returns the short name of a class. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.name;
     }
 
     /**
@@ -140,32 +99,6 @@ class MapDeclaration extends Declaration {
      */
     getValue() {
         return this.value;
-    }
-
-    /**
-     * Returns the string representation of this class
-     * @return {String} the string representation of the class
-     */
-    toString() {
-        return 'MapDeclaration {id=' + this.getFullyQualifiedName() + '}';
-    }
-
-    /**
-     * Returns the kind of declaration
-     *
-     * @return {string} what kind of declaration this is
-     */
-    declarationKind() {
-        return 'MapDeclaration';
-    }
-
-    /**
-     * Returns true if this class is the definition of a class declaration.
-     *
-     * @return {boolean} true if the class is a class
-     */
-    isMapDeclaration() {
-        return true;
     }
 }
 

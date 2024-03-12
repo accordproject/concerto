@@ -61,7 +61,7 @@ class Field extends Property {
 
         this.validator = null;
 
-        switch (this.getType()) {
+        switch (this.getPropertyType()) {
         case 'Integer':
         case 'Double':
         case 'Long':
@@ -129,15 +129,6 @@ class Field extends Property {
     }
 
     /**
-     * Returns true if this class is the definition of a field.
-     *
-     * @return {boolean} true if the class is a field
-     */
-    isField() {
-        return true;
-    }
-
-    /**
      * Returns true if the field's type is a scalar
      * @returns {boolean} true if the field is a scalar type
      */
@@ -156,7 +147,7 @@ class Field extends Property {
 
     /**
      * Unboxes a field that references a scalar type to an
-     * underlying Field definition.
+     * underlying primitive Field definition.
      * @throws {Error} throws an error if this field is not a scalar type.
      * @returns {Field} the primitive field for this scalar
      */

@@ -17,14 +17,14 @@
 const ModelManager = require('../../src/modelmanager');
 const sinon = require('sinon');
 const ClassDeclaration = require('../../src/introspect/classdeclaration');
-const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
+const RelationshipProperty = require('../../src/introspect/relationshipproperty');
 const Util = require('../composer/composermodelutility');
 
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 
-describe('RelationshipDeclaration', function () {
+describe('RelationshipProperty', function () {
 
     let modelManager;
     let mockClassDeclaration;
@@ -52,9 +52,9 @@ describe('RelationshipDeclaration', function () {
             modelManager.addCTOModel(levelOneModel);
             const vehicleDeclaration = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
-            (field instanceof RelationshipDeclaration).should.be.true;
+            (field instanceof RelationshipProperty).should.be.true;
             // stub the getType method to return null
-            sinon.stub(field, 'getType').callsFake(function(){return null;});
+            sinon.stub(field, 'getPropertyType').callsFake(function(){return null;});
             (function () {
                 field.validate(vehicleDeclaration);
             }).should.throw(/Relationship must have a type/);
@@ -81,7 +81,7 @@ describe('RelationshipDeclaration', function () {
             modelManager.addCTOModel(model2);
             const vehicleDeclaration = modelManager.getType('org.acme.l2@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
-            (field instanceof RelationshipDeclaration).should.be.true;
+            (field instanceof RelationshipProperty).should.be.true;
             modelManager.getType = () => { return null; };
 
             (function () {
@@ -104,7 +104,7 @@ describe('RelationshipDeclaration', function () {
             modelManager.addCTOModel(model);
             const vehicleDeclaration = modelManager.getType('org.acme.l1@1.0.0.Car');
             const field = vehicleDeclaration.getProperty('owner');
-            (field instanceof RelationshipDeclaration).should.be.true;
+            (field instanceof RelationshipProperty).should.be.true;
             field.getParent().getModelFile().getType = () => {return mockClassDeclaration;};
 
             (function () {

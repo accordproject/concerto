@@ -28,10 +28,9 @@ import DecoratorFactory = require("./introspect/decoratorfactory");
 import DecoratorManager = require("./decoratormanager");
 import Declaration = require("./introspect/declaration");
 import ClassDeclaration = require("./introspect/classdeclaration");
-import IdentifiedDeclaration = require("./introspect/identifieddeclaration");
 import AssetDeclaration = require("./introspect/assetdeclaration");
 import ConceptDeclaration = require("./introspect/conceptdeclaration");
-import EnumValueDeclaration = require("./introspect/enumvaluedeclaration");
+import EnumDeclaration = require("./introspect/enumdeclaration");
 import EventDeclaration = require("./introspect/eventdeclaration");
 import ParticipantDeclaration = require("./introspect/participantdeclaration");
 import TransactionDeclaration = require("./introspect/transactiondeclaration");
@@ -41,8 +40,8 @@ import MapKeyType = require("./introspect/mapkeytype");
 import MapValueType = require("./introspect/mapvaluetype");
 import Property = require("./introspect/property");
 import Field = require("./introspect/field");
-import EnumDeclaration = require("./introspect/enumdeclaration");
-import RelationshipDeclaration = require("./introspect/relationshipdeclaration");
+import RelationshipProperty = require("./introspect/relationshipproperty");
+import EnumValue = require("./introspect/enumvalue");
 import Validator = require("./introspect/validator");
 import NumberValidator = require("./introspect/numbervalidator");
 import StringValidator = require("./introspect/stringvalidator");
@@ -64,4 +63,45 @@ export type version = {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, Declaration, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, MapDeclaration, MapKeyType, MapValueType, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, MetaModel };
+export {
+    SecurityException,
+    IllegalModelException,
+    TypeNotFoundException,
+    MetamodelException,
+    Decorator,
+    DecoratorFactory,
+    DecoratorManager,
+    Declaration,
+    ClassDeclaration,
+    AssetDeclaration,
+    ConceptDeclaration,
+    EnumDeclaration,
+    EventDeclaration,
+    ParticipantDeclaration,
+    TransactionDeclaration,
+    ScalarDeclaration,
+    MapDeclaration,
+    MapKeyType,
+    MapValueType,
+    Property,
+    Field,
+    RelationshipProperty,
+    EnumValue,
+    Validator,
+    NumberValidator,
+    StringValidator,
+    Typed,
+    Identifiable,
+    Relationship,
+    Resource,
+    Factory,
+    Globalize,
+    Introspector,
+    ModelFile,
+    ModelManager,
+    Serializer,
+    ModelUtil,
+    ModelLoader,
+    DateTimeUtil,
+    MetaModel
+};

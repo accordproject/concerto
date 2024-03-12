@@ -14,31 +14,32 @@
 
 'use strict';
 
+const ModelElement = require('./modelelement');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Property = require('./property');
+    const ModelElement = require('./modelelement');
 }
 /* eslint-enable no-unused-vars */
 
 /**
- * Decorator encapsulates a decorator (annotation) on a class or property.
+ * Decorator encapsulates a decorator (annotation) on a declaration or property.
  * @class
  * @memberof module:concerto-core
  */
-class Decorator {
+class Decorator extends ModelElement {
     /**
      * Create a Decorator.
-     * @param {ClassDeclaration | Property} parent - the owner of this property
+     * @param {ModelFile} modelFile - the model file for this decorator
+     * @param {ModelElement} [parent] - the owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
-        this.ast = ast;
+    constructor(modelFile, parent, ast) {
+        super(modelFile, ast);
         this.parent = parent;
         this.arguments = null;
         this.process();
@@ -57,7 +58,7 @@ class Decorator {
 
     /**
      * Returns the owner of this property
-     * @return {ClassDeclaration|Property} the parent class or property declaration
+     * @return {ModelElement} the parent model element
      */
     getParent() {
         return this.parent;
@@ -99,28 +100,11 @@ class Decorator {
     validate() { }
 
     /**
-     * Returns the name of a decorator
-     * @return {string} the name of this decorator
-     */
-    getName() {
-        return this.name;
-    }
-
-    /**
      * Returns the arguments for this decorator
      * @return {object[]} the arguments for this decorator
      */
     getArguments() {
         return this.arguments;
-    }
-
-    /**
-     * Returns true if this class is the definition of a decorator.
-     *
-     * @return {boolean} true if the class is a decorator
-     */
-    isDecorator() {
-        return true;
     }
 }
 
