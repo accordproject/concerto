@@ -4,11 +4,12 @@
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
-        "node": ">=14",
+        "node": ">=16",
         "npm": ">=6"
     },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
+    "type": "module",
+    "exports": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "clean": "rimraf src/generated dist",
         "codegen": "node scripts/codegen.js",
@@ -17,7 +18,8 @@
         "pretest": "npm-run-all licchk lint",
         "lint": "eslint .",
         "licchk": "license-check-and-add",
-        "test": "echo no tests"
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "test:watch": "NODE_OPTIONS=--experimental-vm-modules npx jest --watchAll"
     },
     "repository": {
         "type": "git",
@@ -37,9 +39,12 @@
         "@accordproject/concerto-metamodel": "3.8.1",
         "@accordproject/concerto-util": "^4.0.0-alpha.0",
         "eslint": "8.2.0",
+        "jest": "28.1.1",
         "license-check-and-add": "2.3.6",
         "npm-run-all": "4.1.5",
         "rimraf": "3.0.2",
+        "ts-jest": "28.0.4",
+        "ts-json-schema-generator": "1.4.0",
         "typescript": "4.6.3"
     },
     "license-check-and-add-config": {
@@ -58,9 +63,7 @@
             ".nyc-output",
             "out",
             ".tern-project",
-            "./generated/concerto.metamodel@1.0.0.ts",
-            "./generated/concerto.ts",
-            "./generated/concerto@1.0.0.ts"
+            "./generated/"
         ],
         "file_type_method": "EXCLUDE",
         "file_types": [
@@ -87,5 +90,27 @@
                 "file": "./HEADER.md"
             }
         }
+    },
+    "jest": {
+        "preset": "ts-jest/presets/default-esm",
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "<rootDir>/dist/",
+            "/node_modules/"
+        ],
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "src/**/*.ts"
+        ],
+        "extensionsToTreatAsEsm": [".ts"],
+        "globals": {
+            "ts-jest": {
+                "useESM": true
+            }
+        },
+        "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1"
+        },
+        "modulePathIgnorePatterns": ["<rootDir>/dist/"]
     }
 }
