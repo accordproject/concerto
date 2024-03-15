@@ -4,10 +4,11 @@
     "coveralls": "3.1.0",
     "dayjs": "1.11.10",
     "eslint": "8.2.0",
-    "jsdoc": "^4.0.2",
     "glob": "^7.2.0",
+    "jsdoc": "^4.0.2",
     "lerna": "^5.6.2",
     "license-check-and-add": "2.3.6",
+    "mocha": "^10.3.0",
     "nyc": "15.1.0",
     "semver": "7.5.4"
   },
@@ -98,5 +99,13 @@
         "file": "HEADER.md"
       }
     }
+  },
+  "dependencies": {
+    "@accordproject/concerto-vocabulary": "^3.16.5",
+    "@supercharge/promise-pool": "^3.1.1",
+    "chai": "^4.4.1",
+    "chai-as-promised": "^7.1.1",
+    "chai-things": "^0.2.0",
+    "sinon": "^17.0.1"
   }
 }

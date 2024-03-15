@@ -78,4 +78,12 @@ describe('Decorator', () => {
         });
 
     });
+
+    // add a test to check decorator.getArguments()
+    describe('#getArguments', () => {
+        it('should return the arguments', () => {
+            const d = new Decorator(mockAssetDeclaration, ast);
+            d.getArguments().should.deep.equal(['one','two','three']);
+        });
+    });
 });

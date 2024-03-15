@@ -570,6 +570,7 @@ class BaseModelManager {
         const namespace = ModelUtil.getNamespace(qualifiedName);
 
         const modelFile = this.getModelFile(namespace);
+
         if (!modelFile) {
             const formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
             throw new TypeNotFoundException(qualifiedName, formatter({
