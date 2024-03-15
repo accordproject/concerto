@@ -16,6 +16,7 @@
 
 const ModelElement = require('./modelelement');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -72,17 +73,21 @@ class Decorator extends ModelElement {
     process() {
         this.name = this.ast.name;
         this.arguments = [];
+        // let thingType = null;
 
         if (this.ast.arguments) {
             for (let n = 0; n < this.ast.arguments.length; n++) {
                 let thing = this.ast.arguments[n];
                 if (thing) {
-                    if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
+                    if (
+                        thing.$class ===
+                        `${MetaModelNamespace}.DecoratorTypeReference`
+                    ) {
                         // XXX Is this really what we want?
                         this.arguments.push({
-                            type: 'Identifier',
+                            type: this._resolveArguemntType(thing),
                             name: thing.type.name,
-                            array: thing.isArray
+                            array: thing.isArray,
                         });
                     } else {
                         this.arguments.push(thing.value);
@@ -97,7 +102,7 @@ class Decorator extends ModelElement {
      * @throws {IllegalModelException}
      * @private
      */
-    validate() { }
+    validate() {}
 
     /**
      * Returns the arguments for this decorator
@@ -105,6 +110,42 @@ class Decorator extends ModelElement {
      */
     getArguments() {
         return this.arguments;
+    }
+
+    /**
+     * Returns true if this class is the definition of a decorator.
+     *
+     * @return {boolean} true if the class is a decorator
+     */
+    isDecorator() {
+        return true;
+    }
+
+    /**
+     * Resolves the type of the decorator argument
+     * @param {Object} argument - the decorator argument // Idt we have argument as any defined type
+     * @return {ClassDeclaration} the type of the decorator argument // similar to [this](https://github.com/accordproject/concerto/blob/0d7f108d4961f87782436dd689639ce0f35e97f8/packages/concerto-core/lib/introspect/classdeclaration.js#L155) method
+     */
+    _resolveArguemntType(argument) {
+
+        let classDecl = null;
+
+        const modelFile = this.parent.getModelFile();
+
+        if (modelFile.isImportedType(argument.type.name)) {
+            let fullyQualifiedTypeName = modelFile.resolveImport(argument.type.name);
+            classDecl = modelFile.getModelManager().getType(fullyQualifiedTypeName);
+        } else {
+            classDecl = modelFile.getType(argument.type.name);
+        }
+
+        if (!classDecl) {
+            // THROW AN EXCEPTION TYPE NOT FOUND NEITHER IN THE NAMESPACE NOR IN THE IMPORTS
+            throw new IllegalModelException('Could not find type ' + this.type.name, modelFile, this.ast.location);
+        }
+
+        return classDecl;
+
     }
 }
 

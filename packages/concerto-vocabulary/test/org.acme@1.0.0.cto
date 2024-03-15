@@ -9,7 +9,7 @@ enum Color {
 scalar SSN extends String default="000-00-0000"
 scalar VIN extends String
 
-asset Vehicle identified by vin {
+asset Vehicle identified {
     o VIN vin
     o Color color
 }

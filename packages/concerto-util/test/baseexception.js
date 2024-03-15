@@ -17,6 +17,9 @@
 const BaseException = require('../src/').BaseException;
 
 require('chai').should();
+// Instead change the require of chai.js in /Users/duccio/Documents/Accord/concerto/packages/concerto-util/test/baseexception.js to a dynamic import() which is available in all CommonJS modules.
+
+
 
 describe('BaseException', function () {
 

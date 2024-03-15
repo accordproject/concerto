@@ -25,8 +25,14 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 chai.use(jestSnapshotPlugin());
 
+<<<<<<< Updated upstream
 const { VocabularyManager } = require('../src');
 const { ModelManager, DecoratorManager } = require('@accordproject/concerto-core');
+=======
+const { VocabularyManager } = require('..');
+const ModelManager = require('@accordproject/concerto-core/lib/modelmanager');
+const DecoratorManager = require('@accordproject/concerto-core/lib/decoratormanager');
+>>>>>>> Stashed changes
 
 let modelManager = null;
 let vocabularyManager = null;
