@@ -4,6 +4,96 @@
     "namespace": "test.person@1.0.0-alpha.0+build1",
     "imports": [
         {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0-a+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0-a.a+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0-a+b.c"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0+b.c"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0-a"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0-a.a"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "पः",
+            "namespace": "b@1.0.0"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a.a+b.b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a+b.b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a.a+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0+b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0+b.b"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0-a.a"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "A",
+            "namespace": "b@1.0.0+-a"
+        },
+        {
             "$class": "concerto.metamodel@1.0.0.ImportTypes",
             "namespace": "test",
             "types": ["Foo", "Bar"]
