@@ -21,7 +21,7 @@ const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
-const IllegalModelException = require("./introspect/illegalmodelexception")
+const IllegalModelException = require('./introspect/illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -440,7 +440,7 @@ class DecoratorManager {
                         this.ast.location,
                     );
                 }
-            })
+            });
             decorated.decorators
                 ? decorated.decorators.push(newDecorator)
                 : (decorated.decorators = [newDecorator]);
