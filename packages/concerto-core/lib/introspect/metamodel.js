@@ -47,11 +47,12 @@ function validateMetaModel(input) {
     const metaModelManager = newMetaModelManager();
     const factory = new Factory(metaModelManager);
     const serializer = new Serializer(factory, metaModelManager);
-    // First validate the metaModel
-    const object = serializer.fromJSON(input);
-    return serializer.toJSON(object);
-}
 
+    // validate the metaModel
+    serializer.fromJSON(input);
+
+    return input;
+}
 /**
  * Import metamodel to a model manager
  * @param {object} metaModel - the metamodel
