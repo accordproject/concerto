@@ -16,10 +16,10 @@ declare class Declaration extends Decorated {
      * result of parsing.
      *
      * @param {ModelFile} modelFile - the ModelFile for this class
-     * @param {Object} ast - the AST created by the parser
+     * @param {IDeclaration} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile: ModelFile, ast: any);
+    constructor(modelFile: ModelFile, ast: IDeclaration);
     modelFile: ModelFile;
     name: any;
     fqn: string;
@@ -93,3 +93,4 @@ declare class Declaration extends Decorated {
 }
 import Decorated = require("./decorated");
 import ModelFile = require("./modelfile");
+import {IDeclaration} from "../../../../concerto-types/src/generated/unions/concerto.metamodel@1.0.0"
