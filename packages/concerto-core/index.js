@@ -22,131 +22,86 @@
  */
 
 // Exceptions
-const SecurityException = require('./lib/securityexception');
-const IllegalModelException = require('./lib/introspect/illegalmodelexception');
-const TypeNotFoundException = require('./lib/typenotfoundexception');
-const MetamodelException = require('./lib/metamodelexception');
+export const SecurityException = require('./lib/securityexception');
+export const IllegalModelException = require('./lib/introspect/illegalmodelexception');
+export const TypeNotFoundException = require('./lib/typenotfoundexception');
+export const MetamodelException = require('./lib/metamodelexception');
 
 // Decorated
-const Decorator = require('./lib/introspect/decorator');
-const DecoratorFactory = require('./lib/introspect/decoratorfactory');
+export const Decorator = require('./lib/introspect/decorator');
+export const DecoratorFactory = require('./lib/introspect/decoratorfactory');
 
 // ClassDeclarations
-const ClassDeclaration = require('./lib/introspect/classdeclaration');
-const IdentifiedDeclaration = require('./lib/introspect/identifieddeclaration');
-const AssetDeclaration = require('./lib/introspect/assetdeclaration');
-const ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
-const EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
-const EventDeclaration = require('./lib/introspect/eventdeclaration');
-const ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
-const ScalarDeclaration = require('./lib/introspect/scalardeclaration');
+export const ClassDeclaration = require('./lib/introspect/classdeclaration');
+export const IdentifiedDeclaration = require('./lib/introspect/identifieddeclaration');
+export const AssetDeclaration = require('./lib/introspect/assetdeclaration');
+export const ConceptDeclaration = require('./lib/introspect/conceptdeclaration');
+export const EnumValueDeclaration = require('./lib/introspect/enumvaluedeclaration');
+export const EventDeclaration = require('./lib/introspect/eventdeclaration');
+export const ParticipantDeclaration = require('./lib/introspect/participantdeclaration');
+export const TransactionDeclaration = require('./lib/introspect/transactiondeclaration');
+export const ScalarDeclaration = require('./lib/introspect/scalardeclaration');
 
 // MapDeclaration
-const MapDeclaration = require('./lib/introspect/mapdeclaration');
-const MapKeyType = require('./lib/introspect/mapkeytype');
-const MapValueType = require('./lib/introspect/mapvaluetype');
+export const MapDeclaration = require('./lib/introspect/mapdeclaration');
+export const MapKeyType = require('./lib/introspect/mapkeytype');
+export const MapValueType = require('./lib/introspect/mapvaluetype');
 
 // Properties
-const Property = require('./lib/introspect/property');
-const Field = require('./lib/introspect/field');
-const EnumDeclaration = require('./lib/introspect/enumdeclaration');
-const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
+export const Property = require('./lib/introspect/property');
+export const Field = require('./lib/introspect/field');
+export const EnumDeclaration = require('./lib/introspect/enumdeclaration');
+export const RelationshipDeclaration = require('./lib/introspect/relationshipdeclaration');
 
 // Validators
-const Validator = require('./lib/introspect/validator');
-const NumberValidator = require('./lib/introspect/numbervalidator');
-const StringValidator = require('./lib/introspect/stringvalidator');
+export const Validator = require('./lib/introspect/validator');
+export const NumberValidator = require('./lib/introspect/numbervalidator');
+export const StringValidator = require('./lib/introspect/stringvalidator');
 
 // Typed
-const Typed = require('./lib/model/typed');
+export const Typed = require('./lib/model/typed');
 
 // Identifiables
-const Identifiable = require('./lib/model/identifiable');
-const Relationship = require('./lib/model/relationship');
-const Resource = require('./lib/model/resource');
+export const Identifiable = require('./lib/model/identifiable');
+export const Relationship = require('./lib/model/relationship');
+export const Resource = require('./lib/model/resource');
 
 // Factory
-const Factory = require('./lib/factory');
+export const Factory = require('./lib/factory');
 
 // Globalize
-const Globalize = require('./lib/globalize');
+export const Globalize = require('./lib/globalize');
 
 // Introspector
-const Introspector = require('./lib/introspect/introspector');
+export const Introspector = require('./lib/introspect/introspector');
 
 // ModelFile
-const ModelFile = require('./lib/introspect/modelfile');
+export const ModelFile = require('./lib/introspect/modelfile');
 
 // ModelManager
-const ModelManager = require('./lib/modelmanager');
+export const ModelManager = require('./lib/modelmanager');
 
 // Serializer
-const Serializer = require('./lib/serializer');
+export const Serializer = require('./lib/serializer');
 
 // ModelUtil
-const ModelUtil = require('./lib/modelutil');
+export const ModelUtil = require('./lib/modelutil');
 
 // ModelLoader
-const ModelLoader = require('./lib/modelloader');
+export const ModelLoader = require('./lib/modelloader');
 
 // DecoratorManager
-const DecoratorManager = require('./lib/decoratormanager');
+export const DecoratorManager = require('./lib/decoratormanager');
 
 // DateTimeUtil
-const DateTimeUtil = require('./lib/datetimeutil');
+export const DateTimeUtil = require('./lib/datetimeutil');
 
 // Concerto
-const Concerto = require('./lib/concerto');
+export const Concerto = require('./lib/concerto');
 
 // MetaModel
-const MetaModel = require('./lib/introspect/metamodel');
+export const MetaModel = require('./lib/introspect/metamodel');
 
 // Version
 /** @type {{ name: string, version: string }} */
-const version = require('./package.json');
-
-module.exports = {
-    SecurityException,
-    IllegalModelException,
-    TypeNotFoundException,
-    MetamodelException,
-    Decorator,
-    DecoratorFactory,
-    DecoratorManager,
-    ClassDeclaration,
-    IdentifiedDeclaration,
-    AssetDeclaration,
-    ConceptDeclaration,
-    EnumValueDeclaration,
-    EventDeclaration,
-    ParticipantDeclaration,
-    TransactionDeclaration,
-    ScalarDeclaration,
-    MapDeclaration,
-    MapKeyType,
-    MapValueType,
-    Property,
-    Field,
-    EnumDeclaration,
-    RelationshipDeclaration,
-    Validator,
-    NumberValidator,
-    StringValidator,
-    Typed,
-    Identifiable,
-    Relationship,
-    Resource,
-    Factory,
-    Globalize,
-    Introspector,
-    ModelFile,
-    ModelManager,
-    Serializer,
-    ModelUtil,
-    ModelLoader,
-    DateTimeUtil,
-    Concerto,
-    MetaModel,
-    version
-};
+export const version = require('./package.json');

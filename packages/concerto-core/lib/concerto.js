@@ -33,7 +33,7 @@ if (global === undefined) {
  * @class
  * @memberof module:concerto-core
  */
-class Concerto {
+export default class Concerto {
     /**
      * Create a Concerto instance.
      * @param {ModelManager} modelManager - The this.modelManager to use for validation etc.
@@ -207,5 +207,3 @@ class Concerto {
         return this.getTypeDeclaration(obj).getNamespace();
     }
 }
-
-module.exports = Concerto;

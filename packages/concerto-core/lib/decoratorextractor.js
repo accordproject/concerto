@@ -23,7 +23,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
  */
-class DecoratorExtractor {
+export default class DecoratorExtractor {
     /**
      * Create the DecoratorExtractor.
      * @constructor
@@ -387,4 +387,3 @@ class DecoratorExtractor {
         };
     }
 }
-module.exports = DecoratorExtractor;

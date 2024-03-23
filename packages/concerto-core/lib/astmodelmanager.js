@@ -38,7 +38,7 @@ const astProcessFile = (name, data) => {
  *
  * @memberof module:concerto-core
  */
-class AstModelManager extends BaseModelManager {
+export default class AstModelManager extends BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
@@ -48,5 +48,3 @@ class AstModelManager extends BaseModelManager {
         super(options, astProcessFile);
     }
 }
-
-module.exports = AstModelManager;
