@@ -494,7 +494,7 @@ describe('JSONPopulator', () => {
             }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
         });
 
-        it('should be able to deserialise a map that uses abstract types as values', () => { 
+        it('should be able to deserialise a map that uses abstract types as values', () => {
             let options = {
                 jsonStack: new TypedStack({
                     $class: 'org.acme.abstract.MyContainerAsset3',
