@@ -61,6 +61,15 @@ class EnumValueDeclaration extends Property {
     isEnumValue() {
         return true;
     }
+
+    /**
+     * Returns name of the enum value as a Java String.
+     * 
+     * @returns {string} 
+     */
+    toString(){
+        return `EnumValueDeclaration ${this.name}`;
+    }
 }
 
 module.exports = EnumValueDeclaration;

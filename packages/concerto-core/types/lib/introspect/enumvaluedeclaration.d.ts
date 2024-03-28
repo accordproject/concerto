@@ -14,5 +14,13 @@ declare class EnumValueDeclaration extends Property {
      * @return {boolean} true if the class is an enum value
      */
     isEnumValue(): boolean;
+
+
+    /**
+     * Returns name of the enum value as a Java String.
+     * 
+     * @returns {string} 
+     */
+    toString():string;
 }
 import Property = require("./property");

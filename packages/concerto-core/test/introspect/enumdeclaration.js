@@ -83,4 +83,22 @@ describe('EnumDeclaration', () => {
         });
     });
 
+    describe('#toString enumValue',()=>{
+        it("Should give the correct value",()=>{
+
+            const model = `namespace test@1.0.0
+            enum Country {
+                o UK
+                o USA
+                o FRANCE
+                o GERMANY
+                o JAPAN
+            }`
+            const model_Manager = new ModelManager();
+            model_Manager.addCTOModel(model);
+            const enum_value = model_Manager.getEnumDeclarations()[0].getOwnProperties()[0];
+            enum_value.toString().should.equal('EnumValueDeclaration UK');
+        })
+    })
+
 });
