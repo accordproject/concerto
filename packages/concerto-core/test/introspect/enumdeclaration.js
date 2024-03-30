@@ -97,7 +97,8 @@ describe('EnumDeclaration', () => {
             const model_Manager = new ModelManager();
             model_Manager.addCTOModel(model);
             const enum_value = model_Manager.getEnumDeclarations()[0].getOwnProperties()[0];
-            enum_value.toString().should.equal('EnumValueDeclaration UK');
+            console.log(enum_value.toString())
+            enum_value.toString().should.equal('EnumValueDeclaration test@1.0.0.Country.UK');
         })
     })
 

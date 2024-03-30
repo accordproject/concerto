@@ -68,7 +68,7 @@ class EnumValueDeclaration extends Property {
      * @returns {string} 
      */
     toString(){
-        return `EnumValueDeclaration ${this.name}`;
+        return `EnumValueDeclaration ${this.getFullyQualifiedName()}`;
     }
 }
 
