@@ -15,6 +15,8 @@
 'use strict';
 
 const ModelManager = require('../../lib/modelmanager');
+const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
+const TypeNotFoundException = require('../../lib/typenotfoundexception');
 const sinon = require('sinon');
 const Util = require('../composer/composermodelutility');
 
@@ -65,10 +67,13 @@ describe('Property', function () {
             const field = person.getProperty('owner');
             // stub the getType method to return null
             sinon.stub(person, 'getModelFile').callsFake(function(){return null;});
-
-            (function () {
+            
+            try{
                 field.getFullyQualifiedTypeName();
-            }).should.throw(/Parent of property owner does not have a ModelFile!/);
+            }catch(err){
+                err.should.be.an.instanceOf(IllegalModelException);
+                err.message.should.match(/Parent of property owner does not have a ModelFile!/)
+            }
         });
         it('should throw if ModelFile fails to find type', function () {
             const person = modelManager.getType('org.acme.l1.Car');
@@ -76,9 +81,12 @@ describe('Property', function () {
             // stub the getType method to return null
             sinon.stub(person.getModelFile(), 'getFullyQualifiedTypeName').callsFake(function(){return null;});
 
-            (function () {
+            try{
                 field.getFullyQualifiedTypeName();
-            }).should.throw(/Failed to find fully qualified type name for property owner with type Person/);
+            }catch(err){
+                err.should.be.an.instanceOf(TypeNotFoundException);
+                err.message.should.match(/Failed to find fully qualified type name for property owner with type Person/)
+            }
         });
         it('toString works', function () {
             const person = modelManager.getType('org.acme.l1.Car');
