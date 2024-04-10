@@ -436,8 +436,7 @@ class DecoratorManager {
             decorated.decorators.forEach((d)=>{
                 if(d.name === newDecorator.name){
                     throw new IllegalModelException(
-                        `Duplicate decorator ${newDecorator}`,
-                        this.ast.location,
+                        `Duplicate decorator ${newDecorator.name}`
                     );
                 }
             });

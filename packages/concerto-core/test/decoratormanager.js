@@ -568,10 +568,14 @@ describe('DecoratorManager', () => {
     });
 
     describe("#applyDecorator",async function(){
-        const testModelManager = new ModelManager({strict:true,});
-            const modelText = fs.readFileSync('./test/data/decoratorcommands/model-without-vocab.cto', 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const resp1 = DecoratorManager.applyDecorator(testModelManager,'APPEND',new Decorator(this,'decoratorOne'));
-            DecoratorManager.applyDecorator(testModelManager,'APPEND',new Decorator(this,'decoratorOne').should.throw(/Duplicate decorator decoratorOne /)
-    })
+        it("Duplicate decorator",()=>{
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(__dirname+'/data/decorators/model.cto', 'utf-8');
+            const modelFile = testModelManager.addCTOModel(modelText, 'model.cto');
+            
+            (()=>{
+                DecoratorManager.applyDecorator(modelFile.getDecorator('noargs').parent,'APPEND',modelFile.getDecorator('noargs').parent.decorators[0]);
+            }).should.throw(/Duplicate decorator noargs/);
+        });
+    });
 });
