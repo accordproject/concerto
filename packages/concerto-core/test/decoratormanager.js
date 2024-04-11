@@ -21,7 +21,6 @@ const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanage
 const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
-const Decorator = require('../lib/introspect/decorator');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
@@ -568,7 +567,7 @@ describe('DecoratorManager', () => {
     });
 
     describe("#applyDecorator",async function(){
-        it("Duplicate decorator",()=>{
+        it("should throw error for appending duplicate decorator",()=>{
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(__dirname+'/data/decorators/model.cto', 'utf-8');
             const modelFile = testModelManager.addCTOModel(modelText, 'model.cto');
@@ -578,4 +577,5 @@ describe('DecoratorManager', () => {
             }).should.throw(/Duplicate decorator noargs/);
         });
     });
+    
 });
