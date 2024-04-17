@@ -20,9 +20,8 @@ declare class Decorator {
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
      */
-    private accept;
+    accept(visitor: any, parameters: any): any;
     /**
      * Returns the owner of this property
      * @return {ClassDeclaration|Property} the parent class or property declaration

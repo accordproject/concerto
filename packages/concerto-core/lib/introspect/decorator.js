@@ -49,7 +49,6 @@ class Decorator {
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @public
      */
     accept(visitor, parameters) {
         return visitor.visit(this, parameters);
