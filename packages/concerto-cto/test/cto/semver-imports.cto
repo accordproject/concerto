@@ -1,5 +1,23 @@
 namespace test.person@1.0.0-alpha.0+build1
 
+import b@1.0.0-a+b.पः
+import b@1.0.0-a.a+b.पः
+import b@1.0.0-a+b.c.पः
+import b@1.0.0+b.पः
+import b@1.0.0+b.c.पः
+import b@1.0.0-a.पः
+import b@1.0.0-a.a.पः
+import b@1.0.0.पः
+import b@1.0.0-a+b.A
+import b@1.0.0-a.a+b.b.A
+import b@1.0.0-a+b.b.A
+import b@1.0.0-a.a+b.A
+import b@1.0.0+b.A
+import b@1.0.0+b.b.A
+import b@1.0.0-a.A
+import b@1.0.0-a.a.A
+import b@1.0.0.A
+import b@1.0.0+-a.A
 import test.{Foo,Bar}
 import test.Foo
 import test.Foo from github://foo
@@ -10,3 +28,6 @@ import test@1.0.0.Foo from github://foo
 participant Person identified by name {
   o String name
 }
+
+
+
