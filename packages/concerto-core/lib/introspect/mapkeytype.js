@@ -69,20 +69,12 @@ class MapKeyType extends Decorated {
      * @protected
      */
     validate() {
-
         if (!ModelUtil.isPrimitiveType(this.type)) {
-
             const decl = this.modelFile.getType(this.ast.type.name);
-
+            // All but StringScalar & DateTimeScalar are unsupported.
             if  (!ModelUtil.isValidMapKeyScalar(decl)) {
                 throw new IllegalModelException(
                     `Scalar must be one of StringScalar, DateTimeScalar in context of MapKeyType. Invalid Scalar: ${this.type}, for MapDeclaration ${this.parent.name}`
-                );
-            }
-
-            if (decl?.isConcept?.() || decl?.isClassDeclaration?.()) {
-                throw new IllegalModelException(
-                    `Invalid Map key type in MapDeclaration ${this.parent.name}. Only String and DateTime types are supported for Map key types`
                 );
             }
         }
@@ -95,8 +87,7 @@ class MapKeyType extends Decorated {
      * @private
      */
     processType(ast) {
-        let decl;
-        switch(this.ast.$class) {
+        switch(ast.$class) {
         case `${MetaModelNamespace}.DateTimeMapKeyType`:
             this.type = 'DateTime';
             break;
