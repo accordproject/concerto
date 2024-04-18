@@ -298,36 +298,55 @@ describe('MapDeclaration', () => {
         it('should throw if ast contains illegal Map Key Type - Concept', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.concept.cto', MapDeclaration);
-                decl.validate().should.throw(IllegalModelException);
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
+        });
+
+        it('should throw if ast contains illegal Map Key Type - Enum', () => {
+            (() =>  {
+                let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.declaration.enum.cto', MapDeclaration);
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
 
         it('should throw if ast contains illegal Map Key Type - Scalar Long', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.long.cto', MapDeclaration);
-                decl.validate();
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
 
         it('should throw if ast contains illegal Map Key Type - Scalar Integer', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.integer.cto', MapDeclaration);
-                decl.validate().should.throw(IllegalModelException);
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
 
         it('should throw if ast contains illegal Map Key Type - Scalar Double', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.double.cto', MapDeclaration);
-                decl.validate().should.throw(IllegalModelException);
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
 
         it('should throw if ast contains illegal Map Key Type - Scalar Boolean', () => {
             (() =>  {
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.scalar.boolean.cto', MapDeclaration);
-                decl.validate().should.throw(IllegalModelException);
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
 
         it('should throw if ast contains illegal Map Key Type - Boolean', () => {
@@ -414,8 +433,10 @@ describe('MapDeclaration', () => {
                 const base_cto = fs.readFileSync('test/data/parser/mapdeclaration/base.cto', 'utf-8');
                 introspectUtils.modelManager.addCTOModel(base_cto, 'base.cto');
                 let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badkey.imported.thing.cto', MapDeclaration);
-                decl.validate().should.throw(IllegalModelException);
-            });
+                (() => {
+                    decl.validate();
+                }).should.throw(IllegalModelException);
+            })();
         });
     });
 

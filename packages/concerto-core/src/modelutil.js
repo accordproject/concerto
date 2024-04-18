@@ -316,9 +316,8 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key Scalar type
     */
     static isValidMapKeyScalar(decl) {
-        return (decl?.isScalarDeclaration?.() &&
-        (decl?.ast.$class !== `${MetaModelNamespace}.StringScalar`  ||
-        decl?.ast.$class !== `${MetaModelNamespace}.DateTimeScalar`));
+        return (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.StringScalar`)  ||
+        (decl?.isScalarDeclaration?.() && decl?.ast.$class === `${MetaModelNamespace}.DateTimeScalar`);
     }
 
     /**
