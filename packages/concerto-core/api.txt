@@ -132,6 +132,7 @@ class Declaration extends Decorated {
 }
 class Decorator {
    + void constructor(ClassDeclaration|Property,Object) throws IllegalModelException
+   + Object accept(Object,Object) 
    + void getParent() 
    + string getName() 
    + object[] getArguments() 
@@ -161,6 +162,7 @@ class IllegalModelException extends BaseFileException {
 }
 class Introspector {
    + void constructor(ModelManager) 
+   + Object accept(Object,Object) 
    + ClassDeclaration[] getClassDeclarations() 
    + ClassDeclaration getClassDeclaration(String) throws Error
 }
@@ -208,6 +210,7 @@ class ModelFile extends Decorated {
    + string getVersion() 
    + Boolean isSystemModelFile() 
    + boolean isExternal() 
+   + Object accept(Object,Object) 
    + ModelManager getModelManager() 
    + string[] getImports() 
    ~ void validate() throws IllegalModelException

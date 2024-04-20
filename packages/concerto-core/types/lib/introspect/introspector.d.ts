@@ -18,9 +18,8 @@ declare class Introspector {
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
      */
-    private accept;
+    accept(visitor: any, parameters: any): any;
     /**
      * Returns all the class declarations for the business network.
      * @return {ClassDeclaration[]} the array of class declarations
