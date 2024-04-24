@@ -14,8 +14,9 @@ declare class BaseFileException extends BaseException {
      * @param {string} fullMessage - the optional full message text
      * @param {string} [fileName] - the file name
      * @param {string} [component] - the component which throws this error
+     * @param {string} [errorType='BaseFileException'] - the error code
      */
-    constructor(message: string, fileLocation: string, fullMessage: string, fileName?: string, component?: string);
+    constructor(message: string, fileLocation: string, fullMessage: string, fileName?: string, component?: string, errorType?: string);
     fileLocation: string;
     shortMessage: string;
     fileName: string;

@@ -58,9 +58,13 @@ describe('Property', function () {
             // stub the getType method to return null
             sinon.stub(field, 'getParent').callsFake(function(){return null;});
 
-            (function () {
+            try{
                 field.getFullyQualifiedTypeName();
-            }).should.throw(/Property owner does not have a parent./);
+            }catch(err){
+                err.errorType.should.match(/IllegalModelException/);
+                err.should.be.an.instanceOf(IllegalModelException);
+                err.message.should.match(/Property owner does not have a parent./);
+            }
         });
         it('should throw if parent has no ModelFile', function () {
             const person = modelManager.getType('org.acme.l1.Car');
@@ -71,8 +75,9 @@ describe('Property', function () {
             try{
                 field.getFullyQualifiedTypeName();
             }catch(err){
+                err.errorType.should.match(/IllegalModelException/);
                 err.should.be.an.instanceOf(IllegalModelException);
-                err.message.should.match(/Parent of property owner does not have a ModelFile!/)
+                err.message.should.match(/Parent of property owner does not have a ModelFile!/);
             }
         });
         it('should throw if ModelFile fails to find type', function () {
@@ -84,8 +89,9 @@ describe('Property', function () {
             try{
                 field.getFullyQualifiedTypeName();
             }catch(err){
+                err.errorType.should.match(/TypeNotFoundException/);
                 err.should.be.an.instanceOf(TypeNotFoundException);
-                err.message.should.match(/Failed to find fully qualified type name for property owner with type Person/)
+                err.message.should.match(/Failed to find fully qualified type name for property owner with type Person/);
             }
         });
         it('toString works', function () {

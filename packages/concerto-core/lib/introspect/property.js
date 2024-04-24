@@ -179,11 +179,11 @@ class Property extends Decorated {
 
         const parent = this.getParent();
         if(!parent) {
-            throw new Error('Property ' + this.name + ' does not have a parent.');
+            throw new IllegalModelException('Property ' + this.name + ' does not have a parent.');
         }
         const modelFile = parent.getModelFile();
         if(!modelFile) {
-            throw new IllegalModelException('Parent of property ' + this.name + ' does not have a ModelFile!',modelFile);
+            throw new IllegalModelException('Parent of property ' + this.name + ' does not have a ModelFile!');
         }
         const result = modelFile.getFullyQualifiedTypeName(this.type);
         if(!result) {

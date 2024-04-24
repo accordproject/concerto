@@ -14,7 +14,7 @@
 
 'use strict';
 
-const { BaseFileException } = require('@accordproject/concerto-util');
+const {BaseFileException,ErrorCodes} = require("@accordproject/concerto-util");
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -42,8 +42,9 @@ class IllegalModelException extends BaseFileException {
      * @param {number} fileLocation.end.line - end line of the error location.
      * @param {number} fileLocation.end.column - end column of the error location.
      * @param {string} [component] - the component which throws this error
+     * @param {string} [errorType='IllegalModelException'] - the error code
      */
-    constructor(message, modelFile, fileLocation, component) {
+    constructor(message, modelFile, fileLocation, component, errorType = ErrorCodes.ILLEGAL_MODEL_EXCEPTION) {
 
         let messageSuffix = '';
         let fileName = null;
@@ -61,7 +62,7 @@ class IllegalModelException extends BaseFileException {
         // First character to be uppercase
         messageSuffix = messageSuffix.charAt(0).toUpperCase() + messageSuffix.slice(1);
 
-        super(message, fileLocation, message + ' ' + messageSuffix, fileName, component);
+        super(message, fileLocation, message + ' ' + messageSuffix, fileName, component, errorType);
     }
 }
 
