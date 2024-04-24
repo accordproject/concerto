@@ -14,7 +14,7 @@
 
 'use strict';
 
-const {BaseFileException,ErrorCodes} = require("@accordproject/concerto-util");
+const {BaseFileException,ErrorCodes} = require('@accordproject/concerto-util');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
