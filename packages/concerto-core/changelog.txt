@@ -25,7 +25,7 @@
 #
 
 
-Version 3.16.7 {44d3b20134cd254582e44ccb6d5dd276} 2024-05-01
+Version 3.16.7 {8f455df1e788c4994f423d6e236bee21} 2024-05-01
 - Added missing `strictQualifiedDateTimes` option to Serializer.fromJSON
 
 Version 3.13.4 {56df3674b9e8d094cec0ae690c07ea1f} 2024-04-20
