@@ -59,7 +59,6 @@ class Validator {
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
      */
     accept(visitor,parameters) {
         return visitor.visit(this, parameters);
