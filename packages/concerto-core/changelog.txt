@@ -24,9 +24,12 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.16.7 {44d3b20134cd254582e44ccb6d5dd276} 2024-05-01
+- Added missing `strictQualifiedDateTimes` option to Serializer.fromJSON
+
 Version 3.13.3 {8f59b43e6071c4d3ae42e94476142f7a} 2023-11-07
 - Added DCS and vocabulary extraction support for decoratorManager
-- Added errortype to BaseException and used that to define error types in introspect 
+- Added errortype to BaseException and used that to define error types in introspect
 
 Version 3.13.2 {dccc690753912cf87e7ceec56d949058} 2023-10-18
 - Add getNamespace method to key type and value type of maps
