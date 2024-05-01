@@ -27,7 +27,6 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
-    console.log(path.join(__dirname,"/data"))
 
     beforeEach(() => {
         process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
