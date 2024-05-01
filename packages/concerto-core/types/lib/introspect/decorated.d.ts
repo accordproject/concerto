@@ -30,9 +30,8 @@ declare class Decorated {
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
-     * @private
      */
-    private accept;
+    accept(visitor: any, parameters: any): any;
     /**
      * Process the AST and build the model
      *
