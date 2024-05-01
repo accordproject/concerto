@@ -344,7 +344,7 @@ class Serializer {
    + void constructor(Factory,ModelManager,object?) 
    + void setDefaultOptions(Object) 
    + Object toJSON(Resource,Object?,boolean?,boolean?,boolean?,boolean?,boolean?,number?) throws Error
-   + Resource fromJSON(Object,Object?,boolean,boolean,number?) 
+   + Resource fromJSON(Object,Object?,boolean,boolean,number?,boolean?) 
 }
 class TypeNotFoundException extends BaseException {
    + void constructor(string,string|,string,string) 
