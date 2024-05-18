@@ -21,6 +21,7 @@ const Decorator = require('../../lib/introspect/decorator');
 
 require('chai').should();
 const sinon = require('sinon');
+const { IllegalModelException } = require('../../lib/introspect/illegalmodelexception');
 
 describe('Decorator', () => {
 
@@ -59,6 +60,42 @@ describe('Decorator', () => {
             d.getArguments().should.deep.equal(['one','two','three']);
             d.isDecorator().should.equal(true);
 
+        });
+    });
+    describe('#check DecoratorTypeReference', () => {
+        it('should throw an error for invalid DecoratorTypeReference', () => {
+            const ast = {
+                name: 'TestDecorator',
+                arguments: [
+                    {
+                        $class: 'DifferentMetaModelNamespace.DecoratorTypeReference',
+                        type: {
+                            name: 'Color',
+                            isArray: false
+                        }
+                    }
+                ]
+            };
+
+            const errorMessage = `Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
+            (() => new Decorator(mockAssetDeclaration, ast)).should.throw(IllegalModelException, errorMessage);
+        });
+        it('should work fine for valid DecoratorTypeReference ', () => {
+            const ast = {
+                name: 'TestDecorator',
+                arguments: [
+                    {
+                        $class: `${MetaModelNamespace}.DecoratorTypeReference`,
+                        type: {
+                            name: 'Color',
+                            isArray: false
+                        }
+                    }
+                ]
+            };
+
+            const errorMessage = `Type '${ast.arguments[0].type.name}' not found within the namespace '${MetaModelNamespace}'. `;
+            (() => new Decorator(mockAssetDeclaration, ast)).should.not.throw(IllegalModelException, errorMessage);
         });
     });
 

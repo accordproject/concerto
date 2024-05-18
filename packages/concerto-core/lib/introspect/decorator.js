@@ -15,6 +15,7 @@
 'use strict';
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -82,7 +83,10 @@ class Decorator {
                             name: thing.type.name,
                             array: thing.isArray
                         });
-                    } else {
+                    } else if(thing.$class.includes('DecoratorTypeReference')){
+                        const errorMessage = `Type '${thing.type.name}' not found within the namespace '${MetaModelNamespace}'.`;
+                        throw new IllegalModelException(errorMessage);
+                    }  else {
                         this.arguments.push(thing.value);
                     }
                 }
