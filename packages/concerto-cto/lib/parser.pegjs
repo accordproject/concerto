@@ -1687,7 +1687,10 @@ FromUri
   = FromToken __ u:$URI __ {
     return u;
   }
+  
 
+  
+    
 ImportAll
     = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
     	const result = {
@@ -1711,22 +1714,43 @@ ImportType
   }
 
 ImportTypes
-    = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedIdentifiers _ "}" __ u:FromUri? {
+    = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedTypes _ "}" __ u:FromUri? {
+    	const { aliasedTypes, remainingTypes } = types.reduce((acc, type) => {
+        if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
+          acc.aliasedTypes.push(type);
+        } else {
+          acc.remainingTypes.push(type);
+        }
+        return acc;
+      }, { aliasedTypes: [], remainingTypes: [] });
     	const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
-            types,
+            types:remainingTypes,
+            aliasedTypes,
+            
         };
         u && (result.uri = u);
         return result;
     }
 
-commaSeparatedIdentifiers
-  = head:$Identifier _ tail:(',' _ @$Identifier _ )*
-  {
-    return [head, ...tail];
-  }
+AliasedIdentifier 
+    = name:$Identifier _ $":" _ aliasName:$Identifier{
+      const result = {
+        "$class":"concerto.metamodel@1.0.0.AliasType",
+        name:name,
+        aliasName:aliasName
+      };
+      return result;
+    }
+  
+Types
+  = AliasedIdentifier / $Identifier
 
+commaSeparatedTypes
+  = head:Types _ tail:(',' _ Types)* {
+      return [head, ...tail.map(t => t[2])];
+    }
 Import
     =  ImportTypes /
        ImportAll /
