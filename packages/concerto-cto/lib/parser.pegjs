@@ -419,6 +419,7 @@ FalseToken      = "false"      !IdentifierPart
 ImportToken     = "import"     !IdentifierPart
 NullToken       = "null"       !IdentifierPart
 TrueToken       = "true"       !IdentifierPart
+AsToken         = "as"         !IdentifierPart
 
 /* Skipped */
 
@@ -1718,6 +1719,7 @@ ImportTypes
     	const { aliasedTypes, remainingTypes } = types.reduce((acc, type) => {
         if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
           acc.aliasedTypes.push(type);
+          acc.remainingTypes.push(type.name);
         } else {
           acc.remainingTypes.push(type);
         }
@@ -1727,7 +1729,7 @@ ImportTypes
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
             types:remainingTypes,
-            aliasedTypes,
+            ... aliasedTypes.length >0 && {aliasedTypes},
             
         };
         u && (result.uri = u);
@@ -1735,7 +1737,7 @@ ImportTypes
     }
 
 AliasedIdentifier 
-    = name:$Identifier _ $":" _ aliasName:$Identifier{
+    = name:$Identifier _ $AsToken _ aliasName:$Identifier{
       const result = {
         "$class":"concerto.metamodel@1.0.0.AliasType",
         name:name,
