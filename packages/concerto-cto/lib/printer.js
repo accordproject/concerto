@@ -387,9 +387,17 @@ function toCTO(metaModel) {
             case `${MetaModelNamespace}.ImportAllFrom`:
                 result += `\nimport ${imp.namespace}.*`;
                 break;
-            case `${MetaModelNamespace}.ImportTypes`:
-                result += `\nimport ${imp.namespace}.{${imp.types.join(',')}}`;
+            case `${MetaModelNamespace}.ImportTypes`:{
+                let aliasedTypes=new Map();
+                if(Object.prototype.hasOwnProperty.call(imp,'aliasedTypes')){
+                    imp.aliasedTypes.forEach(({name,aliasName}) => {
+                        aliasedTypes.set(name,aliasName);
+                    });
+                }
+                let commaSeparatedTypesString = imp.types.map((type) =>aliasedTypes.has(type) ? `${type} as ${aliasedTypes.get(type)}`: type).join(',');
+                result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
                 break;
+            }
             default:
                 throw new Error('Unrecognized import');
             }
