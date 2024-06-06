@@ -1,0 +1,4 @@
+namespace test.aliasing
+
+import org.accordproject.{doc1 as d1,doc2 as d2}
+import org.accordproject.files.{file1,file2 as f2,file3}

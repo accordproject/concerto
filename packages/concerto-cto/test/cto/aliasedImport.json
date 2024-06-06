@@ -1,0 +1,37 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "test.aliasing",
+    "imports": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.accordproject",
+            "types": ["doc1", "doc2"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "doc1",
+                    "aliasName": "d1"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "doc2",
+                    "aliasName": "d2"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.accordproject.files",
+            "types": ["file1", "file2", "file3"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "file2",
+                    "aliasName": "f2"
+                }
+            ]
+        }
+    ],
+    "declarations": []
+}
