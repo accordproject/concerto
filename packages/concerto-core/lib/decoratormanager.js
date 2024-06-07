@@ -253,6 +253,178 @@ class DecoratorManager {
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
     }
+
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet
+     * to the ModelManager.
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} a new model manager with the decorations applied
+     */
+    static getDecoratorMaps(decoratorCommandSet) {
+        const namespaceCommandsMap = new Map();
+        const declarationCommandsMap = new Map();
+        const propertyCommandsMap = new Map();
+        const mapElementCommandsMap = new Map();
+        const typeCommandsMap = new Map();
+
+        decoratorCommandSet.commands.map(decoratorCommand => {
+            if(decoratorCommand.target.type) {
+                if (typeCommandsMap.has(decoratorCommand.target.type)) {
+                    typeCommandsMap.get(decoratorCommand.target.type).push(decoratorCommand);
+                } else {
+                    typeCommandsMap.set(decoratorCommand.target.type, [{...decoratorCommand}]);
+                }
+            }
+
+            if(decoratorCommand.target.property) {
+                if (propertyCommandsMap.has(decoratorCommand.target.property)) {
+                    propertyCommandsMap.get(decoratorCommand.target.property).push(decoratorCommand);
+                } else {
+                    propertyCommandsMap.set(decoratorCommand.target.property, [{...decoratorCommand}]);
+                }
+            } else if(decoratorCommand.target.mapElement) {
+                if (mapElementCommandsMap.has(decoratorCommand.target.declaration)) {
+                    mapElementCommandsMap.get(decoratorCommand.target.declaration).push(decoratorCommand);
+                } else {
+                    mapElementCommandsMap.set(decoratorCommand.target.declaration, [{...decoratorCommand}]);
+                }
+            } else if(decoratorCommand.target.declaration) {
+                if (declarationCommandsMap.has(decoratorCommand.target.declaration)) {
+                    declarationCommandsMap.get(decoratorCommand.target.declaration).push(decoratorCommand);
+                } else {
+                    declarationCommandsMap.set(decoratorCommand.target.declaration, [{...decoratorCommand}]);
+                }
+            } else if(decoratorCommand.target.namespace) {
+                if (namespaceCommandsMap.has(decoratorCommand.target.namespace)) {
+                    namespaceCommandsMap.get(decoratorCommand.target.namespace).push(decoratorCommand);
+                } else {
+                    namespaceCommandsMap.set(decoratorCommand.target.namespace, [{...decoratorCommand}]);
+                }
+            }
+        });
+
+        return {
+            namespaceCommandsMap,
+            declarationCommandsMap,
+            propertyCommandsMap,
+            mapElementCommandsMap,
+            typeCommandsMap
+        };
+    }
+
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet
+     * to the ModelManager.
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {object} [options] - decorator models options
+     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @returns {ModelManager} a new model manager with the decorations applied
+     */
+    static optimizedDecorateModels(modelManager, decoratorCommandSet, options) {
+
+        if (options?.migrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
+            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
+        }
+
+        if (options?.validate) {
+            const validationModelManager = new ModelManager({
+                strict: true,
+                metamodelValidation: true,
+                addMetamodel: true,
+            });
+            validationModelManager.addModelFiles(modelManager.getModelFiles());
+            validationModelManager.addCTOModel(
+                DCS_MODEL,
+                'decoratorcommands@0.3.0.cto'
+            );
+            const factory = new Factory(validationModelManager);
+            const serializer = new Serializer(factory, validationModelManager);
+            serializer.fromJSON(decoratorCommandSet);
+            if (options?.validateCommands) {
+                decoratorCommandSet.commands.forEach((command) => {
+                    DecoratorManager.validateCommand(
+                        validationModelManager,
+                        command
+                    );
+                });
+            }
+        }
+        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
+        const ast = modelManager.getAst(true);
+        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        decoratedAst.models.forEach((model) => {
+            model.declarations.forEach((decl) => {
+                const { name: declarationName, $class: $classForDeclaration } = decl;
+                if (declarationCommandsMap.has(declarationName)) {
+                    const commands = declarationCommandsMap.get(declarationName);
+                    console.log('decl');
+                    commands.forEach(command => {
+                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    });
+                }
+
+                if (namespaceCommandsMap.has(model.namespace)) {
+                    const commands = namespaceCommandsMap.get(model.namespace);
+                    console.log('name');
+                    commands.forEach(command => {
+                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    });
+                }
+
+                if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
+                    if (mapElementCommandsMap.has(declarationName)) {
+                        const commands = mapElementCommandsMap.get(declarationName);
+                        console.log('map');
+                        commands.forEach(command => {
+                            this.executeDeclarationCommand(model.namespace, decl, command);
+                        });
+                    }
+                }
+
+                if (typeCommandsMap.has($classForDeclaration)) {
+                    const commands = namespaceCommandsMap.get($classForDeclaration);
+                    console.log('typedecl');
+                    commands.forEach(command => {
+                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    });
+                }
+                // scalars are declarations but do not have properties
+                if (decl.properties) {
+                    decl.properties.forEach((property) => {
+                        const { name: propertyName, $class: $classForProperty } = property;
+                        if (propertyCommandsMap.has(propertyName)) {
+                            const commands = propertyCommandsMap.get(propertyName);
+                            console.log('prop');
+                            commands.forEach(command => {
+                                DecoratorManager.executePropertyCommand(
+                                    property,
+                                    command
+                                );
+                            });
+                        }
+                        if (typeCommandsMap.has($classForProperty)) {
+                            const commands = typeCommandsMap.get($classForProperty);
+                            commands.forEach(command => {
+                                DecoratorManager.executePropertyCommand(
+                                    property,
+                                    command
+                                );
+                            });
+                        }
+                    });
+                }
+
+            });
+        });
+        const newModelManager = new ModelManager();
+        newModelManager.fromAst(decoratedAst);
+        return newModelManager;
+    }
     /**
      * @typedef decoratorCommandSet
      * @type {object}
@@ -488,6 +660,48 @@ class DecoratorManager {
                         );
                     });
                 }
+            }
+        }
+    }
+
+    /**
+     * Executes a Command against a ClassDeclaration, adding
+     * decorators to the ClassDeclaration, or its properties, as required.
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     */
+    static executeDeclarationCommand(namespace, declaration, command) {
+        const { target, decorator, type } = command;
+        const { name } = ModelUtil.parseNamespace( namespace );
+        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
+            this.falsyOrEqual(target.declaration, [declaration.name])) {
+
+            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                if (target.mapElement) {
+                    switch (target.mapElement) {
+                    case 'KEY':
+                    case 'VALUE':
+                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        break;
+                    case 'KEY_VALUE':
+                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
+                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
+                        break;
+                    }
+                } else if (target.type) {
+                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
+                        this.applyDecorator(declaration.key, type, decorator);
+                    }
+                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
+                        this.applyDecorator(declaration.value, type, decorator);
+                    }
+                } else {
+                    this.applyDecorator(declaration, type, decorator);
+                }
+            } else if (!(target.property || target.properties || target.type)) {
+                this.applyDecorator(declaration, type, decorator);
             }
         }
     }

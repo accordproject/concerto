@@ -55,6 +55,31 @@ declare class DecoratorManager {
         migrate?: boolean;
     }): ModelManager;
     /**
+     * Applies all the decorator commands from the DecoratorCommandSet
+     * to the ModelManager.
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} a new model manager with the decorations applied
+     */
+    static getDecoratorMaps(decoratorCommandSet: any): any;
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet
+     * to the ModelManager.
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {object} [options] - decorator models options
+     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @returns {ModelManager} a new model manager with the decorations applied
+     */
+    static optimizedDecorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
+        validate?: boolean;
+        validateCommands?: boolean;
+        migrate?: boolean;
+    }): ModelManager;
+    /**
      * @typedef decoratorCommandSet
      * @type {object}
      * @typedef vocabularies
@@ -127,6 +152,15 @@ declare class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executeCommand(namespace: string, declaration: any, command: any): void;
+    /**
+     * Executes a Command against a ClassDeclaration, adding
+     * decorators to the ClassDeclaration, or its properties, as required.
+     * @param {string} namespace the namespace for the declaration
+     * @param {*} declaration the class declaration
+     * @param {*} command the Command object from the
+     * org.accordproject.decoratorcommands model
+     */
+    static executeDeclarationCommand(namespace: string, declaration: any, command: any): void;
     /**
      * Executes a Command against a Property, adding
      * decorators to the Property as required.
