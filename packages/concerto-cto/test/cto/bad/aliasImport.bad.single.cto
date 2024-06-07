@@ -1,0 +1,4 @@
+namespace test.aliasing@1.0.0
+
+//Bad Import : without paranthesis 
+import com.example.foo@1.0.4.baz as bar

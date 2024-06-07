@@ -2,3 +2,8 @@ namespace test.aliasing
 
 import org.accordproject.{doc1 as d1,doc2 as d2}
 import org.accordproject.files.{file1,file2 as f2,file3}
+import com.example.foo@1.0.4-X.y.z-01.{baz1 as bar1}
+import com.example.foo@1.0.4.{baz2 as bar2} from https://com.example.co.uk/models/com.example.foo.cto
+import com.example.foo@1.0.4.{tee,baz as bar,lorem,ipsum,dolor as freq}
+import com.example.foo@1.0.4.{As as as,as as as}
+import com.example.foo@1.0.4.{baz}
