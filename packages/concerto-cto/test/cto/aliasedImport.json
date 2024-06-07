@@ -31,6 +31,70 @@
                     "aliasName": "f2"
                 }
             ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4-X.y.z-01",
+            "types": ["baz1"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "baz1",
+                    "aliasName": "bar1"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["baz2"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "baz2",
+                    "aliasName": "bar2"
+                }
+            ],
+            "uri": "https://com.example.co.uk/models/com.example.foo.cto"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["tee", "baz", "lorem", "ipsum", "dolor"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "baz",
+                    "aliasName": "bar"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "dolor",
+                    "aliasName": "freq"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["As", "as"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "As",
+                    "aliasName": "as"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "name": "as",
+                    "aliasName": "as"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["baz"]
         }
     ],
     "declarations": []
