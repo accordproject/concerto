@@ -1213,14 +1213,14 @@ function peg$parse(input, options) {
   };
   var peg$f108 = function(ns, types, u) {
     	const { aliasedTypes, remainingTypes } = types.reduce((acc, type) => {
-        if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
-          acc.aliasedTypes.push(type);
-          acc.remainingTypes.push(type.name);
-        } else {
-          acc.remainingTypes.push(type);
-        }
-        return acc;
-      }, { aliasedTypes: [], remainingTypes: [] });
+          if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
+            acc.aliasedTypes.push(type);
+            acc.remainingTypes.push(type.name);
+          } else {
+            acc.remainingTypes.push(type);
+          }
+          return acc;
+        }, { aliasedTypes: [], remainingTypes: [] });
     	const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
@@ -1232,12 +1232,11 @@ function peg$parse(input, options) {
         return result;
     };
   var peg$f109 = function(name, aliasName) {
-      const result = {
+      return {
         "$class":"concerto.metamodel@1.0.0.AliasType",
         name:name,
         aliasName:aliasName
       };
-      return result;
     };
   var peg$f110 = function(head, tail) {
       return [head, ...tail.map(t => t[2])];
@@ -10937,7 +10936,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseTypes() {
+  function peg$parseIdentifierTypeExpression() {
     var s0, s1;
 
     s0 = peg$parseAliasedIdentifier();
@@ -10958,7 +10957,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5, s6, s7;
 
     s0 = peg$currPos;
-    s1 = peg$parseTypes();
+    s1 = peg$parseIdentifierTypeExpression();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       s3 = [];
@@ -10972,7 +10971,7 @@ function peg$parse(input, options) {
       }
       if (s5 !== peg$FAILED) {
         s6 = peg$parse_();
-        s7 = peg$parseTypes();
+        s7 = peg$parseIdentifierTypeExpression();
         if (s7 !== peg$FAILED) {
           s5 = [s5, s6, s7];
           s4 = s5;
@@ -10996,7 +10995,7 @@ function peg$parse(input, options) {
         }
         if (s5 !== peg$FAILED) {
           s6 = peg$parse_();
-          s7 = peg$parseTypes();
+          s7 = peg$parseIdentifierTypeExpression();
           if (s7 !== peg$FAILED) {
             s5 = [s5, s6, s7];
             s4 = s5;

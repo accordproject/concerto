@@ -389,7 +389,7 @@ function toCTO(metaModel) {
                 break;
             case `${MetaModelNamespace}.ImportTypes`:{
                 let aliasedTypes=new Map();
-                if(Object.prototype.hasOwnProperty.call(imp,'aliasedTypes')){
+                if(imp.aliasedTypes){
                     imp.aliasedTypes.forEach(({name,aliasName}) => {
                         aliasedTypes.set(name,aliasName);
                     });
