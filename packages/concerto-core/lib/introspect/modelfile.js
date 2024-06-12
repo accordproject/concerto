@@ -711,6 +711,7 @@ class ModelFile extends Decorated {
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser
      * @private
+     * TODO: Update the code for aliased imports
      */
     fromAst(ast) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
@@ -738,6 +739,7 @@ class ModelFile extends Decorated {
             );
         }
 
+        // TODO:handle ImportTypes
         this.imports = imports;
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
