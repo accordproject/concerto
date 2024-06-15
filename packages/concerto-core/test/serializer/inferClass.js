@@ -26,7 +26,7 @@ describe('InferClass Serialization', () => {
     let serializerV2;
 
     before(() => {
-        modelManager = new ModelManager({addMetamodel: true, strict:true});
+        modelManager = new ModelManager({ addMetamodel: true, strict: true });
         modelManager.addCTOModel(`
             namespace org.acme.zoo@1.0.0
 
@@ -63,7 +63,7 @@ describe('InferClass Serialization', () => {
 
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
-        serializerV2 = new Serializer(factory, modelManager, {inferClass: true});
+        serializerV2 = new Serializer(factory, modelManager, { inferClass: true });
     });
 
     beforeEach(() => {
@@ -97,7 +97,7 @@ describe('InferClass Serialization', () => {
                     age: 42
                 },
                 animals: [
-                    {  $class: 'Dog', name: 'fido' }
+                    { $class: 'Dog', name: 'fido' }
                 ]
             });
         });
@@ -161,6 +161,29 @@ describe('InferClass Serialization', () => {
             const resource = serializerV2.fromJSON(json);
             resource.should.not.be.null;
         });
+        it.only('should detect creating ambiguity', () => {
+            const resource = serializerV2.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                person: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'org.acme.cat@1.0.0.Cat',
+                        name: 'tiddles'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.cat@1.0.0.Cat');
+            const json = serializerV2.toJSON(resource);
+            modelManager.addCTOModel(`namespace org.acme.vip@1.0.0
+            import org.acme.zoo@1.0.0.{Person}
+            concept Vip extends Person {}`);
+            (() => {
+                serializerV2.fromJSON(json);
+            }).should.throw(/The type org.acme.zoo@1.0.0.Person which was unambigious is now ambigious due to org.acme.zoo@1.0.0.Owner,org.acme.vip@1.0.0.Vip/);
+        });
     });
     describe('#inferClass (false)', () => {
         it('should support short names for nested objects', () => {
@@ -187,7 +210,7 @@ describe('InferClass Serialization', () => {
                     age: 42
                 },
                 animals: [
-                    {  $class: 'org.acme.zoo@1.0.0.Dog', name: 'fido' }
+                    { $class: 'org.acme.zoo@1.0.0.Dog', name: 'fido' }
                 ]
             });
         });
