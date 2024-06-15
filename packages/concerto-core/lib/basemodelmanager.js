@@ -592,9 +592,7 @@ class BaseModelManager {
      * @throws {TypeNotFoundException} - if the type cannot be found or is a primitive type.
      */
     getType(qualifiedName) {
-
         const namespace = ModelUtil.getNamespace(qualifiedName);
-
         const modelFile = this.getModelFile(namespace);
         if (!modelFile) {
             const formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
@@ -604,6 +602,7 @@ class BaseModelManager {
         }
 
         const classDecl = modelFile.getType(qualifiedName);
+
         if (!classDecl) {
             const formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
             throw new TypeNotFoundException(qualifiedName, formatter({

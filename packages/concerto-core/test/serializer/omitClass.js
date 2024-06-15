@@ -1,0 +1,241 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+'use strict';
+
+const Factory = require('../../lib/factory');
+const Serializer = require('../../lib/serializer');
+const ModelManager = require('../../lib/modelmanager');
+const Util = require('../composer/composermodelutility');
+
+describe('InferClass Serialization', () => {
+
+    let modelManager;
+    let factory;
+    let serializer;
+    let serializerV2;
+
+    before(() => {
+        modelManager = new ModelManager();
+        Util.addComposerModel(modelManager);
+        modelManager.addCTOModel(`
+            namespace org.acme.zoo@1.0.0
+
+            abstract concept Animal {
+               o String name
+            }
+
+            // a type that extends Animal, in the same ns as Animal
+            concept Dog extends Animal{}
+
+            concept Owner {
+               o String name
+               o Integer age
+            }
+
+            concept Zoo {
+               o Owner owner // $class can be inferred from model
+               o Animal[] animals // $class cannot be inferred from model
+            }
+        `);
+
+        modelManager.addCTOModel(`
+            namespace org.acme.cat@1.0.0
+            import org.acme.zoo@1.0.0.{Animal}
+            // a type that extends Animal in a different namespace
+            concept Cat extends Animal{}
+        `);
+
+        factory = new Factory(modelManager);
+        serializer = new Serializer(factory, modelManager);
+        serializerV2 = new Serializer(factory, modelManager, {inferClass: true});
+    });
+
+    beforeEach(() => {
+    });
+
+    afterEach(() => {
+    });
+
+    describe('#inferClass (true)', () => {
+        it('should support short names for nested objects', () => {
+            const resource = serializerV2.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'Dog',
+                        name: 'fido'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.zoo@1.0.0.Dog');
+            const json = serializerV2.toJSON(resource);
+            console.log(JSON.stringify(json, null, 2));
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {  $class: 'Dog', name: 'fido' }
+                ]
+            });
+        });
+        it('should support long names for nested objects', () => {
+            const resource = serializerV2.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'org.acme.zoo@1.0.0.Dog',
+                        name: 'fido'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.zoo@1.0.0.Dog');
+            const json = serializerV2.toJSON(resource);
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    { $class: 'Dog', name: 'fido' }
+                ]
+            });
+        });
+        it('should use FQNs for nested objects in a different ns', () => {
+            const resource = serializerV2.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'org.acme.cat@1.0.0.Cat',
+                        name: 'tiddles'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.cat@1.0.0.Cat');
+            const json = serializerV2.toJSON(resource);
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    { $class: 'org.acme.cat@1.0.0.Cat', name: 'tiddles' }
+                ]
+            });
+        });
+    });
+    describe('#inferClass (false)', () => {
+        it('should support short names for nested objects', () => {
+            const resource = serializer.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'Dog',
+                        name: 'fido'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.zoo@1.0.0.Dog');
+            const json = serializer.toJSON(resource);
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    $class: 'org.acme.zoo@1.0.0.Owner',
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {  $class: 'org.acme.zoo@1.0.0.Dog', name: 'fido' }
+                ]
+            });
+        });
+        it('should support long names for nested objects', () => {
+            const resource = serializer.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'org.acme.zoo@1.0.0.Dog',
+                        name: 'fido'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.zoo@1.0.0.Dog');
+            const json = serializer.toJSON(resource);
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    $class: 'org.acme.zoo@1.0.0.Owner',
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    { $class: 'org.acme.zoo@1.0.0.Dog', name: 'fido' }
+                ]
+            });
+        });
+        it('should use FQNs for nested objects in a different ns', () => {
+            const resource = serializer.fromJSON({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    {
+                        $class: 'org.acme.cat@1.0.0.Cat',
+                        name: 'tiddles'
+                    }
+                ]
+            });
+            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.cat@1.0.0.Cat');
+            const json = serializer.toJSON(resource);
+            json.should.deep.equal({
+                $class: 'org.acme.zoo@1.0.0.Zoo',
+                owner: {
+                    $class: 'org.acme.zoo@1.0.0.Owner',
+                    name: 'Dan',
+                    age: 42
+                },
+                animals: [
+                    { $class: 'org.acme.cat@1.0.0.Cat', name: 'tiddles' }
+                ]
+            });
+        });
+    });
+});

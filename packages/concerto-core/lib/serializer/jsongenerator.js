@@ -44,13 +44,15 @@ class JSONGenerator {
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * are specified for relationship fields into their id, false by default.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
+     * @param {boolean} [inferClass] Only include $class in JSON when it cannot be inferred from model
      */
-    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset) {
+    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset, inferClass) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
         this.utcOffset = utcOffset || 0;
+        this.inferClass = inferClass;
     }
 
     /**
@@ -142,10 +144,31 @@ class JSONGenerator {
             }
         }
 
+        // by default we set the $class on the result
         result.$class = classDeclaration.getFullyQualifiedName();
+
+        // if we are in the inferClass mode and this is not the root instance
+        // we attempt to remove the $class
+        if(this.inferClass && !parameters.isRoot && parameters.field) {
+            const fieldClassDecl = parameters.modelManager.getType(parameters.field.getFullyQualifiedTypeName());
+            // if the $class cannot be unambigiously inferred from the type of the field in the model
+            // we have to include it, but we attempt to shorten it, if the object and the field are in the same ns
+            if(fieldClassDecl.getAssignableClassDeclarations().length > 1) {
+                const objAndFieldSameNs = parameters.field ? ModelUtil.getNamespace(parameters.field.getFullyQualifiedTypeName()) === obj.getNamespace() : false;
+                result.$class = (objAndFieldSameNs && !parameters.isRoot)  ? obj.getType() : obj.getFullyQualifiedType();
+            }
+            else {
+                // we don't need the $class - we can recreate it from the model
+                delete result.$class;
+            }
+        }
+
         if(this.deduplicateResources && id) {
             result.$id = id;
         }
+
+        // no longer dealing with the root object...
+        parameters.isRoot = false;
 
         // Walk each property of the class declaration
         const properties = classDeclaration.getProperties();
@@ -154,6 +177,7 @@ class JSONGenerator {
             const value = obj[property.getName()];
             if (!Util.isNull(value)) {
                 parameters.stack.push(value);
+                parameters.field = property; // save the property to the stack!
                 result[property.getName()] = property.accept(this, parameters);
             }
         }
@@ -178,6 +202,7 @@ class JSONGenerator {
                 const item = obj[index];
                 if (!field.isPrimitive() && !ModelUtil.isEnum(field)) {
                     parameters.stack.push(item, Typed);
+                    parameters.field = field; // save the field to the stack!
                     const classDeclaration = parameters.modelManager.getType(item.getFullyQualifiedType());
                     array.push(classDeclaration.accept(this, parameters));
                 } else {
@@ -192,11 +217,13 @@ class JSONGenerator {
         } else if (ModelUtil.isMap(field)) {
             parameters.stack.push(obj);
             const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            parameters.field = field; // save the field to the stack!
             result = mapDeclaration.accept(this, parameters);
         }
         else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
+            parameters.field = field; // save the field to the stack!
             result = classDeclaration.accept(this, parameters);
         }
 
@@ -256,6 +283,7 @@ class JSONGenerator {
                         parameters.seenResources.add(fqi);
                         parameters.stack.push(item, Resource);
                         const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+                        parameters.field = relationshipDeclaration; // save the relationship to the stack!
                         array.push(classDecl.accept(this, parameters));
                         parameters.seenResources.delete(fqi);
                     }
@@ -274,6 +302,7 @@ class JSONGenerator {
                 parameters.seenResources.add(fqi);
                 parameters.stack.push(obj, Resource);
                 const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+                parameters.field = relationshipDeclaration; // save the relationship to the stack!
                 result = classDecl.accept(this, parameters);
                 parameters.seenResources.delete(fqi);
             }

@@ -24,6 +24,8 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.16.8 {7b282538e0319c3872928e133560441e} 2024-06-14
+- Added `inferClass` option to Serializer.toJSON
 
 Version 3.16.7 {8f455df1e788c4994f423d6e236bee21} 2024-05-01
 - Added missing `strictQualifiedDateTimes` option to Serializer.fromJSON

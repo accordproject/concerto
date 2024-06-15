@@ -26,6 +26,7 @@ const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
     validate: true,
     utcOffset: defaultUtcOffset,
+    inferClass: false
 };
 
 // Types needed for TypeScript generation.
@@ -92,6 +93,8 @@ class Serializer {
      * @param {boolean} [options.convertResourcesToId] - Convert resources that
      * are specified for relationship fields into their id, false by default.
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
+     * @param {boolean} [options.inferClass] - Only create $class in JSON when it
+     * cannot be inferred from the model, false by default
      * @return {Object} - The Javascript Object that represents the resource
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
@@ -123,10 +126,12 @@ class Serializer {
             options.convertResourcesToId === true,
             false,
             options.utcOffset,
+            options.inferClass === true
         );
 
         parameters.stack.clear();
         parameters.stack.push(resource);
+        parameters.isRoot = true;
 
         // this performs the conversion of the resouce into a standard JSON object
         let result = classDeclaration.accept(generator, parameters);
