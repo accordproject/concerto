@@ -101,6 +101,7 @@ describe('InferClass Serialization', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 owner: {
+                    $class: 'org.acme.zoo@1.0.0.Owner',
                     name: 'Dan',
                     age: 42
                 },
