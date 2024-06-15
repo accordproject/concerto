@@ -13,11 +13,10 @@
  */
 
 'use strict';
-
+const fs = require('fs');
 const Factory = require('../../lib/factory');
 const Serializer = require('../../lib/serializer');
 const ModelManager = require('../../lib/modelmanager');
-const Util = require('../composer/composermodelutility');
 
 describe('InferClass Serialization', () => {
 
@@ -27,8 +26,7 @@ describe('InferClass Serialization', () => {
     let serializerV2;
 
     before(() => {
-        modelManager = new ModelManager();
-        Util.addComposerModel(modelManager);
+        modelManager = new ModelManager({addMetamodel: true, strict:true});
         modelManager.addCTOModel(`
             namespace org.acme.zoo@1.0.0
 
@@ -39,13 +37,16 @@ describe('InferClass Serialization', () => {
             // a type that extends Animal, in the same ns as Animal
             concept Dog extends Animal{}
 
-            concept Owner {
+            abstract concept Person {
                o String name
+            }
+
+            concept Owner extends Person {
                o Integer age
             }
 
             concept Zoo {
-               o Owner owner // $class can be inferred from model
+               o Person person // $class can be inferred from model, there is one 1 class (Owner)
                o Animal[] animals // $class cannot be inferred from model
             }
         `);
@@ -56,6 +57,9 @@ describe('InferClass Serialization', () => {
             // a type that extends Animal in a different namespace
             concept Cat extends Animal{}
         `);
+
+        // const mm = fs.readFileSync('./test/data/model/metamodel@1.0.0.cto', 'utf8');
+        // modelManager.addCTOModel(mm, 'metamodel.cto');
 
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
@@ -72,7 +76,7 @@ describe('InferClass Serialization', () => {
         it('should support short names for nested objects', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -88,7 +92,7 @@ describe('InferClass Serialization', () => {
             console.log(JSON.stringify(json, null, 2));
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -100,7 +104,7 @@ describe('InferClass Serialization', () => {
         it('should support long names for nested objects', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     $class: 'org.acme.zoo@1.0.0.Owner',
                     name: 'Dan',
                     age: 42
@@ -116,7 +120,7 @@ describe('InferClass Serialization', () => {
             const json = serializerV2.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -128,7 +132,7 @@ describe('InferClass Serialization', () => {
         it('should use FQNs for nested objects in a different ns', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -143,7 +147,7 @@ describe('InferClass Serialization', () => {
             const json = serializerV2.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -152,12 +156,17 @@ describe('InferClass Serialization', () => {
                 ]
             });
         });
+        it('should deserialize a metamodel instance metamodel', () => {
+            const json = JSON.parse(fs.readFileSync('./test/serializer/sampleMetamodel.json', 'utf-8'));
+            const resource = serializerV2.fromJSON(json);
+            resource.should.not.be.null;
+        });
     });
     describe('#inferClass (false)', () => {
         it('should support short names for nested objects', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -172,7 +181,7 @@ describe('InferClass Serialization', () => {
             const json = serializer.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     $class: 'org.acme.zoo@1.0.0.Owner',
                     name: 'Dan',
                     age: 42
@@ -185,7 +194,7 @@ describe('InferClass Serialization', () => {
         it('should support long names for nested objects', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -200,7 +209,7 @@ describe('InferClass Serialization', () => {
             const json = serializer.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     $class: 'org.acme.zoo@1.0.0.Owner',
                     name: 'Dan',
                     age: 42
@@ -213,7 +222,7 @@ describe('InferClass Serialization', () => {
         it('should use FQNs for nested objects in a different ns', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     name: 'Dan',
                     age: 42
                 },
@@ -228,7 +237,7 @@ describe('InferClass Serialization', () => {
             const json = serializer.toJSON(resource);
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
-                owner: {
+                person: {
                     $class: 'org.acme.zoo@1.0.0.Owner',
                     name: 'Dan',
                     age: 42

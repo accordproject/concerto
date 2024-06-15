@@ -104,7 +104,20 @@ function qualifyTypeName(clazz, field) {
  * or a $class inferred from the model
  */
 function resolveFullyQualifiedTypeName(obj, field) {
-    return obj.$class ? qualifyTypeName(obj.$class, field) : field.getFullyQualifiedTypeName();
+    const fqn = obj.$class ? qualifyTypeName(obj.$class, field) : field.getFullyQualifiedTypeName();
+    const mm = field.getParent().getModelFile().getModelManager();
+    const classDecl = mm.getType(fqn);
+    if(classDecl.isAbstract()) {
+        const assignable = classDecl.getAssignableClassDeclarations()
+            .filter( a => !a.isAbstract());
+        if(assignable.length !== 1) {
+            throw new Error(`The type ${fqn} which was unambigious is now ambigious ${assignable.map(a => a.getFullyQualifiedName()).join(',')}`);
+        }
+        else {
+            return assignable[0].getFullyQualifiedName();
+        }
+    }
+    return fqn;
 }
 
 /**

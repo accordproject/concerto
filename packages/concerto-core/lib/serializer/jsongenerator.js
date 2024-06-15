@@ -153,7 +153,7 @@ class JSONGenerator {
             const fieldClassDecl = parameters.modelManager.getType(parameters.field.getFullyQualifiedTypeName());
             // if the $class cannot be unambigiously inferred from the type of the field in the model
             // we have to include it, but we attempt to shorten it, if the object and the field are in the same ns
-            if(fieldClassDecl.getAssignableClassDeclarations().length > 1) {
+            if(fieldClassDecl.getAssignableClassDeclarations().length > 2) {
                 const objAndFieldSameNs = parameters.field ? ModelUtil.getNamespace(parameters.field.getFullyQualifiedTypeName()) === obj.getNamespace() : false;
                 result.$class = (objAndFieldSameNs && !parameters.isRoot)  ? obj.getType() : obj.getFullyQualifiedType();
             }
