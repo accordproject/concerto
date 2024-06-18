@@ -35,7 +35,7 @@
     "devDependencies": {
         "@accordproject/concerto-codegen": "3.22.1",
         "@accordproject/concerto-core": "3.16.9",
-        "@accordproject/concerto-metamodel": "3.9.1",
+        "@accordproject/concerto-metamodel": "3.9.2",
         "@accordproject/concerto-util": "3.16.9",
         "@types/jest": "28.1.1",
         "ajv": "8.12.0",
