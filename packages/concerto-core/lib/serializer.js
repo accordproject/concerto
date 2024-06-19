@@ -131,7 +131,6 @@ class Serializer {
 
         parameters.stack.clear();
         parameters.stack.push(resource);
-        parameters.isRoot = true;
 
         // this performs the conversion of the resouce into a standard JSON object
         let result = classDeclaration.accept(generator, parameters);
