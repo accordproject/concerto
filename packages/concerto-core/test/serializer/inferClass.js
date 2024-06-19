@@ -34,10 +34,19 @@ describe('InferClass Serialization', () => {
                o String name
             }
 
+            concept Address {
+               o String line1
+               o String line2 optional
+               o String city
+               o String state
+               o String country
+            }
+
             // a type that extends Animal, in the same ns as Animal
             concept Dog extends Animal{}
 
             abstract concept Person {
+               o Address address optional
                o String name
             }
 
@@ -77,8 +86,15 @@ describe('InferClass Serialization', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
-                    age: 42
+                    age: 42,
+                    address: {
+                        line1: '1 Main Street',
+                        city: 'Boston',
+                        state: 'MA',
+                        country: 'USA'
+                    }
                 },
                 animals: [
                     {
@@ -93,8 +109,15 @@ describe('InferClass Serialization', () => {
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
-                    age: 42
+                    age: 42,
+                    address: {
+                        line1: '1 Main Street',
+                        city: 'Boston',
+                        state: 'MA',
+                        country: 'USA'
+                    }
                 },
                 animals: [
                     { $class: 'Dog', name: 'fido' }
@@ -121,6 +144,7 @@ describe('InferClass Serialization', () => {
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
@@ -133,6 +157,7 @@ describe('InferClass Serialization', () => {
             const resource = serializerV2.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
@@ -140,7 +165,8 @@ describe('InferClass Serialization', () => {
                     {
                         $class: 'org.acme.cat@1.0.0.Cat',
                         name: 'tiddles'
-                    }
+                    },
+                    { $class: 'Dog', name: 'fido' }
                 ]
             });
             resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.cat@1.0.0.Cat');
@@ -148,11 +174,13 @@ describe('InferClass Serialization', () => {
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
                 animals: [
-                    { $class: 'org.acme.cat@1.0.0.Cat', name: 'tiddles' }
+                    { $class: 'org.acme.cat@1.0.0.Cat', name: 'tiddles' },
+                    { $class: 'Dog', name: 'fido' }
                 ]
             });
         });
@@ -161,35 +189,13 @@ describe('InferClass Serialization', () => {
             const resource = serializerV2.fromJSON(json);
             resource.should.not.be.null;
         });
-        it.only('should detect creating ambiguity', () => {
-            const resource = serializerV2.fromJSON({
-                $class: 'org.acme.zoo@1.0.0.Zoo',
-                person: {
-                    name: 'Dan',
-                    age: 42
-                },
-                animals: [
-                    {
-                        $class: 'org.acme.cat@1.0.0.Cat',
-                        name: 'tiddles'
-                    }
-                ]
-            });
-            resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.cat@1.0.0.Cat');
-            const json = serializerV2.toJSON(resource);
-            modelManager.addCTOModel(`namespace org.acme.vip@1.0.0
-            import org.acme.zoo@1.0.0.{Person}
-            concept Vip extends Person {}`);
-            (() => {
-                serializerV2.fromJSON(json);
-            }).should.throw(/The type org.acme.zoo@1.0.0.Person which was unambigious is now ambigious due to org.acme.zoo@1.0.0.Owner,org.acme.vip@1.0.0.Vip/);
-        });
     });
     describe('#inferClass (false)', () => {
         it('should support short names for nested objects', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
@@ -218,6 +224,7 @@ describe('InferClass Serialization', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
@@ -246,6 +253,7 @@ describe('InferClass Serialization', () => {
             const resource = serializer.fromJSON({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
+                    $class: 'Owner',
                     name: 'Dan',
                     age: 42
                 },
