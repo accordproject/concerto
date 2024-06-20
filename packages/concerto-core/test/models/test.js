@@ -208,10 +208,6 @@ describe('Test Model', function(){
             cObject.model = { 'foo' : 'bar' };
             ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
 
-            // set model to null
-            cObject.model = null;
-            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme.Vehicle#YVBVLSFXXAL342374" is missing the required field "model".');
-
             // set model to an array
             cObject.model = ['1','2'];
             ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "["1","2"]" (type of value: "object"). Expected type of value: "String".');

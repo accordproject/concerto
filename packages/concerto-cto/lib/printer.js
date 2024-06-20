@@ -148,6 +148,16 @@ function typeFromMetaModel(mm){
 }
 
 /**
+ * Returns true if the typeof the object === 'undefined' or
+ * the object === null.
+ * @param {Object} obj - the object to be tested
+ * @returns {boolean} true if the object is null or undefined
+ */
+function isNull(obj) {
+    return(typeof(obj) === 'undefined' || obj === null);
+}
+
+/**
  * Create modifiers string from a metamodel
  *
  * @param {object} mm - the metamodel
@@ -179,7 +189,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
     case `${MetaModelNamespace}.DoubleScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
 
             defaultString += ` default=${doubleString}`;
@@ -192,7 +202,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.IntegerProperty`:
     case `${MetaModelNamespace}.IntegerScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {
@@ -203,7 +213,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.LongProperty`:
     case `${MetaModelNamespace}.LongScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {

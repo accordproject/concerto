@@ -16,6 +16,8 @@
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
+const Util = require('../util');
+
 dayjs.extend(utc);
 
 // Types needed for TypeScript generation.
@@ -152,7 +154,7 @@ class Typed {
                 defaultValue = field.getDefaultValue();
                 type = field.getType();
             }
-            if (defaultValue) {
+            if (!Util.isNull(defaultValue)) {
                 if (type === 'String') {
                     this.setPropertyValue(field.getName(), defaultValue);
                 } else if (type === 'Integer') {

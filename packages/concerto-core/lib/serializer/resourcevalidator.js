@@ -278,6 +278,10 @@ class ResourceValidator {
                     ) {
                         continue;
                     }
+                    // Allow implicit optionality by declaring a default value, without using the optional keyword.
+                    if (!Util.isNull(property?.defaultValue)){
+                        continue;
+                    }
                     ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
                 }
             }

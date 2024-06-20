@@ -15,6 +15,34 @@
           "isArray": false,
           "isOptional": true,
           "defaultValue": "FOO"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.DoubleProperty",
+            "name": "doubleDefaultZero",
+            "isArray": false,
+            "isOptional": true,
+            "defaultValue": 0
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.IntegerProperty",
+            "name": "intDefaultZero",
+            "isArray": false,
+            "isOptional": true,
+            "defaultValue": 0
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.LongProperty",
+            "name": "longDefaultZero",
+            "isArray": false,
+            "isOptional": true,
+            "defaultValue": 0
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.BooleanProperty",
+            "name": "boolDefaultFalse",
+            "isArray": false,
+            "isOptional": true,
+            "defaultValue": false
         }
       ]
     }
