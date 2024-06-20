@@ -125,6 +125,14 @@ class BaseModelManager {
     }
 
     /**
+     * Returns the value of the enableAliasedType option
+     * @returns {boolean} true if the enableAliasedType has been set
+     */
+    isAliasedTypeEnabled() {
+        return this.enableAliasedType;
+    }
+
+    /**
      * Adds root types
      * @private
      */
