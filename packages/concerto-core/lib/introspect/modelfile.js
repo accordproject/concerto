@@ -219,7 +219,7 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
-
+        // TODO
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 
@@ -752,9 +752,24 @@ class ModelFile extends Decorated {
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
             case `${MetaModelNamespace}.ImportTypes`:
-                imp.types.forEach( type => {
-                    this.importShortNames.set(type, `${imp.namespace}.${type}`);
-                });
+                if (this.getModelManager().isAliasedTypeEnabled()) {
+                    // map: alias name to the fqn's
+                    // imp.types and imp.aliasedTypes both are available
+                    let aliasedTypes = new Map();
+                    if (imp.aliasedTypes) {
+                        imp.aliasedTypes.forEach(({ name, aliasName }) => {
+                            aliasedTypes.set(name, aliasName);
+                        });
+                    }
+                    imp.types.forEach((type)=> aliasedTypes.has(type)? this.importShortNames.set(aliasedTypes[type],`${imp.namespace}.${type}`):this.importShortNames.set(type,`${imp.namespace}.${type}`));
+                } else {
+                    if (imp.aliasedTypes) {
+                        throw new Error('Aliasing disabled, set enableAliasType to true');
+                    }
+                    imp.types.forEach((type) => {
+                        this.importShortNames.set(type,`${imp.namespace}.${type}`);
+                    });
+                }
                 break;
             default:
                 this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
