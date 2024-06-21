@@ -711,7 +711,6 @@ class ModelFile extends Decorated {
      * Populate from an AST
      * @param {object} ast - the AST obtained from the parser
      * @private
-     * TODO: Update the code for aliased imports
      */
     fromAst(ast) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
@@ -755,9 +754,12 @@ class ModelFile extends Decorated {
                 if (this.getModelManager().isAliasedTypeEnabled()) {
                     // map: alias name to the fqn's
                     // imp.types and imp.aliasedTypes both are available
-                    let aliasedTypes = new Map();
+                    const aliasedTypes = new Map();
                     if (imp.aliasedTypes) {
                         imp.aliasedTypes.forEach(({ name, aliasName }) => {
+                            if(ModelUtil.isPrimitiveType(aliasName)){
+                                throw new Error('Types cannot be aliased to primitive type');
+                            }
                             aliasedTypes.set(name, aliasName);
                         });
                     }
