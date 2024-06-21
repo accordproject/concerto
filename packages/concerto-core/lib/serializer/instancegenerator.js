@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 const Globalize = require('../globalize');
 
 /**

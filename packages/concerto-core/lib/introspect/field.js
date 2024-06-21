@@ -19,7 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Property = require('./property');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -104,11 +104,7 @@ class Field extends Property {
      * @return {string | number} the default value for the field or null
      */
     getDefaultValue() {
-        if (!Util.isNull(this.defaultValue)) {
-            return this.defaultValue;
-        } else {
-            return null;
-        }
+        return this.defaultValue;
     }
 
     /**

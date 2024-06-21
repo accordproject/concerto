@@ -19,7 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Declaration = require('./declaration');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -178,12 +178,7 @@ class ScalarDeclaration extends Declaration {
      * @return {string | number | null} the default value for the field or null
      */
     getDefaultValue() {
-        if(!Util.isNull(this.ast.defaultValue)) {
-            return this.defaultValue;
-        }
-        else {
-            return null;
-        }
+        return this.defaultValue;
     }
 
     /**

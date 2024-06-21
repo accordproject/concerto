@@ -16,7 +16,7 @@
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 
 dayjs.extend(utc);
 

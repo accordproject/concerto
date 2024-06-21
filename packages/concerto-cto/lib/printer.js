@@ -15,6 +15,7 @@
 'use strict';
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const { isNull } = require('@accordproject/concerto-util').NullUtil;
 
 /**
  * Returns true if the metamodel is a MapDeclaration
@@ -145,16 +146,6 @@ function typeFromMetaModel(mm){
         break;
     }
     return result;
-}
-
-/**
- * Returns true if the typeof the object === 'undefined' or
- * the object === null.
- * @param {Object} obj - the object to be tested
- * @returns {boolean} true if the object is null or undefined
- */
-function isNull(obj) {
-    return(typeof(obj) === 'undefined' || obj === null);
 }
 
 /**
