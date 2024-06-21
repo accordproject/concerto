@@ -133,6 +133,13 @@ describe('ScalarDeclaration', () => {
             should.equal(testClass.getDefaultValue(), '000-00-0000');
         });
 
+        it('should return the default value for falsy cases', () => {
+            const modelFiles = introspectUtils.loadModelFiles(['test/data/parser/scalardeclaration.ssn.cto'], modelManager);
+            modelManager.addModelFiles(modelFiles);
+            const testClass = modelManager.getType('com.testing.BoolWithDefault');
+            should.equal(testClass.getDefaultValue(), false);
+        });
+
         it('should return null', () => {
             const modelFiles = introspectUtils.loadModelFiles(['test/data/parser/scalardeclaration.permutations.cto'], modelManager);
             modelManager.addModelFiles(modelFiles);

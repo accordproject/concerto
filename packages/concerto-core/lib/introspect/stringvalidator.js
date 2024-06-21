@@ -15,7 +15,7 @@
 'use strict';
 
 const { ErrorCodes } = require('@accordproject/concerto-util');
-const { isNull } = require('../util');
+const { isNull } = require('@accordproject/concerto-util').NullUtil;
 const Validator = require('./validator');
 
 // Types needed for TypeScript generation.

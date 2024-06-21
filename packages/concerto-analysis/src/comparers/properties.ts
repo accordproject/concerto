@@ -32,7 +32,7 @@ const propertyAdded: ComparerFactory = (context) => ({
             return;
         }
         const isOptional = b.isOptional();
-        const hasDefault = b instanceof Field ? !!b.getDefaultValue() : false;
+        const hasDefault = b instanceof Field ? b.getDefaultValue() !== null : false;
         const required = !isOptional && !hasDefault;
         const type = getPropertyType(b);
         if (required) {
@@ -68,7 +68,7 @@ const propertyRemoved: ComparerFactory = (context) => ({
             return;
         }
         const isOptional = a.isOptional();
-        const hasDefault = a instanceof Field ? !!a.getDefaultValue() : false;
+        const hasDefault = a instanceof Field ? a.getDefaultValue() !== null : false;
         const required = !isOptional && !hasDefault;
         const type = getPropertyType(a);
         if (required) {

@@ -66,6 +66,8 @@ describe('Serializer', () => {
             o String country
             o Double elevation
             o PostalCode postcode optional
+            o Boolean isResidential default=true
+            o Boolean isPrivate default=false
         }
 
         concept DateTimeTest {
@@ -229,6 +231,8 @@ describe('Serializer', () => {
                 elevation: 3.14,
                 city: 'Winchester',
                 postcode: 'SO21 2JN',
+                isPrivate: false,
+                isResidential: true,
             });
         });
 
@@ -485,6 +489,22 @@ describe('Serializer', () => {
             };
             const result = serializer.fromJSON(json);
             result.should.be.an.instanceOf(Resource);
+        });
+
+        it('should not error for boolean properties with default values without optional modifier', () => {
+            serializer.setDefaultOptions({ validate: false });
+            let json = {
+                $class: 'org.acme.sample.Address',
+                country: 'UK',
+                elevation: 3.14,
+                city: 'Winchester',
+                postcode: 'SO21 2JN',
+            };
+            const result = serializer.fromJSON(json, { validate: true });
+            result.should.be.an.instanceOf(Resource);
+            const roundTrip = serializer.toJSON(result, { validate: true });
+            roundTrip.isResidential.should.be.true;
+            roundTrip.isPrivate.should.be.false;
         });
 
         const json = {

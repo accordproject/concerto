@@ -15,6 +15,7 @@
 'use strict';
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const { isNull } = require('@accordproject/concerto-util').NullUtil;
 
 /**
  * Returns true if the metamodel is a MapDeclaration
@@ -179,7 +180,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
     case `${MetaModelNamespace}.DoubleScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
 
             defaultString += ` default=${doubleString}`;
@@ -192,7 +193,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.IntegerProperty`:
     case `${MetaModelNamespace}.IntegerScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {
@@ -203,7 +204,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.LongProperty`:
     case `${MetaModelNamespace}.LongScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {
