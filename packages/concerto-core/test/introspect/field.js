@@ -118,4 +118,17 @@ describe('Field', () => {
 
     });
 
+
+    describe('#getDefaultValue', () => {
+        it('should return the default value for falsy defaults', () => {
+            let f = new Field(mockClassDeclaration, {
+                $class: `${MetaModelNamespace}.BooleanProperty`,
+                name: 'field',
+                isOptional: false, // implicitly optional
+                defaultValue: false
+            });
+            f.getDefaultValue().should.equal(false);
+        });
+    });
+
 });

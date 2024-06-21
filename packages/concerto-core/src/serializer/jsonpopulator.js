@@ -16,7 +16,7 @@
 
 const { TypedStack } = require('@accordproject/concerto-util');
 const Relationship = require('../model/relationship');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const dayjs = require('dayjs');

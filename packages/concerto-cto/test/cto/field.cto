@@ -2,4 +2,8 @@ namespace test.field@1.0.0
 
 concept Foo {
   o String foo default="FOO" optional
+  o Double doubleDefaultZero default=0.0 optional
+  o Integer intDefaultZero default=0 optional
+  o Long longDefaultZero default=0 optional
+  o Boolean boolDefaultFalse default=false optional
 }

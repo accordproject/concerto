@@ -17,7 +17,7 @@
 const Resource = require('../model/resource');
 const Typed = require('../model/typed');
 const ModelUtil = require('../modelutil');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 
 /**
  * Converts the contents of a Resource to JSON. The parameters

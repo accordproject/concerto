@@ -113,6 +113,23 @@ describe('Typed', () => {
 
         });
 
+        it('should assign the default value for falsy values', () => {
+            modelManager.addCTOModel(`namespace org.acme.defaults
+            concept DefaultAsset {
+                o Boolean bool default=false
+                o Integer int default=0
+                o Long long default=0
+                o Double double default=0.0
+            }`);
+            const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
+            typed.assignFieldDefaults();
+            typed.bool.should.equal(false);
+            typed.int.should.equal(0);
+            typed.long.should.equal(0);
+            typed.double.should.equal(0.0);
+        });
+
     });
 
 });

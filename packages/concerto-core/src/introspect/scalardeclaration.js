@@ -20,6 +20,7 @@ const Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
+const Util = require('@accordproject/concerto-util').NullUtil;
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -89,7 +90,7 @@ class ScalarDeclaration extends Declaration {
             break;
         }
 
-        if(this.ast.defaultValue) {
+        if(!Util.isNull(this.ast.defaultValue)) {
             this.defaultValue = this.ast.defaultValue;
         } else {
             this.defaultValue = null;
@@ -193,12 +194,7 @@ class ScalarDeclaration extends Declaration {
      * @return {string | number | null} the default value for the field or null
      */
     getDefaultValue() {
-        if(this.defaultValue) {
-            return this.defaultValue;
-        }
-        else {
-            return null;
-        }
+        return this.defaultValue;
     }
 
     /**

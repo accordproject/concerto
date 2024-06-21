@@ -55,6 +55,9 @@ const Identifiers = require('./identifiers');
 //errorcodes
 const ErrorCodes = require('./errorcodes');
 
+// NullUtil
+const NullUtil = require('./lib/null');
+
 module.exports = {
     BaseException,
     BaseFileException,
@@ -71,5 +74,6 @@ module.exports = {
     TypedStack,
     Label,
     Identifiers,
-    ErrorCodes
+    ErrorCodes,
+    NullUtil
 };
