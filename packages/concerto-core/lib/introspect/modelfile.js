@@ -763,7 +763,7 @@ class ModelFile extends Decorated {
                             aliasedTypes.set(name, aliasName);
                         });
                     }
-                    imp.types.forEach((type)=> aliasedTypes.has(type)? this.importShortNames.set(aliasedTypes[type],`${imp.namespace}.${type}`):this.importShortNames.set(type,`${imp.namespace}.${type}`));
+                    imp.types.forEach((type)=> aliasedTypes.has(type)? this.importShortNames.set(aliasedTypes.get(type),`${imp.namespace}.${type}`):this.importShortNames.set(type,`${imp.namespace}.${type}`));
                 } else {
                     if (imp.aliasedTypes) {
                         throw new Error('Aliasing disabled, set enableAliasType to true');

@@ -608,6 +608,92 @@ describe('ModelFile', () => {
 
     });
 
+    describe('#aliasedImport', () => {
+
+        beforeEach(()=>{
+            modelManager.enableAliasedType=true;
+        });
+        it('should resolve aliased name of import type', () => {
+            const model = `
+            namespace org.acme
+            import org.saluja.{doc as d}`;
+
+            let modelFile = ParserUtil.newModelFile(modelManager, model);
+            modelFile.resolveImport('d').should.equal('org.saluja.doc');
+        });
+
+        it('should not throw if an aliased import exists for a type that exists in a valid namespace', () => {
+            const model1 = `
+            namespace org.saluja.ext
+            asset MyAsset2 identified by assetId {
+                o String assetId
+            }`;
+            const model2 = `
+            namespace org.acme
+            import org.saluja.ext.{MyAsset2 as m}
+            asset MyAsset identified by assetId {
+                o String assetId
+                o m[] arr
+            }`;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            (() => modelFile2.validate()).should.not.throw();
+        });
+
+        it('should not throw if an duplicate types aliased to distinct aliased names', () => {
+            const model1 = `
+            namespace org.saluja
+            asset MyAsset identified by assetId {
+                o String assetId
+            }`;
+            const model2 = `
+            namespace org.acme
+            asset MyAsset identified by assetId {
+                o String assetId
+            }`;
+
+            const model3 = `
+            namespace org.acme2
+            import org.saluja.{MyAsset as m1}
+            import org.acme.{MyAsset as m2}
+
+            asset MyAsset identified by assetId {
+                o String assetId
+                o m1[] arr1
+                o m2[] arr2
+            }`;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            modelManager.addModelFile(modelFile2);
+            let modelFile3 = ParserUtil.newModelFile(modelManager, model3);
+            (() => modelFile3.validate()).should.not.throw();
+        });
+
+        it('should not throw if map value is an aliased type', () => {
+            const model1 = `
+            namespace org.saluja
+            asset Student identified by rollno {
+                o String rollno
+            }`;
+            const model2 = `
+            namespace org.acme
+            import org.saluja.{Student as stud}
+            
+            map StudMap{
+            o DateTime
+            o stud
+            }`;
+            modelManager.enableMapType=true;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            (() => modelFile2.validate()).should.not.throw();
+        });
+    });
+
+
     describe('#isDefined', () => {
 
         let modelManager;
