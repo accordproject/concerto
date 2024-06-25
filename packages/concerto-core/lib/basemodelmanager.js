@@ -126,7 +126,7 @@ class BaseModelManager {
 
     /**
      * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} 
+     * @returns {boolean} true if the enableAliasedType has been set
      */
     isAliasedTypeEnabled() {
         return this.enableAliasedType;
