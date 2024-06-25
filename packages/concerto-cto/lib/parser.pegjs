@@ -1717,19 +1717,19 @@ ImportType
 
 ImportTypes
     = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedTypes _ "}" __ u:FromUri? {
-    	const { aliasedTypes, remainingTypes } = types.reduce((acc, type) => {
+    	const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
           if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
             acc.aliasedTypes.push(type);
-            acc.remainingTypes.push(type.name);
+            acc.typesNames.push(type.name);
           } else {
-            acc.remainingTypes.push(type);
+            acc.typesNames.push(type);
           }
           return acc;
-        }, { aliasedTypes: [], remainingTypes: [] });
+        }, { aliasedTypes: [], typesNames: [] });
     	const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
-            types:remainingTypes,
+            types:typesNames,
             ... aliasedTypes.length >0 && {aliasedTypes},
             
         };
@@ -1744,8 +1744,8 @@ AliasedIdentifier
       }
       return {
         "$class":"concerto.metamodel@1.0.0.AliasType",
-        name:name,
-        aliasName:aliasName
+        name,
+        aliasName
       };
     }
   
