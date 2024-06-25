@@ -97,6 +97,10 @@
       namespace: split.join('.')
     };
   }
+  function isPrimitiveType(typeName) {
+        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+        return (primitiveTypes.indexOf(typeName) >= 0);
+  }
 }
 
 Start
@@ -1735,6 +1739,9 @@ ImportTypes
 
 AliasedIdentifier 
     = name:$Identifier _ $AsToken _ aliasName:$Identifier{
+      if(isPrimitiveType(aliasName)){
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasName}".`);
+      }
       return {
         "$class":"concerto.metamodel@1.0.0.AliasType",
         name:name,

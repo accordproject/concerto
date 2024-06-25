@@ -1232,6 +1232,9 @@ function peg$parse(input, options) {
         return result;
     };
   var peg$f109 = function(name, aliasName) {
+      if(isPrimitiveType(aliasName)){
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasName}".`);
+      }
       return {
         "$class":"concerto.metamodel@1.0.0.AliasType",
         name:name,
@@ -11285,6 +11288,10 @@ function peg$parse(input, options) {
       name: name,
       namespace: split.join('.')
     };
+  }
+  function isPrimitiveType(typeName) {
+        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+        return (primitiveTypes.indexOf(typeName) >= 0);
   }
 
   peg$result = peg$startRuleFunction();
