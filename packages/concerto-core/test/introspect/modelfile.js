@@ -691,6 +691,29 @@ describe('ModelFile', () => {
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
         });
+
+        it('should not throw if declaration is extended on a aliased type declaration', () => {
+            const model1 = `
+            namespace org.saluja
+            
+            scalar nickname extends String
+            asset Vehicle identified by serialno {
+                o String serialno
+            }`;
+            const model2 = `
+            namespace org.acme
+            import org.saluja.{Vehicle as V,nickname as nk}
+            
+            asset Car extends V{
+                o String company 
+                o nk shortname
+            }`;
+            modelManager.enableMapType = true;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            (() => modelFile2.validate()).should.not.throw();
+        });
     });
 
 

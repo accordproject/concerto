@@ -219,7 +219,6 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
-        // TODO
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 
@@ -738,7 +737,6 @@ class ModelFile extends Decorated {
             );
         }
 
-        // TODO:handle ImportTypes
         this.imports = imports;
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
@@ -752,8 +750,6 @@ class ModelFile extends Decorated {
                 break;
             case `${MetaModelNamespace}.ImportTypes`:
                 if (this.getModelManager().isAliasedTypeEnabled()) {
-                    // map: alias name to the fqn's
-                    // imp.types and imp.aliasedTypes both are available
                     const aliasedTypes = new Map();
                     if (imp.aliasedTypes) {
                         imp.aliasedTypes.forEach(({ name, aliasName }) => {
@@ -763,7 +759,18 @@ class ModelFile extends Decorated {
                             aliasedTypes.set(name, aliasName);
                         });
                     }
-                    imp.types.forEach((type)=> aliasedTypes.has(type)? this.importShortNames.set(aliasedTypes.get(type),`${imp.namespace}.${type}`):this.importShortNames.set(type,`${imp.namespace}.${type}`));
+                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                    imp.types.forEach((type) =>
+                        aliasedTypes.has(type)
+                            ? this.importShortNames.set(
+                                aliasedTypes.get(type),
+                                `${imp.namespace}.${type}`
+                            )
+                            : this.importShortNames.set(
+                                type,
+                                `${imp.namespace}.${type}`
+                            )
+                    );
                 } else {
                     if (imp.aliasedTypes) {
                         throw new Error('Aliasing disabled, set enableAliasType to true');
