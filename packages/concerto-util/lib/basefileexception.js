@@ -15,6 +15,7 @@
 'use strict';
 
 const BaseException = require('./baseexception');
+const { BASE_FILE_EXCEPTION } = require("./errorcodes");
 
 /**
  * Exception throws when a Concerto file is semantically invalid
@@ -31,9 +32,10 @@ class BaseFileException extends BaseException {
      * @param {string} fullMessage - the optional full message text
      * @param {string} [fileName] - the file name
      * @param {string} [component] - the component which throws this error
+     * @param {string} [errorType='BaseFileException'] - the error code
      */
-    constructor(message, fileLocation, fullMessage, fileName, component) {
-        super(fullMessage ? fullMessage : message, component);
+    constructor(message, fileLocation, fullMessage, fileName, component, errorType = BASE_FILE_EXCEPTION) {
+        super(fullMessage ? fullMessage : message, component, errorType);
         this.fileLocation = fileLocation;
         this.shortMessage = message;
         this.fileName = fileName;

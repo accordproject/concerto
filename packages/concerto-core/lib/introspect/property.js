@@ -18,6 +18,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
+const TypeNotFoundException = require("../../lib/typenotfoundexception");
 const Decorated = require('./decorated');
 
 // Types needed for TypeScript generation.
@@ -178,15 +179,15 @@ class Property extends Decorated {
 
         const parent = this.getParent();
         if(!parent) {
-            throw new Error('Property ' + this.name + ' does not have a parent.');
+            throw new IllegalModelException('Property ' + this.name + ' does not have a parent.');
         }
         const modelFile = parent.getModelFile();
         if(!modelFile) {
-            throw new Error('Parent of property ' + this.name + ' does not have a ModelFile!');
+            throw new IllegalModelException('Parent of property ' + this.name + ' does not have a ModelFile!');
         }
         const result = modelFile.getFullyQualifiedTypeName(this.type);
         if(!result) {
-            throw new Error('Failed to find fully qualified type name for property ' + this.name + ' with type ' + this.type );
+            throw new TypeNotFoundException(this.type,'Failed to find fully qualified type name for property ' + this.name + ' with type ' + this.type);
         }
 
         return result;

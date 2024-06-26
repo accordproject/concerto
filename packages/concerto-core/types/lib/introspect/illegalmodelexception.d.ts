@@ -17,8 +17,9 @@ declare class IllegalModelException extends BaseFileException {
      * @param {number} fileLocation.end.line - end line of the error location.
      * @param {number} fileLocation.end.column - end column of the error location.
      * @param {string} [component] - the component which throws this error
+     * @param {string} [errorType='IllegalModelException'] - the error code
      */
-    constructor(message: string, modelFile?: ModelFile, fileLocation?: any, component?: string);
+    constructor(message: string, modelFile?: ModelFile, fileLocation?: any, component?: string, errorType?: string);
 }
 import { BaseFileException } from "@accordproject/concerto-util";
 import ModelFile = require("./modelfile");
