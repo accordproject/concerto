@@ -72,7 +72,7 @@ const defaultProcessFile = (name, data) => {
  *
  * @memberof module:concerto-core
  */
-class BaseModelManager {
+export default class BaseModelManager {
     /**
      * Create the ModelManager.
      * @constructor
@@ -855,5 +855,3 @@ class BaseModelManager {
         return modelManager;
     }
 }
-
-module.exports = BaseModelManager;
