@@ -44,13 +44,15 @@ class JSONGenerator {
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * are specified for relationship fields into their id, false by default.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
+     * @param {boolean} [inferClass] Only include $class in JSON when it cannot be inferred from model
      */
-    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset) {
+    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset, inferClass) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
         this.convertResourcesToId = convertResourcesToId;
         this.utcOffset = utcOffset || 0;
+        this.inferClass = inferClass;
     }
 
     /**
@@ -142,7 +144,21 @@ class JSONGenerator {
             }
         }
 
-        result.$class = classDeclaration.getFullyQualifiedName();
+        // if we are in the inferClass mode and this is not the root instance
+        // we attempt to remove the $class
+        if(this.inferClass && parameters.property) {
+            const propertyFqn = parameters.property.getFullyQualifiedTypeName();
+            const isResourceInstanceOfPropertyType = propertyFqn === obj.getFullyQualifiedType();
+            if(isResourceInstanceOfPropertyType === false) {
+                const objAndFieldSameNs = ModelUtil.getNamespace(propertyFqn) === obj.getNamespace();
+                result.$class = objAndFieldSameNs ? obj.getType() : obj.getFullyQualifiedType();
+            }
+        }
+        else {
+            // if we don't have a field, then we are dealing with the root object
+            result.$class = obj.getFullyQualifiedType();
+        }
+
         if(this.deduplicateResources && id) {
             result.$id = id;
         }
@@ -154,6 +170,7 @@ class JSONGenerator {
             const value = obj[property.getName()];
             if (!Util.isNull(value)) {
                 parameters.stack.push(value);
+                parameters.property = property;
                 result[property.getName()] = property.accept(this, parameters);
             }
         }
@@ -178,6 +195,7 @@ class JSONGenerator {
                 const item = obj[index];
                 if (!field.isPrimitive() && !ModelUtil.isEnum(field)) {
                     parameters.stack.push(item, Typed);
+                    parameters.property = field;
                     const classDeclaration = parameters.modelManager.getType(item.getFullyQualifiedType());
                     array.push(classDeclaration.accept(this, parameters));
                 } else {
@@ -192,11 +210,13 @@ class JSONGenerator {
         } else if (ModelUtil.isMap(field)) {
             parameters.stack.push(obj);
             const mapDeclaration = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            parameters.property = field;
             result = mapDeclaration.accept(this, parameters);
         }
         else {
             parameters.stack.push(obj);
             const classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
+            parameters.property = field;
             result = classDeclaration.accept(this, parameters);
         }
 
@@ -256,6 +276,7 @@ class JSONGenerator {
                         parameters.seenResources.add(fqi);
                         parameters.stack.push(item, Resource);
                         const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+                        parameters.property = relationshipDeclaration;
                         array.push(classDecl.accept(this, parameters));
                         parameters.seenResources.delete(fqi);
                     }
@@ -274,6 +295,7 @@ class JSONGenerator {
                 parameters.seenResources.add(fqi);
                 parameters.stack.push(obj, Resource);
                 const classDecl = parameters.modelManager.getType(relationshipDeclaration.getFullyQualifiedTypeName());
+                parameters.property = relationshipDeclaration;
                 result = classDecl.accept(this, parameters);
                 parameters.seenResources.delete(fqi);
             }

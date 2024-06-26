@@ -99,6 +99,21 @@ describe('JSONGenerator', () => {
             }
         `);
 
+        modelManager.addCTOModel(`
+            namespace org.acme.zoo
+
+            concept Zoo {
+               o Animal[] animals
+            }
+
+            abstract concept Animal{
+            }
+
+            concept Cat extends Animal{}
+
+            concept Dog extends Animal {}
+        `);
+
         factory = new Factory(modelManager);
 
         relationshipDeclaration1 = modelManager.getType('org.acme.MyTx1').getProperty('myAsset');
@@ -109,7 +124,7 @@ describe('JSONGenerator', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        jsonGenerator = new JSONGenerator(null, null, null, null, null, 'Z');
+        jsonGenerator = new JSONGenerator(null, null, null, null, null, 'Z', null);
     });
 
     afterEach(() => {
@@ -510,6 +525,7 @@ describe('JSONGenerator', () => {
                 'isArray':function(){return false;},
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
+                'getFullyQualifiedTypeName': function(){return 'foo.Vehicle';},
                 'getParent':function(){
                     return {
                         'getModelFile':function(){
@@ -607,7 +623,8 @@ describe('JSONGenerator', () => {
                 'isOptional':function(){return false;},
                 'isPrimitive':function(){return false;},
                 'getParent':function(){return 'vehicle';},
-                'getType':function(){return 'String';}
+                'getType':function(){return 'String';},
+                'getFullyQualifiedTypeName': function(){return 'foo.Vehicle';},
             };
             let child1 = factory.newResource('org.acme','MyAsset1','child1');
             let child2 = factory.newResource('org.acme','MyAsset1','child2');

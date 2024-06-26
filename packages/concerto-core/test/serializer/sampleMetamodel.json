@@ -1,0 +1,212 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "namespace": "Lorem nisi enim enim.",
+    "sourceUri": "Cupidatat officia laborum sunt incididunt.",
+    "concertoVersion": "Veniam.",
+    "imports": [
+      {
+        "$class": "ImportAll",
+        "namespace": "Duis sint.",
+        "uri": "Ea sunt reprehenderit."
+      }
+    ],
+    "declarations": [
+      {
+        "$class": "MapDeclaration",
+        "key": {
+          "$class": "StringMapKeyType",
+          "decorators": [
+            {
+              "name": "Incididunt excepteur nostrud enim.",
+              "arguments": [
+                {
+                  "$class": "DecoratorString",
+                  "value": "Cillum occaecat aute aute.",
+                  "location": {
+                    "start": {
+                      "line": 38511,
+                      "column": 43930,
+                      "offset": 23033
+                    },
+                    "end": {
+                      "line": 36502,
+                      "column": 39816,
+                      "offset": 19486
+                    },
+                    "source": "Labore tempor et aliquip mollit."
+                  }
+                }
+              ],
+              "location": {
+                "start": {
+                  "line": 42391,
+                  "column": 3627,
+                  "offset": 33958
+                },
+                "end": {
+                  "line": 983,
+                  "column": 40090,
+                  "offset": 25069
+                },
+                "source": "Excepteur tempor veniam pariatur."
+              }
+            }
+          ],
+          "location": {
+            "start": {
+              "line": 61309,
+              "column": 47612,
+              "offset": 47848
+            },
+            "end": {
+              "line": 4788,
+              "column": 48475,
+              "offset": 41651
+            },
+            "source": "Non anim nisi ipsum occaecat."
+          }
+        },
+        "value": {
+          "$class": "BooleanMapValueType",
+          "decorators": [
+            {
+              "name": "Commodo ut tempor eiusmod.",
+              "arguments": [
+                {
+                  "$class": "DecoratorString",
+                  "value": "Nulla ea sit pariatur incididunt.",
+                  "location": {
+                    "start": {
+                      "line": 32231,
+                      "column": 39463,
+                      "offset": 11115
+                    },
+                    "end": {
+                      "line": 5812,
+                      "column": 46231,
+                      "offset": 50449
+                    },
+                    "source": "Ut cupidatat nisi duis elit."
+                  }
+                }
+              ],
+              "location": {
+                "start": {
+                  "line": 44063,
+                  "column": 49727,
+                  "offset": 33761
+                },
+                "end": {
+                  "line": 51897,
+                  "column": 32889,
+                  "offset": 39320
+                },
+                "source": "Pariatur laboris adipisicing."
+              }
+            }
+          ],
+          "location": {
+            "start": {
+              "line": 37476,
+              "column": 16394,
+              "offset": 12273
+            },
+            "end": {
+              "line": 50689,
+              "column": 63232,
+              "offset": 29302
+            },
+            "source": "In veniam anim ut."
+          }
+        },
+        "name": "Foo",
+        "decorators": [
+          {
+            "name": "Labore cillum.",
+            "arguments": [
+              {
+                "$class": "DecoratorString",
+                "value": "Qui.",
+                "location": {
+                  "start": {
+                    "line": 8643,
+                    "column": 22128,
+                    "offset": 37375
+                  },
+                  "end": {
+                    "line": 35202,
+                    "column": 14646,
+                    "offset": 36723
+                  },
+                  "source": "Sint eu tempor sint."
+                }
+              }
+            ],
+            "location": {
+              "start": {
+                "line": 63155,
+                "column": 29327,
+                "offset": 52746
+              },
+              "end": {
+                "line": 58986,
+                "column": 61943,
+                "offset": 29968
+              },
+              "source": "Sint excepteur sunt elit."
+            }
+          }
+        ],
+        "location": {
+          "start": {
+            "line": 16561,
+            "column": 54945,
+            "offset": 30256
+          },
+          "end": {
+            "line": 8976,
+            "column": 9505,
+            "offset": 43034
+          },
+          "source": "Labore."
+        }
+      }
+    ],
+    "decorators": [
+      {
+        "name": "Pariatur aute voluptate id.",
+        "arguments": [
+          {
+            "$class": "DecoratorString",
+            "value": "Sit.",
+            "location": {
+              "start": {
+                "line": 11878,
+                "column": 38094,
+                "offset": 16933
+              },
+              "end": {
+                "line": 12942,
+                "column": 61905,
+                "offset": 17270
+              },
+              "source": "Anim occaecat proident."
+            }
+          }
+        ],
+        "location": {
+          "start": {
+            "line": 26284,
+            "column": 63143,
+            "offset": 13162
+          },
+          "end": {
+            "line": 28658,
+            "column": 38157,
+            "offset": 63188
+          },
+          "source": "Id nisi."
+        }
+      }
+    ]
+  }
