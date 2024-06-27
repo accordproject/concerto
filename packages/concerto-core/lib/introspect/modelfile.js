@@ -752,11 +752,11 @@ class ModelFile extends Decorated {
                 if (this.getModelManager().isAliasedTypeEnabled()) {
                     const aliasedTypes = new Map();
                     if (imp.aliasedTypes) {
-                        imp.aliasedTypes.forEach(({ name, aliasName }) => {
-                            if(ModelUtil.isPrimitiveType(aliasName)){
+                        imp.aliasedTypes.forEach(({ name, aliasedName }) => {
+                            if(ModelUtil.isPrimitiveType(aliasedName)){
                                 throw new Error('Types cannot be aliased to primitive type');
                             }
-                            aliasedTypes.set(name, aliasName);
+                            aliasedTypes.set(name, aliasedName);
                         });
                     }
                     // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
