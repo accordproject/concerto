@@ -1718,7 +1718,7 @@ ImportType
 ImportTypes
     = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedTypes _ "}" __ u:FromUri? {
     	const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
-          if (type.$class === "concerto.metamodel@1.0.0.AliasType") {
+          if (type.$class === "concerto.metamodel@1.0.0.AliasedType") {
             acc.aliasedTypes.push(type);
             acc.typesNames.push(type.name);
           } else {
@@ -1738,14 +1738,14 @@ ImportTypes
     }
 
 AliasedIdentifier 
-    = name:$Identifier _ $AsToken _ aliasName:$Identifier{
-      if(isPrimitiveType(aliasName)){
-        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasName}".`);
+    = name:$Identifier _ $AsToken _ aliasedName:$Identifier{
+      if(isPrimitiveType(aliasedName)){
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasedName}".`);
       }
       return {
-        "$class":"concerto.metamodel@1.0.0.AliasType",
+        "$class":"concerto.metamodel@1.0.0.AliasedType",
         name,
-        aliasName
+        aliasedName
       };
     }
   
