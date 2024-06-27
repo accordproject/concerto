@@ -9,14 +9,14 @@
             "types": ["doc1", "doc2"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "doc1",
-                    "aliasName": "d1"
+                    "aliasedName": "d1"
                 },
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "doc2",
-                    "aliasName": "d2"
+                    "aliasedName": "d2"
                 }
             ]
         },
@@ -26,9 +26,9 @@
             "types": ["file1", "file2", "file3"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "file2",
-                    "aliasName": "f2"
+                    "aliasedName": "f2"
                 }
             ]
         },
@@ -38,9 +38,9 @@
             "types": ["baz1"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "baz1",
-                    "aliasName": "bar1"
+                    "aliasedName": "bar1"
                 }
             ]
         },
@@ -50,9 +50,9 @@
             "types": ["baz2"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "baz2",
-                    "aliasName": "bar2"
+                    "aliasedName": "bar2"
                 }
             ],
             "uri": "https://com.example.co.uk/models/com.example.foo.cto"
@@ -63,14 +63,14 @@
             "types": ["tee", "baz", "lorem", "ipsum", "dolor"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "baz",
-                    "aliasName": "bar"
+                    "aliasedName": "bar"
                 },
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "dolor",
-                    "aliasName": "freq"
+                    "aliasedName": "freq"
                 }
             ]
         },
@@ -80,14 +80,14 @@
             "types": ["As", "as"],
             "aliasedTypes": [
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "As",
-                    "aliasName": "as"
+                    "aliasedName": "as"
                 },
                 {
-                    "$class": "concerto.metamodel@1.0.0.AliasType",
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
                     "name": "as",
-                    "aliasName": "as"
+                    "aliasedName": "as"
                 }
             ]
         },

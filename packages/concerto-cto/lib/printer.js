@@ -390,8 +390,8 @@ function toCTO(metaModel) {
             case `${MetaModelNamespace}.ImportTypes`:{
                 let aliasedTypes=new Map();
                 if(imp.aliasedTypes){
-                    imp.aliasedTypes.forEach(({name,aliasName}) => {
-                        aliasedTypes.set(name,aliasName);
+                    imp.aliasedTypes.forEach(({name,aliasedName}) => {
+                        aliasedTypes.set(name,aliasedName);
                     });
                 }
                 let commaSeparatedTypesString = imp.types.map((type) =>aliasedTypes.has(type) ? `${type} as ${aliasedTypes.get(type)}`: type).join(',');
