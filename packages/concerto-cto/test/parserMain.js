@@ -81,6 +81,31 @@ describe('parser', () => {
         });
     });
 
+    describe('alias-imports',()=>{
+        it('Should not parse bad import alias: No parenthesis',()=>{
+            const content = fs.readFileSync('./test/cto/bad/aliasImport.bad.single.cto','utf-8');
+            (()=>{
+                Parser.parse(content);
+            }).should.throw(/Expected .+ but/);
+        });
+        it('Should not parse bad import alias: alias missing',()=>{
+            const content = fs.readFileSync('./test/cto/bad/aliasImport.bad.alias-missing.cto','utf-8');
+            (()=>{
+                Parser.parse(content);
+            }).should.throw(/Expected .+ but/);
+        });
+        it('Should throw when type is alias to a pimitive type',()=>{
+            const model=`
+            namespace org.saluja
+            
+            import org.ece.{doc as String}
+            `;
+            (() => {
+                Parser.parse(model);
+            }).should.throw(/cannot be aliased to a Primitive type/);
+        });
+    });
+
     describe('self-extending', () => {
         const declarationTypes = [
             'asset',
