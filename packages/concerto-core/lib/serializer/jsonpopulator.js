@@ -211,9 +211,18 @@ class JSONPopulator {
      * @private
      */
     processMapType(mapDeclaration, parameters, value, type) {
-        let decl = mapDeclaration.getModelFile()
-            .getAllDeclarations()
-            .find(decl => decl.name === type);
+        let decl;
+        if (value && typeof value === 'object' && value.$class) {
+            // Use the $class property to find the class declaration
+            decl = mapDeclaration.getModelFile()
+                .getAllDeclarations()
+                .find(decl => decl.getFullyQualifiedName() === value.$class);
+        } else {
+            // Fallback to the original type lookup if value is not an object or doesn't have $class
+            decl = mapDeclaration.getModelFile()
+                .getAllDeclarations()
+                .find(decl => decl.name === type);
+        }
 
         // if its a ClassDeclaration, populate the Concept.
         if (decl?.isClassDeclaration()) {
