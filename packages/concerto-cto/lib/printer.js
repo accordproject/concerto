@@ -389,11 +389,20 @@ function toCTO(metaModel) {
                 break;
             case `${MetaModelNamespace}.ImportTypes`: {
                 const aliasedTypes = imp.aliasedTypes
-                    ? new Map(imp.aliasedTypes.map(({name,aliasedName})=>[name,aliasedName]))
+                    ? new Map(
+                        imp.aliasedTypes.map(({ name, aliasedName }) => [
+                            name,
+                            aliasedName,
+                        ])
+                    )
                     : new Map();
-                const commaSeparatedTypesString = imp.types.map((type) => aliasedTypes.has(type)
-                    ? `${type} as ${aliasedTypes.get(type)}`
-                    : type).join(',');
+                const commaSeparatedTypesString = imp.types
+                    .map((type) =>
+                        aliasedTypes.has(type)
+                            ? `${type} as ${aliasedTypes.get(type)}`
+                            : type
+                    )
+                    .join(',');
                 result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
                 break;
             }

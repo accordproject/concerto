@@ -98,8 +98,8 @@
     };
   }
   function isPrimitiveType(typeName) {
-        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
-        return (primitiveTypes.indexOf(typeName) >= 0);
+    const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+    return (primitiveTypes.indexOf(typeName) >= 0);
   }
 }
 
@@ -1692,7 +1692,7 @@ FromUri
   = FromToken __ u:$URI __ {
     return u;
   }
-     
+
 ImportAll
     = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
     	const result = {
@@ -1731,16 +1731,16 @@ ImportTypes
             namespace: ns,
             types:typesNames,
             ... aliasedTypes.length >0 && {aliasedTypes},
-            
+
         };
         u && (result.uri = u);
         return result;
     }
 
-AliasedIdentifier 
+AliasedIdentifier
     = name:$Identifier _ $AsToken _ aliasedName:$Identifier{
       if(isPrimitiveType(aliasedName)){
-        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasedName}".`);
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased as "${aliasedName}".`);
       }
       return {
         "$class":"concerto.metamodel@1.0.0.AliasedType",
@@ -1748,7 +1748,7 @@ AliasedIdentifier
         aliasedName
       };
     }
-  
+
 IdentifierTypeExpression
   = AliasedIdentifier / $Identifier
 
