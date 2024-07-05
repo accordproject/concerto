@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-cto": "3.16.10",
-    "@accordproject/concerto-metamodel": "3.9.2",
+    "@accordproject/concerto-metamodel": "3.10.0",
     "@accordproject/concerto-util": "3.16.10",
     "dayjs": "1.11.10",
     "debug": "4.3.4",
