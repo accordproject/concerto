@@ -269,6 +269,11 @@ export interface ILongDomainValidator extends IConcept {
    upper?: number;
 }
 
+export interface IAliasedType extends IConcept {
+   name: string;
+   aliasedName: string;
+}
+
 export interface IImport extends IConcept {
    namespace: string;
    uri?: string;
@@ -287,6 +292,7 @@ export interface IImportType extends IImport {
 
 export interface IImportTypes extends IImport {
    types: string[];
+   aliasedTypes?: IAliasedType[];
 }
 
 export interface IModel extends IConcept {

@@ -14,4 +14,5 @@ import TypedStack = require("./lib/typedstack");
 import Label = require("./lib/label");
 import Identifiers = require("./lib/identifiers");
 import ErrorCodes = require("./lib/errorcodes");
-export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label, Identifiers, ErrorCodes };
+import NullUtil = require("./lib/null");
+export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label, Identifiers, ErrorCodes, NullUtil };
