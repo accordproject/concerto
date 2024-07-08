@@ -1,0 +1,101 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "test.aliasing",
+    "imports": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.accordproject",
+            "types": ["doc1", "doc2"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "doc1",
+                    "aliasedName": "d1"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "doc2",
+                    "aliasedName": "d2"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.accordproject.files",
+            "types": ["file1", "file2", "file3"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "file2",
+                    "aliasedName": "f2"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4-X.y.z-01",
+            "types": ["baz1"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "baz1",
+                    "aliasedName": "bar1"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["baz2"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "baz2",
+                    "aliasedName": "bar2"
+                }
+            ],
+            "uri": "https://com.example.co.uk/models/com.example.foo.cto"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["tee", "baz", "lorem", "ipsum", "dolor"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "baz",
+                    "aliasedName": "bar"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "dolor",
+                    "aliasedName": "freq"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["As", "as"],
+            "aliasedTypes": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "As",
+                    "aliasedName": "as"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.AliasedType",
+                    "name": "as",
+                    "aliasedName": "as"
+                }
+            ]
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "com.example.foo@1.0.4",
+            "types": ["baz"]
+        }
+    ],
+    "declarations": []
+}
