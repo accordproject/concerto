@@ -1226,14 +1226,14 @@ function peg$parse(input, options) {
             namespace: ns,
             types:typesNames,
             ... aliasedTypes.length >0 && {aliasedTypes},
-            
+
         };
         u && (result.uri = u);
         return result;
     };
   var peg$f109 = function(name, aliasedName) {
       if(isPrimitiveType(aliasedName)){
-        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased to "${aliasedName}".`);
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased as "${aliasedName}".`);
       }
       return {
         "$class":"concerto.metamodel@1.0.0.AliasedType",
@@ -11290,8 +11290,8 @@ function peg$parse(input, options) {
     };
   }
   function isPrimitiveType(typeName) {
-        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
-        return (primitiveTypes.indexOf(typeName) >= 0);
+    const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+    return (primitiveTypes.indexOf(typeName) >= 0);
   }
 
   peg$result = peg$startRuleFunction();

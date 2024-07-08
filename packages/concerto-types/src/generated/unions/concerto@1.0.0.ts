@@ -21,6 +21,7 @@ import type {
 	IDoubleDomainValidator,
 	IIntegerDomainValidator,
 	ILongDomainValidator,
+	IAliasedType,
 	IImport,
 	IModel,
 	IModels
@@ -47,6 +48,7 @@ IStringLengthValidator |
 IDoubleDomainValidator | 
 IIntegerDomainValidator | 
 ILongDomainValidator | 
+IAliasedType | 
 IImport | 
 IModel | 
 IModels;
