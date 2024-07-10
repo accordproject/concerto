@@ -102,6 +102,9 @@ const Concerto = require('./lib/concerto');
 // MetaModel
 const MetaModel = require('./lib/introspect/metamodel');
 
+// ConcertoCodes
+const ConcertoCodes = require('./lib/concertoCodes');
+
 // Version
 /** @type {{ name: string, version: string }} */
 const version = require('./package.json');
@@ -148,5 +151,6 @@ module.exports = {
     DateTimeUtil,
     Concerto,
     MetaModel,
+    ConcertoCodes,
     version
 };

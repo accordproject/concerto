@@ -746,6 +746,7 @@ class ModelFile extends Decorated {
                 if (this.getModelManager().isStrict()){
                     throw new Error('Wilcard Imports are not permitted in strict mode.');
                 }
+                // Should we change this as well?
                 console.warn('DEPRECATED: Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.');
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
