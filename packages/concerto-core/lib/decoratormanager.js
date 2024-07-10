@@ -22,7 +22,6 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
-const ConcertoCodes = require('./concertoCodes');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -249,7 +248,7 @@ class DecoratorManager {
             model.declarations.forEach((decl) => {
                 decoratorCommandSet.commands.forEach((command) => {
                     this.executeCommand(model.namespace, decl, command, options?.enableDcsNamespaceTarget);
-                    if(this.checkForNamespaceTarget(options?.enableDcsNamespaceTarget)) {
+                    if(this.isNamespaceTargetEnabled(options?.enableDcsNamespaceTarget)) {
                         this.executeNamespaceCommand(model, command);
                     }
                 });
@@ -449,9 +448,9 @@ class DecoratorManager {
     /**
      * Executes a Command against a Model Namespace, adding
      * decorators to the Namespace.
+     * @private
      * @param {*} model the model
      * @param {*} command the Command object from the dcs
-     * org.accordproject.decoratorcommands model
      */
     static executeNamespaceCommand(model, command) {
         const { target, decorator, type } = command;
@@ -542,6 +541,7 @@ class DecoratorManager {
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
      * if enabled, applies the decorator on top of the namespace or else on all declarations
      * within the namespace.
+     * @private
      * @param {*} declaration the type to apply the decorator to
      * @param {string} type the command type
      * @param {*} decorator the decorator to add
@@ -549,7 +549,7 @@ class DecoratorManager {
      * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
     static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, enableDcsNamespaceTarget) {
-        if(this.checkForNamespaceTarget(enableDcsNamespaceTarget)) {
+        if(this.isNamespaceTargetEnabled(enableDcsNamespaceTarget)) {
             if (target.declaration) {
                 this.applyDecorator(declaration, type, decorator);
             }
@@ -560,19 +560,20 @@ class DecoratorManager {
 
     /**
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
-     * and print depreaction warning if not enabled and return boolean value as well
+     * and print deprecation warning if not enabled and return boolean value as well
+     *  @private
      *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      *  @returns {Boolean} true if either of the flags is enabled
      */
-    static checkForNamespaceTarget(enableDcsNamespaceTarget) {
+    static isNamespaceTargetEnabled(enableDcsNamespaceTarget) {
         if(enableDcsNamespaceTarget || process.env.ENABLE_DCS_NAMESPACE_TARGET === 'true') {
             return true;
         } else {
             Warning.printDeprecationWarning(
                 'Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
                 ErrorCodes.DEPRECATION_WARNING,
-                ConcertoCodes.CONCERTO_DEPRECATION_001,
-                'Please refer See https://concerto.accordproject.org/depreaction#001'
+                ErrorCodes.CONCERTO_DEPRECATION_001,
+                'Please refer to https://concerto.accordproject.org/deprecation/001'
             );
             return false;
         }

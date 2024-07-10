@@ -31,6 +31,7 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
+const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -746,8 +747,12 @@ class ModelFile extends Decorated {
                 if (this.getModelManager().isStrict()){
                     throw new Error('Wilcard Imports are not permitted in strict mode.');
                 }
-                // Should we change this as well?
-                console.warn('DEPRECATED: Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.');
+                Warning.printDeprecationWarning(
+                    'Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
+                    ErrorCodes.DEPRECATION_WARNING,
+                    ErrorCodes.CONCERTO_DEPRECATION_002,
+                    'Please refer to https://concerto.accordproject.org/deprecation/002'
+                );
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
             case `${MetaModelNamespace}.ImportTypes`:

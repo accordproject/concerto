@@ -64,11 +64,8 @@ class DecoratorManager {
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
-   + void executeNamespaceCommand(model,command) 
    + void executeCommand(string,declaration,command,boolean?) 
    + void executePropertyCommand(property,command) 
-   + void checkForNamespaceTargetAndApplyDecorator(declaration,string,decorator,target,boolean?) 
-   + Boolean checkForNamespaceTarget(boolean?) 
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 

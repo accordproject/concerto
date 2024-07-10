@@ -22,8 +22,7 @@ const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanage
 const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
-const { DEPRECATION_WARNING } = require('@accordproject/concerto-util/lib/errorcodes');
-const { CONCERTO_DEPRECATION_001 } = require('../lib/concertoCodes');
+const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = require('@accordproject/concerto-util/lib/errorcodes');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
@@ -149,10 +148,10 @@ describe('DecoratorManager', () => {
         it('should add decorators that target namespace and catch warning - behaviour to be deprecated', async function() {
             // event listner to catch the warning
             process.once('warning', (warning) => {
-                chai.expect(warning.message).to.be.equals('Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
+                chai.expect(warning.message).to.be.equals('DEPRECATED: Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
                 chai.expect(warning.name).to.be.equals(DEPRECATION_WARNING);
                 chai.expect(warning.code).to.be.equals(CONCERTO_DEPRECATION_001);
-                chai.expect(warning.detail).to.be.equals('Please refer See https://concerto.accordproject.org/depreaction#001');
+                chai.expect(warning.detail).to.be.equals('Please refer to https://concerto.accordproject.org/deprecation/001');
             });
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});

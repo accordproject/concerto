@@ -18,7 +18,7 @@ let isWarningEmitted = false;
 
 /**
  * Emits DeprecationWaring to stderr only once and can be caught using an warning event listener as well, please define the code
- * and document the deprecation code on https://concerto.accordproject.org/depreaction
+ * and document the deprecation code on https://concerto.accordproject.org/deprecation
  * @param {string} message - message of the deprecation warning
  * @param {string} type - type of the deprecation warning
  * @param {string} code - code of the deprecation warning
@@ -27,7 +27,7 @@ let isWarningEmitted = false;
 function printDeprecationWarning(message, type, code, detail) {
     if (!isWarningEmitted) {
         isWarningEmitted = true;
-        process.emitWarning(message, {
+        process.emitWarning(`DEPRECATED: ${message}`, {
             type,
             code,
             detail
