@@ -22,5 +22,7 @@ const DEFAULT_VALIDATOR_EXCEPTION = 'DefaultValidatorException';
 const REGEX_VALIDATOR_EXCEPTION = 'RegexValidatorException';
 // base exception for Type not found
 const TYPE_NOT_FOUND_EXCEPTION = 'TypeNotFoundException';
+// deprecation warning type for process.emitWarning
+const DEPRECATION_WARNING = 'DeprecationWarning';
 
-module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION};
+module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION, DEPRECATION_WARNING};
