@@ -63,7 +63,7 @@ declare class BaseModelManager {
      */
     isStrict(): boolean;
     /**
-     * Returns the value of the enableAliasedType option
+     * Checks if the import aliasing feature is enabled.
      * @returns {boolean} true if the enableAliasedType has been set
      */
     isAliasedTypeEnabled(): boolean;
