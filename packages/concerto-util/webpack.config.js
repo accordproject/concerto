@@ -20,6 +20,8 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const packageJson = require('./package.json');
 
+const emitWarningPollyfill = 'function(message, options){ console.warn({message: `DEPRECATED: ${message}`,type: options?.type,code: options?.code,detail: options?.detail});}';
+
 module.exports = {
     entry: './dist/index.js',
     output: {
@@ -44,7 +46,8 @@ module.exports = {
         new webpack.DefinePlugin({
             'process.env': {
                 'NODE_ENV': JSON.stringify('production')
-            }
+            },
+            'process.emitWarning': emitWarningPollyfill
         }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],

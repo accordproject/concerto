@@ -58,6 +58,9 @@ const ErrorCodes = require('./errorcodes');
 // NullUtil
 const NullUtil = require('./lib/null');
 
+// Warning
+const Warning = require('./lib/warning');
+
 module.exports = {
     BaseException,
     BaseFileException,
@@ -75,5 +78,6 @@ module.exports = {
     Label,
     Identifiers,
     ErrorCodes,
-    NullUtil
+    NullUtil,
+    Warning
 };
