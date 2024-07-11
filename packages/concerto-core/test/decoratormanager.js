@@ -22,6 +22,7 @@ const VocabularyManager= require('../../concerto-vocabulary/lib/vocabularymanage
 const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
+const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = require('@accordproject/concerto-util/lib/errorcodes');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
@@ -121,7 +122,7 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
-        it('should add decorator', async function() {
+        it('should add decorators that target declarations', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
@@ -138,10 +139,105 @@ describe('DecoratorManager', () => {
             const decl = decoratedModelManager.getType('test@1.0.0.Person');
             decl.should.not.be.null;
             decl.getDecorator('Editable').should.not.be.null;
+        });
+
+        /*
+        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to
+        all the declarations within the namespace, which has been identified as bug and will be deprecated.
+        */
+        it('should add decorators that target namespace and catch warning - behaviour to be deprecated', async function() {
+            // event listner to catch the warning
+            process.once('warning', (warning) => {
+                chai.expect(warning.message).to.be.equals('DEPRECATED: Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
+                chai.expect(warning.name).to.be.equals(DEPRECATION_WARNING);
+                chai.expect(warning.code).to.be.equals(CONCERTO_DEPRECATION_001);
+                chai.expect(warning.detail).to.be.equals('Please refer to https://concerto.accordproject.org/deprecation/001');
+            });
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const modelFile = decoratedModelManager.getModelFile('test@1.0.0');
+            modelFile.should.not.be.null;
+            chai.expect(modelFile.getDecorator('IsValid')).to.be.null;
+
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            ssnDecl.getDecorator('IsValid').should.not.be.null;
+
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.should.not.be.null;
+            decl.getDecorator('IsValid').should.not.be.null;
+        });
+
+        /*
+        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to the
+        namespace, which is the new feature added can be accessed using the feature flag: ENABLE_DCS_NAMESPACE_TARGET.
+        */
+        it('should add decorators that target namespace - updated behaviour using environment variable', async function() {
+            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const modelFile = decoratedModelManager.getModelFile('test@1.0.0');
+            modelFile.should.not.be.null;
+            modelFile.getDecorator('IsValid').should.not.be.null;
+
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            chai.expect(ssnDecl.getDecorator('IsValid')).to.be.null;
+            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
+        });
+
+        /*
+        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to the
+        namespace, which is the new feature added can be accessed using the option parameter: enableDcsNamespaceTarget.
+        */
+        it('should add decorators that target namespace - updated behaviour using options parameter', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true, enableDcsNamespaceTarget: true});
+
+            const modelFile = decoratedModelManager.getModelFile('test@1.0.0');
+            modelFile.should.not.be.null;
+            modelFile.getDecorator('IsValid').should.not.be.null;
+
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            chai.expect(ssnDecl.getDecorator('IsValid')).to.be.null;
+        });
+
+        it('should add decorators that target properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true});
+
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.should.not.be.null;
 
             const firstNameProperty = decl.getProperty('firstName');
             firstNameProperty.should.not.be.null;
-
             const decoratorFormFirstName = firstNameProperty.getDecorator('Form');
             decoratorFormFirstName.should.not.be.null;
             decoratorFormFirstName.getArguments()[0].should.equal('inputType');

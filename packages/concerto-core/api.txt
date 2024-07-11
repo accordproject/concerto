@@ -59,12 +59,12 @@ class DecoratorExtractor {
 }
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
-   + void executeCommand(string,declaration,command) 
+   + void executeCommand(string,declaration,command,boolean?) 
    + void executePropertyCommand(property,command) 
 }
    + string[] intersect() 
