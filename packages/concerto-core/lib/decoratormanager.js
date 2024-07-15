@@ -21,6 +21,7 @@ const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
+const DcsIndexWrapper = require('./DcsIndexWrapper');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -267,38 +268,45 @@ class DecoratorManager {
         const mapElementCommandsMap = new Map();
         const typeCommandsMap = new Map();
 
-        decoratorCommandSet.commands.map(decoratorCommand => {
+        decoratorCommandSet.commands.map((decoratorCommand, index) => {
+            const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
             if(decoratorCommand.target.type) {
                 if (typeCommandsMap.has(decoratorCommand.target.type)) {
-                    typeCommandsMap.get(decoratorCommand.target.type).push(decoratorCommand);
+                    typeCommandsMap.get(decoratorCommand.target.type).push({...dcsWithIndex});
                 } else {
-                    typeCommandsMap.set(decoratorCommand.target.type, [{...decoratorCommand}]);
+                    typeCommandsMap.set(decoratorCommand.target.type, [{...dcsWithIndex}]);
                 }
-            }
-
-            if(decoratorCommand.target.property) {
+            } else if(decoratorCommand.target.property) {
                 if (propertyCommandsMap.has(decoratorCommand.target.property)) {
-                    propertyCommandsMap.get(decoratorCommand.target.property).push(decoratorCommand);
+                    propertyCommandsMap.get(decoratorCommand.target.property).push({...dcsWithIndex});
                 } else {
-                    propertyCommandsMap.set(decoratorCommand.target.property, [{...decoratorCommand}]);
+                    propertyCommandsMap.set(decoratorCommand.target.property, [{...dcsWithIndex}]);
                 }
+            } else if(decoratorCommand.target.properties) {
+                decoratorCommand.target.properties.forEach((property) => {
+                    if (propertyCommandsMap.has(property)) {
+                        propertyCommandsMap.get(property).push({...dcsWithIndex});
+                    } else {
+                        propertyCommandsMap.set(property, [{...dcsWithIndex}]);
+                    }
+                });
             } else if(decoratorCommand.target.mapElement) {
-                if (mapElementCommandsMap.has(decoratorCommand.target.declaration)) {
-                    mapElementCommandsMap.get(decoratorCommand.target.declaration).push(decoratorCommand);
+                if (mapElementCommandsMap.has(decoratorCommand.target.mapElement)) {
+                    mapElementCommandsMap.get(decoratorCommand.target.mapElement).push({...dcsWithIndex});
                 } else {
-                    mapElementCommandsMap.set(decoratorCommand.target.declaration, [{...decoratorCommand}]);
+                    mapElementCommandsMap.set(decoratorCommand.target.mapElement, [{...dcsWithIndex}]);
                 }
             } else if(decoratorCommand.target.declaration) {
                 if (declarationCommandsMap.has(decoratorCommand.target.declaration)) {
-                    declarationCommandsMap.get(decoratorCommand.target.declaration).push(decoratorCommand);
+                    declarationCommandsMap.get(decoratorCommand.target.declaration).push({...dcsWithIndex});
                 } else {
-                    declarationCommandsMap.set(decoratorCommand.target.declaration, [{...decoratorCommand}]);
+                    declarationCommandsMap.set(decoratorCommand.target.declaration, [{...dcsWithIndex}]);
                 }
             } else if(decoratorCommand.target.namespace) {
                 if (namespaceCommandsMap.has(decoratorCommand.target.namespace)) {
-                    namespaceCommandsMap.get(decoratorCommand.target.namespace).push(decoratorCommand);
+                    namespaceCommandsMap.get(decoratorCommand.target.namespace).push({...dcsWithIndex});
                 } else {
-                    namespaceCommandsMap.set(decoratorCommand.target.namespace, [{...decoratorCommand}]);
+                    namespaceCommandsMap.set(decoratorCommand.target.namespace, [{...dcsWithIndex}]);
                 }
             }
         });
@@ -310,6 +318,28 @@ class DecoratorManager {
             mapElementCommandsMap,
             typeCommandsMap
         };
+    }
+
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet
+     * to the ModelManager.
+     * @param {*} computedDcsMap the DecoratorCommandSet object
+     * @param {string} targetCandidate the DecoratorCommandSet object
+     * @param {*} dcsWithIndex the DecoratorCommandSet object
+     * @returns {Object} a new model manager with the decorations applied
+     * @private
+     */
+    static getComputedDcsMap(computedDcsMap, targetCandidate, dcsWithIndex) {
+        if(computedDcsMap.has(targetCandidate)) {
+            const commandIndex = computedDcsMap.get(targetCandidate).index;
+            if(commandIndex < dcsWithIndex.index) {
+                computedDcsMap.set(targetCandidate, dcsWithIndex);
+            }
+        } else {
+            computedDcsMap.set(targetCandidate, dcsWithIndex);
+        }
+
+        return computedDcsMap;
     }
 
     /**
@@ -354,68 +384,120 @@ class DecoratorManager {
                 });
             }
         }
+        // create a new class with the decoratorscommand and the index of the command, then add to the respective set, change variable name from maps to set
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
             model.declarations.forEach((decl) => {
+                let computedDeclDcsMap = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
                 if (declarationCommandsMap.has(declarationName)) {
-                    const commands = declarationCommandsMap.get(declarationName);
+                    const dcsWithIndexList = declarationCommandsMap.get(declarationName);
                     console.log('decl');
-                    commands.forEach(command => {
-                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    dcsWithIndexList.forEach(dcsWithIndex => {
+                        computedDeclDcsMap.push(dcsWithIndex);
                     });
                 }
 
                 if (namespaceCommandsMap.has(model.namespace)) {
-                    const commands = namespaceCommandsMap.get(model.namespace);
+                    const dcsWithIndexList = namespaceCommandsMap.get(model.namespace);
                     console.log('name');
-                    commands.forEach(command => {
-                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    dcsWithIndexList.forEach(dcsWithIndex => {
+                        computedDeclDcsMap.push(dcsWithIndex);
                     });
                 }
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    if (mapElementCommandsMap.has(declarationName)) {
-                        const commands = mapElementCommandsMap.get(declarationName);
-                        console.log('map');
-                        commands.forEach(command => {
-                            this.executeDeclarationCommand(model.namespace, decl, command);
+                    let computedMapDcsMap = [];
+                    if (typeCommandsMap.has(decl.key.$class)) {
+                        const dcsWithIndexList = typeCommandsMap.get(decl.key.$class);
+                        console.log('typedecl');
+                        dcsWithIndexList.forEach(dcsWithIndex => {
+                            computedMapDcsMap.push(dcsWithIndex);
+                            // this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
                         });
                     }
+
+                    if (typeCommandsMap.has(decl.value.$class)) {
+                        const dcsWithIndexList = typeCommandsMap.get(decl.value.$class);
+                        console.log('typedecl');
+                        dcsWithIndexList.forEach(dcsWithIndex => {
+                            computedMapDcsMap.push(dcsWithIndex);
+                        });
+                    }
+
+                    if (mapElementCommandsMap.has('KEY')) {
+                        const dcsWithIndexList = mapElementCommandsMap.get('KEY');
+                        console.log('map');
+                        dcsWithIndexList.forEach(dcsWithIndex => {
+                            computedMapDcsMap.push(dcsWithIndex);
+                        });
+                    }
+
+                    if (mapElementCommandsMap.has('VALUE')) {
+                        const dcsWithIndexList = mapElementCommandsMap.get('VALUE');
+                        console.log('map');
+                        dcsWithIndexList.forEach(dcsWithIndex => {
+                            computedMapDcsMap.push(dcsWithIndex);
+                        });
+                    }
+
+                    if (mapElementCommandsMap.has('KEY_VALUE')) {
+                        const dcsWithIndexList = mapElementCommandsMap.get('KEY_VALUE');
+                        console.log('map');
+                        dcsWithIndexList.forEach(dcsWithIndex => {
+                            computedMapDcsMap.push(dcsWithIndex);
+                        });
+                    }
+
+                    const sortedMapList = computedMapDcsMap.sort((a, b) => a.index - b.index);
+                    // does iterable require pollyfill?
+                    sortedMapList.forEach(dcsWithIndex => {
+                        this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
+                    });
                 }
 
                 if (typeCommandsMap.has($classForDeclaration)) {
-                    const commands = namespaceCommandsMap.get($classForDeclaration);
+                    const dcsWithIndexList = typeCommandsMap.get($classForDeclaration);
                     console.log('typedecl');
-                    commands.forEach(command => {
-                        this.executeDeclarationCommand(model.namespace, decl, command);
+                    dcsWithIndexList.forEach(dcsWithIndex => {
+                        computedDeclDcsMap.push(dcsWithIndex);
                     });
                 }
+
+                const sortedDeclList = computedDeclDcsMap.sort((a, b) => a.index - b.index);
+                // does iterable require pollyfill?
+                sortedDeclList.forEach(dcsWithIndex => {
+                    this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
+                });
+
                 // scalars are declarations but do not have properties
                 if (decl.properties) {
                     decl.properties.forEach((property) => {
+                        let computedPropertyDcsMap = []
                         const { name: propertyName, $class: $classForProperty } = property;
                         if (propertyCommandsMap.has(propertyName)) {
-                            const commands = propertyCommandsMap.get(propertyName);
-                            console.log('prop');
-                            commands.forEach(command => {
-                                DecoratorManager.executePropertyCommand(
-                                    property,
-                                    command
-                                );
+                            const dcsWithIndexList = propertyCommandsMap.get(propertyName);
+                            dcsWithIndexList.forEach(dcsWithIndex => {
+                                computedPropertyDcsMap.push(dcsWithIndex);
                             });
                         }
                         if (typeCommandsMap.has($classForProperty)) {
-                            const commands = typeCommandsMap.get($classForProperty);
-                            commands.forEach(command => {
-                                DecoratorManager.executePropertyCommand(
-                                    property,
-                                    command
-                                );
+                            const dcsWithIndexList = typeCommandsMap.get($classForProperty);
+                            dcsWithIndexList.forEach(dcsWithIndex => {
+                                computedPropertyDcsMap.push(dcsWithIndex);
+                                // DecoratorManager.executePropertyCommand(
+                                //     property,
+                                //     dcsWithIndex.command
+                                // );
                             });
                         }
+
+                        const soertedPropertyList = computedPropertyDcsMap.sort((a, b) => a.index - b.index);
+                        soertedPropertyList.forEach(dcsWithIndex => {
+                            this.executePropertyCommand(property, dcsWithIndex.command);
+                        });
                     });
                 }
 

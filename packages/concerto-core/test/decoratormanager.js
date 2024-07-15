@@ -91,7 +91,7 @@ describe('DecoratorManager', () => {
         });
     });
 
-    describe('#optimizedDecorateModels', function() {
+    describe.only('#optimizedDecorateModels', function() {
         it('should support no validation', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
@@ -121,7 +121,7 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
-        it.only('should add decorator', async function() {
+        it('should add decorator', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
