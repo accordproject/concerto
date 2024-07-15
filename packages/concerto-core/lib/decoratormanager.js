@@ -256,10 +256,27 @@ class DecoratorManager {
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
+     * Add decorator commands set with index object to the coresponding target map
+     * @param {*} targetMap the target map to add the command to
+     * @param {targetKey} targetKey the target key to add the command to
+     * @param {DcsIndexWrapper} dcsWithIndex the command to add
+     * @private
+     */
+    static addDcsWithIndexToMap(targetMap, targetKey, dcsWithIndex) {
+        const targetCommands = targetMap.get(targetKey);
+        if (targetCommands) {
+            targetCommands.push(dcsWithIndex);
+        } else {
+            targetMap.set(targetKey, [dcsWithIndex]);
+        }
+    }
+
+
+    /**
+     * Creates five difeerent maps to index decorator command sets by target type and returns them
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @returns {Object} a new model manager with the decorations applied
+     * @private
      */
     static getDecoratorMaps(decoratorCommandSet) {
         const namespaceCommandsMap = new Map();
@@ -271,43 +288,19 @@ class DecoratorManager {
         decoratorCommandSet.commands.map((decoratorCommand, index) => {
             const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
             if(decoratorCommand.target.type) {
-                if (typeCommandsMap.has(decoratorCommand.target.type)) {
-                    typeCommandsMap.get(decoratorCommand.target.type).push({...dcsWithIndex});
-                } else {
-                    typeCommandsMap.set(decoratorCommand.target.type, [{...dcsWithIndex}]);
-                }
+                this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
             } else if(decoratorCommand.target.property) {
-                if (propertyCommandsMap.has(decoratorCommand.target.property)) {
-                    propertyCommandsMap.get(decoratorCommand.target.property).push({...dcsWithIndex});
-                } else {
-                    propertyCommandsMap.set(decoratorCommand.target.property, [{...dcsWithIndex}]);
-                }
+                this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
             } else if(decoratorCommand.target.properties) {
                 decoratorCommand.target.properties.forEach((property) => {
-                    if (propertyCommandsMap.has(property)) {
-                        propertyCommandsMap.get(property).push({...dcsWithIndex});
-                    } else {
-                        propertyCommandsMap.set(property, [{...dcsWithIndex}]);
-                    }
+                    this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
                 });
             } else if(decoratorCommand.target.mapElement) {
-                if (mapElementCommandsMap.has(decoratorCommand.target.mapElement)) {
-                    mapElementCommandsMap.get(decoratorCommand.target.mapElement).push({...dcsWithIndex});
-                } else {
-                    mapElementCommandsMap.set(decoratorCommand.target.mapElement, [{...dcsWithIndex}]);
-                }
+                this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
             } else if(decoratorCommand.target.declaration) {
-                if (declarationCommandsMap.has(decoratorCommand.target.declaration)) {
-                    declarationCommandsMap.get(decoratorCommand.target.declaration).push({...dcsWithIndex});
-                } else {
-                    declarationCommandsMap.set(decoratorCommand.target.declaration, [{...dcsWithIndex}]);
-                }
+                this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
             } else if(decoratorCommand.target.namespace) {
-                if (namespaceCommandsMap.has(decoratorCommand.target.namespace)) {
-                    namespaceCommandsMap.get(decoratorCommand.target.namespace).push({...dcsWithIndex});
-                } else {
-                    namespaceCommandsMap.set(decoratorCommand.target.namespace, [{...dcsWithIndex}]);
-                }
+                this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
             }
         });
 
@@ -321,47 +314,22 @@ class DecoratorManager {
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
-     * @param {*} computedDcsMap the DecoratorCommandSet object
-     * @param {string} targetCandidate the DecoratorCommandSet object
-     * @param {*} dcsWithIndex the DecoratorCommandSet object
-     * @returns {Object} a new model manager with the decorations applied
-     * @private
-     */
-    static getComputedDcsMap(computedDcsMap, targetCandidate, dcsWithIndex) {
-        if(computedDcsMap.has(targetCandidate)) {
-            const commandIndex = computedDcsMap.get(targetCandidate).index;
-            if(commandIndex < dcsWithIndex.index) {
-                computedDcsMap.set(targetCandidate, dcsWithIndex);
-            }
-        } else {
-            computedDcsMap.set(targetCandidate, dcsWithIndex);
-        }
-
-        return computedDcsMap;
-    }
-
-    /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
+     * Migrate or validate the DecoratorCommandSet object if the options are set as true
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @param {object} [options] - decorator models options
-     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} shouldValidate validate that decorator command set is valid
      * with respect to to decorator command set model
-     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
      * the validate option must also be true
-     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
-     * @returns {ModelManager} a new model manager with the decorations applied
+     * @private
      */
-    static optimizedDecorateModels(modelManager, decoratorCommandSet, options) {
-
-        if (options?.migrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
+    static migrateAndValidate(modelManager, decoratorCommandSet, shouldMigrate, shouldValidate, shouldValidateCommands) {
+        if (shouldMigrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
             decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
         }
 
-        if (options?.validate) {
+        if (shouldValidate) {
             const validationModelManager = new ModelManager({
                 strict: true,
                 metamodelValidation: true,
@@ -375,7 +343,7 @@ class DecoratorManager {
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
             serializer.fromJSON(decoratorCommandSet);
-            if (options?.validateCommands) {
+            if (shouldValidateCommands) {
                 decoratorCommandSet.commands.forEach((command) => {
                     DecoratorManager.validateCommand(
                         validationModelManager,
@@ -384,119 +352,78 @@ class DecoratorManager {
                 });
             }
         }
-        // create a new class with the decoratorscommand and the index of the command, then add to the respective set, change variable name from maps to set
+    }
+
+    /**
+     * Adds decorator commands with index to the computed list
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} a new model manager with the decorations applied
+     * @private
+     */
+    static addToComputedList(targetMap, targetKey, computedList) {
+        const targetCommands = targetMap.get(targetKey);
+        if (targetCommands) {
+            targetCommands.forEach((dcsWithIndex) => {
+                computedList.push(dcsWithIndex);
+            });
+        }
+    }
+
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager, 
+     * this is optimized version of decorateModel method and will eventually replace its internal logic.
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {object} [options] - decorator models options
+     * @param {boolean} [options.validate] - validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @returns {ModelManager} a new model manager with the decorations applied
+     */
+    static optimizedDecorateModels(modelManager, decoratorCommandSet, options) {
+
+        this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
+
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
             model.declarations.forEach((decl) => {
-                let computedDeclDcsMap = [];
+                const computedDeclDcsList = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
-                if (declarationCommandsMap.has(declarationName)) {
-                    const dcsWithIndexList = declarationCommandsMap.get(declarationName);
-                    console.log('decl');
-                    dcsWithIndexList.forEach(dcsWithIndex => {
-                        computedDeclDcsMap.push(dcsWithIndex);
-                    });
-                }
-
-                if (namespaceCommandsMap.has(model.namespace)) {
-                    const dcsWithIndexList = namespaceCommandsMap.get(model.namespace);
-                    console.log('name');
-                    dcsWithIndexList.forEach(dcsWithIndex => {
-                        computedDeclDcsMap.push(dcsWithIndex);
-                    });
-                }
+                this.addToComputedList(declarationCommandsMap, declarationName, computedDeclDcsList);
+                this.addToComputedList(namespaceCommandsMap, model.namespace, computedDeclDcsList);
+                this.addToComputedList(typeCommandsMap, $classForDeclaration, computedDeclDcsList);
+                const sortedDeclList = computedDeclDcsList.sort((decl1, decl2) => decl1.index - decl2.index);
+                sortedDeclList.forEach(dcsWithIndex => {
+                    this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl);
+                });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    let computedMapDcsMap = [];
-                    if (typeCommandsMap.has(decl.key.$class)) {
-                        const dcsWithIndexList = typeCommandsMap.get(decl.key.$class);
-                        console.log('typedecl');
-                        dcsWithIndexList.forEach(dcsWithIndex => {
-                            computedMapDcsMap.push(dcsWithIndex);
-                            // this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
-                        });
-                    }
-
-                    if (typeCommandsMap.has(decl.value.$class)) {
-                        const dcsWithIndexList = typeCommandsMap.get(decl.value.$class);
-                        console.log('typedecl');
-                        dcsWithIndexList.forEach(dcsWithIndex => {
-                            computedMapDcsMap.push(dcsWithIndex);
-                        });
-                    }
-
-                    if (mapElementCommandsMap.has('KEY')) {
-                        const dcsWithIndexList = mapElementCommandsMap.get('KEY');
-                        console.log('map');
-                        dcsWithIndexList.forEach(dcsWithIndex => {
-                            computedMapDcsMap.push(dcsWithIndex);
-                        });
-                    }
-
-                    if (mapElementCommandsMap.has('VALUE')) {
-                        const dcsWithIndexList = mapElementCommandsMap.get('VALUE');
-                        console.log('map');
-                        dcsWithIndexList.forEach(dcsWithIndex => {
-                            computedMapDcsMap.push(dcsWithIndex);
-                        });
-                    }
-
-                    if (mapElementCommandsMap.has('KEY_VALUE')) {
-                        const dcsWithIndexList = mapElementCommandsMap.get('KEY_VALUE');
-                        console.log('map');
-                        dcsWithIndexList.forEach(dcsWithIndex => {
-                            computedMapDcsMap.push(dcsWithIndex);
-                        });
-                    }
-
-                    const sortedMapList = computedMapDcsMap.sort((a, b) => a.index - b.index);
-                    // does iterable require pollyfill?
+                    const computedMapDcsMap = [];
+                    this.addToComputedList(typeCommandsMap, decl.key.$class, computedMapDcsMap);
+                    this.addToComputedList(typeCommandsMap, decl.value.$class, computedMapDcsMap);
+                    this.addToComputedList(mapElementCommandsMap, 'KEY', computedMapDcsMap);
+                    this.addToComputedList(mapElementCommandsMap, 'VALUE', computedMapDcsMap);
+                    this.addToComputedList(mapElementCommandsMap, 'KEY_VALUE', computedMapDcsMap);
+                    const sortedMapList = computedMapDcsMap.sort((mapDcs1, mapDcs2) => mapDcs1.index - mapDcs2.index);
                     sortedMapList.forEach(dcsWithIndex => {
-                        this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
+                        this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl);
                     });
                 }
-
-                if (typeCommandsMap.has($classForDeclaration)) {
-                    const dcsWithIndexList = typeCommandsMap.get($classForDeclaration);
-                    console.log('typedecl');
-                    dcsWithIndexList.forEach(dcsWithIndex => {
-                        computedDeclDcsMap.push(dcsWithIndex);
-                    });
-                }
-
-                const sortedDeclList = computedDeclDcsMap.sort((a, b) => a.index - b.index);
-                // does iterable require pollyfill?
-                sortedDeclList.forEach(dcsWithIndex => {
-                    this.executeDeclarationCommand(model.namespace, decl, dcsWithIndex.command);
-                });
 
                 // scalars are declarations but do not have properties
                 if (decl.properties) {
                     decl.properties.forEach((property) => {
-                        let computedPropertyDcsMap = []
+                        const computedPropertyDcsMap = [];
                         const { name: propertyName, $class: $classForProperty } = property;
-                        if (propertyCommandsMap.has(propertyName)) {
-                            const dcsWithIndexList = propertyCommandsMap.get(propertyName);
-                            dcsWithIndexList.forEach(dcsWithIndex => {
-                                computedPropertyDcsMap.push(dcsWithIndex);
-                            });
-                        }
-                        if (typeCommandsMap.has($classForProperty)) {
-                            const dcsWithIndexList = typeCommandsMap.get($classForProperty);
-                            dcsWithIndexList.forEach(dcsWithIndex => {
-                                computedPropertyDcsMap.push(dcsWithIndex);
-                                // DecoratorManager.executePropertyCommand(
-                                //     property,
-                                //     dcsWithIndex.command
-                                // );
-                            });
-                        }
-
-                        const soertedPropertyList = computedPropertyDcsMap.sort((a, b) => a.index - b.index);
+                        this.addToComputedList(propertyCommandsMap, propertyName, computedPropertyDcsMap);
+                        this.addToComputedList(typeCommandsMap, $classForProperty, computedPropertyDcsMap);
+                        const soertedPropertyList = computedPropertyDcsMap.sort((property1, property2) => property1.index - property2.index);
                         soertedPropertyList.forEach(dcsWithIndex => {
-                            this.executePropertyCommand(property, dcsWithIndex.command);
+                            this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl, property);
                         });
                     });
                 }
@@ -747,14 +674,16 @@ class DecoratorManager {
     }
 
     /**
-     * Executes a Command against a ClassDeclaration, adding
-     * decorators to the ClassDeclaration, or its properties, as required.
+     * Executes a Command against a Declaration, adding
+     * decorators to the Declaration, or its properties, as required.
+     * @param {*} command the Command object from the
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the
+     * @param {*} property the property
      * org.accordproject.decoratorcommands model
      */
-    static executeDeclarationCommand(namespace, declaration, command) {
+    // Should we change the function signature?
+    static executeCommandOptimized(command, namespace, declaration, property) {
         const { target, decorator, type } = command;
         const { name } = ModelUtil.parseNamespace( namespace );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
@@ -784,6 +713,8 @@ class DecoratorManager {
                 }
             } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);
+            } else {
+                this.executePropertyCommand(property, command);
             }
         }
     }
