@@ -54,20 +54,22 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
+class DcsIndexWrapper {
+   + void constructor(command,number) 
+}
 class DecoratorExtractor {
    + void constructor(boolean,string,string,Object) 
 }
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 
-   + Object getDecoratorMaps(decoratorCommandSet) 
    + ModelManager optimizedDecorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command) 
-   + void executeDeclarationCommand(string,declaration,command) 
+   + void executeCommandOptimized(command,string,declaration,property) 
    + void executePropertyCommand(property,command) 
 }
    + string[] intersect() 

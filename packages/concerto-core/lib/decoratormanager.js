@@ -356,8 +356,9 @@ class DecoratorManager {
 
     /**
      * Adds decorator commands with index to the computed list
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} a new model manager with the decorations applied
+     * @param {*} targetMap the target map to add the command to
+     * @param {targetKey} targetKey the target key to add the command to
+     * @param {DcsIndexWrapper[]} computedList the computed list to add the command to
      * @private
      */
     static addToComputedList(targetMap, targetKey, computedList) {
@@ -370,7 +371,7 @@ class DecoratorManager {
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager, 
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager,
      * this is optimized version of decorateModel method and will eventually replace its internal logic.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
@@ -682,8 +683,8 @@ class DecoratorManager {
      * @param {*} property the property
      * org.accordproject.decoratorcommands model
      */
-    // Should we change the function signature?
     static executeCommandOptimized(command, namespace, declaration, property) {
+        // Should we change the function signature?
         const { target, decorator, type } = command;
         const { name } = ModelUtil.parseNamespace( namespace );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&

@@ -91,7 +91,7 @@ describe('DecoratorManager', () => {
         });
     });
 
-    describe.only('#optimizedDecorateModels', function() {
+    describe('#optimizedDecorateModels', function() {
         it('should support no validation', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');

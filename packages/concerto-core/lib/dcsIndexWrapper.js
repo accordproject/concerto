@@ -14,27 +14,22 @@
 
 'use strict';
 
+/**
+ * Wrapper class to wrap the decorator command and the index of the command
+ * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
+ * @memberof module:concerto-core
+ */
 class DcsIndexWrapper {
 
+    /**
+     * Create the DcsIndexWrapper.
+     * @constructor
+     * @param {*} command - the decorator command
+     * @param {number} index - the index of the command
+     */
     constructor(command, index) {
         this.command = command;
         this.index = index;
-    }
-
-    /**
-     * Get the command
-     * @return {*} the command
-     */
-    getCommand() {
-        return this.command;
-    }
-
-    /**
-     * Get the index
-     * @return {number} the index
-     */
-    getIndex() {
-        return this.index;
     }
 }
 
