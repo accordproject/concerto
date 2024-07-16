@@ -1,0 +1,77 @@
+namespace test@1.0.0
+
+@Declaration()
+@NamespaceDeclaration()
+@NamespaceDeprecated()
+@Namespace()
+scalar SSN extends String
+
+@Editable
+@NamespaceDeprecated()
+@Namespace()
+concept Person {
+  @Custom
+  @Type("Property")
+  o String firstName
+  @Type("Property")
+  o String lastName
+  @Type("Property")
+  o String bio
+  o SSN ssn
+  @Type("Property")
+  o String address1
+  @Type("Property")
+  @NamespaceDeclarationTypeProperties()
+  @Properties()
+  @DeclarationProperties()
+  @NamespaceDeclarationProperties()
+  @NamespaceProperties()
+  @NamespaceTypeProperties()
+  @DeclarationTypeProperties()
+  @PropertiesType()
+  o String address2
+  @Type("Property")
+  o String city
+  @Property()
+  @DeclarationProperty()
+  @NamespaceDeclarationProperty()
+  @NamespaceProperty()
+  @NamespaceDeclarationPropertyType()
+  @NamespacePropertyType()
+  @DeclarationPropertyType()
+  @PropertyType()
+  @Type("Property")
+  o String country
+  o Integer zip
+  o Dictionary dictionary
+}
+
+@NamespaceDeprecated()
+@Namespace()
+map Dictionary {
+  @MapElement()
+  @DeclarationMapElement()
+  @NamespaceDeclarationMapElement()
+  @NamespaceMapElement()
+  o String
+  @NamespaceDeclarationTypeMapElement()
+  @MapElement()
+  @NamespaceTypeMapElement()
+  @DeclarationTypeMapElement()
+  @TypeMapElement()
+  @Type("MapValue")
+  o String
+}
+
+@NamespaceDeprecated()
+@Namespace()
+map Rolodex {
+  @MapElement()
+  @NamespaceMapElement()
+  o String
+  @MapElement()
+  @NamespaceTypeMapElement()
+  @TypeMapElement()
+  @Type("MapValue")
+  o String
+}

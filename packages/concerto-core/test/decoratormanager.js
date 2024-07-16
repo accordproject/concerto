@@ -92,6 +92,23 @@ describe('DecoratorManager', () => {
     });
 
     describe('#optimizedDecorateModels', function() {
+        it.only('should produce same result if a model is decorated using legacy decorateModels or decorateModelsOptimized', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
+            let decoratedModelManagerNormal = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            let decoratedModelManagerOptimized = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs));
+            const normalAst = decoratedModelManagerNormal.getModelFile('test@1.0.0').getAst();
+            const optimizedAst = decoratedModelManagerOptimized.getModelFile('test@1.0.0').getAst();
+            const normalCTO = Printer.toCTO(normalAst);
+            const optimizedCTO = Printer.toCTO(optimizedAst);
+            fs.writeFileSync(path.join(__dirname,'/data/decoratorcommands/normal.cto'), normalCTO);
+            fs.writeFileSync(path.join(__dirname,'/data/decoratorcommands/optimized.cto'), optimizedCTO);
+            const result = JSON.stringify(normalAst) === JSON.stringify(optimizedAst);
+            chai.expect(optimizedAst).to.deep.equal(normalAst);
+        });
+
         it('should support no validation', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
