@@ -91,22 +91,18 @@ describe('DecoratorManager', () => {
         });
     });
 
-    describe('#optimizedDecorateModels', function() {
-        it.only('should produce same result if a model is decorated using legacy decorateModels or decorateModelsOptimized', async function() {
+    describe('#decorateModels', function() {
+        it('should produce same result for test.cto model', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
-            let decoratedModelManagerNormal = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
-            let decoratedModelManagerOptimized = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs));
-            const normalAst = decoratedModelManagerNormal.getModelFile('test@1.0.0').getAst();
-            const optimizedAst = decoratedModelManagerOptimized.getModelFile('test@1.0.0').getAst();
-            const normalCTO = Printer.toCTO(normalAst);
-            const optimizedCTO = Printer.toCTO(optimizedAst);
-            fs.writeFileSync(path.join(__dirname,'/data/decoratorcommands/normal.cto'), normalCTO);
-            fs.writeFileSync(path.join(__dirname,'/data/decoratorcommands/optimized.cto'), optimizedCTO);
-            const result = JSON.stringify(normalAst) === JSON.stringify(optimizedAst);
-            chai.expect(optimizedAst).to.deep.equal(normalAst);
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const decoratedAst = decoratedModelManager.getModelFile('test@1.0.0').getAst();
+            const decoratedCTO = Printer.toCTO(decoratedAst);
+            const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8');
+            const result = decoratedCTO === decoratedTest;
+            chai.expect(result).to.be.true;
         });
 
         it('should support no validation', async function() {
@@ -114,7 +110,7 @@ describe('DecoratorManager', () => {
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            let decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs));
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
             decoratedModelManager.should.not.be.null;
         });
 
@@ -123,7 +119,7 @@ describe('DecoratorManager', () => {
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            let decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true});
             decoratedModelManager.should.not.be.null;
         });
@@ -133,7 +129,7 @@ describe('DecoratorManager', () => {
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            let decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
             decoratedModelManager.should.not.be.null;
         });
@@ -145,7 +141,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
@@ -215,7 +211,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -230,7 +226,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -246,7 +242,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/incompatible_version_dcs.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true, migrate: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -279,7 +275,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -294,7 +290,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -311,7 +307,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -326,7 +322,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -344,7 +340,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
             const dictionary = decoratedModelManager.getType('test@1.0.0.Dictionary');
@@ -361,7 +357,7 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/map-declaration.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true});
 
 
@@ -386,7 +382,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-command.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs));
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
             }).should.throw(/Unknown command type INVALID/);
         });
     });
@@ -401,7 +397,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-type.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/No type "concerto.metamodel@1.0.0.Foo" in namespace "concerto.metamodel@1.0.0" for "DecoratorCommand.type"/);
         });
@@ -415,7 +411,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-target-namespace.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references namespace "missing@1.0.0" which does not exist./);
         });
@@ -429,7 +425,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-target-declaration.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/No type "test@1.0.0.Missing" in namespace "test@1.0.0" for "DecoratorCommand.target.declaration./);
         });
@@ -443,7 +439,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-target-property.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
         });
@@ -457,7 +453,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-target-properties.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references property "test@1.0.0.Person.missing" which does not exist./);
         });
@@ -471,7 +467,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-target-property-properties.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, validateCommands: true});
             }).should.throw(/Decorator Command references both property and properties. You must either reference a single property or a list of properites./);
         });
@@ -487,7 +483,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-model.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true});
             }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.3.0"/);
         });
@@ -501,7 +497,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-command.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.optimizedDecorateModels( testModelManager, JSON.parse(dcs),
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true});
             }).should.throw(/Model violation in the "concerto.metamodel@1.0.0.Decorator" instance. Invalid enum value of "INVALID" for the field "CommandType"/);
         });
@@ -561,10 +557,10 @@ describe('DecoratorManager', () => {
             });
             vocabKeySet.map(voc=>{
                 let commandSet = vocManager.generateDecoratorCommands(newModelManager, voc);
-                newModelManager = DecoratorManager.optimizedDecorateModels(newModelManager, commandSet);
+                newModelManager = DecoratorManager.decorateModels(newModelManager, commandSet);
             });
             dcs.forEach(content => {
-                newModelManager = DecoratorManager.optimizedDecorateModels(newModelManager, (content));
+                newModelManager = DecoratorManager.decorateModels(newModelManager, (content));
             });
             namespaceUpdated.forEach(name=>{
                 let model = newModelManager.getModelFile(name);

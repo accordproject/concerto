@@ -31,6 +31,22 @@ class DcsIndexWrapper {
         this.command = command;
         this.index = index;
     }
+
+    /**
+     * Get the decorator command.
+     * @returns {*} The decorator command.
+     */
+    getCommand() {
+        return this.command;
+    }
+
+    /**
+     * Get the index of the command.
+     * @returns {number} The index of the command.
+     */
+    getIndex() {
+        return this.index;
+    }
 }
 
 module.exports = DcsIndexWrapper;

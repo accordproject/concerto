@@ -106,6 +106,9 @@ const MetaModel = require('./lib/introspect/metamodel');
 /** @type {{ name: string, version: string }} */
 const version = require('./package.json');
 
+// DcsIndexWrapper
+const DcsIndexWrapper = require('./lib/DcsIndexWrapper');
+
 module.exports = {
     SecurityException,
     IllegalModelException,
@@ -148,5 +151,6 @@ module.exports = {
     DateTimeUtil,
     Concerto,
     MetaModel,
-    version
+    version,
+    DcsIndexWrapper
 };

@@ -52,7 +52,7 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test@1.0.0",
-                "declaration": "SSN",
+                "declaration": "Person",
                 "type" : "concerto.metamodel@1.0.0.ConceptDeclaration"
             },
             "decorator" : {
@@ -219,7 +219,7 @@
                 "namespace" : "test",
                 "declaration" : "Person",
                 "type" : "concerto.metamodel@1.0.0.StringProperty",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -232,7 +232,7 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -246,7 +246,7 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "declaration" : "Person",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -261,7 +261,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test",
                 "declaration" : "Person",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -275,7 +275,7 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -290,7 +290,7 @@
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "namespace" : "test",
                 "type" : "concerto.metamodel@1.0.0.StringProperty",
-                "properties" : ["address2", "address2"]
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -304,8 +304,8 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "declaration" : "Person",
-                "type" : "concerto.metamodel@1.0.0.StringProperty",
-                "properties" : ["address2", "address2"]
+                "type" : "concerto.metamodel@1.0.0.IntegerProperty",
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -318,8 +318,8 @@
             "type" : "UPSERT",
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
-                "type" : "concerto.metamodel@1.0.0.StringProperty",
-                "properties" : ["address2", "address2"]
+                "type" : "concerto.metamodel@1.0.0.EnumProperty",
+                "properties" : ["country", "zip"]
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
@@ -435,7 +435,7 @@
             "target" : {
                 "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType",
-                "mapElement": "KEY_VALUE"
+                "mapElement": "KEY"
             },
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",

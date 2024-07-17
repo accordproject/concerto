@@ -200,62 +200,6 @@ class DecoratorManager {
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
-     * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @param {object} [options] - decorator models options
-     * @param {boolean} [options.validate] - validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
-     * the validate option must also be true
-     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
-     * @returns {ModelManager} a new model manager with the decorations applied
-     */
-    static decorateModels(modelManager, decoratorCommandSet, options) {
-
-        if (options?.migrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
-            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
-        }
-
-        if (options?.validate) {
-            const validationModelManager = new ModelManager({
-                strict: true,
-                metamodelValidation: true,
-                addMetamodel: true,
-            });
-            validationModelManager.addModelFiles(modelManager.getModelFiles());
-            validationModelManager.addCTOModel(
-                DCS_MODEL,
-                'decoratorcommands@0.3.0.cto'
-            );
-            const factory = new Factory(validationModelManager);
-            const serializer = new Serializer(factory, validationModelManager);
-            serializer.fromJSON(decoratorCommandSet);
-            if (options?.validateCommands) {
-                decoratorCommandSet.commands.forEach((command) => {
-                    DecoratorManager.validateCommand(
-                        validationModelManager,
-                        command
-                    );
-                });
-            }
-        }
-        const ast = modelManager.getAst(true);
-        const decoratedAst = JSON.parse(JSON.stringify(ast));
-        decoratedAst.models.forEach((model) => {
-            model.declarations.forEach((decl) => {
-                decoratorCommandSet.commands.forEach((command) => {
-                    this.executeCommand(model.namespace, decl, command);
-                });
-            });
-        });
-        const newModelManager = new ModelManager();
-        newModelManager.fromAst(decoratedAst);
-        return newModelManager;
-    }
-
-    /**
      * Add decorator commands set with index object to the coresponding target map
      * @param {*} targetMap the target map to add the command to
      * @param {targetKey} targetKey the target key to add the command to
@@ -383,7 +327,7 @@ class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @returns {ModelManager} a new model manager with the decorations applied
      */
-    static optimizedDecorateModels(modelManager, decoratorCommandSet, options) {
+    static decorateModels(modelManager, decoratorCommandSet, options) {
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
@@ -397,9 +341,9 @@ class DecoratorManager {
                 this.addToComputedList(declarationCommandsMap, declarationName, computedDeclDcsList);
                 this.addToComputedList(namespaceCommandsMap, model.namespace, computedDeclDcsList);
                 this.addToComputedList(typeCommandsMap, $classForDeclaration, computedDeclDcsList);
-                const sortedDeclList = computedDeclDcsList.sort((decl1, decl2) => decl1.index - decl2.index);
+                const sortedDeclList = computedDeclDcsList.sort((decl1, decl2) => decl1.getIndex() - decl2.getIndex());
                 sortedDeclList.forEach(dcsWithIndex => {
-                    this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl);
+                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
                 });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
@@ -409,9 +353,9 @@ class DecoratorManager {
                     this.addToComputedList(mapElementCommandsMap, 'KEY', computedMapDcsMap);
                     this.addToComputedList(mapElementCommandsMap, 'VALUE', computedMapDcsMap);
                     this.addToComputedList(mapElementCommandsMap, 'KEY_VALUE', computedMapDcsMap);
-                    const sortedMapList = computedMapDcsMap.sort((mapDcs1, mapDcs2) => mapDcs1.index - mapDcs2.index);
+                    const sortedMapList = computedMapDcsMap.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
                     sortedMapList.forEach(dcsWithIndex => {
-                        this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl);
+                        this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
                     });
                 }
 
@@ -422,9 +366,9 @@ class DecoratorManager {
                         const { name: propertyName, $class: $classForProperty } = property;
                         this.addToComputedList(propertyCommandsMap, propertyName, computedPropertyDcsMap);
                         this.addToComputedList(typeCommandsMap, $classForProperty, computedPropertyDcsMap);
-                        const soertedPropertyList = computedPropertyDcsMap.sort((property1, property2) => property1.index - property2.index);
+                        const soertedPropertyList = computedPropertyDcsMap.sort((property1, property2) => property1.getIndex() - property2.getIndex());
                         soertedPropertyList.forEach(dcsWithIndex => {
-                            this.executeCommandOptimized(dcsWithIndex.command, model.namespace, decl, property);
+                            this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), property);
                         });
                     });
                 }
@@ -623,68 +567,15 @@ class DecoratorManager {
     }
 
     /**
-     * Executes a Command against a ClassDeclaration, adding
-     * decorators to the ClassDeclaration, or its properties, as required.
-     * @param {string} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the
-     * org.accordproject.decoratorcommands model
-     */
-    static executeCommand(namespace, declaration, command) {
-        const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace( namespace );
-        if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
-            this.falsyOrEqual(target.declaration, [declaration.name])) {
-
-            if (declaration.$class === `${MetaModelNamespace}.MapDeclaration`) {
-                if (target.mapElement) {
-                    switch (target.mapElement) {
-                    case 'KEY':
-                    case 'VALUE':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
-                        break;
-                    case 'KEY_VALUE':
-                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
-                        break;
-                    }
-                } else if (target.type) {
-                    if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                        this.applyDecorator(declaration.key, type, decorator);
-                    }
-                    if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                        this.applyDecorator(declaration.value, type, decorator);
-                    }
-                } else {
-                    this.applyDecorator(declaration, type, decorator);
-                }
-            } else if (!(target.property || target.properties || target.type)) {
-                this.applyDecorator(declaration, type, decorator);
-            } else {
-                // scalars are declarations but do not have properties
-                if (declaration.properties) {
-                    declaration.properties.forEach((property) => {
-                        DecoratorManager.executePropertyCommand(
-                            property,
-                            command
-                        );
-                    });
-                }
-            }
-        }
-    }
-
-    /**
      * Executes a Command against a Declaration, adding
      * decorators to the Declaration, or its properties, as required.
-     * @param {*} command the Command object from the
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
+     * @param {*} command the Command object from the
      * @param {*} property the property
      * org.accordproject.decoratorcommands model
      */
-    static executeCommandOptimized(command, namespace, declaration, property) {
-        // Should we change the function signature?
+    static executeCommand(namespace, declaration, command, property) {
         const { target, decorator, type } = command;
         const { name } = ModelUtil.parseNamespace( namespace );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
@@ -715,7 +606,9 @@ class DecoratorManager {
             } else if (!(target.property || target.properties || target.type)) {
                 this.applyDecorator(declaration, type, decorator);
             } else {
-                this.executePropertyCommand(property, command);
+                if(property) {
+                    this.executePropertyCommand(property, command);
+                }
             }
         }
     }
@@ -729,14 +622,16 @@ class DecoratorManager {
      */
     static executePropertyCommand(property, command) {
         const { target, decorator, type } = command;
-        if (
-            this.falsyOrEqual(
-                target.property ? target.property : target.properties,
-                [property.name]
-            ) &&
-            this.falsyOrEqual(target.type, [property.$class])
-        ) {
-            this.applyDecorator(property, type, decorator);
+        if(target.properties || target.property || target.type) {
+            if (
+                this.falsyOrEqual(
+                    target.property ? target.property : target.properties,
+                    [property.name]
+                ) &&
+                this.falsyOrEqual(target.type, [property.$class])
+            ) {
+                this.applyDecorator(property, type, decorator);
+            }
         }
     }
 }
