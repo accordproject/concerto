@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "3.16.9",
+  "version": "3.17.0",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -71,9 +71,9 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
-    "@accordproject/concerto-cto": "3.16.9",
-    "@accordproject/concerto-metamodel": "3.9.1",
-    "@accordproject/concerto-util": "3.16.9",
+    "@accordproject/concerto-cto": "3.17.0",
+    "@accordproject/concerto-metamodel": "3.10.0",
+    "@accordproject/concerto-util": "3.17.0",
     "dayjs": "1.11.10",
     "debug": "4.3.4",
     "lorem-ipsum": "2.0.8",

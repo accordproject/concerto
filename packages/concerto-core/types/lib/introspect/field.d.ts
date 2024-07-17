@@ -19,7 +19,7 @@ declare class Field extends Property {
      */
     getValidator(): Validator;
     /**
-     * Returns the default value for the field or null
+     * Returns the default value for the field or null if there is no default value
      * @return {string | number} the default value for the field or null
      */
     getDefaultValue(): string | number;

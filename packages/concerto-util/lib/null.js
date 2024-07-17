@@ -16,12 +16,10 @@
 
 /**
  * Internal Utility Class
- * <p><a href="./diagrams-private/util.svg"><img src="./diagrams-private/util.svg" style="height:100%;"/></a></p>
- * @private
  * @class
- * @memberof module:concerto-core
+ * @memberof module:concerto-util
  */
-class Util {
+class NullUtil {
 
     /**
      * Returns true if the typeof the object === 'undefined' or
@@ -34,4 +32,4 @@ class Util {
     }
 }
 
-module.exports = Util;
+module.exports = NullUtil;
