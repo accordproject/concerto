@@ -47,12 +47,14 @@ declare class DecoratorManager {
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
         validate?: boolean;
         validateCommands?: boolean;
         migrate?: boolean;
+        enableDcsNamespaceTarget?: boolean;
     }): ModelManager;
     /**
      * Applies all the decorator commands from the DecoratorCommandSet
@@ -144,14 +146,23 @@ declare class DecoratorManager {
      */
     static applyDecorator(decorated: any, type: string, newDecorator: any): void;
     /**
+     * Executes a Command against a Model Namespace, adding
+     * decorators to the Namespace.
+     * @private
+     * @param {*} model the model
+     * @param {*} command the Command object from the dcs
+     */
+    private static executeNamespaceCommand;
+    /**
      * Executes a Command against a ClassDeclaration, adding
      * decorators to the ClassDeclaration, or its properties, as required.
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the
+     * @param {*} command the Command object from the dcs
+     * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(namespace: string, declaration: any, command: any): void;
+    static executeCommand(namespace: string, declaration: any, command: any, enableDcsNamespaceTarget?: boolean): void;
     /**
      * Executes a Command against a ClassDeclaration, adding
      * decorators to the ClassDeclaration, or its properties, as required.
@@ -169,6 +180,26 @@ declare class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property: any, command: any): void;
+    /**
+     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
+     * if enabled, applies the decorator on top of the namespace or else on all declarations
+     * within the namespace.
+     * @private
+     * @param {*} declaration the type to apply the decorator to
+     * @param {string} type the command type
+     * @param {*} decorator the decorator to add
+     * @param {*} target the target object for the decorator
+     * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     */
+    private static checkForNamespaceTargetAndApplyDecorator;
+    /**
+     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
+     * and print deprecation warning if not enabled and return boolean value as well
+     *  @private
+     *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     *  @returns {Boolean} true if either of the flags is enabled
+     */
+    private static isNamespaceTargetEnabled;
 }
 import ModelFile = require("./introspect/modelfile");
 import ModelManager = require("./modelmanager");
