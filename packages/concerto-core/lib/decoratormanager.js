@@ -21,7 +21,6 @@ const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
-const DcsIndexWrapper = require('./DcsIndexWrapper');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 // Types needed for TypeScript generation.
@@ -125,6 +124,41 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
 }
 
 /**
+ * Helper class to wrap the decorator command and the index of the command
+ * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
+ * @memberof module:concerto-core
+ */
+class DcsIndexWrapper {
+
+    /**
+     * Create the DcsIndexWrapper.
+     * @constructor
+     * @param {*} command - the decorator command
+     * @param {number} index - the index of the command
+     */
+    constructor(command, index) {
+        this.command = command;
+        this.index = index;
+    }
+
+    /**
+     * Get the decorator command.
+     * @returns {*} The decorator command.
+     */
+    getCommand() {
+        return this.command;
+    }
+
+    /**
+     * Get the index of the command.
+     * @returns {number} The index of the command.
+     */
+    getIndex() {
+        return this.index;
+    }
+}
+
+/**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
@@ -218,7 +252,7 @@ class DecoratorManager {
 
 
     /**
-     * Creates five difeerent maps to index decorator command sets by target type and returns them
+     * Creates five different maps to index decorator command sets by target type and returns them
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @returns {Object} a new model manager with the decorations applied
      * @private
@@ -232,20 +266,27 @@ class DecoratorManager {
 
         decoratorCommandSet.commands.map((decoratorCommand, index) => {
             const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
-            if(decoratorCommand.target.type) {
+            switch (true) {
+            case !!decoratorCommand?.target?.type:
                 this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
-            } else if(decoratorCommand.target.property) {
+                break;
+            case !!decoratorCommand?.target?.property:
                 this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
-            } else if(decoratorCommand.target.properties) {
+                break;
+            case !!decoratorCommand?.target?.properties:
                 decoratorCommand.target.properties.forEach((property) => {
                     this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
                 });
-            } else if(decoratorCommand.target.mapElement) {
+                break;
+            case !!decoratorCommand?.target?.mapElement:
                 this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
-            } else if(decoratorCommand.target.declaration) {
+                break;
+            case !!decoratorCommand?.target?.declaration:
                 this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
-            } else if(decoratorCommand.target.namespace) {
+                break;
+            case !!decoratorCommand?.target?.namespace:
                 this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
+                break;
             }
         });
 
@@ -300,24 +341,21 @@ class DecoratorManager {
     }
 
     /**
-     * Adds decorator commands with index to the computed list
-     * @param {*} targetMap the target map to add the command to
-     * @param {targetKey} targetKey the target key to add the command to
-     * @param {DcsIndexWrapper[]} computedList the computed list to add the command to
+     * Adds decorator commands with index to the array passed
+     * @param {DcsIndexWrapper[]} array the array to add the command to
+     * @param {*} map the target map to add the command to
+     * @param {key} key the target key to add the command to
      * @private
      */
-    static addToComputedList(targetMap, targetKey, computedList) {
-        const targetCommands = targetMap.get(targetKey);
+    static pushMapValues(array, map, key) {
+        const targetCommands = map.get(key);
         if (targetCommands) {
-            targetCommands.forEach((dcsWithIndex) => {
-                computedList.push(dcsWithIndex);
-            });
+            array.push(...targetCommands);
         }
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager,
-     * this is optimized version of decorateModel method and will eventually replace its internal logic.
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {object} [options] - decorator models options
@@ -326,6 +364,7 @@ class DecoratorManager {
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
@@ -337,30 +376,30 @@ class DecoratorManager {
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
             model.declarations.forEach((decl) => {
-                const computedDeclDcsList = [];
+                const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
-                this.addToComputedList(declarationCommandsMap, declarationName, computedDeclDcsList);
-                this.addToComputedList(namespaceCommandsMap, model.namespace, computedDeclDcsList);
+                this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
+                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
                 const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
-                this.addToComputedList(namespaceCommandsMap, namespaceName, computedDeclDcsList);
-                this.addToComputedList(typeCommandsMap, $classForDeclaration, computedDeclDcsList);
-                const sortedDeclList = computedDeclDcsList.sort((decl1, decl2) => decl1.getIndex() - decl2.getIndex());
-                sortedDeclList.forEach(dcsWithIndex => {
-                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options?.enableDcsNamespaceTarget);
+                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
+                this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
+                const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
+                sortedDeclarationDecoratorCommandSets.forEach(dcsWithIndex => {
+                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options);
                     if(this.isNamespaceTargetEnabled(options?.enableDcsNamespaceTarget)) {
                         this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
                     }
                 });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const computedMapDcsMap = [];
-                    this.addToComputedList(typeCommandsMap, decl.key.$class, computedMapDcsMap);
-                    this.addToComputedList(typeCommandsMap, decl.value.$class, computedMapDcsMap);
-                    this.addToComputedList(mapElementCommandsMap, 'KEY', computedMapDcsMap);
-                    this.addToComputedList(mapElementCommandsMap, 'VALUE', computedMapDcsMap);
-                    this.addToComputedList(mapElementCommandsMap, 'KEY_VALUE', computedMapDcsMap);
-                    const sortedMapList = computedMapDcsMap.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
-                    sortedMapList.forEach(dcsWithIndex => {
+                    const mapDecoratorCommandSets = [];
+                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
+                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
+                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
+                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'VALUE');
+                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY_VALUE');
+                    const sortedMapDecoratorCommandSets = mapDecoratorCommandSets.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
+                    sortedMapDecoratorCommandSets.forEach(dcsWithIndex => {
                         this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
                     });
                 }
@@ -368,12 +407,12 @@ class DecoratorManager {
                 // scalars are declarations but do not have properties
                 if (decl.properties) {
                     decl.properties.forEach((property) => {
-                        const computedPropertyDcsMap = [];
+                        const propertyDecoratorCommandSets = [];
                         const { name: propertyName, $class: $classForProperty } = property;
-                        this.addToComputedList(propertyCommandsMap, propertyName, computedPropertyDcsMap);
-                        this.addToComputedList(typeCommandsMap, $classForProperty, computedPropertyDcsMap);
-                        const soertedPropertyList = computedPropertyDcsMap.sort((property1, property2) => property1.getIndex() - property2.getIndex());
-                        soertedPropertyList.forEach(dcsWithIndex => {
+                        this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
+                        this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
+                        const sortedPropertyDecoratorCommandSets = propertyDecoratorCommandSets.sort((propertyDcs1, propertyDcs2) => propertyDcs1.getIndex() - propertyDcs2.getIndex());
+                        sortedPropertyDecoratorCommandSets.forEach(dcsWithIndex => {
                             this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), property);
                         });
                     });
@@ -596,10 +635,11 @@ class DecoratorManager {
      * @param {*} declaration the class declaration
      * @param {*} command the Command object from the dcs
      * @param {*} property the property
-     * @param {boolean} enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {object} [options] - execute command options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(namespace, declaration, command, property, enableDcsNamespaceTarget) {
+    static executeCommand(namespace, declaration, command, property, options) {
         const { target, decorator, type } = command;
         const { name } = ModelUtil.parseNamespace( namespace );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
@@ -625,10 +665,10 @@ class DecoratorManager {
                         this.applyDecorator(declaration.value, type, decorator);
                     }
                 } else {
-                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, enableDcsNamespaceTarget);
+                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
                 }
             } else if (!(target.property || target.properties || target.type)) {
-                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, enableDcsNamespaceTarget);
+                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
             } else {
                 if(property) {
                     this.executePropertyCommand(property, command);

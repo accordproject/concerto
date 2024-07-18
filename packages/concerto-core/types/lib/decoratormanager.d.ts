@@ -37,8 +37,42 @@ declare class DecoratorManager {
      */
     private static canMigrate;
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
+     * Add decorator commands set with index object to the coresponding target map
+     * @param {*} targetMap the target map to add the command to
+     * @param {targetKey} targetKey the target key to add the command to
+     * @param {DcsIndexWrapper} dcsWithIndex the command to add
+     * @private
+     */
+    private static addDcsWithIndexToMap;
+    /**
+     * Creates five different maps to index decorator command sets by target type and returns them
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} a new model manager with the decorations applied
+     * @private
+     */
+    private static getDecoratorMaps;
+    /**
+     * Migrate or validate the DecoratorCommandSet object if the options are set as true
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} shouldValidate validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @private
+     */
+    private static migrateAndValidate;
+    /**
+     * Adds decorator commands with index to the array passed
+     * @param {DcsIndexWrapper[]} array the array to add the command to
+     * @param {*} map the target map to add the command to
+     * @param {key} key the target key to add the command to
+     * @private
+     */
+    private static pushMapValues;
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {object} [options] - decorator models options
@@ -55,31 +89,6 @@ declare class DecoratorManager {
         validateCommands?: boolean;
         migrate?: boolean;
         enableDcsNamespaceTarget?: boolean;
-    }): ModelManager;
-    /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} a new model manager with the decorations applied
-     */
-    static getDecoratorMaps(decoratorCommandSet: any): any;
-    /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
-     * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @param {object} [options] - decorator models options
-     * @param {boolean} [options.validate] - validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
-     * the validate option must also be true
-     * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
-     * @returns {ModelManager} a new model manager with the decorations applied
-     */
-    static optimizedDecorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
-        validate?: boolean;
-        validateCommands?: boolean;
-        migrate?: boolean;
     }): ModelManager;
     /**
      * @typedef decoratorCommandSet
@@ -154,24 +163,19 @@ declare class DecoratorManager {
      */
     private static executeNamespaceCommand;
     /**
-     * Executes a Command against a ClassDeclaration, adding
-     * decorators to the ClassDeclaration, or its properties, as required.
+     * Executes a Command against a Declaration, adding
+     * decorators to the Declaration, or its properties, as required.
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
      * @param {*} command the Command object from the dcs
-     * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {*} property the property
+     * @param {object} [options] - execute command options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(namespace: string, declaration: any, command: any, enableDcsNamespaceTarget?: boolean): void;
-    /**
-     * Executes a Command against a ClassDeclaration, adding
-     * decorators to the ClassDeclaration, or its properties, as required.
-     * @param {string} namespace the namespace for the declaration
-     * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the
-     * org.accordproject.decoratorcommands model
-     */
-    static executeDeclarationCommand(namespace: string, declaration: any, command: any): void;
+    static executeCommand(namespace: string, declaration: any, command: any, property: any, options?: {
+        enableDcsNamespaceTarget?: boolean;
+    }): void;
     /**
      * Executes a Command against a Property, adding
      * decorators to the Property as required.

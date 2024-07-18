@@ -676,4 +676,53 @@ describe('DecoratorManager', () => {
         });
     });
 
+    describe('#executePropertyCommand', () => {
+        let property;
+        let command;
+
+        beforeEach(() => {
+            property = {
+                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                'name': 'firstName',
+                'isArray': false,
+                'isOptional': false,
+                'decorators': []
+            };
+
+            command = {
+                '$class' : 'org.accordproject.decoratorcommands@0.3.0.Command',
+                'type' : 'UPSERT',
+                'target' : {
+                    '$class' : 'org.accordproject.decoratorcommands@0.3.0.CommandTarget',
+                    'namespace' : 'test@1.0.0'
+                },
+                'decorator' : {
+                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
+                    'name' : 'Form',
+                    'arguments' : [
+                        {
+                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
+                            'value' : 'inputType'
+                        },
+                        {
+                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
+                            'value' : 'text'
+                        }
+                    ]
+                }
+            };
+        });
+
+        it('should not apply decorator to the property if target property does not match', () => {
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(0);
+        });
+
+        it('should apply decorator to the property if target property matches', () => {
+            command.target.type = 'concerto.metamodel@1.0.0.StringProperty';
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(1);
+            chai.expect(property.decorators[0].name).to.equal('Form');
+        });
+    });
 });
