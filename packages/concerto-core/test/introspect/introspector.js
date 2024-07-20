@@ -82,11 +82,11 @@ describe('Introspector', () => {
             introspector.getClassDeclaration('org.acme.base.Person').should.not.be.null;
         });
 
-        it('should be able to handle the aliased imported types',()=>{
+        it('should be able to handle the aliased imported types', () => {
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            modelManager.enableAliasedType=true;
+            modelManager.enableAliasedType = true;
             modelManager.should.not.be.null;
 
             const model1 = `
@@ -108,7 +108,7 @@ describe('Introspector', () => {
             modelManager.addCTOModel(modelFile2);
             const introspector = new Introspector(modelManager);
             introspector.getClassDeclaration('org.saluja.ext.MyAsset2').should.not.be.null;
-            
+
         });
     });
 
