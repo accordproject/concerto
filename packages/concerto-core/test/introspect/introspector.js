@@ -101,14 +101,11 @@ describe('Introspector', () => {
                 o String assetId
                 o m[] arr
             }`;
-
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelManager.addCTOModel(modelFile2);
+            ParserUtil.newModelFile(modelManager, model2);
             const introspector = new Introspector(modelManager);
             introspector.getClassDeclaration('org.saluja.ext.MyAsset2').should.not.be.null;
-
         });
     });
 
