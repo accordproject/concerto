@@ -47,7 +47,7 @@ declare class DecoratorManager {
     /**
      * Creates five different maps to index decorator command sets by target type and returns them
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
-     * @returns {Object} a new model manager with the decorations applied
+     * @returns {Object} object with all the decorator command maps based on the target
      * @private
      */
     private static getDecoratorMaps;
@@ -168,12 +168,12 @@ declare class DecoratorManager {
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
      * @param {*} command the Command object from the dcs
-     * @param {*} property the property
+     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
      * @param {object} [options] - execute command options
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(namespace: string, declaration: any, command: any, property: any, options?: {
+    static executeCommand(namespace: string, declaration: any, command: any, property?: any, options?: {
         enableDcsNamespaceTarget?: boolean;
     }): void;
     /**

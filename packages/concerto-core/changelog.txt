@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.17.2 {b6919ecdae27724aba58a13f63e9407d} 2024-07-17
+Version 3.17.2 {eb3903401fdcf7c26cca1f3f8a029171} 2024-07-17
 - Added new optimized methods for decorating models with decorator commandsets
 - fixed other decorator command set bugs
 
