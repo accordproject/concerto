@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.17.2 {6bcc4bf04ed3314c5636102bce3a0d42} 2024-06-14
+Version 3.17.2 {e4ee8bebe41decbd4ce1cabbf678c1a7} 2024-06-14
 - Added `inferClass` option to Serializer.toJSON
 
 Version 3.17.1 {ddc91ebd1ff660b421b60302d1e92271} 2024-06-21
