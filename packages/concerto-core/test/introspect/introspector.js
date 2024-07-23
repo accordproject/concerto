@@ -84,19 +84,18 @@ describe('Introspector', () => {
 
         it('should be able to handle the aliased imported types', () => {
             // create and populate the ModelManager with a model file
-            const modelManager = new ModelManager();
+            const modelManager = new ModelManager({ enableAliasedType: true });
             Util.addComposerModel(modelManager);
-            modelManager.enableAliasedType = true;
             modelManager.should.not.be.null;
 
             const model1 = `
-            namespace org.saluja.ext
+            namespace org.example.ext
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
             namespace org.acme
-            import org.saluja.ext.{MyAsset2 as m}
+            import org.example.ext.{MyAsset2 as m}
             asset MyAsset identified by assetId {
                 o String assetId
                 o m[] arr
@@ -105,7 +104,7 @@ describe('Introspector', () => {
             modelManager.addModelFile(modelFile1);
             ParserUtil.newModelFile(modelManager, model2);
             const introspector = new Introspector(modelManager);
-            introspector.getClassDeclaration('org.saluja.ext.MyAsset2').should.not.be.null;
+            introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
         });
     });
 
