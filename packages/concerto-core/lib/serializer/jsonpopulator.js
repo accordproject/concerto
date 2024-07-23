@@ -78,41 +78,6 @@ function validateProperties(properties, classDeclaration) {
 }
 
 /**
- * Resolves the fully-qualified model name for a JSON object.
- * @param {string} clazz the type name (FQN or short)
- * @param {*} field a Field (which could be a Relationship)
- * @returns {string} the fully qualified name of the object
- * @throws {Error} if a short type name has not been imported
- */
-function qualifyTypeName(clazz, field) {
-    const ns = ModelUtil.getNamespace(clazz);
-    if(ns.length > 0) {
-        return clazz; // already FQN
-    }
-    else {
-        // a short name, we use the namespace from the type of the field
-        const fqn = field.getFullyQualifiedTypeName();
-        return ModelUtil.getFullyQualifiedName(ModelUtil.getNamespace(fqn), clazz);
-    }
-}
-
-/**
- * Resolves the fully-qualified model name for a JSON object.
- * @param {*} obj an object with an optional $class
- * @param {*} field a Field (which could be a Relationship)
- * @returns {string} the fully qualified name of the object, based on its explicit $class
- * or a $class inferred from the model
- */
-function resolveFullyQualifiedTypeName(obj, field) {
-    if(obj.$class) {
-        return qualifyTypeName(obj.$class, field);
-    }
-    else {
-        return field.getFullyQualifiedTypeName();
-    }
-}
-
-/**
  * Populates a Resource with data from a JSON object graph. The JSON objects
  * should be the result of calling Serializer.toJSON and then JSON.parse.
  * The parameters object should contain the keys
@@ -301,7 +266,7 @@ class JSONPopulator {
         let result = null;
 
         if(!field.isPrimitive?.() && !field.isTypeEnum?.()) {
-            const typeName = resolveFullyQualifiedTypeName(jsonItem, field);
+            const typeName = ModelUtil.resolveFullyQualifiedTypeName(jsonItem, field);
 
             // This throws if the type does not exist.
             const declaration = parameters.modelManager.getType(typeName);
@@ -439,7 +404,7 @@ class JSONPopulator {
                     if (!this.acceptResourcesForRelationships) {
                         throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
                     }
-                    const typeName = resolveFullyQualifiedTypeName(jsonItem, relationshipDeclaration);
+                    const typeName = ModelUtil.resolveFullyQualifiedTypeName(jsonItem, relationshipDeclaration);
                     const classDeclaration = parameters.modelManager.getType(typeName);
 
                     // create a new instance, using the identifier field name as the ID.
@@ -460,7 +425,7 @@ class JSONPopulator {
                     throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
                 }
 
-                const classDeclaration = parameters.modelManager.getType(resolveFullyQualifiedTypeName(jsonObj, relationshipDeclaration));
+                const classDeclaration = parameters.modelManager.getType(ModelUtil.resolveFullyQualifiedTypeName(jsonObj, relationshipDeclaration));
 
                 // create a new instance, using the identifier field name as the ID.
                 let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),

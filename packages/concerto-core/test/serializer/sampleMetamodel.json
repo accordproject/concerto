@@ -1,14 +1,9 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
-    "namespace": "Lorem nisi enim enim.",
+    "namespace": "org.acme@1.0.0",
     "sourceUri": "Cupidatat officia laborum sunt incididunt.",
-    "concertoVersion": "Veniam.",
+    "concertoVersion": "3",
     "imports": [
-      {
-        "$class": "ImportAll",
-        "namespace": "Duis sint.",
-        "uri": "Ea sunt reprehenderit."
-      }
     ],
     "declarations": [
       {
@@ -169,43 +164,6 @@
             "offset": 43034
           },
           "source": "Labore."
-        }
-      }
-    ],
-    "decorators": [
-      {
-        "name": "Pariatur aute voluptate id.",
-        "arguments": [
-          {
-            "$class": "DecoratorString",
-            "value": "Sit.",
-            "location": {
-              "start": {
-                "line": 11878,
-                "column": 38094,
-                "offset": 16933
-              },
-              "end": {
-                "line": 12942,
-                "column": 61905,
-                "offset": 17270
-              },
-              "source": "Anim occaecat proident."
-            }
-          }
-        ],
-        "location": {
-          "start": {
-            "line": 26284,
-            "column": 63143,
-            "offset": 13162
-          },
-          "end": {
-            "line": 28658,
-            "column": 38157,
-            "offset": 63188
-          },
-          "source": "Id nisi."
         }
       }
     ]

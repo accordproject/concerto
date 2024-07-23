@@ -31,6 +31,9 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
+const Serializer = require('../serializer');
+const Factory = require('../factory');
+const BaseModelManager = require('../basemodelmanager');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -705,6 +708,15 @@ class ModelFile extends Decorated {
                 throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`);
             }
         }
+    }
+
+    /**
+     * Populates from a Resource instance, created from the metamodel AST
+     * @param {object} resource - the Resource obtained from the parser
+     * @private
+    */
+    fromResource(resource) {
+        console.log(resource.getFullyQualifiedType());
     }
 
     /**

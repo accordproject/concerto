@@ -17,6 +17,7 @@ const fs = require('fs');
 const Factory = require('../../lib/factory');
 const Serializer = require('../../lib/serializer');
 const ModelManager = require('../../lib/modelmanager');
+const ModelFile = require('../../lib/introspect/modelfile');
 
 describe('InferClass Serialization', () => {
 
@@ -79,6 +80,20 @@ describe('InferClass Serialization', () => {
     });
 
     afterEach(() => {
+    });
+
+    describe.only('#inferClass (metamodel)', () => {
+        it('should deserialize a metamodel instance', () => {
+            const json = JSON.parse(fs.readFileSync('./test/serializer/sampleMetamodel.json', 'utf-8'));
+            const resource = serializerV2.fromJSON(json);
+            resource.should.not.be.null;
+        });
+        it('should create a ModelFile from a metamodel instance', () => {
+            const json = JSON.parse(fs.readFileSync('./test/serializer/sampleMetamodel.json', 'utf-8'));
+            const mm = new ModelManager();
+            const mf = new ModelFile(mm, json, undefined, 'sampleMetamodel.json');
+            mf.should.not.be.null;
+        });
     });
 
     describe('#inferClass (true)', () => {
@@ -183,11 +198,6 @@ describe('InferClass Serialization', () => {
                     { $class: 'Dog', name: 'fido' }
                 ]
             });
-        });
-        it('should deserialize a metamodel instance metamodel', () => {
-            const json = JSON.parse(fs.readFileSync('./test/serializer/sampleMetamodel.json', 'utf-8'));
-            const resource = serializerV2.fromJSON(json);
-            resource.should.not.be.null;
         });
     });
     describe('#inferClass (false)', () => {

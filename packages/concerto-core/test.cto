@@ -1,0 +1,6 @@
+namespace acme@1.0.0
+
+concept Person {
+    @date
+    o DateTime dob
+}
