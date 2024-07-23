@@ -135,7 +135,7 @@ describe('InferClass Serialization', () => {
             });
             resource.animals[0].getFullyQualifiedType().should.be.equal('org.acme.zoo@1.0.0.Dog');
             const json = serializerV2.toJSON(resource);
-            console.log(JSON.stringify(json, null, 2));
+            // console.log(JSON.stringify(json, null, 2));
             json.should.deep.equal({
                 $class: 'org.acme.zoo@1.0.0.Zoo',
                 person: {
