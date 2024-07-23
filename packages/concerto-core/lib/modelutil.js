@@ -58,6 +58,22 @@ const reservedProperties = [
     ...privateReservedProperties
 ];
 
+const MAP_KEYS = [
+    'StringMapKeyType',
+    'DateTimeMapKeyType',
+    'ObjectMapKeyType',
+];
+
+const MAP_VALUES = [
+    'BooleanMapValueType',
+    'DateTimeMapValueType',
+    'StringMapValueType',
+    'IntegerMapValueType',
+    'LongMapValueType',
+    'DoubleMapValueType',
+    'ObjectMapValueType'
+];
+
 /**
  * Internal Model Utility Class
  * <p><a href="./diagrams-private/modelutil.svg"><img src="./diagrams-private/modelutil.svg" style="height:100%;"/></a></p>
@@ -66,14 +82,6 @@ const reservedProperties = [
  * @memberof module:concerto-core
  */
 class ModelUtil {
-    /**
-     * Assert that all resource properties exist in a given class declaration.
-     * @param {*} ast a metamodel AST with missing or short $class names
-     * @returns {*} an ast with fully-qualified $class names
-     */
-    static qualifyAst(ast) {
-    }
-
     /**
      * Resolves the fully-qualified model name for a JSON object.
      * @param {string} clazz the type name (FQN or short)
@@ -102,7 +110,7 @@ class ModelUtil {
      */
     static resolveFullyQualifiedTypeName(obj, property) {
         if (obj.$class) {
-            return qualifyTypeName(obj.$class, property);
+            return ModelUtil.qualifyTypeName(obj.$class, property);
         }
         else {
             return property.getFullyQualifiedTypeName();
@@ -344,11 +352,8 @@ class ModelUtil {
      * @return {boolean} true if the Key is a valid Map Key
     */
     static isValidMapKey(key) {
-        return [
-            `${MetaModelNamespace}.StringMapKeyType`,
-            `${MetaModelNamespace}.DateTimeMapKeyType`,
-            `${MetaModelNamespace}.ObjectMapKeyType`,
-        ].includes(key.$class);
+        const shortName = ModelUtil.getShortName(key.$class);
+        return MAP_KEYS.includes(shortName);
     }
 
     /**
@@ -369,15 +374,8 @@ class ModelUtil {
      * @return {boolean} true if the Value is a valid Map Value
      */
     static isValidMapValue(value) {
-        return [
-            `${MetaModelNamespace}.BooleanMapValueType`,
-            `${MetaModelNamespace}.DateTimeMapValueType`,
-            `${MetaModelNamespace}.StringMapValueType`,
-            `${MetaModelNamespace}.IntegerMapValueType`,
-            `${MetaModelNamespace}.LongMapValueType`,
-            `${MetaModelNamespace}.DoubleMapValueType`,
-            `${MetaModelNamespace}.ObjectMapValueType`
-        ].includes(value.$class);
+        const shortName = ModelUtil.getShortName(value.$class);
+        return MAP_VALUES.includes(shortName);
     }
 }
 
