@@ -22,5 +22,12 @@ const DEFAULT_VALIDATOR_EXCEPTION = 'DefaultValidatorException';
 const REGEX_VALIDATOR_EXCEPTION = 'RegexValidatorException';
 // base exception for Type not found
 const TYPE_NOT_FOUND_EXCEPTION = 'TypeNotFoundException';
+// deprecation warning type for process.emitWarning
+const DEPRECATION_WARNING = 'DeprecationWarning';
 
-module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION};
+
+//deprecation codes
+const CONCERTO_DEPRECATION_001 = 'concerto-dep:001';
+const CONCERTO_DEPRECATION_002 = 'concerto-dep:002';
+
+module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION, DEPRECATION_WARNING, CONCERTO_DEPRECATION_001, CONCERTO_DEPRECATION_002};

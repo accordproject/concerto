@@ -1,0 +1,4 @@
+namespace test.bad.alias.missing@1.0.0
+
+import ns.{doc as}
+

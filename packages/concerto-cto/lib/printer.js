@@ -15,6 +15,7 @@
 'use strict';
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const { isNull } = require('@accordproject/concerto-util').NullUtil;
 
 /**
  * Returns true if the metamodel is a MapDeclaration
@@ -179,7 +180,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
     case `${MetaModelNamespace}.DoubleScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
 
             defaultString += ` default=${doubleString}`;
@@ -192,7 +193,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.IntegerProperty`:
     case `${MetaModelNamespace}.IntegerScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {
@@ -203,7 +204,7 @@ function modifiersFromMetaModel(mm){
         break;
     case `${MetaModelNamespace}.LongProperty`:
     case `${MetaModelNamespace}.LongScalar`:
-        if (mm.defaultValue) {
+        if (!isNull(mm.defaultValue)) {
             defaultString += ` default=${mm.defaultValue.toString()}`;
         }
         if (mm.validator) {
@@ -386,9 +387,25 @@ function toCTO(metaModel) {
             case `${MetaModelNamespace}.ImportAllFrom`:
                 result += `\nimport ${imp.namespace}.*`;
                 break;
-            case `${MetaModelNamespace}.ImportTypes`:
-                result += `\nimport ${imp.namespace}.{${imp.types.join(',')}}`;
+            case `${MetaModelNamespace}.ImportTypes`: {
+                const aliasedTypes = imp.aliasedTypes
+                    ? new Map(
+                        imp.aliasedTypes.map(({ name, aliasedName }) => [
+                            name,
+                            aliasedName,
+                        ])
+                    )
+                    : new Map();
+                const commaSeparatedTypesString = imp.types
+                    .map((type) =>
+                        aliasedTypes.has(type)
+                            ? `${type} as ${aliasedTypes.get(type)}`
+                            : type
+                    )
+                    .join(',');
+                result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
                 break;
+            }
             default:
                 throw new Error('Unrecognized import');
             }

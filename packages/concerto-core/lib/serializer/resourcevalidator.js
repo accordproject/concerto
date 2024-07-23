@@ -17,7 +17,7 @@
 const Relationship = require('../model/relationship');
 const Resource = require('../model/resource');
 const Identifiable = require('../model/identifiable');
-const Util = require('../util');
+const Util = require('@accordproject/concerto-util').NullUtil;
 const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
@@ -276,6 +276,10 @@ class ResourceValidator {
                     // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
                     if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
                     ) {
+                        continue;
+                    }
+                    // Allow implicit optionality by declaring a default value, without using the optional keyword.
+                    if (!Util.isNull(property?.defaultValue)){
                         continue;
                     }
                     ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);

@@ -144,6 +144,30 @@ test('should detect an optional field being removed', async () => {
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
+test('should detect an field being added with falsy default', async () => {
+    const [a, b] = await getModelFiles('optional-field-changed-a.cto', 'optional-field-changed-b.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'optional-property-added',
+            message: 'The optional field "value" was added to the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect an field being removed with falsy default', async () => {
+    const [a, b] = await getModelFiles('optional-field-changed-b.cto', 'optional-field-changed-a.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'optional-property-removed',
+            message: 'The optional field "value" was removed from the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
 
 [{ from: 'asset', to: 'concept'}, { from: 'enum', to: 'event' }, { from: 'participant', to: 'transaction'}].forEach(({ from, to }) => {
     test(`should detect a change of declaration type (${from} to ${to})`, async () => {

@@ -31,6 +31,7 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
+const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 const CONCEPT_STEREOTYPES = {
     'Asset': AssetDeclaration,
@@ -232,7 +233,6 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
-
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 
@@ -770,7 +770,12 @@ class ModelFile extends Decorated {
                 if (this.getModelManager().isStrict()){
                     throw new Error('Wilcard Imports are not permitted in strict mode.');
                 }
-                console.warn('DEPRECATED: Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.');
+                Warning.printDeprecationWarning(
+                    'Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
+                    ErrorCodes.DEPRECATION_WARNING,
+                    ErrorCodes.CONCERTO_DEPRECATION_002,
+                    'Please refer to https://concerto.accordproject.org/deprecation/002'
+                );
                 this.importWildcardNamespaces.push(imp.namespace);
                 break;
             case `${MetaModelNamespace}.ImportTypes`:
@@ -778,6 +783,36 @@ class ModelFile extends Decorated {
                 imp.types.forEach( type => {
                     this.importShortNames.set(type, `${imp.namespace}.${type}`);
                 });
+                if (this.getModelManager().isAliasedTypeEnabled()) {
+                    const aliasedTypes = new Map();
+                    if (imp.aliasedTypes) {
+                        imp.aliasedTypes.forEach(({ name, aliasedName }) => {
+                            if(ModelUtil.isPrimitiveType(aliasedName)){
+                                throw new Error('Types cannot be aliased to primitive type');
+                            }
+                            aliasedTypes.set(name, aliasedName);
+                        });
+                    }
+                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                    imp.types.forEach((type) =>
+                        aliasedTypes.has(type)
+                            ? this.importShortNames.set(
+                                aliasedTypes.get(type),
+                                `${imp.namespace}.${type}`
+                            )
+                            : this.importShortNames.set(
+                                type,
+                                `${imp.namespace}.${type}`
+                            )
+                    );
+                } else {
+                    if (imp.aliasedTypes) {
+                        throw new Error('Aliasing disabled, set enableAliasType to true');
+                    }
+                    imp.types.forEach((type) => {
+                        this.importShortNames.set(type,`${imp.namespace}.${type}`);
+                    });
+                }
                 break;
             default:
                 this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);

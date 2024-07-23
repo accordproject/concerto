@@ -97,6 +97,10 @@
       namespace: split.join('.')
     };
   }
+  function isPrimitiveType(typeName) {
+    const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+    return (primitiveTypes.indexOf(typeName) >= 0);
+  }
 }
 
 Start
@@ -419,6 +423,7 @@ FalseToken      = "false"      !IdentifierPart
 ImportToken     = "import"     !IdentifierPart
 NullToken       = "null"       !IdentifierPart
 TrueToken       = "true"       !IdentifierPart
+AsToken         = "as"         !IdentifierPart
 
 /* Skipped */
 
@@ -1711,22 +1716,46 @@ ImportType
   }
 
 ImportTypes
-    = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedIdentifiers _ "}" __ u:FromUri? {
+    = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedTypes _ "}" __ u:FromUri? {
+    	const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
+          if (type.$class === "concerto.metamodel@1.0.0.AliasedType") {
+            acc.aliasedTypes.push(type);
+            acc.typesNames.push(type.name);
+          } else {
+            acc.typesNames.push(type);
+          }
+          return acc;
+        }, { aliasedTypes: [], typesNames: [] });
     	const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
-            types,
+            types:typesNames,
+            ... aliasedTypes.length >0 && {aliasedTypes},
+
         };
         u && (result.uri = u);
         return result;
     }
 
-commaSeparatedIdentifiers
-  = head:$Identifier _ tail:(',' _ @$Identifier _ )*
-  {
-    return [head, ...tail];
-  }
+AliasedIdentifier
+    = name:$Identifier _ $AsToken _ aliasedName:$Identifier{
+      if(isPrimitiveType(aliasedName)){
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased as "${aliasedName}".`);
+      }
+      return {
+        "$class":"concerto.metamodel@1.0.0.AliasedType",
+        name,
+        aliasedName
+      };
+    }
 
+IdentifierTypeExpression
+  = AliasedIdentifier / $Identifier
+
+commaSeparatedTypes
+  = head:IdentifierTypeExpression _ tail:(',' _ IdentifierTypeExpression)* {
+      return [head, ...tail.map(t => t[2])];
+    }
 Import
     =  ImportTypes /
        ImportAll /
