@@ -89,14 +89,21 @@ class MapKeyType extends Decorated {
     processType(ast) {
         switch(ast.$class) {
         case `${MetaModelNamespace}.DateTimeMapKeyType`:
+        case 'DateTimeMapKeyType':
             this.type = 'DateTime';
             break;
         case `${MetaModelNamespace}.StringMapKeyType`:
+        case 'StringMapKeyType':
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectMapKeyType`:
+        case 'ObjectMapKeyType':
             this.type = String(this.ast.type.name);
             break;
+        default:
+            throw new IllegalModelException(
+                `Must be one of DateTimeMapKeyType, StringMapKeyType, ObjectMapKeyType. Invalid type: ${ast.$classe}, for MapDeclaration ${this.parent.name}`
+            );
         }
     }
 

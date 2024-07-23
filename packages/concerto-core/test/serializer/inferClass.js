@@ -68,9 +68,8 @@ describe('InferClass Serialization', () => {
             concept Cat extends Animal{}
         `);
 
-        // const mm = fs.readFileSync('./test/data/model/metamodel@1.0.0.cto', 'utf8');
-        // modelManager.addCTOModel(mm, 'metamodel.cto');
-
+        const kitchenSink = fs.readFileSync('./test/data/model/kitchensink.cto', 'utf-8');
+        modelManager.addCTOModel(kitchenSink);
         factory = new Factory(modelManager);
         serializer = new Serializer(factory, modelManager);
         serializerV2 = new Serializer(factory, modelManager, { inferClass: true });
@@ -93,6 +92,22 @@ describe('InferClass Serialization', () => {
             const mm = new ModelManager({enableMapType: true});
             const mf = new ModelFile(mm, json, undefined, 'sampleMetamodel.json');
             mf.should.not.be.null;
+            mm.addModelFile(mf);
+        });
+    });
+
+    describe('#inferClass (roundtrip)', () => {
+        it('should go from qualified to compact', () => {
+            const ks = factory.newConcept('org.accordproject.kitchensink@1.0.0', 'KitchenSink', undefined, {generate: 'sample'});
+            const qualifiedJson = serializer.toJSON(ks);
+            const ks2 = serializerV2.fromJSON(qualifiedJson);
+            ks2.should.not.be.null;
+        });
+        it('should go from compact to qualified', () => {
+            const ks = factory.newConcept('org.accordproject.kitchensink@1.0.0', 'KitchenSink', undefined, {generate: 'sample'});
+            const compactJson = serializerV2.toJSON(ks);
+            const ks2 = serializer.fromJSON(compactJson);
+            ks2.should.not.be.null;
         });
     });
 

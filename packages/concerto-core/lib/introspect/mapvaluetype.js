@@ -88,9 +88,9 @@ class MapValueType extends Decorated {
      * @private
      */
     processType(ast) {
-        let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
+        case 'ObjectMapValueType':
 
             // ObjectMapValueType must have TypeIdentifier.
             if (!('type' in ast)) {
@@ -111,23 +111,31 @@ class MapValueType extends Decorated {
 
             break;
         case `${MetaModelNamespace}.BooleanMapValueType`:
+        case 'BooleanMapValueType':
             this.type = 'Boolean';
             break;
         case `${MetaModelNamespace}.DateTimeMapValueType`:
+        case 'DateTimeMapValueType':
             this.type = 'DateTime';
             break;
         case `${MetaModelNamespace}.StringMapValueType`:
+        case 'StringMapValueType':
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.IntegerMapValueType`:
+        case 'IntegerMapValueType':
             this.type = 'Integer';
             break;
         case `${MetaModelNamespace}.LongMapValueType`:
+        case 'LongMapValueType':
             this.type = 'Long';
             break;
         case `${MetaModelNamespace}.DoubleMapValueType`:
+        case 'DoubleMapValueType':
             this.type = 'Double';
             break;
+        default:
+            throw new IllegalModelException(`ObjectMapValueType $class is unsupport ${this.ast.$class} for declaration ${this.parent.name}`);
         }
     }
 
