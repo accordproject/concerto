@@ -52,8 +52,8 @@ const Label = require('./label');
 // Identifiers
 const Identifiers = require('./identifiers');
 
-//errorcodes
-const ErrorCodes = require('./lib/errorcodes');
+// ErrorCodes
+const ErrorCodes = require('./errorcodes');
 
 // NullUtil
 const NullUtil = require('./lib/null');

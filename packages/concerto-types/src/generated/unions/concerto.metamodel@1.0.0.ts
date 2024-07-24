@@ -68,7 +68,7 @@ export interface IDecoratorTypeReference extends IDecoratorLiteral {
 
 export interface IDecorator extends IConcept {
    name: string;
-   arguments?: DecoratorLiteralUnion[];
+   arguments?: IDecoratorLiteral[];
    location?: IRange;
 }
 
@@ -116,8 +116,8 @@ IObjectMapValueType |
 IRelationshipMapValueType;
 
 export interface IMapDeclaration extends IDeclaration {
-   key: MapKeyTypeUnion;
-   value: MapValueTypeUnion;
+   key: IMapKeyType;
+   value: IMapValueType;
 }
 
 export interface IStringMapKeyType extends IMapKeyType {
@@ -168,9 +168,9 @@ export interface IEnumProperty extends IConcept {
 
 export interface IConceptDeclaration extends IDeclaration {
    isAbstract: boolean;
-   identified?: IdentifiedUnion;
+   identified?: IIdentified;
    superType?: ITypeIdentifier;
-   properties: PropertyUnion[];
+   properties: IProperty[];
 }
 
 export type ConceptDeclarationUnion = IAssetDeclaration | 
@@ -299,8 +299,8 @@ export interface IModel extends IConcept {
    namespace: string;
    sourceUri?: string;
    concertoVersion?: string;
-   imports?: ImportUnion[];
-   declarations?: DeclarationUnion[];
+   imports?: IImport[];
+   declarations?: IDeclaration[];
    decorators?: IDecorator[];
 }
 
