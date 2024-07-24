@@ -26,3 +26,10 @@ map Rolodex {
     o String 
     o String
 }
+
+enum Miscellaneous {
+  o country
+  o USA
+  o zip
+  o dictionary
+}
