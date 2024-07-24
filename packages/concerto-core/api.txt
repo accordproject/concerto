@@ -65,7 +65,7 @@ class DecoratorManager {
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
-   + void executeCommand(string,declaration,command,boolean?) 
+   + void executeCommand(string,declaration,command,property?,object?,boolean?) 
    + void executePropertyCommand(property,command) 
 }
    + string[] intersect() 
