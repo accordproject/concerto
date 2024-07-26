@@ -7,8 +7,9 @@
         "node": ">=18",
         "npm": ">=10"
     },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
+    "type": "module",
+    "exports": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist",
         "prebuild": "npm-run-all clean",
