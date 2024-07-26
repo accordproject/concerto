@@ -13,7 +13,7 @@
  */
 
 import { ModelUtil } from '@accordproject/concerto-core';
-import { ComparerFactory } from '../comparer';
+import { ComparerFactory } from '../comparer.js';
 
 const namespaceChanged: ComparerFactory = (context) => ({
     compareModelFiles: (a, b) => {

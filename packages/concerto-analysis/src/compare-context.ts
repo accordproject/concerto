@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { CompareFinding } from './compare-message';
+import { CompareFinding } from './compare-message.js';
 
 export type CompareContext = {
     report: (finding: CompareFinding) => void;

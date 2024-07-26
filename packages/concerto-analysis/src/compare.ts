@@ -13,10 +13,10 @@
  */
 
 import { ClassDeclaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
-import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
-import { CompareFinding } from './compare-message';
-import { CompareResults } from './compare-results';
-import { Comparer } from './comparer';
+import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config.js';
+import { CompareFinding } from './compare-message.js';
+import { CompareResults } from './compare-results.js';
+import { Comparer } from './comparer.js';
 
 export class Compare {
     private config: CompareConfig;

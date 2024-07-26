@@ -13,7 +13,7 @@
  */
 
 import { ClassDeclaration, EnumValueDeclaration, Field, MapDeclaration, ScalarDeclaration, NumberValidator, Property, RelationshipDeclaration, StringValidator, Validator } from '@accordproject/concerto-core';
-import Declaration from '@accordproject/concerto-core/types/lib/introspect/declaration';
+import Declaration from '@accordproject/concerto-core/types/lib/introspect/declaration.js';
 
 export function getDeclarationType(declaration: Declaration) {
     if (declaration instanceof ClassDeclaration) {

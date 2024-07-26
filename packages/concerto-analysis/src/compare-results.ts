@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { CompareResult } from './compare-config';
+import { CompareResult } from './compare-config.js';
 
 export type CompareFinding = {
     key: string;

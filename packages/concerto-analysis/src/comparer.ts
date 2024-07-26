@@ -13,7 +13,7 @@
  */
 
 import { ClassDeclaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
-import { CompareContext } from './compare-context';
+import { CompareContext } from './compare-context.js';
 
 /**
  * A comparer is responsible for comparing two versions of an object across two versions of a model.

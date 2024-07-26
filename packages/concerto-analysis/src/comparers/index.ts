@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 
-import { classDeclarationComparerFactories } from './class-declarations';
-import { modelFileComparerFactories } from './model-files';
-import { propertyComparerFactories } from './properties';
-import { mapDeclarationComparerFactories } from './map-declarations';
-import { scalarDeclarationComparerFactories } from './scalar-declarations';
+import { classDeclarationComparerFactories } from './class-declarations.js';
+import { modelFileComparerFactories } from './model-files.js';
+import { propertyComparerFactories } from './properties.js';
+import { mapDeclarationComparerFactories } from './map-declarations.js';
+import { scalarDeclarationComparerFactories } from './scalar-declarations.js';
 
 export const comparerFactories = [
     ...classDeclarationComparerFactories,

@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import { ComparerFactory } from './comparer';
-import { comparerFactories } from './comparers';
+import { ComparerFactory } from './comparer.js';
+import { comparerFactories } from './comparers/index.js';
 
 export enum CompareResult {
   NONE,
