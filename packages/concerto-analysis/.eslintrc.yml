@@ -2,6 +2,7 @@ env:
     es6: true
     node: true
     mocha: true
+    jest: true
 extends:
  - 'eslint:recommended'
  - 'plugin:@typescript-eslint/eslint-recommended'
@@ -10,8 +11,8 @@ parser: '@typescript-eslint/parser'
 plugins:
  - '@typescript-eslint'
 parserOptions:
-    ecmaVersion: 13
-    sourceType: script
+    ecmaVersion: latest
+    sourceType: module
 rules:
     indent:
         - error
@@ -34,6 +35,7 @@ rules:
     dot-notation: error
     no-tabs: error
     no-trailing-spaces: error
+    no-undef: error
     # no-use-before-define: error
     no-useless-call: error
     no-with: error
