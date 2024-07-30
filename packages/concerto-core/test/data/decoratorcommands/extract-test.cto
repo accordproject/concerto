@@ -25,6 +25,7 @@ map mapName {
 }
 
 @Term("Person Class")
+@Term_desc("Person Class Description")
 @Editable
 concept Person {
     @Term("HI")

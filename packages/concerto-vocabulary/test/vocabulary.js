@@ -99,4 +99,12 @@ describe('Vocabulary', () => {
         const json = voc.toJSON();
         json.should.not.be.null;
     });
+
+    it('isValidLocale - invalid locale', () => {
+        Vocabulary.isValidLocale('en-US').should.be.false;
+    });
+
+    it('isValidLocale - valid locale', () => {
+        Vocabulary.isValidLocale('en-us').should.be.true;
+    });
 });
