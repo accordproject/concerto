@@ -24,7 +24,9 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * @memberof module:concerto-core
  */
 class DecoratorExtractor {
-
+    /**
+     * The action to be performed to extract all, only vocab or only non-vocab decorators
+     */
     static Action = {
         EXTRACT_ALL: 0,
         EXTRACT_VOCAB: 1,
