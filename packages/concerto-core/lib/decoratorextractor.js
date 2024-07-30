@@ -50,10 +50,10 @@ class DecoratorExtractor {
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;
         if (action) {
-            if (Object.values(this.Action).includes(action)) {
+            if (Object.values(DecoratorExtractor.Action).includes(action)) {
                 this.action = action;
             } else {
-                this.action = this.Action.EXTRACT_ALL;
+                this.action = DecoratorExtractor.Action.EXTRACT_ALL;
             }
         }
     }
@@ -267,18 +267,18 @@ class DecoratorExtractor {
                 const target = this.constructTarget(namespace, obj);
                 decos.forEach(dcs =>{
                     const isVocab = this.isVocabDecorator(dcs.name);
-                    if (!isVocab && this.action !== this.Action.EXTRACT_VOCAB){
+                    if (!isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_VOCAB){
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
-                    if (isVocab && this.action !== this.Action.EXTRACT_NON_VOCAB){
+                    if (isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
                         vocabObject = this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
             });
-            if(this.action !== this.Action.EXTRACT_VOCAB){
+            if(this.action !== DecoratorExtractor.Action.EXTRACT_VOCAB){
                 decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
             }
-            if(this.action !== this.Action.EXTRACT_NON_VOCAB){
+            if(this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
                 vocabData = this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
             }
         });
@@ -293,15 +293,15 @@ class DecoratorExtractor {
      * @private
      */
     filterDecorators(decorators){
-        if (this.action === this.Action.EXTRACT_ALL){
+        if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
             decorators = undefined;
         }
-        else if(this.action === this.Action.EXTRACT_VOCAB){
+        else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
             decorators = decorators.filter((dcs) => {
                 return !this.isVocabDecorator(dcs.name);
             });
         }
-        else if(this.action === this.Action.EXTRACT_NON_VOCAB){
+        else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
             decorators = decorators.filter((dcs) => {
                 return this.isVocabDecorator(dcs.name);
             });
