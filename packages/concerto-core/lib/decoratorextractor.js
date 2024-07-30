@@ -290,19 +290,20 @@ class DecoratorExtractor {
     /**
      * Filter vocab or non-vocab decorators
      * @param {Object} decorators - the collection of decorators
+     * @returns {Object} - the collection of filtered decorators
      * @private
      */
     filterDecorators(decorators){
         if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
-            decorators = undefined;
+            return undefined;
         }
         else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
-            decorators = decorators.filter((dcs) => {
+            return decorators.filter((dcs) => {
                 return !this.isVocabDecorator(dcs.name);
             });
         }
         else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-            decorators = decorators.filter((dcs) => {
+            return decorators.filter((dcs) => {
                 return this.isVocabDecorator(dcs.name);
             });
         }
@@ -323,7 +324,7 @@ class DecoratorExtractor {
                     mapElement: 'KEY'
                 };
                 this.constructDCSDictionary(namespace, declaration.key.decorators, constructOptions);
-                this.filterDecorators(declaration.key.decorators);
+                declaration.key.decorators = this.filterDecorators(declaration.key.decorators);
             }
         }
         if (declaration.value){
@@ -333,7 +334,7 @@ class DecoratorExtractor {
                     mapElement: 'VALUE'
                 };
                 this.constructDCSDictionary(namespace, declaration.value.decorators, constructOptions);
-                this.filterDecorators(declaration.value.decorators);
+                declaration.value.decorators = this.filterDecorators(declaration.value.decorators);
             }
         }
         return declaration;
@@ -356,7 +357,7 @@ class DecoratorExtractor {
                     property: property.name
                 };
                 this.constructDCSDictionary(namespace, property.decorators, constructOptions );
-                this.filterDecorators(property.decorators);
+                property.decorators = this.filterDecorators(property.decorators);
             }
             return property;
         });
@@ -378,7 +379,7 @@ class DecoratorExtractor {
                     declaration: decl.name,
                 };
                 this.constructDCSDictionary(namespace, decl.decorators, constructOptions);
-                this.filterDecorators(decl.decorators);
+                decl.decorators = this.filterDecorators(decl.decorators);
             }
             if (decl.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 const processedMapDecl = this.processMapDeclaration(decl, namespace);
@@ -402,7 +403,7 @@ class DecoratorExtractor {
         const processedModels = this.sourceModelAst.models.map(model =>{
             if ((model?.decorators.length > 0)){
                 this.constructDCSDictionary(model.namespace, model.decorators, {});
-                this.filterDecorators(model.decorators);
+                model.decorators = this.filterDecorators(model.decorators);
             }
             const processedDecl = this.processDeclarations(model.declarations, model.namespace);
             model.declarations = processedDecl;
