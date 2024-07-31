@@ -680,7 +680,7 @@ describe('ModelFile', () => {
             const model2 = `
             namespace org.acme
             import org.saluja.{Student as stud}
-            
+
             map StudMap{
             o DateTime
             o stud
@@ -695,7 +695,7 @@ describe('ModelFile', () => {
         it('should not throw if declaration is extended on a aliased type declaration', () => {
             const model1 = `
             namespace org.saluja
-            
+
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
@@ -703,9 +703,9 @@ describe('ModelFile', () => {
             const model2 = `
             namespace org.acme
             import org.saluja.{Vehicle as V,nickname as nk}
-            
+
             asset Car extends V{
-                o String company 
+                o String company
                 o nk shortname
             }`;
             modelManager.enableMapType = true;
@@ -713,6 +713,32 @@ describe('ModelFile', () => {
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             (() => modelFile2.validate()).should.not.throw();
+        });
+
+        it('should return the actual type name of the imported type', () => {
+            const model1 = `
+            namespace org.example1
+
+            scalar nickname extends String
+            asset Vehicle identified by serialno {
+                o String serialno
+            }`;
+            const model2 = `
+            namespace org.example2
+            import org.example1.{Vehicle as V,nickname}
+
+            asset Car extends V{
+                o String company
+                o nickname shortname
+            }`;
+            modelManager.enableMapType = true;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            it('should return the actual type name for aliased import',
+                () => modelFile2.getActualImportType('V').should.equal('Vehicle'));
+            it('should return the same string for non-aliased import',
+                () => modelFile2.getActualImportType('nickname').should.equal('nickname'));
         });
     });
 
