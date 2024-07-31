@@ -395,10 +395,8 @@ class ModelFile extends Decorated {
      * @returns {string} - the actual imported name. If not aliased then returns the same string
      */
     getActualImportType(type) {
-        if (this.importShortNames.has(type)) {
-            return this.importShortNames.get(type).split('.').pop();
-        }
-        return type;
+        let fqn = this.resolveImport(type);
+        return fqn.split('.').pop();
     }
 
     /**

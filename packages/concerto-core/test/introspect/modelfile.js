@@ -735,10 +735,8 @@ describe('ModelFile', () => {
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            it('should return the actual type name for aliased import',
-                () => modelFile2.getActualImportType('V').should.equal('Vehicle'));
-            it('should return the same string for non-aliased import',
-                () => modelFile2.getActualImportType('nickname').should.equal('nickname'));
+            modelFile2.getActualImportType('V').should.equal('Vehicle');
+            modelFile2.getActualImportType('nickname').should.equal('nickname');
         });
     });
 
