@@ -390,6 +390,18 @@ class ModelFile extends Decorated {
     }
 
     /**
+     * Returns the actual imported name from another namespace
+     * @param {string} type - the short name of the type
+     * @returns {string} - the actual imported name. If not aliased then returns the same string
+     */
+    getActualImportType(type) {
+        if (this.importShortNames.has(type)) {
+            return this.importShortNames.get(type).split('.').pop();
+        }
+        return type;
+    }
+
+    /**
      * Returns true if the type is defined in the model file
      * @param {string} type the name of the type
      * @return {boolean} true if the type (asset or transaction) is defined
