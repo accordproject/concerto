@@ -101,10 +101,10 @@ describe('Vocabulary', () => {
     });
 
     it('isValidLocale - invalid locale', () => {
-        Vocabulary.isValidLocale('en-US').should.be.false;
+        should.Throw(() => Vocabulary.validateLocale('en-US'), Error);
     });
 
     it('isValidLocale - valid locale', () => {
-        Vocabulary.isValidLocale('en-us').should.be.true;
+        should.not.Throw(() => Vocabulary.validateLocale('en-us'), Error);
     });
 });

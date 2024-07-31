@@ -49,13 +49,7 @@ class DecoratorExtractor {
         this.dcs_version = dcs_version;
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;
-        if (action) {
-            if (Object.values(DecoratorExtractor.Action).includes(action)) {
-                this.action = action;
-            } else {
-                this.action = DecoratorExtractor.Action.EXTRACT_ALL;
-            }
-        }
+        this.action = Object.values(DecoratorExtractor.Action).includes(action)? action : DecoratorExtractor.Action.EXTRACT_ALL;
     }
 
     /**
@@ -238,6 +232,18 @@ class DecoratorExtractor {
                 dictVoc[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
             }
         }
+        else if (decl.mapElement !== ''){
+            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
+            }
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+            }
+        }
         else {
             if (dcs.name === 'Term'){
                 dictVoc[decl.declaration].term = dcs.arguments[0].value;
@@ -294,19 +300,22 @@ class DecoratorExtractor {
      * @private
      */
     filterDecorators(decorators){
-        if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
-            return undefined;
+        if(this.removeDecoratorsFromModel){
+            if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
+                return undefined;
+            }
+            else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
+                return decorators.filter((dcs) => {
+                    return !this.isVocabDecorator(dcs.name);
+                });
+            }
+            else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
+                return decorators.filter((dcs) => {
+                    return this.isVocabDecorator(dcs.name);
+                });
+            }
         }
-        else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
-            return decorators.filter((dcs) => {
-                return !this.isVocabDecorator(dcs.name);
-            });
-        }
-        else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-            return decorators.filter((dcs) => {
-                return this.isVocabDecorator(dcs.name);
-            });
-        }
+        return decorators;
     }
     /**
     * Process the map declarations to extract the decorators.

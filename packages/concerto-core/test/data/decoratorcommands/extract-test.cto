@@ -18,7 +18,10 @@ asset assetName identified by assetKey {
     o String assetKey
 }
 
+@Term("Map Name")
 map mapName {
+    @Term("some key")
+    @Term_desc("some key description")
     @deco(1)
     o String
     o String
@@ -33,6 +36,8 @@ concept Person {
     @Form("inputType", "text")
     @New
     o String firstName
+    @term("custom")
+    @term_desc("custom desc")
     @Form("inputType", "text")
     @New
     o String lastName
