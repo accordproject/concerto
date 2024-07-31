@@ -69,7 +69,7 @@ class Vocabulary {
      * Validates a locale
      * @param {string} locale the locale to validate
      * @throws {Error} if the locale is invalid
-     * private
+     * @private
      */
     static validateLocale(locale) {
         if(!locale) {
