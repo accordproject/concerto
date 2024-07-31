@@ -40,9 +40,9 @@ class DecoratorExtractor {
      * @param {string} locale - locale for extracted vocabularies
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
-     * @param {int} action - the action to be performed
+     * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action) {
+    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
