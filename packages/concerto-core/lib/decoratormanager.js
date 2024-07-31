@@ -424,15 +424,11 @@ class DecoratorManager {
         return newModelManager;
     }
     /**
-     * @typedef decoratorCommandSet
-     * @type {object}
-     * @typedef vocabularies
-     * @type {string}
      * @typedef ExtractDecoratorsResult
      * @type {object}
      * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
-     * @property {decoratorCommandSet} object[] - Stripped out decorators, formed into decorator command sets
-     * @property {vocabularies} object[] - Stripped out vocabularies, formed into vocabulary files
+     * @property {object[]} decoratorCommandSet - Stripped out decorators, formed into decorator command sets
+     * @property {string[]} vocabularies - Stripped out vocabularies, formed into vocabulary files
     */
     /**
      * Extracts all the decorator commands from all the models in modelManager
