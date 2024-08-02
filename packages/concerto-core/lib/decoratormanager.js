@@ -461,7 +461,7 @@ class DecoratorManager {
      * @param {string} options.locale - locale for extracted vocabulary set
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
-    static extractVocabDecorators(modelManager,options) {
+    static extractVocabularies(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',

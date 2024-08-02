@@ -22,6 +22,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
+ * @private
  */
 class DecoratorExtractor {
     /**

@@ -55,14 +55,11 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
-class DecoratorExtractor {
-   + void constructor(boolean,string,string,Object,int?) 
-}
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
-   + ExtractDecoratorsResult extractVocabDecorators(ModelManager,object,boolean,string) 
+   + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string) 
    + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
