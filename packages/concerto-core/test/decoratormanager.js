@@ -686,6 +686,7 @@ describe('DecoratorManager', () => {
             const resp = DecoratorManager.extractVocabularies( testModelManager, options);
             const vocab = resp.vocabularies;
             vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
         });
         it('should be able to extract non-vocab decorators from a model', async function() {
             const testModelManager = new ModelManager({strict:true,});
@@ -699,6 +700,7 @@ describe('DecoratorManager', () => {
             const resp = DecoratorManager.extractNonVocabDecorators( testModelManager, options);
             const dcs = resp.decoratorCommandSet;
             dcs.should.be.deep.equal(JSON.parse(expectedDcs));
+            JSON.stringify(dcs).should.include('term_desc');
         });
     });
 
