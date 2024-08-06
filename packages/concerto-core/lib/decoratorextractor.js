@@ -305,14 +305,10 @@ class DecoratorExtractor {
                 return undefined;
             }
             else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
-                return decorators.filter((dcs) => {
-                    return !this.isVocabDecorator(dcs.name);
-                });
+                return decorators.filter((dcs) => !this.isVocabDecorator(dcs.name));
             }
             else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                return decorators.filter((dcs) => {
-                    return this.isVocabDecorator(dcs.name);
-                });
+                return decorators.filter((dcs) => this.isVocabDecorator(dcs.name));
             }
         }
         return decorators;
