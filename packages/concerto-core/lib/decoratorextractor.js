@@ -129,6 +129,7 @@ class DecoratorExtractor {
                     strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
                 }
                 const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
                 if(otherProps.length > 0){
                     if (!vocabObject[decl].term){
                         strVoc += `  - ${decl}: ${decl}\n`;
