@@ -60,8 +60,7 @@ class DecoratorExtractor {
      * @private
      */
     isVocabDecorator(decoractorName) {
-        const vocabPattern = /^Term_/;
-        return decoractorName === 'Term' || vocabPattern.test(decoractorName);
+        return decoractorName === 'Term' || decoractorName.startsWith('Term_');
     }
     /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
