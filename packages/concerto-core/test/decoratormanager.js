@@ -599,7 +599,7 @@ describe('DecoratorManager', () => {
     });
 
     describe('#extractDecorators', function() {
-        it('should be able to extract decorators and vocabs from a model withoup options', async function() {
+        it('should be able to extract decorators and vocabs from a model without options', async function() {
             const testModelManager = new ModelManager({strict:true,});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -660,6 +660,34 @@ describe('DecoratorManager', () => {
             const resp = DecoratorManager.extractDecorators( testModelManager);
             const vocab = resp.vocabularies;
             vocab.should.be.deep.equal([]);
+        });
+        it('should be able to extract vocabs from a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
+        it('should be able to extract non-vocab decorators from a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
+            const expectedDcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-dcs.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractNonVocabDecorators( testModelManager, options);
+            const dcs = resp.decoratorCommandSet;
+            dcs.should.be.deep.equal(JSON.parse(expectedDcs));
+            JSON.stringify(dcs).should.include('term_desc');
         });
     });
 
