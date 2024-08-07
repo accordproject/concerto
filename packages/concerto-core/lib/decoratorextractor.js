@@ -22,8 +22,18 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
+ * @private
  */
 class DecoratorExtractor {
+    /**
+     * The action to be performed to extract all, only vocab or only non-vocab decorators
+     */
+    static Action = {
+        EXTRACT_ALL: 0,
+        EXTRACT_VOCAB: 1,
+        EXTRACT_NON_VOCAB: 2
+    };
+
     /**
      * Create the DecoratorExtractor.
      * @constructor
@@ -31,14 +41,26 @@ class DecoratorExtractor {
      * @param {string} locale - locale for extracted vocabularies
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
+     * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst) {
+    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
         this.dcs_version = dcs_version;
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;
+        this.action = Object.values(DecoratorExtractor.Action).includes(action)? action : DecoratorExtractor.Action.EXTRACT_ALL;
+    }
+
+    /**
+     * Returns if the decorator is vocab or not
+     * @param {string} decoractorName - the name of decorator
+     * @returns {boolean} - returns true if the decorator is a vocabulary decorator else false
+     * @private
+     */
+    isVocabDecorator(decoractorName) {
+        return decoractorName === 'Term' || decoractorName.startsWith('Term_');
     }
     /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
@@ -105,18 +127,24 @@ class DecoratorExtractor {
             Object.keys(vocabObject).forEach(decl =>{
                 if (vocabObject[decl].term){
                     strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
-                    const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                }
+                const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
+                if(otherProps.length > 0){
+                    if (!vocabObject[decl].term){
+                        strVoc += `  - ${decl}: ${decl}\n`;
+                    }
                     otherProps.forEach(key =>{
                         strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
                     });
                 }
                 if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length > 0){
-                    if (!vocabObject[decl].term){
+                    if (!vocabObject[decl].term && otherProps.length === 0){
                         strVoc += `  - ${decl}: ${decl}\n`;
                     }
                     strVoc += '    properties:\n';
                     Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
-                        strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term}\n`;
+                        strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term || ''}\n`;
                         const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
                         otherProps.forEach(key =>{
                             strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
@@ -205,6 +233,18 @@ class DecoratorExtractor {
                 dictVoc[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
             }
         }
+        else if (decl.mapElement !== ''){
+            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
+            }
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+            }
+        }
         else {
             if (dcs.name === 'Term'){
                 dictVoc[decl.declaration].term = dcs.arguments[0].value;
@@ -227,30 +267,54 @@ class DecoratorExtractor {
         let vocabData = [];
         Object.keys(this.extractionDictionary).forEach(namespace => {
             const jsonData = this.extractionDictionary[namespace];
-            const patternToDetermineVocab = /^Term_/i;
             let dcsObjects = [];
             let vocabObject = {};
             jsonData.forEach(obj =>{
                 const decos = JSON.parse(obj.dcs);
                 const target = this.constructTarget(namespace, obj);
                 decos.forEach(dcs =>{
-                    if (dcs.name !== 'Term' && !patternToDetermineVocab.test(dcs.name)){
+                    const isVocab = this.isVocabDecorator(dcs.name);
+                    if (!isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_VOCAB){
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
-                    else {
+                    if (isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
                         vocabObject = this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
             });
-            decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
-            vocabData = this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
+            if(this.action !== DecoratorExtractor.Action.EXTRACT_VOCAB){
+                decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
+            }
+            if(this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
+                vocabData = this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
+            }
         });
         return {
             decoratorCommandSet: decoratorData,
             vocabularies: vocabData
         };
     }
+    /**
+     * Filter vocab or non-vocab decorators
+     * @param {Object} decorators - the collection of decorators
+     * @returns {Object} - the collection of filtered decorators
+     * @private
+     */
+    filterOutDecorators(decorators){
+        if(!this.removeDecoratorsFromModel){
+            return decorators;
+        }
 
+        if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
+            return undefined;
+        }
+        else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
+            return decorators.filter((dcs) => !this.isVocabDecorator(dcs.name));
+        }
+        else{
+            return decorators.filter((dcs) => this.isVocabDecorator(dcs.name));
+        }
+    }
     /**
     * Process the map declarations to extract the decorators.
     *
@@ -267,9 +331,7 @@ class DecoratorExtractor {
                     mapElement: 'KEY'
                 };
                 this.constructDCSDictionary(namespace, declaration.key.decorators, constructOptions);
-                if (this.removeDecoratorsFromModel){
-                    declaration.key.decorators = undefined;
-                }
+                declaration.key.decorators = this.filterOutDecorators(declaration.key.decorators);
             }
         }
         if (declaration.value){
@@ -279,9 +341,7 @@ class DecoratorExtractor {
                     mapElement: 'VALUE'
                 };
                 this.constructDCSDictionary(namespace, declaration.value.decorators, constructOptions);
-                if (this.removeDecoratorsFromModel){
-                    declaration.value.decorators = undefined;
-                }
+                declaration.value.decorators = this.filterOutDecorators(declaration.value.decorators);
             }
         }
         return declaration;
@@ -304,9 +364,7 @@ class DecoratorExtractor {
                     property: property.name
                 };
                 this.constructDCSDictionary(namespace, property.decorators, constructOptions );
-            }
-            if (this.removeDecoratorsFromModel){
-                property.decorators = undefined;
+                property.decorators = this.filterOutDecorators(property.decorators);
             }
             return property;
         });
@@ -328,9 +386,7 @@ class DecoratorExtractor {
                     declaration: decl.name,
                 };
                 this.constructDCSDictionary(namespace, decl.decorators, constructOptions);
-            }
-            if (this.removeDecoratorsFromModel){
-                decl.decorators = undefined;
+                decl.decorators = this.filterOutDecorators(decl.decorators);
             }
             if (decl.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 const processedMapDecl = this.processMapDeclaration(decl, namespace);
@@ -352,11 +408,9 @@ class DecoratorExtractor {
     */
     processModels(){
         const processedModels = this.sourceModelAst.models.map(model =>{
-            if ((model?.decorators.length > 0)){
+            if ((model?.decorators?.length > 0)){
                 this.constructDCSDictionary(model.namespace, model.decorators, {});
-                if (this.removeDecoratorsFromModel){
-                    model.decorators = undefined;
-                }
+                model.decorators = this.filterOutDecorators(model.decorators);
             }
             const processedDecl = this.processDeclarations(model.declarations, model.namespace);
             model.declarations = processedDecl;
