@@ -300,19 +300,20 @@ class DecoratorExtractor {
      * @returns {Object} - the collection of filtered decorators
      * @private
      */
-    filterDecorators(decorators){
-        if(this.removeDecoratorsFromModel){
-            if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
-                return undefined;
-            }
-            else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
-                return decorators.filter((dcs) => !this.isVocabDecorator(dcs.name));
-            }
-            else if(this.action === DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                return decorators.filter((dcs) => this.isVocabDecorator(dcs.name));
-            }
+    filterOutDecorators(decorators){
+        if(!this.removeDecoratorsFromModel){
+            return decorators;
         }
-        return decorators;
+
+        if (this.action === DecoratorExtractor.Action.EXTRACT_ALL){
+            return undefined;
+        }
+        else if(this.action === DecoratorExtractor.Action.EXTRACT_VOCAB){
+            return decorators.filter((dcs) => !this.isVocabDecorator(dcs.name));
+        }
+        else{
+            return decorators.filter((dcs) => this.isVocabDecorator(dcs.name));
+        }
     }
     /**
     * Process the map declarations to extract the decorators.
@@ -330,7 +331,7 @@ class DecoratorExtractor {
                     mapElement: 'KEY'
                 };
                 this.constructDCSDictionary(namespace, declaration.key.decorators, constructOptions);
-                declaration.key.decorators = this.filterDecorators(declaration.key.decorators);
+                declaration.key.decorators = this.filterOutDecorators(declaration.key.decorators);
             }
         }
         if (declaration.value){
@@ -340,7 +341,7 @@ class DecoratorExtractor {
                     mapElement: 'VALUE'
                 };
                 this.constructDCSDictionary(namespace, declaration.value.decorators, constructOptions);
-                declaration.value.decorators = this.filterDecorators(declaration.value.decorators);
+                declaration.value.decorators = this.filterOutDecorators(declaration.value.decorators);
             }
         }
         return declaration;
@@ -363,7 +364,7 @@ class DecoratorExtractor {
                     property: property.name
                 };
                 this.constructDCSDictionary(namespace, property.decorators, constructOptions );
-                property.decorators = this.filterDecorators(property.decorators);
+                property.decorators = this.filterOutDecorators(property.decorators);
             }
             return property;
         });
@@ -385,7 +386,7 @@ class DecoratorExtractor {
                     declaration: decl.name,
                 };
                 this.constructDCSDictionary(namespace, decl.decorators, constructOptions);
-                decl.decorators = this.filterDecorators(decl.decorators);
+                decl.decorators = this.filterOutDecorators(decl.decorators);
             }
             if (decl.$class === `${MetaModelNamespace}.MapDeclaration`) {
                 const processedMapDecl = this.processMapDeclaration(decl, namespace);
@@ -409,7 +410,7 @@ class DecoratorExtractor {
         const processedModels = this.sourceModelAst.models.map(model =>{
             if ((model?.decorators?.length > 0)){
                 this.constructDCSDictionary(model.namespace, model.decorators, {});
-                model.decorators = this.filterDecorators(model.decorators);
+                model.decorators = this.filterOutDecorators(model.decorators);
             }
             const processedDecl = this.processDeclarations(model.declarations, model.namespace);
             model.declarations = processedDecl;
