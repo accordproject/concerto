@@ -91,15 +91,11 @@ declare class DecoratorManager {
         enableDcsNamespaceTarget?: boolean;
     }): ModelManager;
     /**
-     * @typedef decoratorCommandSet
-     * @type {object}
-     * @typedef vocabularies
-     * @type {string}
      * @typedef ExtractDecoratorsResult
      * @type {object}
      * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
-     * @property {decoratorCommandSet} object[] - Stripped out decorators, formed into decorator command sets
-     * @property {vocabularies} object[] - Stripped out vocabularies, formed into vocabulary files
+     * @property {*} decoratorCommandSet - Stripped out decorators, formed into decorator command sets
+     * @property {string[]} vocabularies - Stripped out vocabularies, formed into vocabulary files
     */
     /**
      * Extracts all the decorator commands from all the models in modelManager
@@ -120,7 +116,61 @@ declare class DecoratorManager {
         /**
          * - Stripped out decorators, formed into decorator command sets
          */
-        object: {};
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
+    };
+    /**
+     * Extracts all the vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
+     */
+    static extractVocabularies(modelManager: ModelManager, options: {
+        removeDecoratorsFromModel: boolean;
+        locale: string;
+    }): {
+        /**
+         * - A model manager containing models stripped without decorators
+         */
+        modelManager: ModelManager;
+        /**
+         * - Stripped out decorators, formed into decorator command sets
+         */
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
+    };
+    /**
+     * Extracts all the non-vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
+     */
+    static extractNonVocabDecorators(modelManager: ModelManager, options: {
+        removeDecoratorsFromModel: boolean;
+        locale: string;
+    }): {
+        /**
+         * - A model manager containing models stripped without decorators
+         */
+        modelManager: ModelManager;
+        /**
+         * - Stripped out decorators, formed into decorator command sets
+         */
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
     };
     /**
      * Throws an error if the decoractor command is invalid

@@ -6,6 +6,12 @@ export = Vocabulary;
 */
 declare class Vocabulary {
     /**
+     * Validates a locale
+     * @param {string} locale the locale to validate
+     * @throws {Error} if the locale is invalid
+     */
+    static validateLocale(locale: string): void;
+    /**
      * Create the Vocabulary
      * @constructor
      * @param {VocabularyManager} vocabularyManager - the manager for this vocabulary

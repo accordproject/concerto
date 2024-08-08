@@ -3,8 +3,17 @@ export = DecoratorExtractor;
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
  * @memberof module:concerto-core
+ * @private
  */
 declare class DecoratorExtractor {
+    /**
+     * The action to be performed to extract all, only vocab or only non-vocab decorators
+     */
+    static Action: {
+        EXTRACT_ALL: number;
+        EXTRACT_VOCAB: number;
+        EXTRACT_NON_VOCAB: number;
+    };
     /**
      * Create the DecoratorExtractor.
      * @constructor
@@ -12,14 +21,23 @@ declare class DecoratorExtractor {
      * @param {string} locale - locale for extracted vocabularies
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
+     * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      */
-    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: any);
+    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: any, action?: int);
     extractionDictionary: {};
     removeDecoratorsFromModel: boolean;
     locale: string;
     dcs_version: string;
     sourceModelAst: any;
     updatedModelAst: any;
+    action: any;
+    /**
+     * Returns if the decorator is vocab or not
+     * @param {string} decoractorName - the name of decorator
+     * @returns {boolean} - returns true if the decorator is a vocabulary decorator else false
+     * @private
+     */
+    private isVocabDecorator;
     /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
     * or creates a new key with the provided value.
@@ -84,6 +102,13 @@ declare class DecoratorExtractor {
     * @private
     */
     private transformDecoratorsAndVocabularies;
+    /**
+     * Filter vocab or non-vocab decorators
+     * @param {Object} decorators - the collection of decorators
+     * @returns {Object} - the collection of filtered decorators
+     * @private
+     */
+    private filterOutDecorators;
     /**
     * Process the map declarations to extract the decorators.
     *
