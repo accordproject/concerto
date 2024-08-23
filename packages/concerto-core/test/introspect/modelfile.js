@@ -735,8 +735,8 @@ describe('ModelFile', () => {
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelFile2.getActualImportType('V').should.equal('Vehicle');
-            modelFile2.getActualImportType('nickname').should.equal('nickname');
+            modelFile2.getImportedType('V').should.equal('Vehicle');
+            modelFile2.getImportedType('nickname').should.equal('nickname');
         });
     });
 

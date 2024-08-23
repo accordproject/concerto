@@ -394,7 +394,7 @@ class ModelFile extends Decorated {
      * @param {string} type - the short name of the type
      * @returns {string} - the actual imported name. If not aliased then returns the same string
      */
-    getActualImportType(type) {
+    getImportedType(type) {
         let fqn = this.resolveImport(type);
         return fqn.split('.').pop();
     }
