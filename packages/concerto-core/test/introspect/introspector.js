@@ -84,7 +84,7 @@ describe('Introspector', () => {
 
         it('should be able to handle the aliased imported types', () => {
             // create and populate the ModelManager with a model file
-            const modelManager = new ModelManager({ enableAliasedType: true });
+            const modelManager = new ModelManager({ importAliasing: true });
             Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
 

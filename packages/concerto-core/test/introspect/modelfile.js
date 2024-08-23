@@ -611,7 +611,7 @@ describe('ModelFile', () => {
     describe('#aliasedImport', () => {
 
         beforeEach(()=>{
-            modelManager.enableAliasedType=true;
+            modelManager.importAliasing=true;
         });
         it('should resolve aliased name of import type', () => {
             const model = `
