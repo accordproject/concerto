@@ -1,0 +1,338 @@
+[
+    {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+      "name": "test",
+      "version": "1.0.0",
+      "commands": [
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Dummy"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "deco"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Dummy",
+            "property": "One"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "one"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "SSN"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "scc"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "participantName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "M1"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "participantName",
+            "property": "participantKey"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "M3"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "assetName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Dummy",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "term1"
+              },
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                "value": 2
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "mapName",
+            "mapElement": "KEY"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "deco",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Editable"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "firstName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Custom"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "firstName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Form",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "inputType"
+              },
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "text"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "firstName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "New"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "lastName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "term",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "custom"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "lastName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "term_desc",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "custom desc"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "lastName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Form",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "inputType"
+              },
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "text"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "lastName"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "New"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "bio"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Form",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "inputType"
+              },
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "textArea"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "bio"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "New"
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "ssn"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "Form",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "inputType"
+              },
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "text"
+              }
+            ]
+          }
+        },
+        {
+          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "type": "UPSERT",
+          "target": {
+            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "namespace": "test@1.0.0",
+            "declaration": "Person",
+            "property": "ssn"
+          },
+          "decorator": {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "New"
+          }
+        }
+      ]
+    }
+  ]

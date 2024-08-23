@@ -37,8 +37,42 @@ declare class DecoratorManager {
      */
     private static canMigrate;
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
+     * Add decorator commands set with index object to the coresponding target map
+     * @param {*} targetMap the target map to add the command to
+     * @param {targetKey} targetKey the target key to add the command to
+     * @param {DcsIndexWrapper} dcsWithIndex the command to add
+     * @private
+     */
+    private static addDcsWithIndexToMap;
+    /**
+     * Creates five different maps to index decorator command sets by target type and returns them
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @returns {Object} object with all the decorator command maps based on the target
+     * @private
+     */
+    private static getDecoratorMaps;
+    /**
+     * Migrate or validate the DecoratorCommandSet object if the options are set as true
+     * @param {ModelManager} modelManager the input model manager
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} shouldValidate validate that decorator command set is valid
+     * with respect to to decorator command set model
+     * @param {boolean} shouldValidateCommands validate the decorator command set targets. Note that
+     * the validate option must also be true
+     * @private
+     */
+    private static migrateAndValidate;
+    /**
+     * Adds decorator commands with index to the array passed
+     * @param {DcsIndexWrapper[]} array the array to add the command to
+     * @param {*} map the target map to add the command to
+     * @param {key} key the target key to add the command to
+     * @private
+     */
+    private static pushMapValues;
+    /**
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {object} [options] - decorator models options
@@ -57,15 +91,11 @@ declare class DecoratorManager {
         enableDcsNamespaceTarget?: boolean;
     }): ModelManager;
     /**
-     * @typedef decoratorCommandSet
-     * @type {object}
-     * @typedef vocabularies
-     * @type {string}
      * @typedef ExtractDecoratorsResult
      * @type {object}
      * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
-     * @property {decoratorCommandSet} object[] - Stripped out decorators, formed into decorator command sets
-     * @property {vocabularies} object[] - Stripped out vocabularies, formed into vocabulary files
+     * @property {*} decoratorCommandSet - Stripped out decorators, formed into decorator command sets
+     * @property {string[]} vocabularies - Stripped out vocabularies, formed into vocabulary files
     */
     /**
      * Extracts all the decorator commands from all the models in modelManager
@@ -86,7 +116,61 @@ declare class DecoratorManager {
         /**
          * - Stripped out decorators, formed into decorator command sets
          */
-        object: {};
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
+    };
+    /**
+     * Extracts all the vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
+     */
+    static extractVocabularies(modelManager: ModelManager, options: {
+        removeDecoratorsFromModel: boolean;
+        locale: string;
+    }): {
+        /**
+         * - A model manager containing models stripped without decorators
+         */
+        modelManager: ModelManager;
+        /**
+         * - Stripped out decorators, formed into decorator command sets
+         */
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
+    };
+    /**
+     * Extracts all the non-vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
+     */
+    static extractNonVocabDecorators(modelManager: ModelManager, options: {
+        removeDecoratorsFromModel: boolean;
+        locale: string;
+    }): {
+        /**
+         * - A model manager containing models stripped without decorators
+         */
+        modelManager: ModelManager;
+        /**
+         * - Stripped out decorators, formed into decorator command sets
+         */
+        decoratorCommandSet: any;
+        /**
+         * - Stripped out vocabularies, formed into vocabulary files
+         */
+        vocabularies: string[];
     };
     /**
      * Throws an error if the decoractor command is invalid
@@ -129,15 +213,19 @@ declare class DecoratorManager {
      */
     private static executeNamespaceCommand;
     /**
-     * Executes a Command against a ClassDeclaration, adding
-     * decorators to the ClassDeclaration, or its properties, as required.
+     * Executes a Command against a Declaration, adding
+     * decorators to the Declaration, or its properties, as required.
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
      * @param {*} command the Command object from the dcs
-     * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
+     * @param {object} [options] - execute command options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * org.accordproject.decoratorcommands model
      */
-    static executeCommand(namespace: string, declaration: any, command: any, enableDcsNamespaceTarget?: boolean): void;
+    static executeCommand(namespace: string, declaration: any, command: any, property?: any, options?: {
+        enableDcsNamespaceTarget?: boolean;
+    }): void;
     /**
      * Executes a Command against a Property, adding
      * decorators to the Property as required.

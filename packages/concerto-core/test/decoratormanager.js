@@ -93,6 +93,19 @@ describe('DecoratorManager', () => {
     });
 
     describe('#decorateModels', function() {
+        it('should produce same result for test.cto model', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+            const decoratedAst = decoratedModelManager.getModelFile('test@1.0.0').getAst();
+            const decoratedCTO = Printer.toCTO(decoratedAst);
+            const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8');
+            const result = decoratedCTO === decoratedTest;
+            chai.expect(result).to.be.true;
+        });
+
         it('should support no validation', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
@@ -587,7 +600,7 @@ describe('DecoratorManager', () => {
     });
 
     describe('#extractDecorators', function() {
-        it('should be able to extract decorators and vocabs from a model withoup options', async function() {
+        it('should be able to extract decorators and vocabs from a model without options', async function() {
             const testModelManager = new ModelManager({strict:true,});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -661,6 +674,83 @@ describe('DecoratorManager', () => {
             const vocab = resp.vocabularies;
             vocab.should.be.deep.equal([]);
         });
+        it('should be able to extract vocabs from a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
+        it('should be able to extract non-vocab decorators from a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
+            const expectedDcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-dcs.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractNonVocabDecorators( testModelManager, options);
+            const dcs = resp.decoratorCommandSet;
+            dcs.should.be.deep.equal(JSON.parse(expectedDcs));
+            JSON.stringify(dcs).should.include('term_desc');
+        });
     });
 
+    describe('#executePropertyCommand', () => {
+        let property;
+        let command;
+
+        beforeEach(() => {
+            property = {
+                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                'name': 'firstName',
+                'isArray': false,
+                'isOptional': false,
+                'decorators': []
+            };
+
+            command = {
+                '$class' : 'org.accordproject.decoratorcommands@0.3.0.Command',
+                'type' : 'UPSERT',
+                'target' : {
+                    '$class' : 'org.accordproject.decoratorcommands@0.3.0.CommandTarget',
+                    'namespace' : 'test@1.0.0'
+                },
+                'decorator' : {
+                    '$class' : 'concerto.metamodel@1.0.0.Decorator',
+                    'name' : 'Form',
+                    'arguments' : [
+                        {
+                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
+                            'value' : 'inputType'
+                        },
+                        {
+                            '$class' : 'concerto.metamodel@1.0.0.DecoratorString',
+                            'value' : 'text'
+                        }
+                    ]
+                }
+            };
+        });
+
+        it('should not apply decorator to the property if target property does not match', () => {
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(0);
+        });
+
+        it('should apply decorator to the property if target property matches', () => {
+            command.target.type = 'concerto.metamodel@1.0.0.StringProperty';
+            DecoratorManager.executePropertyCommand(property, command);
+            chai.expect(property.decorators).to.have.lengthOf(1);
+            chai.expect(property.decorators[0].name).to.equal('Form');
+        });
+    });
 });
