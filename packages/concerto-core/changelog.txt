@@ -25,7 +25,7 @@
 #
 
 Version 3.17.1 {ddc91ebd1ff660b421b60302d1e92271} 2024-06-21
-- Added 'importAliasing' option to BaseModelManager
+- Added 'enableAliaseType' option to BaseModelManager
 - Aliased types mapped to FQN in modelfile
 
 Version 3.16.8 {a23d37a4a92071314ff821f879943364} 2024-07-09
