@@ -214,6 +214,7 @@ class ModelFile extends Decorated {
    + ModelManager getModelManager() 
    + string[] getImports() 
    ~ void validate() throws IllegalModelException
+   + string getImportedType(string) 
    + boolean isDefined(string) 
    + ClassDeclaration getLocalType(string) 
    + AssetDeclaration getAssetDeclaration(string) 
