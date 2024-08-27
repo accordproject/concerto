@@ -24,6 +24,7 @@ const chai = require('chai');
 chai.use(require('chai-things'));
 const sinon = require('sinon');
 require('chai').should();
+const ParserUtil = require('./parserutility');
 
 describe('Introspector', () => {
 
@@ -79,6 +80,32 @@ describe('Introspector', () => {
             modelManager.addCTOModel(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
             introspector.getClassDeclaration('org.acme.base@1.0.0.Person').should.not.be.null;
+        });
+
+        it('should be able to handle the aliased imported types', () => {
+            // create and populate the ModelManager with a model file
+            const modelManager = new ModelManager({ importAliasing: true });
+            Util.addComposerModel(modelManager);
+            modelManager.should.not.be.null;
+
+            const model1 = `
+            namespace org.example.ext
+            asset MyAsset2 identified by assetId {
+                o String assetId
+            }`;
+            const model2 = `
+            namespace org.acme
+            import org.example.ext.{MyAsset2 as m}
+            asset MyAsset identified by assetId {
+                o String assetId
+                o m[] arr
+            }`;
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+            modelManager.addModelFile(modelFile1);
+            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
+            const introspector = new Introspector(modelManager);
+            modelFile2.resolveImport('m').should.equal('org.example.ext.MyAsset2');
+            introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
         });
     });
 
