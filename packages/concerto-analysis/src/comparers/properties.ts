@@ -173,13 +173,21 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
         //     return;
         // }
         const versionDiff = semver.diff(aTypeVersion, bTypeVersion);
-        if (!versionDiff) {
-            return;
-        } else if (versionDiff === 'major' || versionDiff === 'premajor') {
+        if (versionDiff === 'major' || versionDiff === 'premajor') {
             context.report({
                 key: 'property-type-changed',
                 message: `The ${aType} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" changed type from "${aFQTN}" to "${bFQTN}" (type version incompatible)`,
                 element: a
+            });
+            return;
+        }
+        // Up to this point, 'a' and 'b' have identical fully qualified type names with matching versions.
+        // Next, we verify whether their types differ locally, which would indicate aliasing.
+        if(a.getType()!=b.getType()){
+            context.report({
+                key:'property-type-aliased',
+                message:`The local type name for "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" is changed from ${a.getType()} to ${b.getType()}`,
+                element:a
             });
             return;
         }
