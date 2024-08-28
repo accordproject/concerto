@@ -183,11 +183,11 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
         }
         // Up to this point, 'a' and 'b' have identical fully qualified type names with matching versions.
         // Next, we verify whether their types differ locally, which would indicate aliasing.
-        if(a.getType()!=b.getType()){
+        if (a.getType() !== b.getType()) {
             context.report({
-                key:'property-type-aliased',
-                message:`The local type name for "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" is changed from ${a.getType()} to ${b.getType()}`,
-                element:a
+                key: 'property-type-aliased',
+                message: `The local type name for "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" is changed from ${a.getType()} to ${b.getType()}`,
+                element: a
             });
             return;
         }
