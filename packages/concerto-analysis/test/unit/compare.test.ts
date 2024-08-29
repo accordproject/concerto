@@ -17,7 +17,7 @@ async function getModelFiles(
     bFileName: string,
     importAliasing = false
 ): Promise<[a: ModelFile, b: ModelFile]> {
-    const modelManager = new ModelManager({ strict: true,importAliasing:importAliasing });
+    const modelManager = new ModelManager({ strict: true, importAliasing: importAliasing });
     const a = await getModelFile(modelManager, aFileName);
     const b = await getModelFile(modelManager, bFileName);
     return [a, b];

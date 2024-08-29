@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.17.5 {9bd69f9522c14a99a085f077e12ac4b2} 2024-08-29
+- importAliasing added to ModelManager parameters
+
 Version 3.17.4 {8cb49c7092c48b568da3b0a3eeab2777} 2024-08-01
 - Added api getImportedType() in modeFile
 
