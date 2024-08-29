@@ -50,7 +50,7 @@ declare class BaseModelManager {
         importAliasing?: boolean;
     };
     enableMapType: boolean;
-    importAliasing: boolean;
+    importAliasing: string | boolean;
     metamodelModelFile: any;
     /**
      * Returns true
