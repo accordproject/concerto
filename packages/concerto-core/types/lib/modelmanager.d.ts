@@ -20,11 +20,13 @@ declare class ModelManager extends BaseModelManager {
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
+     * @param {boolean} [options.importAliasing] - When true, the Concerto Map Type feature is enabled
      */
     constructor(options?: {
         strict?: boolean;
         regExp?: any;
         enableMapType?: boolean;
+        importAliasing?: boolean;
     });
     /**
      * Adds a model in CTO format to the ModelManager.

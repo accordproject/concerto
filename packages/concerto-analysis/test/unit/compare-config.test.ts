@@ -16,7 +16,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.default().build();
 
         expect(actual.comparerFactories.length).toEqual(11);
-        expect(Object.keys(actual.rules).length).toEqual(20);
+        expect(Object.keys(actual.rules).length).toEqual(21);
         expect(actual.rules['class-declaration-added']).toEqual(CompareResult.MINOR);
         expect(actual.rules['optional-property-added']).toEqual(CompareResult.PATCH);
         expect(actual.rules['map-value-type-changed']).toEqual(CompareResult.MAJOR);
@@ -37,7 +37,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.default().extend(toExtend).build();
 
         expect(actual.comparerFactories.length).toEqual(12);
-        expect(Object.keys(actual.rules).length).toEqual(21);
+        expect(Object.keys(actual.rules).length).toEqual(22);
         expect(actual.rules['a-new-rule']).toEqual(CompareResult.MAJOR);
     });
 
@@ -47,7 +47,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.default().addComparerFactory(() => ({})).build();
 
         expect(actual.comparerFactories.length).toEqual(12);
-        expect(Object.keys(actual.rules).length).toEqual(20);
+        expect(Object.keys(actual.rules).length).toEqual(21);
     });
 
     it('Should add a new rule', () => {
@@ -56,7 +56,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.default().addRule('a-new-rule', CompareResult.MAJOR).build();
 
         expect(actual.comparerFactories.length).toEqual(11);
-        expect(Object.keys(actual.rules).length).toEqual(21);
+        expect(Object.keys(actual.rules).length).toEqual(22);
         expect(actual.rules['a-new-rule']).toEqual(CompareResult.MAJOR);
     });
 
@@ -66,7 +66,7 @@ describe('CompareConfigBuilder', () => {
         const actual = builder.default().removeRule('optional-property-added').build();
 
         expect(actual.comparerFactories.length).toEqual(11);
-        expect(Object.keys(actual.rules).length).toEqual(19);
+        expect(Object.keys(actual.rules).length).toEqual(20);
         expect(actual.rules['optional-property-added']).toBeFalsy();
     });
 
