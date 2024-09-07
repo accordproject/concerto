@@ -4,11 +4,12 @@
     "description": "Analysis of Concerto model files",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
-        "node": ">=14",
+        "node": ">=16",
         "npm": ">=6"
     },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
+    "type": "module",
+    "exports": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist",
         "prebuild": "npm-run-all clean",
@@ -39,15 +40,15 @@
         "@accordproject/concerto-cto": "3.19.0",
         "@types/jest": "28.1.1",
         "@types/semver": "7.3.10",
-        "@typescript-eslint/eslint-plugin": "5.27.1",
-        "@typescript-eslint/parser": "5.27.1",
-        "eslint": "8.2.0",
+        "@typescript-eslint/eslint-plugin": "7.17.0",
+        "@typescript-eslint/parser": "7.17.0",
+        "eslint": "8.56.0",
         "jest": "28.1.1",
         "license-check-and-add": "2.3.6",
         "npm-run-all": "4.1.5",
         "rimraf": "3.0.2",
         "ts-jest": "28.0.4",
-        "typescript": "4.6.3"
+        "typescript": "5.5.4"
     },
     "license-check-and-add-config": {
         "folder": "./src",
@@ -96,7 +97,18 @@
     },
     "jest": {
         "preset": "ts-jest",
-        "testEnvironment": "node",
+        "extensionsToTreatAsEsm": [".ts"],
+        "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1"
+        },
+        "transform": {
+            "^.+\\.tsx?$": [
+              "ts-jest",
+              {
+                "useESM": true
+              }
+            ]
+          },
         "testPathIgnorePatterns": [
             "<rootDir>/dist/",
             "/node_modules/"

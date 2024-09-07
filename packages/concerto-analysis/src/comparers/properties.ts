@@ -14,8 +14,8 @@
 
 import { EnumValueDeclaration, Field, ModelUtil } from '@accordproject/concerto-core';
 import * as semver from 'semver';
-import { getDeclarationType, getPropertyType, getValidatorType } from '../compare-utils';
-import { ComparerFactory } from '../comparer';
+import { getDeclarationType, getPropertyType, getValidatorType } from '../compare-utils.js';
+import { ComparerFactory } from '../comparer.js';
 
 const propertyAdded: ComparerFactory = (context) => ({
     compareProperty: (a, b) => {

@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import { getDeclarationType } from '../compare-utils';
-import { ComparerFactory } from '../comparer';
+import { getDeclarationType } from '../compare-utils.js';
+import { ComparerFactory } from '../comparer.js';
 
 // todo rename to declaration.ts , rename all classDeclaration -> declaration
 const classDeclarationAdded: ComparerFactory = (context) => ({

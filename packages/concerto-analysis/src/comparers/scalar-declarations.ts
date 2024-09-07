@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import { ComparerFactory } from '../comparer';
-import { getValidatorType } from '../compare-utils';
+import { ComparerFactory } from '../comparer.js';
+import { getValidatorType } from '../compare-utils.js';
 
 const scalarDeclarationExtendsChanged: ComparerFactory = (context) => ({
     compareScalarDeclaration: (a, b) => {
