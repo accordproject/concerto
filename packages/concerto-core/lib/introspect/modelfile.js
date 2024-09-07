@@ -275,13 +275,14 @@ class ModelFile extends Decorated {
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
+        const concertoTypes = new Set(['Concept', 'Asset', 'Transaction', 'Participant', 'Event']);
         this.declarations.forEach(d => {
             const fqn = d.getFullyQualifiedName();
             const shortName = ModelUtil.getShortName(fqn);
             if (uniqueNames.has(fqn)) {
                 throw new IllegalModelException(`Duplicate class name: ${fqn}`);
             }
-            if (this.importShortNames.has(shortName)) {
+            if (!concertoTypes.has(shortName) && this.importShortNames.has(shortName)) {
                 throw new IllegalModelException(
                     `TypeName Conflict: The type '${shortName}' is being redefined, but it already exists as an imported type from '${this.importShortNames.get(shortName)}'. Please rename your local type or avoid importing conflicting types.`
                 );
