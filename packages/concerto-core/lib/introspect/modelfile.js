@@ -12,34 +12,34 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+const { MetaModelNamespace } = require("@accordproject/concerto-metamodel");
 
-const packageJson = require('../../package.json');
-const semver = require('semver');
-const AssetDeclaration = require('./assetdeclaration');
-const EnumDeclaration = require('./enumdeclaration');
-const ClassDeclaration = require('./classdeclaration');
-const ConceptDeclaration = require('./conceptdeclaration');
-const ScalarDeclaration = require('./scalardeclaration');
-const ParticipantDeclaration = require('./participantdeclaration');
-const TransactionDeclaration = require('./transactiondeclaration');
-const EventDeclaration = require('./eventdeclaration');
-const IllegalModelException = require('./illegalmodelexception');
-const MapDeclaration = require('./mapdeclaration');
-const ModelUtil = require('../modelutil');
-const Globalize = require('../globalize');
-const Decorated = require('./decorated');
-const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const packageJson = require("../../package.json");
+const semver = require("semver");
+const AssetDeclaration = require("./assetdeclaration");
+const EnumDeclaration = require("./enumdeclaration");
+const ClassDeclaration = require("./classdeclaration");
+const ConceptDeclaration = require("./conceptdeclaration");
+const ScalarDeclaration = require("./scalardeclaration");
+const ParticipantDeclaration = require("./participantdeclaration");
+const TransactionDeclaration = require("./transactiondeclaration");
+const EventDeclaration = require("./eventdeclaration");
+const IllegalModelException = require("./illegalmodelexception");
+const MapDeclaration = require("./mapdeclaration");
+const ModelUtil = require("../modelutil");
+const Globalize = require("../globalize");
+const Decorated = require("./decorated");
+const { Warning, ErrorCodes } = require("@accordproject/concerto-util");
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
 if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const ModelManager = require('../modelmanager');
-    const Declaration = require('./declaration');
+    const ClassDeclaration = require("./classdeclaration");
+    const ModelManager = require("../modelmanager");
+    const Declaration = require("./declaration");
 }
 /* eslint-enable no-unused-vars */
 
@@ -71,28 +71,32 @@ class ModelFile extends Decorated {
         this.importShortNames = new Map();
         this.importWildcardNamespaces = [];
         this.importUriMap = {};
-        this.fileName = 'UNKNOWN';
+        this.fileName = "UNKNOWN";
         this.concertoVersion = null;
         this.version = null;
 
-        if(!ast || typeof ast !== 'object') {
-            throw new Error('ModelFile expects a Concerto model AST as input.');
+        if (!ast || typeof ast !== "object") {
+            throw new Error("ModelFile expects a Concerto model AST as input.");
         }
 
         this.ast = ast;
 
-        if(definitions && typeof definitions !== 'string') {
-            throw new Error('ModelFile expects an (optional) Concerto model definition as a string.');
+        if (definitions && typeof definitions !== "string") {
+            throw new Error(
+                "ModelFile expects an (optional) Concerto model definition as a string."
+            );
         }
         this.definitions = definitions;
 
-        if(fileName && typeof fileName !== 'string') {
-            throw new Error('ModelFile expects an (optional) filename as a string.');
+        if (fileName && typeof fileName !== "string") {
+            throw new Error(
+                "ModelFile expects an (optional) filename as a string."
+            );
         }
         this.fileName = fileName;
 
-        if(fileName) {
-            this.external = fileName.startsWith('@');
+        if (fileName) {
+            this.external = fileName.startsWith("@");
         }
 
         // Set up the decorators.
@@ -104,9 +108,10 @@ class ModelFile extends Decorated {
 
         // Now build local types from Declarations
         this.localTypes = new Map();
-        for(let index in this.declarations) {
+        for (let index in this.declarations) {
             let classDeclaration = this.declarations[index];
-            let localType = this.getNamespace() + '.' + classDeclaration.getName();
+            let localType =
+                this.getNamespace() + "." + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
     }
@@ -143,7 +148,10 @@ class ModelFile extends Decorated {
      * @returns {Boolean} true if this is a system model file
      */
     isSystemModelFile() {
-        return this.namespace.startsWith('concerto@') || this.namespace === 'concerto';
+        return (
+            this.namespace.startsWith("concerto@") ||
+            this.namespace === "concerto"
+        );
     }
 
     /**
@@ -162,10 +170,9 @@ class ModelFile extends Decorated {
      */
     getImportURI(namespace) {
         const result = this.importUriMap[namespace];
-        if(result) {
+        if (result) {
             return result;
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -185,7 +192,7 @@ class ModelFile extends Decorated {
      * @param {Object} parameters  - the parameter
      * @return {Object} the result of visiting or null
      */
-    accept(visitor,parameters) {
+    accept(visitor, parameters) {
         return visitor.visit(this, parameters);
     }
 
@@ -206,7 +213,7 @@ class ModelFile extends Decorated {
      */
     getImports() {
         let result = [];
-        this.imports.forEach( imp => {
+        this.imports.forEach((imp) => {
             result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
         });
         return result;
@@ -228,14 +235,21 @@ class ModelFile extends Decorated {
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
-            const modelFile = this.getModelManager().getModelFile(importNamespace);
-            const { name, version: importVersion } = ModelUtil.parseNamespace(importNamespace);
+            const modelFile =
+                this.getModelManager().getModelFile(importNamespace);
+            const { name, version: importVersion } =
+                ModelUtil.parseNamespace(importNamespace);
 
             if (!modelFile) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-                throw new IllegalModelException(formatter({
-                    type: importFqn
-                }), this);
+                let formatter = Globalize.messageFormatter(
+                    "modelmanager-gettype-noregisteredns"
+                );
+                throw new IllegalModelException(
+                    formatter({
+                        type: importFqn,
+                    }),
+                    this
+                );
             }
 
             const existingNamespaceVersion = importsMap.get(name);
@@ -245,51 +259,78 @@ class ModelFile extends Decorated {
 
             // This check is needed because we automatically add both versioned and unversioned versions of
             // the root namespace for backwards compatibillity unless we're running in strict mode
-            const isGlobalModel = name === 'concerto';
+            const isGlobalModel = name === "concerto";
 
-            const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
-            if (!isGlobalModel && differentVersionsOfSameNamespace){
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-duplicatensimport');
-                throw new IllegalModelException(formatter({
-                    namespace: importNamespace,
-                    version1: existingNamespaceVersion,
-                    version2: importVersion
-                }), this);
+            const differentVersionsOfSameNamespace =
+                !unseenNamespace && existingNamespaceVersion !== importVersion;
+            if (!isGlobalModel && differentVersionsOfSameNamespace) {
+                let formatter = Globalize.messageFormatter(
+                    "modelmanager-gettype-duplicatensimport"
+                );
+                throw new IllegalModelException(
+                    formatter({
+                        namespace: importNamespace,
+                        version1: existingNamespaceVersion,
+                        version2: importVersion,
+                    }),
+                    this
+                );
             }
             importsMap.set(name, importVersion);
 
-            if (importFqn.endsWith('*')) {
+            if (importFqn.endsWith("*")) {
                 // This is a wildcard import, org.acme.*
                 // Doesn't matter if 0 or 100 types in the namespace.
                 return;
             }
             if (!modelFile.isLocalType(importShortName)) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-notypeinns');
-                throw new IllegalModelException(formatter({
-                    type: importShortName,
-                    namespace: importNamespace
-                }), this);
+                let formatter = Globalize.messageFormatter(
+                    "modelmanager-gettype-notypeinns"
+                );
+                throw new IllegalModelException(
+                    formatter({
+                        type: importShortName,
+                        namespace: importNamespace,
+                    }),
+                    this
+                );
             }
         });
 
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
-        this.declarations.forEach(
-            d => {
-                const fqn = d.getFullyQualifiedName();
-                if (!uniqueNames.has(fqn)) {
-                    uniqueNames.add(fqn);
-                } else {
-                    throw new IllegalModelException(
-                        `Duplicate class name ${fqn}`
-                    );
-                }
+        const importedTypes = new Set();
+        this.imports.forEach((imp) => {
+            const importedModelFile = this.modelManager.getModelFile(
+                imp.namespace
+            );
+            if (importedModelFile) {
+                importedModelFile.getDeclarations().forEach((declaration) => {
+                    const importedFqn = declaration.getFullyQualifiedName();
+                    importedTypes.add(importedFqn);
+                });
             }
-        );
+        });
+        this.declarations.forEach((d) => {
+            const fqn = d.getFullyQualifiedName();
+            if (importedTypes.has(fqn)) {
+                throw new IllegalModelException(
+                    `Name conflict: ${fqn} conflicts with an imported type.`
+                );
+            }
+        });
+        this.declarations.forEach((d) => {
+            const fqn = d.getFullyQualifiedName();
+            if (!uniqueNames.has(fqn)) {
+                uniqueNames.add(fqn);
+            } else {
+                throw new IllegalModelException(`Duplicate class name ${fqn}`);
+            }
+        });
 
         // Run validations on class declarations
-        for(let n=0; n < this.declarations.length; n++) {
+        for (let n = 0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
             classDeclaration.validate();
         }
@@ -309,21 +350,29 @@ class ModelFile extends Decorated {
      */
     resolveType(context, type, fileLocation) {
         // is the type a primitive?
-        if(!ModelUtil.isPrimitiveType(type)) {
+        if (!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
-            if(!this.isImportedType(type)) {
+            if (!this.isImportedType(type)) {
                 // is the type declared locally?
-                if(!this.isLocalType(type)) {
-                    let formatter = Globalize('en').messageFormatter('modelfile-resolvetype-undecltype');
-                    throw new IllegalModelException(formatter({
-                        'type': type,
-                        'context': context,
-                    }), this, fileLocation);
+                if (!this.isLocalType(type)) {
+                    let formatter = Globalize("en").messageFormatter(
+                        "modelfile-resolvetype-undecltype"
+                    );
+                    throw new IllegalModelException(
+                        formatter({
+                            type: type,
+                            context: context,
+                        }),
+                        this,
+                        fileLocation
+                    );
                 }
-            }
-            else {
+            } else {
                 // check whether type is defined in another file
-                this.getModelManager().resolveType(context,this.resolveImport(type));
+                this.getModelManager().resolveType(
+                    context,
+                    this.resolveImport(type)
+                );
             }
         }
     }
@@ -335,7 +384,7 @@ class ModelFile extends Decorated {
      * @private
      */
     isLocalType(type) {
-        let result = (type && this.getLocalType(type) !== null);
+        let result = type && this.getLocalType(type) !== null;
         return result;
     }
 
@@ -349,9 +398,10 @@ class ModelFile extends Decorated {
         if (this.importShortNames.has(type)) {
             return true;
         } else {
-            for(let index in this.importWildcardNamespaces) {
+            for (let index in this.importWildcardNamespaces) {
                 let wildcardNamespace = this.importWildcardNamespaces[index];
-                const modelFile = this.getModelManager().getModelFile(wildcardNamespace);
+                const modelFile =
+                    this.getModelManager().getModelFile(wildcardNamespace);
                 if (modelFile && modelFile.isLocalType(type)) {
                     return true;
                 }
@@ -371,22 +421,28 @@ class ModelFile extends Decorated {
         if (this.importShortNames.has(type)) {
             return this.importShortNames.get(type);
         } else {
-            for(let index in this.importWildcardNamespaces) {
+            for (let index in this.importWildcardNamespaces) {
                 let wildcardNamespace = this.importWildcardNamespaces[index];
-                const modelFile = this.getModelManager().getModelFile(wildcardNamespace);
+                const modelFile =
+                    this.getModelManager().getModelFile(wildcardNamespace);
                 if (modelFile && modelFile.isLocalType(type)) {
-                    return wildcardNamespace + '.' + type;
+                    return wildcardNamespace + "." + type;
                 }
             }
         }
 
-        let formatter = Globalize('en').messageFormatter('modelfile-resolveimport-failfindimp');
+        let formatter = Globalize("en").messageFormatter(
+            "modelfile-resolveimport-failfindimp"
+        );
 
-        throw new IllegalModelException(formatter({
-            'type': type,
-            'imports': this.imports,
-            'namespace': this.getNamespace()
-        }),this);
+        throw new IllegalModelException(
+            formatter({
+                type: type,
+                imports: this.imports,
+                namespace: this.getNamespace(),
+            }),
+            this
+        );
     }
 
     /**
@@ -396,7 +452,7 @@ class ModelFile extends Decorated {
      */
     getImportedType(type) {
         let fqn = this.resolveImport(type);
-        return fqn.split('.').pop();
+        return fqn.split(".").pop();
     }
 
     /**
@@ -405,7 +461,9 @@ class ModelFile extends Decorated {
      * @return {boolean} true if the type (asset or transaction) is defined
      */
     isDefined(type) {
-        return ModelUtil.isPrimitiveType(type) || this.getLocalType(type) !== null;
+        return (
+            ModelUtil.isPrimitiveType(type) || this.getLocalType(type) !== null
+        );
     }
 
     /**
@@ -417,29 +475,28 @@ class ModelFile extends Decorated {
      */
     getType(type) {
         // is the type a primitive?
-        if(!ModelUtil.isPrimitiveType(type)) {
+        if (!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
-            if(!this.isImportedType(type)) {
+            if (!this.isImportedType(type)) {
                 // is the type declared locally?
-                if(!this.isLocalType(type)) {
+                if (!this.isLocalType(type)) {
                     return null;
-                }
-                else {
+                } else {
                     return this.getLocalType(type);
                 }
-            }
-            else {
+            } else {
                 // check whether type is defined in another file
                 const fqn = this.resolveImport(type);
-                const modelFile = this.getModelManager().getModelFile(ModelUtil.getNamespace(fqn));
+                const modelFile = this.getModelManager().getModelFile(
+                    ModelUtil.getNamespace(fqn)
+                );
                 if (!modelFile) {
                     return null;
                 } else {
                     return modelFile.getLocalType(fqn);
                 }
             }
-        }
-        else {
+        } else {
             // for primitive types we just return the name
             return type;
         }
@@ -454,22 +511,19 @@ class ModelFile extends Decorated {
      */
     getFullyQualifiedTypeName(type) {
         // is the type a primitive?
-        if(!ModelUtil.isPrimitiveType(type)) {
+        if (!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?
-            if(!this.isImportedType(type)) {
+            if (!this.isImportedType(type)) {
                 // is the type declared locally?
-                if(!this.isLocalType(type)) {
+                if (!this.isLocalType(type)) {
                     return null;
-                }
-                else {
+                } else {
                     return this.getLocalType(type).getFullyQualifiedName();
                 }
-            }
-            else {
+            } else {
                 return this.resolveImport(type);
             }
-        }
-        else {
+        } else {
             // for primitive types we just return the name
             return type;
         }
@@ -481,12 +535,14 @@ class ModelFile extends Decorated {
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
     getLocalType(type) {
-        if(!this.localTypes) {
-            throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
+        if (!this.localTypes) {
+            throw new Error(
+                "Internal error: local types are not yet initialized. Do not try to resolve types inside `process`."
+            );
         }
 
-        if(!type.startsWith(this.getNamespace())) {
-            type = this.getNamespace() + '.' + type;
+        if (!type.startsWith(this.getNamespace())) {
+            type = this.getNamespace() + "." + type;
         }
 
         if (this.localTypes.has(type)) {
@@ -503,7 +559,7 @@ class ModelFile extends Decorated {
      */
     getAssetDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration && classDeclaration.isAsset()) {
+        if (classDeclaration && classDeclaration.isAsset()) {
             return classDeclaration;
         }
 
@@ -517,7 +573,7 @@ class ModelFile extends Decorated {
      */
     getTransactionDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration && classDeclaration.isTransaction()) {
+        if (classDeclaration && classDeclaration.isTransaction()) {
             return classDeclaration;
         }
 
@@ -531,7 +587,7 @@ class ModelFile extends Decorated {
      */
     getEventDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration && classDeclaration.isEvent()) {
+        if (classDeclaration && classDeclaration.isEvent()) {
             return classDeclaration;
         }
 
@@ -545,13 +601,12 @@ class ModelFile extends Decorated {
      */
     getParticipantDeclaration(name) {
         let classDeclaration = this.getLocalType(name);
-        if(classDeclaration && classDeclaration.isParticipant()) {
+        if (classDeclaration && classDeclaration.isParticipant()) {
             return classDeclaration;
         }
 
         return null;
     }
-
 
     /**
      * Get the Namespace for this model file.
@@ -648,9 +703,9 @@ class ModelFile extends Decorated {
      */
     getDeclarations(type) {
         let result = [];
-        for(let n=0; n < this.declarations.length; n++) {
+        for (let n = 0; n < this.declarations.length; n++) {
             let declaration = this.declarations[n];
-            if(declaration instanceof type) {
+            if (declaration instanceof type) {
                 result.push(declaration);
             }
         }
@@ -695,10 +750,18 @@ class ModelFile extends Decorated {
      */
     isCompatibleVersion() {
         if (this.ast.concertoVersion) {
-            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
+            if (
+                semver.satisfies(
+                    packageJson.version,
+                    this.ast.concertoVersion,
+                    { includePrerelease: true }
+                )
+            ) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
+                throw new Error(
+                    `ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`
+                );
             }
         }
     }
@@ -709,10 +772,12 @@ class ModelFile extends Decorated {
      * @param {*} imp - the import to validate
      */
     enforceImportVersioning(imp) {
-        if(this.getModelManager().isStrict()) {
+        if (this.getModelManager().isStrict()) {
             const nsInfo = ModelUtil.parseNamespace(imp.namespace);
-            if(!nsInfo.version) {
-                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`);
+            if (!nsInfo.version) {
+                throw new Error(
+                    `Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`
+                );
             }
         }
     }
@@ -725,10 +790,14 @@ class ModelFile extends Decorated {
     fromAst(ast) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
 
-        const namespaceParts = nsInfo.name.split('.');
-        namespaceParts.forEach(part => {
-            if (!ModelUtil.isValidIdentifier(part)){
-                throw new IllegalModelException(`Invalid namespace part '${part}'`, this.modelFile, this.ast.location);
+        const namespaceParts = nsInfo.name.split(".");
+        namespaceParts.forEach((part) => {
+            if (!ModelUtil.isValidIdentifier(part)) {
+                throw new IllegalModelException(
+                    `Invalid namespace part '${part}'`,
+                    this.modelFile,
+                    this.ast.location
+                );
             }
         });
 
@@ -738,69 +807,90 @@ class ModelFile extends Decorated {
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];
 
-        if(!this.isSystemModelFile()) {
-            imports.push(
-                {
-                    $class: `${MetaModelNamespace}.ImportTypes`,
-                    namespace: 'concerto@1.0.0',
-                    types: ['Concept', 'Asset', 'Transaction', 'Participant', 'Event']
-                }
-            );
+        if (!this.isSystemModelFile()) {
+            imports.push({
+                $class: `${MetaModelNamespace}.ImportTypes`,
+                namespace: "concerto@1.0.0",
+                types: [
+                    "Concept",
+                    "Asset",
+                    "Transaction",
+                    "Participant",
+                    "Event",
+                ],
+            });
         }
 
         this.imports = imports;
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
-            switch(imp.$class) {
-            case `${MetaModelNamespace}.ImportAll`:
-                if (this.getModelManager().isStrict()){
-                    throw new Error('Wilcard Imports are not permitted in strict mode.');
-                }
-                Warning.printDeprecationWarning(
-                    'Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
-                    ErrorCodes.DEPRECATION_WARNING,
-                    ErrorCodes.CONCERTO_DEPRECATION_002,
-                    'Please refer to https://concerto.accordproject.org/deprecation/002'
-                );
-                this.importWildcardNamespaces.push(imp.namespace);
-                break;
-            case `${MetaModelNamespace}.ImportTypes`:
-                if (this.getModelManager().isAliasedTypeEnabled()) {
-                    const aliasedTypes = new Map();
-                    if (imp.aliasedTypes) {
-                        imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                            if(ModelUtil.isPrimitiveType(aliasedName)){
-                                throw new Error('Types cannot be aliased to primitive type');
-                            }
-                            aliasedTypes.set(name, aliasedName);
-                        });
+            switch (imp.$class) {
+                case `${MetaModelNamespace}.ImportAll`:
+                    if (this.getModelManager().isStrict()) {
+                        throw new Error(
+                            "Wilcard Imports are not permitted in strict mode."
+                        );
                     }
-                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                    imp.types.forEach((type) =>
-                        aliasedTypes.has(type)
-                            ? this.importShortNames.set(
-                                aliasedTypes.get(type),
-                                `${imp.namespace}.${type}`
-                            )
-                            : this.importShortNames.set(
+                    Warning.printDeprecationWarning(
+                        "Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.",
+                        ErrorCodes.DEPRECATION_WARNING,
+                        ErrorCodes.CONCERTO_DEPRECATION_002,
+                        "Please refer to https://concerto.accordproject.org/deprecation/002"
+                    );
+                    this.importWildcardNamespaces.push(imp.namespace);
+                    break;
+                case `${MetaModelNamespace}.ImportTypes`:
+                    if (this.getModelManager().isAliasedTypeEnabled()) {
+                        const aliasedTypes = new Map();
+                        if (imp.aliasedTypes) {
+                            imp.aliasedTypes.forEach(
+                                ({ name, aliasedName }) => {
+                                    if (
+                                        ModelUtil.isPrimitiveType(aliasedName)
+                                    ) {
+                                        throw new Error(
+                                            "Types cannot be aliased to primitive type"
+                                        );
+                                    }
+                                    aliasedTypes.set(name, aliasedName);
+                                }
+                            );
+                        }
+                        // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                        imp.types.forEach((type) =>
+                            aliasedTypes.has(type)
+                                ? this.importShortNames.set(
+                                      aliasedTypes.get(type),
+                                      `${imp.namespace}.${type}`
+                                  )
+                                : this.importShortNames.set(
+                                      type,
+                                      `${imp.namespace}.${type}`
+                                  )
+                        );
+                    } else {
+                        if (imp.aliasedTypes) {
+                            throw new Error(
+                                "Aliasing disabled, set importAliasing to true"
+                            );
+                        }
+                        imp.types.forEach((type) => {
+                            this.importShortNames.set(
                                 type,
                                 `${imp.namespace}.${type}`
-                            )
-                    );
-                } else {
-                    if (imp.aliasedTypes) {
-                        throw new Error('Aliasing disabled, set importAliasing to true');
+                            );
+                        });
                     }
-                    imp.types.forEach((type) => {
-                        this.importShortNames.set(type,`${imp.namespace}.${type}`);
-                    });
-                }
-                break;
-            default:
-                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
+                    break;
+                default:
+                    this.importShortNames.set(
+                        imp.name,
+                        ModelUtil.importFullyQualifiedNames(imp)[0]
+                    );
             }
-            if(imp.uri) {
-                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
+            if (imp.uri) {
+                this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] =
+                    imp.uri;
             }
         });
 
@@ -809,75 +899,86 @@ class ModelFile extends Decorated {
             return;
         }
 
-        for(let n=0; n < ast.declarations.length; n++) {
+        for (let n = 0; n < ast.declarations.length; n++) {
             // Make sure to clone since we may add super type
             let thing = Object.assign({}, ast.declarations[n]);
 
-            if(thing.$class === `${MetaModelNamespace}.AssetDeclaration`) {
+            if (thing.$class === `${MetaModelNamespace}.AssetDeclaration`) {
                 // Default super type for asset
                 if (!thing.superType) {
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Asset',
+                        name: "Asset",
                     };
                 }
-                this.declarations.push( new AssetDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.TransactionDeclaration`) {
+                this.declarations.push(new AssetDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.TransactionDeclaration`
+            ) {
                 // Default super type for transaction
                 if (!thing.superType) {
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Transaction',
+                        name: "Transaction",
                     };
                 }
-                this.declarations.push( new TransactionDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.EventDeclaration`) {
+                this.declarations.push(new TransactionDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.EventDeclaration`
+            ) {
                 // Default super type for event
                 if (!thing.superType) {
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Event',
+                        name: "Event",
                     };
                 }
-                this.declarations.push( new EventDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.ParticipantDeclaration`) {
+                this.declarations.push(new EventDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.ParticipantDeclaration`
+            ) {
                 // Default super type for participant
                 if (!thing.superType) {
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
-                        name: 'Participant',
+                        name: "Participant",
                     };
                 }
-                this.declarations.push( new ParticipantDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.EnumDeclaration`) {
-                this.declarations.push( new EnumDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.MapDeclaration`) {
-                this.declarations.push( new MapDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
-                this.declarations.push( new ConceptDeclaration(this, thing) );
-            }
-            else if([
-                `${MetaModelNamespace}.BooleanScalar`,
-                `${MetaModelNamespace}.IntegerScalar`,
-                `${MetaModelNamespace}.LongScalar`,
-                `${MetaModelNamespace}.DoubleScalar`,
-                `${MetaModelNamespace}.StringScalar`,
-                `${MetaModelNamespace}.DateTimeScalar`,
-            ].includes(thing.$class)) {
-                this.declarations.push( new ScalarDeclaration(this, thing) );
-            }
-            else {
-                let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
+                this.declarations.push(new ParticipantDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.EnumDeclaration`
+            ) {
+                this.declarations.push(new EnumDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.MapDeclaration`
+            ) {
+                this.declarations.push(new MapDeclaration(this, thing));
+            } else if (
+                thing.$class === `${MetaModelNamespace}.ConceptDeclaration`
+            ) {
+                this.declarations.push(new ConceptDeclaration(this, thing));
+            } else if (
+                [
+                    `${MetaModelNamespace}.BooleanScalar`,
+                    `${MetaModelNamespace}.IntegerScalar`,
+                    `${MetaModelNamespace}.LongScalar`,
+                    `${MetaModelNamespace}.DoubleScalar`,
+                    `${MetaModelNamespace}.StringScalar`,
+                    `${MetaModelNamespace}.DateTimeScalar`,
+                ].includes(thing.$class)
+            ) {
+                this.declarations.push(new ScalarDeclaration(this, thing));
+            } else {
+                let formatter = Globalize("en").messageFormatter(
+                    "modelfile-constructor-unrecmodelelem"
+                );
 
-                throw new IllegalModelException(formatter({
-                    'type': thing.$class,
-                }),this);
+                throw new IllegalModelException(
+                    formatter({
+                        type: thing.$class,
+                    }),
+                    this
+                );
             }
         }
     }
@@ -901,23 +1002,22 @@ class ModelFile extends Decorated {
      * @returns {ModelFile?} - the filtered ModelFile
      * @private
      */
-    filter(predicate, modelManager, removedDeclarations){
+    filter(predicate, modelManager, removedDeclarations) {
         let declarations = []; // ast for all included declarations
-        this.declarations?.forEach( declaration => {
+        this.declarations?.forEach((declaration) => {
             const included = predicate(declaration);
-            if(!included) {
+            if (!included) {
                 removedDeclarations.push(declaration.getFullyQualifiedName());
-            }
-            else {
+            } else {
                 declarations.push(declaration.ast);
             }
-        } );
+        });
 
         const ast = {
             ...this.ast,
             declarations: declarations,
         };
-        if (ast.declarations?.length > 0){
+        if (ast.declarations?.length > 0) {
             return new ModelFile(modelManager, ast, undefined, this.fileName);
         }
         return null;
