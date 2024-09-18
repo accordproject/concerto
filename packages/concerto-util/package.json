@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
-    "axios": "1.6.8",
+    "axios": "1.7.7",
     "colors": "1.4.0",
     "debug": "4.3.4",
     "json-colorizer": "2.2.2",
