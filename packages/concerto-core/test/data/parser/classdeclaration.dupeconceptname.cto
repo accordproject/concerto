@@ -14,12 +14,12 @@
 
 namespace com.testing
 
-concept Concept{
+concept newConcept{
   o String id
   o String newValue
 }
 
-concept Concept{
+concept newConcept{
   o String id
   o String newValue
 }
