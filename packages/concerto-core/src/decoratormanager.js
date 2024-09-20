@@ -314,10 +314,12 @@ class DecoratorManager {
         }
 
         if (shouldValidate) {
+            const enableMapType = modelManager?.enableMapType ? true : false;
             const validationModelManager = new ModelManager({
                 strict: true,
                 metamodelValidation: true,
                 addMetamodel: true,
+                enableMapType
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -418,7 +420,8 @@ class DecoratorManager {
 
             });
         });
-        const newModelManager = new ModelManager();
+        const enableMapType = modelManager?.enableMapType ? true : false;
+        const newModelManager = new ModelManager({ enableMapType });
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
     }

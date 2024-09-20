@@ -301,7 +301,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified MapDeclaration', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true, enableMapType: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
