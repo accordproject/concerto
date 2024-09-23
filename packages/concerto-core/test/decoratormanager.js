@@ -91,7 +91,7 @@ describe('DecoratorManager', () => {
             }).should.throw(/Invalid JSON data/);
         });
 
-        it.only('should not validate a command with null decorator arg value', async function () {
+        it('should not validate a command with null decorator arg', async function () {
             // load a model to decorate
             const testModelManager = new ModelManager({ strict: true, skipLocationNodes: true });
             const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/test.cto'), 'utf-8');
@@ -100,8 +100,21 @@ describe('DecoratorManager', () => {
             (() => {
                 DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs),
                     { validate: true });
+            }).should.throw(/Cannot read properties of null/);
+        });
+
+        it('should not validate a command with null decorator arg value', async function () {
+            // load a model to decorate
+            const testModelManager = new ModelManager({ strict: true, skipLocationNodes: true });
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcs = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/invalid-null-argument-value.json'), 'utf-8');
+            (() => {
+                DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs),
+                    { validate: true });
             }).should.throw(/The instance "concerto.metamodel@1.0.0.DecoratorString" is missing the required field "value"/);
         });
+
     });
 
     describe('#decorateModels', function () {

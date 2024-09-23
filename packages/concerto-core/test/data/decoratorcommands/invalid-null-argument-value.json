@@ -1,6 +1,6 @@
 {
     "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
-    "name" : "invalid-null-argument",
+    "name" : "invalid-null-argument-value",
     "version": "1.0.0",
     "commands" : [
         {
@@ -13,7 +13,12 @@
             "decorator" : {
                 "$class" : "concerto.metamodel@1.0.0.Decorator",
                 "name" : "Test",
-                "arguments" : [null]
+                "arguments" : [
+                    {
+                        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                        "value": null
+                    }
+                ]
             }
         }
     ]
