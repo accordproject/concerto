@@ -55,13 +55,12 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
-class DecoratorExtractor {
-   + void constructor(boolean,string,string,Object) 
-}
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
+   + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string) 
+   + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
@@ -215,6 +214,7 @@ class ModelFile extends Decorated {
    + ModelManager getModelManager() 
    + string[] getImports() 
    ~ void validate() throws IllegalModelException
+   + string getImportedType(string) 
    + boolean isDefined(string) 
    + ClassDeclaration getLocalType(string) 
    + AssetDeclaration getAssetDeclaration(string) 
@@ -334,7 +334,7 @@ class ModelLoader {
    + ModelManager[] loadModelManagerFromModelFiles(object[],string[],object,boolean?,boolean?,number?) 
 }
 class ModelManager extends BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?) 
+   + void constructor(object?,boolean?,Object?,boolean?,boolean?) 
    + ModelFile addCTOModel(string,string?,boolean?) throws IllegalModelException
 }
    + object getRootModel() 

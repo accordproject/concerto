@@ -82,7 +82,7 @@ class BaseModelManager {
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
-     * @param {boolean} [options.enableAliasedType] - When true, the Concerto Aliasing feature is enabled
+     * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -98,8 +98,7 @@ class BaseModelManager {
         // TODO Remove on release of MapType
         // Supports both env var and property based flag
         this.enableMapType = !!options?.enableMapType;
-        this.enableAliasedType = !!options?.enableAliasedType;
-
+        this.importAliasing = process?.env?.IMPORT_ALIASING === 'true' || !!options?.importAliasing;
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 
@@ -126,10 +125,10 @@ class BaseModelManager {
 
     /**
      * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} true if the enableAliasedType has been set
+     * @returns {boolean} true if the importAliasing has been set
      */
     isAliasedTypeEnabled() {
-        return this.enableAliasedType;
+        return this.importAliasing;
     }
 
     /**

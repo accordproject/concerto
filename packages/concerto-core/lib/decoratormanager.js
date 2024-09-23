@@ -315,10 +315,12 @@ class DecoratorManager {
         }
 
         if (shouldValidate) {
+            const enableMapType = modelManager?.enableMapType ? true : false;
             const validationModelManager = new ModelManager({
                 strict: true,
                 metamodelValidation: true,
                 addMetamodel: true,
+                enableMapType
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -419,20 +421,17 @@ class DecoratorManager {
 
             });
         });
-        const newModelManager = new ModelManager();
+        const enableMapType = modelManager?.enableMapType ? true : false;
+        const newModelManager = new ModelManager({ enableMapType });
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
     }
     /**
-     * @typedef decoratorCommandSet
-     * @type {object}
-     * @typedef vocabularies
-     * @type {string}
      * @typedef ExtractDecoratorsResult
      * @type {object}
      * @property {ModelManager} modelManager - A model manager containing models stripped without decorators
-     * @property {decoratorCommandSet} object[] - Stripped out decorators, formed into decorator command sets
-     * @property {vocabularies} object[] - Stripped out vocabularies, formed into vocabulary files
+     * @property {*} decoratorCommandSet - Stripped out decorators, formed into decorator command sets
+     * @property {string[]} vocabularies - Stripped out vocabularies, formed into vocabulary files
     */
     /**
      * Extracts all the decorator commands from all the models in modelManager
@@ -449,7 +448,7 @@ class DecoratorManager {
             ...options
         };
         const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -457,7 +456,50 @@ class DecoratorManager {
             vocabularies: collectionResp.vocabularies
         };
     }
-
+    /**
+     * Extracts all the vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
+     */
+    static extractVocabularies(modelManager,options) {
+        options = {
+            removeDecoratorsFromModel: false,
+            locale:'en',
+            ...options
+        };
+        const sourceAst = modelManager.getAst(true);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
+        const collectionResp = decoratorExtrator.extract();
+        return {
+            modelManager: collectionResp.updatedModelManager,
+            vocabularies: collectionResp.vocabularies
+        };
+    }
+    /**
+     * Extracts all the non-vocab decorator commands from all the models in modelManager
+     * @param {ModelManager} modelManager the input model manager
+     * @param {object} options - decorator models options
+     * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
+     * @param {string} options.locale - locale for extracted vocabulary set
+     * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
+     */
+    static extractNonVocabDecorators(modelManager,options) {
+        options = {
+            removeDecoratorsFromModel: false,
+            locale:'en',
+            ...options
+        };
+        const sourceAst = modelManager.getAst(true);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
+        const collectionResp = decoratorExtrator.extract();
+        return {
+            modelManager: collectionResp.updatedModelManager,
+            decoratorCommandSet: collectionResp.decoratorCommandSet
+        };
+    }
     /**
      * Throws an error if the decoractor command is invalid
      * @param {ModelManager} validationModelManager the validation model manager

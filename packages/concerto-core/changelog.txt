@@ -24,6 +24,17 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.17.5 {9bd69f9522c14a99a085f077e12ac4b2} 2024-08-29
+- importAliasing added to ModelManager parameters
+
+Version 3.17.4 {8cb49c7092c48b568da3b0a3eeab2777} 2024-08-01
+- Added api getImportedType() in modeFile
+
+Version 3.17.3 {1c15de121dd80375cf531bc2244efdd0} 2024-07-26
+- Added new methods to extract vocab or non-vocab decorators from model
+- Fixed some minor bugs related to vocabulary parsing
+- Exposed method to validate locale
+
 Version 3.17.2 {eb3903401fdcf7c26cca1f3f8a029171} 2024-07-17
 - Added new optimized methods for decorating models with decorator commandsets
 - fixed other decorator command set bugs

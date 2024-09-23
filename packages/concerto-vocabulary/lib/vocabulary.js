@@ -47,18 +47,15 @@ class Vocabulary {
             throw new Error('Vocabulary object must have declarations');
         }
 
-        if(!voc.locale) {
-            throw new Error('A vocabulary must specify a locale');
-        }
         if(!voc.namespace) {
             throw new Error('A vocabulary must specify a namespace');
         }
 
-        // validate the locale
-        new Intl.Locale(voc.locale);
-        if(voc.locale !== voc.locale.toLowerCase()) {
-            throw new Error('Locale should be lowercase with dashes');
+        if(!voc.locale) {
+            throw new Error('A vocabulary must specify a locale');
         }
+
+        Vocabulary.validateLocale(voc.locale);
 
         this.vocabularyManager = vocabularyManager;
         this.content = voc;
@@ -70,6 +67,18 @@ class Vocabulary {
      */
     getNamespace() {
         return this.content.namespace;
+    }
+
+    /**
+     * Validates a locale
+     * @param {string} locale the locale to validate
+     * @throws {Error} if the locale is invalid
+     */
+    static validateLocale(locale) {
+        new Intl.Locale(locale);
+        if(locale !== locale.toLowerCase()) {
+            throw new Error('Locale should be lowercase with dashes');
+        }
     }
 
     /**
