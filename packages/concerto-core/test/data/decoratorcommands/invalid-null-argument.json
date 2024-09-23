@@ -1,0 +1,25 @@
+{
+    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+    "name" : "invalid-null-argument",
+    "version": "1.0.0",
+    "commands" : [
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "namespace" : "test@1.0.0",
+                "declaration" : "Person"            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Test",
+                "arguments" : [
+                    {
+                        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                        "value": null
+                    }
+                ]
+            }
+        }
+    ]
+}
