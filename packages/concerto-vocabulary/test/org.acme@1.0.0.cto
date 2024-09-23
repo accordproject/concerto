@@ -22,3 +22,6 @@ map Address {
 asset Truck extends Vehicle {
     o Double weight
 }
+
+asset Motorcycle extends Vehicle {
+}

@@ -93,7 +93,8 @@ class Vocabulary {
      * @returns {Array} an array of objects
      */
     getTerms() {
-        return this.content.declarations;
+        // we remove empty terms from the voc
+        return this.content.declarations.filter(d => Object.values(d)[0]);
     }
 
     /**
@@ -104,7 +105,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
-        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
+        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName && Object.values(d)[0]);
         if(!decl) {
             return null;
         }
@@ -124,7 +125,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getElementTerms(declarationName, propertyName) {
-        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
+        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName && Object.values(d)[0]);
         if(!decl) {
             return null;
         }

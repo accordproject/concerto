@@ -502,6 +502,105 @@ Object {
         "arguments": Array [
           Object {
             "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Motorcycle",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Motorcycle",
+        "namespace": "org.acme@1.0.0",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Vehicle Identification Number",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Motorcycle",
+        "namespace": "org.acme@1.0.0",
+        "property": "vin",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "VIN",
+          },
+        ],
+        "name": "Term_tooltip",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Motorcycle",
+        "namespace": "org.acme@1.0.0",
+        "property": "vin",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Color of the Vehicle",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Motorcycle",
+        "namespace": "org.acme@1.0.0",
+        "property": "color",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
+            "value": "Identifier of the Asset",
+          },
+        ],
+        "name": "Term",
+      },
+      "target": Object {
+        "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+        "declaration": "Motorcycle",
+        "namespace": "org.acme@1.0.0",
+        "property": "$identifier",
+      },
+      "type": "UPSERT",
+    },
+    Object {
+      "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+      "decorator": Object {
+        "$class": "concerto.metamodel@1.0.0.Decorator",
+        "arguments": Array [
+          Object {
+            "$class": "concerto.metamodel@1.0.0.DecoratorString",
             "value": "Thing",
           },
         ],
