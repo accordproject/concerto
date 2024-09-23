@@ -502,7 +502,7 @@ Object {
         "arguments": Array [
           Object {
             "$class": "concerto.metamodel@1.0.0.DecoratorString",
-            "value": "Motorcycle",
+            "value": null,
           },
         ],
         "name": "Term",
