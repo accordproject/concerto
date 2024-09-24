@@ -168,7 +168,7 @@ describe('Decorators', () => {
         });
     });
 
-    describe('#validate', () => {
+    describe.only('#validate', () => {
 
         it('should prevent attaching the same decorator twice', () => {
 
@@ -178,6 +178,44 @@ describe('Decorators', () => {
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid.cto', 'utf8');
                 modelManager.addCTOModel(modelDefinitions);
             }).should.throw(/Duplicate decorator/);
+        });
+
+        it('should fail to validate type refs that are not defined locally', () => {
+
+            (() => {
+                const modelManager = new ModelManager();
+                Util.addComposerModel(modelManager);
+                let modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
+                modelManager.addCTOModel(modelDefinitions);
+            }).should.throw(/Undeclared type "Missing"/);
+        });
+
+        it('should fail to validate type refs that are not in imported namespace', () => {
+
+            (() => {
+                const modelManager = new ModelManager();
+                Util.addComposerModel(modelManager);
+                let modelDefinitions = fs.readFileSync('test/data/decorators/categories-empty.cto', 'utf8');
+                modelManager.addCTOModel(modelDefinitions);
+                modelDefinitions = fs.readFileSync('test/data/decorators/valid-typeref-imported.cto', 'utf8');
+                modelManager.addCTOModel(modelDefinitions);
+            }).should.throw(/Type "Ok" is not defined in namespace/);
+        });
+
+        it('should valdiate type refs that are defined locally', () => {
+            const modelManager = new ModelManager();
+            Util.addComposerModel(modelManager);
+            let modelDefinitions = fs.readFileSync('test/data/decorators/valid-typeref.cto', 'utf8');
+            modelManager.addCTOModel(modelDefinitions);
+        });
+
+        it('should valdiate type refs that are imported locally', () => {
+            const modelManager = new ModelManager();
+            Util.addComposerModel(modelManager);
+            let modelDefinitions = fs.readFileSync('test/data/decorators/categories.cto', 'utf8');
+            modelManager.addCTOModel(modelDefinitions);
+            modelDefinitions = fs.readFileSync('test/data/decorators/valid-typeref-imported.cto', 'utf8');
+            modelManager.addCTOModel(modelDefinitions);
         });
     });
 
