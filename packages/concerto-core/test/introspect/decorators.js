@@ -168,7 +168,7 @@ describe('Decorators', () => {
         });
     });
 
-    describe.only('#validate', () => {
+    describe('#validate', () => {
 
         it('should prevent attaching the same decorator twice', () => {
 
@@ -209,7 +209,7 @@ describe('Decorators', () => {
             modelManager.addCTOModel(modelDefinitions);
         });
 
-        it('should valdiate type refs that are imported locally', () => {
+        it('should valdiate type refs that are imported', () => {
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             let modelDefinitions = fs.readFileSync('test/data/decorators/categories.cto', 'utf8');
