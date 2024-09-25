@@ -85,6 +85,13 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
 
+      - name: Archive npm failure logs
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: npm-logs
+          path: ~/.npm/_logs
+
       - name: timestamp
         id: timestamp
         run: |
