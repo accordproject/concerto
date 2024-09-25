@@ -41,7 +41,7 @@ jobs:
         if: failure()
         with:
           name: npm-logs
-          path: ~/.npm/_logs
+          path: /npm/cache/_logs
 
       - name: Calculate code coverage
         run: npm run coverage
