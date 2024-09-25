@@ -4,8 +4,8 @@
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=10"
   },
   "main": "index.js",
   "typings": "types/index.d.ts",
