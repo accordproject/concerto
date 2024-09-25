@@ -15,13 +15,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 16.x
-          - 18.x
           - 20.x
         os:
-          - ubuntu-latest
           - windows-latest
-          - macOS-latest
 
     runs-on: ${{ matrix.os }}
 
