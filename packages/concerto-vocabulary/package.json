@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-vocabulary",
-  "version": "3.19.1",
+  "version": "3.19.2",
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -37,7 +37,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@accordproject/concerto-core": "3.19.1",
+    "@accordproject/concerto-core": "3.19.2",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -49,10 +49,10 @@
     "nyc": "15.1.0",
     "sinon": "12.0.0",
     "sinon-chai": "3.7.0",
-    "typescript": "4.6.3"
+    "typescript": "5.6.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.10.0",
+    "@accordproject/concerto-metamodel": "3.10.1",
     "yaml": "2.2.2"
   },
   "browserslist": "> 0.25%, not dead",
