@@ -15,48 +15,39 @@
 'use strict';
 
 const GitHubFileLoader = require('../../lib/loaders/githubfileloader');
-
-const moxios = require('moxios');
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
+const { Agent, MockAgent, setGlobalDispatcher } = require('undici');
+const model = 'namespace org.accordproject.usa.business';
 
 const defaultProcessFile = (name, data) => {
     return { name, data };
 };
 
 describe('GitHubFileLoader', () => {
-
     let sandbox;
-
-    let model = `namespace org.accordproject.usa.business
-
-    /**
-     * Types of businesses in the USA
-     * Taken from: https://en.wikipedia.org/wiki/List_of_business_entities#United_States
-     */
-    enum BusinessEntity {
-      o GENERAL_PARTNERSHIP
-      o LP
-      o LLP
-      o LLLP
-      o LLC
-      o PLLC
-      o CORP
-      o PC
-      o DBA
-    }`;
+    let mockAgent;
 
     beforeEach(() => {
+        mockAgent = new MockAgent();
+
+        mockAgent
+            .get('https://raw.githubusercontent.com')
+            .intercept({ path: '/accordproject/business.cto' })
+            .reply(200, model);
+
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
         sandbox = sinon.createSandbox();
-        moxios.install();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await mockAgent.close();
+        setGlobalDispatcher(new Agent());
         sandbox.restore();
-        moxios.uninstall();
     });
 
     describe('#accept', () => {
@@ -75,17 +66,11 @@ describe('GitHubFileLoader', () => {
     describe('#load', () => {
 
         it('should load github URIs', () => {
-            // Match against an exact URL value
-            moxios.stubRequest('https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto', {
-                status: 200,
-                responseText: model
-            });
-
             const ml = new GitHubFileLoader(defaultProcessFile);
-            return ml.load( 'github://accordproject/models/master/src/usa/business.cto', {foo: 'bar' })
+            return ml.load('github://accordproject/business.cto', { foo: 'bar' })
                 .then((mf) => {
                     mf.should.be.deep.equal({
-                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        name: '@raw.githubusercontent.com.accordproject.business.cto',
                         data: model
                     });
                 });

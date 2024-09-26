@@ -95,7 +95,14 @@ class Decorator {
      * @throws {IllegalModelException}
      * @private
      */
-    validate() { }
+    validate() {
+        // check that all type ref arguments can be resolved
+        const typeRefs = this.arguments.filter(a => a?.type === 'Identifier');
+        typeRefs.forEach(typeRef => {
+            const mf = this.getParent().getModelFile();
+            mf.resolveType(`Decorator ${this.getName()} on ${this.getParent().getName()}`, typeRef.name);
+        });
+    }
 
     /**
      * Returns the name of a decorator
