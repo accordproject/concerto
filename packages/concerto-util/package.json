@@ -9,7 +9,7 @@
   },
   "main": "index.js",
   "browser": {
-    "main" : "dist/concerto-util.js",
+    "main": "dist/concerto-util.js",
     "fs": false,
     "path": false
   },
@@ -51,18 +51,15 @@
     "jsdoc": "^4.0.2",
     "license-check-and-add": "2.3.6",
     "mocha": "10.0.0",
-    "moxios": "0.4.0",
     "node-polyfill-webpack-plugin": "2.0.1",
     "nyc": "15.1.0",
     "tmp-promise": "3.0.2",
-    "typescript": "4.6.3"
+    "typescript": "4.6.3",
+    "undici": "^6.19.8"
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
-    "axios": "1.7.4",
-    "colors": "1.4.0",
     "debug": "4.3.4",
-    "json-colorizer": "2.2.2",
     "slash": "3.0.0"
   },
   "browserslist": "> 0.25%, not dead",

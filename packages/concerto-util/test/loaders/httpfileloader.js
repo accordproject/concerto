@@ -15,7 +15,6 @@
 'use strict';
 
 const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
-const moxios = require('moxios');
 
 const chai = require('chai');
 chai.should();
@@ -23,26 +22,39 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
+const { Agent, MockAgent, setGlobalDispatcher } = require('undici');
+const model = 'namespace org.accordproject.usa.business';
+
 const defaultProcessFile = (name, data) => {
     return { name, data };
 };
 
 describe('HTTPModeFilelLoader', () => {
     let sandbox;
-
-    let model = `namespace test
-    enum Test {
-        o ONE
-    }`;
+    let mockAgent;
 
     beforeEach(() => {
+        mockAgent = new MockAgent();
+
+        mockAgent
+            .get('https://raw.githubusercontent.com')
+            .intercept({ path: '/accordproject/business.cto' })
+            .reply(200, model);
+
+        mockAgent
+            .get('https://missing.com')
+            .intercept({ path: '/test' })
+            .reply(404);
+
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
         sandbox = sinon.createSandbox();
-        moxios.install();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await mockAgent.close();
+        setGlobalDispatcher(new Agent());
         sandbox.restore();
-        moxios.uninstall();
     });
 
     describe('#accept', () => {
@@ -65,23 +77,21 @@ describe('HTTPModeFilelLoader', () => {
     describe('#load', () => {
 
         it('should load https URIs', () => {
-
-            // Match against an exact URL value
-            const url = 'https://raw.githubusercontent.com/accordproject/models/master/src/usa/business.cto';
-
-            moxios.stubRequest(url, {
-                status: 200,
-                responseText: model
-            });
-
             const ml = new HTTPFileLoader(defaultProcessFile);
+            const url = 'https://raw.githubusercontent.com/accordproject/business.cto';
             return ml.load(url)
                 .then((mf) => {
                     mf.should.be.deep.equal({
-                        name: '@raw.githubusercontent.com.accordproject.models.master.src.usa.business.cto',
+                        name: '@raw.githubusercontent.com.accordproject.business.cto',
                         data: model
                     });
                 });
+        });
+
+        it('should throw on 404', () => {
+            const ml = new HTTPFileLoader(defaultProcessFile);
+            const url = 'https://missing.com/test';
+            ml.load(url).should.eventually.throw(/HTTP request failed with status: 404/);
         });
     });
 });
