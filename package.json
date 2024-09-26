@@ -24,14 +24,14 @@
   ],
   "name": "concerto",
   "description": "Define and introspect data models",
-  "version": "3.19.1",
+  "version": "3.19.2",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
     "pretest": "npm run licchk",
     "licchk": "license-check-and-add",
-    "test" : "npm test -ws",
-    "build" : "npm run build -ws"
+    "test": "npm test -ws",
+    "build": "npm run build -ws"
   },
   "repository": {
     "type": "git",
