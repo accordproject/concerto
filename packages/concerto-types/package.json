@@ -1,12 +1,12 @@
 {
     "name": "@accordproject/concerto-types",
-    "version": "3.19.1",
+    "version": "3.19.2",
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
         "node": ">=18",
         "npm": ">=10"
-      },
+    },
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "scripts": {
