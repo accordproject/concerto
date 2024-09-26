@@ -4,9 +4,9 @@
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
-        "node": ">=14",
-        "npm": ">=6"
-    },
+        "node": ">=18",
+        "npm": ">=10"
+      },
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "scripts": {

@@ -23,6 +23,9 @@ chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 const nock = require('nock');
 
+const { Agent, MockAgent, setGlobalDispatcher } = require('undici');
+const model = 'namespace org.accordproject.usa.business';
+
 const defaultProcessFile = (name, data) => {
     return { name, data };
 };
@@ -36,10 +39,26 @@ describe('HTTPModeFilelLoader', () => {
     }`;
 
     beforeEach(() => {
+        mockAgent = new MockAgent();
+
+        mockAgent
+            .get('https://raw.githubusercontent.com')
+            .intercept({ path: '/accordproject/business.cto' })
+            .reply(200, model);
+
+        mockAgent
+            .get('https://missing.com')
+            .intercept({ path: '/test' })
+            .reply(404);
+
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
         sandbox = sinon.createSandbox();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await mockAgent.close();
+        setGlobalDispatcher(new Agent());
         sandbox.restore();
     });
 
@@ -63,20 +82,21 @@ describe('HTTPModeFilelLoader', () => {
     describe('#load', () => {
 
         it('should load https URIs', () => {
-
-            // Match against an exact URL value
-            nock('https://raw.githubusercontent.com')
-                .get('/accordproject/models/main/src/usa/business.cto')
-                .reply(200, model);
-
             const ml = new HTTPFileLoader(defaultProcessFile);
-            return ml.load('https://raw.githubusercontent.com/accordproject/models/main/src/usa/business.cto')
+            const url = 'https://raw.githubusercontent.com/accordproject/business.cto';
+            return ml.load(url)
                 .then((mf) => {
                     mf.should.be.deep.equal({
-                        name: '@raw.githubusercontent.com.accordproject.models.main.src.usa.business.cto',
+                        name: '@raw.githubusercontent.com.accordproject.business.cto',
                         data: model
                     });
                 });
+        });
+
+        it('should throw on 404', () => {
+            const ml = new HTTPFileLoader(defaultProcessFile);
+            const url = 'https://missing.com/test';
+            ml.load(url).should.eventually.throw(/HTTP request failed with status: 404/);
         });
     });
 });

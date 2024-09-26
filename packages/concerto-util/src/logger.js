@@ -17,9 +17,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
-const colors = require('colors/safe');
-const jsonColorize = require('json-colorizer');
-
 /**
  * Default levels for the npm configuration.
  * @type {Object}
@@ -34,46 +31,15 @@ const levels = {
     silly: 6
 };
 
-/**
- * Default levels for the npm configuration.
- * @type {Object}
- */
-const colorMap = {
-    error: 'red',
-    warn: 'yellow',
-    info: 'green',
-    verbose: 'cyan',
-    debug: 'blue',
-    silly: 'magenta'
-};
-
 const timestamp = () => (new Date()).toLocaleTimeString();
-const colorize = level => colors[colorMap[level]](level.toUpperCase());
 
 /**
-* Helper function to test if a string is a stringified version of a JSON object
-* @param {string} str - the input string to test
-* @returns {boolean} - true iff the string can be parsed as JSON
-* @private
-*/
-const isJson = (str) => {
-    try {
-        return (JSON.parse(str) && !!str);
-    } catch (e) {
-        return false;
-    }
-};
-
-/**
-* Helper function to color and format JSON objects
+* Helper function to format JSON objects
 * @param {any} obj - the input obj to prettify
 * @returns {any} - the prettified object
 * @private
 */
 const prettifyJson = (obj) => {
-    if(typeof obj === 'object' || isJson(obj)) {
-        return jsonColorize(obj, { pretty: true, colors });
-    }
     return obj;
 };
 
@@ -107,7 +73,7 @@ const defaultTransportShim = (level, ...args) => {
     const stream = ['error', 'warn'].includes(mutatedLevel) ? console.error : console.log;
 
     stream(
-        `${timestamp()} - ${colorize(mutatedLevel)}:`,
+        `${timestamp()} - ${mutatedLevel}:`,
         ...data
             .map(obj => obj instanceof Error ? `${obj.message}\n${obj.stack}`: obj)
             .map(prettifyJson)

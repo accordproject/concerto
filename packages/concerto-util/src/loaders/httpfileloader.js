@@ -14,11 +14,8 @@
 
 'use strict';
 
-const axios = require('axios');
-const url = require('url');
-
 /**
- * Loads Files from an HTTP(S) URL using the axios library.
+ * Loads Files from an HTTP(S) URL using fetch.
  * @class
  * @private
  * @memberof module:concerto-util
@@ -43,29 +40,31 @@ class HTTPFileLoader {
     }
 
     /**
-     * Load a File from a URL and return it
+     * Load a text File from a URL and return it
      * @param {string} requestUrl - the url to get
      * @param {object} options - additional options
      * @return {Promise} a promise to the File
      */
-    load(requestUrl, options) {
-
-        if(!options) {
-            options = {};
+    async load(requestUrl, options) {
+        if (!options) {
+            options = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'text/plain',
+                }
+            };
         }
 
-        const request = JSON.parse(JSON.stringify(options));
-        request.url = requestUrl;
-        request.method = 'get';
-        request.responseType = 'text';
-        return axios(request)
-            .then((response) => {
-                let parsedUrl = url.parse(requestUrl);
-                // external Files have a name that starts with '@'
-                // (so that they are identified as external when an archive is read back in)
-                const name = '@' + (parsedUrl.host + parsedUrl.pathname).replace(/\//g, '.');
-                return this.processFile(name, response.data);
-            });
+        const response = await fetch(requestUrl, options);
+        if (!response.ok) {
+            throw new Error(`HTTP request failed with status: ${response.status}`);
+        }
+        const text = await response.text();
+        const url = new URL(requestUrl);
+        // external Files have a name that starts with '@'
+        // (so that they are identified as external when an archive is read back in)
+        const name = '@' + (url.host + url.pathname).replace(/\//g, '.');
+        return this.processFile(name, text);
     }
 }
 

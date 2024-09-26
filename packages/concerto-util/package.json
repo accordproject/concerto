@@ -68,7 +68,6 @@
     "axios": "1.6.0",
     "colors": "1.4.0",
     "debug": "4.3.4",
-    "json-colorizer": "2.2.2",
     "slash": "3.0.0"
   },
   "browserslist": "> 0.25%, not dead",

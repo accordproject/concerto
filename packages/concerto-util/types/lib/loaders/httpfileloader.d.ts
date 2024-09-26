@@ -1,6 +1,6 @@
 export = HTTPFileLoader;
 /**
- * Loads Files from an HTTP(S) URL using the axios library.
+ * Loads Files from an HTTP(S) URL using fetch.
  * @class
  * @private
  * @memberof module:concerto-util
@@ -20,7 +20,7 @@ declare class HTTPFileLoader {
      */
     accepts(url: string): boolean;
     /**
-     * Load a File from a URL and return it
+     * Load a text File from a URL and return it
      * @param {string} requestUrl - the url to get
      * @param {object} options - additional options
      * @return {Promise} a promise to the File

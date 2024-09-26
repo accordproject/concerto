@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
+namespace org.acme
 
-const path = require('path');
-const semver = require('semver');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+abstract concept Ok {}
 
-const timestamp = dayjs.utc().format('YYYYMMDDHHmmss');
-
-const rootDir = path.resolve('.');
-const configFile = path.resolve(rootDir, 'package.json');
-const config = require(configFile);
-config.version.replace(/-.*/, '');
-const targetVersion = semver.inc(config.version, 'patch') + '-' + timestamp;
-console.log(`::set-output name=stamp::${targetVersion}`);
+@category(Ok)
+asset Car identified by id {
+  o String id
+}

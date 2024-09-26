@@ -9,7 +9,7 @@ We'd love for you to help develop improvements to Concerto technology! Please re
 
 #### Building Concerto
 
-To build Concerto, you clone the source code repository and use lerna to build:
+To build Concerto, you clone the source code repository and use npm to build:
 
 ```shell
 # Clone your Github repository:
@@ -22,7 +22,7 @@ cd concerto
 git remote add upstream "https://github.com/accordproject/concerto.git"
 
 # Install node.js dependencies:
-npx lerna bootstrap
+npm i
 ```
 
 [apdev]: https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md

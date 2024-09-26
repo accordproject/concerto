@@ -78,7 +78,7 @@ $ concerto compare --old model.cto --new model-with-changes.cto
 
 ## Structure of the Code
 
-Top level repository (concerto), with sub packages. Each sub-package is published as an independent npm module using `lerna`:
+Top level repository (concerto), with sub packages. Each sub-package is published as an independent npm module using npm workspaces:
 * [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
 * [concerto-util](https://github.com/accordproject/concerto/tree/master/packages/concerto-util) : contains utility functions used in other parts of the code and fundamentally independent from Concerto as a modeling language
 * [concerto-cto](https://github.com/accordproject/concerto/tree/master/packages/concerto-cto) : contains the parser for the .cto syntax for Concerto. The parser now outputs a proper Concerto object, instance of the metamodel rather than a custom JSON object.

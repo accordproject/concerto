@@ -16,6 +16,14 @@
     "node": ">=18",
     "npm": ">=9"
   },
+  "workspaces": [
+    "packages/concerto-analysis",
+    "packages/concerto-core",
+    "packages/concerto-cto",
+    "packages/concerto-types",
+    "packages/concerto-util",
+    "packages/concerto-vocabulary"
+  ],
   "name": "concerto",
   "description": "Monorepo for concerto packages",
   "version": "4.0.0-alpha.0",
