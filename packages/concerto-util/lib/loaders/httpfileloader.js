@@ -46,7 +46,6 @@ class HTTPFileLoader {
      * @return {Promise} a promise to the File
      */
     async load(requestUrl, options) {
-        console.log(requestUrl);
         if (!options) {
             options = {
                 method: 'GET',

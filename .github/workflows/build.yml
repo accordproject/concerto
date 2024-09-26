@@ -16,8 +16,11 @@ jobs:
       matrix:
         node-version:
           - 18.x
+          - 20.x
         os:
           - windows-latest
+          - macos-latest
+          - linux-latest
 
     runs-on: ${{ matrix.os }}
 
