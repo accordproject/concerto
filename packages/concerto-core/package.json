@@ -4,8 +4,8 @@
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=10"
   },
   "main": "index.js",
   "browser": "dist/concerto-core.js",
@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-cto": "3.19.1",
-    "@accordproject/concerto-metamodel": "3.10.0",
+    "@accordproject/concerto-metamodel": "3.10.1",
     "@accordproject/concerto-util": "3.19.1",
     "dayjs": "1.11.10",
     "debug": "4.3.4",

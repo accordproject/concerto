@@ -6,28 +6,32 @@
     "eslint": "8.2.0",
     "jsdoc": "^4.0.2",
     "glob": "^7.2.0",
-    "lerna": "^5.6.2",
     "license-check-and-add": "2.3.6",
     "nyc": "15.1.0",
     "semver": "7.5.4"
   },
   "engines": {
-    "node": ">=16",
-    "npm": ">=8"
+    "node": ">=18",
+    "npm": ">=10"
   },
+  "workspaces": [
+    "packages/concerto-analysis",
+    "packages/concerto-core",
+    "packages/concerto-cto",
+    "packages/concerto-types",
+    "packages/concerto-util",
+    "packages/concerto-vocabulary"
+  ],
   "name": "concerto",
-  "description": "You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
+  "description": "Define and introspect data models",
   "version": "3.19.1",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
-    "postinstall": "npm run bootstrap",
-    "bootstrap": "lerna bootstrap",
     "pretest": "npm run licchk",
-    "test": "lerna run test",
-    "repoclean": "lerna clean",
     "licchk": "license-check-and-add",
-    "build": "lerna run build"
+    "test" : "npm test -ws",
+    "build" : "npm run build -ws"
   },
   "repository": {
     "type": "git",

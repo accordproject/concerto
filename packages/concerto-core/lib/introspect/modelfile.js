@@ -384,7 +384,7 @@ class ModelFile extends Decorated {
 
         throw new IllegalModelException(formatter({
             'type': type,
-            'imports': this.imports,
+            'imports': JSON.stringify(this.imports),
             'namespace': this.getNamespace()
         }),this);
     }
