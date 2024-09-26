@@ -23,9 +23,9 @@ dayjs.extend(utc);
 
 const timestamp = dayjs.utc().format('YYYYMMDDHHmmss');
 
-const lernaDirectory = path.resolve('.');
-const lernaConfigFile = path.resolve(lernaDirectory, 'lerna.json');
-const lernaConfig = require(lernaConfigFile);
-lernaConfig.version.replace(/-.*/, '');
-const targetVersion = semver.inc(lernaConfig.version, 'patch') + '-' + timestamp;
+const rootDir = path.resolve('.');
+const configFile = path.resolve(rootDir, 'package.json');
+const config = require(configFile);
+config.version.replace(/-.*/, '');
+const targetVersion = semver.inc(config.version, 'patch') + '-' + timestamp;
 console.log(`::set-output name=stamp::${targetVersion}`);
