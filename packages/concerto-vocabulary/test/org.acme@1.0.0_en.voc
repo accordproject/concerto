@@ -22,3 +22,4 @@ declarations:
     properties:
       - KEY: vin of the vehicle
       - VALUE: address of the vehicle
+  - Motorcycle:
