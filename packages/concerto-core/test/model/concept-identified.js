@@ -42,7 +42,7 @@ describe('Concept Identifiers', function () {
             --> Product product
         }
         transaction Request {}
-        event Event {}
+        event newEvent {}
         `, 'test.cto');
         classDecl = modelManager.getType('org.accordproject.Order');
     });
@@ -98,7 +98,7 @@ describe('Concept Identifiers', function () {
             const txn = factory.newResource('org.accordproject', 'Request');
             dayjs(txn.getTimestamp()).isValid().should.be.true;
 
-            const event = factory.newResource('org.accordproject', 'Event');
+            const event = factory.newResource('org.accordproject', 'newEvent');
             dayjs(event.getTimestamp()).isValid().should.be.true;
         });
 
