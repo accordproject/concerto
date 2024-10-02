@@ -103,7 +103,6 @@ class BaseModelManager {
         this.strict = !!options?.strict;
         this.options = options;
         this.addRootModel();
-        this.decorators = undefined;
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
         // TODO Remove on release of MapType
@@ -356,7 +355,6 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
-            this.decorators = undefined;
             delete this.modelFiles[namespace];
         }
     }
@@ -420,8 +418,6 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
-        // clear the decorators, because the model files may have changed
-        this.decorators = undefined;
         for (let ns in this.modelFiles) {
             this.modelFiles[ns].validate();
         }
