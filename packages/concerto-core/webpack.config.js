@@ -17,6 +17,7 @@
 let path = require('path');
 const webpack = require('webpack');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const packageJson = require('./package.json');
 
@@ -53,6 +54,7 @@ module.exports = {
             process: 'process/browser', // provide a shim for the global `process` variable
         }),
         new NodePolyfillPlugin(),
+        new BundleAnalyzerPlugin()
     ],
 
     module: {
