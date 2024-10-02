@@ -32,7 +32,10 @@ function getRootModel(versioned) {
     abstract concept Participant identified {}
     abstract concept Transaction {}
     abstract concept Event {}
-    `;
+    abstract concept Decorator {}
+    concept DotNetNamespace extends Decorator {
+       o String namespace
+    }`;
     const ast = JSON.parse(JSON.stringify(rootModelAst));
     ast.namespace = ns;
     return { rootModelFile, rootModelCto, rootModelAst: ast };

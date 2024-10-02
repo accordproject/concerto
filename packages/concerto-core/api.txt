@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,boolean?,processFile?) 
+   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,boolean?,object?,string?,string?,processFile?) 
    + boolean isModelManager() 
    + boolean isStrict() 
    + boolean isAliasedTypeEnabled() 
@@ -16,6 +16,7 @@ class BaseModelManager {
    + void validateModelFiles() 
    + Promise updateExternalModels(Object?,FileDownloader?) throws IllegalModelException
    + void writeModelsToFileSystem(string,Object?,boolean) 
+   + object getDecoratorValidation() 
    + Object[] getModels(Object?,boolean) 
    + void clearModelFiles() 
    + ModelFile getModelFile(string) 

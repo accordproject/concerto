@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.19.2 {0c20619546430976288fd73984666c4a} 2024-10-02
+- validateDecorators option added to ModelManager
+
 Version 3.17.5 {9bd69f9522c14a99a085f077e12ac4b2} 2024-08-29
 - importAliasing added to ModelManager parameters
 
