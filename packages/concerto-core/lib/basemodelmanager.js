@@ -57,6 +57,12 @@ const defaultProcessFile = (name, data) => {
     };
 };
 
+// default decorator validation configuration
+const DEFAULT_DECORATOR_VALIDATION = {
+    missingDecorator: undefined, // 'error' | 'warn' (see Logger.levels)...,
+    invalidDecorator: undefined, // 'error' | 'warn' ...
+};
+
 /**
  * Manages the Concerto model files.
  *
@@ -83,6 +89,9 @@ class BaseModelManager {
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
+     * @param {object} [options.decoratorValidation] - the decorator validation configuration
+     * @param {string} [options.decoratorValidation.defined] - the validation log level for defined decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.undefined] - the validation log level for undefined decorators: off, warning, error
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -94,11 +103,14 @@ class BaseModelManager {
         this.strict = !!options?.strict;
         this.options = options;
         this.addRootModel();
+        this.decorators = undefined;
+        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
         // TODO Remove on release of MapType
         // Supports both env var and property based flag
         this.enableMapType = !!options?.enableMapType;
         this.importAliasing = process?.env?.IMPORT_ALIASING === 'true' || !!options?.importAliasing;
+
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 
@@ -344,6 +356,7 @@ class BaseModelManager {
         if (!this.modelFiles[namespace]) {
             throw new Error('Model file does not exist');
         } else {
+            this.decorators = undefined;
             delete this.modelFiles[namespace];
         }
     }
@@ -407,6 +420,8 @@ class BaseModelManager {
      * Validates all models files in this model manager
      */
     validateModelFiles() {
+        // clear the decorators, because the model files may have changed
+        this.decorators = undefined;
         for (let ns in this.modelFiles) {
             this.modelFiles[ns].validate();
         }
@@ -467,6 +482,14 @@ class BaseModelManager {
      */
     writeModelsToFileSystem(path, options = {}) {
         ModelWriter.writeModelsToFileSystem(this.getModelFiles(), path, options);
+    }
+
+    /**
+     * Returns the status of the decorator validation options
+     * @returns {object} returns an object that indicates the log levels for defined and undefined decorators
+     */
+    getDecoratorValidation() {
+        return this.decoratorValidation;
     }
 
     /**
