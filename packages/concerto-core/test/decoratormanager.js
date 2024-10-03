@@ -154,6 +154,46 @@ describe('DecoratorManager', () => {
             decl.getDecorator('Editable').should.not.be.null;
         });
 
+        it.only('should add decorators that target declarations, with decorator validation', async function() {
+            // create a model manager with decorator validation ON
+            const testModelManager = new ModelManager({strict:true, decoratorValidation: {missingDecorator: 'error', invalidDecorator: 'error'} });
+
+            // add the model that declares the decorators we can use
+            // in the model and in decorator command sets
+            testModelManager.addCTOModel(`namespace org.acme.decorators@1.0.0
+                import concerto@1.0.0.Decorator
+                concept PII extends Decorator {}
+                concept Form extends Decorator {
+                    o String key
+                    o String value
+                }
+                concept New extends Decorator {}
+                concept UnversionedNamespace extends Decorator {}
+                concept Address extends Decorator {}
+                concept IsValid extends Decorator {}
+            `, 'decorators.cto');
+
+            // add the domain model
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            // load the decorator command set
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+
+            // decorator the models, using the default namespace org.acme.decorators@1.0.0 for decorator
+            // commands that do not supply an explicit namespaces for their decorators
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, validateCommands: true, migrate: true, defaultNamespace: 'org.acme.decorators@1.0.0'});
+
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            ssnDecl.getDecorator('PII').should.not.be.null;
+
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.should.not.be.null;
+            decl.getDecorator('Editable').should.not.be.null;
+        });
+
         /*
         This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to
         all the declarations within the namespace, which has been identified as bug and will be deprecated.
