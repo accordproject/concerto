@@ -31,10 +31,10 @@ if (global === undefined) {
 }
 /* eslint-enable no-unused-vars */
 
-const DCS_VERSION = '0.3.0';
+const DCS_VERSION = '0.4.0';
 
 const DCS_MODEL = `concerto version "^3.0.0"
-namespace org.accordproject.decoratorcommands@0.3.0
+namespace org.accordproject.decoratorcommands@0.4.0
 
 import concerto.metamodel@1.0.0.Decorator
 
@@ -83,6 +83,7 @@ concept Command {
     o CommandTarget target
     o Decorator decorator
     o CommandType type
+    o String decoratorNamespace optional
 }
 
 /**
@@ -325,7 +326,7 @@ class DecoratorManager {
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
                 DCS_MODEL,
-                'decoratorcommands@0.3.0.cto'
+                'decoratorcommands@0.4.0.cto'
             );
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
@@ -365,6 +366,7 @@ class DecoratorManager {
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ModelManager} a new model manager with the decorations applied
      */
@@ -372,10 +374,24 @@ class DecoratorManager {
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
+        const decoratorImports = decoratorCommandSet.commands.map(command => {
+            return {
+                $class: `${MetaModelNamespace}.ImportType`,
+                name: command.decorator.name,
+                namespace: command.decorator.namespace ? command.decorator.namespace : options.defaultNamespace
+            };
+        }).filter(i => i.namespace);
+        decoratorImports.push({
+            $class: `${MetaModelNamespace}.ImportType`,
+            name: 'Decorator',
+            namespace: 'concerto@1.0.0'
+        });
+
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
+            model.imports = decoratorImports;
             model.declarations.forEach((decl) => {
                 const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
@@ -421,8 +437,12 @@ class DecoratorManager {
 
             });
         });
+
         const enableMapType = modelManager?.enableMapType ? true : false;
-        const newModelManager = new ModelManager({ enableMapType });
+        const newModelManager = new ModelManager({
+            strict: modelManager.isStrict(),
+            enableMapType,
+            decoratorValidation: modelManager.getDecoratorValidation()});
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
     }

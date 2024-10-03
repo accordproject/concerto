@@ -781,8 +781,10 @@ class BaseModelManager {
     fromAst(ast) {
         this.clearModelFiles();
         ast.models.forEach( model => {
-            const modelFile = new ModelFile( this, model );
-            this.addModelFile( modelFile, null, null, true );
+            if(model.namespace !== 'concerto@1.0.0') { // excludes the Concerto namespace, already added
+                const modelFile = new ModelFile( this, model );
+                this.addModelFile( modelFile, null, null, true );
+            }
         });
         this.validateModelFiles();
     }
@@ -797,7 +799,7 @@ class BaseModelManager {
             $class: `${MetaModelNamespace}.Models`,
             models: [],
         };
-        const modelFiles = this.getModelFiles();
+        const modelFiles = this.getModelFiles(true); // includes the Concerto namespace
         modelFiles.forEach((thisModelFile) => {
             let metaModel = thisModelFile.getAst();
             if (resolve) {
