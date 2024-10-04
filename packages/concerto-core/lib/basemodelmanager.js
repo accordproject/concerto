@@ -803,7 +803,6 @@ class BaseModelManager {
                 this.addModelFile( modelFile, null, null, true );
             }
         });
-        console.log(Object.keys(this.modelFiles));
         this.validateModelFiles();
     }
 
