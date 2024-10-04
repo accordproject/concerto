@@ -36,7 +36,7 @@ class BaseModelManager {
    + boolean derivesFrom(string,string) 
    + object resolveMetaModel(object) 
    + void fromAst(ast) 
-   + void getAst(boolean?) 
+   + void getAst(boolean?,boolean?) 
    + BaseModelManager filter(FilterFunction) 
 }
 class Concerto {
@@ -70,6 +70,7 @@ class DecoratorManager {
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
+   + object getDecoratorModel() 
 class Factory {
    + string newId() 
    + void constructor(ModelManager) 

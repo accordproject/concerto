@@ -40,7 +40,7 @@ describe('ModelManager', () => {
     describe('#unvalidateDecorators', () => {
         it('should not throw when decorators are declared', () => {
             modelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden optional
 }
@@ -71,7 +71,7 @@ concept Person {
     describe('#validateDecorators', () => {
         it('should not throw when decorators are declared', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden optional
 }
@@ -88,7 +88,7 @@ concept Person {
 
         it('should not throw when using all argument types', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
    o Boolean bool
    o String str
@@ -124,7 +124,7 @@ concept Person {
 
         it('should throw when decorators are declared but have invalid arguments', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden optional
 }
@@ -142,7 +142,7 @@ concept Person {
 
         it('should throw when decorator has invalid string argument', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o String test
 }
@@ -157,7 +157,7 @@ concept Person {
 
         it('should throw when decorator has invalid number argument', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Integer test
 }
@@ -172,7 +172,7 @@ concept Person {
 
         it('should throw when decorator has invalid object argument', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Concept test
 }
@@ -188,7 +188,7 @@ concept Person {
 
         it('should throw when decorators do not have enough arguments', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden
 }
@@ -205,7 +205,7 @@ concept Person {
 
         it('should throw when decorators have too many arguments', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden
 }
@@ -222,7 +222,7 @@ concept Person {
 
         it('should not throw when decorators have missing optional arguments', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 concept Hide extends Decorator {
     o Boolean hidden
     o String description optional

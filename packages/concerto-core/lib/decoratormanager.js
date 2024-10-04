@@ -374,24 +374,20 @@ class DecoratorManager {
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
+        // we create synthetic imports for all decorator declarations
         const decoratorImports = decoratorCommandSet.commands.map(command => {
             return {
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
-                namespace: command.decorator.namespace ? command.decorator.namespace : options.defaultNamespace
+                namespace: command.decorator.namespace ? command.decorator.namespace : options?.defaultNamespace
             };
         }).filter(i => i.namespace);
-        decoratorImports.push({
-            $class: `${MetaModelNamespace}.ImportType`,
-            name: 'Decorator',
-            namespace: 'concerto@1.0.0'
-        });
-
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
-        const ast = modelManager.getAst(true);
+        const ast = modelManager.getAst(true, true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
-            model.imports = decoratorImports;
+            // add the imports for all decorators, in case they get added below
+            model.imports = model.imports ? model.imports.concat(decoratorImports) : decoratorImports;
             model.declarations.forEach((decl) => {
                 const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
@@ -467,7 +463,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const sourceAst = modelManager.getAst(true);
+        const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
         const collectionResp = decoratorExtrator.extract();
         return {
@@ -490,7 +486,7 @@ class DecoratorManager {
             locale:'en',
             ...options
         };
-        const sourceAst = modelManager.getAst(true);
+        const sourceAst = modelManager.getAst(true, true);
         const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
         const collectionResp = decoratorExtrator.extract();
         return {

@@ -27,15 +27,13 @@ function getRootModel(versioned) {
     const ns = versioned ? 'concerto@1.0.0' : 'concerto';
     const rootModelCto = `@DotNetNamespace("AccordProject.Concerto")
     namespace ${ns}
+    import concerto.decorator@1.0.0.DotNetNamespace
     abstract concept Concept {}
     abstract concept Asset identified {}
     abstract concept Participant identified {}
     abstract concept Transaction {}
     abstract concept Event {}
-    abstract concept Decorator {}
-    concept DotNetNamespace extends Decorator {
-       o String namespace
-    }`;
+    `;
     const ast = JSON.parse(JSON.stringify(rootModelAst));
     ast.namespace = ns;
     return { rootModelFile, rootModelCto, rootModelAst: ast };

@@ -1,5 +1,5 @@
 namespace test@1.0.0
-import concerto@1.0.0.Decorator
+import concerto.decorator@1.0.0.Decorator
 
 scalar SSN extends String
 

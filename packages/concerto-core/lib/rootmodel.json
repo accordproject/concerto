@@ -13,7 +13,13 @@
         }
     ],
     "namespace": "concerto@1.0.0",
-    "imports": [],
+    "imports": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "DotNetNamespace",
+            "namespace": "concerto.decorator@1.0.0"
+        }
+    ],
     "declarations": [
         {
             "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
@@ -50,29 +56,6 @@
             "name": "Event",
             "isAbstract": true,
             "properties": []
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-            "name": "Decorator",
-            "isAbstract": true,
-            "properties": []
-        },
-        {
-            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
-            "name": "DotNetNamespace",
-            "superType": {
-                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-                "name": "Decorator"
-            },
-            "isAbstract": false,
-            "properties": [
-                {
-                    "$class": "concerto.metamodel@1.0.0.StringProperty",
-                    "name": "namespace",
-                    "isArray": false,
-                    "isOptional": false
-                }
-            ]
         }
     ]
 }
