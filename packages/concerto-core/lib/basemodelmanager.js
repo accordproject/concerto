@@ -27,6 +27,7 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { getRootModel } = require('./rootmodel');
+const { getDecoratorModel } = require('./decoratormodel');
 const MetamodelException = require('./metamodelexception');
 
 // Types needed for TypeScript generation.
@@ -62,6 +63,10 @@ const DEFAULT_DECORATOR_VALIDATION = {
     missingDecorator: undefined, // 'error' | 'warn' (see Logger.levels)...,
     invalidDecorator: undefined, // 'error' | 'warn' ...
 };
+
+// these namespaces are internal and excluded by default by getModelFiles
+// and ignored by fromAst
+const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
 
 /**
  * Manages the Concerto model files.
@@ -102,6 +107,7 @@ class BaseModelManager {
         this.decoratorFactories = [];
         this.strict = !!options?.strict;
         this.options = options;
+        this.addDecoratorModel();
         this.addRootModel();
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
@@ -164,6 +170,16 @@ class BaseModelManager {
             const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
             this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile, true);
         }
+    }
+
+    /**
+     * Adds decorator types
+     * @private
+     */
+    addDecoratorModel() {
+        const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
+        const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
+        this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
     /**
@@ -501,7 +517,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || (ns !== 'concerto@1.0.0' && ns !== 'concerto')) {
+            if(includeConcertoNamespace || (!EXCLUDE_NS.includes(ns))) {
                 result.push(this.modelFiles[ns]);
             }
         }
@@ -580,6 +596,7 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
+        this.addDecoratorModel();
         this.addRootModel();
     }
 
@@ -770,7 +787,7 @@ class BaseModelManager {
      * @return {object} the resolved metamodel
      */
     resolveMetaModel(metaModel) {
-        const priorModels = this.getAst();
+        const priorModels = this.getAst(false, true);
         return MetaModelUtil.resolveLocalNames(priorModels, metaModel);
     }
 
@@ -781,25 +798,27 @@ class BaseModelManager {
     fromAst(ast) {
         this.clearModelFiles();
         ast.models.forEach( model => {
-            if(model.namespace !== 'concerto@1.0.0') { // excludes the Concerto namespace, already added
+            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
                 const modelFile = new ModelFile( this, model );
                 this.addModelFile( modelFile, null, null, true );
             }
         });
+        console.log(Object.keys(this.modelFiles));
         this.validateModelFiles();
     }
 
     /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names
+     * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve) {
+    getAst(resolve,includeConcertoNamespaces) {
         const result = {
             $class: `${MetaModelNamespace}.Models`,
             models: [],
         };
-        const modelFiles = this.getModelFiles(true); // includes the Concerto namespace
+        const modelFiles = this.getModelFiles(includeConcertoNamespaces);
         modelFiles.forEach((thisModelFile) => {
             let metaModel = thisModelFile.getAst();
             if (resolve) {

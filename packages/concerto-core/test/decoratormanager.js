@@ -103,6 +103,8 @@ describe('DecoratorManager', () => {
             const decoratedCTO = Printer.toCTO(decoratedAst);
             const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8');
             const result = decoratedCTO === decoratedTest;
+            console.log(decoratedCTO);
+            console.log(decoratedTest);
             chai.expect(result).to.be.true;
         });
 
@@ -154,14 +156,14 @@ describe('DecoratorManager', () => {
             decl.getDecorator('Editable').should.not.be.null;
         });
 
-        it.only('should add decorators that target declarations, with decorator validation', async function() {
+        it('should add decorators that target declarations, with decorator validation', async function() {
             // create a model manager with decorator validation ON
             const testModelManager = new ModelManager({strict:true, decoratorValidation: {missingDecorator: 'error', invalidDecorator: 'error'} });
 
             // add the model that declares the decorators we can use
             // in the model and in decorator command sets
             testModelManager.addCTOModel(`namespace org.acme.decorators@1.0.0
-                import concerto@1.0.0.Decorator
+                import concerto.decorator@1.0.0.Decorator
                 concept PII extends Decorator {}
                 concept Form extends Decorator {
                     o String key
@@ -397,9 +399,9 @@ describe('DecoratorManager', () => {
             let dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/incompatible_version_dcs.json'), 'utf-8');
             dcs = DecoratorManager.migrateTo(JSON.parse(dcs), '0.3.0');
 
-            dcs.$class.should.equal('org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet');
-            dcs.commands[0].$class.should.equal('org.accordproject.decoratorcommands@0.3.0.Command');
-            dcs.commands[0].target.$class.should.equal('org.accordproject.decoratorcommands@0.3.0.CommandTarget');
+            dcs.$class.should.equal('org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet');
+            dcs.commands[0].$class.should.equal('org.accordproject.decoratorcommands@0.4.0.Command');
+            dcs.commands[0].target.$class.should.equal('org.accordproject.decoratorcommands@0.4.0.CommandTarget');
             dcs.commands[0].target.type.should.equal('concerto.metamodel@1.0.0.StringMapKeyType'); // concerto metamodel $class does not change
             dcs.commands[0].decorator.$class.should.equal('concerto.metamodel@1.0.0.Decorator'); // concerto metamodel $class does not change
         });
@@ -619,9 +621,8 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/invalid-model.json'), 'utf-8');
 
             (() => {
-                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                    {validate: true});
-            }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.3.0"/);
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),{validate: true});
+            }).should.throw(/Type "Invalid" is not defined in namespace "org.accordproject.decoratorcommands@0.4.0"/);
         });
 
         it('should detect decorator command set with an invalid command type', async function() {
@@ -758,10 +759,10 @@ describe('DecoratorManager', () => {
             };
 
             command = {
-                '$class' : 'org.accordproject.decoratorcommands@0.3.0.Command',
+                '$class' : 'org.accordproject.decoratorcommands@0.4.0.Command',
                 'type' : 'UPSERT',
                 'target' : {
-                    '$class' : 'org.accordproject.decoratorcommands@0.3.0.CommandTarget',
+                    '$class' : 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
                     'namespace' : 'test@1.0.0'
                 },
                 'decorator' : {

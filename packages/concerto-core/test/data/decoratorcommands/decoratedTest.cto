@@ -1,10 +1,22 @@
 namespace test@1.0.0
 
+import concerto.decorator@1.0.0.Decorator
+
 @Declaration()
 @NamespaceDeclaration()
 @NamespaceDeprecated()
 @Namespace()
 scalar SSN extends String
+
+@NamespaceDeprecated()
+@Namespace()
+concept Editable extends Decorator {
+}
+
+@NamespaceDeprecated()
+@Namespace()
+concept Custom extends Decorator {
+}
 
 @Editable
 @NamespaceDeprecated()

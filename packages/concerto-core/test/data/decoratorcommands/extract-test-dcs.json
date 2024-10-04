@@ -1,14 +1,14 @@
 [
     {
-      "$class": "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+      "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
       "name": "test",
       "version": "1.0.0",
       "commands": [
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Dummy"
           },
@@ -18,10 +18,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Dummy",
             "property": "One"
@@ -32,10 +32,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "SSN"
           },
@@ -45,10 +45,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "participantName"
           },
@@ -58,10 +58,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "participantName",
             "property": "participantKey"
@@ -72,10 +72,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "assetName"
           },
@@ -95,10 +95,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "mapName",
             "mapElement": "KEY"
@@ -115,10 +115,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person"
           },
@@ -128,10 +128,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "firstName"
@@ -142,10 +142,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "firstName"
@@ -166,10 +166,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "firstName"
@@ -180,10 +180,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "lastName"
@@ -200,10 +200,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "lastName"
@@ -220,10 +220,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "lastName"
@@ -244,10 +244,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "lastName"
@@ -258,10 +258,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "bio"
@@ -282,10 +282,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "bio"
@@ -296,10 +296,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "ssn"
@@ -320,10 +320,10 @@
           }
         },
         {
-          "$class": "org.accordproject.decoratorcommands@0.3.0.Command",
+          "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
           "type": "UPSERT",
           "target": {
-            "$class": "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
             "namespace": "test@1.0.0",
             "declaration": "Person",
             "property": "ssn"
