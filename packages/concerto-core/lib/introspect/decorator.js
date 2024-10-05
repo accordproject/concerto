@@ -16,6 +16,8 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const { Logger } = require('@accordproject/concerto-util');
+const ModelUtil = require('../modelutil');
+const IllegalModelException = require('./illegalmodelexception');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -25,19 +27,6 @@ if (global === undefined) {
     const Property = require('./property');
 }
 /* eslint-enable no-unused-vars */
-
-/**
- * Handles a validation error, logging and throwing as required
- * @param {string} level the log level
- * @param {*} err the error to log
- * @private
- */
-function handleError(level, err) {
-    Logger.dispatch(level, err);
-    if(level === 'error') {
-        throw err;
-    }
-}
 
 /**
  * Decorator encapsulates a decorator (annotation) on a class or property.
@@ -56,6 +45,20 @@ class Decorator {
         this.parent = parent;
         this.arguments = null;
         this.process();
+    }
+
+    /**
+    * Handles a validation error, logging and throwing as required
+    * @param {string} level the log level
+    * @param {*} err the error to log
+    * @param {*} [fileLocation] the file location
+    * @private
+    */
+    handleError(level, err) {
+        Logger.dispatch(level, err);
+        if (level === 'error') {
+            throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
+        }
     }
 
     /**
@@ -90,7 +93,6 @@ class Decorator {
                 let thing = this.ast.arguments[n];
                 if (thing) {
                     if (thing.$class === `${MetaModelNamespace}.DecoratorTypeReference`) {
-                        // XXX Is this really what we want?
                         this.arguments.push({
                             type: 'Identifier',
                             name: thing.type.name,
@@ -111,27 +113,28 @@ class Decorator {
      */
     validate() {
         const mf = this.getParent().getModelFile();
+        const decoratedName = this.getParent().getFullyQualifiedName?.();
         const mm = mf.getModelManager();
         const validationOptions = mm.getDecoratorValidation();
 
-        if(validationOptions.missingDecorator || validationOptions.invalidDecorator) {
+        if (validationOptions.missingDecorator || validationOptions.invalidDecorator) {
             try {
                 // this throws if the type does not exist
-                mf.resolveType(`Decorator ${this.getName()} on ${this.getParent().getName()}`, this.getName());
+                mf.resolveType(decoratedName, this.getName(), this.ast.location);
                 const decoratorDecl = mf.getType(this.getName());
                 const requiredProperties = decoratorDecl.getProperties().filter(p => !p.isOptional());
                 const optionalProperties = decoratorDecl.getProperties().filter(p => p.isOptional());
                 const allProperties = [...requiredProperties, ...optionalProperties];
-                if(this.getArguments().length < requiredProperties.length) {
+                if (this.getArguments().length < requiredProperties.length) {
                     const err = `Decorator ${this.getName()} has too few arguments. Required properties are: [${requiredProperties.map(p => p.getName()).join()}]`;
-                    handleError(validationOptions.invalidDecorator, err);
+                    this.handleError(validationOptions.invalidDecorator, err);
                 }
                 const args = this.getArguments();
                 for (let n = 0; n < args.length; n++) {
                     const arg = args[n];
-                    if (n > allProperties.length-1) {
+                    if (n > allProperties.length - 1) {
                         const err = `Decorator ${this.getName()} has too many arguments. Properties are: [${allProperties.map(p => p.getName()).join()}]`;
-                        handleError(validationOptions.invalidDecorator, err);
+                        this.handleError(validationOptions.invalidDecorator, err);
                     }
                     else {
                         const property = allProperties[n];
@@ -142,25 +145,36 @@ class Decorator {
                         case 'Long':
                             if (argType !== 'number') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected number. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                handleError(validationOptions.invalidDecorator, err);
+                                this.handleError(validationOptions.invalidDecorator, err);
                             }
                             break;
                         case 'String':
                             if (argType !== 'string') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected string. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                handleError(validationOptions.invalidDecorator, err);
+                                this.handleError(validationOptions.invalidDecorator, err);
                             }
                             break;
                         case 'Boolean':
                             if (argType !== 'boolean') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected boolean. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                handleError(validationOptions.invalidDecorator, err);
+                                this.handleError(validationOptions.invalidDecorator, err);
                             }
                             break;
                         default: {
-                            if (argType !== 'object') {
+                            if (argType !== 'object' || arg?.type !== 'Identifier') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
-                                handleError(validationOptions.invalidDecorator, err);
+                                this.handleError(validationOptions.invalidDecorator, err);
+                            }
+                            const typeDecl = mf.getType(arg.name);
+                            if (!typeDecl) {
+                                const err = `Decorator ${this.getName()} references a type ${arg.name} which has not been defined/imported.`;
+                                this.handleError(validationOptions.invalidDecorator, err);
+                            }
+                            else {
+                                if (!ModelUtil.isAssignableTo(mf, typeDecl.getFullyQualifiedName(), property)) {
+                                    const err = `Decorator ${this.getName()} references a type ${arg.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
+                                    this.handleError(validationOptions.invalidDecorator, err);
+                                }
                             }
                             break;
                         }
@@ -168,8 +182,8 @@ class Decorator {
                     }
                 }
             }
-            catch(err) {
-                handleError(validationOptions.missingDecorator, err);
+            catch (err) {
+                this.handleError(validationOptions.missingDecorator, err);
             }
         }
         // check that all type ref arguments can be resolved

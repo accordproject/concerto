@@ -49,7 +49,7 @@ describe('MetaModel (Person)', () => {
         });
 
         it('should convert and validate a CTO model to its metamodel with name resolution', async () => {
-            const modelManager = await ModelLoader.loadModelManager([personModelPath]);
+            const modelManager = await ModelLoader.loadModelManager([personModelPath], {offline: true});
             const mm1 = Parser.parse(personModel);
             validateMetaModel(mm1);
             const mm1r = modelManager.resolveMetaModel(mm1);
