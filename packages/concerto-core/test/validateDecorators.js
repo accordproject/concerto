@@ -16,9 +16,6 @@
 
 const ModelManager = require('../lib/modelmanager');
 
-// const chai = require('chai');
-// const should = chai.should();
-
 describe('ModelManager', () => {
 
     let validatedModelManager = null;
@@ -107,14 +104,35 @@ o Integer age
             validatedModelManager.validateModelFiles();
         });
 
-        it('should throw when decorators are not imported/declared', () => {
+        it('should throw when decorators are not imported/declared - property', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
 concept Person {
-   o String name
    @Hide
    o String ssn
-   @Hide(false)
-   o Integer age
+}`, 'test.cto', true);
+
+            (() => {
+                validatedModelManager.validateModelFiles();
+            }).should.throw(/Undeclared type "Hide"/);
+        });
+
+        it('should throw when decorators are not imported/declared - declaration', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+@Hide
+concept Person {
+   o String ssn
+}`, 'test.cto', true);
+
+            (() => {
+                validatedModelManager.validateModelFiles();
+            }).should.throw(/Undeclared type "Hide"/);
+        });
+
+        it('should throw when decorators are not imported/declared - namespace', () => {
+            validatedModelManager.addCTOModel(`@Hide
+namespace test@1.0.0
+concept Person {
+   o String ssn
 }`, 'test.cto', true);
 
             (() => {
@@ -137,7 +155,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has invalid decorator argument. Expected boolean. Found string, with value "foo"/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
         it('should throw when decorator has invalid string argument', () => {
@@ -152,7 +170,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has invalid decorator argument. Expected string. Found boolean, with value false/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
         it('should throw when decorator has invalid number argument', () => {
@@ -167,24 +185,81 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has invalid decorator argument. Expected number. Found boolean, with value false/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
-        it('should throw when decorator has invalid object argument', () => {
+        it('should not throw when decorator has valid object argument', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
 import concerto.decorator@1.0.0.Decorator
+
+abstract concept Category {}
+concept HR extends Category {}
+
 concept Hide extends Decorator {
-    o Concept test
+    o Category category
 }
+
 concept Person {
-   @Hide(false)
+   @Hide(HR)
+   o String ssn
+}`, 'test.cto', true);
+            validatedModelManager.validateModelFiles();
+        });
+
+        it('should throw when decorator has invalid object argument - type checking', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+abstract concept Category {}
+concept HR extends Category {}
+concept Name {}
+
+concept Hide extends Decorator {
+    o Category category
+}
+
+concept Person {
+   @Hide(Name)
    o String ssn
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has invalid decorator argument. Expected object. Found boolean, with value false/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
+        it('should throw when decorator has invalid object argument - primitive', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide("foo")
+   o String ssn
+}`, 'test.cto', true);
+            (() => {
+                validatedModelManager.validateModelFiles();
+            }).should.throw(/IllegalModelException: Decorator Hide/);
+        });
+
+        it('should throw when decorator has missing object argument', () => {
+            validatedModelManager.addCTOModel(`namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
+
+concept Hide extends Decorator {
+    o Concept concept
+}
+
+concept Person {
+   @Hide(Missing)
+   o String ssn
+}`, 'test.cto', true);
+            (() => {
+                validatedModelManager.validateModelFiles();
+            }).should.throw(/IllegalModelException: Decorator Hide/);
+        });
 
         it('should throw when decorators do not have enough arguments', () => {
             validatedModelManager.addCTOModel(`namespace test@1.0.0
@@ -200,7 +275,7 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has too few arguments. Required properties are: \[hidden\]/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
         it('should throw when decorators have too many arguments', () => {
@@ -217,12 +292,14 @@ concept Person {
 }`, 'test.cto', true);
             (() => {
                 validatedModelManager.validateModelFiles();
-            }).should.throw(/Decorator Hide has too many arguments. Properties are: \[hidden\]/);
+            }).should.throw(/IllegalModelException: Decorator Hide/);
         });
 
         it('should not throw when decorators have missing optional arguments', () => {
-            validatedModelManager.addCTOModel(`namespace test@1.0.0
+            validatedModelManager.addCTOModel(`@Hide(false)
+namespace test@1.0.0
 import concerto.decorator@1.0.0.Decorator
+@Hide(true)
 concept Hide extends Decorator {
     o Boolean hidden
     o String description optional
