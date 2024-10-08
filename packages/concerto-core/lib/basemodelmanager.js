@@ -95,7 +95,7 @@ class BaseModelManager {
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
-     * @param {string} [options.decoratorValidation.defined] - the validation log level for defined decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.undefined] - the validation log level for undefined decorators: off, warning, error
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
