@@ -96,7 +96,7 @@ class BaseModelManager {
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
-     * @param {string} [options.decoratorValidation.undefined] - the validation log level for undefined decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
