@@ -160,40 +160,43 @@ describe('DecoratorManager', () => {
             // create a model manager with decorator validation ON
             const testModelManager = new ModelManager({strict:true, decoratorValidation: {missingDecorator: 'error', invalidDecorator: 'error'} });
 
+            // add a model that defines types that are *referenced* by decorators
+            // declared in the decorator command set web.json
+            testModelManager.addCTOModel(`namespace org.acme.categories@1.0.0
+                abstract concept Category {}
+                concept HR extends Category {}
+            `, 'categories.cto');
+
             // add the model that declares the decorators we can use
             // in the model and in decorator command sets
             testModelManager.addCTOModel(`namespace org.acme.decorators@1.0.0
                 import concerto.decorator@1.0.0.Decorator
-                concept PII extends Decorator {}
+
                 concept Form extends Decorator {
                     o String key
                     o String value
+                    o Concept category
                 }
-                concept New extends Decorator {}
-                concept UnversionedNamespace extends Decorator {}
-                concept Address extends Decorator {}
-                concept IsValid extends Decorator {}
             `, 'decorators.cto');
 
             // add the domain model
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'validated.cto');
+
+            const cat = testModelManager.getType('org.acme.categories@1.0.0.HR');
+            cat.should.not.be.null;
 
             // load the decorator command set
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/validated.json'), 'utf-8');
 
             // decorator the models, using the default namespace org.acme.decorators@1.0.0 for decorator
             // commands that do not supply an explicit namespaces for their decorators
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                 {validate: true, validateCommands: true, migrate: true, defaultNamespace: 'org.acme.decorators@1.0.0'});
 
-            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
-            ssnDecl.should.not.be.null;
-            ssnDecl.getDecorator('PII').should.not.be.null;
-
-            const decl = decoratedModelManager.getType('test@1.0.0.Person');
-            decl.should.not.be.null;
-            decl.getDecorator('Editable').should.not.be.null;
+            const personDecl = decoratedModelManager.getType('test@1.0.0.Person');
+            personDecl.should.not.be.null;
+            personDecl.getProperty('firstName').getDecorator('Form').should.not.be.null;
         });
 
         /*

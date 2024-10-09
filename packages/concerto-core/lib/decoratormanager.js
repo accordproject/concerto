@@ -375,19 +375,30 @@ class DecoratorManager {
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
         // we create synthetic imports for all decorator declarations
+        // along with any of their type reference arguments
         const decoratorImports = decoratorCommandSet.commands.map(command => {
-            return {
+            return [{
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
                 namespace: command.decorator.namespace ? command.decorator.namespace : options?.defaultNamespace
-            };
-        }).filter(i => i.namespace);
+            }].concat(command.decorator.arguments ? command.decorator.arguments?.filter(a => a.type)
+                .map(a => {
+                    return {
+                        $class: `${MetaModelNamespace}.ImportType`,
+                        name: a.type.name,
+                        namespace: a.type.namespace ? a.type.namespace : options?.defaultNamespace
+                    };
+                })
+                : []);
+        }).flat().filter(i => i.namespace);
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
         const ast = modelManager.getAst(true, true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
-            // add the imports for all decorators, in case they get added below
-            model.imports = model.imports ? model.imports.concat(decoratorImports) : decoratorImports;
+            // remove the imports for types defined in this namespace
+            const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
+            // add the imports for decorators, in case they get added below
+            model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
             model.declarations.forEach((decl) => {
                 const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;

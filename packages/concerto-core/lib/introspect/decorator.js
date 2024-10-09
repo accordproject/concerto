@@ -171,7 +171,7 @@ class Decorator {
                                 this.handleError(validationOptions.invalidDecorator, err);
                             }
                             else {
-                                if (!ModelUtil.isAssignableTo(mf, typeDecl.getFullyQualifiedName(), property)) {
+                                if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
                                     const err = `Decorator ${this.getName()} references a type ${arg.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
                                     this.handleError(validationOptions.invalidDecorator, err);
                                 }
@@ -183,14 +183,10 @@ class Decorator {
                 }
             }
             catch (err) {
+                console.log(err);
                 this.handleError(validationOptions.missingDecorator, err);
             }
         }
-        // check that all type ref arguments can be resolved
-        const typeRefs = this.arguments.filter(a => a?.type === 'Identifier');
-        typeRefs.forEach(typeRef => {
-            mf.resolveType(`Decorator ${this.getName()} on ${this.getParent().getName()}`, typeRef.name);
-        });
     }
 
     /**

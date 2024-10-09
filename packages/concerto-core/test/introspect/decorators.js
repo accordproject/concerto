@@ -183,11 +183,15 @@ describe('Decorators', () => {
         it('should fail to validate type refs that are not defined locally', () => {
 
             (() => {
-                const modelManager = new ModelManager();
+                const modelManager = new ModelManager({
+                    decoratorValidation: {
+                        missingDecorator: 'error'
+                    }
+                });
                 Util.addComposerModel(modelManager);
                 let modelDefinitions = fs.readFileSync('test/data/decorators/invalid-typeref.cto', 'utf8');
                 modelManager.addCTOModel(modelDefinitions);
-            }).should.throw(/Undeclared type "Missing"/);
+            }).should.throw(/IllegalModelException: Undeclared type/);
         });
 
         it('should fail to validate type refs that are not in imported namespace', () => {

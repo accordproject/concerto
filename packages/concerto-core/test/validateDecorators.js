@@ -215,7 +215,7 @@ concept HR extends Category {}
 concept Name {}
 
 concept Hide extends Decorator {
-    o Category category
+    o Category category optional
 }
 
 concept Person {
