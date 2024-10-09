@@ -1,13 +1,13 @@
 {
-    "$class" : "org.accordproject.decoratorcommands@0.3.0.Invalid",
+    "$class" : "org.accordproject.decoratorcommands@0.4.0.Invalid",
     "name" : "invalid-type",
     "version": "1.0.0",
     "commands" : [
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "type" : "concerto.metamodel@1.0.0.Foo"
             },
             "decorator" : {

@@ -386,7 +386,7 @@ describe('VocabularyManager', () => {
         const commandSet = vocabularyManager.generateDecoratorCommands(modelManager, 'en-GB');
         expect(commandSet).toMatchSnapshot();
         const newModelManager = DecoratorManager.decorateModels( modelManager, commandSet,
-            {validate: true, validateCommands: true});
+            {validate: true, migrate: true, validateCommands: true});
         const mf = newModelManager.getModelFile('org.acme@1.0.0');
         const vehicleDecl = mf.getAssetDeclaration('Vehicle');
         const decorator = vehicleDecl.getDecorator('Term');
