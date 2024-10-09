@@ -195,8 +195,12 @@ class BaseModelManager {
         const existingModelFileName = this.modelFiles[modelFile.getNamespace()].getName();
         const postfix = existingModelFileName ? ` in file ${existingModelFileName}` : '';
         const prefix = modelFile.getName() ? ` specified in file ${modelFile.getName()}` : '';
-        let errMsg = `Namespace ${modelFile.getNamespace()}${prefix} is already declared${postfix}`;
-        throw new Error(errMsg);
+        let formatter = Globalize.messageFormatter('basemodelmanager-namespaceexists');
+        throw new Error(formatter({
+            namespace: modelFile.getNamespace(),
+            prefix: prefix,
+            postfix: postfix
+        }));
     }
 
     /**
@@ -219,7 +223,7 @@ class BaseModelManager {
         debug(NAME, 'addModelFile', modelFile, fileName);
 
         if(this.isStrict() && !modelFile.getVersion()) {
-            throw new Error('Cannot add an unversioned namespace when \'strict\' is true');
+            throw new Error(Globalize.formatMessage('basemodelmanager-unversionednamespace'));
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
@@ -252,7 +256,11 @@ class BaseModelManager {
         const { version: metamodelVersion } = ModelUtil.parseNamespace(MetaModelNamespace);
 
         if (modelFileVersion !== metamodelVersion){
-            throw new MetamodelException(`Model file version ${modelFileVersion} does not match metamodel version ${metamodelVersion}`);
+            let formatter = Globalize.messageFormatter('basemodelmanager-metamodelversion');
+            throw new MetamodelException(formatter({
+                modelFileVersion: modelFileVersion,
+                metamodelVersion: metamodelVersion
+            }));
         }
 
         const alreadyHasMetamodel = !!this.getModelFile(MetaModelNamespace);
@@ -326,7 +334,10 @@ class BaseModelManager {
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
-                throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
+                let formatter = Globalize.messageFormatter('basemodelmanager-modelfilenotfound');
+                throw new Error(formatter({
+                    namespace: modelFile.getNamespace()
+                }));
             }
             if (!disableValidation) {
                 modelFile.validate();
@@ -342,7 +353,10 @@ class BaseModelManager {
      */
     deleteModelFile(namespace) {
         if (!this.modelFiles[namespace]) {
-            throw new Error('Model file does not exist');
+            let formatter = Globalize.messageFormatter('basemodelmanager-modelfilenotfound');
+            throw new Error(formatter({
+                namespace: namespace
+            }));
         } else {
             delete this.modelFiles[namespace];
         }

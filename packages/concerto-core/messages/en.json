@@ -13,13 +13,18 @@
         "test-repeat-array": "{0} {0} {0}",
         "test-repeat-object": "{value} {value} {value}",
 
+        "basemodelmanager-namespaceexists": "Namespace \"{namespace}\"\"{prefix}\" is already declared\"{postfix}\".",
+        "basemodelmanager-unversionednamespace": "Cannot add an unversioned namespace when \"strict\" is true",
+        "basemodelmanager-metamodelversion": "Model file version \"{modelFileVersion}\" does not match metamodel version \"{metamodelVersion}\"",
+        "basemodelmanager-modelfilenotfound": "Model file for namespace \"{namespace}\" not found",
+
         "classdeclaration-constructor-modelastreq": "\"ModelFile\" and \"AST\" are required to create a \"ClassDecl\".",
         "classdeclaration-process-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "classdeclaration-getfield-notfindsupertype": "Could not find supertype \"{type}\".",
         "classdeclaration-validate-identifiernotproperty": "Class \"{class}\" is identified by field \"{idField}\", but does not contain this property.",
         "classdeclaration-validate-identifiernotstring": "Class \"{class}\" is identified by field \"{idField}\", but the type of the field is not \"String\".",
         "classdeclaration-validate-duplicatefieldname": "Class \"{class}\" has more than one field named \"{fieldName}\".",
-        "classdeclaration-validate-missingidentifier" : "Class \"{class}\" is not declared as \"abstract\". It must define an identifying field.",
+        "classdeclaration-validate-missingidentifier": "Class \"{class}\" is not declared as \"abstract\". It must define an identifying field.",
         "classdeclaration-validate-selfextending": "Class \"{class}\" cannot extend itself.",
         "classdeclaration-validate-undefined-properties": "Properties of Class \"{class}\" has to be defined.",
 
@@ -42,8 +47,8 @@
         "factory-newinstance-missingidentifier": "Missing identifier for Type \"{type}\" in namespace \"{namespace}\".",
         "factory-newinstance-invalididentifier": "Invalid or missing identifier for Type \"{type}\" in namespace \"{namespace}\".",
         "factory-newinstance-abstracttype": "Cannot instantiate the abstract type \"{type}\" in the \"{namespace}\" namespace.",
-        "factory-newrelationship-notregisteredwithmm" : "Cannot create relationship as namespace \"{namespace}\" is not known.",
-        "factory-newinstance-typenotdeclaredinns" : "Cannot instantiate Type \"{type}\" in namespace \"{namespace}\".",
+        "factory-newrelationship-notregisteredwithmm": "Cannot create relationship as namespace \"{namespace}\" is not known.",
+        "factory-newinstance-typenotdeclaredinns": "Cannot instantiate Type \"{type}\" in namespace \"{namespace}\".",
 
         "instancegenerator-newinstance-noconcreteclass": "No concrete extending type for \"{type}\".",
 
@@ -78,7 +83,7 @@
         "whereastvalidator-propertytypeviolation": "Property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"{fieldType}\".",
         "whereastvalidator-enum-propertytypeviolation": "Enum property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
         "whereastvalidator-relationship-propertytypeviolation": "Relationship \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
-         "whereastvalidator-unsupportedtype": "Property \"{propertyName}\" of type \"{fieldType}\" cannot be compared with a literal value.",
+        "whereastvalidator-unsupportedtype": "Property \"{propertyName}\" of type \"{fieldType}\" cannot be compared with a literal value.",
         "whereastvalidator-invalidoperator": "Property \"{propertyName}\" cannot be compared using the \"{operator}\" operator."
     }
 }
