@@ -37,8 +37,8 @@ declare class BaseModelManager {
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
-    factory: any;
-    serializer: any;
+    factory: Factory;
+    serializer: Serializer;
     decoratorFactories: any[];
     strict: boolean;
     options: {
@@ -51,7 +51,7 @@ declare class BaseModelManager {
     };
     enableMapType: boolean;
     importAliasing: boolean;
-    metamodelModelFile: any;
+    metamodelModelFile: ModelFile;
     /**
      * Returns true
      * @returns {boolean} true
@@ -345,6 +345,8 @@ declare class BaseModelManager {
      */
     filter(predicate: (declaration: Declaration) => boolean): BaseModelManager;
 }
+import Factory = require("./factory");
+import Serializer = require("./serializer");
 import ModelFile = require("./introspect/modelfile");
 import { FileDownloader } from "@accordproject/concerto-util";
 import ClassDeclaration = require("./introspect/classdeclaration");
@@ -355,7 +357,5 @@ import ParticipantDeclaration = require("./introspect/participantdeclaration");
 import MapDeclaration = require("./introspect/mapdeclaration");
 import EnumDeclaration = require("./introspect/enumdeclaration");
 import ConceptDeclaration = require("./introspect/conceptdeclaration");
-import Factory = require("./factory");
-import Serializer = require("./serializer");
 import DecoratorFactory = require("./introspect/decoratorfactory");
 import Declaration = require("./introspect/declaration");

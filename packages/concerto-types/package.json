@@ -1,6 +1,6 @@
 {
     "name": "@accordproject/concerto-types",
-    "version": "3.19.2",
+    "version": "3.19.3",
     "description": "Types for the Concerto Modeling Language",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
