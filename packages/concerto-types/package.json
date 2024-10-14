@@ -33,10 +33,10 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "devDependencies": {
-        "@accordproject/concerto-codegen": "3.22.1",
-        "@accordproject/concerto-core": "3.19.1",
-        "@accordproject/concerto-metamodel": "3.10.0",
-        "@accordproject/concerto-util": "3.19.1",
+        "@accordproject/concerto-codegen": "3.23.8",
+        "@accordproject/concerto-core": "3.19.2",
+        "@accordproject/concerto-metamodel": "3.10.1",
+        "@accordproject/concerto-util": "3.19.2",
         "@types/jest": "28.1.1",
         "ajv": "8.12.0",
         "eslint": "8.2.0",
@@ -46,7 +46,7 @@
         "rimraf": "6.0.1",
         "ts-jest": "28.0.4",
         "ts-json-schema-generator": "1.4.0",
-        "typescript": "4.6.3"
+        "typescript": "5.6.3"
     },
     "license-check-and-add-config": {
         "folder": "./src",
