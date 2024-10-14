@@ -32,11 +32,11 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "dependencies": {
-        "@accordproject/concerto-core": "3.19.1",
+        "@accordproject/concerto-core": "3.19.2",
         "semver": "7.5.4"
     },
     "devDependencies": {
-        "@accordproject/concerto-cto": "3.19.1",
+        "@accordproject/concerto-cto": "3.19.2",
         "@types/jest": "28.1.1",
         "@types/semver": "7.3.10",
         "@typescript-eslint/eslint-plugin": "5.27.1",
@@ -47,7 +47,7 @@
         "npm-run-all": "4.1.5",
         "rimraf": "6.0.1",
         "ts-jest": "28.0.4",
-        "typescript": "4.6.3"
+        "typescript": "5.6.3"
     },
     "license-check-and-add-config": {
         "folder": "./src",
