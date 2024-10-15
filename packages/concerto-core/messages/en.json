@@ -86,6 +86,9 @@
 
         "typenotfounderror-defaultmessage": "Type \"{typeName}\" not found.",
 
+        "vocabularymanager-addvocabulary-nocontents": "Vocabulary contents must be specified",
+        "vocabularymanager-addvocabulary-alreadyadded": "Vocabulary \"{identifier}\" is already added",
+
         "whereastvalidator-propertytypeviolation": "Property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"{fieldType}\".",
         "whereastvalidator-enum-propertytypeviolation": "Enum property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
         "whereastvalidator-relationship-propertytypeviolation": "Relationship \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
