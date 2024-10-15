@@ -28,6 +28,12 @@
         "classdeclaration-validate-selfextending": "Class \"{class}\" cannot extend itself.",
         "classdeclaration-validate-undefined-properties": "Properties of Class \"{class}\" has to be defined.",
 
+        "concerto-gettypedeclaration-noclassattribute": "Input object does not have a $class attribute.",
+        "concerto-getidentifier-noidfield": "Object does not have an identifier: \"{object}\".",
+        "concerto-fromuri-invaliduri": "Invalid URI \"{uri}\".",
+        "concerto-fromuri-invalidurischeme": "Invalid URI scheme \"{uri}\".",
+        "concerto-fromuri-invaliduriformat":"Invalid URI resource format \"{uri}\".",
+
         "modelfile-constructor-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "modelfile-resolvetype-undecltype": "Undeclared type \"{type}\" in \"{context}\".",
         "modelfile-resolveimport-failfindimp": "Failed to find \"{type}\" in list of imports \"[{imports}]\" for namespace \"{namespace}\".",
