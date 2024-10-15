@@ -97,6 +97,9 @@
 
         "typenotfounderror-defaultmessage": "Type \"{typeName}\" not found.",
 
+        "validatedresource-fieldnotdefined": "The instance with id \"{id}\" trying to set field \"{propName}\" which is not declared in the model.",
+        "validatedresource-addarrayvalue-notarray": "The instance with id \"{id}\" trying to add array item \"{propName}\" which is not declared as an array in the model.",
+
         "vocabularymanager-addvocabulary-nocontents": "Vocabulary contents must be specified",
         "vocabularymanager-addvocabulary-alreadyadded": "Vocabulary \"{identifier}\" is already added",
 
