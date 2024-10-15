@@ -17,6 +17,7 @@
 const doctrine = require('doctrine');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
+const Globalize = require('./globalize');
 
 /**
  * Processes a single Javascript file (.js extension)
@@ -360,13 +361,19 @@ class JavaScriptParser {
         const tags = parsedComment.tags;
 
         if (tags.length > 1) {
-            throw new Error('Malformed JSDoc comment. More than one returns: ' + comment);
+            let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccommentmultiplereturns');
+            throw new Error(formatter({
+                comment: comment
+            }));
         }
 
         tags.forEach((tag) => {
             if (tag.type) {
                 if (!tag.type.name && !tag.type) {
-                    throw new Error('Malformed JSDoc comment. ' + comment);
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: comment
+                    }));
                 }
 
                 if (tag.type.name) {
@@ -382,7 +389,10 @@ class JavaScriptParser {
 
                 }
             } else {
-                throw new Error('Malformed JSDoc comment. ' + comment);
+                let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                throw new Error(formatter({
+                    comment: comment
+                }));
             }
         });
         return result;
@@ -407,17 +417,26 @@ class JavaScriptParser {
         const tags = parsedComment.tags;
 
         if (tags.length > 1) {
-            throw new Error('Malformed JSDoc comment. More than one throws/exception: ' + comment);
+            let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccommentmultipleexceptions');
+            throw new Error(formatter({
+                comment: comment
+            }));
         }
 
         tags.forEach((tag) => {
             if (tag.type) {
                 if (!tag.type.type || !tag.type.name) {
-                    throw new Error('Malformed JSDoc comment. ' + comment);
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: comment
+                    }));
                 }
                 result = tag.type.name;
             } else {
-                throw new Error('Malformed JSDoc comment. ' + comment);
+                let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                throw new Error(formatter({
+                    comment: comment
+                }));
             }
         });
 
@@ -443,7 +462,10 @@ class JavaScriptParser {
 
         // param is mentioned but not picked up by parser
         if (comment.indexOf('@' + TAG) !== -1 && tags.length === 0) {
-            throw new Error('Malformed JSDoc comment: ' + comment);
+            let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+            throw new Error(formatter({
+                comment: comment
+            }));
         }
 
         tags.forEach((tag) => {
@@ -452,12 +474,18 @@ class JavaScriptParser {
                 if (tag.description.trim().indexOf('}') === 0 ||
                     !tag.type ||
                     !tag.name) {
-                    throw new Error('Malformed JSDoc comment: ' + comment);
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: comment
+                    }));
                 }
             }
             if (tag.type.name) {
                 if (tag.type.name.indexOf(' ') !== -1) {
-                    throw new Error('Malformed JSDoc comment: ' + comment);
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: comment
+                    }));
                 }
             }
 
@@ -467,7 +495,10 @@ class JavaScriptParser {
                     paramTypes.push(tag.type.elements.map( e => e.name).join('|'));
                 }
                 else {
-                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: JSON.stringify(tag)
+                    }));
                 }
                 break;
             case 'OptionalType':
@@ -481,7 +512,10 @@ class JavaScriptParser {
                     paramTypes.push(`${tag?.name}?`);
                 }
                 else {
-                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: JSON.stringify(tag)
+                    }));
                 }
                 break;
             case 'AllLiteral':
@@ -489,7 +523,10 @@ class JavaScriptParser {
                     paramTypes.push(tag.name);
                 }
                 else {
-                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: JSON.stringify(tag)
+                    }));
                 }
                 break;
             case 'NameExpression':
@@ -497,7 +534,10 @@ class JavaScriptParser {
                     paramTypes.push(tag.type.name);
                 }
                 else {
-                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: JSON.stringify(tag)
+                    }));
                 }
                 break;
             case 'TypeApplication':
@@ -505,11 +545,16 @@ class JavaScriptParser {
                     paramTypes.push(tag.type.applications.map(e => e.name).join(',') + '[]');
                 }
                 else {
-                    throw new Error('Malformed JSDoc comment: ' + JSON.stringify(tag));
+                    let formatter = Globalize.messageFormatter('javascriptparser-malformedjsdoccomment');
+                    throw new Error(formatter({
+                        comment: JSON.stringify(tag)
+                    }));
                 }
                 break;
             default:
-                throw new Error('Unrecognized JSDoc comment: ' + JSON.stringify(tag));
+                throw new Error(Globalize.messageFormatter('javascriptparser-unrecognizedjsdoccomment')({
+                    comment: JSON.stringify(tag)
+                }));
             }
         });
         return paramTypes;

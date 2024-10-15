@@ -40,6 +40,11 @@
         "factory-nsnotspecified": "Namespace not specified.",
         "factory-typenotspecified": "Type not specified.",
 
+        "javascriptparser-malformedjsdoccommentmultiplereturns": "Malformed JSDoc comment. More than one returns: \"{comment}\"",
+        "javascriptparser-malformedjsdoccommentmultipleexceptions": "Malformed JSDoc comment. More than one throws/exception: \"{comment}\"",
+        "javascriptparser-malformedjsdoccomment": "Malformed JSDoc comment. \"{comment}\"",
+        "javascriptparser-unrecognizedjsdoccomment": "Unrecognized JSDoc comment. \"{comment}\"",
+
         "modelfile-constructor-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "modelfile-resolvetype-undecltype": "Undeclared type \"{type}\" in \"{context}\".",
         "modelfile-resolveimport-failfindimp": "Failed to find \"{type}\" in list of imports \"[{imports}]\" for namespace \"{namespace}\".",
