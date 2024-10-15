@@ -34,6 +34,12 @@
         "concerto-fromuri-invalidurischeme": "Invalid URI scheme \"{uri}\".",
         "concerto-fromuri-invaliduriformat":"Invalid URI resource format \"{uri}\".",
 
+        "factory-newinstance-invalididentifierregex": "Provided id does not match regex: \"{regex}\".",
+        "factory-newinstance-typenotidentifiable": "Type \"{type}\" is not identifiable.",
+        "factory-newrelationship-notidentifiable":"Cannot create a relationship to \"{fqn}\", it is not identifiable.",
+        "factory-nsnotspecified": "Namespace not specified.",
+        "factory-typenotspecified": "Type not specified.",
+
         "modelfile-constructor-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "modelfile-resolvetype-undecltype": "Undeclared type \"{type}\" in \"{context}\".",
         "modelfile-resolveimport-failfindimp": "Failed to find \"{type}\" in list of imports \"[{imports}]\" for namespace \"{namespace}\".",

@@ -127,11 +127,17 @@ class Factory {
                 }
                 // if regex on identifier field & provided id does not match regex, throw error
                 if(idFullField?.validator?.regex && (idFullField.validator?.regex.test(id) === false)) {
-                    throw new Error('Provided id does not match regex: ' + idFullField?.validator?.regex);
+                    let formatter = Globalize.messageFormatter('factory-newinstance-invalididentifierregex');
+                    throw new Error(formatter({
+                        regex: idFullField?.validator?.regex,
+                    }));
                 }
             }
         } else if(id) {
-            throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
+            let formatter = Globalize.messageFormatter('factory-newinstance-typenotidentifiable');
+            throw new Error(formatter({
+                type: classDecl.getFullyQualifiedName()
+            }));
         }
 
         let newObj = null;
@@ -195,7 +201,10 @@ class Factory {
         const fqn = ModelUtil.getFullyQualifiedName(ns, type);
         const classDecl = this.modelManager.getType(fqn);
         if(!classDecl.isIdentified()) {
-            throw new Error(`Cannot create a relationship to ${fqn}, it is not identifiable.`);
+            let formatter = Globalize.messageFormatter('factory-newrelationship-notidentifiable');
+            throw new Error(formatter({
+                fqn: fqn
+            }));
         }
         return new Relationship(this.modelManager, classDecl, ns, type, id);
     }
@@ -215,9 +224,9 @@ class Factory {
      */
     newTransaction(ns, type, id, options) {
         if (!ns) {
-            throw new Error('ns not specified');
+            throw new Error(Globalize.formatMessage('factory-nsnotspecified'));
         } else if (!type) {
-            throw new Error('type not specified');
+            throw new Error(Globalize.formatMessage('factory-typenotspecified'));
         }
         let transaction = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
@@ -245,9 +254,9 @@ class Factory {
      */
     newEvent(ns, type, id, options) {
         if (!ns) {
-            throw new Error('ns not specified');
+            throw new Error(Globalize.formatMessage('factory-nsnotspecified'));
         } else if (!type) {
-            throw new Error('type not specified');
+            throw new Error(Globalize.formatMessage('factory-typenotspecified'));
         }
         let event = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
