@@ -27,6 +27,7 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const { getRootModel } = require('./rootmodel');
+const { getDecoratorModel } = require('./decoratormodel');
 const MetamodelException = require('./metamodelexception');
 
 // Types needed for TypeScript generation.
@@ -57,6 +58,16 @@ const defaultProcessFile = (name, data) => {
     };
 };
 
+// default decorator validation configuration
+const DEFAULT_DECORATOR_VALIDATION = {
+    missingDecorator: undefined, // 'error' | 'warn' (see Logger.levels)...,
+    invalidDecorator: undefined, // 'error' | 'warn' ...
+};
+
+// these namespaces are internal and excluded by default by getModelFiles
+// and ignored by fromAst
+const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
+
 /**
  * Manages the Concerto model files.
  *
@@ -83,6 +94,9 @@ class BaseModelManager {
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
+     * @param {object} [options.decoratorValidation] - the decorator validation configuration
+     * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options, processFile) {
@@ -93,12 +107,15 @@ class BaseModelManager {
         this.decoratorFactories = [];
         this.strict = !!options?.strict;
         this.options = options;
+        this.addDecoratorModel();
         this.addRootModel();
+        this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
         // TODO Remove on release of MapType
         // Supports both env var and property based flag
         this.enableMapType = !!options?.enableMapType;
         this.importAliasing = process?.env?.IMPORT_ALIASING === 'true' || !!options?.importAliasing;
+
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 
@@ -153,6 +170,16 @@ class BaseModelManager {
             const mUnversioned = new ModelFile(this, unversioned.rootModelAst, unversioned.rootModelCto, unversioned.rootModelFile);
             this.addModelFile(mUnversioned, unversioned.rootModelCto, unversioned.rootModelFile, true);
         }
+    }
+
+    /**
+     * Adds decorator types
+     * @private
+     */
+    addDecoratorModel() {
+        const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
+        const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
+        this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
     /**
@@ -470,6 +497,14 @@ class BaseModelManager {
     }
 
     /**
+     * Returns the status of the decorator validation options
+     * @returns {object} returns an object that indicates the log levels for defined and undefined decorators
+     */
+    getDecoratorValidation() {
+        return this.decoratorValidation;
+    }
+
+    /**
      * Get the array of model file instances
      * @param {Boolean} [includeConcertoNamespace] - whether to include the concerto namespace
      * (default to false)
@@ -482,7 +517,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || (ns !== 'concerto@1.0.0' && ns !== 'concerto')) {
+            if(includeConcertoNamespace || (!EXCLUDE_NS.includes(ns))) {
                 result.push(this.modelFiles[ns]);
             }
         }
@@ -561,6 +596,7 @@ class BaseModelManager {
      */
     clearModelFiles() {
         this.modelFiles = {};
+        this.addDecoratorModel();
         this.addRootModel();
     }
 
@@ -751,7 +787,7 @@ class BaseModelManager {
      * @return {object} the resolved metamodel
      */
     resolveMetaModel(metaModel) {
-        const priorModels = this.getAst();
+        const priorModels = this.getAst(false, true);
         return MetaModelUtil.resolveLocalNames(priorModels, metaModel);
     }
 
@@ -762,8 +798,10 @@ class BaseModelManager {
     fromAst(ast) {
         this.clearModelFiles();
         ast.models.forEach( model => {
-            const modelFile = new ModelFile( this, model );
-            this.addModelFile( modelFile, null, null, true );
+            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
+                const modelFile = new ModelFile( this, model );
+                this.addModelFile( modelFile, null, null, true );
+            }
         });
         this.validateModelFiles();
     }
@@ -771,14 +809,15 @@ class BaseModelManager {
     /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names
+     * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve) {
+    getAst(resolve,includeConcertoNamespaces) {
         const result = {
             $class: `${MetaModelNamespace}.Models`,
             models: [],
         };
-        const modelFiles = this.getModelFiles();
+        const modelFiles = this.getModelFiles(includeConcertoNamespaces);
         modelFiles.forEach((thisModelFile) => {
             let metaModel = thisModelFile.getAst();
             if (resolve) {

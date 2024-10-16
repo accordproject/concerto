@@ -1,13 +1,13 @@
 {
-    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+    "$class" : "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
     "name" : "invalid-target-properties",
     "version": "1.0.0",
     "commands" : [
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Person",
                 "properties" : ["missing"]

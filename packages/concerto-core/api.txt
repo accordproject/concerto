@@ -2,7 +2,7 @@ class AstModelManager extends BaseModelManager {
    + void constructor(object?) 
 }
 class BaseModelManager {
-   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,boolean?,processFile?) 
+   + void constructor(object?,boolean?,Object?,boolean?,boolean?,boolean?,boolean?,object?,string?,string?,processFile?) 
    + boolean isModelManager() 
    + boolean isStrict() 
    + boolean isAliasedTypeEnabled() 
@@ -16,6 +16,7 @@ class BaseModelManager {
    + void validateModelFiles() 
    + Promise updateExternalModels(Object?,FileDownloader?) throws IllegalModelException
    + void writeModelsToFileSystem(string,Object?,boolean) 
+   + object getDecoratorValidation() 
    + Object[] getModels(Object?,boolean) 
    + void clearModelFiles() 
    + ModelFile getModelFile(string) 
@@ -35,7 +36,7 @@ class BaseModelManager {
    + boolean derivesFrom(string,string) 
    + object resolveMetaModel(object) 
    + void fromAst(ast) 
-   + void getAst(boolean?) 
+   + void getAst(boolean?,boolean?) 
    + BaseModelManager filter(FilterFunction) 
 }
 class Concerto {
@@ -57,7 +58,7 @@ class Concerto {
    + object setCurrentTime() 
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
    + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string) 
    + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string) 
@@ -69,6 +70,7 @@ class DecoratorManager {
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
+   + object getDecoratorModel() 
 class Factory {
    + string newId() 
    + void constructor(ModelManager) 
