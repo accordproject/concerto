@@ -1,6 +1,10 @@
 namespace test@1.0.0
+import concerto.decorator@1.0.0.Decorator
 
 scalar SSN extends String
+
+concept Editable extends Decorator {}
+concept Custom extends Decorator {}
 
 @Editable
 concept Person {

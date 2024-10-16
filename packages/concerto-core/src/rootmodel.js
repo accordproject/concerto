@@ -26,6 +26,7 @@ function getRootModel() {
     const ns = 'concerto@1.0.0';
     const rootModelCto = `@DotNetNamespace("AccordProject.Concerto")
     namespace ${ns}
+    import concerto.decorator@1.0.0.DotNetNamespace
     abstract concept Concept {}
     abstract concept Asset identified {}
     abstract concept Participant identified {}

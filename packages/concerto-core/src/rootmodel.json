@@ -13,7 +13,13 @@
         }
     ],
     "namespace": "concerto@1.0.0",
-    "imports": [],
+    "imports": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ImportType",
+            "name": "DotNetNamespace",
+            "namespace": "concerto.decorator@1.0.0"
+        }
+    ],
     "declarations": [
         {
             "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",

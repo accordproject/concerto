@@ -1,13 +1,13 @@
 {
-    "$class" : "org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet",
+    "$class" : "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
     "name" : "web",
     "version": "1.0.0",
     "commands" : [
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary"
             },
@@ -18,10 +18,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "APPEND",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
                 "declaration" : "Dictionary",
@@ -34,10 +34,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
@@ -50,10 +50,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "mapElement": "KEY"
@@ -65,10 +65,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType",
@@ -81,10 +81,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "mapElement": "VALUE"
@@ -96,10 +96,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "mapElement": "KEY_VALUE"
@@ -112,10 +112,10 @@
         },
 
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType",
                 "mapElement": "KEY_VALUE"
@@ -127,10 +127,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType",
                 "mapElement": "KEY_VALUE"
@@ -142,10 +142,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType"
@@ -157,10 +157,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "declaration" : "Dictionary",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType"
@@ -172,10 +172,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapKeyType"
             },
@@ -186,10 +186,10 @@
             }
         },
         {
-            "$class" : "org.accordproject.decoratorcommands@0.3.0.Command",
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
             "type" : "UPSERT",
             "target" : {
-                "$class" : "org.accordproject.decoratorcommands@0.3.0.CommandTarget",
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                 "namespace" : "test@1.0.0",
                 "type" : "concerto.metamodel@1.0.0.StringMapValueType"
             },
