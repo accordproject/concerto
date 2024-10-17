@@ -103,8 +103,6 @@ describe('DecoratorManager', () => {
             const decoratedCTO = Printer.toCTO(decoratedAst);
             const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8');
             const result = decoratedCTO === decoratedTest;
-            console.log(decoratedCTO);
-            console.log(decoratedTest);
             chai.expect(result).to.be.true;
         });
 
