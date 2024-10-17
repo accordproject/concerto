@@ -16,6 +16,7 @@
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
 const Resource = require('./resource');
+const Globalize = require('../globalize');
 
 /**
  * ValidatedResource is a Resource that can validate that property
@@ -60,9 +61,11 @@ class ValidatedResource extends Resource {
         let field = classDeclaration.getProperty(propName);
 
         if (!field) {
-            throw new Error('The instance with id ' +
-                this.getIdentifier() + ' trying to set field ' +
-                propName + ' which is not declared in the model.');
+            let formatter = Globalize.messageFormatter('validatedresource-fieldnotdefined');
+            throw new Error(formatter({
+                id: this.getIdentifier(),
+                propName: propName
+            }));
         }
         // else {
         //     this.log( 'Validating field ' + field + ' with data ' + value );
@@ -87,15 +90,19 @@ class ValidatedResource extends Resource {
         let field = classDeclaration.getProperty(propName);
 
         if (!field) {
-            throw new Error('The instance with id ' +
-                this.getIdentifier() + ' trying to set field ' +
-                propName + ' which is not declared in the model.');
+            let formatter = Globalize.messageFormatter('validatedresource-fieldnotdefined');
+            throw new Error(formatter({
+                id: this.getIdentifier(),
+                propName: propName
+            }));
         }
 
         if (!field.isArray()) {
-            throw new Error('The instance with id ' +
-                this.getIdentifier() + ' trying to add array item ' +
-                propName + ' which is not declared as an array in the model.');
+            let formatter = Globalize.messageFormatter('validatedresource-addarrayvalue-notarray');
+            throw new Error(formatter({
+                id: this.getIdentifier(),
+                propName: propName
+            }));
         }
 
         const parameters = {};

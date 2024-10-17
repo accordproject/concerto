@@ -14,6 +14,8 @@
 
 'use strict';
 
+const Globalize = require('./globalize');
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -37,22 +39,22 @@ class Vocabulary {
      */
     constructor(vocabularyManager, voc) {
         if(!vocabularyManager) {
-            throw new Error('VocabularyManager must be specified');
+            throw new Error(Globalize.formatMessage('vocabulary-constructor-vocabularymanagerrequired'));
         }
         if(!voc) {
-            throw new Error('Vocabulary object must be specified');
+            throw new Error(Globalize.formatMessage('vocabulary-constructor-vocabularyobjectrequired'));
         }
 
         if(!voc.declarations) {
-            throw new Error('Vocabulary object must have declarations');
+            throw new Error(Globalize.formatMessage('vocabulary-constructor-vocabularyobjectdeclarationsrequired'));
         }
 
         if(!voc.namespace) {
-            throw new Error('A vocabulary must specify a namespace');
+            throw new Error(Globalize.formatMessage('vocabulary-constructor-vocabularyobjectnamespacerequired'));
         }
 
         if(!voc.locale) {
-            throw new Error('A vocabulary must specify a locale');
+            throw new Error(Globalize.formatMessage('vocabulary-constructor-vocabularyobjectlocalerequired'));
         }
 
         Vocabulary.validateLocale(voc.locale);
@@ -77,7 +79,7 @@ class Vocabulary {
     static validateLocale(locale) {
         new Intl.Locale(locale);
         if(locale !== locale.toLowerCase()) {
-            throw new Error('Locale should be lowercase with dashes');
+            throw new Error(Globalize.formatMessage('vocabulary-validatelocale-localelowercase'));
         }
     }
 

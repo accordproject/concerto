@@ -13,15 +13,37 @@
         "test-repeat-array": "{0} {0} {0}",
         "test-repeat-object": "{value} {value} {value}",
 
+        "basemodelmanager-namespaceexists": "Namespace \"{namespace}\"\"{prefix}\" is already declared\"{postfix}\".",
+        "basemodelmanager-unversionednamespace": "Cannot add an unversioned namespace when \"strict\" is true",
+        "basemodelmanager-metamodelversion": "Model file version \"{modelFileVersion}\" does not match metamodel version \"{metamodelVersion}\"",
+        "basemodelmanager-modelfilenotfound": "Model file for namespace \"{namespace}\" not found",
+
         "classdeclaration-constructor-modelastreq": "\"ModelFile\" and \"AST\" are required to create a \"ClassDecl\".",
         "classdeclaration-process-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "classdeclaration-getfield-notfindsupertype": "Could not find supertype \"{type}\".",
         "classdeclaration-validate-identifiernotproperty": "Class \"{class}\" is identified by field \"{idField}\", but does not contain this property.",
         "classdeclaration-validate-identifiernotstring": "Class \"{class}\" is identified by field \"{idField}\", but the type of the field is not \"String\".",
         "classdeclaration-validate-duplicatefieldname": "Class \"{class}\" has more than one field named \"{fieldName}\".",
-        "classdeclaration-validate-missingidentifier" : "Class \"{class}\" is not declared as \"abstract\". It must define an identifying field.",
+        "classdeclaration-validate-missingidentifier": "Class \"{class}\" is not declared as \"abstract\". It must define an identifying field.",
         "classdeclaration-validate-selfextending": "Class \"{class}\" cannot extend itself.",
         "classdeclaration-validate-undefined-properties": "Properties of Class \"{class}\" has to be defined.",
+
+        "concerto-gettypedeclaration-noclassattribute": "Input object does not have a $class attribute.",
+        "concerto-getidentifier-noidfield": "Object does not have an identifier: \"{object}\".",
+        "concerto-fromuri-invaliduri": "Invalid URI \"{uri}\".",
+        "concerto-fromuri-invalidurischeme": "Invalid URI scheme \"{uri}\".",
+        "concerto-fromuri-invaliduriformat":"Invalid URI resource format \"{uri}\".",
+
+        "factory-newinstance-invalididentifierregex": "Provided id does not match regex: \"{regex}\".",
+        "factory-newinstance-typenotidentifiable": "Type \"{type}\" is not identifiable.",
+        "factory-newrelationship-notidentifiable":"Cannot create a relationship to \"{fqn}\", it is not identifiable.",
+        "factory-nsnotspecified": "Namespace not specified.",
+        "factory-typenotspecified": "Type not specified.",
+
+        "javascriptparser-malformedjsdoccommentmultiplereturns": "Malformed JSDoc comment. More than one returns: \"{comment}\"",
+        "javascriptparser-malformedjsdoccommentmultipleexceptions": "Malformed JSDoc comment. More than one throws/exception: \"{comment}\"",
+        "javascriptparser-malformedjsdoccomment": "Malformed JSDoc comment. \"{comment}\"",
+        "javascriptparser-unrecognizedjsdoccomment": "Unrecognized JSDoc comment. \"{comment}\"",
 
         "modelfile-constructor-unrecmodelelem": "Unrecognised model element \"{type}\".",
         "modelfile-resolvetype-undecltype": "Undeclared type \"{type}\" in \"{context}\".",
@@ -42,8 +64,8 @@
         "factory-newinstance-missingidentifier": "Missing identifier for Type \"{type}\" in namespace \"{namespace}\".",
         "factory-newinstance-invalididentifier": "Invalid or missing identifier for Type \"{type}\" in namespace \"{namespace}\".",
         "factory-newinstance-abstracttype": "Cannot instantiate the abstract type \"{type}\" in the \"{namespace}\" namespace.",
-        "factory-newrelationship-notregisteredwithmm" : "Cannot create relationship as namespace \"{namespace}\" is not known.",
-        "factory-newinstance-typenotdeclaredinns" : "Cannot instantiate Type \"{type}\" in namespace \"{namespace}\".",
+        "factory-newrelationship-notregisteredwithmm": "Cannot create relationship as namespace \"{namespace}\" is not known.",
+        "factory-newinstance-typenotdeclaredinns": "Cannot instantiate Type \"{type}\" in namespace \"{namespace}\".",
 
         "instancegenerator-newinstance-noconcreteclass": "No concrete extending type for \"{type}\".",
 
@@ -75,10 +97,23 @@
 
         "typenotfounderror-defaultmessage": "Type \"{typeName}\" not found.",
 
+        "validatedresource-fieldnotdefined": "The instance with id \"{id}\" trying to set field \"{propName}\" which is not declared in the model.",
+        "validatedresource-addarrayvalue-notarray": "The instance with id \"{id}\" trying to add array item \"{propName}\" which is not declared as an array in the model.",
+
+        "vocabulary-constructor-vocabularymanagerrequired": "\"VocabularyManager\" must be specified",
+        "vocabulary-constructor-vocabularyobjectrequired": "\"Vocabulary object\" must be specified",
+        "vocabulary-constructor-vocabularyobjectdeclarationsrequired": "\"Vocabulary object\" must have declarations.",
+        "vocabulary-constructor-vocabularyobjectnamespacerequired": "A vocabulary must specify a namespace.",
+        "vocabulary-constructor-vocabularyobjectlocalerequired": "A vocabulary must specify a locale.",
+        "vocabulary-validatelocale-localelowercase": "Locale must be lowercase with dashes.",
+
+        "vocabularymanager-addvocabulary-nocontents": "Vocabulary contents must be specified",
+        "vocabularymanager-addvocabulary-alreadyadded": "Vocabulary \"{identifier}\" is already added",
+
         "whereastvalidator-propertytypeviolation": "Property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"{fieldType}\".",
         "whereastvalidator-enum-propertytypeviolation": "Enum property \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
         "whereastvalidator-relationship-propertytypeviolation": "Relationship \"{propertyName}\" cannot be compared with \"{value}\" (type of value: \"{typeOfValue}\"). Expected type: \"String\".",
-         "whereastvalidator-unsupportedtype": "Property \"{propertyName}\" of type \"{fieldType}\" cannot be compared with a literal value.",
+        "whereastvalidator-unsupportedtype": "Property \"{propertyName}\" of type \"{fieldType}\" cannot be compared with a literal value.",
         "whereastvalidator-invalidoperator": "Property \"{propertyName}\" cannot be compared using the \"{operator}\" operator."
     }
 }
