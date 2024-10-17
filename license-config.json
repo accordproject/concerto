@@ -1,0 +1,57 @@
+{
+    "ignore": [
+        ".editorconfig",
+        ".eslintignore",
+        ".eslintrc.yml",
+        ".gitignore",
+        "HEADER.md",
+        "scripts/**",
+        "**/*.zip",
+        "**/*.tgz",    
+        "**/.git",
+        "**/.github",
+        "**/.gitattributes",
+        "**/*.tern-project",
+        "node_modules",
+        "packages",
+        "softhsm",
+        "build.cfg",
+        "README.md",
+        "CONTRIBUTING.md",
+        "DEVELOPERS.md",
+        "NOTICES.md",
+        "CHARTER.md",
+        "ISSUE_TEMPLATE.md",
+        "MAINTAINERS.md",
+        "contrib-notes",
+        "log",
+        "LICENSE",
+        "HEADER",
+        "docs/",
+        "umd/",
+        "coverage",
+        ".DS_Store",
+        "packages/concerto-core/api.txt",
+        "coverage",
+        "index.d.ts",
+        "**/__snapshots__/**",
+        "packages/concerto-core/introspect/parser.js",
+        ".nyc-output"
+    ],
+    "license": "LICENSE",
+    "licenseFormats": {
+        "js": {
+            "prepend": "/*",
+            "append": " */",
+            "eachLine": {
+                "prepend": " * "
+            }
+        },
+        "dotfile|^Dockerfile": {
+            "eachLine": {
+                "prepend": "# "
+            }
+        }
+    },
+    "trailingWhitespace": "TRIM"
+}
