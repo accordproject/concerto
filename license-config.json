@@ -34,7 +34,7 @@
         "packages/concerto-core/api.txt",
         "coverage",
         "index.d.ts",
-        "**/__snapshots__/**",
+        "**/*.snap",
         "packages/concerto-core/introspect/parser.js",
         ".nyc-output"
     ],
