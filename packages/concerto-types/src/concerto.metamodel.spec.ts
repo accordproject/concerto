@@ -43,7 +43,7 @@ test('Chained TypeScript and JSONSchema conversion respects inheritance when fla
     // Validate the instance with Ajv, a JSON Schema validator
     const ajv = new Ajv()
     const validate = ajv.compile(jsonSchema)
-    const valid = validate(data)
+    validate(data);
     expect(validate.errors).toBeNull();
 
     // Validate the instance with Concerto
