@@ -101,6 +101,6 @@ declare class Logger {
     private static silly;
 }
 declare namespace Logger {
-    const level: string;
-    const transports: {}[];
+    let level: string;
+    let transports: {}[];
 }
