@@ -7,6 +7,7 @@
         "**/.git",
         "**/*.pegjs",
         "packages/concerto-cto/lib/parser.js",
+        "**/jest.config.js",
         "packages/*/scripts/**",
         "**/generated/**",
         "node_modules",
