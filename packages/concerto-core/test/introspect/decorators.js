@@ -170,7 +170,7 @@ describe('Decorators', () => {
 
     describe('#validate', () => {
 
-        it.only('should prevent attaching the same decorator twice', () => {
+        it('should prevent attaching the same decorator twice', () => {
 
             (() => {
                 const modelManager = new ModelManager();

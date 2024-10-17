@@ -800,7 +800,7 @@ class DecoratorManager {
             return true;
         } else {
             Warning.printDeprecationWarning(
-                'Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
+                'Functionality for namespace targeted Decorator Command Sets has changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
                 ErrorCodes.DEPRECATION_WARNING,
                 ErrorCodes.CONCERTO_DEPRECATION_001,
                 'Please refer to https://concerto.accordproject.org/deprecation/001'

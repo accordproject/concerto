@@ -204,7 +204,7 @@ describe('DecoratorManager', () => {
         it('should add decorators that target namespace and catch warning - behaviour to be deprecated', async function() {
             // event listner to catch the warning
             process.once('warning', (warning) => {
-                chai.expect(warning.message).to.be.equals('DEPRECATED: Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
+                chai.expect(warning.message).to.be.equals('DEPRECATED: Functionality for namespace targeted Decorator Command Sets has changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
                 chai.expect(warning.name).to.be.equals(DEPRECATION_WARNING);
                 chai.expect(warning.code).to.be.equals(CONCERTO_DEPRECATION_001);
                 chai.expect(warning.detail).to.be.equals('Please refer to https://concerto.accordproject.org/deprecation/001');

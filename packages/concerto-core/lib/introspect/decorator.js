@@ -116,8 +116,6 @@ class Decorator {
         const decoratedName = this.getParent().getFullyQualifiedName?.();
         const mm = mf.getModelManager();
         const validationOptions = mm.getDecoratorValidation();
-        console.log(`ModelManager.validationOptions: ${JSON.stringify(validationOptions)}`);
-
         if (validationOptions.missingDecorator || validationOptions.invalidDecorator) {
             try {
                 // this throws if the type does not exist
