@@ -1,3 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chained TypeScript and JSONSchema conversion respects inheritance when flattening subclasses to a union type 1`] = `
 {
   "$ref": "#/definitions/IDecorator",
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -5,189 +8,190 @@
     "DecoratorLiteralUnion": {
       "anyOf": [
         {
-          "$ref": "#/definitions/IDecoratorString"
+          "$ref": "#/definitions/IDecoratorString",
         },
         {
-          "$ref": "#/definitions/IDecoratorNumber"
+          "$ref": "#/definitions/IDecoratorNumber",
         },
         {
-          "$ref": "#/definitions/IDecoratorBoolean"
+          "$ref": "#/definitions/IDecoratorBoolean",
         },
         {
-          "$ref": "#/definitions/IDecoratorTypeReference"
-        }
-      ]
+          "$ref": "#/definitions/IDecoratorTypeReference",
+        },
+      ],
     },
     "IDecorator": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "arguments": {
           "items": {
-            "$ref": "#/definitions/DecoratorLiteralUnion"
+            "$ref": "#/definitions/DecoratorLiteralUnion",
           },
-          "type": "array"
+          "type": "array",
         },
         "location": {
-          "$ref": "#/definitions/IRange"
+          "$ref": "#/definitions/IRange",
         },
         "name": {
-          "type": "string"
-        }
+          "type": "string",
+        },
       },
       "required": [
         "$class",
-        "name"
+        "name",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IDecoratorBoolean": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "location": {
-          "$ref": "#/definitions/IRange"
+          "$ref": "#/definitions/IRange",
         },
         "value": {
-          "type": "boolean"
-        }
+          "type": "boolean",
+        },
       },
       "required": [
         "$class",
-        "value"
+        "value",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IDecoratorNumber": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "location": {
-          "$ref": "#/definitions/IRange"
+          "$ref": "#/definitions/IRange",
         },
         "value": {
-          "type": "number"
-        }
+          "type": "number",
+        },
       },
       "required": [
         "$class",
-        "value"
+        "value",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IDecoratorString": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "location": {
-          "$ref": "#/definitions/IRange"
+          "$ref": "#/definitions/IRange",
         },
         "value": {
-          "type": "string"
-        }
+          "type": "string",
+        },
       },
       "required": [
         "$class",
-        "value"
+        "value",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IDecoratorTypeReference": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "isArray": {
-          "type": "boolean"
+          "type": "boolean",
         },
         "location": {
-          "$ref": "#/definitions/IRange"
+          "$ref": "#/definitions/IRange",
         },
         "type": {
-          "$ref": "#/definitions/ITypeIdentifier"
-        }
+          "$ref": "#/definitions/ITypeIdentifier",
+        },
       },
       "required": [
         "$class",
         "isArray",
-        "type"
+        "type",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IPosition": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "column": {
-          "type": "number"
+          "type": "number",
         },
         "line": {
-          "type": "number"
+          "type": "number",
         },
         "offset": {
-          "type": "number"
-        }
+          "type": "number",
+        },
       },
       "required": [
         "$class",
         "column",
         "line",
-        "offset"
+        "offset",
       ],
-      "type": "object"
+      "type": "object",
     },
     "IRange": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "end": {
-          "$ref": "#/definitions/IPosition"
+          "$ref": "#/definitions/IPosition",
         },
         "source": {
-          "type": "string"
+          "type": "string",
         },
         "start": {
-          "$ref": "#/definitions/IPosition"
-        }
+          "$ref": "#/definitions/IPosition",
+        },
       },
       "required": [
         "$class",
         "end",
-        "start"
+        "start",
       ],
-      "type": "object"
+      "type": "object",
     },
     "ITypeIdentifier": {
       "additionalProperties": false,
       "properties": {
         "$class": {
-          "type": "string"
+          "type": "string",
         },
         "name": {
-          "type": "string"
+          "type": "string",
         },
         "namespace": {
-          "type": "string"
-        }
+          "type": "string",
+        },
       },
       "required": [
         "$class",
-        "name"
+        "name",
       ],
-      "type": "object"
-    }
-  }
+      "type": "object",
+    },
+  },
 }
+`;

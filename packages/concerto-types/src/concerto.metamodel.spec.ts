@@ -16,7 +16,6 @@ const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-m
 import { createGenerator } from "ts-json-schema-generator";
 import Ajv from "ajv";
 import path from "path";
-import fs from 'fs';
 
 test('Chained TypeScript and JSONSchema conversion respects inheritance when flattening subclasses to a union type', () => {
 
@@ -27,8 +26,7 @@ test('Chained TypeScript and JSONSchema conversion respects inheritance when fla
         type: 'IDecorator',
     }
     const jsonSchema = createGenerator(config).createSchema(config.type);
-    const staticJsonSchemaResult = JSON.parse(fs.readFileSync('src/fixtures/decorator.jsonschema.json', 'utf8'));
-    expect(jsonSchema).toMatchObject(staticJsonSchemaResult);
+    expect(jsonSchema).toMatchSnapshot();
 
     // Test instance
     const data = {
