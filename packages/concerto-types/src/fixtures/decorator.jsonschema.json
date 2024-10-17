@@ -1,193 +1,193 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/IDecorator",
-    "definitions": {
-      "IDecorator": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "arguments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/DecoratorLiteralUnion"
-            }
-          },
-          "location": {
-            "$ref": "#/definitions/IRange"
-          }
+  "$ref": "#/definitions/IDecorator",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "DecoratorLiteralUnion": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/IDecoratorString"
         },
-        "required": [
-          "$class",
-          "name"
-        ],
-        "additionalProperties": false
-      },
-      "DecoratorLiteralUnion": {
-        "anyOf": [
-          {
-            "$ref": "#/definitions/IDecoratorString"
-          },
-          {
-            "$ref": "#/definitions/IDecoratorNumber"
-          },
-          {
-            "$ref": "#/definitions/IDecoratorBoolean"
-          },
-          {
-            "$ref": "#/definitions/IDecoratorTypeReference"
-          }
-        ]
-      },
-      "IDecoratorString": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "location": {
-            "$ref": "#/definitions/IRange"
-          },
-          "value": {
-            "type": "string"
-          }
+        {
+          "$ref": "#/definitions/IDecoratorNumber"
         },
-        "required": [
-          "$class",
-          "value"
-        ],
-        "additionalProperties": false
-      },
-      "IRange": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "start": {
-            "$ref": "#/definitions/IPosition"
-          },
-          "end": {
-            "$ref": "#/definitions/IPosition"
-          },
-          "source": {
-            "type": "string"
-          }
+        {
+          "$ref": "#/definitions/IDecoratorBoolean"
         },
-        "required": [
-          "$class",
-          "end",
-          "start"
-        ],
-        "additionalProperties": false
-      },
-      "IPosition": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "line": {
-            "type": "number"
-          },
-          "column": {
-            "type": "number"
-          },
-          "offset": {
-            "type": "number"
-          }
+        {
+          "$ref": "#/definitions/IDecoratorTypeReference"
+        }
+      ]
+    },
+    "IDecorator": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
         },
-        "required": [
-          "$class",
-          "column",
-          "line",
-          "offset"
-        ],
-        "additionalProperties": false
-      },
-      "IDecoratorNumber": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
+        "arguments": {
+          "items": {
+            "$ref": "#/definitions/DecoratorLiteralUnion"
           },
-          "location": {
-            "$ref": "#/definitions/IRange"
-          },
-          "value": {
-            "type": "number"
-          }
+          "type": "array"
         },
-        "required": [
-          "$class",
-          "value"
-        ],
-        "additionalProperties": false
-      },
-      "IDecoratorBoolean": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "location": {
-            "$ref": "#/definitions/IRange"
-          },
-          "value": {
-            "type": "boolean"
-          }
+        "location": {
+          "$ref": "#/definitions/IRange"
         },
-        "required": [
-          "$class",
-          "value"
-        ],
-        "additionalProperties": false
+        "name": {
+          "type": "string"
+        }
       },
-      "IDecoratorTypeReference": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "location": {
-            "$ref": "#/definitions/IRange"
-          },
-          "type": {
-            "$ref": "#/definitions/ITypeIdentifier"
-          },
-          "isArray": {
-            "type": "boolean"
-          }
+      "required": [
+        "$class",
+        "name"
+      ],
+      "type": "object"
+    },
+    "IDecoratorBoolean": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
         },
-        "required": [
-          "$class",
-          "isArray",
-          "type"
-        ],
-        "additionalProperties": false
+        "location": {
+          "$ref": "#/definitions/IRange"
+        },
+        "value": {
+          "type": "boolean"
+        }
       },
-      "ITypeIdentifier": {
-        "type": "object",
-        "properties": {
-          "$class": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "namespace": {
-            "type": "string"
-          }
+      "required": [
+        "$class",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IDecoratorNumber": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
         },
-        "required": [
-          "$class",
-          "name"
-        ],
-        "additionalProperties": false
-      }
+        "location": {
+          "$ref": "#/definitions/IRange"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "$class",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IDecoratorString": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/definitions/IRange"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "$class",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IDecoratorTypeReference": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
+        },
+        "isArray": {
+          "type": "boolean"
+        },
+        "location": {
+          "$ref": "#/definitions/IRange"
+        },
+        "type": {
+          "$ref": "#/definitions/ITypeIdentifier"
+        }
+      },
+      "required": [
+        "$class",
+        "isArray",
+        "type"
+      ],
+      "type": "object"
+    },
+    "IPosition": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
+        },
+        "column": {
+          "type": "number"
+        },
+        "line": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "$class",
+        "column",
+        "line",
+        "offset"
+      ],
+      "type": "object"
+    },
+    "IRange": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
+        },
+        "end": {
+          "$ref": "#/definitions/IPosition"
+        },
+        "source": {
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/definitions/IPosition"
+        }
+      },
+      "required": [
+        "$class",
+        "end",
+        "start"
+      ],
+      "type": "object"
+    },
+    "ITypeIdentifier": {
+      "additionalProperties": false,
+      "properties": {
+        "$class": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "$class",
+        "name"
+      ],
+      "type": "object"
     }
   }
+}

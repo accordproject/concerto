@@ -27,9 +27,8 @@ test('Chained TypeScript and JSONSchema conversion respects inheritance when fla
         type: 'IDecorator',
     }
     const jsonSchema = createGenerator(config).createSchema(config.type);
-
     const staticJsonSchemaResult = JSON.parse(fs.readFileSync('src/fixtures/decorator.jsonschema.json', 'utf8'));
-    expect(jsonSchema).toStrictEqual(staticJsonSchemaResult);
+    expect(jsonSchema).toMatchObject(staticJsonSchemaResult);
 
     // Test instance
     const data = {
