@@ -17,6 +17,7 @@
 const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
+const Globalize = require('./globalize');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.3.0';
 
@@ -95,13 +96,16 @@ class VocabularyManager {
      */
     addVocabulary(contents) {
         if (!contents) {
-            throw new Error('Vocabulary contents must be specified');
+            throw new Error(Globalize.formatMessage('vocabularymanager-addvocabulary-nocontents'));
         }
         const voc = new Vocabulary(this, YAML.parse(contents));
 
         const existing = Object.values(this.vocabularies).find(v => v.getIdentifier() === voc.getIdentifier());
         if (existing) {
-            throw new Error('Vocabulary has already been added.');
+            let formatter = Globalize.messageFormatter('vocabularymanager-addvocabulary-alreadyadded');
+            throw new Error(formatter({
+                identifier: voc.getIdentifier()
+            }));
         }
         this.vocabularies[voc.getIdentifier()] = voc;
         return voc;
