@@ -16,7 +16,7 @@
         "build": "tsc",
         "pretest": "npm-run-all lint",
         "lint": "eslint .",
-        "test": "jest",
+        "test": "jest --maxConcurrency=1",
         "test:watch": "jest --watchAll"
     },
     "repository": {
