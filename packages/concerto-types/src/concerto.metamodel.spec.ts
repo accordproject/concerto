@@ -21,8 +21,8 @@ test('Chained TypeScript and JSONSchema conversion respects inheritance when fla
 
     // TS to JSON Schema conversion
     const config = {
-        path: path.resolve('../src/generated/union/concerto-metamodel@1.0.0.ts'),
-        tsconfig: path.resolve('../concerto-types/tsconfig.json'),
+        path: path.resolve('./src/generated/union/concerto-metamodel@1.0.0.ts'),
+        tsconfig: path.resolve('./tsconfig.json'),
         type: 'IDecorator',
     }
     const jsonSchema = createGenerator(config).createSchema(config.type);
