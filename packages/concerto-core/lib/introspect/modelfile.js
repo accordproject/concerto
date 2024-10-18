@@ -76,18 +76,18 @@ class ModelFile extends Decorated {
         this.version = null;
 
         if(!ast || typeof ast !== 'object') {
-            throw new Error('ModelFile expects a Concerto model AST as input.');
+            throw new Error(Globalize.formatMessage('modelfile-constructor-astnotobject'));
         }
 
         this.ast = ast;
 
         if(definitions && typeof definitions !== 'string') {
-            throw new Error('ModelFile expects an (optional) Concerto model definition as a string.');
+            throw new Error(Globalize.formatMessage('modelfile-constructor-defnotstring'));
         }
         this.definitions = definitions;
 
         if(fileName && typeof fileName !== 'string') {
-            throw new Error('ModelFile expects an (optional) filename as a string.');
+            throw new Error(Globalize.formatMessage('modelfile-constructor-filenamenotstring'));
         }
         this.fileName = fileName;
 
@@ -482,7 +482,7 @@ class ModelFile extends Decorated {
      */
     getLocalType(type) {
         if(!this.localTypes) {
-            throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
+            throw new Error(Globalize.formatMessage('modelfile-getlocaltype-notinit'));
         }
 
         if(!type.startsWith(this.getNamespace())) {
@@ -698,7 +698,11 @@ class ModelFile extends Decorated {
             if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
+                let formatter = Globalize.messageFormatter('modelfile-incompatibleversion');
+                throw new Error(formatter({
+                    concertoVersion: this.ast.concertoVersion,
+                    packageJsonVersion: packageJson.version
+                }));
             }
         }
     }
@@ -712,7 +716,10 @@ class ModelFile extends Decorated {
         if(this.getModelManager().isStrict()) {
             const nsInfo = ModelUtil.parseNamespace(imp.namespace);
             if(!nsInfo.version) {
-                throw new Error(`Cannot use an unversioned import ${imp.namespace} when 'strict' option on Model Manager is set.`);
+                let formatter = Globalize.messageFormatter('modelfile-unversionedimport');
+                throw new Error(formatter({
+                    namespace: imp.namespace
+                }));
             }
         }
     }
@@ -728,7 +735,10 @@ class ModelFile extends Decorated {
         const namespaceParts = nsInfo.name.split('.');
         namespaceParts.forEach(part => {
             if (!ModelUtil.isValidIdentifier(part)){
-                throw new IllegalModelException(`Invalid namespace part '${part}'`, this.modelFile, this.ast.location);
+                let formatter = Globalize.messageFormatter('modelfile-invalidnamespacepart');
+                throw new IllegalModelException(formatter({
+                    part: part
+                }), this.modelFile, this.ast.location);
             }
         });
 
@@ -754,7 +764,7 @@ class ModelFile extends Decorated {
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 if (this.getModelManager().isStrict()){
-                    throw new Error('Wilcard Imports are not permitted in strict mode.');
+                    throw new Error(Globalize.formatMessage('modelfile-wildcardimport-notallowed'));
                 }
                 Warning.printDeprecationWarning(
                     'Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
@@ -770,7 +780,7 @@ class ModelFile extends Decorated {
                     if (imp.aliasedTypes) {
                         imp.aliasedTypes.forEach(({ name, aliasedName }) => {
                             if(ModelUtil.isPrimitiveType(aliasedName)){
-                                throw new Error('Types cannot be aliased to primitive type');
+                                throw new Error(Globalize.formatMessage('modelfile-aliastype-primitive'));
                             }
                             aliasedTypes.set(name, aliasedName);
                         });
@@ -789,7 +799,7 @@ class ModelFile extends Decorated {
                     );
                 } else {
                     if (imp.aliasedTypes) {
-                        throw new Error('Aliasing disabled, set importAliasing to true');
+                        throw new Error(Globalize.formatMessage('modelfile-aliastype-disabled'));
                     }
                     imp.types.forEach((type) => {
                         this.importShortNames.set(type,`${imp.namespace}.${type}`);

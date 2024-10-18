@@ -69,6 +69,17 @@
 
         "instancegenerator-newinstance-noconcreteclass": "No concrete extending type for \"{type}\".",
 
+        "modelfile-constructor-astnotobject": "ModelFile expects a Concerto model AST as input.",
+        "modelfile-constructor-defnotstring": "ModelFile expects an (optional) Concerto model definition as a string.",
+        "modelfile-constructor-filenamenotstring": "ModelFile expects an (optional) filename as a string.",
+        "modelfile-getlocaltype-notinit": "Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.",
+        "modelfile-incompatibleversion": "ModelFile expects Concerto version \"{concertoVersion}\" but this is \"{packageJsonVersion}\"",
+        "modelfile-unversionedimport": "Cannot use an unversioned import \"{namespace}\" when 'strict' option on Model Manager is set.",
+        "modelfile-invalidnamespacepart": "Invalid namespace part '\"{part}\"'",
+        "modelfile-wildcardimport-notallowed": "Wilcard Imports are not permitted in strict mode.",
+        "modelfile-aliastype-primitive": "Types cannot be aliased to primitive type",
+        "modelfile-aliastype-disabled": "Aliasing disabled, set importAliasing to true",
+
         "modelmanager-resolvetype-nonsfortype": "No registered namespace for type \"{type}\" in \"{context}\".",
         "modelmanager-resolvetype-notypeinnsforcontext": "No type \"{type}\" in namespace \"{namespace}\" for \"{context}\".",
 
