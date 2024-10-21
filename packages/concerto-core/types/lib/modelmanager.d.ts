@@ -19,14 +19,26 @@ declare class ModelManager extends BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {boolean} [options.strict] - require versioned namespaces and imports
      * @param {Object} [options.regExp] - An alternative regular expression engine.
+     * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
+     * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
-     * @param {boolean} [options.importAliasing] - When true, the Concerto Map Type feature is enabled
+     * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
+     * @param {object} [options.decoratorValidation] - the decorator validation configuration
+     * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
+     * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
         strict?: boolean;
         regExp?: any;
+        metamodelValidation?: boolean;
+        addMetamodel?: boolean;
         enableMapType?: boolean;
         importAliasing?: boolean;
+        decoratorValidation?: {
+            missingDecorator?: string;
+            invalidDecorator?: string;
+        };
     });
     /**
      * Adds a model in CTO format to the ModelManager.

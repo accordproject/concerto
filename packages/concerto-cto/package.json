@@ -13,11 +13,8 @@
   "scripts": {
     "prepublishOnly": "npm run webpack",
     "parser": "peggy -o lib/parser.js lib/parser.pegjs",
-    "pretest": "npm run lint && npm run parser",
+    "pretest": "npm run lint && npm run parser && npm run doc",
     "lint": "eslint .",
-    "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "nyc mocha --recursive -t 10000",
     "test:watch": "nyc mocha --watch --recursive -t 10000",
@@ -47,7 +44,6 @@
     "debug": "4.3.4",
     "eslint": "8.2.0",
     "jsdoc": "^4.0.2",
-    "license-check-and-add": "2.3.6",
     "mocha": "10.0.0",
     "nyc": "15.1.0",
     "peggy": "2.0.1",
@@ -61,47 +57,6 @@
     "path-browserify": "1.0.1"
   },
   "browserslist": "> 0.25%, not dead",
-  "license-check-and-add-config": {
-    "folder": "./lib",
-    "license": "HEADER",
-    "exact_paths_method": "EXCLUDE",
-    "exact_paths": [
-      "api.txt",
-      "composer-logs",
-      "coverage",
-      "./parser.js",
-      "LICENSE",
-      "node_modules",
-      ".nyc-output",
-      "out",
-      ".tern-project"
-    ],
-    "file_type_method": "EXCLUDE",
-    "file_types": [
-      ".yml",
-      ".yaml",
-      ".zip",
-      ".tgz"
-    ],
-    "insert_license": false,
-    "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
-        "prepend": "/*",
-        "append": " */",
-        "eachLine": {
-          "prepend": " * "
-        }
-      },
-      "npmrc|editorconfig|txt": {
-        "eachLine": {
-          "prepend": "# "
-        }
-      },
-      "md": {
-        "file": "HEADER.md"
-      }
-    }
-  },
   "nyc": {
     "produce-source-map": "true",
     "sourceMap": "inline",

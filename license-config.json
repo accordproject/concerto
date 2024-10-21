@@ -1,0 +1,56 @@
+{
+    "ignore": [
+        "scripts/**",
+        "**/*.zip",
+        "**/changelog.txt",
+        "**/*.tgz",
+        "**/.git",
+        "**/*.pegjs",
+        "packages/concerto-cto/lib/parser.js",
+        "**/jest.config.js",
+        "packages/*/scripts/**",
+        "**/generated/**",
+        "node_modules",
+        "**/out/**",
+        "**/HEADER",
+        "**/[.]*",
+        "**/[.]*/**",
+        "**/test/**",
+        "**/*.cto",
+        "**/*.d.ts",
+        "**/*.md",
+        "**/coverage/**",
+        "log",
+        "LICENSE",
+        "HEADER",
+        "packages/concerto-core/api.txt",
+        "**/*.snap"
+    ],
+    "license": "HEADER",
+    "defaultFormat": {
+        "prepend": "/*",
+        "append": "*/"
+    },
+    "licenseFormats": {
+        "js": {
+            "prepend": "/*",
+            "append": " */",
+            "eachLine": {
+                "prepend": " * "
+            }
+        },
+        "ts": {
+            "prepend": "/*",
+            "append": " */",
+            "eachLine": {
+                "prepend": " * "
+            }
+        },
+        "dotfile|^Dockerfile": {
+            "eachLine": {
+                "prepend": "# "
+            }
+        }
+    },
+    "trailingWhitespace": "TRIM"
+}
