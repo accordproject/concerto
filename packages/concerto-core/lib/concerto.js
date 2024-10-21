@@ -18,6 +18,7 @@ const URIJS = require('urijs');
 const RESOURCE_SCHEME = 'resource';
 const { TypedStack } = require('@accordproject/concerto-util');
 const ObjectValidator = require('./serializer/objectvalidator');
+const Globalize = require('./globalize');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -81,7 +82,7 @@ class Concerto {
      */
     getTypeDeclaration(obj) {
         if (!obj.$class) {
-            throw new Error('Input object does not have a $class attribute.');
+            throw new Error(Globalize.formatMessage('concerto-gettypedeclaration-noclassattribute'));
         }
 
         return this.modelManager.getType(obj.$class);
@@ -96,7 +97,10 @@ class Concerto {
         const typeDeclaration = this.getTypeDeclaration(obj);
         const idField = typeDeclaration.getIdentifierFieldName();
         if (!idField) {
-            throw new Error(`Object does not have an identifier: ${JSON.stringify(obj)}`);
+            let formatter = Globalize.messageFormatter('concerto-getidentifier-noidfield');
+            throw new Error(formatter({
+                object: JSON.stringify(obj)
+            }));
         }
         return obj[idField];
     }
@@ -170,15 +174,24 @@ class Concerto {
         try {
             uriComponents = URIJS.parse(uri);
         } catch (err) {
-            throw new Error('Invalid URI: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-fromuri-invaliduri');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
 
         const scheme = uriComponents.protocol;
         if (scheme && scheme !== RESOURCE_SCHEME) {
-            throw new Error('Invalid URI scheme: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-fromuri-invalidurischeme');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
         if (uriComponents.username || uriComponents.password || uriComponents.port || uriComponents.query) {
-            throw new Error('Invalid resource URI format: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-fromuri-invaliduriformat');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
 
         return {
