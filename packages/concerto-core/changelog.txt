@@ -24,6 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.19.2 {844c910d1f8f61ab31c34e85d8c51546} 2024-10-21
+- update options for ModelManager
+
 Version 3.19.2 {56bc38dc7305eee0a06f08a8cf639910} 2024-10-02
 - validateDecorators option added to ModelManager
 - update DecoratorManager to support validated decorators
