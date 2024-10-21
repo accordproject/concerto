@@ -81,6 +81,7 @@ declare class DecoratorManager {
      * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
      * the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
+     * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ModelManager} a new model manager with the decorations applied
      */
@@ -88,6 +89,7 @@ declare class DecoratorManager {
         validate?: boolean;
         validateCommands?: boolean;
         migrate?: boolean;
+        defaultNamespace?: boolean;
         enableDcsNamespaceTarget?: boolean;
     }): ModelManager;
     /**

@@ -14,9 +14,9 @@
         "codegen": "node scripts/codegen.js",
         "prebuild": "npm-run-all clean codegen",
         "build": "tsc",
-        "pretest": "npm-run-all lint",
+        "pretest": "npm-run-all prebuild lint",
         "lint": "eslint .",
-        "test": "jest",
+        "test": "jest --passWithNoTests",
         "test:watch": "jest --watchAll"
     },
     "repository": {

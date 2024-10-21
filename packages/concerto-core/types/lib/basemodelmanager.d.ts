@@ -25,6 +25,9 @@ declare class BaseModelManager {
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
+     * @param {object} [options.decoratorValidation] - the decorator validation configuration
+     * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
+     * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
      * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
      */
     constructor(options?: {
@@ -34,11 +37,15 @@ declare class BaseModelManager {
         addMetamodel?: boolean;
         enableMapType?: boolean;
         importAliasing?: boolean;
+        decoratorValidation?: {
+            missingDecorator?: string;
+            invalidDecorator?: string;
+        };
     }, processFile?: any);
     processFile: any;
     modelFiles: {};
-    factory: any;
-    serializer: any;
+    factory: Factory;
+    serializer: Serializer;
     decoratorFactories: any[];
     strict: boolean;
     options: {
@@ -48,10 +55,21 @@ declare class BaseModelManager {
         addMetamodel?: boolean;
         enableMapType?: boolean;
         importAliasing?: boolean;
+        decoratorValidation?: {
+            missingDecorator?: string;
+            invalidDecorator?: string;
+        };
+    };
+    decoratorValidation: {
+        missingDecorator: any;
+        invalidDecorator: any;
+    } | {
+        missingDecorator?: string;
+        invalidDecorator?: string;
     };
     enableMapType: boolean;
     importAliasing: boolean;
-    metamodelModelFile: any;
+    metamodelModelFile: ModelFile;
     /**
      * Returns true
      * @returns {boolean} true
@@ -72,6 +90,11 @@ declare class BaseModelManager {
      * @private
      */
     private addRootModel;
+    /**
+     * Adds decorator types
+     * @private
+     */
+    private addDecoratorModel;
     /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
@@ -186,6 +209,11 @@ declare class BaseModelManager {
     writeModelsToFileSystem(path: string, options?: {
         includeExternalModels: boolean;
     }): void;
+    /**
+     * Returns the status of the decorator validation options
+     * @returns {object} returns an object that indicates the log levels for defined and undefined decorators
+     */
+    getDecoratorValidation(): object;
     /**
      * Get the array of model file instances
      * @param {Boolean} [includeConcertoNamespace] - whether to include the concerto namespace
@@ -325,9 +353,10 @@ declare class BaseModelManager {
     /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names
+     * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve?: boolean): any;
+    getAst(resolve?: boolean, includeConcertoNamespaces?: boolean): any;
     /**
      * A function type definition for use as an argument to the filter function
      * @callback FilterFunction
@@ -345,6 +374,8 @@ declare class BaseModelManager {
      */
     filter(predicate: (declaration: Declaration) => boolean): BaseModelManager;
 }
+import Factory = require("./factory");
+import Serializer = require("./serializer");
 import ModelFile = require("./introspect/modelfile");
 import { FileDownloader } from "@accordproject/concerto-util";
 import ClassDeclaration = require("./introspect/classdeclaration");
@@ -355,7 +386,5 @@ import ParticipantDeclaration = require("./introspect/participantdeclaration");
 import MapDeclaration = require("./introspect/mapdeclaration");
 import EnumDeclaration = require("./introspect/enumdeclaration");
 import ConceptDeclaration = require("./introspect/conceptdeclaration");
-import Factory = require("./factory");
-import Serializer = require("./serializer");
 import DecoratorFactory = require("./introspect/decoratorfactory");
 import Declaration = require("./introspect/declaration");

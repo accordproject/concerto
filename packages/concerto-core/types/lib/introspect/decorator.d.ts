@@ -16,6 +16,14 @@ declare class Decorator {
     parent: ClassDeclaration | Property;
     arguments: any[];
     /**
+    * Handles a validation error, logging and throwing as required
+    * @param {string} level the log level
+    * @param {*} err the error to log
+    * @param {*} [fileLocation] the file location
+    * @private
+    */
+    private handleError;
+    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -35,7 +43,7 @@ declare class Decorator {
     private process;
     name: any;
     /**
-     * Validate the property
+     * Validate the decorator
      * @throws {IllegalModelException}
      * @private
      */
