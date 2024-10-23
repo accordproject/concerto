@@ -1,6 +1,6 @@
 {
     "name": "@accordproject/concerto-analysis",
-    "version": "3.19.3",
+    "version": "3.19.4",
     "description": "Analysis of Concerto model files",
     "homepage": "https://github.com/accordproject/concerto",
     "engines": {
