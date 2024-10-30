@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ComparerFactory } from '../comparer';
+import { ComparerFactory } from '../comparer.js';
 
 const mapDeclarationTypeChanged: ComparerFactory = (context) => ({
     compareMapDeclaration: (a, b) => {

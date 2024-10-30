@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-export { Compare } from './compare';
-export { CompareConfig, CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config';
-export { CompareFinding, CompareResults } from './compare-results';
+export { Compare } from './compare.js';
+export { CompareConfig, CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config.js';
+export { CompareFinding, CompareResults } from './compare-results.js';
 

@@ -1,4 +1,4 @@
-import { CompareConfig, CompareConfigBuilder, CompareResult } from '../../src/compare-config';
+import { CompareConfig, CompareConfigBuilder, CompareResult } from '../../src/compare-config.js';
 
 describe('CompareConfigBuilder', () => {
     it('Should start with empty config', () => {
