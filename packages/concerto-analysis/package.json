@@ -31,7 +31,7 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "dependencies": {
-        "@accordproject/concerto-core": "3.19.3",
+        "@accordproject/concerto-core": "3.19.4",
         "semver": "7.5.4"
     },
     "devDependencies": {
