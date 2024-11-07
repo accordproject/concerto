@@ -34,7 +34,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@accordproject/concerto-core": "3.19.3",
+    "@accordproject/concerto-core": "3.19.4",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
@@ -48,7 +48,7 @@
     "typescript": "5.6.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.10.1",
+    "@accordproject/concerto-metamodel": "3.10.2",
     "yaml": "2.2.2"
   },
   "browserslist": "> 0.25%, not dead",
