@@ -68,7 +68,7 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
-    "@accordproject/concerto-cto": "3.19.5",
+    "@accordproject/concerto-cto": "3.19.6",
     "@accordproject/concerto-metamodel": "3.10.2",
     "@accordproject/concerto-util": "3.19.5",
     "dayjs": "1.11.10",
