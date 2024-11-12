@@ -12,21 +12,21 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
-const { TypedStack } = require('@accordproject/concerto-util');
-const Relationship = require('../model/relationship');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
-const ValidationException = require('./validationexception');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
+const { TypedStack } = require("@accordproject/concerto-util");
+const Relationship = require("../model/relationship");
+const Util = require("@accordproject/concerto-util").NullUtil;
+const ModelUtil = require("../modelutil");
+const ValidationException = require("./validationexception");
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
 dayjs.extend(utc);
-const quarterOfYear = require('dayjs/plugin/quarterOfYear');
+const quarterOfYear = require("dayjs/plugin/quarterOfYear");
 dayjs.extend(quarterOfYear);
-const minMax = require('dayjs/plugin/minMax');
+const minMax = require("dayjs/plugin/minMax");
 dayjs.extend(minMax);
-const duration = require('dayjs/plugin/duration');
+const duration = require("dayjs/plugin/duration");
 dayjs.extend(duration);
 
 /**
@@ -38,14 +38,18 @@ dayjs.extend(duration);
  */
 function getAssignableProperties(resourceData, classDeclaration) {
     const properties = Object.keys(resourceData);
-    const privateProperties = properties.filter(ModelUtil.isPrivateSystemProperty);
-    if (privateProperties.length > 0){
-        const errorText = `Unexpected reserved properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
-            privateProperties.join(', ');
+    const privateProperties = properties.filter(
+        ModelUtil.isPrivateSystemProperty
+    );
+    if (privateProperties.length > 0) {
+        const errorText =
+            `Unexpected reserved properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
+            privateProperties.join(", ");
         throw new ValidationException(errorText);
     }
 
-    if (properties.includes('$timestamp') &&
+    if (
+        properties.includes("$timestamp") &&
         !(classDeclaration.isTransaction?.() || classDeclaration.isEvent?.())
     ) {
         const errorText = `Unexpected property for type ${classDeclaration.getFullyQualifiedName()}: $timestamp`;
@@ -53,7 +57,10 @@ function getAssignableProperties(resourceData, classDeclaration) {
     }
 
     return properties.filter((property) => {
-        return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
+        return (
+            !ModelUtil.isSystemProperty(property) &&
+            !Util.isNull(resourceData[property])
+        );
     });
 }
 
@@ -69,10 +76,13 @@ function validateProperties(properties, classDeclaration) {
         .getProperties()
         .map((property) => property.getName());
 
-    const invalidProperties = properties.filter((property) => !expectedProperties.includes(property));
+    const invalidProperties = properties.filter(
+        (property) => !expectedProperties.includes(property)
+    );
     if (invalidProperties.length > 0) {
-        const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
-            invalidProperties.join(', ');
+        const errorText =
+            `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
+            invalidProperties.join(", ");
         throw new ValidationException(errorText);
     }
 }
@@ -99,13 +109,20 @@ class JSONPopulator {
      * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
 
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
+    constructor(
+        acceptResourcesForRelationships,
+        ergo,
+        utcOffset,
+        strictQualifiedDateTimes = true
+    ) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes;
 
-        if (process.env.TZ){
-            console.warn(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
+        if (process.env.TZ) {
+            console.warn(
+                `Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`
+            );
         }
     }
 
@@ -117,7 +134,7 @@ class JSONPopulator {
      * @private
      */
     visit(thing, parameters = {}) {
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        parameters.path ?? (parameters.path = new TypedStack("$"));
 
         if (thing.isClassDeclaration?.()) {
             return this.visitClassDeclaration(thing, parameters);
@@ -130,7 +147,7 @@ class JSONPopulator {
         } else if (thing.isField?.()) {
             return this.visitField(thing, parameters);
         } else {
-            throw new Error('Unrecognised ' + JSON.stringify(thing) );
+            throw new Error("Unrecognised " + JSON.stringify(thing));
         }
     }
 
@@ -144,7 +161,7 @@ class JSONPopulator {
     visitClassDeclaration(classDeclaration, parameters) {
         const jsonObj = parameters.jsonStack.pop();
         const resourceObj = parameters.resourceStack.pop();
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        parameters.path ?? (parameters.path = new TypedStack("$"));
 
         const properties = getAssignableProperties(jsonObj, classDeclaration);
         validateProperties(properties, classDeclaration);
@@ -155,7 +172,7 @@ class JSONPopulator {
                 parameters.path.push(`.${property}`);
                 parameters.jsonStack.push(value);
                 const classProperty = classDeclaration.getProperty(property);
-                resourceObj[property] = classProperty.accept(this,parameters);
+                resourceObj[property] = classProperty.accept(this, parameters);
                 parameters.path.pop();
             }
         });
@@ -171,7 +188,7 @@ class JSONPopulator {
      */
     visitMapDeclaration(mapDeclaration, parameters) {
         let jsonObj = parameters.jsonStack.pop();
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        parameters.path ?? (parameters.path = new TypedStack("$"));
 
         // Throws if Map contains reserved properties - a Map containing reserved Properties should not be serialized.
         getAssignableProperties(jsonObj, mapDeclaration);
@@ -181,18 +198,29 @@ class JSONPopulator {
         let map = new Map();
 
         jsonObj.forEach((value, key) => {
-
-            if (key === '$class') {
+            if (key === "$class") {
                 map.set(key, value);
                 return;
             }
 
             if (!ModelUtil.isPrimitiveType(mapDeclaration.getKey().getType())) {
-                key = this.processMapType(mapDeclaration, parameters, key, mapDeclaration.getKey().getType());
+                key = this.processMapType(
+                    mapDeclaration,
+                    parameters,
+                    key,
+                    mapDeclaration.getKey().getType()
+                );
             }
 
-            if (!ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())) {
-                value = this.processMapType(mapDeclaration, parameters, value, mapDeclaration.getValue().getType());
+            if (
+                !ModelUtil.isPrimitiveType(mapDeclaration.getValue().getType())
+            ) {
+                value = this.processMapType(
+                    mapDeclaration,
+                    parameters,
+                    value,
+                    mapDeclaration.getValue().getType()
+                );
             }
 
             map.set(key, value);
@@ -211,14 +239,18 @@ class JSONPopulator {
      * @private
      */
     processMapType(mapDeclaration, parameters, value, type) {
-        let decl = mapDeclaration.getModelFile()
+        let decl = mapDeclaration
+            .getModelFile()
             .getAllDeclarations()
-            .find(decl => decl.name === type);
+            .find((decl) => decl.name === type);
 
         // if its a ClassDeclaration, populate the Concept.
         if (decl?.isClassDeclaration()) {
-            let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                decl.getName(), decl.getIdentifierFieldName() );
+            let subResource = parameters.factory.newConcept(
+                decl.getNamespace(),
+                decl.getName(),
+                decl.getIdentifierFieldName()
+            );
 
             parameters.jsonStack.push(value);
             parameters.resourceStack.push(subResource);
@@ -236,20 +268,20 @@ class JSONPopulator {
      * @private
      */
     visitField(field, parameters) {
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        parameters.path ?? (parameters.path = new TypedStack("$"));
         let jsonObj = parameters.jsonStack.pop();
         let result = null;
 
-        if(field.isArray()) {
+        if (field.isArray()) {
             result = [];
-            for(let n=0; n < jsonObj.length; n++) {
+            for (let n = 0; n < jsonObj.length; n++) {
                 parameters.path.push(`[${n}]`);
                 const jsonItem = jsonObj[n];
-                result.push(this.convertItem(field,jsonItem, parameters));
+                result.push(this.convertItem(field, jsonItem, parameters));
                 parameters.path.pop();
             }
         } else {
-            result = this.convertItem(field,jsonObj, parameters);
+            result = this.convertItem(field, jsonObj, parameters);
         }
 
         return result;
@@ -265,9 +297,9 @@ class JSONPopulator {
     convertItem(field, jsonItem, parameters) {
         let result = null;
 
-        if(!field.isPrimitive?.() && !field.isTypeEnum?.()) {
+        if (!field.isPrimitive?.() && !field.isTypeEnum?.()) {
             let typeName = jsonItem.$class;
-            if(!typeName) {
+            if (!typeName) {
                 // If the type name is not specified in the data, then use the
                 // type name from the model. This will only happen in the case of
                 // a sub resource inside another resource.
@@ -278,25 +310,28 @@ class JSONPopulator {
             const declaration = parameters.modelManager.getType(typeName);
 
             if (!declaration.isMapDeclaration?.()) {
-
                 // create a new instance, using the identifier field name as the ID.
                 let subResource = null;
 
                 // if this is identifiable, then we create a resource
                 if (declaration.isIdentified()) {
-                    subResource = parameters.factory.newResource(declaration.getNamespace(),
-                        declaration.getName(), jsonItem[declaration.getIdentifierFieldName()] );
+                    subResource = parameters.factory.newResource(
+                        declaration.getNamespace(),
+                        declaration.getName(),
+                        jsonItem[declaration.getIdentifierFieldName()]
+                    );
                 } else {
                     // otherwise we create a concept
-                    subResource = parameters.factory.newConcept(declaration.getNamespace(),
-                        declaration.getName());
+                    subResource = parameters.factory.newConcept(
+                        declaration.getNamespace(),
+                        declaration.getName()
+                    );
                 }
                 parameters.resourceStack.push(subResource);
             }
             parameters.jsonStack.push(jsonItem);
             result = declaration.accept(this, parameters);
-        }
-        else {
+        } else {
             result = this.convertToObject(field, jsonItem, parameters);
         }
 
@@ -313,70 +348,98 @@ class JSONPopulator {
      */
     convertToObject(field, json, parameters = {}) {
         let result = null;
-        parameters.path ?? (parameters.path = new TypedStack('$'));
-        const path = parameters.path.stack.join('');
+        parameters.path ?? (parameters.path = new TypedStack("$"));
+        const path = parameters.path.stack.join("");
 
-        switch(field.getType()) {
-        case 'DateTime': {
-            if (json && typeof json === 'object' && typeof json.isBefore === 'function') {
-                result = json;
-            } else if (typeof json !== 'string') {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            } else if (!this.strictQualifiedDateTimes){
-                result = dayjs.utc(json).utcOffset(this.utcOffset);
-            } else if (this.strictQualifiedDateTimes){
-                if (json.match(/^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/)){
-                    result = dayjs.utc(json);
-                } else {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`);
+        switch (field.getType()) {
+            case "DateTime":
+                {
+                    if (
+                        json &&
+                        typeof json === "object" &&
+                        typeof json.isBefore === "function"
+                    ) {
+                        result = json;
+                    } else if (typeof json !== "string") {
+                        throw new ValidationException(
+                            `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                        );
+                    } else if (!this.strictQualifiedDateTimes) {
+                        result = dayjs.utc(json).utcOffset(this.utcOffset);
+                    } else if (this.strictQualifiedDateTimes) {
+                        if (
+                            json.match(
+                                /^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[+-]\d{2}:\d{2}))$/
+                            )
+                        ) {
+                            result = dayjs.utc(json);
+                        } else {
+                            throw new ValidationException(
+                                `Expected value at path \`${path}\` to be of type \`${field.getType()}\` with format YYYY-MM-DDTHH:mm:ss[Z]`
+                            );
+                        }
+                    }
+                    if (!result || !result.isValid()) {
+                        throw new ValidationException(
+                            `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                        );
+                    }
                 }
-            }
-            if (!result || !result.isValid()) {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            }
-        }
-            break;
-        case 'Integer':
-        case 'Long': {
-            const num = json;
-            if (typeof num === 'number') {
-                if (Math.trunc(num) !== num) {
-                    throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-                } else {
-                    result = num;
+                break;
+            case "Integer":
+            case "Long":
+                {
+                    const num = json;
+                    if (typeof num === "number") {
+                        if (Math.trunc(num) !== num) {
+                            throw new ValidationException(
+                                `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                            );
+                        } else {
+                            result = num;
+                        }
+                    } else {
+                        throw new ValidationException(
+                            `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                        );
+                    }
                 }
-            } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            }
-        }
-            break;
-        case 'Double': {
-            if (typeof json === 'number') {
-                result = parseFloat(json);
-            } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            }
-        }
-            break;
-        case 'Boolean': {
-            if (typeof json === 'boolean') {
+                break;
+            case "Double":
+                {
+                    if (typeof json === "number") {
+                        result = parseFloat(json);
+                    } else {
+                        throw new ValidationException(
+                            `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                        );
+                    }
+                }
+                break;
+            case "Boolean":
+                {
+                    if (typeof json === "boolean") {
+                        result = json;
+                    } else {
+                        throw new ValidationException(
+                            `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                        );
+                    }
+                }
+                break;
+            case "String":
+                if (typeof json === "string") {
+                    result = json;
+                } else {
+                    throw new ValidationException(
+                        `Expected value at path \`${path}\` to be of type \`${field.getType()}\``
+                    );
+                }
+                break;
+            default: {
+                // everything else should be an enumerated value...
                 result = json;
-            } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
-        }
-            break;
-        case 'String':
-            if (typeof json === 'string') {
-                result = json;
-            } else {
-                throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
-            }
-            break;
-        default: {
-            // everything else should be an enumerated value...
-            result = json;
-        }
         }
         return result;
     }
@@ -389,62 +452,103 @@ class JSONPopulator {
      * @private
      */
     visitRelationshipDeclaration(relationshipDeclaration, parameters) {
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        parameters.path ?? (parameters.path = new TypedStack("$"));
         let jsonObj = parameters.jsonStack.pop();
         let result = null;
 
         let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
         let defaultNamespace = ModelUtil.getNamespace(typeFQN);
-        if(!defaultNamespace) {
+        if (!defaultNamespace) {
             defaultNamespace = relationshipDeclaration.getNamespace();
         }
         let defaultType = ModelUtil.getShortName(typeFQN);
 
-        if(relationshipDeclaration.isArray()) {
+        if (relationshipDeclaration.isArray()) {
             result = [];
-            for(let n=0; n < jsonObj.length; n++) {
+            for (let n = 0; n < jsonObj.length; n++) {
                 let jsonItem = jsonObj[n];
-                if (typeof jsonItem === 'string') {
-                    result.push(Relationship.fromURI(parameters.modelManager, jsonItem, defaultNamespace, defaultType ));
+                if (typeof jsonItem === "string") {
+                    result.push(
+                        Relationship.fromURI(
+                            parameters.modelManager,
+                            jsonItem,
+                            defaultNamespace,
+                            defaultType
+                        )
+                    );
                 } else {
                     if (!this.acceptResourcesForRelationships) {
-                        throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+                        throw new Error(
+                            "Invalid JSON data. Found a value that is not a string: " +
+                                jsonObj +
+                                " for relationship " +
+                                relationshipDeclaration
+                        );
                     }
 
                     // this isn't a relationship, but it might be an object!
-                    if(!jsonItem.$class) {
-                        throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonItem + ' for relationship ' + relationshipDeclaration );
+                    if (!jsonItem.$class) {
+                        throw new Error(
+                            "Invalid JSON data. Does not contain a $class type identifier: " +
+                                jsonItem +
+                                " for relationship " +
+                                relationshipDeclaration
+                        );
                     }
 
-                    const classDeclaration = parameters.modelManager.getType(jsonItem.$class);
+                    const classDeclaration = parameters.modelManager.getType(
+                        jsonItem.$class
+                    );
 
                     // create a new instance, using the identifier field name as the ID.
-                    let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                        classDeclaration.getName(), jsonItem[classDeclaration.getIdentifierFieldName()] );
+                    let subResource = parameters.factory.newResource(
+                        classDeclaration.getNamespace(),
+                        classDeclaration.getName(),
+                        jsonItem[classDeclaration.getIdentifierFieldName()]
+                    );
                     parameters.jsonStack.push(jsonItem);
                     parameters.resourceStack.push(subResource);
                     classDeclaration.accept(this, parameters);
                     result.push(subResource);
                 }
             }
-        }
-        else {
-            if (typeof jsonObj === 'string') {
-                result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
+        } else {
+            if (typeof jsonObj === "string") {
+                result = Relationship.fromURI(
+                    parameters.modelManager,
+                    jsonObj,
+                    defaultNamespace,
+                    defaultType
+                );
             } else {
                 if (!this.acceptResourcesForRelationships) {
-                    throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
+                    throw new Error(
+                        "Invalid JSON data. Found a value that is not a string: " +
+                            jsonObj +
+                            " for relationship " +
+                            relationshipDeclaration
+                    );
                 }
 
                 // this isn't a relationship, but it might be an object!
-                if(!jsonObj.$class) {
-                    throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
+                if (!jsonObj.$class) {
+                    throw new Error(
+                        "Invalid JSON data. Does not contain a $class type identifier: " +
+                            jsonObj +
+                            " for relationship " +
+                            relationshipDeclaration
+                    );
                 }
-                const classDeclaration = parameters.modelManager.getType(jsonObj.$class);
+                const classDeclaration = parameters.modelManager.getType(
+                    jsonObj.$class
+                );
 
                 // create a new instance, using the identifier field name as the ID.
-                let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonObj[classDeclaration.getIdentifierFieldName()] );
+                let subResource = parameters.factory.newResource(
+                    classDeclaration.getNamespace(),
+                    classDeclaration.getName(),
+                    jsonObj[classDeclaration.getIdentifierFieldName()]
+                );
                 parameters.jsonStack.push(jsonObj);
                 parameters.resourceStack.push(subResource);
                 classDeclaration.accept(this, parameters);
