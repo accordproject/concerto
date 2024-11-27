@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.10.2",
-    "@accordproject/concerto-util": "3.19.6",
+    "@accordproject/concerto-util": "file:../concerto-util",
     "path-browserify": "1.0.1"
   },
   "browserslist": "> 0.25%, not dead",
