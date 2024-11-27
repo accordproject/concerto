@@ -68,9 +68,9 @@
     "yargs": "17.3.1"
   },
   "dependencies": {
-    "@accordproject/concerto-cto": "3.19.6",
+    "@accordproject/concerto-cto": "file:../concerto-cto",
     "@accordproject/concerto-metamodel": "3.10.2",
-    "@accordproject/concerto-util": "3.19.5",
+    "@accordproject/concerto-util": "file:../concerto-util",
     "dayjs": "1.11.10",
     "debug": "4.3.4",
     "lorem-ipsum": "2.0.8",
