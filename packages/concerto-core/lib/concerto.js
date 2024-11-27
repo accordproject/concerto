@@ -174,7 +174,7 @@ class Concerto {
         try {
             uriComponents = URIJS.parse(uri);
         } catch (err) {
-            let formatter = Globalize.messageFormatter('concerto-fromuri-invaliduri');
+            let formatter = Globalize.messageFormatter('concerto-invaliduri');
             throw new Error(formatter({
                 uri: uri
             }));
@@ -182,13 +182,13 @@ class Concerto {
 
         const scheme = uriComponents.protocol;
         if (scheme && scheme !== RESOURCE_SCHEME) {
-            let formatter = Globalize.messageFormatter('concerto-fromuri-invalidurischeme');
+            let formatter = Globalize.messageFormatter('concerto-invalidurischeme');
             throw new Error(formatter({
                 uri: uri
             }));
         }
         if (uriComponents.username || uriComponents.password || uriComponents.port || uriComponents.query) {
-            let formatter = Globalize.messageFormatter('concerto-fromuri-invaliduriformat');
+            let formatter = Globalize.messageFormatter('concerto-invaliduriformat');
             throw new Error(formatter({
                 uri: uri
             }));

@@ -30,9 +30,9 @@
 
         "concerto-gettypedeclaration-noclassattribute": "Input object does not have a $class attribute.",
         "concerto-getidentifier-noidfield": "Object does not have an identifier: \"{object}\".",
-        "concerto-fromuri-invaliduri": "Invalid URI \"{uri}\".",
-        "concerto-fromuri-invalidurischeme": "Invalid URI scheme \"{uri}\".",
-        "concerto-fromuri-invaliduriformat":"Invalid URI resource format \"{uri}\".",
+        "concerto-invaliduri": "Invalid URI \"{uri}\".",
+        "concerto-invalidurischeme": "Invalid URI scheme \"{uri}\".",
+        "concerto-invaliduriformat":"Invalid URI resource format \"{uri}\".",
 
         "factory-newinstance-invalididentifierregex": "Provided id does not match regex: \"{regex}\".",
         "factory-newinstance-typenotidentifiable": "Type \"{type}\" is not identifiable.",
@@ -94,6 +94,10 @@
         "util-securitycheck-novalidcontext": "A valid \"SecurityContext\" must be specified.",
 
         "modelutil-getnamespace-nofnq": "FQN is invalid.",
+
+        "resourceid-constructor-missingnamespace": "Missing namespace",
+        "resourceid-constructor-missingtype": "Missing type",
+        "resourceid-constructor-missingid": "Missing id",
 
         "resourcevalidator-notresourceorconcept": "Model violation in the \"{resourceId}\" instance. Class \"{classFQN}\" has the value of \"{invalidValue}\". Expected a \"Resource\" or a \"Concept\".",
         "resourcevalidator-notrelationship": "Model violation in the \"{resourceId}\" instance. Class \"{classFQN}\" has a value of \"{invalidValue}\". Expected a \"Relationship\".",
