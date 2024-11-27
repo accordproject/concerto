@@ -3,7 +3,6 @@
     "@types/webgl-ext": "^0.0.37",
     "ajv": "^8.17.1",
     "colors": "1.4.0",
-    "coveralls": "3.1.0",
     "dayjs": "1.11.10",
     "eslint": "8.2.0",
     "glob": "^7.2.0",
@@ -26,7 +25,7 @@
   ],
   "name": "concerto",
   "description": "Define and introspect data models",
-  "version": "3.19.6",
+  "version": "3.19.7",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",

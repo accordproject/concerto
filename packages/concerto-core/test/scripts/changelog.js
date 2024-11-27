@@ -22,7 +22,6 @@ chai.use(require('chai-as-promised'));
 const path = require('path');
 
 const yargs = require('yargs');
-const mockery = require('mockery');
 const VersionChecker = require('../../scripts/versionchecker');
 
 
@@ -32,10 +31,6 @@ describe('composer cli', () => {
     let stubreadfile;
 
     beforeEach(() => {
-        mockery.enable({
-            warnOnReplace: false,
-            warnOnUnregistered: false
-        });
         sandbox = sinon.createSandbox();
         sandbox.stub(yargs, 'options').returns(yargs);
         sandbox.stub(yargs, 'usage').returns(yargs);
@@ -47,13 +42,18 @@ describe('composer cli', () => {
 
         /** test class */
         stubreadfile = sandbox.stub();
-        let fs =  { readFileSync : stubreadfile };
-        mockery.registerMock('fs', fs);
+        const fs = { readFileSync: stubreadfile };
+        const fsPath = require.resolve('fs');
+        require.cache[fsPath] = {
+            id: fsPath,
+            filename: fsPath,
+            loaded: false,
+            exports: fs,
+        };
         sandbox.stub(console,'log');
     });
 
     afterEach(() => {
-        mockery.deregisterAll();
         sandbox.restore();
     });
 
