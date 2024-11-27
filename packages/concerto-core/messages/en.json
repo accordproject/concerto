@@ -115,6 +115,12 @@
         "validatedresource-fieldnotdefined": "The instance with id \"{id}\" trying to set field \"{propName}\" which is not declared in the model.",
         "validatedresource-addarrayvalue-notarray": "The instance with id \"{id}\" trying to add array item \"{propName}\" which is not declared as an array in the model.",
 
+        "versionchecker-check-missing-open-brace": "Invalid changelog, failed to find { in line \"{line}\".",
+        "versionchecker-check-invalid-version": "The version in the changelog file \"{version}\" is not less than or equal to the next available version in package.json \"{packageObjVersion}\".",
+        "versionchecker-check-missing-close-brace": "Invalid changelog, failed to find } in line \"{line}\".",
+        "versionchecker-check-invalid-md5": "Computed public API digest did not match the digest in the changelog for the most recent version. Increment the version number and add a new entry to the changelog (explaining your public API change) using the digest ' + \"{digest}\". Run 'git diff api.txt' to understand the pubic API changes. Please ensure that TypeScript definitions are up to date by executing `npm run build:types`",
+        "versionchecker-check-no-version": "No version found in the changelog file.",
+
         "vocabulary-constructor-vocabularymanagerrequired": "\"VocabularyManager\" must be specified",
         "vocabulary-constructor-vocabularyobjectrequired": "\"Vocabulary object\" must be specified",
         "vocabulary-constructor-vocabularyobjectdeclarationsrequired": "\"Vocabulary object\" must have declarations.",
