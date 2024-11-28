@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "dayjs": "1.11.13",
     "glob": "^11.0.0",
     "license-check-and-add": "4.0.5",
