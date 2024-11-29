@@ -321,7 +321,8 @@ class DecoratorManager {
                 strict: true,
                 metamodelValidation: true,
                 addMetamodel: true,
-                enableMapType
+                enableMapType,
+                importAliasing: modelManager.isAliasedTypeEnabled(),
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -449,6 +450,7 @@ class DecoratorManager {
         const newModelManager = new ModelManager({
             strict: modelManager.isStrict(),
             enableMapType,
+            importAliasing: modelManager.isAliasedTypeEnabled(),
             decoratorValidation: modelManager.getDecoratorValidation()});
         newModelManager.fromAst(decoratedAst);
         return newModelManager;
