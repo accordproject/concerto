@@ -18,6 +18,8 @@ const URIJS = require('urijs');
 
 const ModelUtils = require('../modelutil');
 
+const Globalize = require('../globalize');
+
 const RESOURCE_SCHEME = 'resource';
 
 /**
@@ -39,13 +41,13 @@ class ResourceId {
      */
     constructor(namespace, type, id) {
         if (!namespace) {
-            throw new Error('Missing namespace');
+            throw new Error(Globalize.formatMessage('resourceid-constructor-missingnamespace'));
         }
         if (!type) {
-            throw new Error('Missing type');
+            throw new Error(Globalize.formatMessage('resourceid-constructor-missingtype'));
         }
         if (!id) {
-            throw new Error('Missing id');
+            throw new Error(Globalize.formatMessage('resourceid-constructor-missingid'));
         }
 
         this.namespace = namespace;
@@ -73,16 +75,25 @@ class ResourceId {
         try {
             uriComponents = URIJS.parse(uri);
         } catch (err){
-            throw new Error('Invalid URI: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-invaliduriformat');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
 
         const scheme = uriComponents.protocol;
         // Accept legacy identifiers with missing URI scheme as valid
         if (scheme && scheme !== RESOURCE_SCHEME) {
-            throw new Error('Invalid URI scheme: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-invalidurischeme');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
         if (uriComponents.username || uriComponents.password || uriComponents.port || uriComponents.query) {
-            throw new Error('Invalid resource URI format: ' + uri);
+            let formatter = Globalize.messageFormatter('concerto-invaliduriformat');
+            throw new Error(formatter({
+                uri: uri
+            }));
         }
 
         let namespace, type;
