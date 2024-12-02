@@ -812,4 +812,4 @@ class DecoratorManager {
     }
 }
 
-module.exports = DecoratorManager;
+module.exports = {DecoratorManager,DCS_MODEL};
