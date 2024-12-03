@@ -3,6 +3,7 @@
     "@types/jest": "^29.5.14",
     "dayjs": "1.11.13",
     "glob": "^7.2.0",
+    "lerna": "^8.1.9",
     "license-check-and-add": "4.0.5",
     "nyc": "17.1.0",
     "semver": "7.6.3"
