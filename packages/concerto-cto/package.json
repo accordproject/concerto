@@ -51,8 +51,8 @@
     "typescript": "5.7.2"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.10.3",
-    "@accordproject/concerto-util": "file:../concerto-util"
+    "@accordproject/concerto-metamodel": "3.10.4",
+    "@accordproject/concerto-util": "3.19.9"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {
