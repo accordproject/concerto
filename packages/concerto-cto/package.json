@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.10.4",
-    "@accordproject/concerto-util": "3.19.10"
+    "@accordproject/concerto-util": "3.19.6"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {
