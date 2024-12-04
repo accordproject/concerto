@@ -4,7 +4,7 @@ const { ModelManager } = require('@accordproject/concerto-core');
 const { CodeGen: { TypescriptVisitor }} = require('@accordproject/concerto-codegen');
 const { FileWriter } = require('@accordproject/concerto-util');
 const path = require('path');
-const {DCS_MODEL }= require('@accordproject/concerto-core/lib/decoratormanager');
+const { DCS_MODEL }= require('@accordproject/concerto-core');
 
 /**
  * Generate TypeScript files from the metamodel.
