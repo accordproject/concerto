@@ -7,5 +7,4 @@ declare namespace peg$SyntaxError {
     function buildMessage(expected: any, found: any): string;
 }
 declare function peg$parse(input: any, options: any): any;
-export declare let StartRules: string[];
 export { peg$SyntaxError as SyntaxError, peg$parse as parse };
