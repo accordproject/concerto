@@ -104,5 +104,6 @@ jobs:
       - name: build and publish
         run: |
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          node ./scripts/bump_version.js ${{ steps.timestamp.outputs.stamp }}
           npm version --workspaces --include-workspace-root --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
           npm publish --workspaces --access public --tag=unstable 2>&1
