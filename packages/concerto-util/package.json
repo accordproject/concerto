@@ -49,13 +49,14 @@
     "mocha": "10.8.2",
     "node-polyfill-webpack-plugin": "4.0.0",
     "nyc": "17.1.0",
+    "sinon": "19.0.2",
     "tmp-promise": "3.0.3",
     "typescript": "5.7.2",
     "undici": "^7.0.0",
-    "webpack": "5.96.1",
-    "sinon": "19.0.2"
+    "webpack": "5.96.1"
   },
   "dependencies": {
+    "@accordproject/concerto-util": "file:",
     "@supercharge/promise-pool": "1.7.0",
     "debug": "4.3.7",
     "slash": "3.0.0"
