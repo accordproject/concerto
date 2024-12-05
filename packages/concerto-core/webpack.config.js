@@ -14,13 +14,15 @@
 
 'use strict';
 
-let path = require('path');
+const path = require('path');
 const webpack = require('webpack');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin'); // For minification
 
 const packageJson = require('./package.json');
 
 module.exports = {
+    mode: 'production', // Explicit production mode for optimization
     entry: './index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -43,48 +45,46 @@ module.exports = {
         limitations under the License.`),
         new webpack.DefinePlugin({
             'process.env': {
-                'NODE_ENV': JSON.stringify('production')
-            }
+                'NODE_ENV': JSON.stringify('production'),
+            },
         }),
         new webpack.ProvidePlugin({
-            Buffer: ['buffer', 'Buffer'],
+            Buffer: ['buffer', 'Buffer'], // Polyfill Buffer
+            process: 'process/browser',  // Shim global process variable
         }),
-        new webpack.ProvidePlugin({
-            process: 'process/browser', // provide a shim for the global `process` variable
-        }),
-        new NodePolyfillPlugin(),
+        new NodePolyfillPlugin(), // Add polyfills for Node.js core modules
     ],
-
     module: {
         rules: [
             {
                 test: /\.js$/,
                 include: [path.join(__dirname, 'lib')],
-                use: ['babel-loader']
+                use: ['babel-loader'], // Transpile JavaScript files
             },
             {
                 test: /\.ne$/,
-                use: ['raw-loader']
-            }
-        ]
+                use: ['raw-loader'], // Handle raw `.ne` files
+            },
+        ],
     },
     resolve: {
         fallback: {
-            // Webpack 5 no longer polyfills Node.js core modules automatically.
-            // see https://webpack.js.org/configuration/resolve/#resolvefallback
-            // for the list of Node.js core module polyfills.
+            // Polyfills for Node.js core modules
             'fs': false,
             'tls': false,
             'net': false,
             'child_process': false,
-            'os': false,
-            'path': false,
-            // 'crypto': require.resolve('crypto-browserify'),
-            // 'stream': require.resolve('stream-browserify'),
-            // 'http': require.resolve('stream-http'),
-            // 'https': require.resolve('https-browserify'),
-            // 'zlib': require.resolve('browserify-zlib'),
-            // 'vm2': require.resolve('vm-browserify'),
-        }
-    }
+            'os': require.resolve('os-browserify/browser'),
+            'path': require.resolve('path-browserify'),
+            'crypto': require.resolve('crypto-browserify'),
+            'stream': require.resolve('stream-browserify'),
+            'http': require.resolve('stream-http'),
+            'https': require.resolve('https-browserify'),
+            'zlib': require.resolve('browserify-zlib'),
+        },
+    },
+    optimization: {
+        minimize: true,
+        minimizer: [new TerserPlugin()], // Minify output using Terser
+    },
 };
