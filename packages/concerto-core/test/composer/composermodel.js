@@ -33,16 +33,16 @@ const COMPOSER_MODEL =
  */
 namespace system
 
-event Event {
+event newEvent {
 }
 
-participant Participant {
+participant newParticipant {
 }
 
-asset Asset {
+asset newAsset {
 }
 
-transaction Transaction {
+transaction newTransaction {
 }
 
 /**
