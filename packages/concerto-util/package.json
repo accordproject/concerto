@@ -8,11 +8,7 @@
     "npm": ">=10"
   },
   "main": "index.js",
-  "browser": {
-    "main": "dist/concerto-util.js",
-    "fs": false,
-    "path": false
-  },
+  "browser": "dist/concerto-util.js",
   "typings": "types/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run webpack",
