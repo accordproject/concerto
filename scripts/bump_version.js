@@ -19,11 +19,11 @@ const fs = require('fs');
 const glob = require('glob');
 
 /**
- * This script updates the devDependencies and dependencies in the workspaces 
+ * This script updates the devDependencies and dependencies in the workspaces
  * to match the version specified by the given parameter.
  * The expected parameter should be the tag for the package.
- * 
- * Example: 
+ *
+ * Example:
  * node ./script/bump_version.js <tag>
  */
 
@@ -38,7 +38,7 @@ const packageNames = [
 ];
 
 function bumpDependencies() {
-    const targetPackageVersion = process.argv[2];
+    const targetPackageVersion = process.argv[2].replace(/^v/, '');
     const workspacePackages = glob.sync(workspacesPattern);
 
     workspacePackages.forEach((packagePath) => {
