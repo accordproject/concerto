@@ -17,6 +17,7 @@
 const crypto = require('crypto');
 const semver = require('semver');
 const Logger = require('@accordproject/concerto-util').Logger;
+const Globalize = require('../lib/globalize');
 
 /**
  * Checks that a change log file takes into account
@@ -52,7 +53,10 @@ class VersionChecker {
                     const openBraceIndex = line.indexOf('{', versionIndex);
 
                     if (openBraceIndex < 0) {
-                        throw new Error('Invalid changelog, failed to find { in line ' + line);
+                        let formatter = Globalize.messageFormatter('versionchecker-check-missing-open-brace');
+                        throw new Error(formatter({
+                            line: line
+                        }));
                     }
 
                     const version = line.substring(versionIndex + 'Version'.length, openBraceIndex).trim();
@@ -61,22 +65,30 @@ class VersionChecker {
                     const packageObj = JSON.parse(packageJson);
 
                     if (!semver.lte(version, semver.inc(packageObj.version,'patch'))) {
-                        throw new Error(`The version in the changelog file "${version}" is not less than or equal to the next available version in package.json "${packageObj.version}".`);
+                        let formatter = Globalize.messageFormatter('versionchecker-check-invalid-version');
+                        throw new Error(formatter({
+                            version: version,
+                            packageObjVersion: packageObj.version
+                        }));
                     }
 
                     // get MD5
                     const closeBraceIndex = line.indexOf('}', openBraceIndex);
 
                     if (closeBraceIndex < 0) {
-                        throw new Error('Invalid changelog, failed to find } in line ' + line);
+                        let formatter = Globalize.messageFormatter('versionchecker-check-missing-close-brace');
+                        throw new Error(formatter({
+                            line: line
+                        }));
                     }
 
                     const md5 = line.substring(openBraceIndex + 1, closeBraceIndex).trim();
 
                     if (digest !== md5) {
-                        throw new Error('Computed public API digest did not match the digest in the changelog for the most recent version. ' +
-                        'Increment the version number and add a new entry to the changelog (explaining your public API change) using the digest ' + digest +
-                        '. Run \'git diff api.txt\' to understand the pubic API changes. Please ensure that TypeScript definitions are up to date by executing `npm run build:types`');
+                        let formatter = Globalize.messageFormatter('versionchecker-check-invalid-md5');
+                        throw new Error(formatter({
+                            digest: digest,
+                        }));
                     }
 
                     // we're done here...
@@ -87,7 +99,9 @@ class VersionChecker {
 
         }
         if (!result) {
-            throw new Error('Did not find any version in changelog.');
+            throw new Error(
+                Globalize.formatMessage('versionchecker-check-no-version')
+            );
         }
         else {
             Logger.info('SUCCESS: validated public API against package.json and changelog.txt.');
