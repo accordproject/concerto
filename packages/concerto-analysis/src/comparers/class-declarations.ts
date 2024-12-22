@@ -54,14 +54,22 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
         if (aType === bType) {
             return;
         }
-
+        if(aType !== bType){
+            context.report({
+                key: `class-declaration-type-changed`,
+                message: `The ${aType} "${a.getName()}" changed from ${aType} to ${bType}`,
+                element: a
+            });
+        }
+  
+        //add Logic for abstractness changes
         const isAbstract = (declaration) => declaration.isAbstract();
         if (isAbstract(a) !== isAbstract(b)) {
             const changeType = isAbstract(a) ? 'abstract to concrete' : 'concrete to abstract';
-            const changeSeverity = isAbstract(a) ? 'minor' : 'major';
+            const changeKey =isAbstract(a) ? `class-declaration-abstract-to-concrete` : `class-declaration-concrete-to-abstract`;
             context.report({
-                key: 'class-declaration-abstractness-changed',
-                message: `The class "${a.getName()}" changed from ${changeType} (${changeSeverity} change).`,
+                key: changeKey,
+                message: `The class "${a.getName()}" changed from ${changeType}.`,
                 element: a
             });
         }

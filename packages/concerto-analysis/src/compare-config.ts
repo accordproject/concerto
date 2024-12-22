@@ -53,6 +53,8 @@ export const defaultCompareConfig: CompareConfig = {
         'optional-property-added': CompareResult.PATCH,
         'required-property-removed': CompareResult.MAJOR,
         'optional-property-removed': CompareResult.MAJOR,
+        'class-declaration-abstract-to-concrete': CompareResult.MINOR,
+        'class-declaration-concrete-to-abstract': CompareResult.MAJOR, 
         'namespace-changed': CompareResult.ERROR,
         'enum-value-added': CompareResult.PATCH,
         'enum-value-removed': CompareResult.MAJOR,
