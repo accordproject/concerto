@@ -1,0 +1,8 @@
+namespace org.example.basic
+
+concept Person identified by name {
+  o String name
+  o Double height
+  o DateTime dateOfBirth
+  o String address optional  // New field added
+}

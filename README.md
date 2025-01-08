@@ -21,7 +21,7 @@ concept Person identified by name  {
   o Address address optional
   @description("Height (cm)")
   o Double height range=[0,]
-  o DateTime dateOfBirth 
+  o DateTime dateOfBirth
 }
 ```
 
@@ -36,56 +36,68 @@ concept Person identified by name  {
 🔎 Introspect the model using a [powerful set of APIs](https://docs.accordproject.org/docs/model-api.html)
 
 🎛 Convert the model to other formats:
-- JSON Schema
-- XML Schema
-- OData CDSL
-- GraphQL Schema
-- Java Classes
-- Go Types
-- C# Classes
-- TypeScript Classes
-- Protobuf Messages
-- PlantUML Diagrams
-- Mermaid UML Diagrams
-- Markdown (with embedded Mermaid)
-- OpenAPI v3 specification document
-- Apache Avro
+
+-   JSON Schema
+-   XML Schema
+-   OData CDSL
+-   GraphQL Schema
+-   Java Classes
+-   Go Types
+-   C# Classes
+-   TypeScript Classes
+-   Protobuf Messages
+-   PlantUML Diagrams
+-   Mermaid UML Diagrams
+-   Markdown (with embedded Mermaid)
+-   OpenAPI v3 specification document
+-   Apache Avro
 
 🕸 Publish your reusable models to any website, including the Accord Project [model repository](https://models.accordproject.org)
 
 Infer models from other formats:
-- JSON document
-- JSON Schema
-- OpenAPI v3 specification document
+
+-   JSON document
+-   JSON Schema
+-   OpenAPI v3 specification document
+
+## Features
+
+-   **Expressive Model Language**: Capture business models succinctly.
+-   **Serialization**: Convert instances to JSON.
+-   **Deserialization and Validation**: Validate instances from JSON.
+-   **Model Introspection**: Utilize a powerful set of APIs.
+-   **Format Conversion**: Convert models to various formats such as JSON Schema, GraphQL Schema, Java Classes, and more.
+-   **Model Publication**: Publish reusable models to websites or repositories.
 
 ## Getting Started
 
-- Install the [Command Line Tool](https://concerto.accordproject.org/docs/tools/ref-concerto-cli)
-- Read the [Concerto specification](https://docs.accordproject.org/docs/model-concerto.html)
+-   Install the [Command Line Tool](https://concerto.accordproject.org/docs/tools/ref-concerto-cli)
+-   Read the [Concerto specification](https://docs.accordproject.org/docs/model-concerto.html)
 
 ```console
 $ npm i -g @accordproject/concerto-cli
-$ concerto compare --old model.cto --new model-with-changes.cto 
-[required-field-added]: The required field "weight" was added to the concept "Person" (major) 
+$ concerto compare --old model.cto --new model-with-changes.cto
+[required-field-added]: The required field "weight" was added to the concept "Person" (major)
 ```
 
-- Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
+-   Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
 
 ![VSCode Editor](https://accordproject.org/wp-content/uploads/2022/10/af57b31d0eb66154bce4e0ffec780027.png)
 
-- Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
-- Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
+-   Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
+-   Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
 
 ## Structure of the Code
 
 Top level repository (concerto), with sub packages. Each sub-package is published as an independent npm module using npm workspaces:
-* [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
-* [concerto-util](https://github.com/accordproject/concerto/tree/master/packages/concerto-util) : contains utility functions used in other parts of the code and fundamentally independent from Concerto as a modeling language
-* [concerto-cto](https://github.com/accordproject/concerto/tree/master/packages/concerto-cto) : contains the parser for the .cto syntax for Concerto. The parser now outputs a proper Concerto object, instance of the metamodel rather than a custom JSON object.
-* [concerto-vocabulary](https://github.com/accordproject/concerto/tree/master/packages/concerto-vocabulary) : functionality to handle model vocabularies and localization
-* [concerto-analysis](https://github.com/accordproject/concerto/tree/master/packages/concerto-analysis) : tools for comparing model files
-* [concerto-types](https://github.com/accordproject/concerto/tree/master/packages/concerto-types) : TypeScript type definitions for Concerto
-* [concerto-dotnet](https://github.com/accordproject/concerto-dotnet) : .NET type definitions for Concerto, and serialization tools
+
+-   [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
+-   [concerto-util](https://github.com/accordproject/concerto/tree/master/packages/concerto-util) : contains utility functions used in other parts of the code and fundamentally independent from Concerto as a modeling language
+-   [concerto-cto](https://github.com/accordproject/concerto/tree/master/packages/concerto-cto) : contains the parser for the .cto syntax for Concerto. The parser now outputs a proper Concerto object, instance of the metamodel rather than a custom JSON object.
+-   [concerto-vocabulary](https://github.com/accordproject/concerto/tree/master/packages/concerto-vocabulary) : functionality to handle model vocabularies and localization
+-   [concerto-analysis](https://github.com/accordproject/concerto/tree/master/packages/concerto-analysis) : tools for comparing model files
+-   [concerto-types](https://github.com/accordproject/concerto/tree/master/packages/concerto-types) : TypeScript type definitions for Concerto
+-   [concerto-dotnet](https://github.com/accordproject/concerto-dotnet) : .NET type definitions for Concerto, and serialization tools
 
 ---
 
@@ -139,13 +151,11 @@ Copyright 2018-2019 Clause, Inc. All trademarks are the property of their respec
 
 [linuxfound]: https://www.linuxfoundation.org
 [charter]: https://github.com/accordproject/governance/blob/master/accord-project-technical-charter.md
-[apmain]: https://accordproject.org/ 
+[apmain]: https://accordproject.org/
 [apblog]: https://medium.com/@accordhq
 [apdoc]: https://docs.accordproject.org/
 [apdiscord]: https://discord.com/invite/Zm99SKhhtA
-
 [contributing]: https://github.com/accordproject/concerto/blob/master/CONTRIBUTING.md
 [developers]: https://github.com/accordproject/concerto/blob/master/DEVELOPERS.md
-
 [apache]: https://github.com/accordproject/concerto/blob/master/LICENSE
 [creativecommons]: http://creativecommons.org/licenses/by/4.0/
