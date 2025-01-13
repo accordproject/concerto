@@ -65,6 +65,7 @@ class Declaration extends Decorated {
             throw new IllegalModelException(`Invalid class name '${this.ast.name}'`, this.modelFile, this.ast.location);
         }
 
+        // should we use resolved name here?
         this.name = this.ast.name;
         this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.name);
     }

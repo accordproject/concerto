@@ -1,0 +1,24 @@
+@test(Kid)
+namespace parent@1.0.0
+
+import child@1.0.0.{MyString as Str, Child as Kid}
+
+@test(Kid)
+concept Child extends Kid {
+   @test(Kid)
+   o Kid kid
+   o Str str
+}
+
+concept Student extends Child {
+   o Str schoolName
+   o Str name
+   o Child myChild
+}
+
+@test(Kid)
+map KidIndex {
+   o Str
+   @test(Kid)
+   o Kid
+}

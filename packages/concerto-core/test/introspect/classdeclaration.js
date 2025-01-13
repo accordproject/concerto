@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +29,9 @@ const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
+const fs = require('fs');
+const path = require('path');
+const ModelFile = require('../../lib/introspect/modelfile');
 
 describe('ClassDeclaration', () => {
 
@@ -482,6 +486,106 @@ describe('ClassDeclaration', () => {
             const testClass = modelManager.getType('com.testing.child.Sub');
             testClass.isEvent().should.be.false;
 
+        });
+    });
+});
+
+
+describe('ClassDeclaration - Test for declarations using Import Aliasing', () => {
+
+    let modelManager;
+    let resolvedModelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+
+        const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
+        const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
+
+        modelManager.addCTOModel(childModelCTO, 'child@1.0.0.cto');
+        modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
+        const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
+        const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
+        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
+        const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
+        resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
+    });
+
+    describe('#getName', () => {
+
+        it('should return the local aliased name of the Type', () => {
+            const classDecl = resolvedModelManager.getType('parent@1.0.0.Child');
+            classDecl.getName().should.equal('Child');
+        });
+
+    });
+
+    describe('#getFullyQualifiedName', () => {
+
+        it('should return the fully qualified name if function is in a namespace', () => {
+            const classDecl = resolvedModelManager.getType('parent@1.0.0.Child');
+            classDecl.getFullyQualifiedName().should.equal('parent@1.0.0.Child');
+        });
+
+    });
+
+    describe('#getSuperType', function() {
+
+        it('should return superclass when one exists in a different model file and is aliased my importing', function() {
+            const subclass = resolvedModelManager.getType('parent@1.0.0.Child');
+            const superclassName = subclass.getSuperType();
+            superclassName.should.equal('child@1.0.0.Child');
+        });
+    });
+
+    describe('#getNested', function() {
+
+        it('get nested happy path', function() {
+            let aliasedClassDeclration = resolvedModelManager.getType('parent@1.0.0.Student');
+            should.exist(aliasedClassDeclration.getNestedProperty('myChild.kid.age'));
+        });
+    });
+
+    describe('#getAssignableClassDeclarations', function() {
+
+        it('should return all subclass definitions', function() {
+            const baseclass = resolvedModelManager.getType('child@1.0.0.Child');
+            should.exist(baseclass);
+            const subclasses = baseclass.getAssignableClassDeclarations();
+            const subclassNames = subclasses.map(classDef => classDef.getName());
+            subclassNames.should.have.same.members(['Child', 'Child', 'Student']);
+        });
+    });
+
+    describe('#_resolveSuperType', () => {
+
+        it('should return the super class declaration for a super class in another file and is aliased while importing', () => {
+            let classDecl = resolvedModelManager.getType('parent@1.0.0.Child');
+            let superClassDecl = classDecl._resolveSuperType();
+            superClassDecl.getFullyQualifiedName().should.equal('child@1.0.0.Child');
+        });
+
+    });
+
+    describe('#getAllSuperTypeDeclarations', function() {
+
+        it('should return all superclass definitions with one of the classDeclration being aliased while importing', function() {
+            const testClass = resolvedModelManager.getType('parent@1.0.0.Child');
+            should.exist(testClass);
+            const superclasses = testClass.getAllSuperTypeDeclarations();
+            const superclassNames = superclasses.map(classDef => classDef.getName());
+            superclassNames.should.have.same.members(['Child', 'Concept']);
+        });
+    });
+
+    describe('#getDirectSubclasses', function() {
+        it('should return an array with Child (in parent@1.0.0) given it extends Child (in parent@1.0.0)', function() {
+            const testClass = resolvedModelManager.getType('child@1.0.0.Child');
+            should.exist(testClass);
+            const subclasses = testClass.getDirectSubclasses();
+            const subclassNames = subclasses.map(classDef => classDef.getName());
+            subclassNames.should.have.same.members(['Child']);
         });
     });
 });

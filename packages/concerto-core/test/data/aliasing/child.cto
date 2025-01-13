@@ -1,0 +1,5 @@
+namespace child@1.0.0
+concept Child {
+    o Integer age
+}
+scalar MyString extends String
