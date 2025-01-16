@@ -28,14 +28,14 @@ function copyFiles(files, destDir) {
         fs.mkdirSync('coverage');
     }
     return Promise.all(files.map(f => {
-       return copyFilePromise(f.source, path.join(destDir, f.destination).split(path.sep).join('/'));
+       return copyFilePromise(f.source, path.join(destDir, f.destination));
     }));
 }
 
-const lcovs = glob.sync(globPattern).map((dir) => {
+const lcovs = glob.sync(globPattern.split(path.sep).join('/')).map((dir) => {
     const packageName = dir.split('/').pop();
     return {
-        source: path.join(dir, 'coverage/coverage-final.json').split(path.sep).join('/'),
+        source: path.join(dir, 'coverage/coverage-final.json'),
         destination: `${packageName}.json`
     };
 });
