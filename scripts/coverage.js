@@ -28,7 +28,7 @@ function copyFiles(files, destDir) {
         fs.mkdirSync('coverage');
     }
     return Promise.all(files.map(f => {
-       return copyFilePromise(f.source, path.join(destDir, f.destination));
+       return copyFilePromise(f.source, path.join(destDir, f.destination).split(path.sep).join('/'));
     }));
 }
 
