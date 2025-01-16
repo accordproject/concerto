@@ -106,8 +106,14 @@ describe('Decorator - Test for Decorator arguments using Import Aliasing', () =>
 
     describe('#validate', () => {
 
-        it('should be able get validate a decorator whose argument is an imported type which is aliased', () => {
+        it('should be able get validate a decorator on a classDeclaration whose argument is an imported type which is aliased', () => {
             const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
+            const decorator = classDeclaration.getDecorators()[0];
+            expect(decorator.validate.bind(decorator)).to.not.throw();
+        });
+
+        it('should be able get validate a decorator on a namespace whose argument is an imported type which is aliased', () => {
+            const classDeclaration = resolvedModelManager.getModelFile('parent@1.0.0');
             const decorator = classDeclaration.getDecorators()[0];
             expect(decorator.validate.bind(decorator)).to.not.throw();
         });
