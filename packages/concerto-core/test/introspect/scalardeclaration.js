@@ -23,10 +23,6 @@ const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();
 const sinon = require('sinon');
-const ModelFile = require('../../lib/introspect/modelfile');
-
-const fs = require('fs');
-const path = require('path');
 
 describe('ScalarDeclaration', () => {
 
@@ -309,63 +305,3 @@ describe('ScalarDeclaration', () => {
     });
 });
 
-describe('ScalarDeclaration -  - Test for declarations using Import Aliasing', () => {
-
-    let modelManager;
-    let resolvedModelManager;
-
-    beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
-
-        const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
-        const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
-
-        modelManager.addCTOModel(childModelCTO, 'child@1.0.0.cto');
-        modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
-        const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
-        const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
-        const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
-        const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
-        resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
-    });
-
-    // describe.only('#getName', () => {
-    //     it('should return the scalar name', () => {
-    //         // This fails, current imports are not declared within a namespace. Is this a bug?
-    //         // Why are we treating imported declrations as foreign objects? Shouldn't they be treated as part of the namespace and declared?
-    //         // Extend this test to map keys and value as well
-    //         const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
-    //         const property = classDeclaration.getProperty('str');
-    //         const type = property.getType();
-    //         const namespce = property.getNamespace();
-    //         const scalarDeclarationFQN = `${namespce}.${type}`;
-    //         const scalarDeclaration = resolvedModelManager.getType(scalarDeclarationFQN);
-    //         console.log(scalarDeclaration);
-    //     });
-
-    // });
-
-    // describe('#getNamespace', () => {
-    //     const modelFileName = 'test/data/parser/scalardeclaration.ssn.cto';
-
-    //     beforeEach(() => {
-    //         const modelFiles = introspectUtils.loadModelFiles([modelFileName], modelManager);
-    //         modelManager.addModelFiles(modelFiles);
-    //     });
-    //     it('should return null', () => {
-    //         const testClass = modelManager.getType('com.testing.SSN');
-    //         should.equal(testClass.getNamespace(), 'com.testing');
-    //     });
-    // });
-
-    // describe('#getFullyQualifiedName', () => {
-    //     it('should return the fully qualified name if function is in a namespace', () => {
-    //         let clz = new ScalarDeclaration(modelFile, {
-    //             name: 'suchName',
-    //         });
-    //         clz.getFullyQualifiedName().should.equal('com.hyperledger.testing.suchName');
-    //     });
-
-    // });
-});

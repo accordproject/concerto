@@ -104,17 +104,6 @@ describe('Decorator - Test for declarations using Import Aliasing', () => {
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
     });
 
-    // describe.only('#getArguments', () => {
-
-    //     it('should be able get validate a decorator whose argument is an imported type which is aliased', () => {
-    //         const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
-    //         const decorator = classDeclaration.getDecorators()[0];
-    //         console.log(decorator.getArguments()[0]);
-    //         this returns { type: 'Identifier', name: 'Kid', array: false }, how do we get back the base/super type?
-    //     });
-
-    // });
-
     describe('#validate', () => {
 
         it('should be able get validate a decorator whose argument is an imported type which is aliased', () => {
@@ -122,6 +111,5 @@ describe('Decorator - Test for declarations using Import Aliasing', () => {
             const decorator = classDeclaration.getDecorators()[0];
             expect(decorator.validate.bind(decorator)).to.not.throw();
         });
-
     });
 });

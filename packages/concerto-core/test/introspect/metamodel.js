@@ -203,3 +203,43 @@ describe('MetaModel (Version)', () => {
         });
     });
 });
+
+describe('MetaModel (Parent - Child (Import Aliasing))', () => {
+    const parentModelPath = path.resolve(__dirname, '../data/aliasing/parent.cto');
+    const parentModel = fs.readFileSync(parentModelPath, 'utf8');
+    const parentMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.json'), 'utf-8'));
+
+    const childModelPath = path.resolve(__dirname, '../data/aliasing/child.cto');
+    const childModel = fs.readFileSync(childModelPath, 'utf8');
+
+    describe('#toMetaModel', () => {
+        it('should convert and validate a CTO model with import aliasing to its metamodel', () => {
+            const mm1 = Parser.parse(parentModel);
+            validateMetaModel(mm1);
+            mm1.should.deep.equal(parentMetaModel);
+        });
+
+        it('should convert and validate a ModelFile to its metamodel', () => {
+            const modelManager1 = new ModelManager({ importAliasing: true, enableMapType: true });
+            const mf1 = ParserUtil.newModelFile(modelManager1, parentModel);
+            const mm1 = mf1.getAst();
+            mm1.should.deep.equal(parentMetaModel);
+            const model2 = Printer.toCTO(mm1);
+            const modelManager2 = new ModelManager({ importAliasing: true, enableMapType: true });
+            const mf2 = ParserUtil.newModelFile(modelManager2, model2);
+            const mm2 = mf2.getAst();
+            mm2.should.deep.equal(parentMetaModel);
+        });
+
+        it('should accpet a cto model with its dependency, resolve the types and build back the cto', () => {
+            const modelManager = new ModelManager({ importAliasing: true, enableMapType: true });
+            const mf1 = ParserUtil.newModelFile(modelManager, childModel);
+            const mf2 = ParserUtil.newModelFile(modelManager, parentModel);
+            modelManager.addModelFiles([mf1, mf2], ['child.cto', 'parent.cto']);
+            const resolvedParentModelAst = modelManager.resolveMetaModel(mf2.getAst());
+            const resolvedModelPrint = Printer.toCTO(resolvedParentModelAst);
+            const mf3 = ParserUtil.newModelFile(modelManager, resolvedModelPrint);
+            mf3.getAst().should.deep.equal(parentMetaModel);
+        });
+    });
+});
