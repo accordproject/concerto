@@ -83,7 +83,7 @@ describe('Decorator', () => {
     });
 });
 
-describe('Decorator - Test for declarations using Import Aliasing', () => {
+describe('Decorator - Test for Decorator arguments using Import Aliasing', () => {
 
     let modelManager;
     let resolvedModelManager;

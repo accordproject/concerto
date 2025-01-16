@@ -109,7 +109,6 @@ class Property extends Decorated {
             this.type = 'String';
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            // should we have resolved name here?
             this.type = this.ast.type ? this.ast.type.name : null;
             break;
         case `${MetaModelNamespace}.RelationshipProperty`:

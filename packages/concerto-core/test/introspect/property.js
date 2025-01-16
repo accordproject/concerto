@@ -117,7 +117,7 @@ describe('Property', () => {
 
 });
 
-describe('Property - Test for declarations using Import Aliasing', () => {
+describe('Property - Test for property types using Import Aliasing', () => {
 
     let modelManager;
     let resolvedModelManager;

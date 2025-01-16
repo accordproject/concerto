@@ -790,7 +790,7 @@ describe('MapDeclaration', () => {
     });
 });
 
-describe('MapDeclration - Test for declarations using Import Aliasing', () => {
+describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => {
 
     let modelManager;
     let resolvedModelManager;
