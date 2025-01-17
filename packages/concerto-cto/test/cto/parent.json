@@ -22,14 +22,14 @@
       "$class": "concerto.metamodel@1.0.0.ImportTypes",
       "namespace": "child@1.0.0",
       "types": [
-        "MyString",
+        "FullName",
         "Child"
       ],
       "aliasedTypes": [
         {
           "$class": "concerto.metamodel@1.0.0.AliasedType",
-          "name": "MyString",
-          "aliasedName": "Str"
+          "name": "FullName",
+          "aliasedName": "KidFullName"
         },
         {
           "$class": "concerto.metamodel@1.0.0.AliasedType",
@@ -73,10 +73,10 @@
         },
         {
           "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-          "name": "str",
+          "name": "name",
           "type": {
             "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-            "name": "Str"
+            "name": "KidFullName"
           },
           "isArray": false,
           "isOptional": false
@@ -109,22 +109,8 @@
       "isAbstract": false,
       "properties": [
         {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
           "name": "schoolName",
-          "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-            "name": "Str"
-          },
-          "isArray": false,
-          "isOptional": false
-        },
-        {
-          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
-          "name": "name",
-          "type": {
-            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-            "name": "Str"
-          },
           "isArray": false,
           "isOptional": false
         },
@@ -151,7 +137,7 @@
         "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
         "type": {
           "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
-          "name": "Str"
+          "name": "KidFullName"
         }
       },
       "value": {

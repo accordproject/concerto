@@ -4,4 +4,4 @@ concept Child {
   o Integer age
 }
 
-scalar MyString extends String
+scalar FullName extends String

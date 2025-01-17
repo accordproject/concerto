@@ -19,7 +19,7 @@
     },
     {
       "$class": "concerto.metamodel@1.0.0.StringScalar",
-      "name": "MyString"
+      "name": "FullName"
     }
   ]
 }
