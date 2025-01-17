@@ -37,6 +37,7 @@ export interface IRange extends IConcept {
 
 export interface ITypeIdentifier extends IConcept {
    name: string;
+   resolvedName?: string;
    namespace?: string;
 }
 

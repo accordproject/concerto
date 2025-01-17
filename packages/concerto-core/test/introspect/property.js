@@ -22,6 +22,10 @@ const Property = require('../../lib/introspect/property');
 
 const should = require('chai').should();
 const sinon = require('sinon');
+const ModelManager = require('../../lib/modelmanager');
+
+const fs = require('fs');
+const path = require('path');
 
 describe('Property', () => {
 
@@ -109,6 +113,59 @@ describe('Property', () => {
             });
             (p instanceof Property).should.be.true;
         });
+    });
+
+});
+
+describe('Property - Test for property types using Import Aliasing', () => {
+
+    let modelManager;
+    let resolvedModelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+
+        const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
+        const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
+
+        modelManager.addCTOModel(childModelCTO, 'child@1.0.0.cto');
+        modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
+        const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
+        const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
+        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
+        const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
+        resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
+    });
+
+    describe('#getType', () => {
+
+        it('should return the local aliased name of the Type', () => {
+            const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
+            const property = classDeclaration.getProperty('kid');
+            property.getType().should.equal('Kid');
+        });
+
+    });
+
+    describe('#getFullyQualifiedTypeName', () => {
+
+        it('should return the fully qualified type of name of the base classDeclaration that was imported aliased', () => {
+            const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
+            const property = classDeclaration.getProperty('kid');
+            property.getFullyQualifiedTypeName().should.equal('child@1.0.0.Child');
+        });
+
+    });
+
+    describe('#getFullyQualifiedName', () => {
+
+        it('should return the fully qualified name of the property', () => {
+            const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
+            const property = classDeclaration.getProperty('kid');
+            property.getFullyQualifiedName().should.equal('parent@1.0.0.Child.kid');
+        });
+
     });
 
 });

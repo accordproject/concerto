@@ -33,9 +33,9 @@ function copyFiles(files, destDir) {
 }
 
 const lcovs = glob.sync(globPattern).map((dir) => {
-    const packageName = dir.split('/').pop();
+    const packageName = dir.split(path.sep).join('/').split('/').pop();
     return {
-        source: path.join(dir, 'coverage/coverage-final.json'),
+        source: path.join(dir.split(path.sep).join('/'), 'coverage/coverage-final.json'),
         destination: `${packageName}.json`
     };
 });
