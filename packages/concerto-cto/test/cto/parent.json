@@ -1,0 +1,184 @@
+{
+  "$class": "concerto.metamodel@1.0.0.Model",
+  "decorators": [
+    {
+      "$class": "concerto.metamodel@1.0.0.Decorator",
+      "name": "test",
+      "arguments": [
+        {
+          "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Kid"
+          },
+          "isArray": false
+        }
+      ]
+    }
+  ],
+  "namespace": "parent@1.0.0",
+  "imports": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ImportTypes",
+      "namespace": "child@1.0.0",
+      "types": [
+        "FullName",
+        "Child"
+      ],
+      "aliasedTypes": [
+        {
+          "$class": "concerto.metamodel@1.0.0.AliasedType",
+          "name": "FullName",
+          "aliasedName": "KidFullName"
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.AliasedType",
+          "name": "Child",
+          "aliasedName": "Kid"
+        }
+      ]
+    }
+  ],
+  "declarations": [
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Child",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "kid",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Kid"
+          },
+          "isArray": false,
+          "isOptional": false,
+          "decorators": [
+            {
+              "$class": "concerto.metamodel@1.0.0.Decorator",
+              "name": "test",
+              "arguments": [
+                {
+                  "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                  "type": {
+                    "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                    "name": "Kid"
+                  },
+                  "isArray": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "name",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "KidFullName"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Kid"
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "test",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Kid"
+              },
+              "isArray": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+      "name": "Student",
+      "isAbstract": false,
+      "properties": [
+        {
+          "$class": "concerto.metamodel@1.0.0.StringProperty",
+          "name": "schoolName",
+          "isArray": false,
+          "isOptional": false
+        },
+        {
+          "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+          "name": "myChild",
+          "type": {
+            "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+            "name": "Child"
+          },
+          "isArray": false,
+          "isOptional": false
+        }
+      ],
+      "superType": {
+        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+        "name": "Child"
+      }
+    },
+    {
+      "$class": "concerto.metamodel@1.0.0.MapDeclaration",
+      "name": "KidIndex",
+      "key": {
+        "$class": "concerto.metamodel@1.0.0.ObjectMapKeyType",
+        "type": {
+          "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+          "name": "KidFullName"
+        }
+      },
+      "value": {
+        "$class": "concerto.metamodel@1.0.0.ObjectMapValueType",
+        "type": {
+          "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+          "name": "Kid"
+        },
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "test",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                "type": {
+                  "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                  "name": "Kid"
+                },
+                "isArray": false
+              }
+            ]
+          }
+        ]
+      },
+      "decorators": [
+        {
+          "$class": "concerto.metamodel@1.0.0.Decorator",
+          "name": "test",
+          "arguments": [
+            {
+              "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+              "type": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Kid"
+              },
+              "isArray": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
