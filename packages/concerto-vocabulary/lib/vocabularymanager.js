@@ -18,7 +18,7 @@ const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
 
-const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.3.0';
+const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */

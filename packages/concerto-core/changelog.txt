@@ -24,6 +24,10 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+
+Version 3.20.4 {335406876b7005f0a2e6f9ca3e0d0dbf} 2025-01-21
+- expose canMigrate and MigrateTo methods from decorator manager
+
 Version 3.19.2 {844c910d1f8f61ab31c34e85d8c51546} 2024-10-21
 - update options for ModelManager
 
