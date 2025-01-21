@@ -21,21 +21,19 @@ declare class DecoratorManager {
     static validate(decoratorCommandSet: any, modelFiles?: ModelFile[]): ModelManager;
     /**
      * Rewrites the $class property on decoratorCommandSet classes.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {string} version the DCS version upgrade target
      * @returns {object} the migrated DecoratorCommandSet object
      */
-    private static migrateTo;
+    static migrateTo(decoratorCommandSet: any, version: string): object;
     /**
      * Checks if the supplied decoratorCommandSet can be migrated.
      * Migrations should only take place across minor versions of the same major version.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {*} DCS_VERSION the DecoratorCommandSet version
      * @returns {boolean} returns true if major versions are equal
      */
-    private static canMigrate;
+    static canMigrate(decoratorCommandSet: any, DCS_VERSION: any): boolean;
     /**
      * Add decorator commands set with index object to the coresponding target map
      * @param {*} targetMap the target map to add the command to
