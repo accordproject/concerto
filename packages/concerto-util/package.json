@@ -47,7 +47,7 @@
     "nyc": "17.1.0",
     "tmp-promise": "3.0.3",
     "typescript": "5.7.2",
-    "undici": "^7.0.0",
+    "undici": "^7.2.3",
     "webpack": "5.96.1",
     "sinon": "19.0.2"
   },
