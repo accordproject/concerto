@@ -88,7 +88,7 @@ declare class DecoratorExtractor {
      */
     private parseNonVocabularyDecorators;
     /**
-     * @param {Object} dictVoc - the collection of collected vocabularies
+     * @param {Object} vocabObject - the collection of collected vocabularies
      * @param {Object} decl - the declaration object
      * @param {Object} dcs - the current dcs json to be parsed
      * @returns {Object} - the collection of collected vocabularies with current dcs

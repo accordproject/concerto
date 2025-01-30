@@ -268,6 +268,14 @@ describe('VocabularyManager', () => {
         term.should.equal('Gross Weight of the Truck');
     });
 
+    it('getTerms - missingTermGenerator', () => {
+        vocabularyManager = new VocabularyManager({
+            missingTermGenerator: VocabularyManager.englishMissingTermGenerator
+        });
+        let terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', null, null);
+        terms.term.should.equal('Org.acme');
+    });
+
     it('resolveTerms - class', () => {
         const terms = vocabularyManager.resolveTerms(modelManager, 'org.acme@1.0.0', 'en-gb', 'Truck');
         terms.Truck.should.equal('A lorry');

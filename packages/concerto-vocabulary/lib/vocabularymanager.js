@@ -17,6 +17,7 @@
 const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
+const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.3.0';
 
@@ -68,6 +69,9 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
+        if(!declarationName){
+            return camelCaseToSentence(namespace.split('@')[0]);
+        }
         const firstPart = propertyName ? propertyName.replace('$', '') + ' of the' : '';
         return camelCaseToSentence(firstPart + declarationName);
     }
@@ -204,7 +208,7 @@ class VocabularyManager {
      */
     resolveTerms(modelManager, namespace, locale, declarationName, propertyName) {
         const modelFile = modelManager.getModelFile(namespace);
-        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
+        const classDecl = modelFile ? modelFile.getType(declarationName) : null; //check this
         let property;
         if(classDecl && !classDecl.isScalarDeclaration()) {
             if(classDecl.isMapDeclaration()) {
@@ -231,7 +235,7 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(namespace, locale, declarationName, propertyName, identifier) {
-        const voc = this.getVocabulary(namespace, locale);
+        const voc = this.getVocabulary(namespace, locale); //need change?
         let term = null;
         if (voc) {
             term = voc.getTerm(declarationName, propertyName, identifier);
@@ -274,7 +278,7 @@ class VocabularyManager {
                 return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
-                const missingKey = propertyName ? propertyName : declarationName;
+                const missingKey = propertyName ? propertyName : declarationName? declarationName : 'term';
                 return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
             }
         }
@@ -308,6 +312,53 @@ class VocabularyManager {
         };
 
         modelManager.getModelFiles().forEach(model => {
+            if(this.isNamespaceTargetEnabled()) { //options?.enableDcsNamespaceTarget
+                const terms = this.resolveTerms(modelManager, model.getNamespace(), locale);
+                if (terms) {
+                    Object.keys(terms).forEach( term => {
+                        if(term === 'term') {
+                            decoratorCommandSet.commands.push({
+                                '$class': `${DC_NAMESPACE}.Command`,
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
+                                    'namespace': model.getNamespace(),
+                                },
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': 'Term',
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
+                        }
+                        else if(term.localeCompare('declarations') && term.localeCompare('namespace') && term.localeCompare('locale')) {
+                            decoratorCommandSet.commands.push({
+                                '$class': `${DC_NAMESPACE}.Command`,
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
+                                    'namespace': model.getNamespace(),
+                                },
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': `Term_${term}`,
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
+                        }
+                    });
+                }
+            }
             model.getAllDeclarations().forEach(decl => {
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
                 if (terms) {
@@ -462,6 +513,26 @@ class VocabularyManager {
                 }
             });
         return result;
+    }
+
+    /**
+     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
+     * and print deprecation warning if not enabled and return boolean value as well
+     *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     *  @returns {Boolean} true if either of the flags is enabled
+     */
+    isNamespaceTargetEnabled(enableDcsNamespaceTarget) {
+        if(enableDcsNamespaceTarget || process.env.ENABLE_DCS_NAMESPACE_TARGET === 'true') {
+            return true;
+        } else {
+            Warning.printDeprecationWarning(
+                'Functionality for namespace targeted Decorator Command Sets has changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
+                ErrorCodes.DEPRECATION_WARNING,
+                ErrorCodes.CONCERTO_DEPRECATION_001,
+                'Please refer to https://concerto.accordproject.org/deprecation/001'
+            );
+            return false;
+        }
     }
 }
 

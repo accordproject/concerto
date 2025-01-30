@@ -133,6 +133,10 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getElementTerms(declarationName, propertyName) {
+        if(!declarationName){
+            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
+            return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
+        }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;

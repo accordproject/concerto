@@ -119,39 +119,53 @@ class DecoratorExtractor {
      * @private
      */
     transformVocabularyDecorators(vocabObject, namespace, vocabData){
-        if (Object.keys(vocabObject).length > 0 ){
+        if (Object.keys(vocabObject).length > 0 ){ //will it always be true?
             let strVoc = '';
             strVoc = strVoc + `locale: ${this.locale}\n`;
             strVoc = strVoc + `namespace: ${namespace}\n`;
-            strVoc = strVoc + 'declarations:\n';
-            Object.keys(vocabObject).forEach(decl =>{
-                if (vocabObject[decl].term){
-                    strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
+            if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
+                if (vocabObject.namespace.term){
+                    strVoc += `term: ${vocabObject.namespace.term}\n`;
                 }
-                const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
-                //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
-                if(otherProps.length > 0){
-                    if (!vocabObject[decl].term){
-                        strVoc += `  - ${decl}: ${decl}\n`;
+                let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term');
+                otherProps.forEach(key =>{
+                    strVoc += `${key}: ${vocabObject.namespace[key]}\n`;
+                });
+            }
+            if (vocabObject.declarations && Object.keys(vocabObject.declarations).length > 0 ){
+                strVoc = strVoc + 'declarations:\n';
+                Object.keys(vocabObject.declarations).forEach(decl =>{
+                    if (vocabObject.declarations[decl].term){
+                        strVoc += `  - ${decl}: ${vocabObject.declarations[decl].term}\n`;
                     }
-                    otherProps.forEach(key =>{
-                        strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
-                    });
-                }
-                if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length > 0){
-                    if (!vocabObject[decl].term && otherProps.length === 0){
-                        strVoc += `  - ${decl}: ${decl}\n`;
-                    }
-                    strVoc += '    properties:\n';
-                    Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
-                        strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term || ''}\n`;
-                        const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
+                    const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                    //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
+                    if(otherProps.length > 0){
+                        if (!vocabObject.declarations[decl].term){
+                            strVoc += `  - ${decl}: ${decl}\n`;
+                        }
                         otherProps.forEach(key =>{
-                            strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
+                            strVoc += `    ${key}: ${vocabObject.declarations[decl][key]}\n`;
                         });
-                    });
-                }
-            });
+                    }
+                    if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
+                        if (!vocabObject.declarations[decl].term && otherProps.length === 0){
+                            strVoc += `  - ${decl}: ${decl}\n`;
+                        }
+                        strVoc += '    properties:\n';
+                        Object.keys(vocabObject.declarations[decl].propertyVocabs).forEach(prop =>{
+                            strVoc += `      - ${prop}: ${vocabObject.declarations[decl].propertyVocabs[prop].term || ''}\n`;
+                            const otherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
+                            otherProps.forEach(key =>{
+                                strVoc += `        ${key}: ${vocabObject.declarations[decl].propertyVocabs[prop][key]}\n`;
+                            });
+                        });
+                    }
+                });
+            }
+            else{
+                strVoc = strVoc + 'declarations: []\n';
+            }
             vocabData.push(strVoc);
         }
         return vocabData;
@@ -213,48 +227,60 @@ class DecoratorExtractor {
         return dcsObjects;
     }
     /**
-     * @param {Object} dictVoc - the collection of collected vocabularies
+     * @param {Object} vocabObject - the collection of collected vocabularies
      * @param {Object} decl - the declaration object
      * @param {Object} dcs - the current dcs json to be parsed
      * @returns {Object} - the collection of collected vocabularies with current dcs
      * @private
      */
-    parseVocabularies(dictVoc, decl, dcs){
-        dictVoc[decl.declaration] = dictVoc[decl.declaration] || { propertyVocabs: {} };
-        if (decl.property !== ''){
-            if (!dictVoc[decl.declaration].propertyVocabs[decl.property]){
-                dictVoc[decl.declaration].propertyVocabs[decl.property] = {};
-            }
+    parseVocabularies(vocabObject, decl, dcs){
+        if(decl.declaration === ''){
+            vocabObject.namespace = vocabObject.namespace || {};
             if (dcs.name === 'Term'){
-                dictVoc[decl.declaration].propertyVocabs[decl.property].term = dcs.arguments[0].value;
+                vocabObject.namespace.term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                dictVoc[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
+                vocabObject.namespace[extensionKey] = dcs.arguments[0].value;
+            }
+            return vocabObject;
+        }
+        vocabObject.declarations = vocabObject.declarations || {};
+        vocabObject.declarations[decl.declaration] = vocabObject.declarations[decl.declaration] || { propertyVocabs: {} };
+        if (decl.property !== ''){
+            if (!vocabObject.declarations[decl.declaration].propertyVocabs[decl.property]){
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property] = {};
+            }
+            if (dcs.name === 'Term'){
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
             }
         }
         else if (decl.mapElement !== ''){
-            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
+            if (!vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement]){
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement] = {};
             }
             if (dcs.name === 'Term'){
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
             }
         }
         else {
             if (dcs.name === 'Term'){
-                dictVoc[decl.declaration].term = dcs.arguments[0].value;
+                vocabObject.declarations[decl.declaration].term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                dictVoc[decl.declaration][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[decl.declaration][extensionKey] = dcs.arguments[0].value;
             }
         }
-        return dictVoc;
+        return vocabObject;
     }
     /**
     * parses the extracted decorators and generates arrays of decorator command set and vocabularies
