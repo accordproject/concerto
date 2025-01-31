@@ -113,7 +113,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
-        if(!declarationName){ //test
+        if(!declarationName){
             const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
             return namespaceTerms.length > 0 ? identifier ? Object.fromEntries(namespaceTerms)[identifier]:Object.fromEntries(namespaceTerms).term : null;
         }
@@ -160,7 +160,7 @@ class Vocabulary {
      * @param {ModelFile} modelFile the model file for this vocabulary
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
-    validate(modelFile) { //test
+    validate(modelFile) {
         const getOwnProperties = (declaration) => {
             // ensures we have a valid return, even for scalars and map-declarations
             if(declaration.isMapDeclaration()) {

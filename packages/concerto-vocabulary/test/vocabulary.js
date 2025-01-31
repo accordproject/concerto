@@ -107,4 +107,29 @@ describe('Vocabulary', () => {
     it('isValidLocale - valid locale', () => {
         should.not.Throw(() => Vocabulary.validateLocale('en-us'), Error);
     });
+
+    it('getTerm - without namespace term', () => {
+        const vocabularyManager = {};
+        const obj = {
+            declarations: [],
+            locale: 'en',
+            namespace: 'org.acme'
+        };
+        const voc = new Vocabulary(vocabularyManager, obj);
+        const term = voc.getTerm();
+        should.equal(term, null);
+    });
+
+    it('getTerm - namespace term', () => {
+        const vocabularyManager = {};
+        const obj = {
+            declarations: [],
+            locale: 'en',
+            namespace: 'org.acme',
+            term: 'term of org.acme'
+        };
+        const voc = new Vocabulary(vocabularyManager, obj);
+        const term = voc.getTerm();
+        should.equal(term, obj.term);
+    });
 });

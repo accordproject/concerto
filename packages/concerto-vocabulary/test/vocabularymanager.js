@@ -383,6 +383,23 @@ describe('VocabularyManager', () => {
         result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
     });
 
+    it('validate - including namespace terms', () => {
+        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
+        const result = vocabularyManager.validate(modelManager);
+        result.missingVocabularies.length.should.equal(1);
+        result.missingVocabularies[0].should.equal('org.accordproject@1.0.0');
+        result.additionalVocabularies.length.should.equal(1);
+        result.additionalVocabularies[0].getNamespace().should.equal('com.example@1.0.0');
+        result.vocabularies['org.acme@1.0.0/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
+        result.vocabularies['org.acme@1.0.0/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color', 'namespace']);
+        result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat', 'Address.BAD_KEY']);
+        result.vocabularies['org.acme@1.0.0/fr'].missingTerms.should.have.members(['Color', 'SSN', 'VIN', 'Vehicle.color', 'Address.VALUE', 'Truck', 'namespace']);
+        result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
+        result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'VIN', 'Address', 'Truck', 'namespace']);
+        result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
+        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
+    });
+
     it('decorateModels', () => {
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator

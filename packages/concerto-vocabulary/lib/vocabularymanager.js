@@ -235,7 +235,7 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(namespace, locale, declarationName, propertyName, identifier) {
-        const voc = this.getVocabulary(namespace, locale); //test
+        const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
             term = voc.getTerm(declarationName, propertyName, identifier);
