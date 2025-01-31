@@ -57,7 +57,7 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
         if(aType !== bType){
             context.report({
                 key: `class-declaration-type-changed`,
-                message: `The ${aType} "${a.getName()}" changed from ${aType} to ${bType}`,
+                message: `The ${aType} '${a.getName()}' changed from ${aType} to ${bType}`,
                 element: a
             });
         }
@@ -69,7 +69,7 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
         const isAbstract = (declaration: ClassDeclaration) => declaration.isAbstract();
         if (isAbstract(a) !== isAbstract(b)) {
             const changeType = isAbstract(a) ? 'abstract to concrete' : 'concrete to abstract';
-            const changeKey =isAbstract(a) ? `class-declaration-abstract-to-concrete` : `class-declaration-concrete-to-abstract`;
+            const changeKey = isAbstract(a) ? 'class-declaration-abstract-to-concrete' : 'class-declaration-concrete-to-abstract';
             context.report({
                 key: changeKey,
                 message: `The class "${a.getName()}" changed from ${changeType}.`,
