@@ -917,12 +917,29 @@ DecoratorIdentifier =
           ...buildRange(location())
       }
   }
+  
+DecoratorJSON = 
+  "{" _ pairs:(KeyValue ("," _ KeyValue)*)? _ "}" {
+      return {
+        $class: "concerto.metamodel@1.0.0.DecoratorJSON",
+        value: pairs ? pairs.reduce((obj, pair) => {
+          obj[pair.key] = pair.value;
+          return obj;
+        }, {}) : {},
+        ...buildRange(location())
+      };
+  }
+KeyValue = 
+  key:StringLiteral _ ":" _ value:DecoratorLiteral {
+    return { key: key.value, value:value };
+  }
 
 DecoratorLiteral =
   DecoratorString
   / DecoratorBoolean
   / DecoratorNumber
   / DecoratorIdentifier
+  / DecoratorJSON 
 
 DecoratorArguments
   = "(" __ first:(d:DecoratorLiteral __ "," __ {return d;})* last:DecoratorLiteral? __ ")" {

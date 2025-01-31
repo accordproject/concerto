@@ -159,6 +159,25 @@ class Decorator {
                                 this.handleError(validationOptions.invalidDecorator, err);
                             }
                             break;
+                        case 'DecoratorJSON': {
+                            if (argType !== 'object') {
+                                const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object for JSON. Found ${argType}, with value ${JSON.stringify(arg)}`;
+                                this.handleError(validationOptions.invalidDecorator, err);
+                            }
+                            const keys = Object.keys(arg);
+                            keys.forEach(key => {
+                                if (typeof key !== 'string') {
+                                    const err = `Decorator ${this.getName()} has an invalid key in the JSON object. Expected string, but found ${typeof key}.`;
+                                    this.handleError(validationOptions.invalidDecorator, err);
+                                }
+                                const valueType = typeof arg[key];
+                                if (!['string', 'number', 'boolean'].includes(valueType)) {
+                                    const err = `Decorator ${this.getName()} has an invalid value type in the JSON object. Expected string, number, or boolean, but found ${valueType} for key ${key}.`;
+                                    this.handleError(validationOptions.invalidDecorator, err);
+                                }
+                            });
+                            break;
+                        }
                         default: {
                             if (argType !== 'object' || arg?.type !== 'Identifier') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
