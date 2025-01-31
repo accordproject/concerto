@@ -72,7 +72,7 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
             const changeKey = isAbstract(a) ? 'class-declaration-abstract-to-concrete' : 'class-declaration-concrete-to-abstract';
             context.report({
                 key: changeKey,
-                message: `The class "${a.getName()}" changed from ${changeType}.`,
+                message: `The class '${a.getName()}' changed from ${changeType}.`,
                 element: a
             });
         }
