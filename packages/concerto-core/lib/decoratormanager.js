@@ -793,7 +793,6 @@ class DecoratorManager {
     /**
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
      * and print deprecation warning if not enabled and return boolean value as well
-     *  @private
      *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      *  @returns {Boolean} true if either of the flags is enabled
      */

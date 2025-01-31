@@ -17,7 +17,7 @@
 const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
-const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const { DecoratorManager } = require('@accordproject/concerto-core');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.3.0';
 
@@ -312,7 +312,7 @@ class VocabularyManager {
         };
 
         modelManager.getModelFiles().forEach(model => {
-            if(this.isNamespaceTargetEnabled()) { //options?.enableDcsNamespaceTarget
+            if(DecoratorManager.isNamespaceTargetEnabled()) { //options?.enableDcsNamespaceTarget
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale);
                 if (terms) {
                     Object.keys(terms).forEach( term => {
@@ -513,26 +513,6 @@ class VocabularyManager {
                 }
             });
         return result;
-    }
-
-    /**
-     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
-     * and print deprecation warning if not enabled and return boolean value as well
-     *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
-     *  @returns {Boolean} true if either of the flags is enabled
-     */
-    isNamespaceTargetEnabled(enableDcsNamespaceTarget) {
-        if(enableDcsNamespaceTarget || process.env.ENABLE_DCS_NAMESPACE_TARGET === 'true') {
-            return true;
-        } else {
-            Warning.printDeprecationWarning(
-                'Functionality for namespace targeted Decorator Command Sets has changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
-                ErrorCodes.DEPRECATION_WARNING,
-                ErrorCodes.CONCERTO_DEPRECATION_001,
-                'Please refer to https://concerto.accordproject.org/deprecation/001'
-            );
-            return false;
-        }
     }
 }
 
