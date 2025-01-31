@@ -119,7 +119,7 @@ class DecoratorExtractor {
      * @private
      */
     transformVocabularyDecorators(vocabObject, namespace, vocabData){
-        if (Object.keys(vocabObject).length > 0 ){ //will it always be true?
+        if (Object.keys(vocabObject).length > 0 ){
             let strVoc = '';
             strVoc = strVoc + `locale: ${this.locale}\n`;
             strVoc = strVoc + `namespace: ${namespace}\n`;

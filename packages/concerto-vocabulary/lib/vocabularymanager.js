@@ -208,7 +208,7 @@ class VocabularyManager {
      */
     resolveTerms(modelManager, namespace, locale, declarationName, propertyName) {
         const modelFile = modelManager.getModelFile(namespace);
-        const classDecl = modelFile ? modelFile.getType(declarationName) : null; //check this
+        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
         let property;
         if(classDecl && !classDecl.isScalarDeclaration()) {
             if(classDecl.isMapDeclaration()) {
@@ -235,7 +235,7 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(namespace, locale, declarationName, propertyName, identifier) {
-        const voc = this.getVocabulary(namespace, locale); //need change?
+        const voc = this.getVocabulary(namespace, locale); //test
         let term = null;
         if (voc) {
             term = voc.getTerm(declarationName, propertyName, identifier);

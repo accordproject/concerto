@@ -113,6 +113,10 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
+        if(!declarationName){ //test
+            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
+            return namespaceTerms.length > 0 ? identifier ? Object.fromEntries(namespaceTerms)[identifier]:Object.fromEntries(namespaceTerms).term : null;
+        }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
@@ -156,7 +160,7 @@ class Vocabulary {
      * @param {ModelFile} modelFile the model file for this vocabulary
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
-    validate(modelFile) {
+    validate(modelFile) { //test
         const getOwnProperties = (declaration) => {
             // ensures we have a valid return, even for scalars and map-declarations
             if(declaration.isMapDeclaration()) {
@@ -200,6 +204,10 @@ class Vocabulary {
                 ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( i => i !== null)
         };
+
+        if(this.vocabularyManager.isNamespaceTargetEnabled() && !this.content.term){
+            result.missingTerms.push('namespace');
+        }
 
         return result;
     }
