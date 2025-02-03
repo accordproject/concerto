@@ -69,7 +69,7 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
-        if(!declarationName){
+        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
             return camelCaseToSentence(namespace.split('@')[0]);
         }
         const firstPart = propertyName ? propertyName.replace('$', '') + ' of the' : '';
@@ -278,7 +278,10 @@ class VocabularyManager {
                 return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
-                const missingKey = propertyName ? propertyName : declarationName? declarationName : 'term';
+                let missingKey = propertyName ? propertyName : declarationName;
+                if(DecoratorManager.isNamespaceTargetEnabled()){
+                    missingKey = missingKey? missingKey : 'term';
+                }
                 return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
             }
         }

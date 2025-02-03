@@ -268,12 +268,14 @@ describe('VocabularyManager', () => {
         term.should.equal('Gross Weight of the Truck');
     });
 
-    it('getTerms - missingTermGenerator', () => {
+    it('getTerms - missingTermGenerator for namespace', () => {
+        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator
         });
         let terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', null, null);
         terms.term.should.equal('Org.acme');
+        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
     });
 
     it('resolveTerms - class', () => {
