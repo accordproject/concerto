@@ -302,6 +302,18 @@ describe('ModelManager', () => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Model file version 99.0.0 does not match metamodel version 1.0.0');
         });
+
+        it('should throw when using an unknown metamodel version', () => {
+            const basemodelmanager = new BaseModelManager({ strict: true, metamodelValidation: true });
+            const ast = {
+                $class: 'concerto.metamodel@99.0.0.Model',
+                namespace: 'org.acme@1.0.0',
+                undeclared: []
+            };
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.throw('Model file version 99.0.0 does not match metamodel version 1.0.0');
+        });
     });
 
     describe('#addModelFiles', () => {
