@@ -211,21 +211,35 @@ class JSONPopulator {
      * @private
      */
     processMapType(mapDeclaration, parameters, value, type) {
+        // This property is which concrete class to instatiate (like Dog or Cat)
+        const className = value.$class;
+        if (!className) {
+            throw new Error(`Map value does not specify a $class: ${JSON.stringify(value)}`);
+        }
+
+        // class name from `$class` will help us find right class (e.g., Dog or Cat)
         let decl = mapDeclaration.getModelFile()
             .getAllDeclarations()
-            .find(decl => decl.name === type);
+            .find(decl => decl.getFullyQualifiedName === className);
 
-        // if its a ClassDeclaration, populate the Concept.
-        if (decl?.isClassDeclaration()) {
-            let subResource = parameters.factory.newConcept(decl.getNamespace(),
-                decl.getName(), decl.getIdentifierFieldName() );
-
-            parameters.jsonStack.push(value);
-            parameters.resourceStack.push(subResource);
-            return decl.accept(this, parameters);
+        if (!decl) {
+            throw new Error(`Class ${className} is not defined in the model file.`);
         }
-        // otherwise its a scalar value, we only need to return the primitve value of the scalar.
-        return value;
+
+        // check if the concrete class is a subclass of the abstract type Animal
+        if (!ModelUtil.isAssignableTo(decl.getModelFile(), decl.getFullyQualifiedName(), type)) {
+            throw new Error(`Class ${className} is not assignable to abstract type ${type}`);
+        }
+
+        // use the factory to create an instance of the concrete class
+        let subResource = parameters.factory.newConcept(decl.getNamespace(),
+            decl.getName());
+
+        // push the value and subResource into their respective stack
+        parameters.jsonStack.push(value);
+        parameters.resourceStack.push(subResource);
+        // return the result after processing the concept
+        return decl.accept(this, parameters);
     }
 
     /**
