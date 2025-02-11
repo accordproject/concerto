@@ -719,7 +719,7 @@ describe('DecoratorManager', () => {
                 removeDecoratorsFromModel:true,
                 locale:'en'
             };
-            const namespaceSource = testModelManager.getNamespaces().filter(namespace=>namespace!=='concerto@1.0.0' && namespace!=='concerto');
+            const namespaceSource = testModelManager.getNamespaces();
             namespaceSource.forEach(name=>{
                 let model = testModelManager.getModelFile(name);
                 let modelAst=model.getAst();
