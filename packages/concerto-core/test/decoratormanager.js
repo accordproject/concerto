@@ -735,7 +735,7 @@ describe('DecoratorManager', () => {
                 vocManager.addVocabulary(content);
             });
             const vocabKeySet=[];
-            const namespaceUpdated = newModelManager.getNamespaces().filter(namespace=>namespace!=='concerto@1.0.0' && namespace!=='concerto');
+            const namespaceUpdated = newModelManager.getNamespaces();
             namespaceUpdated.forEach(name=>{
                 let vocab = vocManager.getVocabulariesForNamespace(name);
                 vocab.forEach(voc=>vocabKeySet.push(voc.getLocale()));
