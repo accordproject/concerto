@@ -70,6 +70,7 @@ class ModelManager extends BaseModelManager {
      */
     constructor(options) {
         super(options, ctoProcessFile(options));
+        this.metamodelVersions = ['1.0.0', '1.1.0']; // Add supported metamodel versions here
     }
 
     /**
@@ -88,6 +89,30 @@ class ModelManager extends BaseModelManager {
         return this.addModel(cto, cto, fileName, disableValidation);
     }
 
+    /**
+     * Validates the metamodel version.
+     * @param {string} version - The metamodel version to validate.
+     * @throws {Error} If the version is not supported.
+     */
+    validateMetamodelVersion(version) {
+        if (!this.metamodelVersions.includes(version)) {
+            throw new Error(`Unsupported metamodel version: ${version}`);
+        }
+    }
+
+    /**
+     * Adds a model in AST format to the ModelManager.
+     * @param {object} ast - The AST of the model.
+     * @param {string} [fileName] - An optional file name to associate with the model file.
+     * @param {boolean} [disableValidation] - If true then the model files are not validated.
+     * @throws {IllegalModelException}
+     * @return {ModelFile} The newly added model file (internal).
+     */
+    addModel(ast, cto, fileName, disableValidation) {
+        const version = ast.$class.split('@')[1];
+        this.validateMetamodelVersion(version);
+        return super.addModel(ast, cto, fileName, disableValidation);
+    }
 }
 
 module.exports = ModelManager;
