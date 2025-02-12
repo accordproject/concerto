@@ -37,14 +37,6 @@
     "licchk": "license-check-and-add",
     "build": "npm run build --workspaces --if-present"
   },
-  "workspaces": [
-    "./packages/concerto-util",
-    "./packages/concerto-cto",
-    "./packages/concerto-core",
-    "./packages/concerto-types",
-    "./packages/concerto-vocabulary",
-    "./packages/concerto-analysis"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/accordproject/concerto"

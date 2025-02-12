@@ -56,10 +56,10 @@ const Identifiers = require('./identifiers');
 const ErrorCodes = require('./errorcodes');
 
 // NullUtil
-const NullUtil = require('./lib/null');
+const NullUtil = require('./null');
 
 // Warning
-const Warning = require('./lib/warning');
+const Warning = require('./warning');
 
 module.exports = {
     BaseException,

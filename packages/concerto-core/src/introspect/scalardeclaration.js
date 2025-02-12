@@ -21,7 +21,6 @@ const IllegalModelException = require('./illegalmodelexception');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 const Util = require('@accordproject/concerto-util').NullUtil;
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
 const ModelUtil = require('../modelutil');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */

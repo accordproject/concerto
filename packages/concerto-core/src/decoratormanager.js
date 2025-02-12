@@ -22,7 +22,6 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
-const IllegalModelException = require('./introspect/illegalmodelexception');
 const rfdc = require('rfdc')({
     circles: true,
     proto: false,
@@ -40,7 +39,6 @@ if (global === undefined) {
 
 const DCS_VERSION = '0.4.0';
 
-const DCS_MODEL = `namespace org.accordproject.decoratorcommands@0.3.0
 const DCS_MODEL = `concerto version "^3.0.0"
 namespace org.accordproject.decoratorcommands@0.4.0
 

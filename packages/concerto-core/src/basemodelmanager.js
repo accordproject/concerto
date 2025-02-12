@@ -143,6 +143,14 @@ class BaseModelManager {
     }
 
     /**
+     * Checks if the import aliasing feature is enabled.
+     * @returns {boolean} true if the importAliasing has been set
+     */
+    isAliasedTypeEnabled() {
+        return this.importAliasing;
+    }
+
+    /**
      * Visitor design pattern
      * @param {Object} visitor - the visitor
      * @param {Object} parameters  - the parameter
@@ -171,6 +179,16 @@ class BaseModelManager {
         } else {
             modelFile.validate();
         }
+    }
+
+    /**
+     * Adds decorator types
+     * @private
+     */
+    addDecoratorModel() {
+        const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
+        const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
+        this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
     /**

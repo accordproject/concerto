@@ -802,7 +802,7 @@ function peg$parse(input, options) {
       }
       return result;
   };
-  var peg$f65 = function(d) {
+  var peg$f70 = function(d) {
      const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
       };
@@ -1222,6 +1222,15 @@ function peg$parse(input, options) {
         return result;
   };
   var peg$f112 = function(ns, types, u) {
+    	const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
+          if (type.$class === "concerto.metamodel@1.0.0.AliasedType") {
+            acc.aliasedTypes.push(type);
+            acc.typesNames.push(type.name);
+          } else {
+            acc.typesNames.push(type);
+          }
+          return acc;
+        }, { aliasedTypes: [], typesNames: [] });
     	const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
@@ -1232,13 +1241,23 @@ function peg$parse(input, options) {
         u && (result.uri = u);
         return result;
     };
-  var peg$f113 = function(head, tail) {
-    return [head, ...tail];
-  };
-  var peg$f114 = function(version) {
+  var peg$f113 = function(name, aliasedName) {
+      if(isPrimitiveType(aliasedName)){
+        throw new Error(`A type cannot be aliased to a Primitive type, here "${name}" is being aliased as "${aliasedName}".`);
+      }
+      return {
+        "$class":"concerto.metamodel@1.0.0.AliasedType",
+        name,
+        aliasedName
+      };
+    };
+  var peg$f114 = function(head, tail) {
+      return [head, ...tail.map(t => t[2])];
+    };
+  var peg$f115 = function(version) {
        return version.value;
      };
-  var peg$f115 = function(version, decorators, ns, imports, body) {
+  var peg$f116 = function(version, decorators, ns, imports, body) {
       const result = {
         $class: "concerto.metamodel@1.0.0.Model",
         decorators: optionalList(decorators),
@@ -1251,10 +1270,10 @@ function peg$parse(input, options) {
       }
       return result;
     };
-  var peg$f116 = function(first, rest) {
+  var peg$f117 = function(first, rest) {
           return buildList(first, rest, 1);
         };
-  var peg$f117 = function(first, rest) {
+  var peg$f118 = function(first, rest) {
       return buildList(first, rest, 1);
     };
   var peg$currPos = 0;
@@ -6979,11 +6998,11 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 45) {
-        s3 = peg$c62;
+        s3 = peg$c63;
         peg$currPos++;
       } else {
         s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$e99); }
+        if (peg$silentFails === 0) { peg$fail(peg$e100); }
       }
       if (s3 !== peg$FAILED) {
         s4 = peg$parsepreRelease();
@@ -7002,11 +7021,11 @@ function peg$parse(input, options) {
       }
       s3 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 43) {
-        s4 = peg$c59;
+        s4 = peg$c60;
         peg$currPos++;
       } else {
         s4 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$e96); }
+        if (peg$silentFails === 0) { peg$fail(peg$e97); }
       }
       if (s4 !== peg$FAILED) {
         s5 = peg$parsebuildWithTrailingPeriod();
@@ -7037,11 +7056,11 @@ function peg$parse(input, options) {
       if (s1 !== peg$FAILED) {
         s2 = peg$currPos;
         if (input.charCodeAt(peg$currPos) === 45) {
-          s3 = peg$c62;
+          s3 = peg$c63;
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$e99); }
+          if (peg$silentFails === 0) { peg$fail(peg$e100); }
         }
         if (s3 !== peg$FAILED) {
           s4 = peg$parsepreReleaseWithTrailingPeriod();
@@ -11158,7 +11177,7 @@ function peg$parse(input, options) {
         }
         if (s5 !== peg$FAILED) {
           peg$savedPos = s0;
-          s0 = peg$f109(s1, s5);
+          s0 = peg$f113(s1, s5);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
@@ -11248,7 +11267,7 @@ function peg$parse(input, options) {
         }
       }
       peg$savedPos = s0;
-      s0 = peg$f113(s1, s3);
+      s0 = peg$f114(s1, s3);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -11282,7 +11301,7 @@ function peg$parse(input, options) {
         if (s5 !== peg$FAILED) {
           s6 = peg$parse__();
           peg$savedPos = s0;
-          s0 = peg$f114(s5);
+          s0 = peg$f115(s5);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
@@ -11319,7 +11338,7 @@ function peg$parse(input, options) {
         s5 = null;
       }
       peg$savedPos = s0;
-      s0 = peg$f115(s1, s2, s3, s4, s5);
+      s0 = peg$f116(s1, s2, s3, s4, s5);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -11359,7 +11378,7 @@ function peg$parse(input, options) {
         }
       }
       peg$savedPos = s0;
-      s0 = peg$f116(s1, s2);
+      s0 = peg$f117(s1, s2);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -11399,7 +11418,7 @@ function peg$parse(input, options) {
         }
       }
       peg$savedPos = s0;
-      s0 = peg$f117(s1, s2);
+      s0 = peg$f118(s1, s2);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -11523,8 +11542,8 @@ function peg$parse(input, options) {
     };
   }
   function isPrimitiveType(typeName) {
-        const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
-        return (primitiveTypes.indexOf(typeName) >= 0);
+    const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
+    return (primitiveTypes.indexOf(typeName) >= 0);
   }
 
   peg$result = peg$startRuleFunction();
