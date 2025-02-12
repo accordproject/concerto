@@ -75,9 +75,23 @@ describe('JSONPopulator', () => {
                 o String assetId
             }
         `);
-        assetDeclaration1 = modelManager.getType('org.acme@1.0.0.MyContainerAsset1').getProperty('myAsset');
-        relationshipDeclaration1 = modelManager.getType('org.acme@1.0.0.MyTx1').getProperty('myAsset');
-        relationshipDeclaration2 = modelManager.getType('org.acme@1.0.0.MyTx2').getProperty('myAssets');
+        modelManager.addCTOModel(`
+            namespace org.acme.abstract
+            abstract asset Asset3 {
+                o String assetId
+            }
+            asset Asset4 extends Asset3 {}
+            map AssetByName {
+                o String
+                o Asset3
+            }
+            concept MyContainerAsset3 {
+                o AssetByName assetByName
+            }
+        `);
+        assetDeclaration1 = modelManager.getType('org.acme.MyContainerAsset1').getProperty('myAsset');
+        relationshipDeclaration1 = modelManager.getType('org.acme.MyTx1').getProperty('myAsset');
+        relationshipDeclaration2 = modelManager.getType('org.acme.MyTx2').getProperty('myAssets');
     });
 
     beforeEach(() => {
@@ -519,6 +533,29 @@ describe('JSONPopulator', () => {
                 jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyContainerAsset2'), options);
             }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
         });
+
+        it('should be able to deserialise a map that uses abstract types as values', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme.abstract.MyContainerAsset3',
+                    assetByName: {
+                        'asset3': {
+                            $class: 'org.acme.abstract.Asset4'
+                        }
+                    }
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            let mockResource1 = sinon.createStubInstance(Resource);
+            mockFactory.newResource.withArgs('org.acme.abstract', 'MyAsset4', 'asset3').returns(mockResource1);
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme.abstract.MyContainerAsset3'), options);
+            }).should.not.throw();
+        });
+
     });
 
     describe('#visitField', () => {
