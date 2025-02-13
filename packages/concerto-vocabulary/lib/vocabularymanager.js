@@ -17,6 +17,7 @@
 const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
+const { DecoratorManager } = require('@accordproject/concerto-core');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
@@ -68,6 +69,9 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
+        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
+            return camelCaseToSentence(namespace.split('@')[0]);
+        }
         const firstPart = propertyName ? propertyName.replace('$', '') + ' of the' : '';
         return camelCaseToSentence(firstPart + declarationName);
     }
@@ -274,7 +278,10 @@ class VocabularyManager {
                 return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
             }
             else {
-                const missingKey = propertyName ? propertyName : declarationName;
+                let missingKey = propertyName ? propertyName : declarationName;
+                if(DecoratorManager.isNamespaceTargetEnabled()){
+                    missingKey = missingKey? missingKey : 'term';
+                }
                 return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
             }
         }
@@ -308,6 +315,53 @@ class VocabularyManager {
         };
 
         modelManager.getModelFiles().forEach(model => {
+            if(DecoratorManager.isNamespaceTargetEnabled()) { //options?.enableDcsNamespaceTarget
+                const terms = this.resolveTerms(modelManager, model.getNamespace(), locale);
+                if (terms) {
+                    Object.keys(terms).forEach( term => {
+                        if(term === 'term') {
+                            decoratorCommandSet.commands.push({
+                                '$class': `${DC_NAMESPACE}.Command`,
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
+                                    'namespace': model.getNamespace(),
+                                },
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': 'Term',
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
+                        }
+                        else if(term.localeCompare('declarations') && term.localeCompare('namespace') && term.localeCompare('locale')) {
+                            decoratorCommandSet.commands.push({
+                                '$class': `${DC_NAMESPACE}.Command`,
+                                'type': 'UPSERT',
+                                'target': {
+                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
+                                    'namespace': model.getNamespace(),
+                                },
+                                'decorator': {
+                                    '$class': `${MetaModelNamespace}.Decorator`,
+                                    'name': `Term_${term}`,
+                                    'arguments': [
+                                        {
+                                            '$class': `${MetaModelNamespace}.DecoratorString`,
+                                            'value': terms[term]
+                                        },
+                                    ]
+                                }
+                            });
+                        }
+                    });
+                }
+            }
             model.getAllDeclarations().forEach(decl => {
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
                 if (terms) {

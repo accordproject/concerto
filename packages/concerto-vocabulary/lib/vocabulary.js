@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { DecoratorManager } = require('@accordproject/concerto-core');
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -113,6 +115,10 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
+        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
+            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
+            return namespaceTerms.length > 0 ? identifier ? Object.fromEntries(namespaceTerms)[identifier]:Object.fromEntries(namespaceTerms).term : null;
+        }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
@@ -133,6 +139,10 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getElementTerms(declarationName, propertyName) {
+        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
+            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
+            return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
+        }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
@@ -196,6 +206,10 @@ class Vocabulary {
                 ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( i => i !== null)
         };
+
+        if(DecoratorManager.isNamespaceTargetEnabled() && !this.content.term){
+            result.missingTerms.push('namespace');
+        }
 
         return result;
     }
