@@ -54,7 +54,7 @@ export const defaultCompareConfig: CompareConfig = {
         'required-property-removed': CompareResult.MAJOR,
         'optional-property-removed': CompareResult.MAJOR,
         'class-declaration-abstract-to-concrete': CompareResult.MINOR,
-        'class-declaration-concrete-to-abstract': CompareResult.MAJOR, 
+        'class-declaration-concrete-to-abstract': CompareResult.MAJOR,
         'namespace-changed': CompareResult.ERROR,
         'enum-value-added': CompareResult.PATCH,
         'enum-value-removed': CompareResult.MAJOR,
@@ -68,7 +68,7 @@ export const defaultCompareConfig: CompareConfig = {
         'scalar-extends-changed': CompareResult.MAJOR,
         'scalar-validator-added': CompareResult.MAJOR,
         'scalar-validator-removed': CompareResult.PATCH,
-        'scalar-validator-changed': CompareResult.MAJOR,
+        'scalar-validator-changed': CompareResult.MAJOR
     },
 };
 
