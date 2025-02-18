@@ -68,7 +68,7 @@ export const defaultCompareConfig: CompareConfig = {
         'scalar-extends-changed': CompareResult.MAJOR,
         'scalar-validator-added': CompareResult.MAJOR,
         'scalar-validator-removed': CompareResult.PATCH,
-        'scalar-validator-changed': CompareResult.MAJOR
+        'scalar-validator-changed': CompareResult.MAJOR,
     },
 };
 
