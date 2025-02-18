@@ -56,7 +56,7 @@ const classDeclarationTypeChanged: ComparerFactory = (context) => ({
         }
         if(aType !== bType){
             context.report({
-                key: `class-declaration-type-changed`,
+                key: 'class-declaration-type-changed',
                 message: `The ${aType} '${a.getName()}' changed from ${aType} to ${bType}`,
                 element: a
             });
