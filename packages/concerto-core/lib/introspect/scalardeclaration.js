@@ -20,7 +20,8 @@ const Declaration = require('./declaration');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 const Util = require('@accordproject/concerto-util').NullUtil;
-
+const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
+const ModelUtil = require('../modelutil');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -51,6 +52,13 @@ class ScalarDeclaration extends Declaration {
     process() {
         super.process();
 
+        const scalarName = this.getName(); // Get the local name of the scalar
+        if (ModelUtil.isPrimitiveType(scalarName)) {
+            throw new IllegalModelException(
+                `Invalid scalar name '${scalarName}'. Name conflicts with primitive type.`,
+                this.ast.name.location // Directly use the AST node's location
+            );
+        }
         this.superType = null;
         this.superTypeDeclaration = null;
         this.idField = null;
