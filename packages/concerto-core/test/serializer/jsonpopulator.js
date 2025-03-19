@@ -109,18 +109,42 @@ describe('JSONPopulator', () => {
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(dayjs.utc('2016-10-20T05:34:03.519Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
-        it('should convert to dates from dayjs objects', () => {
+        it('should convert to dates from fully qualified date-time strings with offset', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulator.convertToObject(field, dayjs.utc('2016-10-20T05:34:03Z'));
-            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(dayjs.utc('2016-10-20T05:34:03.000Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
+            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519+02:00');
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2016-10-20T03:34:03.519Z');
         });
 
-        it('should not convert to dates from invalid dayjs objects', () => {
+        it('should reject unqualified date-time strings when strictQualifiedDateTimes is true', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, 'foo');
+                jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519');
+            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+        });
+
+        it('should reject date-only strings when strictQualifiedDateTimes is true', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, '2020-01-01');
+            }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
+        });
+
+        it('should convert to dates from dayjs objects', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            let dayjsObj = dayjs.utc('2016-10-20T05:34:03Z');
+            let value = jsonPopulator.convertToObject(field, dayjsObj);
+            value.isSame(dayjsObj).should.be.true;
+        });
+
+        it('should not convert to dates when not in ISO 8601 format', () => {
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            (() => {
+                jsonPopulator.convertToObject(field, 'abc');
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
@@ -140,12 +164,28 @@ describe('JSONPopulator', () => {
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
-        it('should not convert to dates when not in ISO 8601 format', () => {
+        it('should convert unqualified date-time strings when strictQualifiedDateTimes is false', () => {
+            let jsonPopulatorNonStrict = new JSONPopulator(false, 0, false); // acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            (() => {
-                jsonPopulator.convertToObject(field, 'abc');
-            }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2016-10-20T05:34:03.519Z');
+        });
+
+        it('should convert date-only strings when strictQualifiedDateTimes is false', () => {
+            let jsonPopulatorNonStrict = new JSONPopulator(false, 0, false);
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2020-01-01');
+            value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2020-01-01T00:00:00.000Z');
+        });
+
+        it('should apply utcOffset to unqualified date-time strings when strictQualifiedDateTimes is false', () => {
+            let jsonPopulatorNonStrict = new JSONPopulator(false, 120, false); // utcOffset=120 minutes (+2 hours)
+            let field = sinon.createStubInstance(Field);
+            field.getType.returns('DateTime');
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
+            value.format('YYYY-MM-DDTHH:mm:ss.SSSZ').should.equal('2016-10-20T07:34:03.519+02:00');
         });
 
         it('should not convert to integers from strings', () => {
