@@ -190,7 +190,7 @@ class DecoratorExtractor {
      * @private
      */
     parseNonVocabularyDecorators(dcsObjects, dcs, DCS_VERSION, target){
-        const decotatorObj = {
+        const decoratorObj = {
             '$class': 'concerto.metamodel@1.0.0.Decorator',
             'name': dcs.name,
         };
@@ -201,15 +201,29 @@ class DecoratorExtractor {
                     'value':arg.value
                 };
             });
-            decotatorObj.arguments = args;
+            decoratorObj.arguments = args;
         }
-        let dcsObject = {
-            '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
-            'type': 'UPSERT',
-            'target': target,
-            'decorator': decotatorObj,
-        };
-        dcsObjects.push(dcsObject);
+
+        // Check if we already have a command with the same target
+        const existingCommandIndex = dcsObjects.findIndex(command => {
+            return JSON.stringify(command.target) === JSON.stringify(target);
+        });
+
+        if (existingCommandIndex !== -1) {
+            // If the command already exists, add the decorator to the decorators array
+            const existingCommand = dcsObjects[existingCommandIndex];
+            existingCommand.decorators.push(decoratorObj);
+        } else {
+            // If the command doesn't exist, create a new one with the decorator in the decorators array
+            let dcsObject = {
+                '$class': `org.accordproject.decoratorcommands@${DCS_VERSION}.Command`,
+                'type': 'UPSERT',
+                'target': target,
+                'decorators': [decoratorObj]
+            };
+            dcsObjects.push(dcsObject);
+        }
+
         return dcsObjects;
     }
     /**
