@@ -695,3 +695,35 @@ test('should give a MAJOR CompareResult for Map Type compare config rules)', asy
     expect(defaultCompareConfig.rules['map-key-type-changed']).toBe(CompareResult.MAJOR);
     expect(defaultCompareConfig.rules['map-value-type-changed']).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a required property changed to optional', async () => {
+    const [a, b] = await getModelFiles('required-to-optional-a.cto', 'required-to-optional-b.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'required-to-optional-property',
+            message: 'The required field "value" was changed to be optional in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect an optional property changed to required', async () => {
+    const [a, b] = await getModelFiles('optional-to-required-a.cto', 'optional-to-required-b.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'optional-to-required-property',
+            message: 'The optional field "value" was changed to be required in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
