@@ -236,4 +236,36 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged];
+const propertyOptionalChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b) {
+            return;
+        }
+        const aIsOptional = a.isOptional();
+        const bIsOptional = b.isOptional();
+        if (aIsOptional === bIsOptional) {
+            return;
+        }
+        if(aIsOptional && !bIsOptional) {
+            const classDeclarationType = getDeclarationType(a.getParent());
+            const type = getPropertyType(a);
+            context.report({
+                key: 'optional-to-required-property',
+                message: `The optional ${type} "${a.getName()}" was changed to be required in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a,
+            });
+            return;
+        }else{
+            const classDeclarationType = getDeclarationType(a.getParent());
+            const type = getPropertyType(a);
+            context.report({
+                key: 'required-to-optional-property',
+                message: `The required ${type} "${a.getName()}" was changed to be optional in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a,
+            });
+            return;
+        }
+    }
+});
+
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertyOptionalChanged];
