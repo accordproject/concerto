@@ -44,17 +44,36 @@ function parse(cto, fileName, options) {
  * Parses an array of model files
  * @param {string[]} files - array of cto files
  * @param {Object} [options] - an optional options parameter
- * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
- * @return {*} the AST / metamodel
+ * @param {boolean} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
+ * @return {Object} an object with:
+ *   - `$class` {string}: the AST/metamodel namespace
+ *   - `models` {Object[]}: successfully parsed metamodels
+ *   - `errors` {Object[]}: parse errors, each containing:
+ *       - `file` {string}: file identifier
+ *       - `message` {string}: error message
+ *       - `location` {Object} [optional]: error location, if available
  */
 function parseModels(files, options) {
     const result = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
+        errors: [],
     };
-    files.forEach((modelFile) => {
-        let metaModel = Parser.parse(modelFile, options);
-        result.models.push(metaModel);
+    files.forEach((modelFile, index) => {
+        const fileId = `file_${index}`; // for unique file id
+        try {
+            let metaModel = parse(modelFile, fileId, options);
+            result.models.push(metaModel);
+        } catch (err) {
+            const errorDetails = {
+                file: err.fileName || fileId,
+                message: err.message,
+            };
+            if (err.fileLocation) {
+                errorDetails.location = err.fileLocation;
+            }
+            result.errors.push(errorDetails);
+        }
     });
     return result;
 }
