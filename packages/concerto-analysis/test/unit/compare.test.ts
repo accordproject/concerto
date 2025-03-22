@@ -727,3 +727,51 @@ test('should detect an optional property changed to required', async () => {
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a default value being added to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-added.cto', 'scalar-default-value-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-added',
+            message: 'Default value "hello" added to scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a default value being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-default-value-added.cto','scalar-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-removed',
+            message: 'Default value "hello" removed from scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a default value being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-default-value-added.cto','scalar-default-value-changed.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-changed',
+            message: 'Default value changed from "hello" to "bye" in scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
