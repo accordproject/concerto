@@ -61,8 +61,23 @@ describe('parser', () => {
             {
                 $class: 'concerto.metamodel@1.0.0.Models',
                 models: getCTOFiles().map(({ ast }) => JSON.parse(ast)),
+                errors: [],
             }
         );
+    });
+
+    it('Should handle errors in multiple files', () => {
+        const files = [
+            getCTOFiles()[0].content, // Valid (file_0)
+            'namespace invalid\nconcept Bad { o String bad', // Invalid (file_1)
+            getCTOFiles()[1].content, // Valid (file_2)
+        ];
+        const mm = Parser.parseModels(files, { skipLocationNodes: true });
+        mm.models.length.should.equal(2);
+        mm.errors.length.should.equal(1);
+        mm.errors[0].file.should.equal('file_1');
+        mm.errors[0].message.should.match(/Expected .+ but/);
+        mm.errors[0].location.should.exist; // Now correctly checks `fileLocation`
     });
 
     describe('maps', () => {
