@@ -96,13 +96,13 @@ class JSONPopulator {
      * place of relationships, false by default.
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
-     * @param {number} [strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
+     * @param {boolean} [strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
 
      */
     constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
-        this.strictQualifiedDateTimes = strictQualifiedDateTimes;
+        this.strictQualifiedDateTimes = strictQualifiedDateTimes !== undefined ? strictQualifiedDateTimes : true;
 
         if (process.env.TZ){
             console.warn(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
