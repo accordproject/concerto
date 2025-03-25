@@ -77,11 +77,11 @@ enum MapElement {
 }
 
 /**
- * Applies a decorator to a given target
+ * Applies decorators to a given target
  */
 concept Command {
     o CommandTarget target
-    o Decorator decorator
+    o Decorator[] decorators
     o CommandType type
     o String decoratorNamespace optional
 }
@@ -687,11 +687,15 @@ class DecoratorManager {
      * @param {*} command the Command object from the dcs
      */
     static executeNamespaceCommand(model, command) {
-        const { target, decorator, type } = command;
+        const { target, decorators, type } = command;
         if (Object.keys(target).length === 2 && target.namespace) {
             const { name } = ModelUtil.parseNamespace( model.namespace );
             if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
-                this.applyDecorator(model, type, decorator);
+                if (decorators && decorators.length > 0) {
+                    decorators.forEach(dec => {
+                        this.applyDecorator(model, type, dec);
+                    });
+                }
             }
         }
     }
@@ -708,7 +712,7 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executeCommand(namespace, declaration, command, property, options) {
-        const { target, decorator, type } = command;
+        const { target, decorators, type } = command;
         const { name } = ModelUtil.parseNamespace( namespace );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
@@ -718,25 +722,49 @@ class DecoratorManager {
                     switch (target.mapElement) {
                     case 'KEY':
                     case 'VALUE':
-                        this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, decorator);
+                        if (decorators && decorators.length > 0) {
+                            decorators.forEach(dec => {
+                                this.applyDecoratorForMapElement(target.mapElement, target, declaration, type, dec);
+                            });
+                        }
                         break;
                     case 'KEY_VALUE':
-                        this.applyDecoratorForMapElement('KEY', target, declaration, type, decorator);
-                        this.applyDecoratorForMapElement('VALUE', target, declaration, type, decorator);
+                        if (decorators && decorators.length > 0) {
+                            decorators.forEach(dec => {
+                                this.applyDecoratorForMapElement('KEY', target, declaration, type, dec);
+                                this.applyDecoratorForMapElement('VALUE', target, declaration, type, dec);
+                            });
+                        }
                         break;
                     }
                 } else if (target.type) {
                     if (this.falsyOrEqual(target.type, declaration.key.$class)) {
-                        this.applyDecorator(declaration.key, type, decorator);
+                        if (decorators && decorators.length > 0) {
+                            decorators.forEach(dec => {
+                                this.applyDecorator(declaration.key, type, dec);
+                            });
+                        }
                     }
                     if (this.falsyOrEqual(target.type, declaration.value.$class)) {
-                        this.applyDecorator(declaration.value, type, decorator);
+                        if (decorators && decorators.length > 0) {
+                            decorators.forEach(dec => {
+                                this.applyDecorator(declaration.value, type, dec);
+                            });
+                        }
                     }
                 } else {
-                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
+                    if (decorators && decorators.length > 0) {
+                        decorators.forEach(dec => {
+                            this.checkForNamespaceTargetAndApplyDecorator(declaration, type, dec, target, options?.enableDcsNamespaceTarget);
+                        });
+                    }
                 }
             } else if (!(target.property || target.properties || target.type)) {
-                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
+                if (decorators && decorators.length > 0) {
+                    decorators.forEach(dec => {
+                        this.checkForNamespaceTargetAndApplyDecorator(declaration, type, dec, target, options?.enableDcsNamespaceTarget);
+                    });
+                }
             } else {
                 if(property) {
                     this.executePropertyCommand(property, command);
@@ -753,7 +781,7 @@ class DecoratorManager {
      * org.accordproject.decoratorcommands model
      */
     static executePropertyCommand(property, command) {
-        const { target, decorator, type } = command;
+        const { target, decorators, type } = command;
         if(target.properties || target.property || target.type) {
             if (
                 this.falsyOrEqual(
@@ -762,7 +790,11 @@ class DecoratorManager {
                 ) &&
                 this.falsyOrEqual(target.type, [property.$class])
             ) {
-                this.applyDecorator(property, type, decorator);
+                if (decorators && decorators.length > 0) {
+                    decorators.forEach(dec => {
+                        this.applyDecorator(property, type, dec);
+                    });
+                }
             }
         }
     }
