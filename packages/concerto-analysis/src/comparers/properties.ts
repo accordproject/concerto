@@ -236,4 +236,60 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged];
+const propertyOptionalChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b) {
+            return;
+        }
+        const aIsOptional = a.isOptional();
+        const bIsOptional = b.isOptional();
+        if (aIsOptional === bIsOptional) {
+            return;
+        }
+        if(aIsOptional && !bIsOptional) {
+            const classDeclarationType = getDeclarationType(a.getParent());
+            const type = getPropertyType(a);
+            context.report({
+                key: 'optional-to-required-property',
+                message: `The optional ${type} "${a.getName()}" was changed to be required in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a,
+            });
+            return;
+        }else{
+            const classDeclarationType = getDeclarationType(a.getParent());
+            const type = getPropertyType(a);
+            context.report({
+                key: 'required-to-optional-property',
+                message: `The required ${type} "${a.getName()}" was changed to be optional in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a,
+            });
+            return;
+        }
+    }
+});
+
+const propertyDefaultChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b) {return;}
+
+        const aAST = JSON.parse(JSON.stringify(a.ast));
+        const bAST = JSON.parse(JSON.stringify(b.ast));
+        const aDefaultValue = aAST.defaultValue ?? null;
+        const bDefaultValue = bAST.defaultValue ?? null;
+
+        if (aDefaultValue === bDefaultValue) {return;}
+
+        const changeType = !aDefaultValue ? 'added'
+            : !bDefaultValue ? 'removed' : 'changed';
+        const classDeclarationType = getDeclarationType(a.getParent());
+        context.report({
+            key: `property-default-value-${changeType}`,
+            message: changeType === 'added' ? `Default value "${bDefaultValue}" added to property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`
+                : changeType === 'removed' ? `Default value "${aDefaultValue}" removed from property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`
+                    : `Default value changed from "${aDefaultValue}" to "${bDefaultValue}" in property "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+            element: a.getName()
+        });
+    }
+});
+
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertyOptionalChanged, propertyDefaultChanged];
