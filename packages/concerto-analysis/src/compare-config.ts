@@ -72,6 +72,9 @@ export const defaultCompareConfig: CompareConfig = {
         'scalar-default-value-added': CompareResult.PATCH,
         'scalar-default-value-removed': CompareResult.MAJOR,
         'scalar-default-value-changed': CompareResult.MAJOR,
+        'property-default-value-added': CompareResult.PATCH,
+        'property-default-value-removed': CompareResult.MAJOR,
+        'property-default-value-changed': CompareResult.MAJOR,
     },
 };
 
@@ -177,3 +180,6 @@ export class CompareConfigBuilder {
         return this;
     }
 }
+
+export const DEFAULT_COMPARER_FACTORIES_COUNT = defaultCompareConfig.comparerFactories.length;
+export const DEFAULT_RULES_COUNT = Object.keys(defaultCompareConfig.rules).length;

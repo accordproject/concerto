@@ -775,3 +775,51 @@ test('should detect a default value being removed from a scalar', async () => {
     ]));
     expect(results.result).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a default value being added to a property', async () => {
+    const [a, b] = await getModelFiles('property-added.cto', 'property-default-value-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-added',
+            message: 'Default value "Fred" added to property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a default value being removed from a property', async () => {
+    const [a, b] = await getModelFiles('property-default-value-added.cto','property-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-removed',
+            message: 'Default value "Fred" removed from property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a default value being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('property-default-value-added.cto','property-default-value-changed.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-changed',
+            message: 'Default value changed from "Fred" to "NotFred" in property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
