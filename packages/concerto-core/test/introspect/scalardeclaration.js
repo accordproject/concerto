@@ -15,11 +15,13 @@
 'use strict';
 
 const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
+const IllegalModelException = require('../../lib/introspect/illegalmodelexception'); // ADDED MISSING IMPORT
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
 const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 const should = require('chai').should();
 const sinon = require('sinon');
@@ -36,7 +38,28 @@ describe('ScalarDeclaration', () => {
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
     });
+    describe('Primitive type name conflict', () => {
+        it('should throw an error when scalar name is a primitive type', () => {
+            const primitives = ['String', 'Integer', 'Boolean', 'DateTime', 'Double', 'Long'];
+            primitives.forEach(primitive => {
+                (() => {
+                    new ScalarDeclaration(modelFile, {
+                        name: primitive,
+                        $class: `${MetaModelNamespace}.StringScalar`
+                    });
+                }).should.throw(IllegalModelException, `Invalid scalar name '${primitive}'. Name conflicts with primitive type.`);
+            });
+        });
 
+        it('should not throw when scalar name is valid', () => {
+            (() => {
+                new ScalarDeclaration(modelFile, {
+                    name: 'ValidScalar',
+                    $class: `${MetaModelNamespace}.StringScalar`
+                });
+            }).should.not.throw();
+        });
+    });
     describe('#accept', () => {
         it('should call the visitor', () => {
             let clz = new ScalarDeclaration(modelFile, {
