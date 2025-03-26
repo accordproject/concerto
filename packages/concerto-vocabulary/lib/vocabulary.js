@@ -115,7 +115,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
-        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
+        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !declarationName){
             const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
             return namespaceTerms.length > 0 ? identifier ? Object.fromEntries(namespaceTerms)[identifier]:Object.fromEntries(namespaceTerms).term : null;
         }
@@ -139,7 +139,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getElementTerms(declarationName, propertyName) {
-        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
+        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !declarationName){
             const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
             return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
         }
@@ -207,7 +207,7 @@ class Vocabulary {
                 : k ).filter( i => i !== null)
         };
 
-        if(DecoratorManager.isNamespaceTargetEnabled() && !this.content.term){
+        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !this.content.term){
             result.missingTerms.push('namespace');
         }
 

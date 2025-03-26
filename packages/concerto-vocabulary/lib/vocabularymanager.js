@@ -18,6 +18,7 @@ const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
 const { DecoratorManager } = require('@accordproject/concerto-core');
+const ModelUtil = require('./modelutil');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
@@ -52,12 +53,14 @@ class VocabularyManager {
      * Create the VocabularyManager
      * @param {*} [options] options to configure vocabulary lookup
      * @param {*} [options.missingTermGenerator] A function to call for missing terms. The function
+     * @param {*} [options.enableDcsNamespaceTarget] A boolean to enable the namespace target in the DCS
      * should accept namespace, locale, declarationName, propertyName as arguments
      * @constructor
      */
     constructor(options) {
         this.vocabularies = {}; // key is namespace/locale, value is a Vocabulary object
         this.missingTermGenerator = options ? options.missingTermGenerator : null;
+        this.enableDcsNamespaceTarget = options?.enableDcsNamespaceTarget ? true : false;
     }
 
     /**
@@ -69,8 +72,8 @@ class VocabularyManager {
      * @returns {string} the term or null if it does not exist
      */
     static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
-        if(DecoratorManager.isNamespaceTargetEnabled() && !declarationName){
-            return camelCaseToSentence(namespace.split('@')[0]);
+        if(DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget) && !declarationName){
+            return camelCaseToSentence(ModelUtil.parseNamespace(namespace).name);
         }
         const firstPart = propertyName ? propertyName.replace('$', '') + ' of the' : '';
         return camelCaseToSentence(firstPart + declarationName);
@@ -279,7 +282,7 @@ class VocabularyManager {
             }
             else {
                 let missingKey = propertyName ? propertyName : declarationName;
-                if(DecoratorManager.isNamespaceTargetEnabled()){
+                if(DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)){
                     missingKey = missingKey? missingKey : 'term';
                 }
                 return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
@@ -315,7 +318,7 @@ class VocabularyManager {
         };
 
         modelManager.getModelFiles().forEach(model => {
-            if(DecoratorManager.isNamespaceTargetEnabled()) { //options?.enableDcsNamespaceTarget
+            if(DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)) {
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale);
                 if (terms) {
                     Object.keys(terms).forEach( term => {

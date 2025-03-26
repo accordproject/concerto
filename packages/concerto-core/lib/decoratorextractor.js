@@ -228,13 +228,14 @@ class DecoratorExtractor {
     }
     /**
      * @param {Object} vocabObject - the collection of collected vocabularies
-     * @param {Object} decl - the declaration object
+     * @param {Object} vocabTarget - the declaration object
      * @param {Object} dcs - the current dcs json to be parsed
      * @returns {Object} - the collection of collected vocabularies with current dcs
      * @private
      */
-    parseVocabularies(vocabObject, decl, dcs){
-        if(decl.declaration === ''){
+    parseVocabularies(vocabObject, vocabTarget, dcs){
+        //If the vocabTarget declaration is empty, then it is a namespace level vocabulary
+        if(vocabTarget.declaration === ''){
             vocabObject.namespace = vocabObject.namespace || {};
             if (dcs.name === 'Term'){
                 vocabObject.namespace.term = dcs.arguments[0].value;
@@ -246,38 +247,38 @@ class DecoratorExtractor {
             return vocabObject;
         }
         vocabObject.declarations = vocabObject.declarations || {};
-        vocabObject.declarations[decl.declaration] = vocabObject.declarations[decl.declaration] || { propertyVocabs: {} };
-        if (decl.property !== ''){
-            if (!vocabObject.declarations[decl.declaration].propertyVocabs[decl.property]){
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property] = {};
+        vocabObject.declarations[vocabTarget.declaration] = vocabObject.declarations[vocabTarget.declaration] || { propertyVocabs: {} };
+        if (vocabTarget.property !== ''){
+            if (!vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property]){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property] = {};
             }
             if (dcs.name === 'Term'){
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property].term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][extensionKey] = dcs.arguments[0].value;
             }
         }
-        else if (decl.mapElement !== ''){
-            if (!vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement]){
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement] = {};
+        else if (vocabTarget.mapElement !== ''){
+            if (!vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement]){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement] = {};
             }
             if (dcs.name === 'Term'){
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement].term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                vocabObject.declarations[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
             }
         }
         else {
             if (dcs.name === 'Term'){
-                vocabObject.declarations[decl.declaration].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].term = dcs.arguments[0].value;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                vocabObject.declarations[decl.declaration][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration][extensionKey] = dcs.arguments[0].value;
             }
         }
         return vocabObject;
