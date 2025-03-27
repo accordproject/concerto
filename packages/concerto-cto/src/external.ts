@@ -14,7 +14,7 @@
 
 import debug from 'debug';
 import * as pathBrowserify from 'path-browserify';
-import { DefaultFileLoader, FileDownloader } from '@accordproject/concerto-util';
+const { DefaultFileLoader, FileDownloader } = require('@accordproject/concerto-util');
 import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { IModel, IModels } from '@accordproject/concerto-types';
 
@@ -69,7 +69,7 @@ function updateModels(models: Models, newModel: Model): Models {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-async function resolveExternal(models: Models, options?: any, fileDownloader?: FileDownloader): Promise<Models> {
+async function resolveExternal(models: Models, options?: any, fileDownloader?: typeof FileDownloader): Promise<Models> {
     const NAME = 'updateExternalModels';
     debugLog(NAME, 'updateExternalModels', options);
 

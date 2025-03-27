@@ -29,7 +29,7 @@ interface Decorator {
 
 interface MetaModelWithType {
     $class: string;
-    type: {
+    type?: {
         name: string;
     };
 }
@@ -40,6 +40,14 @@ interface MetaModelWithValidator {
     validator?: {
         lower?: number;
         upper?: number;
+        regex?: string;
+        length?: { lower?: number; upper?: number };
+        pattern?: string;
+        flags?: string;
+    };
+    lengthValidator?: {
+        minLength?: number;
+        maxLength?: number;
     };
 }
 
@@ -49,6 +57,7 @@ interface Property {
     isArray?: boolean;
     isOptional?: boolean;
     decorators?: Decorator[];
+    isRelationship?: boolean;
 }
 
 interface MapEntry {
@@ -69,13 +78,26 @@ interface Declaration {
     range?: { lower: number; upper: number };
     keyType?: any;
     valueType?: any;
+    isIdentified?: boolean;
+    identifierFieldName?: string;
+}
+
+interface Import {
+    $class: string;
+    namespace: string;
+    uri?: string;
+    name?: string;
+    types?: string[];
+    aliasedTypes?: Array<{ name: string; aliasedName: string }>;
 }
 
 interface MetaModel {
     $class: string;
     namespace: string;
-    imports?: Array<{ namespace: string; uri?: string }>;
+    imports?: Import[];
     declarations?: Declaration[];
+    concertoVersion?: string;
+    decorators?: Decorator[];
 }
 
 /**
@@ -199,11 +221,15 @@ function typeFromMetaModel(mm: MetaModelWithType): string {
     case `${MetaModelNamespace}.ObjectProperty`:
     case `${MetaModelNamespace}.ObjectMapKeyType`:
     case `${MetaModelNamespace}.ObjectMapValueType`:
-        result += ` ${mm.type.name}`;
+        if (mm.type) {
+            result += ` ${mm.type.name}`;
+        }
         break;
     case `${MetaModelNamespace}.RelationshipProperty`:
     case `${MetaModelNamespace}.RelationshipMapValueType`:
-        result += ` ${mm.type.name}`;
+        if (mm.type) {
+            result += ` ${mm.type.name}`;
+        }
         break;
     }
     return result;
@@ -236,14 +262,13 @@ function modifiersFromMetaModel(mm: MetaModelWithValidator): string {
     case `${MetaModelNamespace}.DateTimeProperty`:
     case `${MetaModelNamespace}.DateTimeScalar`:
         if (mm.defaultValue) {
-            result += ` default="${mm.defaultValue}"`;
+            defaultString += ` default="${mm.defaultValue}"`;
         }
         break;
     case `${MetaModelNamespace}.DoubleProperty`:
     case `${MetaModelNamespace}.DoubleScalar`:
-        if (mm.defaultValue) {
+        if (mm.defaultValue !== undefined) {
             const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
-
             defaultString += ` default=${doubleString}`;
         }
         if (mm.validator) {
@@ -263,6 +288,38 @@ function modifiersFromMetaModel(mm: MetaModelWithValidator): string {
             validatorString += ` range=[${lowerString},${upperString}]`;
         }
         break;
+    case `${MetaModelNamespace}.LongProperty`:
+    case `${MetaModelNamespace}.LongScalar`:
+        if (mm.defaultValue !== undefined) {
+            defaultString += ` default=${mm.defaultValue.toString()}`;
+        }
+        if (mm.validator) {
+            const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
+            const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+            validatorString += ` range=[${lowerString},${upperString}]`;
+        }
+        break;
+    case `${MetaModelNamespace}.StringProperty`:
+    case `${MetaModelNamespace}.StringScalar`:
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
+        if (mm.validator) {
+            if (mm.validator.pattern) {
+                validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags || ''}`;
+            }
+        }
+        if (mm.lengthValidator) {
+            const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
+            const maxLength = mm.lengthValidator.maxLength !== undefined ? mm.lengthValidator.maxLength : '';
+            validatorString += ` length=[${minLength},${maxLength}]`;
+        }
+        break;
+    case `${MetaModelNamespace}.ObjectProperty`:
+        if (mm.defaultValue) {
+            defaultString += ` default="${mm.defaultValue}"`;
+        }
+        break;
     }
     
     return result + defaultString + validatorString;
@@ -276,32 +333,23 @@ function modifiersFromMetaModel(mm: MetaModelWithValidator): string {
  */
 function propertyFromMetaModel(prop: Property): string {
     let result = '';
-    if (prop.decorators) {
-        result += decoratorsFromMetaModel(prop.decorators, '    ');
-    }
-    result += '    o';
-    switch (prop.$class) {
-    case `${MetaModelNamespace}.EnumProperty`:
-        result += ` ${prop.name}`;
-        break;
-    default:
-        result += typeFromMetaModel(prop as any as MetaModelWithType);
-        result += ` ${prop.name}`;
-        if (prop.isArray) {
-            result += '[]';
-        }
-    }
 
-    let modifiers = modifiersFromMetaModel(prop as any as MetaModelWithValidator);
-    if (prop.isOptional) {
-        if (modifiers) {
-            modifiers += ' optional';
-        } else {
-            modifiers = ' optional';
-        }
+    if (prop.decorators) {
+        result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
-    if (modifiers) {
-        result += modifiers;
+    if (prop.isRelationship) {
+        result += '-->';
+    } else {
+        result += 'o';
+    }
+    result += typeFromMetaModel(prop as any as MetaModelWithType);
+    if (prop.isArray) {
+        result += '[]';
+    }
+    result += ` ${prop.name}`;
+    result += modifiersFromMetaModel(prop as any as MetaModelWithValidator);
+    if (prop.isOptional) {
+        result += ' optional';
     }
     return result;
 }
@@ -315,23 +363,14 @@ function propertyFromMetaModel(prop: Property): string {
 function mapFromMetaModel(entry: MapEntry): string {
     let result = '';
     if (entry.decorators) {
-        result += decoratorsFromMetaModel(entry.decorators, '    ');
+        result += decoratorsFromMetaModel(entry.decorators, '  ');
     }
-    result += '    o Map{';
-    switch (entry.key.$class) {
-    case `${MetaModelNamespace}.StringMapKeyType`:
-        result += 'String';
-        break;
-    case `${MetaModelNamespace}.DateTimeMapKeyType`:
-        result += 'DateTime';
-        break;
-    case `${MetaModelNamespace}.ObjectMapKeyType`:
-        result += entry.key.type.name;
-        break;
+    if (entry.$class === `${MetaModelNamespace}.RelationshipMapValueType`) {
+        result += '-->';
+    } else {
+        result += 'o';
     }
-    result += ',';
-    result += typeFromMetaModel(entry.value as any as MetaModelWithType).trim();
-    result += '}';
+    result += typeFromMetaModel(entry as any as MetaModelWithType);
     return result;
 }
 
@@ -343,136 +382,73 @@ function mapFromMetaModel(entry: MapEntry): string {
  */
 function declFromMetaModel(mm: Declaration): string {
     let result = '';
-    const metaModel = mm as any;
 
     if (mm.decorators) {
         result += decoratorsFromMetaModel(mm.decorators, '');
     }
-    
-    if (isScalar(metaModel)) {
-        result += 'scalar';
-        result += typeFromMetaModel(metaModel);
-        result += ` ${mm.name}`;
-        result += modifiersFromMetaModel(metaModel);
-        result += '\n';
-    } else if (isMap(metaModel)) {
-        result += 'map';
-        result += ` ${mm.name} {`;
-        result += '\n';
-        const mapEntry = {
-            $class: '',
-            key: mm.keyType,
-            value: mm.valueType,
-            decorators: undefined
-        };
-        result += mapFromMetaModel(mapEntry);
-        result += '\n';
-        result += '}\n';
+
+    if (isScalar(mm)) {
+        result += `scalar ${mm.name} extends`;
+        result += typeFromMetaModel(mm);
+        result += modifiersFromMetaModel(mm);
+    } else if (isMap(mm)) {
+        result += `map ${mm.name} {`;
+        if (mm.keyType && mm.valueType) {
+            const mapEntry = {
+                $class: '',
+                key: mm.keyType,
+                value: mm.valueType,
+                decorators: undefined
+            };
+            result += `\n  ${mapFromMetaModel(mapEntry)}`;
+        }
+        result += '\n}';
     } else {
+        if (mm.isAbstract) {
+            result += 'abstract ';
+        }
         switch (mm.$class) {
-        case `${MetaModelNamespace}.ConceptDeclaration`:
-            if (mm.isAbstract) {
-                result += 'abstract ';
-            }
-            result += 'concept';
-            result += ` ${mm.name}`;
-            if (mm.superType) {
-                result += ` extends ${mm.superType.name}`;
-            }
-            result += ' {\n';
-            if (mm.properties) {
-                result += mm.properties.map(propertyFromMetaModel).join('\n');
-            }
-            if (mm.properties && mm.properties.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
-            break;
         case `${MetaModelNamespace}.AssetDeclaration`:
-            if (mm.isAbstract) {
-                result += 'abstract ';
-            }
-            result += 'asset';
-            result += ` ${mm.name}`;
-            if (mm.superType) {
-                result += ` extends ${mm.superType.name}`;
-            }
-            result += ' {\n';
-            if (mm.properties) {
-                result += mm.properties.map(propertyFromMetaModel).join('\n');
-            }
-            if (mm.properties && mm.properties.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
+            result += `asset ${mm.name} `;
             break;
-        case `${MetaModelNamespace}.ParticipantDeclaration`:
-            if (mm.isAbstract) {
-                result += 'abstract ';
-            }
-            result += 'participant';
-            result += ` ${mm.name}`;
-            if (mm.superType) {
-                result += ` extends ${mm.superType.name}`;
-            }
-            result += ' {\n';
-            if (mm.properties) {
-                result += mm.properties.map(propertyFromMetaModel).join('\n');
-            }
-            if (mm.properties && mm.properties.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
-            break;
-        case `${MetaModelNamespace}.TransactionDeclaration`:
-            if (mm.isAbstract) {
-                result += 'abstract ';
-            }
-            result += 'transaction';
-            result += ` ${mm.name}`;
-            if (mm.superType) {
-                result += ` extends ${mm.superType.name}`;
-            }
-            result += ' {\n';
-            if (mm.properties) {
-                result += mm.properties.map(propertyFromMetaModel).join('\n');
-            }
-            if (mm.properties && mm.properties.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
+        case `${MetaModelNamespace}.ConceptDeclaration`:
+            result += `concept ${mm.name} `;
             break;
         case `${MetaModelNamespace}.EventDeclaration`:
-            if (mm.isAbstract) {
-                result += 'abstract ';
-            }
-            result += 'event';
-            result += ` ${mm.name}`;
-            if (mm.superType) {
-                result += ` extends ${mm.superType.name}`;
-            }
-            result += ' {\n';
-            if (mm.properties) {
-                result += mm.properties.map(propertyFromMetaModel).join('\n');
-            }
-            if (mm.properties && mm.properties.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
+            result += `event ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.ParticipantDeclaration`:
+            result += `participant ${mm.name} `;
+            break;
+        case `${MetaModelNamespace}.TransactionDeclaration`:
+            result += `transaction ${mm.name} `;
             break;
         case `${MetaModelNamespace}.EnumDeclaration`:
-            result += 'enum';
-            result += ` ${mm.name} {\n`;
-            if (mm.values) {
-                result += mm.values.map(value => `    o ${value}`).join('\n');
-            }
-            if (mm.values && mm.values.length > 0) {
-                result += '\n';
-            }
-            result += '}\n';
+            result += `enum ${mm.name} `;
             break;
         }
+        if (mm.isIdentified) {
+            if (mm.identifierFieldName) {
+                result += `identified by ${mm.identifierFieldName} `;
+            } else {
+                result += 'identified ';
+            }
+        }
+        if (mm.superType) {
+            if (mm.superType.name === mm.name) {
+                throw new Error(`The declaration "${mm.name}" cannot extend itself.`);
+            }
+            result += `extends ${mm.superType.name} `;
+        }
+        result += '{';
+        if (mm.properties) {
+            mm.properties.forEach((property) => {
+                result += `\n  ${propertyFromMetaModel(property)}`;
+            });
+        }
+        result += '\n}';
     }
+
     return result;
 }
 
@@ -485,33 +461,69 @@ function declFromMetaModel(mm: Declaration): string {
 function toCTO(metaModel: MetaModel): string {
     let result = '';
 
+    // version
+    if (metaModel.concertoVersion) {
+        result += `concerto version "${metaModel.concertoVersion}"\n\n`;
+    }
+
+    // decorators
+    if (metaModel.decorators && metaModel.decorators.length > 0) {
+        result += decoratorsFromMetaModel(metaModel.decorators, '');
+    }
+
     // namespace
-    result += `namespace ${metaModel.namespace}\n`;
+    result += `namespace ${metaModel.namespace}`;
 
     // imports
-    if (metaModel.imports) {
-        metaModel.imports.forEach(element => {
-            if (element.uri) {
-                result += `import ${element.namespace} from ${element.uri}\n`;
-            } else {
-                result += `import ${element.namespace}\n`;
+    if (metaModel.imports && metaModel.imports.length > 0) {
+        result += '\n';
+        metaModel.imports.forEach((imp) => {
+            switch(imp.$class) {
+            case `${MetaModelNamespace}.ImportType`:
+            case `${MetaModelNamespace}.ImportTypeFrom`:
+                result += `\nimport ${imp.namespace}.${imp.name}`;
+                break;
+            case `${MetaModelNamespace}.ImportAll`:
+            case `${MetaModelNamespace}.ImportAllFrom`:
+                result += `\nimport ${imp.namespace}.*`;
+                break;
+            case `${MetaModelNamespace}.ImportTypes`: {
+                const aliasedTypes = imp.aliasedTypes
+                    ? new Map(
+                        imp.aliasedTypes.map(({ name, aliasedName }) => [
+                            name,
+                            aliasedName,
+                        ])
+                    )
+                    : new Map();
+                const commaSeparatedTypesString = imp.types
+                    ? imp.types
+                        .map((type) =>
+                            aliasedTypes.has(type)
+                                ? `${type} as ${aliasedTypes.get(type)}`
+                                : type
+                        )
+                        .join(',')
+                    : '';
+                result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
+                break;
+            }
+            default:
+                throw new Error('Unrecognized import');
+            }
+            if (imp.uri) {
+                result += ` from ${imp.uri}`;
             }
         });
-        if (metaModel.imports.length > 0) {
-            result += '\n';
-        }
     }
 
     // declarations
-    if (metaModel.declarations) {
-        metaModel.declarations.forEach(decl => {
-            result += declFromMetaModel(decl);
-            result += '\n';
+    if (metaModel.declarations && metaModel.declarations.length > 0) {
+        metaModel.declarations.forEach((decl) => {
+            result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
 
-    // trim end
-    result = result.replace(/\n*$/, '\n');
     return result;
 }
 

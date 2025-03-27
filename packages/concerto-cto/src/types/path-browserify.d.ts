@@ -21,4 +21,18 @@ declare module 'path-browserify' {
     export function normalize(path: string): string;
     export function isAbsolute(path: string): boolean;
     export function relative(from: string, to: string): string;
+    export function parse(path: string): {
+        root: string;
+        dir: string;
+        base: string;
+        ext: string;
+        name: string;
+    };
+    export function format(pathObject: {
+        root?: string;
+        dir?: string;
+        base?: string;
+        ext?: string;
+        name?: string;
+    }): string;
 } 

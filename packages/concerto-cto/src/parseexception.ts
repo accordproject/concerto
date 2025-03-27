@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { BaseFileException } from '@accordproject/concerto-util';
+const { BaseFileException } = require('@accordproject/concerto-util');
 
 /**
  * Exception throws when a Concerto file is syntactically invalid
