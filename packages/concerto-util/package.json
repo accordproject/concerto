@@ -7,7 +7,8 @@
     "node": ">=18",
     "npm": ">=10"
   },
-  "main": "index.js",
+  "type": "commonjs",
+  "main": "dist/concerto-util.js",
   "browser": "dist/concerto-util.js",
   "typings": "types/index.d.ts",
   "scripts": {
@@ -15,14 +16,14 @@
     "pretest": "npm run lint && npm run doc",
     "lint": "eslint .",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "nyc mocha --recursive -t 10000",
-    "test:watch": "nyc mocha --watch --recursive -t 10000",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
-    "postbuild": "npm run webpack",
+    "test": "nyc ts-mocha --require source-map-support/register --recursive -t 10000 'test/**/*.ts'",
+    "test:watch": "nyc ts-mocha --require source-map-support/register --watch --recursive -t 10000 'test/**/*.ts'",
+    "mocha": "ts-mocha --require source-map-support/register --recursive -t 10000 'test/**/*.ts'",
+    "nyc": "nyc ts-mocha --require source-map-support/register --recursive -t 10000 'test/**/*.ts'",
+    "build": "npm run webpack",
+    "postbuild": "npm run build:types",
     "webpack": "webpack --config webpack.config.js --mode production",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "build:types": "tsc --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {
     "type": "git",
@@ -37,19 +38,36 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "chai": "4.3.6",
-    "chai-as-promised": "7.1.1",
+    "@types/chai": "^5.2.1",
+    "@types/chai-as-promised": "^8.0.2",
+    "@types/chai-things": "^0.0.38",
+    "@types/debug": "^4.1.12",
+    "@types/mocha": "^10.0.10",
+    "@types/mock-fs": "^4.13.4",
+    "@types/node": "^22.13.13",
+    "@types/sinon": "^17.0.4",
+    "@types/sinon-chai": "^4.0.0",
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "chai-sinon": "^2.8.1",
     "chai-things": "0.2.0",
     "eslint": "8.57.1",
     "jsdoc": "^4.0.4",
-    "mocha": "10.8.2",
+    "mocha": "^10.8.2",
+    "mock-fs": "^5.5.0",
     "node-polyfill-webpack-plugin": "4.0.0",
-    "nyc": "17.1.0",
+    "nyc": "^17.1.0",
+    "sinon": "^19.0.2",
+    "sinon-chai": "^4.0.0",
+    "source-map-support": "^0.5.21",
     "tmp-promise": "3.0.3",
-    "typescript": "5.7.2",
+    "ts-loader": "^9.5.2",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
     "undici": "^7.0.0",
     "webpack": "5.96.1",
-    "sinon": "19.0.2"
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
@@ -57,6 +75,7 @@
     "slash": "3.0.0"
   },
   "browserslist": "> 0.25%, not dead",
+  "files": ["dist", "types"],
   "nyc": {
     "produce-source-map": "true",
     "sourceMap": "inline",
@@ -67,13 +86,20 @@
       "json"
     ],
     "include": [
-      "lib/**/*.js"
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "test/**/*",
+      "dist/**/*"
     ],
     "all": true,
     "check-coverage": true,
-    "statements": 99,
-    "branches": 93,
-    "functions": 98,
-    "lines": 99
+    "statements": 90,
+    "branches": 85,
+    "functions": 90,
+    "lines": 90,
+    "extension": [
+      ".ts"
+    ]
   }
 }

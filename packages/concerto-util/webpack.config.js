@@ -14,7 +14,7 @@
 
 'use strict';
 
-let path = require('path');
+const path = require('path');
 const webpack = require('webpack');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
@@ -23,7 +23,8 @@ const packageJson = require('./package.json');
 const emitWarningPollyfill = 'function(message, options){ console.warn({message: `DEPRECATED: ${message}`,type: options?.type,code: options?.code,detail: options?.detail});}';
 
 module.exports = {
-    entry: './index.js',
+    mode: 'production', // Set the mode to production (as per your npm script)
+    entry: './src/index.ts', // Update the entry point to src/index.ts
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-util.js',
@@ -31,6 +32,7 @@ module.exports = {
             name: 'concerto-util',
             type: 'umd',
         },
+        globalObject: 'this', // Ensure compatibility with both browser and Node.js environments
     },
     plugins: [
         new webpack.BannerPlugin(`Concerto Util v${packageJson.version}
@@ -53,26 +55,33 @@ module.exports = {
             Buffer: ['buffer', 'Buffer'],
         }),
         new webpack.ProvidePlugin({
-            process: 'process/browser', // provide a shim for the global `process` variable
+            process: 'process/browser', // Provide a shim for the global `process` variable
         }),
-        new NodePolyfillPlugin(),],
+        new NodePolyfillPlugin(),
+    ],
     module: {
         rules: [
             {
-                test: /\.js$/,
-                include: [path.join(__dirname, 'lib')],
-                use: ['babel-loader']
+                test: /\.ts$/, // Add rule for TypeScript files
+                use: 'ts-loader',
+                exclude: /node_modules/,
             },
             {
-                test: /\.ne$/,
-                use: ['raw-loader']
-            }
-        ]
+                test: /\.js$/, // Retain the rule for JavaScript files (if any remain)
+                include: [path.join(__dirname, 'lib')],
+                use: ['babel-loader'],
+            },
+            {
+                test: /\.ne$/, // Retain the rule for .ne files
+                use: ['raw-loader'],
+            },
+        ],
     },
     resolve: {
+        extensions: ['.ts', '.js'], // Add .ts to the list of resolved extensions
         fallback: {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
-            // see https://webpack.js.org/configuration/resolve/#resolvefallback
+            // See https://webpack.js.org/configuration/resolve/#resolvefallback
             // for the list of Node.js core module polyfills.
             'fs': false,
             'tls': false,
@@ -86,6 +95,6 @@ module.exports = {
             // 'https': require.resolve('https-browserify'),
             // 'zlib': require.resolve('browserify-zlib'),
             // 'vm2': require.resolve('vm-browserify'),
-        }
-    }
+        },
+    },
 };
