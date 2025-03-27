@@ -17,8 +17,7 @@
 const YAML = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const Vocabulary = require('./vocabulary');
-const { DecoratorManager } = require('@accordproject/concerto-core');
-const ModelUtil = require('./modelutil');
+const { DecoratorManager, ModelUtil } = require('@accordproject/concerto-core');
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
