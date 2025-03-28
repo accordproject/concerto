@@ -31,7 +31,18 @@ class ParseException extends BaseFileException {
      * @param {string} [fullMessageOverride] - the pre-existing full message
      * @param {string} [component] - the component which throws this error
      */
-    constructor(message: string, fileLocation?: any, fileName?: string, fullMessageOverride?: string, component?: string) {
+    constructor(message: string, fileLocation?: {
+        start: {
+            line: number;
+            column: number;
+            offset: number;
+        };
+        end?: {
+            line: number;
+            column: number;
+            offset: number;
+        };
+    }, fileName?: string, fullMessageOverride?: string, component?: string) {
         let fullMessage = message;
         let suffix = '';
 

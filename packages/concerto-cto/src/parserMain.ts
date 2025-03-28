@@ -13,6 +13,7 @@
  */
 
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { IModels } from '@accordproject/concerto-types';
 
 import Parser = require('./parser');
 import ParseException = require('./parseexception');
@@ -47,9 +48,9 @@ function parse(cto: string, fileName?: string, options?: ParseOptions): any {
  * @param {string[]} files - array of cto files
  * @param {Object} [options] - an optional options parameter
  * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
- * @return {*} the AST / metamodel
+ * @return {IModels} the AST / metamodel
  */
-function parseModels(files: string[], options?: ParseOptions): any {
+function parseModels(files: string[], options?: ParseOptions): IModels {
     const result: { $class: string; models: any[] } = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],

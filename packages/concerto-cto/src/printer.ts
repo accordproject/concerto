@@ -13,99 +13,27 @@
  */
 
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-
-interface DecoratorArgument {
-    $class: string;
-    type?: { name: string };
-    isArray?: boolean;
-    value?: any;
-}
-
-interface Decorator {
-    $class: string;
-    name: string;
-    arguments?: DecoratorArgument[];
-}
-
-interface MetaModelWithType {
-    $class: string;
-    type?: {
-        name: string;
-    };
-}
-
-interface MetaModelWithValidator {
-    $class: string;
-    defaultValue?: any;
-    validator?: {
-        lower?: number;
-        upper?: number;
-        regex?: string;
-        length?: { lower?: number; upper?: number };
-        pattern?: string;
-        flags?: string;
-    };
-    lengthValidator?: {
-        minLength?: number;
-        maxLength?: number;
-    };
-}
-
-interface Property {
-    $class: string;
-    name: string;
-    isArray?: boolean;
-    isOptional?: boolean;
-    decorators?: Decorator[];
-    isRelationship?: boolean;
-}
-
-interface MapEntry {
-    $class: string;
-    key: any;
-    value: any;
-    decorators?: Decorator[];
-}
-
-interface Declaration {
-    $class: string;
-    name?: string;
-    isAbstract?: boolean;
-    superType?: { name: string };
-    properties?: Property[];
-    decorators?: Decorator[];
-    values?: any[];
-    range?: { lower: number; upper: number };
-    keyType?: any;
-    valueType?: any;
-    isIdentified?: boolean;
-    identifierFieldName?: string;
-}
-
-interface Import {
-    $class: string;
-    namespace: string;
-    uri?: string;
-    name?: string;
-    types?: string[];
-    aliasedTypes?: Array<{ name: string; aliasedName: string }>;
-}
-
-interface MetaModel {
-    $class: string;
-    namespace: string;
-    imports?: Import[];
-    declarations?: Declaration[];
-    concertoVersion?: string;
-    decorators?: Decorator[];
-}
+import {
+    IDeclaration,
+    IDecorator,
+    IDecoratorLiteral,
+    IDecoratorString,
+    IDecoratorTypeReference,
+    IMapDeclaration,
+    IModel,
+    IProperty,
+    IRelationshipProperty,
+    IImport,
+    IImportTypes,
+    IConceptDeclaration
+} from '@accordproject/concerto-types';
 
 /**
  * Returns true if the metamodel is a MapDeclaration
  * @param {object} mm - the metamodel
  * @return {boolean} the string for that model
  */
-function isMap(mm: any): boolean {
+function isMap(mm: IDeclaration): boolean {
     return mm.$class === `${MetaModelNamespace}.MapDeclaration`;
 }
 
@@ -114,7 +42,7 @@ function isMap(mm: any): boolean {
  * @param {object} mm - the metamodel
  * @return {boolean} the string for that model
  */
-function isScalar(mm: any): boolean {
+function isScalar(mm: IDeclaration): boolean {
     return [
         `${MetaModelNamespace}.BooleanScalar`,
         `${MetaModelNamespace}.IntegerScalar`,
@@ -130,17 +58,20 @@ function isScalar(mm: any): boolean {
  * @param {object} mm - the metamodel
  * @return {string} the string for the decorator argument
  */
-function decoratorArgFromMetaModel(mm: DecoratorArgument): string {
+function decoratorArgFromMetaModel(mm: IDecoratorLiteral): string {
     let result = '';
     switch (mm.$class) {
     case `${MetaModelNamespace}.DecoratorTypeReference`:
-        result += `${mm.type?.name}${mm.isArray ? '[]' : ''}`;
+        const typeRef = mm as unknown as IDecoratorTypeReference;
+        result += `${typeRef.type?.name}${typeRef.isArray ? '[]' : ''}`;
         break;
     case `${MetaModelNamespace}.DecoratorString`:
-        result += `"${mm.value}"`;
+        const strRef = mm as unknown as IDecoratorString;
+        result += `"${strRef.value}"`;
         break;
     default:
-        result += `${mm.value}`;
+        // For other types, we assume they have a value property
+        result += `${(mm as any).value}`;
         break;
     }
     return result;
@@ -151,7 +82,7 @@ function decoratorArgFromMetaModel(mm: DecoratorArgument): string {
  * @param {object} mm - the metamodel
  * @return {string} the string for the decorator
  */
-function decoratorFromMetaModel(mm: Decorator): string {
+function decoratorFromMetaModel(mm: IDecorator): string {
     let result = '';
     result += `@${mm.name}`;
     if (mm.arguments) {
@@ -168,7 +99,7 @@ function decoratorFromMetaModel(mm: Decorator): string {
  * @param {string} prefix - indentation
  * @return {string} the string for the decorators
  */
-function decoratorsFromMetaModel(mm: Decorator[], prefix: string): string {
+function decoratorsFromMetaModel(mm: IDecorator[], prefix: string): string {
     let result = '';
     result += mm.map(decoratorFromMetaModel).join(`\n${prefix}`);
     result += `\n${prefix}`;
@@ -181,7 +112,7 @@ function decoratorsFromMetaModel(mm: Decorator[], prefix: string): string {
  * @param {object} mm - the metamodel
  * @return {string} the string for the type
  */
-function typeFromMetaModel(mm: MetaModelWithType): string {
+function typeFromMetaModel(mm: any): string {
     let result = '';
     switch (mm.$class) {
     case `${MetaModelNamespace}.EnumProperty`:
@@ -241,7 +172,7 @@ function typeFromMetaModel(mm: MetaModelWithType): string {
  * @param {object} mm - the metamodel
  * @return {string} the string for the modifiers
  */
-function modifiersFromMetaModel(mm: MetaModelWithValidator): string {
+function modifiersFromMetaModel(mm: any): string {
     let result = '';
     let defaultString = '';
     let validatorString = '';
@@ -331,23 +262,24 @@ function modifiersFromMetaModel(mm: MetaModelWithValidator): string {
  * @param {object} prop - the property metamodel object
  * @return {string} the string for the property
  */
-function propertyFromMetaModel(prop: Property): string {
+function propertyFromMetaModel(prop: IProperty): string {
     let result = '';
 
     if (prop.decorators) {
         result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
-    if (prop.isRelationship) {
+    
+    if (prop.$class === `${MetaModelNamespace}.RelationshipProperty`) {
         result += '-->';
     } else {
         result += 'o';
     }
-    result += typeFromMetaModel(prop as any as MetaModelWithType);
+    result += typeFromMetaModel(prop);
     if (prop.isArray) {
         result += '[]';
     }
     result += ` ${prop.name}`;
-    result += modifiersFromMetaModel(prop as any as MetaModelWithValidator);
+    result += modifiersFromMetaModel(prop);
     if (prop.isOptional) {
         result += ' optional';
     }
@@ -355,12 +287,12 @@ function propertyFromMetaModel(prop: Property): string {
 }
 
 /**
- * Create map string from a metamodel
+ * Create map type string from a metamodel map
  *
  * @param {object} entry - the map metamodel object
  * @return {string} the string for the map
  */
-function mapFromMetaModel(entry: MapEntry): string {
+function mapFromMetaModel(entry: any): string {
     let result = '';
     if (entry.decorators) {
         result += decoratorsFromMetaModel(entry.decorators, '  ');
@@ -370,7 +302,7 @@ function mapFromMetaModel(entry: MapEntry): string {
     } else {
         result += 'o';
     }
-    result += typeFromMetaModel(entry as any as MetaModelWithType);
+    result += typeFromMetaModel(entry);
     return result;
 }
 
@@ -380,7 +312,7 @@ function mapFromMetaModel(entry: MapEntry): string {
  * @param {object} mm - the declaration metamodel object
  * @return {string} the string for the declaration
  */
-function declFromMetaModel(mm: Declaration): string {
+function declFromMetaModel(mm: IDeclaration): string {
     let result = '';
 
     if (mm.decorators) {
@@ -393,18 +325,18 @@ function declFromMetaModel(mm: Declaration): string {
         result += modifiersFromMetaModel(mm);
     } else if (isMap(mm)) {
         result += `map ${mm.name} {`;
-        if (mm.keyType && mm.valueType) {
-            const mapEntry = {
-                $class: '',
-                key: mm.keyType,
-                value: mm.valueType,
-                decorators: undefined
-            };
-            result += `\n  ${mapFromMetaModel(mapEntry)}`;
+        const mapDecl = mm as unknown as IMapDeclaration;
+        if (mapDecl.key && mapDecl.value) {
+            // Output key type
+            result += `\n  ${mapFromMetaModel(mapDecl.key)}`;
+            
+            // Output value type
+            result += `\n  ${mapFromMetaModel(mapDecl.value)}`;
         }
         result += '\n}';
     } else {
-        if (mm.isAbstract) {
+        const conceptDecl = mm as unknown as IConceptDeclaration;
+        if (conceptDecl.isAbstract) {
             result += 'abstract ';
         }
         switch (mm.$class) {
@@ -427,22 +359,30 @@ function declFromMetaModel(mm: Declaration): string {
             result += `enum ${mm.name} `;
             break;
         }
-        if (mm.isIdentified) {
-            if (mm.identifierFieldName) {
-                result += `identified by ${mm.identifierFieldName} `;
+        
+        // Handle identified
+        if (conceptDecl.identified) {
+            if (conceptDecl.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
+                const identifiedBy = conceptDecl.identified as any;
+                result += `identified by ${identifiedBy.name} `;
             } else {
                 result += 'identified ';
             }
         }
-        if (mm.superType) {
-            if (mm.superType.name === mm.name) {
+        
+        // Handle supertype
+        if (conceptDecl.superType) {
+            if (conceptDecl.superType.name === mm.name) {
                 throw new Error(`The declaration "${mm.name}" cannot extend itself.`);
             }
-            result += `extends ${mm.superType.name} `;
+            result += `extends ${conceptDecl.superType.name} `;
         }
+        
         result += '{';
-        if (mm.properties) {
-            mm.properties.forEach((property) => {
+        
+        // Handle properties
+        if (conceptDecl.properties) {
+            conceptDecl.properties.forEach((property) => {
                 result += `\n  ${propertyFromMetaModel(property)}`;
             });
         }
@@ -458,7 +398,7 @@ function declFromMetaModel(mm: Declaration): string {
  * @param {*} metaModel - the metamodel instance
  * @return {string} the CTO model as a string
  */
-function toCTO(metaModel: MetaModel): string {
+function toCTO(metaModel: IModel): string {
     let result = '';
 
     // version
@@ -480,25 +420,28 @@ function toCTO(metaModel: MetaModel): string {
         metaModel.imports.forEach((imp) => {
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportType`:
-            case `${MetaModelNamespace}.ImportTypeFrom`:
-                result += `\nimport ${imp.namespace}.${imp.name}`;
+            case `${MetaModelNamespace}.ImportTypeFrom`: {
+                const typedImport = imp as any;
+                result += `\nimport ${imp.namespace}.${typedImport.name}`;
                 break;
+            }
             case `${MetaModelNamespace}.ImportAll`:
             case `${MetaModelNamespace}.ImportAllFrom`:
                 result += `\nimport ${imp.namespace}.*`;
                 break;
             case `${MetaModelNamespace}.ImportTypes`: {
-                const aliasedTypes = imp.aliasedTypes
+                const typesImport = imp as unknown as IImportTypes;
+                const aliasedTypes = (typesImport as any).aliasedTypes
                     ? new Map(
-                        imp.aliasedTypes.map(({ name, aliasedName }) => [
-                            name,
-                            aliasedName,
+                        (typesImport as any).aliasedTypes.map((aliasedType: any) => [
+                            aliasedType.name,
+                            aliasedType.aliasedName,
                         ])
                     )
                     : new Map();
-                const commaSeparatedTypesString = imp.types
-                    ? imp.types
-                        .map((type) =>
+                const commaSeparatedTypesString = typesImport.types
+                    ? typesImport.types
+                        .map((type: string) =>
                             aliasedTypes.has(type)
                                 ? `${type} as ${aliasedTypes.get(type)}`
                                 : type
