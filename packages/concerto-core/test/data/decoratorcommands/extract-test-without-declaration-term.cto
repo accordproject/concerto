@@ -23,6 +23,8 @@ map mapName {
     @Term_desc("some key description")
     @deco(1)
     o String
+    @Term("some value")
+    @Term_desc("some value description")
     o String
 }
 
