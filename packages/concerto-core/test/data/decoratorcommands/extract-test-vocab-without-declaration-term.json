@@ -1,0 +1,1 @@
+["locale: en\nnamespace: test@1.0.0\ndeclarations:\n  - mapName: mapName\n    properties:\n      - KEY: some key\n        desc: some key description\n  - Person: Person\n    desc: Person Class Description\n    properties:\n      - firstName: HI\n      - bio: some\n        cus: con\n"]

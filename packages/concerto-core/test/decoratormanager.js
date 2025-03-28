@@ -778,6 +778,20 @@ describe('DecoratorManager', () => {
             vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
             vocab[0].should.not.include('custom');
         });
+        it('should be able to extract vocabs from a model without Declaration Term ', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-without-declaration-term.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-without-declaration-term.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
         it('should be able to extract vocabs from a model with terms for namespace', async function() {
             const testModelManager = new ModelManager({strict:true,});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-term.cto'), 'utf-8');
