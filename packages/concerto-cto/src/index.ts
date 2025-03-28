@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Concerto CTO concrete syntax module. Concerto is a framework for defining domain
  * specific models.
@@ -22,18 +20,18 @@
  */
 
 // Exceptions
-const ParseException = require('./parseexception');
+import ParseException = require('./parseexception');
 
 // Parser
-const Parser = require('./parserMain');
+import Parser = require('./parserMain');
 
 // Printer
-const Printer = require('./printer');
+import Printer = require('./printer');
 
 // External models resolution
-const External = require('./external');
+import External = require('./external');
 
-module.exports = {
+export {
     ParseException,
     Parser,
     Printer,

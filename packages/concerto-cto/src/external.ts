@@ -12,16 +12,25 @@
  * limitations under the License.
  */
 
-'use strict';
+import debug from 'debug';
+import * as pathBrowserify from 'path-browserify';
+const { DefaultFileLoader, FileDownloader } = require('@accordproject/concerto-util');
+import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { IModel, IModels } from '@accordproject/concerto-types';
 
-const path = require('path');
+import Parser = require('./parser');
 
-const { DefaultFileLoader, FileDownloader }  = require('@accordproject/concerto-util');
+const debugLog = debug('concerto:ModelManager');
 
-const debug = require('debug')('concerto:ModelManager');
+interface Model {
+    namespace: string;
+    [key: string]: any;
+}
 
-const Parser = require('./parser');
-const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+interface Models {
+    $class: string;
+    models: Model[];
+}
 
 /**
  * Update models with a new model
@@ -29,15 +38,15 @@ const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-m
  * @param {*} newModel - new model
  * @return {*} the updated models
  */
-function updateModels(models, newModel) {
-    const result = {
+function updateModels(models: Models, newModel: Model): Models {
+    const result: Models = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
     const newNamespace = newModel.namespace;
     const priors = models.models;
     let found = false;
-    priors.forEach((priorModel, index) => {
+    priors.forEach((priorModel) => {
         if (priorModel.namespace === newNamespace) {
             result.models.push(newModel);
             found = true;
@@ -60,16 +69,16 @@ function updateModels(models, newModel) {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-async function resolveExternal(models, options, fileDownloader) {
+async function resolveExternal(models: Models, options?: any, fileDownloader?: typeof FileDownloader): Promise<Models> {
     const NAME = 'updateExternalModels';
-    debug(NAME, 'updateExternalModels', options);
+    debugLog(NAME, 'updateExternalModels', options);
 
     if(!fileDownloader) {
         // How to create a modelfile from the external content
-        const processFile = (name, data) => {
+        const processFile = (name: string, data: any): any => {
             // Note: JSON URLs seem to be already parsed in 'data'
             // return { ast: data, data, name };
-            if (path.extname(name) === '.cto') {
+            if (pathBrowserify.extname(name) === '.cto') {
                 return Parser.parse(data);
             }
             throw new Error('External model file references are expected to have a .cto extension');
@@ -80,13 +89,13 @@ async function resolveExternal(models, options, fileDownloader) {
     const externalModelFiles = await fileDownloader.downloadExternalDependencies(models.models, options);
 
     let result = models;
-    externalModelFiles.forEach((mf) => {
+    externalModelFiles.forEach((mf: Model) => {
         result = updateModels(result, mf);
     });
 
     return result;
 }
 
-module.exports = {
+export = {
     resolveExternal,
-};
+}; 

@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 const { BaseFileException } = require('@accordproject/concerto-util');
 
 /**
@@ -28,12 +26,23 @@ class ParseException extends BaseFileException {
     /**
      * Create an ParseException
      * @param {string} message - the message for the exception
-     * @param {string} [fileLocation] - the file location associated with the exception
+     * @param {string | object} [fileLocation] - the file location associated with the exception
      * @param {string} [fileName] - the file name associated with the exception
      * @param {string} [fullMessageOverride] - the pre-existing full message
      * @param {string} [component] - the component which throws this error
      */
-    constructor(message, fileLocation, fileName, fullMessageOverride, component) {
+    constructor(message: string, fileLocation?: {
+        start: {
+            line: number;
+            column: number;
+            offset: number;
+        };
+        end?: {
+            line: number;
+            column: number;
+            offset: number;
+        };
+    }, fileName?: string, fullMessageOverride?: string, component?: string) {
         let fullMessage = message;
         let suffix = '';
 
@@ -66,4 +75,4 @@ class ParseException extends BaseFileException {
     }
 }
 
-module.exports = ParseException;
+export = ParseException; 

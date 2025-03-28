@@ -1,11 +1,12 @@
 {
   "devDependencies": {
+    "@types/path-browserify": "^1.0.3",
     "colors": "1.4.0",
     "coveralls": "3.1.0",
     "dayjs": "1.11.10",
     "eslint": "8.2.0",
-    "jsdoc": "^4.0.2",
     "glob": "^7.2.0",
+    "jsdoc": "^4.0.2",
     "lerna": "^5.6.2",
     "license-check-and-add": "2.3.6",
     "nyc": "15.1.0",
@@ -27,12 +28,12 @@
     "build": "npm run build --workspaces --if-present"
   },
   "workspaces": [
-      "./packages/concerto-util",
-      "./packages/concerto-cto",
-      "./packages/concerto-core",
-      "./packages/concerto-types",
-      "./packages/concerto-vocabulary",
-      "./packages/concerto-analysis"
+    "./packages/concerto-util",
+    "./packages/concerto-cto",
+    "./packages/concerto-core",
+    "./packages/concerto-types",
+    "./packages/concerto-vocabulary",
+    "./packages/concerto-analysis"
   ],
   "repository": {
     "type": "git",
