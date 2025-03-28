@@ -16,7 +16,6 @@
 
 const ModelManager = require('./modelmanager');
 const ModelUtil = require('./modelutil');
-const DecoratorManager = require('./decoratormanager');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
@@ -398,7 +397,7 @@ class DecoratorExtractor {
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
                     if (isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                        vocabObject = DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)? this.parseVocabulariesV2(vocabObject, obj, dcs) : this.parseVocabularies(vocabObject, obj, dcs);
+                        vocabObject = this.enableDcsNamespaceTarget ? this.parseVocabulariesV2(vocabObject, obj, dcs) : this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
             });
@@ -406,7 +405,7 @@ class DecoratorExtractor {
                 decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
             }
             if(this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                vocabData = DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)? this.transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData) : this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
+                vocabData = this.enableDcsNamespaceTarget ? this.transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData) : this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
             }
         });
         return {

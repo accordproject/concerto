@@ -785,7 +785,8 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
                 removeDecoratorsFromModel:true,
-                locale:'en'
+                locale:'en',
+                enableDcsNamespaceTarget:true
             };
             const resp = DecoratorManager.extractVocabularies( testModelManager, options);
             const vocab = resp.vocabularies;
@@ -799,7 +800,8 @@ describe('DecoratorManager', () => {
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
                 removeDecoratorsFromModel:true,
-                locale:'en'
+                locale:'en',
+                enableDcsNamespaceTarget:true
             };
             const resp = DecoratorManager.extractVocabularies( testModelManager, options);
             const vocab = resp.vocabularies;
