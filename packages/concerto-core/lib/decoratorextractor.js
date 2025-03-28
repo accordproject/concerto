@@ -16,6 +16,7 @@
 
 const ModelManager = require('./modelmanager');
 const ModelUtil = require('./modelutil');
+const DecoratorManager = require('./decoratormanager');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
@@ -42,11 +43,13 @@ class DecoratorExtractor {
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
+     * @param {boolean} enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL) {
+    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, enableDcsNamespaceTarget) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
+        this.enableDcsNamespaceTarget = enableDcsNamespaceTarget;
         this.dcs_version = dcs_version;
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;
@@ -119,6 +122,52 @@ class DecoratorExtractor {
      * @private
      */
     transformVocabularyDecorators(vocabObject, namespace, vocabData){
+        if (Object.keys(vocabObject).length > 0 ){
+            let strVoc = '';
+            strVoc = strVoc + `locale: ${this.locale}\n`;
+            strVoc = strVoc + `namespace: ${namespace}\n`;
+            strVoc = strVoc + 'declarations:\n';
+            Object.keys(vocabObject).forEach(decl =>{
+                if (vocabObject[decl].term){
+                    strVoc += `  - ${decl}: ${vocabObject[decl].term}\n`;
+                }
+                const otherProps = Object.keys(vocabObject[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
+                if(otherProps.length > 0){
+                    if (!vocabObject[decl].term){
+                        strVoc += `  - ${decl}: ${decl}\n`;
+                    }
+                    otherProps.forEach(key =>{
+                        strVoc += `    ${key}: ${vocabObject[decl][key]}\n`;
+                    });
+                }
+                if (vocabObject[decl].propertyVocabs && Object.keys(vocabObject[decl].propertyVocabs).length > 0){
+                    if (!vocabObject[decl].term && otherProps.length === 0){
+                        strVoc += `  - ${decl}: ${decl}\n`;
+                    }
+                    strVoc += '    properties:\n';
+                    Object.keys(vocabObject[decl].propertyVocabs).forEach(prop =>{
+                        strVoc += `      - ${prop}: ${vocabObject[decl].propertyVocabs[prop].term || ''}\n`;
+                        const otherProps = Object.keys(vocabObject[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
+                        otherProps.forEach(key =>{
+                            strVoc += `        ${key}: ${vocabObject[decl].propertyVocabs[prop][key]}\n`;
+                        });
+                    });
+                }
+            });
+            vocabData.push(strVoc);
+        }
+        return vocabData;
+    }
+    /**
+     * Transforms the collected vocabularies into proper vocabulary command sets
+     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
+     * @returns {Array<Object>} - the collection of vocabularies command sets
+     * @private
+     */
+    transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData){
         if (Object.keys(vocabObject).length > 0 ){
             let strVoc = '';
             strVoc = strVoc + `locale: ${this.locale}\n`;
@@ -227,13 +276,57 @@ class DecoratorExtractor {
         return dcsObjects;
     }
     /**
+     * @param {Object} dictVoc - the collection of collected vocabularies
+     * @param {Object} decl - the declaration object
+     * @param {Object} dcs - the current dcs json to be parsed
+     * @returns {Object} - the collection of collected vocabularies with current dcs
+     * @private
+     */
+    parseVocabularies(dictVoc, decl, dcs){
+        dictVoc[decl.declaration] = dictVoc[decl.declaration] || { propertyVocabs: {} };
+        if (decl.property !== ''){
+            if (!dictVoc[decl.declaration].propertyVocabs[decl.property]){
+                dictVoc[decl.declaration].propertyVocabs[decl.property] = {};
+            }
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].propertyVocabs[decl.property].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration].propertyVocabs[decl.property][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        else if (decl.mapElement !== ''){
+            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
+            }
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        else {
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        return dictVoc;
+    }
+    /**
      * @param {Object} vocabObject - the collection of collected vocabularies
      * @param {Object} vocabTarget - the declaration object
      * @param {Object} dcs - the current dcs json to be parsed
      * @returns {Object} - the collection of collected vocabularies with current dcs
      * @private
      */
-    parseVocabularies(vocabObject, vocabTarget, dcs){
+    parseVocabulariesV2(vocabObject, vocabTarget, dcs){
         //If the vocabTarget declaration is empty, then it is a namespace level vocabulary
         if(vocabTarget.declaration === ''){
             vocabObject.namespace = vocabObject.namespace || {};
@@ -305,7 +398,7 @@ class DecoratorExtractor {
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
                     if (isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                        vocabObject = this.parseVocabularies(vocabObject, obj, dcs);
+                        vocabObject = DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)? this.parseVocabulariesV2(vocabObject, obj, dcs) : this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
             });
@@ -313,7 +406,7 @@ class DecoratorExtractor {
                 decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
             }
             if(this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                vocabData = this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
+                vocabData = DecoratorManager.isNamespaceTargetEnabled(this.enableDcsNamespaceTarget)? this.transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData) : this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
             }
         });
         return {
