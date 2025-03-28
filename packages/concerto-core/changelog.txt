@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.20.5 {811a8e795811c539a5f27fb4bed69826} 2025-02-03
+Version 3.20.5 {3be18f4d17eb0e65e9a9ffc369231bf6} 2025-02-03
 - vocabulary support for namespace scoped decorators
 
 Version 3.20.4 {335406876b7005f0a2e6f9ca3e0d0dbf} 2025-01-21
