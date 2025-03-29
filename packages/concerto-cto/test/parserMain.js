@@ -61,8 +61,27 @@ describe('parser', () => {
             {
                 $class: 'concerto.metamodel@1.0.0.Models',
                 models: getCTOFiles().map(({ ast }) => JSON.parse(ast)),
+                errors: [],
             }
         );
+    });
+
+    it('Should handle errors in multiple files', () => {
+        const files = [
+            getCTOFiles()[0].content, // Valid (file_0)
+            'namespace invalid\nconcept Bad { o String bad', // Invalid (file_1)
+            getCTOFiles()[1].content, // Valid (file_2)
+        ];
+        try {
+            Parser.parseModels(files, { skipLocationNodes: true });
+            should.fail('Expected an error to be thrown');
+        } catch (err) {
+            err.message.should.match(/Parsing errors occurred in 1 files: Error in file_1: .+/);
+            err.errors.length.should.equal(1);
+            err.errors[0].file.should.equal('file_1');
+            err.errors[0].message.should.match(/Expected .+ but/);
+            should.exist(err.errors[0].location);
+        }
     });
 
     describe('maps', () => {
