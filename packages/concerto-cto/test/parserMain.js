@@ -72,12 +72,16 @@ describe('parser', () => {
             'namespace invalid\nconcept Bad { o String bad', // Invalid (file_1)
             getCTOFiles()[1].content, // Valid (file_2)
         ];
-        const mm = Parser.parseModels(files, { skipLocationNodes: true });
-        mm.models.length.should.equal(2);
-        mm.errors.length.should.equal(1);
-        mm.errors[0].file.should.equal('file_1');
-        mm.errors[0].message.should.match(/Expected .+ but/);
-        mm.errors[0].location.should.exist; // Now correctly checks `fileLocation`
+        try {
+            Parser.parseModels(files, { skipLocationNodes: true });
+            should.fail('Expected an error to be thrown');
+        } catch (err) {
+            err.message.should.match(/Parsing errors occurred in 1 files: Error in file_1: .+/);
+            err.errors.length.should.equal(1);
+            err.errors[0].file.should.equal('file_1');
+            err.errors[0].message.should.match(/Expected .+ but/);
+            should.exist(err.errors[0].location);
+        }
     });
 
     describe('maps', () => {

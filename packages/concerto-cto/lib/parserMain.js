@@ -75,6 +75,12 @@ function parseModels(files, options) {
             result.errors.push(errorDetails);
         }
     });
+    if (result.errors.length > 0) {
+        const errorMessages = result.errors.map(e=> `Error in ${e.file}: ${e.message}`).join('; ');
+        const aggregateError = new Error(`Parsing errors occurred in ${result.errors.length} files: ${errorMessages}`);
+        aggregateError.errors = result.errors; // individual errors
+        throw aggregateError;
+    }
     return result;
 }
 
