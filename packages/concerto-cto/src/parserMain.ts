@@ -51,7 +51,7 @@ function parse(cto: string, fileName?: string, options?: ParseOptions): any {
  * @return {IModels} the AST / metamodel
  */
 function parseModels(files: string[], options?: ParseOptions): IModels {
-    const result: { $class: string; models: any[] } = {
+    const result: IModels = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
     };

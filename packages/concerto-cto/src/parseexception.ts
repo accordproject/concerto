@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+// @ts-ignore
 const { BaseFileException } = require('@accordproject/concerto-util');
 
 /**
@@ -22,7 +23,7 @@ const { BaseFileException } = require('@accordproject/concerto-util');
  * @memberof module:concerto-core
  * @private
  */
-class ParseException extends BaseFileException {
+class ParseException extends (BaseFileException as any) {
     /**
      * Create an ParseException
      * @param {string} message - the message for the exception

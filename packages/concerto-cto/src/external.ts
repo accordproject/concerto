@@ -22,24 +22,14 @@ import Parser = require('./parser');
 
 const debugLog = debug('concerto:ModelManager');
 
-interface Model {
-    namespace: string;
-    [key: string]: any;
-}
-
-interface Models {
-    $class: string;
-    models: Model[];
-}
-
 /**
  * Update models with a new model
  * @param {*} models - existing models
  * @param {*} newModel - new model
  * @return {*} the updated models
  */
-function updateModels(models: Models, newModel: Model): Models {
-    const result: Models = {
+function updateModels(models: IModels, newModel: IModel): IModels {
+    const result: IModels = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
@@ -69,33 +59,41 @@ function updateModels(models: Models, newModel: Model): Models {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-async function resolveExternal(models: Models, options?: any, fileDownloader?: typeof FileDownloader): Promise<Models> {
+async function resolveExternal(models: IModels, options?: any, fileDownloader?: any): Promise<IModels> {
     const NAME = 'updateExternalModels';
     debugLog(NAME, 'updateExternalModels', options);
 
-    if(!fileDownloader) {
-        // How to create a modelfile from the external content
-        const processFile = (name: string, data: any): any => {
-            // Note: JSON URLs seem to be already parsed in 'data'
-            // return { ast: data, data, name };
-            if (pathBrowserify.extname(name) === '.cto') {
-                return Parser.parse(data);
-            }
-            throw new Error('External model file references are expected to have a .cto extension');
-        };
-        fileDownloader = new FileDownloader(new DefaultFileLoader(processFile), MetaModelUtil.getExternalImports);
-    }
-
-    const externalModelFiles = await fileDownloader.downloadExternalDependencies(models.models, options);
+    // Create default file downloader if none provided
+    const downloader = fileDownloader || createDefaultFileDownloader();
+    
+    const externalModelFiles = await downloader.downloadExternalDependencies(models.models, options);
 
     let result = models;
-    externalModelFiles.forEach((mf: Model) => {
+    externalModelFiles.forEach((mf: IModel) => {
         result = updateModels(result, mf);
     });
 
     return result;
 }
 
+/**
+ * Creates a default file downloader
+ * @return {FileDownloader} a default file downloader instance
+ */
+function createDefaultFileDownloader(): any {
+    // How to create a modelfile from the external content
+    const processFile = (name: string, data: any): any => {
+        // Note: JSON URLs seem to be already parsed in 'data'
+        // return { ast: data, data, name };
+        if (pathBrowserify.extname(name) === '.cto') {
+            return Parser.parse(data);
+        }
+        throw new Error('External model file references are expected to have a .cto extension');
+    };
+    return new FileDownloader(new DefaultFileLoader(processFile), MetaModelUtil.getExternalImports);
+}
+
 export = {
     resolveExternal,
+    createDefaultFileDownloader,
 }; 

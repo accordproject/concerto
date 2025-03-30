@@ -382,7 +382,7 @@ function declFromMetaModel(mm: IDeclaration): string {
         
         // Handle properties
         if (conceptDecl.properties) {
-            conceptDecl.properties.forEach((property) => {
+            conceptDecl.properties.forEach((property: IProperty) => {
                 result += `\n  ${propertyFromMetaModel(property)}`;
             });
         }
@@ -417,7 +417,7 @@ function toCTO(metaModel: IModel): string {
     // imports
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';
-        metaModel.imports.forEach((imp) => {
+        metaModel.imports.forEach((imp: IImport) => {
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportType`:
             case `${MetaModelNamespace}.ImportTypeFrom`: {
@@ -462,7 +462,7 @@ function toCTO(metaModel: IModel): string {
 
     // declarations
     if (metaModel.declarations && metaModel.declarations.length > 0) {
-        metaModel.declarations.forEach((decl) => {
+        metaModel.declarations.forEach((decl: IDeclaration) => {
             result += `\n\n${declFromMetaModel(decl)}`;
         });
     }
