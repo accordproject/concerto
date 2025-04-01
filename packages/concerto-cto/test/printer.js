@@ -88,4 +88,39 @@ describe('parser', () => {
             ]
         })).should.throw(Error, 'The declaration "Self_Extending" cannot extend itself.');
     });
+
+    it('Should handle ImportTypes with aliased types', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: ['Person', 'Address'],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' },
+                    { name: 'Address', aliasedName: 'Location' }
+                ],
+                uri: 'https://example.org/models/example.cto'
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.{Person as Individual,Address as Location}');
+        result.should.include('from https://example.org/models/example.cto');
+    });
+
+    it('Should handle ImportAll type', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                namespace: 'org.example@1.0.0',
+                uri: 'https://example.org/models/example.cto'
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.*');
+        result.should.include('from https://example.org/models/example.cto');
+    });
 });
