@@ -22,10 +22,13 @@ import {
     IMapDeclaration,
     IModel,
     IProperty,
-    IRelationshipProperty,
     IImport,
     IImportTypes,
-    IConceptDeclaration
+    IConceptDeclaration,
+    IIdentifiedBy,
+    IImportType,
+    IDecoratorBoolean,
+    IDecoratorNumber
 } from '@accordproject/concerto-types';
 
 /**
@@ -61,18 +64,17 @@ function isScalar(mm: IDeclaration): boolean {
 function decoratorArgFromMetaModel(mm: IDecoratorLiteral): string {
     let result = '';
     switch (mm.$class) {
-    case `${MetaModelNamespace}.DecoratorTypeReference`:
-        const typeRef = mm as unknown as IDecoratorTypeReference;
-        result += `${typeRef.type?.name}${typeRef.isArray ? '[]' : ''}`;
-        break;
-    case `${MetaModelNamespace}.DecoratorString`:
-        const strRef = mm as unknown as IDecoratorString;
-        result += `"${strRef.value}"`;
-        break;
-    default:
-        // For other types, we assume they have a value property
-        result += `${(mm as any).value}`;
-        break;
+        case `${MetaModelNamespace}.DecoratorTypeReference`:
+            const typeRef = mm as IDecoratorTypeReference;
+            result += `${typeRef.type.name}${!!typeRef.isArray ? '[]' : ''}`;
+            break;
+        case `${MetaModelNamespace}.DecoratorString`:
+            const strRef = mm as IDecoratorString;
+            result += `"${strRef.value}"`;
+            break;
+        default:
+            result += `${(mm as (IDecoratorNumber | IDecoratorBoolean)).value}`;
+            break;
     }
     return result;
 }
@@ -115,53 +117,49 @@ function decoratorsFromMetaModel(mm: IDecorator[], prefix: string): string {
 function typeFromMetaModel(mm: any): string {
     let result = '';
     switch (mm.$class) {
-    case `${MetaModelNamespace}.EnumProperty`:
-        break;
-    case `${MetaModelNamespace}.BooleanScalar`:
-    case `${MetaModelNamespace}.BooleanProperty`:
-    case `${MetaModelNamespace}.BooleanMapValueType`:
-        result += ' Boolean';
-        break;
-    case `${MetaModelNamespace}.DateTimeProperty`:
-    case `${MetaModelNamespace}.DateTimeScalar`:
-    case `${MetaModelNamespace}.DateTimeMapKeyType`:
-    case `${MetaModelNamespace}.DateTimeMapValueType`:
-        result += ' DateTime';
-        break;
-    case `${MetaModelNamespace}.DoubleProperty`:
-    case `${MetaModelNamespace}.DoubleScalar`:
-    case `${MetaModelNamespace}.DoubleMapValueType`:
-        result += ' Double';
-        break;
-    case `${MetaModelNamespace}.IntegerProperty`:
-    case `${MetaModelNamespace}.IntegerScalar`:
-    case `${MetaModelNamespace}.IntegerMapValueType`:
-        result += ' Integer';
-        break;
-    case `${MetaModelNamespace}.LongProperty`:
-    case `${MetaModelNamespace}.LongScalar`:
-    case `${MetaModelNamespace}.LongMapValueType`:
-        result += ' Long';
-        break;
-    case `${MetaModelNamespace}.StringProperty`:
-    case `${MetaModelNamespace}.StringScalar`:
-    case `${MetaModelNamespace}.StringMapKeyType`:
-    case `${MetaModelNamespace}.StringMapValueType`:
-        result += ' String';
-        break;
-    case `${MetaModelNamespace}.ObjectProperty`:
-    case `${MetaModelNamespace}.ObjectMapKeyType`:
-    case `${MetaModelNamespace}.ObjectMapValueType`:
-        if (mm.type) {
+        case `${MetaModelNamespace}.EnumProperty`:
+            break;
+        case `${MetaModelNamespace}.BooleanScalar`:
+        case `${MetaModelNamespace}.BooleanProperty`:
+        case `${MetaModelNamespace}.BooleanMapValueType`:
+            result += ' Boolean';
+            break;
+        case `${MetaModelNamespace}.DateTimeProperty`:
+        case `${MetaModelNamespace}.DateTimeScalar`:
+        case `${MetaModelNamespace}.DateTimeMapKeyType`:
+        case `${MetaModelNamespace}.DateTimeMapValueType`:
+            result += ' DateTime';
+            break;
+        case `${MetaModelNamespace}.DoubleProperty`:
+        case `${MetaModelNamespace}.DoubleScalar`:
+        case `${MetaModelNamespace}.DoubleMapValueType`:
+            result += ' Double';
+            break;
+        case `${MetaModelNamespace}.IntegerProperty`:
+        case `${MetaModelNamespace}.IntegerScalar`:
+        case `${MetaModelNamespace}.IntegerMapValueType`:
+            result += ' Integer';
+            break;
+        case `${MetaModelNamespace}.LongProperty`:
+        case `${MetaModelNamespace}.LongScalar`:
+        case `${MetaModelNamespace}.LongMapValueType`:
+            result += ' Long';
+            break;
+        case `${MetaModelNamespace}.StringProperty`:
+        case `${MetaModelNamespace}.StringScalar`:
+        case `${MetaModelNamespace}.StringMapKeyType`:
+        case `${MetaModelNamespace}.StringMapValueType`:
+            result += ' String';
+            break;
+        case `${MetaModelNamespace}.ObjectProperty`:
+        case `${MetaModelNamespace}.ObjectMapKeyType`:
+        case `${MetaModelNamespace}.ObjectMapValueType`:
             result += ` ${mm.type.name}`;
-        }
-        break;
-    case `${MetaModelNamespace}.RelationshipProperty`:
-    case `${MetaModelNamespace}.RelationshipMapValueType`:
-        if (mm.type) {
+            break;
+        case `${MetaModelNamespace}.RelationshipProperty`:
+        case `${MetaModelNamespace}.RelationshipMapValueType`:
             result += ` ${mm.type.name}`;
-        }
-        break;
+            break;
     }
     return result;
 }
@@ -178,81 +176,79 @@ function modifiersFromMetaModel(mm: any): string {
     let validatorString = '';
 
     switch (mm.$class) {
-    case `${MetaModelNamespace}.EnumProperty`:
-        break;
-    case `${MetaModelNamespace}.BooleanProperty`:
-    case `${MetaModelNamespace}.BooleanScalar`:
-        if (mm.defaultValue === true || mm.defaultValue === false) {
-            if (mm.defaultValue) {
-                defaultString += ' default=true';
-            } else {
-                defaultString += ' default=false';
+        case `${MetaModelNamespace}.EnumProperty`:
+            break;
+        case `${MetaModelNamespace}.BooleanProperty`:
+        case `${MetaModelNamespace}.BooleanScalar`:
+            if (mm.defaultValue === true || mm.defaultValue === false) {
+                if (mm.defaultValue) {
+                    defaultString += ' default=true';
+                } else {
+                    defaultString += ' default=false';
+                }
             }
-        }
-        break;
-    case `${MetaModelNamespace}.DateTimeProperty`:
-    case `${MetaModelNamespace}.DateTimeScalar`:
-        if (mm.defaultValue) {
-            defaultString += ` default="${mm.defaultValue}"`;
-        }
-        break;
-    case `${MetaModelNamespace}.DoubleProperty`:
-    case `${MetaModelNamespace}.DoubleScalar`:
-        if (mm.defaultValue !== undefined) {
-            const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
-            defaultString += ` default=${doubleString}`;
-        }
-        if (mm.validator) {
-            const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-            const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
-            validatorString += ` range=[${lowerString},${upperString}]`;
-        }
-        break;
-    case `${MetaModelNamespace}.IntegerProperty`:
-    case `${MetaModelNamespace}.IntegerScalar`:
-        if (mm.defaultValue !== undefined) {
-            defaultString += ` default=${mm.defaultValue.toString()}`;
-        }
-        if (mm.validator) {
-            const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-            const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
-            validatorString += ` range=[${lowerString},${upperString}]`;
-        }
-        break;
-    case `${MetaModelNamespace}.LongProperty`:
-    case `${MetaModelNamespace}.LongScalar`:
-        if (mm.defaultValue !== undefined) {
-            defaultString += ` default=${mm.defaultValue.toString()}`;
-        }
-        if (mm.validator) {
-            const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-            const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
-            validatorString += ` range=[${lowerString},${upperString}]`;
-        }
-        break;
-    case `${MetaModelNamespace}.StringProperty`:
-    case `${MetaModelNamespace}.StringScalar`:
-        if (mm.defaultValue) {
-            defaultString += ` default="${mm.defaultValue}"`;
-        }
-        if (mm.validator) {
-            if (mm.validator.pattern) {
+            break;
+        case `${MetaModelNamespace}.DateTimeProperty`:
+        case `${MetaModelNamespace}.DateTimeScalar`:
+            if (mm.defaultValue) {
+                defaultString += ` default="${mm.defaultValue}"`;
+            }
+            break;
+        case `${MetaModelNamespace}.DoubleProperty`:
+        case `${MetaModelNamespace}.DoubleScalar`:
+            if (mm.defaultValue !== undefined) {
+                const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
+                defaultString += ` default=${doubleString}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
+                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+                validatorString += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case `${MetaModelNamespace}.IntegerProperty`:
+        case `${MetaModelNamespace}.IntegerScalar`:
+            if (mm.defaultValue !== undefined) {
+                defaultString += ` default=${mm.defaultValue.toString()}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
+                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+                validatorString += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case `${MetaModelNamespace}.LongProperty`:
+        case `${MetaModelNamespace}.LongScalar`:
+            if (mm.defaultValue !== undefined) {
+                defaultString += ` default=${mm.defaultValue.toString()}`;
+            }
+            if (mm.validator) {
+                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
+                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+                validatorString += ` range=[${lowerString},${upperString}]`;
+            }
+            break;
+        case `${MetaModelNamespace}.StringProperty`:
+        case `${MetaModelNamespace}.StringScalar`:
+            if (mm.defaultValue) {
+                defaultString += ` default="${mm.defaultValue}"`;
+            }
+            if (mm.validator) {
                 validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags || ''}`;
             }
-        }
-        if (mm.lengthValidator) {
-            const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
-            const maxLength = mm.lengthValidator.maxLength !== undefined ? mm.lengthValidator.maxLength : '';
-            validatorString += ` length=[${minLength},${maxLength}]`;
-        }
-        break;
-    case `${MetaModelNamespace}.ObjectProperty`:
-        if (mm.defaultValue) {
-            defaultString += ` default="${mm.defaultValue}"`;
-        }
-        break;
+            if (mm.lengthValidator) {
+                const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
+                const maxLength = mm.lengthValidator.maxLength !== undefined ? mm.lengthValidator.maxLength : '';
+                validatorString += ` length=[${minLength},${maxLength}]`;
+            }
+            break;
+        case `${MetaModelNamespace}.ObjectProperty`:
+            if (mm.defaultValue) {
+                defaultString += ` default="${mm.defaultValue}"`;
+            }
+            break;
     }
-    
+
     return result + defaultString + validatorString;
 }
 
@@ -268,7 +264,7 @@ function propertyFromMetaModel(prop: IProperty): string {
     if (prop.decorators) {
         result += decoratorsFromMetaModel(prop.decorators, '  ');
     }
-    
+
     if (prop.$class === `${MetaModelNamespace}.RelationshipProperty`) {
         result += '-->';
     } else {
@@ -325,51 +321,46 @@ function declFromMetaModel(mm: IDeclaration): string {
         result += modifiersFromMetaModel(mm);
     } else if (isMap(mm)) {
         result += `map ${mm.name} {`;
-        const mapDecl = mm as unknown as IMapDeclaration;
-        if (mapDecl.key && mapDecl.value) {
-            // Output key type
-            result += `\n  ${mapFromMetaModel(mapDecl.key)}`;
-            
-            // Output value type
-            result += `\n  ${mapFromMetaModel(mapDecl.value)}`;
-        }
+        const mapDecl = mm as IMapDeclaration;
+        result += `\n  ${mapFromMetaModel(mapDecl.key)}`;
+        result += `\n  ${mapFromMetaModel(mapDecl.value)}`;
         result += '\n}';
     } else {
-        const conceptDecl = mm as unknown as IConceptDeclaration;
+        const conceptDecl = mm as IConceptDeclaration;
         if (conceptDecl.isAbstract) {
             result += 'abstract ';
         }
         switch (mm.$class) {
-        case `${MetaModelNamespace}.AssetDeclaration`:
-            result += `asset ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.ConceptDeclaration`:
-            result += `concept ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.EventDeclaration`:
-            result += `event ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.ParticipantDeclaration`:
-            result += `participant ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.TransactionDeclaration`:
-            result += `transaction ${mm.name} `;
-            break;
-        case `${MetaModelNamespace}.EnumDeclaration`:
-            result += `enum ${mm.name} `;
-            break;
+            case `${MetaModelNamespace}.AssetDeclaration`:
+                result += `asset ${mm.name} `;
+                break;
+            case `${MetaModelNamespace}.ConceptDeclaration`:
+                result += `concept ${mm.name} `;
+                break;
+            case `${MetaModelNamespace}.EventDeclaration`:
+                result += `event ${mm.name} `;
+                break;
+            case `${MetaModelNamespace}.ParticipantDeclaration`:
+                result += `participant ${mm.name} `;
+                break;
+            case `${MetaModelNamespace}.TransactionDeclaration`:
+                result += `transaction ${mm.name} `;
+                break;
+            case `${MetaModelNamespace}.EnumDeclaration`:
+                result += `enum ${mm.name} `;
+                break;
         }
-        
+
         // Handle identified
         if (conceptDecl.identified) {
             if (conceptDecl.identified.$class === `${MetaModelNamespace}.IdentifiedBy`) {
-                const identifiedBy = conceptDecl.identified as any;
+                const identifiedBy = conceptDecl.identified as IIdentifiedBy;
                 result += `identified by ${identifiedBy.name} `;
             } else {
                 result += 'identified ';
             }
         }
-        
+
         // Handle supertype
         if (conceptDecl.superType) {
             if (conceptDecl.superType.name === mm.name) {
@@ -377,15 +368,13 @@ function declFromMetaModel(mm: IDeclaration): string {
             }
             result += `extends ${conceptDecl.superType.name} `;
         }
-        
+
         result += '{';
-        
+
         // Handle properties
-        if (conceptDecl.properties) {
-            conceptDecl.properties.forEach((property: IProperty) => {
-                result += `\n  ${propertyFromMetaModel(property)}`;
-            });
-        }
+        conceptDecl.properties.forEach((property: IProperty) => {
+            result += `\n  ${propertyFromMetaModel(property)}`;
+        });
         result += '\n}';
     }
 
@@ -418,41 +407,39 @@ function toCTO(metaModel: IModel): string {
     if (metaModel.imports && metaModel.imports.length > 0) {
         result += '\n';
         metaModel.imports.forEach((imp: IImport) => {
-            switch(imp.$class) {
-            case `${MetaModelNamespace}.ImportType`:
-            case `${MetaModelNamespace}.ImportTypeFrom`: {
-                const typedImport = imp as any;
-                result += `\nimport ${imp.namespace}.${typedImport.name}`;
-                break;
-            }
-            case `${MetaModelNamespace}.ImportAll`:
-            case `${MetaModelNamespace}.ImportAllFrom`:
-                result += `\nimport ${imp.namespace}.*`;
-                break;
-            case `${MetaModelNamespace}.ImportTypes`: {
-                const typesImport = imp as unknown as IImportTypes;
-                const aliasedTypes = (typesImport as any).aliasedTypes
-                    ? new Map(
-                        (typesImport as any).aliasedTypes.map((aliasedType: any) => [
-                            aliasedType.name,
-                            aliasedType.aliasedName,
-                        ])
-                    )
-                    : new Map();
-                const commaSeparatedTypesString = typesImport.types
-                    ? typesImport.types
+            switch (imp.$class) {
+                case `${MetaModelNamespace}.ImportType`:
+                case `${MetaModelNamespace}.ImportTypeFrom`: {
+                    const typedImport = imp as IImportType;
+                    result += `\nimport ${imp.namespace}.${typedImport.name}`;
+                    break;
+                }
+                case `${MetaModelNamespace}.ImportAll`:
+                case `${MetaModelNamespace}.ImportAllFrom`:
+                    result += `\nimport ${imp.namespace}.*`;
+                    break;
+                case `${MetaModelNamespace}.ImportTypes`: {
+                    const typesImport = imp as IImportTypes;
+                    const aliasedTypes = typesImport.aliasedTypes
+                        ? new Map(
+                            typesImport.aliasedTypes.map((aliasedType: any) => [
+                                aliasedType.name,
+                                aliasedType.aliasedName,
+                            ])
+                        )
+                        : new Map();
+                    const commaSeparatedTypesString = typesImport.types
                         .map((type: string) =>
                             aliasedTypes.has(type)
                                 ? `${type} as ${aliasedTypes.get(type)}`
                                 : type
                         )
-                        .join(',')
-                    : '';
-                result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
-                break;
-            }
-            default:
-                throw new Error('Unrecognized import');
+                        .join(',');
+                    result += `\nimport ${imp.namespace}.{${commaSeparatedTypesString}}`;
+                    break;
+                }
+                default:
+                    throw new Error('Unrecognized import');
             }
             if (imp.uri) {
                 result += ` from ${imp.uri}`;
@@ -472,4 +459,4 @@ function toCTO(metaModel: IModel): string {
 
 export = {
     toCTO,
-}; 
+};

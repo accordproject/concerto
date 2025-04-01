@@ -44,6 +44,7 @@
     "@types/debug": "^4.1.12",
     "@types/jest": "28.1.1",
     "@types/node": "18.11.18",
+    "@types/path-browserify": "^1.0.3",
     "@types/semver": "7.3.10",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
@@ -134,7 +135,7 @@
     "all": true,
     "check-coverage": true,
     "statements": 100,
-    "branches": 98.85,
+    "branches": 100,
     "functions": 100,
     "lines": 100
   }
