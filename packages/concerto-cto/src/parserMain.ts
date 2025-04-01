@@ -12,12 +12,15 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { IModels } from '@accordproject/concerto-types';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import Parser = require('./parser');
+import ParseException = require('./parseexception');
 
-const Parser = require('./parser');
-const ParseException = require('./parseexception');
+interface ParseOptions {
+    skipLocationNodes?: boolean;
+}
 
 /**
  * Create a metamodel instance (i.e. JSON AST) object from a CTO string
@@ -27,10 +30,10 @@ const ParseException = require('./parseexception');
  * @param {boolean} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
  * @return {object} the metamodel instance for the cto argument
  */
-function parse(cto, fileName, options) {
+function parse(cto: string, fileName?: string, options?: ParseOptions): any {
     try {
         return Parser.parse(cto, options);
-    } catch(err) {
+    } catch(err: any) {
         if(err.location && err.location.start) {
             throw new ParseException(err.message, err.location, fileName);
         }
@@ -45,10 +48,10 @@ function parse(cto, fileName, options) {
  * @param {string[]} files - array of cto files
  * @param {Object} [options] - an optional options parameter
  * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
- * @return {*} the AST / metamodel
+ * @return {IModels} the AST / metamodel
  */
-function parseModels(files, options) {
-    const result = {
+function parseModels(files: string[], options?: ParseOptions): IModels {
+    const result: IModels = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
@@ -59,7 +62,7 @@ function parseModels(files, options) {
     return result;
 }
 
-module.exports = {
+export = {
     parse,
     parseModels,
-};
+}; 

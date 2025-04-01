@@ -42,6 +42,7 @@
     "@babel/preset-env": "7.16.11",
     "@istanbuljs/nyc-config-typescript": "1.0.2",
     "@types/jest": "28.1.1",
+    "@types/node": "18.11.18",
     "@types/semver": "7.3.10",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
