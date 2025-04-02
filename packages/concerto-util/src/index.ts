@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Concerto utility module. Concerto is a framework for defining domain
  * specific models.
@@ -22,54 +20,63 @@
  */
 
 // Exceptions
-const BaseException = require('./baseexception');
-const BaseFileException = require('./basefileexception');
-
-// Transitive closure downloader
-const FileDownloader = require('./filedownloader');
+import BaseException from './baseexception';
 
 // File Loaders
-const CompositeFileLoader = require('./loaders/compositefileloader');
-const DefaultFileLoader = require('./loaders/defaultfileloader');
-const GitHubFileLoader = require('./loaders/githubfileloader');
-const HTTPFileLoader = require('./loaders/httpfileloader');
+import CompositeFileLoader from './loaders/compositefileloader';
+import DefaultFileLoader from './loaders/defaultfileloader';
+import GitHubFileLoader from './loaders/githubfileloader';
+import HTTPFileLoader from './loaders/httpfileloader';
+
+// Transitive closure downloader
+import FileDownloader from './filedownloader';
 
 // Writers
-const Writer = require('./writer');
-const FileWriter = require('./filewriter');
-const ModelWriter = require('./modelwriter');
-const InMemoryWriter = require('./inmemorywriter');
+import FileWriter from './filewriter';
+import InMemoryWriter from './inmemorywriter';
+import { writeModelsToFileSystem } from './modelwriter';
+import Writer from './writer';
 
 // Logger
-const Logger = require('./logger');
+import Logger from './logger';
 
 // TypedStack
-const TypedStack = require('./typedstack');
+import TypedStack from './typedstack';
 
 // Label
-const Label = require('./label');
+import { labelToSentence, sentenceToLabel } from './label';
 
 // Identifiers
-const Identifiers = require('./identifiers');
+import { normalizeIdentifier, ID_REGEX } from './identifiers';
 
-//errorcodes
-const ErrorCodes = require('./errorcodes');
+// ErrorCodes
+import ErrorCodes from './errorcodes';
 
-module.exports = {
+// NullUtil
+import { isNull } from './null';
+
+// Warning
+import { printDeprecationWarning } from './warning';
+
+// Export all utilities as named exports
+export {
     BaseException,
-    BaseFileException,
-    FileDownloader,
     CompositeFileLoader,
     DefaultFileLoader,
     GitHubFileLoader,
     HTTPFileLoader,
-    Writer,
+    FileDownloader,
     FileWriter,
     InMemoryWriter,
-    ModelWriter,
+    writeModelsToFileSystem,
+    Writer,
     Logger,
     TypedStack,
-    Label,
-    Identifiers,
-    ErrorCodes
+    labelToSentence,
+    sentenceToLabel,
+    normalizeIdentifier,
+    ID_REGEX,
+    ErrorCodes,
+    isNull,
+    printDeprecationWarning,
 };

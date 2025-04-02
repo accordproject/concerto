@@ -12,21 +12,20 @@
  * limitations under the License.
  */
 
-'use strict';
-
-let path = require('path');
+const path = require('path');
 const webpack = require('webpack');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-
 const packageJson = require('./package.json');
 
 module.exports = {
+    mode: 'production',
+    target: 'web',
     entry: './dist/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-util.js',
         library: {
-            name: 'concerto-util',
+            name: 'ConcertoUtil',
             type: 'umd',
         },
     },
@@ -50,16 +49,12 @@ module.exports = {
             Buffer: ['buffer', 'Buffer'],
         }),
         new webpack.ProvidePlugin({
-            process: 'process/browser', // provide a shim for the global `process` variable
+            process: 'process/browser',
         }),
-        new NodePolyfillPlugin(),],
+        new NodePolyfillPlugin(),
+    ],
     module: {
         rules: [
-            {
-                test: /\.js$/,
-                include: [path.join(__dirname, 'lib')],
-                use: ['babel-loader']
-            },
             {
                 test: /\.ne$/,
                 use: ['raw-loader']
@@ -67,6 +62,7 @@ module.exports = {
         ]
     },
     resolve: {
+        extensions: ['.js', '.ts'],
         fallback: {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
             // see https://webpack.js.org/configuration/resolve/#resolvefallback
@@ -82,7 +78,10 @@ module.exports = {
             // 'http': require.resolve('stream-http'),
             // 'https': require.resolve('https-browserify'),
             // 'zlib': require.resolve('browserify-zlib'),
-            // 'vm2': require.resolve('vm-browserify'),
+            // 'vm': require.resolve('vm-browserify'),
+        },
+        alias: {
+            './packageInfo': path.resolve(__dirname, 'dist/packageInfo.browser.js')
         }
     }
 };
