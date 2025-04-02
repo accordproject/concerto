@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-
-
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
@@ -38,6 +36,12 @@ describe('InMemoryWriter', () => {
             const imw = new InMemoryWriter();
             expect(imw).to.exist;
         });
+
+        it('should initialize data as an empty Map', () => {
+            const imw = new InMemoryWriter();
+            expect(imw.data).to.be.instanceOf(Map);
+            expect(imw.data.size).to.equal(0);
+        });
     });
 
     describe('#openFile', () => {
@@ -60,6 +64,15 @@ describe('InMemoryWriter', () => {
 
             sinon.assert.calledOnceWithExactly(stub, 2, 'text');
         });
+
+        it('should throw error if file not opened', () => {
+            const stub = sandbox.stub(Writer.prototype, 'writeLine').returns(undefined);
+            const imw = new InMemoryWriter();
+            expect(imw).to.exist;
+
+            expect(() => imw.writeLine(2, 'text')).to.throw('File has not been opened');
+            sinon.assert.notCalled(stub);
+        });
     });
 
     describe('#writeBeforeLine', () => {
@@ -72,6 +85,15 @@ describe('InMemoryWriter', () => {
             imw.writeBeforeLine(2, 'text');
 
             sinon.assert.calledOnceWithExactly(stub, 2, 'text');
+        });
+
+        it('should throw error if file not opened', () => {
+            const stub = sandbox.stub(Writer.prototype, 'writeBeforeLine').returns(undefined);
+            const imw = new InMemoryWriter();
+            expect(imw).to.exist;
+
+            expect(() => imw.writeBeforeLine(2, 'text')).to.throw('File has not been opened');
+            sinon.assert.notCalled(stub);
         });
     });
 
@@ -88,9 +110,30 @@ describe('InMemoryWriter', () => {
 
             sinon.assert.calledOnce(superClearBuffer);
         });
+
+        it('should throw error if no file open', () => {
+            const superClearBuffer = sandbox.stub(Writer.prototype, 'clearBuffer').returns(undefined);
+            const superGetBuffer = sandbox.stub(Writer.prototype, 'getBuffer').returns('0123');
+
+            const imw = new InMemoryWriter();
+            expect(imw).to.exist;
+
+            expect(() => imw.closeFile()).to.throw('No file open');
+            sinon.assert.notCalled(superClearBuffer);
+            sinon.assert.notCalled(superGetBuffer);
+        });
     });
 
     describe('#getFilesInMemory', () => {
+        it('should return empty map if no files written', () => {
+            const imw = new InMemoryWriter();
+            expect(imw).to.exist;
+
+            const files = imw.getFilesInMemory();
+            expect(files).to.be.instanceOf(Map);
+            expect(files.size).to.equal(0);
+        });
+
         it('main code path', () => {
             const superClearBuffer = sandbox.stub(Writer.prototype, 'clearBuffer').returns(undefined);
             const superGetBuffer = sandbox.stub(Writer.prototype, 'getBuffer').returns('lorem ipsum\n');

@@ -18,7 +18,7 @@
  * @class
  * @memberof module:concerto-core
  */
-import packageJson from '../package.json';
+import packageJson from './packageInfo';
 import ErrorCodes from './errorcodes';
 
  class BaseException extends Error {

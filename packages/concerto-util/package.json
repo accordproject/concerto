@@ -27,7 +27,7 @@
     "webpack": "webpack --config webpack.config.js --mode production"
   },
   "repository": {
-    "type": "git",
+    "type": "module",
     "url": "https://github.com/accordproject/concerto.git",
     "directory": "packages/concerto-util"
   },
@@ -67,7 +67,9 @@
     "tmp-promise": "3.0.2",
     "ts-jest": "28.0.4",
     "ts-node": "10.9.1",
-    "typescript": "4.6.3"
+    "typescript": "4.6.3",
+    "webpack": "^5.94.0", 
+    "webpack-cli": "^5.1.4" 
   },
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",

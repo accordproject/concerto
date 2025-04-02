@@ -34,6 +34,13 @@ describe('FileDownloader', () => {
     });
 
     describe('#downloadExternalDependencies', () => {
+        it('should handle empty files array', async () => {
+            const getExternalImports = (_file: string): Record<string, string> => ({});
+            const mfd = new FileDownloader(ml, getExternalImports, 1);
+            const result = await mfd.downloadExternalDependencies([]);
+            expect(result).to.deep.equal([]);
+        });
+
         it('should handle generic loader errors properly', async () => {
             ml.load.withArgs('github://external.cto').rejects(new Error('oh noes!'));
 
@@ -72,6 +79,66 @@ describe('FileDownloader', () => {
             const mfd = new FileDownloader(ml, getExternalImports, 1);
             await expect(mfd.downloadExternalDependencies(files)).to.be.rejectedWith(
                 "Unable to download external model dependency 'github://external.cto'"
+            );
+        });
+
+        it('should handle other errors in handleJobError', async () => {
+            const genericError = new Error('Network timeout');
+            (genericError as any).code = 'ETIMEDOUT';
+            ml.load.withArgs('github://external.cto').rejects(genericError);
+
+            const files = [`namespace org.root\nimport org.external from github://external.cto\nconcept Foo {};`];
+            const getExternalImports = (_file: string): Record<string, string> => ({ 'org.external': 'github://external.cto' });
+
+            const mfd = new FileDownloader(ml, getExternalImports, 1);
+            await expect(mfd.downloadExternalDependencies(files)).to.be.rejectedWith(
+                Error,
+                "Failed to load model file. Job: github://external.cto Details: Error: Network timeout"
+            );
+        });
+
+        it('should handle errors without response in hasResponse', async () => {
+            const genericError = new Error('Generic error');
+            ml.load.withArgs('github://external.cto').rejects(genericError);
+
+            const files = [`namespace org.root\nimport org.external from github://external.cto\nconcept Foo {};`];
+            const getExternalImports = (_file: string): Record<string, string> => ({ 'org.external': 'github://external.cto' });
+
+            const mfd = new FileDownloader(ml, getExternalImports, 1);
+            await expect(mfd.downloadExternalDependencies(files)).to.be.rejectedWith(
+                Error,
+                "Failed to load model file. Job: github://external.cto Details: Error: Generic error"
+            );
+        });
+
+        it('should skip already downloaded URIs in runJob', async () => {
+            const files = [`namespace org.root\nimport org.external from github://external.cto\nconcept Foo {};`];
+            const getExternalImports = sinon.stub();
+            getExternalImports.onFirstCall().returns({ 'org.external': 'github://external.cto' });
+            getExternalImports.onSecondCall().returns({ 'org.external': 'github://external.cto' });
+
+            ml.load.withArgs('github://external.cto').resolves('file content');
+
+            const mfd = new FileDownloader(ml, getExternalImports, 1);
+            const result = await mfd.downloadExternalDependencies(files);
+            expect(result).to.have.lengthOf(1);
+            expect(result[0]).to.equal('file content');
+        });
+    });
+
+    describe('#handleJobError', () => {
+        it('should handle job as a string in handleJobError', async () => {
+            const genericError = new Error('Network timeout');
+            (genericError as any).code = 'ETIMEDOUT';
+            ml.load.withArgs('github://external.cto').rejects(genericError);
+
+            const files = [`namespace org.root\nimport org.external from github://external.cto\nconcept Foo {};`];
+            const getExternalImports = (_file: string): Record<string, string> => ({ 'org.external': 'github://external.cto' });
+
+            const mfd = new FileDownloader(ml, getExternalImports, 1);
+            await expect(mfd['handleJobError'](genericError, 'github://external.cto')).to.be.rejectedWith(
+                Error,
+                "Failed to load model file. Job: github://external.cto Details: Error: Network timeout"
             );
         });
     });
