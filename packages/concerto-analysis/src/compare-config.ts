@@ -69,12 +69,12 @@ export const defaultCompareConfig: CompareConfig = {
         'scalar-validator-added': CompareResult.MAJOR,
         'scalar-validator-removed': CompareResult.PATCH,
         'scalar-validator-changed': CompareResult.MAJOR,
-        'scalar-default-value-added': CompareResult.PATCH,
+        'scalar-default-value-added': CompareResult.MINOR,
         'scalar-default-value-removed': CompareResult.MAJOR,
-        'scalar-default-value-changed': CompareResult.MAJOR,
-        'property-default-value-added': CompareResult.PATCH,
+        'scalar-default-value-changed': CompareResult.PATCH,
+        'property-default-value-added': CompareResult.MINOR,
         'property-default-value-removed': CompareResult.MAJOR,
-        'property-default-value-changed': CompareResult.MAJOR,
+        'property-default-value-changed': CompareResult.PATCH,
     },
 };
 
