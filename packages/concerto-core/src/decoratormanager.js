@@ -198,15 +198,12 @@ class DecoratorManager {
     }
 
     /**
-     * Applies all the decorator commands from the DecoratorCommandSet
-     * to the ModelManager.
+     * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager.
      * @param {ModelManager} modelManager the input model manager
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {object} [options] - decorator models options
-     * @param {boolean} [options.validate] - validate that decorator command set is valid
-     * with respect to to decorator command set model
-     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that
-     * the validate option must also be true
+     * @param {boolean} [options.validate] - validate that decorator command set is valid with respect to to decorator command set model
+     * @param {boolean} [options.validateCommands] - validate the decorator command set targets. Note that the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @returns {ModelManager} a new model manager with the decorations applied
      */
@@ -242,9 +239,14 @@ class DecoratorManager {
         const ast = modelManager.getAst(true);
         const decoratedAst = JSON.parse(JSON.stringify(ast));
         decoratedAst.models.forEach((model) => {
+            decoratorCommandSet.commands.forEach((command) => {
+                this.executeNamespaceCommand(model, command);
+            });
             model.declarations.forEach((decl) => {
                 decoratorCommandSet.commands.forEach((command) => {
-                    this.executeCommand(model.namespace, decl, command);
+                    if (Object.keys(command.target).length > 2 || !command.target.namespace) {
+                        this.executeCommand(model.namespace, decl, command);
+                    }
                 });
             });
         });
@@ -440,11 +442,27 @@ class DecoratorManager {
     }
 
     /**
+     * Executes a Command against a Model Namespace, adding decorators to the Namespace.
+     * @private
+     * @param {*} model the model
+     * @param {*} command the Command object from the dcs
+     */
+    static executeNamespaceCommand(model, command) {
+        const { target, decorator, type } = command;
+        if (Object.keys(target).length === 2 && target.namespace) {
+            const { name } = ModelUtil.parseNamespace( model.namespace );
+            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
+                this.applyDecorator(model, type, decorator);
+            }
+        }
+    }
+
+    /**
      * Executes a Command against a ClassDeclaration, adding
      * decorators to the ClassDeclaration, or its properties, as required.
      * @param {string} namespace the namespace for the declaration
      * @param {*} declaration the class declaration
-     * @param {*} command the Command object from the
+     * @param {*} command the Command object from the dcs
      * org.accordproject.decoratorcommands model
      */
     static executeCommand(namespace, declaration, command) {
@@ -472,11 +490,13 @@ class DecoratorManager {
                     if (this.falsyOrEqual(target.type, declaration.value.$class)) {
                         this.applyDecorator(declaration.value, type, decorator);
                     }
-                } else {
+                } else if (target.declaration){
                     this.applyDecorator(declaration, type, decorator);
                 }
             } else if (!(target.property || target.properties || target.type)) {
-                this.applyDecorator(declaration, type, decorator);
+                if (target.declaration) {
+                    this.applyDecorator(declaration, type, decorator);
+                }
             } else {
                 // scalars are declarations but do not have properties
                 if (declaration.properties) {

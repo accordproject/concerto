@@ -96,7 +96,7 @@ describe('DecoratorManager', () => {
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
-            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+            let decoratedModelManager = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs));
             decoratedModelManager.should.not.be.null;
         });
 
@@ -120,7 +120,7 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
-        it('should add decorator', async function() {
+        it('should add decorators that target declarations', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
@@ -137,6 +137,19 @@ describe('DecoratorManager', () => {
             const decl = decoratedModelManager.getType('test@1.0.0.Person');
             decl.should.not.be.null;
             decl.getDecorator('Editable').should.not.be.null;
+        });
+
+        it('should add decorators that target properties', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = fs.readFileSync('./test/data/decoratorcommands/web.json', 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
+
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.should.not.be.null;
 
             const firstNameProperty = decl.getProperty('firstName');
             firstNameProperty.should.not.be.null;
@@ -181,13 +194,60 @@ describe('DecoratorManager', () => {
             const zipProperty = decl.getProperty('zip');
             zipProperty.should.not.be.null;
             const decoratorZipProperty = zipProperty.getDecorator('Address');
-            (decoratorZipProperty ===null).should.be.true;
+            (decoratorZipProperty === null).should.be.true;
 
             // applied using properties, no type
             const cityProperty = decl.getProperty('city');
             cityProperty.should.not.be.null;
             const decoratorCity2Property = cityProperty.getDecorator('Address');
             decoratorCity2Property.should.not.be.null;
+        });
+
+        it('should add a namespace-only decorator to the namespace and not its declarations', async function() {
+            // Load the model
+            const testModelManager = new ModelManager({strict: true});
+            const modelText = fs.readFileSync('./test/data/decoratorcommands/test.cto', 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const customDcs = {
+                '$class': 'org.accordproject.decoratorcommands@0.3.0.DecoratorCommandSet',
+                'name': 'NamespaceTest',
+                'version': '1.0.0',
+                'commands': [
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.3.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.3.0.CommandTarget',
+                            'namespace': 'test@1.0.0'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'NamespaceOnly',
+                            'arguments': []
+                        }
+                    }
+                ]
+            };
+
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, customDcs, {validate: true, validateCommands: true});
+
+            const ast = decoratedModelManager.getAst(true);
+
+            const model = ast.models.find(m => m.namespace === 'test@1.0.0');
+            model.should.exist;
+
+            model.decorators.should.exist;
+            model.decorators.should.have.lengthOf(1);
+            model.decorators[0].name.should.equal('NamespaceOnly');
+
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            ssnDecl.should.not.be.null;
+            chai.expect(ssnDecl.getDecorator('NamespaceOnly')).to.be.null;
+
+            const personDecl = decoratedModelManager.getType('test@1.0.0.Person');
+            personDecl.should.not.be.null;
+            chai.expect(personDecl.getDecorator('NamespaceOnly')).to.be.null;
         });
 
         it('should decorate the specified MapDeclaration', async function() {
@@ -368,7 +428,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync('./test/data/decoratorcommands/invalid-command.json', 'utf-8');
 
             (() => {
-                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
+                DecoratorManager.decorateModels(testModelManager, JSON.parse(dcs));
             }).should.throw(/Unknown command type INVALID/);
         });
     });
