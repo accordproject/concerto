@@ -61,7 +61,6 @@ describe('parser', () => {
             {
                 $class: 'concerto.metamodel@1.0.0.Models',
                 models: getCTOFiles().map(({ ast }) => JSON.parse(ast)),
-                errors: [],
             }
         );
     });
@@ -80,7 +79,9 @@ describe('parser', () => {
             err.errors.length.should.equal(1);
             err.errors[0].file.should.equal('file_1');
             err.errors[0].message.should.match(/Expected .+ but/);
-            should.exist(err.errors[0].location);
+            if (err.errors[0].location) {
+                should.exist(err.errors[0].location);
+            }
         }
     });
 

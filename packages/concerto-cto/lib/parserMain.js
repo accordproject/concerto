@@ -48,17 +48,19 @@ function parse(cto, fileName, options) {
  * @return {Object} an object with:
  *   - `$class` {string}: the AST/metamodel namespace
  *   - `models` {Object[]}: successfully parsed metamodels
- *   - `errors` {Object[]}: parse errors, each containing:
- *       - `file` {string}: file identifier
- *       - `message` {string}: error message
- *       - `location` {Object} [optional]: error location, if available
+ * @throws {Error} if there are any parse errors, throws an aggregate error with:
+ *  - `message` {string}: summary of all errors
+ *  - `errors` {Object[]}: array of error details, each with:
+ *      - `file` {string}: file identifier
+ *      - `message` {string}: error message
+ *      - `location` {Object}: location of the error, if available
  */
 function parseModels(files, options) {
     const result = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
-        errors: [],
     };
+    const errors = [];
     files.forEach((modelFile, index) => {
         const fileId = `file_${index}`; // for unique file id
         try {
@@ -72,13 +74,13 @@ function parseModels(files, options) {
             if (err.fileLocation) {
                 errorDetails.location = err.fileLocation;
             }
-            result.errors.push(errorDetails);
+            errors.push(errorDetails);
         }
     });
-    if (result.errors.length > 0) {
-        const errorMessages = result.errors.map(e=> `Error in ${e.file}: ${e.message}`).join('; ');
-        const aggregateError = new Error(`Parsing errors occurred in ${result.errors.length} files: ${errorMessages}`);
-        aggregateError.errors = result.errors; // individual errors
+    if (errors.length > 0) {
+        const errorMessages = errors.map(e=> `Error in ${e.file}: ${e.message}`).join('; ');
+        const aggregateError = new Error(`Parsing errors occurred in ${errors.length} files: ${errorMessages}`);
+        aggregateError.errors = errors; // individual errors
         throw aggregateError;
     }
     return result;
