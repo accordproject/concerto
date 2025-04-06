@@ -333,7 +333,7 @@ class VocabularyManager {
                                 }
                             });
                         }
-                        else if(term.localeCompare('properties')) {
+                        else if(term === 'properties') {
                             decoratorCommandSet.commands.push({
                                 '$class': `${DC_NAMESPACE}.Command`,
                                 'type': 'UPSERT',
