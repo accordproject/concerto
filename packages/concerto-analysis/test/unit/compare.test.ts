@@ -741,7 +741,7 @@ test('should detect a default value being added to a scalar', async () => {
             message: 'Default value "hello" added to scalar "Thing"',
         }),
     ]));
-    expect(results.result).toBe(CompareResult.PATCH);
+    expect(results.result).toBe(CompareResult.MINOR);
 });
 
 test('should detect a default value being removed from a scalar', async () => {
@@ -773,7 +773,7 @@ test('should detect a default value being removed from a scalar', async () => {
             message: 'Default value changed from "hello" to "bye" in scalar "Thing"',
         }),
     ]));
-    expect(results.result).toBe(CompareResult.MAJOR);
+    expect(results.result).toBe(CompareResult.PATCH);
 });
 
 test('should detect a default value being added to a property', async () => {
@@ -789,7 +789,7 @@ test('should detect a default value being added to a property', async () => {
             message: 'Default value "Fred" added to property "name" in the concept "Thing"',
         }),
     ]));
-    expect(results.result).toBe(CompareResult.PATCH);
+    expect(results.result).toBe(CompareResult.MINOR);
 });
 
 test('should detect a default value being removed from a property', async () => {
@@ -808,7 +808,7 @@ test('should detect a default value being removed from a property', async () => 
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
-test('should detect a default value being removed from a scalar', async () => {
+test('should detect a default value being removed from a property', async () => {
     const [a, b] = await getModelFiles('property-default-value-added.cto','property-default-value-changed.cto');
     const results = new Compare().compare(a, b);
     const findings = results.findings.map(finding => ({
@@ -821,5 +821,5 @@ test('should detect a default value being removed from a scalar', async () => {
             message: 'Default value changed from "Fred" to "NotFred" in property "name" in the concept "Thing"',
         }),
     ]));
-    expect(results.result).toBe(CompareResult.MAJOR);
+    expect(results.result).toBe(CompareResult.PATCH);
 });
