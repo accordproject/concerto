@@ -117,7 +117,7 @@ describe('Vocabulary', () => {
         };
         const voc = new Vocabulary(vocabularyManager, obj);
         const term = voc.getTerm();
-        should.equal(term, null);
+        should.not.exist(term);
     });
 
     it('getTerm - namespace term', () => {

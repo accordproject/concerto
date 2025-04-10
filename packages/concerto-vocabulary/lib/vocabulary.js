@@ -108,6 +108,19 @@ class Vocabulary {
     }
 
     /**
+     * Gets the terms of Namespace
+     * @returns {string} the term or null if it does not exist
+     * @private
+     */
+    getNamespaceTerms(){
+        if(!DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget)){
+            return null;
+        }
+        const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
+        return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
+    }
+
+    /**
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
@@ -115,9 +128,9 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getTerm(declarationName, propertyName, identifier) {
-        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !declarationName){
-            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
-            return namespaceTerms.length > 0 ? identifier ? Object.fromEntries(namespaceTerms)[identifier]:Object.fromEntries(namespaceTerms).term : null;
+        if(!declarationName){
+            const namespaceTerms = this.getNamespaceTerms();
+            return identifier ? namespaceTerms?.[identifier]:namespaceTerms?.term;
         }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {
@@ -139,9 +152,8 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      */
     getElementTerms(declarationName, propertyName) {
-        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !declarationName){
-            const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
-            return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
+        if(!declarationName){
+            return this.getNamespaceTerms();
         }
         const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
         if(!decl) {

@@ -45,9 +45,9 @@ export interface IDecoratorLiteral extends IConcept {
    location?: IRange;
 }
 
-export type DecoratorLiteralUnion = IDecoratorString |
-IDecoratorNumber |
-IDecoratorBoolean |
+export type DecoratorLiteralUnion = IDecoratorString | 
+IDecoratorNumber | 
+IDecoratorBoolean | 
 IDecoratorTypeReference;
 
 export interface IDecoratorString extends IDecoratorLiteral {
@@ -88,9 +88,9 @@ export interface IDeclaration extends IConcept {
    location?: IRange;
 }
 
-export type DeclarationUnion = IMapDeclaration |
-IEnumDeclaration |
-IConceptDeclaration |
+export type DeclarationUnion = IMapDeclaration | 
+IEnumDeclaration | 
+IConceptDeclaration | 
 IScalarDeclaration;
 
 export interface IMapKeyType extends IConcept {
@@ -98,8 +98,8 @@ export interface IMapKeyType extends IConcept {
    location?: IRange;
 }
 
-export type MapKeyTypeUnion = IStringMapKeyType |
-IDateTimeMapKeyType |
+export type MapKeyTypeUnion = IStringMapKeyType | 
+IDateTimeMapKeyType | 
 IObjectMapKeyType;
 
 export interface IMapValueType extends IConcept {
@@ -107,13 +107,13 @@ export interface IMapValueType extends IConcept {
    location?: IRange;
 }
 
-export type MapValueTypeUnion = IBooleanMapValueType |
-IDateTimeMapValueType |
-IStringMapValueType |
-IIntegerMapValueType |
-ILongMapValueType |
-IDoubleMapValueType |
-IObjectMapValueType |
+export type MapValueTypeUnion = IBooleanMapValueType | 
+IDateTimeMapValueType | 
+IStringMapValueType | 
+IIntegerMapValueType | 
+ILongMapValueType | 
+IDoubleMapValueType | 
+IObjectMapValueType | 
 IRelationshipMapValueType;
 
 export interface IMapDeclaration extends IDeclaration {
@@ -174,9 +174,9 @@ export interface IConceptDeclaration extends IDeclaration {
    properties: PropertyUnion[];
 }
 
-export type ConceptDeclarationUnion = IAssetDeclaration |
-IParticipantDeclaration |
-ITransactionDeclaration |
+export type ConceptDeclarationUnion = IAssetDeclaration | 
+IParticipantDeclaration | 
+ITransactionDeclaration | 
 IEventDeclaration;
 
 export interface IAssetDeclaration extends IConceptDeclaration {
@@ -199,13 +199,13 @@ export interface IProperty extends IConcept {
    location?: IRange;
 }
 
-export type PropertyUnion = IRelationshipProperty |
-IObjectProperty |
-IBooleanProperty |
-IDateTimeProperty |
-IStringProperty |
-IDoubleProperty |
-IIntegerProperty |
+export type PropertyUnion = IRelationshipProperty | 
+IObjectProperty | 
+IBooleanProperty | 
+IDateTimeProperty | 
+IStringProperty | 
+IDoubleProperty | 
+IIntegerProperty | 
 ILongProperty;
 
 export interface IRelationshipProperty extends IProperty {
@@ -280,8 +280,8 @@ export interface IImport extends IConcept {
    uri?: string;
 }
 
-export type ImportUnion = IImportAll |
-IImportType |
+export type ImportUnion = IImportAll | 
+IImportType | 
 IImportTypes;
 
 export interface IImportAll extends IImport {
@@ -312,11 +312,11 @@ export interface IModels extends IConcept {
 export interface IScalarDeclaration extends IDeclaration {
 }
 
-export type ScalarDeclarationUnion = IBooleanScalar |
-IIntegerScalar |
-ILongScalar |
-IDoubleScalar |
-IStringScalar |
+export type ScalarDeclarationUnion = IBooleanScalar | 
+IIntegerScalar | 
+ILongScalar | 
+IDoubleScalar | 
+IStringScalar | 
 IDateTimeScalar;
 
 export interface IBooleanScalar extends IScalarDeclaration {
@@ -347,4 +347,3 @@ export interface IStringScalar extends IScalarDeclaration {
 export interface IDateTimeScalar extends IScalarDeclaration {
    defaultValue?: string;
 }
-

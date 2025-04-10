@@ -42,13 +42,14 @@ class DecoratorExtractor {
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
-     * @param {boolean} enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {object} [options] - decorator extractor options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, enableDcsNamespaceTarget) {
+    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, options) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
-        this.enableDcsNamespaceTarget = enableDcsNamespaceTarget;
+        this.enableDcsNamespaceTarget = options?.enableDcsNamespaceTarget? true : false;
         this.dcs_version = dcs_version;
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;

@@ -477,7 +477,7 @@ class DecoratorManager {
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL, this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget));
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -502,7 +502,7 @@ class DecoratorManager {
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB, this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget));
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -526,7 +526,7 @@ class DecoratorManager {
             ...options
         };
         const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB, this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget));
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
