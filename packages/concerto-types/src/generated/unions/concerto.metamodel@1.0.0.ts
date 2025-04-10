@@ -347,3 +347,4 @@ export interface IStringScalar extends IScalarDeclaration {
 export interface IDateTimeScalar extends IScalarDeclaration {
    defaultValue?: string;
 }
+
