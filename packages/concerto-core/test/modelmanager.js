@@ -1107,21 +1107,26 @@ concept Bar {
     });
 
     describe('#filter', () => {
-        it('should return true for a valid ModelManager', () => {
+        it('should return true for a valid ModelManager and do not modify the original', () => {
             modelManager.addModelFiles([composerModel, modelBase, farm2fork, concertoModel]);
 
-            modelManager.getModelFiles().length.should.equal(5);
-            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(69);
+            const originalModelFilesCount = modelManager.getModelFiles().length;
+            const originalDeclarationsCount = modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length;
+
+            originalModelFilesCount.should.equal(5);
+            originalDeclarationsCount.should.equal(69);
 
             const filtered = modelManager.filter(declaration => declaration.getFullyQualifiedName() === 'org.accordproject.test.Product');
 
             filtered.getModelFiles().length.should.equal(1);
             filtered.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(1);
-
             filtered.validateModelFiles();
+
+            modelManager.getModelFiles().length.should.equal(originalModelFilesCount);
+            modelManager.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(originalDeclarationsCount);
         });
 
-        it('should remove imports for filtered types', () => {
+        it('should remove imports for filtered types without modifying original', () => {
             modelManager.addCTOModel(`namespace child@1.0.0
             concept Used {}
             concept Unused {}
@@ -1145,9 +1150,16 @@ concept Bar {
                 o AlsoUsed alsoUsed
             }
             `, 'test.cto');
+
+            const testModelFile = modelManager.getModelFile('test@1.0.0');
+            const originalImports = testModelFile.getImports();
+
             const filtered = modelManager.filter(declaration =>
                 ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
+
             filtered.validateModelFiles();
+            const afterFilterImports = testModelFile.getImports();
+            afterFilterImports.should.deep.equal(originalImports);
         });
     });
 });

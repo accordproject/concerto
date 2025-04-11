@@ -849,8 +849,15 @@ class BaseModelManager {
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
         const removedFqns = []; // the list of FQN of types that have been removed
 
+        // deep copy of the model files
+        const copiedModelFiles = Object.values(this.modelFiles).map(modelFile => {
+            const ast = modelFile.getAst();
+            const copiedAst = JSON.parse(JSON.stringify(ast));
+            return new ModelFile(this, copiedAst, undefined, modelFile.fileName);
+        });
+
         // remove the types from model files, populating removedFqns
-        let filteredModels = Object.values(this.modelFiles)
+        let filteredModels = copiedModelFiles
             .map((modelFile) => modelFile.filter(predicate, modelManager, removedFqns))
             .filter(Boolean);
 
