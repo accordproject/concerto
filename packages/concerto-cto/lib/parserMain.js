@@ -78,8 +78,8 @@ function parseModels(files, options) {
         }
     });
     if (errors.length > 0) {
-        const errorMessages = errors.map(e=> `Error in ${e.file}: ${e.message}`).join('; ');
-        const aggregateError = new Error(`Parsing errors occurred in ${errors.length} files: ${errorMessages}`);
+        const errorMessages = errors.map(e=> `\tError in ${e.file}: ${e.message}`).join('\n');
+        const aggregateError = new Error(`Parsing errors occurred in ${errors.length} files:\n${errorMessages}`);
         aggregateError.errors = errors; // individual errors
         throw aggregateError;
     }

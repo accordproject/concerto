@@ -75,7 +75,7 @@ describe('parser', () => {
             Parser.parseModels(files, { skipLocationNodes: true });
             should.fail('Expected an error to be thrown');
         } catch (err) {
-            err.message.should.match(/Parsing errors occurred in 1 files: Error in file_1: .+/);
+            err.message.should.match(/Parsing errors occurred in 1 files:\n\tError in file_1: .+/);
             err.errors.length.should.equal(1);
             err.errors[0].file.should.equal('file_1');
             err.errors[0].message.should.match(/Expected .+ but/);
