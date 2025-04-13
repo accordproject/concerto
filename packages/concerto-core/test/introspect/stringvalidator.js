@@ -81,6 +81,36 @@ describe('StringValidator', () => {
                 new StringValidator(mockField, null, NEGETIVE_LENGTH);
             }).should.throw(/minLength and-or maxLength must be positive integers/);
         });
+
+        it('should throw when defaultValue length is less than minLength', () => {
+            mockField.ast = { defaultValue: 'abc' };
+            (() => {
+                new StringValidator(mockField, null, {
+                    minLength: 5,
+                    maxLength: 10,
+                });
+            }).should.throw(/The string length of 'abc' should be at least 5 characters./);
+        });
+
+        it('should throw when defaultValue length is greater than maxLength', () => {
+            mockField.ast = { defaultValue: 'abcdefgh' };
+            (() => {
+                new StringValidator(mockField, null, {
+                    minLength: 2,
+                    maxLength: 5,
+                });
+            }).should.throw(/The string length of 'abcdefgh' should not exceed 5 characters./);
+        });
+
+        it('should accept valid defaultValue that matches length and pattern constraints', () => {
+            mockField.ast = { defaultValue: 'ABC' };
+            (()=>{
+                new StringValidator(mockField,
+                    { pattern: '^[A-Z]{3,5}$' },
+                    { minLength: 3, maxLength: 5 },
+                );
+            }).should.not.throw();
+        });
     });
 
     describe('#validate', () => {

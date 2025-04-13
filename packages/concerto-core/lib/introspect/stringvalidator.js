@@ -74,6 +74,10 @@ class StringValidator extends Validator{
                 this.reportError(field.getName(), exception.message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }
+
+        if(this.field?.ast?.defaultValue) {
+            this.validate(field.getName(), this.field.ast.defaultValue);
+        }
     }
 
     /**
