@@ -822,9 +822,35 @@ describe('DecoratorManager', () => {
             vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
             vocab[0].should.not.include('custom');
         });
-        it('should throw error if reserved terms found in a model', async function() {
+        it('should throw error if namespace level reserved terms found in a model', async function() {
             const testModelManager = new ModelManager({strict:true,});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-invalid-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            (() => {
+                DecoratorManager.extractVocabularies( testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+        it('should throw error if declaration level reserved terms found in a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            (() => {
+                DecoratorManager.extractVocabularies( testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+        it('should throw error if property level reserved terms found in a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-property-invalid-term.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
                 removeDecoratorsFromModel:true,
