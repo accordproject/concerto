@@ -335,6 +335,9 @@ class DecoratorExtractor {
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === 'namespace' || extensionKey === 'locale' || extensionKey === 'declarations'){
+                    throw new Error(`Invalid vocabulary key: ${extensionKey}. The key should not be one of the reserved keys: namespace, locale, declarations`);
+                }
                 vocabObject.namespace[extensionKey] = dcs.arguments[0].value;
             }
             return vocabObject;
@@ -350,6 +353,9 @@ class DecoratorExtractor {
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === vocabTarget.property){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
+                }
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][extensionKey] = dcs.arguments[0].value;
             }
         }
@@ -362,6 +368,9 @@ class DecoratorExtractor {
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === vocabTarget.mapElement){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
+                }
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
             }
         }
@@ -371,6 +380,9 @@ class DecoratorExtractor {
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === 'properties' || extensionKey === vocabTarget.declaration){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key cannot be a reserved word such as "properties" or the name of the current declaration.`);
+                }
                 vocabObject.declarations[vocabTarget.declaration][extensionKey] = dcs.arguments[0].value;
             }
         }
