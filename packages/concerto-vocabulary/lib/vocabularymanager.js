@@ -59,7 +59,7 @@ class VocabularyManager {
     constructor(options) {
         this.vocabularies = {}; // key is namespace/locale, value is a Vocabulary object
         this.missingTermGenerator = options ? options.missingTermGenerator : null;
-        this.enableDcsNamespaceTarget = options?.enableDcsNamespaceTarget ? true : false;
+        this.enableDcsNamespaceTarget = options?.enableDcsNamespaceTarget;
     }
 
     /**
