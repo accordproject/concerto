@@ -469,16 +469,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
     static extractDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -492,16 +494,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
     static extractVocabularies(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -514,16 +518,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
     static extractNonVocabDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -794,7 +800,6 @@ class DecoratorManager {
     /**
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
      * and print deprecation warning if not enabled and return boolean value as well
-     *  @private
      *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      *  @returns {Boolean} true if either of the flags is enabled
      */

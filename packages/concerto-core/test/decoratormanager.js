@@ -697,6 +697,54 @@ describe('DecoratorManager', () => {
             });
             sourceCTO.should.be.deep.equal(updatedCTO);
         });
+        it('should ensure that extraction and re-application of decorators and vocabs from a model is an identity operation including namespace terms', async function() {
+            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
+            const testModelManager = new ModelManager();
+            const sourceCTO = [];
+            const updatedCTO = [];
+            const modelTextWithoutNamespace = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelTextWithoutNamespace, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const namespaceSource = testModelManager.getNamespaces();
+            namespaceSource.forEach(name=>{
+                let model = testModelManager.getModelFile(name);
+                let modelAst=model.getAst();
+                let data =  Printer.toCTO(modelAst);
+                sourceCTO.push(data);
+            });
+            const resp = DecoratorManager.extractDecorators( testModelManager, options);
+            const dcs = resp.decoratorCommandSet;
+            const vocabs= resp.vocabularies;
+            let newModelManager=resp.modelManager;
+            const vocManager = new VocabularyManager();
+            vocabs.forEach(content => {
+                vocManager.addVocabulary(content);
+            });
+            const vocabKeySet=[];
+            const namespaceUpdated = newModelManager.getNamespaces();
+            namespaceUpdated.forEach(name=>{
+                let vocab = vocManager.getVocabulariesForNamespace(name);
+                vocab.forEach(voc=>vocabKeySet.push(voc.getLocale()));
+            });
+            vocabKeySet.map(voc=>{
+                let commandSet = vocManager.generateDecoratorCommands(newModelManager, voc);
+                newModelManager = DecoratorManager.decorateModels(newModelManager, commandSet);
+            });
+            dcs.forEach(content => {
+                newModelManager = DecoratorManager.decorateModels(newModelManager, (content));
+            });
+            namespaceUpdated.forEach(name=>{
+                let model = newModelManager.getModelFile(name);
+                let modelAst=model.getAst();
+                let data =  Printer.toCTO(modelAst);
+                updatedCTO.push(data);
+            });
+            sourceCTO.should.be.deep.equal(updatedCTO);
+            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
+        });
         it('should give proper response in there is no vocabulary on any model', async function() {
             const testModelManager = new ModelManager({strict:true,});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/model-without-vocab.cto'), 'utf-8');
@@ -718,6 +766,89 @@ describe('DecoratorManager', () => {
             const vocab = resp.vocabularies;
             vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
             vocab[0].should.not.include('custom');
+        });
+        it('should be able to extract vocabs from a model without Declaration Term ', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-without-declaration-term.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-without-declaration-term.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
+        it('should be able to extract vocabs from a model with terms for namespace', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-term.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-2.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
+        it('should be able to extract vocabs from a model with only terms for namespace', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-only-namespace-term.cto'), 'utf-8');
+            const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-3.json'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            const resp = DecoratorManager.extractVocabularies( testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.be.deep.equal(JSON.parse(expectedVocabs));
+            vocab[0].should.not.include('custom');
+        });
+        it('should throw error if namespace level reserved terms found in a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-invalid-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            (() => {
+                DecoratorManager.extractVocabularies( testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+        it('should throw error if declaration level reserved terms found in a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            (() => {
+                DecoratorManager.extractVocabularies( testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+        it('should throw error if property level reserved terms found in a model', async function() {
+            const testModelManager = new ModelManager({strict:true,});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-property-invalid-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en',
+                enableDcsNamespaceTarget:true
+            };
+            (() => {
+                DecoratorManager.extractVocabularies( testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
         });
         it('should be able to extract non-vocab decorators from a model', async function() {
             const testModelManager = new ModelManager({strict:true,});

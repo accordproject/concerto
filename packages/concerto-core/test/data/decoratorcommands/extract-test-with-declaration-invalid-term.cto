@@ -1,0 +1,56 @@
+@Term("my Namespace")
+@Term_Desc("my Namespace desc")
+@deco("testing namespace")
+namespace test@1.0.0
+@deco
+enum Dummy {
+  @one
+  o One
+}
+@scc
+scalar SSN extends String default="000-00-0000"
+
+@M1
+@Term_participantName("some value")
+participant participantName identified by participantKey {
+  @M3
+  o String participantKey
+}
+
+@Dummy("term1",2)
+asset assetName identified by assetKey {
+    o String assetKey
+}
+
+@Term("Map Name")
+map mapName {
+    @Term("some key")
+    @Term_desc("some key description")
+    @deco(1)
+    o String
+    o String
+}
+
+@Term("Person Class")
+@Term_desc("Person Class Description")
+@Editable
+concept Person {
+    @Term("HI")
+    @Custom
+    @Form("inputType", "text")
+    @New
+    o String firstName
+    @term("custom")
+    @term_desc("custom desc")
+    @Form("inputType", "text")
+    @New
+    o String lastName
+    @Term("some")
+    @Term_cus("con")
+    @Form("inputType", "textArea")
+    @New
+    o String bio
+    @Form("inputType", "text")
+    @New
+    o String ssn
+}
