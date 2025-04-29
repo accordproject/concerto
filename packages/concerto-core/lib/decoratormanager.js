@@ -22,6 +22,10 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const rfdc = require('rfdc')({
+    circles: true,
+    proto: false,
+});
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -349,9 +353,8 @@ class DecoratorManager {
      * @private
      */
     static pushMapValues(array, map, key) {
-        const targetCommands = map.get(key);
-        if (targetCommands) {
-            array.push(...targetCommands);
+        for (const value of map.get(key) || []) {
+            array.push(value);
         }
     }
 
@@ -375,7 +378,7 @@ class DecoratorManager {
 
         // we create synthetic imports for all decorator declarations
         // along with any of their type reference arguments
-        const decoratorImports = decoratorCommandSet.commands.map(command => {
+        const decoratorImports = decoratorCommandSet.commands.flatMap(command => {
             return [{
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
@@ -389,21 +392,21 @@ class DecoratorManager {
                     };
                 })
                 : []);
-        }).flat().filter(i => i.namespace);
+        }).filter(i => i.namespace);
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
         const ast = modelManager.getAst(true, true);
-        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        const decoratedAst = rfdc(ast);
         decoratedAst.models.forEach((model) => {
             // remove the imports for types defined in this namespace
             const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
             // add the imports for decorators, in case they get added below
             model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
+            const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
             model.declarations.forEach((decl) => {
                 const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
                 this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
-                const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
                 this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
                 const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
