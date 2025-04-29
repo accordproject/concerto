@@ -41,6 +41,12 @@ declare class Vocabulary {
      */
     getTerms(): any[];
     /**
+     * Gets the terms of Namespace
+     * @returns {string} the term or null if it does not exist
+     * @private
+     */
+    private getNamespaceTerms;
+    /**
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
