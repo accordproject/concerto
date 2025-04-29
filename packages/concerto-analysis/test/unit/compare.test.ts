@@ -679,3 +679,131 @@ test('should give a MAJOR CompareResult for Map Type compare config rules)', asy
     expect(defaultCompareConfig.rules['map-key-type-changed']).toBe(CompareResult.MAJOR);
     expect(defaultCompareConfig.rules['map-value-type-changed']).toBe(CompareResult.MAJOR);
 });
+
+test('should detect a required property changed to optional', async () => {
+    const [a, b] = await getModelFiles('required-to-optional-a.cto', 'required-to-optional-b.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'required-to-optional-property',
+            message: 'The required field "value" was changed to be optional in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect an optional property changed to required', async () => {
+    const [a, b] = await getModelFiles('optional-to-required-a.cto', 'optional-to-required-b.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'optional-to-required-property',
+            message: 'The optional field "value" was changed to be required in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a default value being added to a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-added.cto', 'scalar-default-value-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-added',
+            message: 'Default value "hello" added to scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a default value being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-default-value-added.cto','scalar-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-removed',
+            message: 'Default value "hello" removed from scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a default value being removed from a scalar', async () => {
+    const [a, b] = await getModelFiles('scalar-default-value-added.cto','scalar-default-value-changed.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-default-value-changed',
+            message: 'Default value changed from "hello" to "bye" in scalar "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a default value being added to a property', async () => {
+    const [a, b] = await getModelFiles('property-added.cto', 'property-default-value-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-added',
+            message: 'Default value "Fred" added to property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a default value being removed from a property', async () => {
+    const [a, b] = await getModelFiles('property-default-value-added.cto','property-added.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-removed',
+            message: 'Default value "Fred" removed from property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a default value being removed from a property', async () => {
+    const [a, b] = await getModelFiles('property-default-value-added.cto','property-default-value-changed.cto');
+    const results = new Compare().compare(a, b);
+    const findings = results.findings.map(finding => ({
+        key: finding.key,
+        message: finding.message,
+    }));
+    expect(findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-default-value-changed',
+            message: 'Default value changed from "Fred" to "NotFred" in property "name" in the concept "Thing"',
+        }),
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});

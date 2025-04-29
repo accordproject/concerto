@@ -53,6 +53,8 @@ export const defaultCompareConfig: CompareConfig = {
         'optional-property-added': CompareResult.PATCH,
         'required-property-removed': CompareResult.MAJOR,
         'optional-property-removed': CompareResult.MAJOR,
+        'optional-to-required-property': CompareResult.MAJOR,
+        'required-to-optional-property': CompareResult.PATCH,
         'namespace-changed': CompareResult.ERROR,
         'enum-value-added': CompareResult.PATCH,
         'enum-value-removed': CompareResult.MAJOR,
@@ -67,6 +69,12 @@ export const defaultCompareConfig: CompareConfig = {
         'scalar-validator-added': CompareResult.MAJOR,
         'scalar-validator-removed': CompareResult.PATCH,
         'scalar-validator-changed': CompareResult.MAJOR,
+        'scalar-default-value-added': CompareResult.MINOR,
+        'scalar-default-value-removed': CompareResult.MAJOR,
+        'scalar-default-value-changed': CompareResult.PATCH,
+        'property-default-value-added': CompareResult.MINOR,
+        'property-default-value-removed': CompareResult.MAJOR,
+        'property-default-value-changed': CompareResult.PATCH,
     },
 };
 
@@ -172,3 +180,6 @@ export class CompareConfigBuilder {
         return this;
     }
 }
+
+export const DEFAULT_COMPARER_FACTORIES_COUNT = defaultCompareConfig.comparerFactories.length;
+export const DEFAULT_RULES_COUNT = Object.keys(defaultCompareConfig.rules).length;
