@@ -144,7 +144,7 @@ describe('ScalarDeclaration', () => {
         });
         it('should return the validator', () => {
             const testClass = modelManager.getType('com.testing.SSN');
-            should.equal(testClass.getValidator().validator.pattern, '\\d{3}-\\d{2}-\\{4}+');
+            should.equal(testClass.getValidator().validator.pattern, '\\d{3}-\\d{2}-\\d{4}');
         });
     });
 
