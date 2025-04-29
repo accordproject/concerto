@@ -65,6 +65,17 @@ class NumberValidator extends Validator{
                 this.reportError(null, 'Lower bound must be less than or equal to upper bound.');
             }
         }
+
+        if(this.field?.ast?.defaultValue !== undefined) {
+            let value = this.field.ast.defaultValue;
+            if(this.lowerBound !== null && value < this.lowerBound) {
+                this.reportError(null, `Value ${value} is outside lower bound ${this.lowerBound}`);
+            }
+
+            if(this.upperBound !== null && value > this.upperBound) {
+                this.reportError(null, `Value ${value} is outside upper bound ${this.upperBound}`);
+            }
+        }
     }
 
     /**

@@ -71,6 +71,41 @@ describe('NumberValidator', () => {
                 new NumberValidator(mockField, LOWER_IS_HIGHER_THAN_UPPER);
             }).should.throw(/Lower bound must be less than or equal to upper bound./);
         });
+
+        it('should use default value if input is null and within range', () => {
+            mockField.ast = { defaultValue: 50 };
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: 100 });
+            }).should.not.throw();
+        });
+
+        it('should throw an error if default value is outside the lower bound', () => {
+            mockField.ast = { defaultValue: 5 };
+            (() => {
+                new NumberValidator(mockField, { lower: 10, upper: 100 });
+            }).should.throw(/Value 5 is outside lower bound 10/);
+        });
+
+        it('should throw an error if default value is outside the upper bound', () => {
+            mockField.ast = { defaultValue: 60 };
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: 50 });
+            }).should.throw(/Value 60 is outside upper bound 50/);
+        });
+
+        it('should not throw an error if default value is exactly at the lower bound', () => {
+            mockField.ast = { defaultValue: 10 };
+            (() => {
+                new NumberValidator(mockField, { lower: 10, upper: 100 });
+            }).should.not.throw();
+        });
+
+        it('should not throw an error if default value is exactly at the upper bound', () => {
+            mockField.ast = { defaultValue: 50 };
+            (() => {
+                new NumberValidator(mockField, { lower: 0, upper: 50 });
+            }).should.not.throw();
+        });
     });
 
     describe('#validate', () => {
