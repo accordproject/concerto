@@ -44,18 +44,45 @@ function parse(cto, fileName, options) {
  * Parses an array of model files
  * @param {string[]} files - array of cto files
  * @param {Object} [options] - an optional options parameter
- * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
- * @return {*} the AST / metamodel
+ * @param {boolean} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
+ * @return {Object} an object with:
+ *   - `$class` {string}: the AST/metamodel namespace
+ *   - `models` {Object[]}: successfully parsed metamodels
+ * @throws {Error} if there are any parse errors, throws an aggregate error with:
+ *  - `message` {string}: summary of all errors
+ *  - `errors` {Object[]}: array of error details, each with:
+ *      - `file` {string}: file identifier
+ *      - `message` {string}: error message
+ *      - `location` {Object}: location of the error, if available
  */
 function parseModels(files, options) {
     const result = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
     };
-    files.forEach((modelFile) => {
-        let metaModel = Parser.parse(modelFile, options);
-        result.models.push(metaModel);
+    const errors = [];
+    files.forEach((modelFile, index) => {
+        const fileId = `file_${index}`; // for unique file id
+        try {
+            let metaModel = parse(modelFile, fileId, options);
+            result.models.push(metaModel);
+        } catch (err) {
+            const errorDetails = {
+                file: err.fileName || fileId,
+                message: err.message,
+            };
+            if (err.fileLocation) {
+                errorDetails.location = err.fileLocation;
+            }
+            errors.push(errorDetails);
+        }
     });
+    if (errors.length > 0) {
+        const errorMessages = errors.map(e=> `\tError in ${e.file}: ${e.message}`).join('\n');
+        const aggregateError = new Error(`Parsing errors occurred in ${errors.length} files:\n${errorMessages}`);
+        aggregateError.errors = errors; // individual errors
+        throw aggregateError;
+    }
     return result;
 }
 
