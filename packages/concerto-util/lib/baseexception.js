@@ -43,6 +43,13 @@ class BaseException extends Error {
         }
     }
 
+    /**
+     * Returns the error type associated with the exception
+     * @return {string} the error type for this exception
+     */
+    getErrorType() {
+        return this.errorType;
+    }
 }
 
 module.exports = BaseException;

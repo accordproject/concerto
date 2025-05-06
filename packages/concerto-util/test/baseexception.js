@@ -15,6 +15,7 @@
 'use strict';
 
 const BaseException = require('../lib/baseexception');
+const ErrorCodes = require('../lib/errorcodes');
 
 require('chai').should();
 
@@ -59,6 +60,18 @@ describe('BaseException', function () {
             }
         });
 
+    });
+
+    describe('#getErrorType', function () {
+        it('should return the default error type when not specified', function () {
+            let exc = new BaseException('hello world');
+            exc.getErrorType().should.equal(ErrorCodes.DEFAULT_BASE_EXCEPTION);
+        });
+
+        it('should return the specified error type', function () {
+            let exc = new BaseException('hello world', 'component', ErrorCodes.TYPE_NOT_FOUND_EXCEPTION);
+            exc.getErrorType().should.equal(ErrorCodes.TYPE_NOT_FOUND_EXCEPTION);
+        });
     });
 
 });
