@@ -15,4 +15,9 @@ declare class BaseException extends Error {
     constructor(message: string, component: string, errorType: string);
     component: any;
     errorType: string;
+    /**
+     * Returns the error type associated with the exception
+     * @return {string} the error type for this exception
+     */
+    getErrorType(): string;
 }
