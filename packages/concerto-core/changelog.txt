@@ -23,6 +23,8 @@
 #
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
+Version 3.21.0 {f5cd054bfe8de6f9367fb74f517271cf} 2025-05-20
+- Remove Import Aliasing and Map Type feature flags
 
 Version 3.20.5 {3be18f4d17eb0e65e9a9ffc369231bf6} 2025-02-03
 - vocabulary support for namespace scoped decorators

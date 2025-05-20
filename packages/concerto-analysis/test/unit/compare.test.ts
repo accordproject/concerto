@@ -15,9 +15,8 @@ async function getModelFile(modelManager: ModelManager, fileName: string) {
 async function getModelFiles(
     aFileName: string,
     bFileName: string,
-    importAliasing = false
 ): Promise<[a: ModelFile, b: ModelFile]> {
-    const modelManager = new ModelManager({ strict: true, importAliasing: importAliasing });
+    const modelManager = new ModelManager({ strict: true });
     const a = await getModelFile(modelManager, aFileName);
     const b = await getModelFile(modelManager, bFileName);
     return [a, b];
@@ -72,7 +71,6 @@ test('should detect a change of namespace', async () => {
 
 ['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map', 'scalar'].forEach(type => {
     test(`should detect a ${type} being added`, async () => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
         const [a, b] = await getModelFiles('empty.cto', `${type}-added.cto`);
         const results = new Compare().compare(a, b);
         expect(results.findings).toEqual(expect.arrayContaining([
@@ -269,7 +267,6 @@ test('should detect a field local type name change', async () => {
 });
 
 test('should detect a map key type changing from x to y', async () => {
-    process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
     const [a, b] = await getModelFiles('map-added.cto', 'map-changed-key.cto');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([
@@ -283,7 +280,6 @@ test('should detect a map key type changing from x to y', async () => {
 });
 
 test('should detect a map value type changing from x to y', async () => {
-    process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
     const [a, b] = await getModelFiles('map-added.cto', 'map-changed-value.cto');
     const results = new Compare().compare(a, b);
     expect(results.findings).toEqual(expect.arrayContaining([

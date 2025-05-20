@@ -123,7 +123,7 @@ describe('Property - Test for property types using Import Aliasing', () => {
     let resolvedModelManager;
 
     beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        modelManager = new ModelManager({ strict: true });
 
         const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
         const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
@@ -132,7 +132,7 @@ describe('Property - Test for property types using Import Aliasing', () => {
         modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
         const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
         const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        resolvedModelManager = new ModelManager({ strict: true });
         const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
         const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);

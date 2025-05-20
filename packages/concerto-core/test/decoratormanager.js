@@ -29,13 +29,6 @@ chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
 
-    beforeEach(() => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
-    });
-
-    afterEach(() => {
-    });
-
     describe('#falsyOrEqual', function() {
         it('should match null', async function() {
             DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;

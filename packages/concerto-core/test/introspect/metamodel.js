@@ -220,19 +220,19 @@ describe('MetaModel (Parent - Child (Import Aliasing))', () => {
         });
 
         it('should convert and validate a ModelFile to its metamodel', () => {
-            const modelManager1 = new ModelManager({ importAliasing: true, enableMapType: true });
+            const modelManager1 = new ModelManager();
             const mf1 = ParserUtil.newModelFile(modelManager1, parentModel);
             const mm1 = mf1.getAst();
             mm1.should.deep.equal(parentMetaModel);
             const model2 = Printer.toCTO(mm1);
-            const modelManager2 = new ModelManager({ importAliasing: true, enableMapType: true });
+            const modelManager2 = new ModelManager();
             const mf2 = ParserUtil.newModelFile(modelManager2, model2);
             const mm2 = mf2.getAst();
             mm2.should.deep.equal(parentMetaModel);
         });
 
         it('should accpet a cto model with its dependency, resolve the types and build back the cto', () => {
-            const modelManager = new ModelManager({ importAliasing: true, enableMapType: true });
+            const modelManager = new ModelManager();
             const mf1 = ParserUtil.newModelFile(modelManager, childModel);
             const mf2 = ParserUtil.newModelFile(modelManager, parentModel);
             modelManager.addModelFiles([mf1, mf2], ['child.cto', 'parent.cto']);
