@@ -318,13 +318,10 @@ class DecoratorManager {
         }
 
         if (shouldValidate) {
-            const enableMapType = modelManager?.enableMapType ? true : false;
             const validationModelManager = new ModelManager({
                 strict: true,
                 metamodelValidation: true,
                 addMetamodel: true,
-                enableMapType,
-                importAliasing: modelManager.isAliasedTypeEnabled(),
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -447,11 +444,8 @@ class DecoratorManager {
             });
         });
 
-        const enableMapType = modelManager?.enableMapType ? true : false;
         const newModelManager = new ModelManager({
             strict: modelManager.isStrict(),
-            enableMapType,
-            importAliasing: modelManager.isAliasedTypeEnabled(),
             decoratorValidation: modelManager.getDecoratorValidation()});
         newModelManager.fromAst(decoratedAst);
         return newModelManager;

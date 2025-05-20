@@ -788,9 +788,6 @@ class ModelFile extends Decorated {
                             )
                     );
                 } else {
-                    if (imp.aliasedTypes) {
-                        throw new Error('Aliasing disabled, set importAliasing to true');
-                    }
                     imp.types.forEach((type) => {
                         this.importShortNames.set(type,`${imp.namespace}.${type}`);
                     });

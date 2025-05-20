@@ -23,8 +23,6 @@ declare class BaseModelManager {
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
-     * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
-     * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
@@ -35,8 +33,6 @@ declare class BaseModelManager {
         regExp?: any;
         metamodelValidation?: boolean;
         addMetamodel?: boolean;
-        enableMapType?: boolean;
-        importAliasing?: boolean;
         decoratorValidation?: {
             missingDecorator?: string;
             invalidDecorator?: string;
@@ -53,8 +49,6 @@ declare class BaseModelManager {
         regExp?: any;
         metamodelValidation?: boolean;
         addMetamodel?: boolean;
-        enableMapType?: boolean;
-        importAliasing?: boolean;
         decoratorValidation?: {
             missingDecorator?: string;
             invalidDecorator?: string;
@@ -67,8 +61,6 @@ declare class BaseModelManager {
         missingDecorator?: string;
         invalidDecorator?: string;
     };
-    enableMapType: boolean;
-    importAliasing: boolean;
     metamodelModelFile: ModelFile;
     /**
      * Returns true
