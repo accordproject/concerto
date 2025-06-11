@@ -81,6 +81,8 @@ declare class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
@@ -89,6 +91,8 @@ declare class DecoratorManager {
         migrate?: boolean;
         defaultNamespace?: boolean;
         enableDcsNamespaceTarget?: boolean;
+        disableMetamodelResolution?: boolean;
+        disableMetamodelValidation?: boolean;
     }): ModelManager;
     /**
      * @typedef ExtractDecoratorsResult
@@ -210,6 +214,13 @@ declare class DecoratorManager {
      * @param {*} newDecorator the decorator to add
      */
     static applyDecorator(decorated: any, type: string, newDecorator: any): void;
+    /**
+     * Checks for duplicate decorators added to a decorated model element.
+     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
+     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
+     * @private
+     */
+    private static checkForDuplicateDecorators;
     /**
      * Executes a Command against a Model Namespace, adding
      * decorators to the Namespace.
