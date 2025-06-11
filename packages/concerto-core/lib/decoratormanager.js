@@ -699,20 +699,18 @@ class DecoratorManager {
      * @private
      */
     static checkForDuplicateDecorators(decoratedAst) {
-        if (decoratedAst.decorators && decoratedAst.decorators.length > 0) {
-            const uniqueDecoratorNames = new Set();
-            decoratedAst.decorators.forEach(d => {
-                const decoratorName = d.name;
-                if(!uniqueDecoratorNames.has(decoratorName)) {
-                    uniqueDecoratorNames.add(decoratorName);
-                } else {
-                    throw new IllegalModelException(
-                        `Duplicate decorator ${decoratorName}`,
-                        decoratedAst.location,
-                    );
-                }
-            });
-        }
+        const uniqueDecoratorNames = new Set();
+        decoratedAst.decorators.forEach(d => {
+            const decoratorName = d.name;
+            if(!uniqueDecoratorNames.has(decoratorName)) {
+                uniqueDecoratorNames.add(decoratorName);
+            } else {
+                throw new IllegalModelException(
+                    `Duplicate decorator ${decoratorName}`,
+                    decoratedAst.location,
+                );
+            }
+        });
     }
 
     /**
