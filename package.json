@@ -33,6 +33,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/accordproject/concerto"
-  },
-  "packageManager": "npm@11.4.1+sha512.fcee43884166b6f9c5d04535fb95650e9708b6948a1f797eddf40e9778646778a518dfa32651b1c62ff36f4ac42becf177ca46ca27d53f24b539190c8d91802b"
+  }
 }
