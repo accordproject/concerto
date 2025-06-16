@@ -60,7 +60,7 @@ class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + object migrateTo(decoratorCommandSet,string) 
    + boolean canMigrate(decoratorCommandSet,DCS_VERSION) 
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?) 
    + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string,boolean) 
    + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string,boolean) 
    + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string,boolean) 

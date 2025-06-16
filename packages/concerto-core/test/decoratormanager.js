@@ -554,6 +554,34 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
+        it('should decorate validated and resolved model using fast mode', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, fastMode: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should throw error if fast mode is enabled and disableModelResoltion and disableModelValidation are set as false', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, fastMode: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
+            }).should.throw(/Fast mode cannot be used with disableMetamodelResolution or disableMetamodelValidation or enableDcsNamespaceTarget options as false/);
+        });
+
         it('should check for duplicate while appending a decorator from DCS', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});

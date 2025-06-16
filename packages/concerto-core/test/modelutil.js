@@ -180,9 +180,9 @@ describe('ModelUtil', function () {
         it('valid, with version validation disabled', function() {
             const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.x', { disableVersionValidation: true });
             nsInfo.name.should.equal('org.acme');
-            nsInfo.escapedNamespace.should.equal('org.acme_1.0.x');
-            nsInfo.version.should.equal('1.0.x');
-            nsInfo.versionParsed.should.not.equal(1);
+            nsInfo.should.not.have.property('escapedNamespace');
+            nsInfo.should.not.have.property('version');
+            nsInfo.should.not.have.property('versionParsed');
         });
 
         it('invalid', function() {

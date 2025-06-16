@@ -137,6 +137,12 @@ class ModelUtil {
             version = semver.parse(parts[1]);
         }
 
+        if (options?.disableVersionValidation) {
+            return {
+                name: parts[0],
+            };
+        }
+
         return {
             name: parts[0],
             escapedNamespace: ns.replace('@', '_'),
