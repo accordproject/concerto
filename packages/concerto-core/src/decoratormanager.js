@@ -22,6 +22,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const IllegalModelException = require('./introspect/illegalmodelexception');
 const rfdc = require('rfdc')({
     circles: true,
     proto: false,
@@ -373,9 +374,20 @@ class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
+
+        if (options?.skipValidationAndResolution) {
+            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
+                throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
+            }
+            options.disableMetamodelResolution = true;
+            options.disableMetamodelValidation = true;
+        }
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
@@ -397,7 +409,7 @@ class DecoratorManager {
                 : []);
         }).filter(i => i.namespace);
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
-        const ast = modelManager.getAst(true, true);
+        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
         const decoratedAst = rfdc(ast);
         decoratedAst.models.forEach((model) => {
             // remove the imports for types defined in this namespace
@@ -456,7 +468,7 @@ class DecoratorManager {
             enableMapType,
             importAliasing: modelManager.isAliasedTypeEnabled(),
             decoratorValidation: modelManager.getDecoratorValidation()});
-        newModelManager.fromAst(decoratedAst);
+        newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
         return newModelManager;
     }
     /**
@@ -686,9 +698,31 @@ class DecoratorManager {
             decorated.decorators
                 ? decorated.decorators.push(newDecorator)
                 : (decorated.decorators = [newDecorator]);
+            this.checkForDuplicateDecorators(decorated);
         } else {
             throw new Error(`Unknown command type ${type}`);
         }
+    }
+
+    /**
+     * Checks for duplicate decorators added to a decorated model element.
+     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
+     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
+     * @private
+     */
+    static checkForDuplicateDecorators(decoratedAst) {
+        const uniqueDecoratorNames = new Set();
+        decoratedAst.decorators.forEach(d => {
+            const decoratorName = d.name;
+            if(!uniqueDecoratorNames.has(decoratorName)) {
+                uniqueDecoratorNames.add(decoratorName);
+            } else {
+                throw new IllegalModelException(
+                    `Duplicate decorator ${decoratorName}`,
+                    decoratedAst.location,
+                );
+            }
+        });
     }
 
     /**
@@ -721,7 +755,8 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command, property, options) {
         const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace( namespace );
+        // the namespace version is already validated in the decorateModels method
+        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 

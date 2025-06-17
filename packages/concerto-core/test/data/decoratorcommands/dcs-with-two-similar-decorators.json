@@ -1,0 +1,43 @@
+{
+    "$class" : "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+    "name" : "validated",
+    "version": "1.0.0",
+    "commands" : [
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
+            "type" : "UPSERT",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Hide",
+                "arguments" : [
+                    {
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorBoolean",
+                        "value" : true
+                    }
+                ]
+            }
+        },
+        {
+            "$class" : "org.accordproject.decoratorcommands@0.4.0.Command",
+            "type" : "APPEND",
+            "target" : {
+                "$class" : "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                "type" : "concerto.metamodel@1.0.0.StringProperty"
+            },
+            "decorator" : {
+                "$class" : "concerto.metamodel@1.0.0.Decorator",
+                "name" : "Hide",
+                "arguments" : [
+                    {
+                        "$class" : "concerto.metamodel@1.0.0.DecoratorBoolean",
+                        "value" : false
+                    }
+                ]
+            }
+        }
+    ]
+}

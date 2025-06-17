@@ -171,6 +171,14 @@ describe('ModelUtil', function () {
             nsInfo.versionParsed.major.should.equal(1);
         });
 
+        it('valid, with version validation disabled', function() {
+            const nsInfo = ModelUtil.parseNamespace('org.acme@1.0.x', { disableVersionParsing: true });
+            nsInfo.name.should.equal('org.acme');
+            nsInfo.should.not.have.property('escapedNamespace');
+            nsInfo.should.not.have.property('version');
+            nsInfo.should.not.have.property('versionParsed');
+        });
+
         it('invalid', function() {
             (() => {
                 ModelUtil.parseNamespace(null);
