@@ -114,29 +114,40 @@ class ModelUtil {
      * its name and version parts. The version of the namespace
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
+     * @param {object} [options] optional parsing options
+     * @param {boolean} [options.disableVersionParsing] if false, the version will be parsed
      * @returns {ParseNamespaceResult} the result of parsing
      */
-    static parseNamespace(ns) {
+    static parseNamespace(ns, options) {
         if(!ns) {
             throw new Error('Namespace is null or undefined.');
         }
 
         const parts = ns.split('@');
+        let version = parts[1];
         if(parts.length > 2) {
             throw new Error(`Invalid namespace ${ns}`);
         }
 
-        if(parts.length === 2) {
+        if(parts.length === 2 && !options?.disableVersionParsing) {
+            // Validate the version using semver
             if(!semver.valid(parts[1])) {
                 throw new Error(`Invalid namespace ${ns}`);
             }
+            version = semver.parse(parts[1]);
+        }
+
+        if (options?.disableVersionParsing) {
+            return {
+                name: parts[0],
+            };
         }
 
         return {
             name: parts[0],
             escapedNamespace: ns.replace('@', '_'),
             version: parts.length > 1 ? parts[1] : null,
-            versionParsed: parts.length > 1 ? semver.parse(parts[1]) : null
+            versionParsed: parts.length > 1 ? version : null
         };
     }
 

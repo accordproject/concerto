@@ -348,8 +348,12 @@ declare class BaseModelManager {
     /**
      * Populates the model manager from a models metamodel AST
      * @param {*} ast the metamodel
+     * @param {object} [options] - options for the from ast method
+     * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
-    fromAst(ast: any): void;
+    fromAst(ast: any, options?: {
+        disableValidation?: object;
+    }): void;
     /**
      * Get the full ast (metamodel instances) for a modelmanager
      * @param {boolean} [resolve] - whether to resolve names

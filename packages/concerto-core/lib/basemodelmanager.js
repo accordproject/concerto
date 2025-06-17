@@ -794,8 +794,10 @@ class BaseModelManager {
     /**
      * Populates the model manager from a models metamodel AST
      * @param {*} ast the metamodel
+     * @param {object} [options] - options for the from ast method
+     * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
-    fromAst(ast) {
+    fromAst(ast, options) {
         this.clearModelFiles();
         ast.models.forEach( model => {
             if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
@@ -803,7 +805,9 @@ class BaseModelManager {
                 this.addModelFile( modelFile, null, null, true );
             }
         });
-        this.validateModelFiles();
+        if (!options?.disableValidation) {
+            this.validateModelFiles();
+        }
     }
 
     /**

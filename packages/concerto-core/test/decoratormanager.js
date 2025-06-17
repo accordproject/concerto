@@ -23,6 +23,7 @@ const Printer= require('../../concerto-cto/lib/printer');
 
 const chai = require('chai');
 const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = require('@accordproject/concerto-util/lib/errorcodes');
+const ModelFile = require('../lib/introspect/modelfile');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
@@ -523,6 +524,76 @@ describe('DecoratorManager', () => {
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs));
             }).should.throw(/Unknown command type INVALID/);
+        });
+
+        it('should decorate resolved model without resolving the model again', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, disableMetamodelResolution: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should decorate validated model without validating the model again', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, disableMetamodelValidation: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should decorate validated and resolved model using fast mode', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, skipValidationAndResolution: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should throw error if fast mode is enabled and disableModelResoltion and disableModelValidation are set as false', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, skipValidationAndResolution: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
+            }).should.throw(/skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false/);
+        });
+
+        it('should check for duplicate while appending a decorator from DCS', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/dcs-with-two-similar-decorators.json'), 'utf-8');
+            chai.expect(() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, disableMetamodelValidation: true});
+            }).to.throw('Duplicate decorator Hide');
         });
     });
 
