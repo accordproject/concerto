@@ -33,11 +33,11 @@ declare class ModelUtil {
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @param {object} [options] optional parsing options
-     * @param {boolean} [options.disableVersionValidation] if false, the version will be validated
+     * @param {boolean} [options.disableVersionParsing] if false, the version will be parsed
      * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns: string, options?: {
-        disableVersionValidation?: boolean;
+        disableVersionParsing?: boolean;
     }): {
         /**
          * the name of the namespace

@@ -115,7 +115,7 @@ class ModelUtil {
      * (if present) is parsed using semver.parse.
      * @param {string} ns the namespace to parse
      * @param {object} [options] optional parsing options
-     * @param {boolean} [options.disableVersionValidation] if false, the version will be validated
+     * @param {boolean} [options.disableVersionParsing] if false, the version will be parsed
      * @returns {ParseNamespaceResult} the result of parsing
      */
     static parseNamespace(ns, options) {
@@ -129,7 +129,7 @@ class ModelUtil {
             throw new Error(`Invalid namespace ${ns}`);
         }
 
-        if(parts.length === 2 && !options?.disableVersionValidation) {
+        if(parts.length === 2 && !options?.disableVersionParsing) {
             // Validate the version using semver
             if(!semver.valid(parts[1])) {
                 throw new Error(`Invalid namespace ${ns}`);
@@ -137,7 +137,7 @@ class ModelUtil {
             version = semver.parse(parts[1]);
         }
 
-        if (options?.disableVersionValidation) {
+        if (options?.disableVersionParsing) {
             return {
                 name: parts[0],
             };

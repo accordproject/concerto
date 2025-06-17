@@ -81,6 +81,7 @@ declare class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
@@ -91,6 +92,7 @@ declare class DecoratorManager {
         migrate?: boolean;
         defaultNamespace?: boolean;
         enableDcsNamespaceTarget?: boolean;
+        skipValidationAndResolution?: boolean;
         disableMetamodelResolution?: boolean;
         disableMetamodelValidation?: boolean;
     }): ModelManager;

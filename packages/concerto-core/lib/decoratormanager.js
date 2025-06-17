@@ -371,20 +371,19 @@ class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
-     * @param {boolean} [options.dangerouslyFast] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
 
-        if (options?.dangerouslyFast) {
-            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false || options?.enableDcsNamespaceTarget === false) {
-                throw new Error('Fast mode cannot be used with disableMetamodelResolution or disableMetamodelValidation or enableDcsNamespaceTarget options as false');
+        if (options?.skipValidationAndResolution) {
+            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
+                throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
             }
             options.disableMetamodelResolution = true;
             options.disableMetamodelValidation = true;
-            options.enableDcsNamespaceTarget = true;
         }
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
@@ -754,7 +753,7 @@ class DecoratorManager {
     static executeCommand(namespace, declaration, command, property, options) {
         const { target, decorator, type } = command;
         // the namespace version is already validated in the decorateModels method
-        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionValidation: true } );
+        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 

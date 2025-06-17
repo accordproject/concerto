@@ -563,7 +563,7 @@ describe('DecoratorManager', () => {
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true, dangerouslyFast: true});
+                {validate: true, skipValidationAndResolution: true});
 
             decoratedModelManager.should.not.be.null;
         });
@@ -578,8 +578,8 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                    {validate: true, dangerouslyFast: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
-            }).should.throw(/Fast mode cannot be used with disableMetamodelResolution or disableMetamodelValidation or enableDcsNamespaceTarget options as false/);
+                    {validate: true, skipValidationAndResolution: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
+            }).should.throw(/skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false/);
         });
 
         it('should check for duplicate while appending a decorator from DCS', async function() {
