@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-analysis",
-  "version": "3.21.0",
+  "version": "3.22.0",
   "description": "Analysis of Concerto model files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -31,11 +31,11 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "3.21.0",
+    "@accordproject/concerto-core": "3.22.0",
     "semver": "7.6.3"
   },
   "devDependencies": {
-    "@accordproject/concerto-cto": "3.21.0",
+    "@accordproject/concerto-cto": "3.22.0",
     "@types/semver": "7.5.8",
     "@typescript-eslint/eslint-plugin": "8.16.0",
     "@typescript-eslint/parser": "8.16.0",
