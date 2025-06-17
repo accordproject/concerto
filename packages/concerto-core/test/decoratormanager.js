@@ -563,7 +563,7 @@ describe('DecoratorManager', () => {
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true, fastMode: true});
+                {validate: true, dangerouslyFast: true});
 
             decoratedModelManager.should.not.be.null;
         });
@@ -578,7 +578,7 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                    {validate: true, fastMode: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
+                    {validate: true, dangerouslyFast: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
             }).should.throw(/Fast mode cannot be used with disableMetamodelResolution or disableMetamodelValidation or enableDcsNamespaceTarget options as false/);
         });
 
