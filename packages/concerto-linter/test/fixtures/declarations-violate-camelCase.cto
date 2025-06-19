@@ -1,0 +1,22 @@
+namespace org.example@1.0.0
+
+scalar ssnNumber extends String default="000-00-0000"
+
+concept MyProduct {
+}
+
+asset PAYmentOrder {
+}
+
+participant Customer {
+}
+
+transaction Order {
+} 
+
+event LateDelivery{
+}
+
+enum Product  {
+
+}

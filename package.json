@@ -22,7 +22,8 @@
     "packages/concerto-cto",
     "packages/concerto-types",
     "packages/concerto-util",
-    "packages/concerto-vocabulary"
+    "packages/concerto-vocabulary",
+    "packages/concerto-linter"
   ],
   "name": "concerto",
   "description": "Monorepo for concerto packages",
