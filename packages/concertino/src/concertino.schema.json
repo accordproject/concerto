@@ -1,0 +1,245 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/concertino.schema.json",
+    "title": "Concertino",
+    "type": "object",
+    "required": ["declarations", "metadata"],
+    "properties": {
+        "declarations": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/definitions/Declaration" }
+        },
+        "metadata": { "$ref": "#/definitions/Metadata" }
+    },
+    "definitions": {
+        "Metadata": {
+            "type": "object",
+            "required": ["concertinoVersion", "models"],
+            "properties": {
+                "concertinoVersion": { "type": "string" },
+                "models": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "concertoVersion": { "type": "string" },
+                            "sourceUri": { "type": "string" },
+                            "imports": {
+                                "type": "array",
+                                "items": { "type": "object" }
+                            },
+                            "decorators": {
+                                "type": "array",
+                                "items": { "type": "object" }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "Vocabulary": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "path": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    }
+                },
+                "additionalTerms": {
+                    "type": "object",
+                    "additionalProperties": { "type": "string" }
+                }
+            },
+            "additionalProperties": false
+        },
+        "MetadataMap": {
+            "type": "object",
+            "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                { "type": "string" },
+                                { "type": "number" },
+                                { "type": "boolean" },
+                                { "type": "object" }
+                            ]
+                        }
+            }
+        },
+        "FullyQualifiedName": {
+            "type": "object",
+            "required": ["namespace", "localName", "version"],
+            "properties": {
+                "namespace": { "type": "string" },
+                "localName": { "type": "string" },
+                "version": { "type": "string" }
+            },
+            "additionalProperties": false
+        },
+        "EnumOption": {
+            "type": "object",
+            "properties": {
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" }
+            },
+            "additionalProperties": false
+        },
+        "Declaration": {
+            "oneOf": [
+                { "$ref": "#/definitions/ConceptDeclaration" },
+                { "$ref": "#/definitions/EnumDeclaration" },
+                { "$ref": "#/definitions/ScalarDeclaration" },
+                { "$ref": "#/definitions/MapDeclaration" }
+            ]
+        },
+        "ConceptDeclaration": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+                "type": { "const": "ConceptDeclaration" },
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": { "$ref": "#/definitions/Property" }
+                },
+                "extends": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "isAbstract": { "type": "boolean" },
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "prototype": { "type": "string" },
+                "name": { "$ref": "#/definitions/FullyQualifiedName" }
+            },
+            "additionalProperties": false
+        },
+        "EnumDeclaration": {
+            "type": "object",
+            "required": ["type", "values"],
+            "properties": {
+                "type": { "const": "EnumDeclaration" },
+                "values": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/EnumOption"
+                    }
+                },
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "name": { "$ref": "#/definitions/FullyQualifiedName" }
+            },
+            "additionalProperties": false
+        },
+        "ScalarDeclaration": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+                "type": {
+                    "enum": [
+                        "StringScalar",
+                        "IntegerScalar",
+                        "BooleanScalar",
+                        "DoubleScalar",
+                        "LongScalar",
+                        "DateTimeScalar"
+                    ]
+                },
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "regex": { "type": "string" },
+                "length": {
+                    "type": "array",
+                    "items": [
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                    ],
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "range": {
+                    "type": "array",
+                    "items": [
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                    ],
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "default": {
+                    "anyOf": [
+                        { "type": "string" },
+                        { "type": "number" },
+                        { "type": "boolean" }
+                    ]
+                },
+                "name": { "$ref": "#/definitions/FullyQualifiedName" }
+            },
+            "additionalProperties": false
+        },
+        "MapDeclaration": {
+            "type": "object",
+            "required": ["type", "keyType", "valueType"],
+            "properties": {
+                "type": { "const": "MapDeclaration" },
+                "keyType": { "type": "string" },
+                "valueType": { "type": "string" },
+                "isRelationshipValue": { "type": "boolean" },
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "name": { "$ref": "#/definitions/FullyQualifiedName" }
+            },
+            "additionalProperties": false
+        },
+        "Property": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "scalarType": { "type": "string" },
+                "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                "isCircular": { "type": "boolean" },
+                "isEnum": { "type": "boolean" },
+                "isOptional": { "type": "boolean" },
+                "isArray": { "type": "boolean" },
+                "isRelationship": { "type": "boolean" },
+                "isIdentifier": { "type": "boolean" },
+                "inheritedFrom": { "type": "string" },
+                "metadata": { "$ref": "#/definitions/MetadataMap" },
+                "regex": { "type": "string" },
+                "length": {
+                    "type": "array",
+                    "items": [
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                    ],
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "range": {
+                    "type": "array",
+                    "items": [
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                    ],
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "default": {
+                    "anyOf": [
+                        { "type": "string" },
+                        { "type": "number" },
+                        { "type": "boolean" }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
