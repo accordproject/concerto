@@ -1,0 +1,687 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`concertino edge cases and error handling should roundtrip sourceUri 1`] = `
+{
+  "declarations": {},
+  "metadata": {
+    "concertinoVersion": "0.1.0-alpha.3",
+    "models": {
+      "sourceUriTest@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": undefined,
+        "imports": undefined,
+        "sourceUri": "uri",
+      },
+    },
+  },
+}
+`;
+
+exports[`concertino roundtripping (sample models) should produce valid concertino 1`] = `
+{
+  "declarations": {
+    "com.test.another@1.0.0.Fee": {
+      "name": {
+        "localName": "Fee",
+        "namespace": "com.test.another",
+        "version": "1.0.0",
+      },
+      "regex": "/^[A-Za-z]+$/",
+      "type": "StringScalar",
+    },
+    "com.test.another@1.0.0.Fi": {
+      "isAbstract": true,
+      "name": {
+        "localName": "Fi",
+        "namespace": "com.test.another",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "someString": {
+          "isOptional": true,
+          "name": "someString",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "com.test.another@1.0.0.Fo": {
+      "extends": [
+        "com.test.another@1.0.0.Fi",
+      ],
+      "name": {
+        "localName": "Fo",
+        "namespace": "com.test.another",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "personId": {
+          "isIdentifier": true,
+          "name": "personId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "someString": {
+          "inheritedFrom": "com.test.another@1.0.0.Fi",
+          "isOptional": true,
+          "name": "someString",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "com.test.another@1.0.0.Fum": {
+      "name": {
+        "localName": "Fum",
+        "namespace": "com.test.another",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$identifier": {
+          "isIdentifier": true,
+          "name": "$identifier",
+          "type": "String",
+        },
+        "someString": {
+          "name": "someString",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "com.test.models@1.2.3.AuditEvent": {
+      "name": {
+        "localName": "AuditEvent",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "com.test.models@1.2.3.Bar": {
+      "metadata": {
+        "Decoratored": [],
+      },
+      "name": {
+        "localName": "Bar",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "someString": {
+          "name": "someString",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "some string",
+          },
+        },
+      },
+      "type": "ConceptDeclaration",
+      "vocabulary": {
+        "additionalTerms": {
+          "Description": "bar",
+        },
+        "label": "bar",
+      },
+    },
+    "com.test.models@1.2.3.Dictionary": {
+      "keyType": "String",
+      "name": {
+        "localName": "Dictionary",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "type": "MapDeclaration",
+      "valueType": "String",
+    },
+    "com.test.models@1.2.3.Foo": {
+      "name": {
+        "localName": "Foo",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "bar": {
+          "name": "bar",
+          "type": "com.test.models@1.2.3.Bar",
+          "vocabulary": {
+            "label": "bar prop",
+          },
+        },
+        "fum": {
+          "isArray": true,
+          "isOptional": true,
+          "isRelationship": true,
+          "metadata": {
+            "Decorated": [
+              "my relationship decorator",
+            ],
+          },
+          "name": "fum",
+          "type": "com.test.another@1.0.0.Fum",
+          "vocabulary": {
+            "additionalTerms": {
+              "tooltip": "my relationship tooltip",
+            },
+            "label": "my relationship",
+          },
+        },
+        "myEnum": {
+          "metadata": {
+            "Decoratored": [
+              1,
+              true,
+              "a",
+            ],
+            "Decoratored2": [
+              {
+                "type": "com.test.models@1.2.3.Bar",
+              },
+            ],
+            "Decoratored3": null,
+          },
+          "name": "myEnum",
+          "type": "com.test.models@1.2.3.MyEnum",
+          "vocabulary": {
+            "additionalTerms": {
+              "Description": "my enum description",
+            },
+            "label": "my enum",
+          },
+        },
+        "quuux": {
+          "default": 10,
+          "name": "quuux",
+          "range": [
+            0,
+            100,
+          ],
+          "scalarType": "com.test.models@1.2.3.Quuux",
+          "type": "Integer",
+        },
+        "quux": {
+          "length": [
+            1,
+            100,
+          ],
+          "name": "quux",
+          "regex": "/^[A-Za-z]+$/",
+          "scalarType": "com.test.models@1.2.3.Quux",
+          "type": "String",
+        },
+        "qux": {
+          "name": "qux",
+          "scalarType": "com.test.models@1.2.3.Qux",
+          "type": "String",
+        },
+        "someBoolean": {
+          "name": "someBoolean",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "someDouble": {
+          "default": 5,
+          "name": "someDouble",
+          "scalarType": "Double",
+          "type": "Double",
+          "vocabulary": {
+            "label": "some double",
+          },
+        },
+        "someInts": {
+          "isArray": true,
+          "name": "someInts",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "someLong": {
+          "isOptional": true,
+          "name": "someLong",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "someTime": {
+          "name": "someTime",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "x": {
+          "length": [
+            0,
+            1,
+          ],
+          "name": "x",
+          "regex": "/[A-Z]/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "y": {
+          "name": "y",
+          "range": [
+            0,
+            1,
+          ],
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+      },
+      "type": "ConceptDeclaration",
+      "vocabulary": {
+        "additionalTerms": {
+          "tooltip": "foo tooltip",
+        },
+        "label": "foo",
+      },
+    },
+    "com.test.models@1.2.3.MyEnum": {
+      "metadata": {
+        "Decorated": null,
+      },
+      "name": {
+        "localName": "MyEnum",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "FIRST": {
+          "vocabulary": {
+            "additionalTerms": {
+              "Description": "first description",
+            },
+            "label": "first",
+          },
+        },
+        "SECOND": {
+          "metadata": {
+            "Decorated": [
+              "some value",
+            ],
+          },
+          "vocabulary": {
+            "label": "second",
+          },
+        },
+      },
+      "vocabulary": {
+        "label": null,
+      },
+    },
+    "com.test.models@1.2.3.Quuux": {
+      "default": 10,
+      "name": {
+        "localName": "Quuux",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "range": [
+        0,
+        100,
+      ],
+      "type": "IntegerScalar",
+    },
+    "com.test.models@1.2.3.Quux": {
+      "length": [
+        1,
+        100,
+      ],
+      "name": {
+        "localName": "Quux",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "regex": "/^[A-Za-z]+$/",
+      "type": "StringScalar",
+    },
+    "com.test.models@1.2.3.Qux": {
+      "metadata": {
+        "Decorated": [],
+      },
+      "name": {
+        "localName": "Qux",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "type": "StringScalar",
+      "vocabulary": {
+        "label": null,
+      },
+    },
+    "com.test.models@1.2.3.RelationshipMap": {
+      "isRelationshipValue": true,
+      "keyType": "com.test.models@1.2.3.Qux",
+      "metadata": {
+        "Decorated": null,
+      },
+      "name": {
+        "localName": "RelationshipMap",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "type": "MapDeclaration",
+      "valueType": "com.test.models@1.2.3.Fo",
+    },
+    "com.test.models@1.2.3.Xyc": {
+      "extends": [
+        "com.test.another@1.0.0.Fo",
+        "com.test.another@1.0.0.Fi",
+      ],
+      "name": {
+        "localName": "Xyc",
+        "namespace": "com.test.models",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "personId": {
+          "inheritedFrom": "com.test.another@1.0.0.Fo",
+          "isIdentifier": true,
+          "name": "personId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "qux": {
+          "name": "qux",
+          "scalarType": "com.test.models@1.2.3.Qux",
+          "type": "String",
+        },
+        "someString": {
+          "inheritedFrom": "com.test.another@1.0.0.Fi",
+          "isOptional": true,
+          "name": "someString",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.complex@1.0.0.Department": {
+      "name": {
+        "localName": "Department",
+        "namespace": "org.example.complex",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "code": {
+          "name": "code",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "manager": {
+          "name": "manager",
+          "type": "org.example.complex@1.0.0.Employee",
+        },
+        "name": {
+          "name": "name",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.complex@1.0.0.Document": {
+      "extends": [
+        "org.example.complex@1.0.0.DocumentBase",
+      ],
+      "name": {
+        "localName": "Document",
+        "namespace": "org.example.complex",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "docusignId": {
+          "inheritedFrom": "org.example.complex@1.0.0.DocumentBase",
+          "name": "docusignId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "expiryDate": {
+          "isOptional": true,
+          "name": "expiryDate",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "id": {
+          "isIdentifier": true,
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "issueDate": {
+          "name": "issueDate",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "number": {
+          "name": "number",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "type": {
+          "name": "type",
+          "type": "org.example.complex@1.0.0.DocumentType",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.complex@1.0.0.DocumentBase": {
+      "name": {
+        "localName": "DocumentBase",
+        "namespace": "org.example.complex",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "docusignId": {
+          "name": "docusignId",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.complex@1.0.0.DocumentType": {
+      "name": {
+        "localName": "DocumentType",
+        "namespace": "org.example.complex",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "DRIVING_LICENSE": {},
+        "NATIONAL_ID": {},
+        "PASSPORT": {},
+      },
+    },
+    "org.example.complex@1.0.0.Employee": {
+      "name": {
+        "localName": "Employee",
+        "namespace": "org.example.complex",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "department": {
+          "name": "department",
+          "type": "org.example.complex@1.0.0.Department",
+        },
+        "employeeId": {
+          "name": "employeeId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "identificationDocuments": {
+          "isArray": true,
+          "name": "identificationDocuments",
+          "type": "org.example.complex@1.0.0.Document",
+        },
+        "personalInfo": {
+          "name": "personalInfo",
+          "type": "org.example.sample@1.0.0.Person",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.sample@1.0.0.Address": {
+      "name": {
+        "localName": "Address",
+        "namespace": "org.example.sample",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "city": {
+          "name": "city",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "country": {
+          "metadata": {
+            "Crud": [
+              "Create,Read",
+            ],
+          },
+          "name": "country",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "postalCode": {
+          "name": "postalCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "street": {
+          "metadata": {
+            "description": [
+              "Street name and number",
+            ],
+          },
+          "name": "street",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.sample@1.0.0.ContactInfo": {
+      "name": {
+        "localName": "ContactInfo",
+        "namespace": "org.example.sample",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "type": {
+          "name": "type",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "value": {
+          "name": "value",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.example.sample@1.0.0.Person": {
+      "name": {
+        "localName": "Person",
+        "namespace": "org.example.sample",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "address": {
+          "name": "address",
+          "type": "org.example.sample@1.0.0.Address",
+        },
+        "contacts": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "contacts",
+          "type": "org.example.sample@1.0.0.ContactInfo",
+        },
+        "firstName": {
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "lastName": {
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "surname",
+          },
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+  },
+  "metadata": {
+    "concertinoVersion": "0.1.0-alpha.3",
+    "models": {
+      "com.test.another@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "com.test.models@1.2.3": {
+        "concertoVersion": "^3.0.0",
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "name": "NamespaceScopedDecorator",
+          },
+        ],
+        "imports": [
+          {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "aliasedTypes": [
+              {
+                "$class": "concerto.metamodel@1.0.0.AliasedType",
+                "aliasedName": "Fo",
+                "name": "Fo",
+              },
+            ],
+            "namespace": "com.test.another@1.0.0",
+            "types": [
+              "Fee",
+              "Fi",
+              "Fo",
+              "Fum",
+            ],
+          },
+        ],
+        "sourceUri": undefined,
+      },
+      "org.example.complex@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [
+          {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.example.sample@1.0.0",
+            "types": [
+              "Person",
+            ],
+          },
+        ],
+        "sourceUri": undefined,
+      },
+      "org.example.sample@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+    },
+  },
+}
+`;

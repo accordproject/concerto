@@ -43,12 +43,12 @@
             "type": "object",
             "properties": {
                 "label": {
-                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    "oneOf": [{ "type": "string" }, { "type": "null" }]
                 },
                 "path": {
                     "type": "object",
                     "additionalProperties": {
-                        "anyOf": [{ "type": "string" }, { "type": "null" }]
+                        "oneOf": [{ "type": "string" }, { "type": "null" }]
                     }
                 },
                 "additionalTerms": {
@@ -61,15 +61,20 @@
         "MetadataMap": {
             "type": "object",
             "additionalProperties": {
+                "oneOf": [
+                    {
                         "type": "array",
                         "items": {
-                            "anyOf": [
+                            "oneOf": [
                                 { "type": "string" },
                                 { "type": "number" },
                                 { "type": "boolean" },
                                 { "type": "object" }
                             ]
                         }
+                    },
+                    { "type": "null" }
+                ]
             }
         },
         "FullyQualifiedName": {
@@ -156,8 +161,8 @@
                 "length": {
                     "type": "array",
                     "items": [
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] }
                     ],
                     "minItems": 2,
                     "maxItems": 2
@@ -165,14 +170,14 @@
                 "range": {
                     "type": "array",
                     "items": [
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] }
                     ],
                     "minItems": 2,
                     "maxItems": 2
                 },
                 "default": {
-                    "anyOf": [
+                    "oneOf": [
                         { "type": "string" },
                         { "type": "number" },
                         { "type": "boolean" }
@@ -216,8 +221,8 @@
                 "length": {
                     "type": "array",
                     "items": [
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] }
                     ],
                     "minItems": 2,
                     "maxItems": 2
@@ -225,14 +230,14 @@
                 "range": {
                     "type": "array",
                     "items": [
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] },
-                        { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] }
                     ],
                     "minItems": 2,
                     "maxItems": 2
                 },
                 "default": {
-                    "anyOf": [
+                    "oneOf": [
                         { "type": "string" },
                         { "type": "number" },
                         { "type": "boolean" }
