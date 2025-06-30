@@ -3,10 +3,11 @@ import { join } from 'path';
 
 import { ModelManager } from '@accordproject/concerto-core';
 import { Parser } from '@accordproject/concerto-cto';
-import { convertToConcertino, convertToMetamodel, ConcertinoConverter } from '../src/';
+import { ConcertinoConverter } from '../src/';
 import { determineScalarType, dispatchDeclaration, getInheritanceChain, determinePropertyType } from '../src/concertino';
 import { readdirSync, statSync } from 'fs';
 import { IModel, IModels } from '@accordproject/concerto-types';
+import { it, expect, describe } from 'vitest';
 
 const loadAllCtoFiles = (dir: string, models: object[]): void => {
     const files = readdirSync(dir);

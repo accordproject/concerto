@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`concertino edge cases and error handling should roundtrip sourceUri 1`] = `
+exports[`concertino edge cases and error handling > should roundtrip sourceUri 1`] = `
 {
   "declarations": {},
   "metadata": {
@@ -17,7 +17,7 @@ exports[`concertino edge cases and error handling should roundtrip sourceUri 1`]
 }
 `;
 
-exports[`concertino roundtripping (sample models) should produce valid concertino 1`] = `
+exports[`concertino roundtripping (sample models) > should produce valid concertino 1`] = `
 {
   "declarations": {
     "com.test.another@1.0.0.Fee": {
