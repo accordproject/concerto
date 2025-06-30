@@ -1,0 +1,203 @@
+namespace concertino.metamodel@0.1.0-alpha.2
+
+import concerto.metamodel@1.0.0.{Decorator, Import}
+
+// IMPORTANT NOTE
+// This model is not a specification for the Concertino metamodel because Concertino
+// does not use $class discriminators. Therefore, this model cannot be used to validate Concertino files
+// without a feature such as https://github.com/accordproject/concerto/issues/542
+// Nevertheless, this model is useful for understanding the structure of Concertino files and for generating code.
+
+/**
+ * Represents the Concertino format.
+ */
+concept Concertino {
+  o Metadata metadata
+  o DeclarationMap declarations
+}
+
+/**
+ * Represents a map of declarations.
+ */
+map DeclarationMap {
+  o String
+  o Declaration
+}
+
+/**
+ * Metadata for the Concertino format.
+ */
+concept Metadata {
+  o String concertinoVersion
+  o ModelMetadata[] models
+}
+
+/**
+ * Represents metadata for a model.
+ */
+concept ModelMetadata {
+  o String namespace
+  o String concertoVersion optional
+  o String sourceUri optional
+  o Import[] imports optional
+  o Decorator[] decorators optional
+}
+
+/**
+ * Represents a unique identifier for a declaration.
+ */
+concept FullyQualifiedName {
+  o String namespace
+  o String localName
+  o String version
+}
+
+/**
+ * Represents a generic declaration.
+ */
+abstract concept Declaration {
+  o String name
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a ConceptDeclaration.
+ */
+concept ConceptDeclaration extends Declaration {
+  o Property[] properties
+  o String[] extends optional
+  o Boolean isAbstract optional
+  o Prototype prototype optional
+}
+
+/**
+ * Indicates a prototype for a ConceptDeclaration.
+ */
+enum Prototype {
+  o AssetDeclaration
+  o EventDeclaration
+  o TransactionDeclaration
+  o ParticipantDeclaration
+}
+
+/**
+ * Represents an EnumDeclaration.
+ */
+concept EnumDeclaration extends Declaration {
+  o EnumValue[] values
+}
+
+/**
+ * Represents a ScalarDeclaration.
+ */
+abstract concept ScalarDeclaration extends Declaration {}
+
+concept StringScalarDeclaration extends ScalarDeclaration {
+  o String regex optional // For StringScalar
+  o Integer[] length optional length=2 // For StringScalar
+  o String default optional // Default value for StringScalar
+}
+concept IntegerScalarDeclaration extends ScalarDeclaration {
+  o Integer[] range optional length=2  // For IntegerScalar
+  o Integer default optional // Default value for IntegerScalar
+}
+concept BooleanScalarDeclaration extends ScalarDeclaration {
+  o Boolean default optional // Default value for BooleanScalar
+}
+concept DoubleScalarDeclaration extends ScalarDeclaration {
+  o Double[] range optional length=2  // For DoubleScalar
+  o Double default optional // Default value for DoubleScalar
+}
+concept LongScalarDeclaration extends ScalarDeclaration {
+  o Long[] range optional length=2  // For LongScalar
+  o Long default optional // Default value for LongScalar
+}
+concept DateTimeScalarDeclaration extends ScalarDeclaration {
+  o String default optional // Default value for DateTimeScalar
+}
+
+/**
+ * Represents a MapDeclaration.
+ */
+concept MapDeclaration extends Declaration {
+  o String keyType // e.g., "String", "DateTime"
+  o String valueType // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
+  o Boolean isRelationshipValue optional // For relationship map values
+}
+
+/**
+ * Represents a property in a ConceptDeclaration.
+ */
+abstract concept Property {
+  o String name
+  o String type // Fully qualified type name or primitive type
+  o Boolean isArray optional
+  o Boolean isOptional optional
+  o Boolean isRelationship optional
+  o Boolean isIdentifier optional
+  o String inheritedFrom optional // For inherited properties
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+concept StringProperty extends Property {
+  o String regex optional // For String properties
+  o Integer[] length optional // For String properties
+  o String default optional // Default value for StringProperty
+}
+concept IntegerProperty extends Property {
+  o Integer[] range optional length=2 // For Integer properties
+  o Integer default optional // Default value for IntegerProperty
+}
+concept BooleanProperty extends Property {
+  o Boolean default optional // Default value for BooleanProperty
+}
+concept DoubleProperty extends Property {
+  o Double[] range optional length=2 // For Double properties
+  o Double default optional // Default value for DoubleProperty
+}
+concept LongProperty extends Property {
+  o Long[] range optional length=2 // For Long properties
+  o Long default optional // Default value for LongProperty
+}
+concept DateTimeProperty extends Property {
+  o String default optional // Default value for DateTimeProperty
+}
+
+/**
+ * Represents an enum value in an EnumDeclaration.
+ */
+concept EnumValue {
+  o String name
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a vocabulary object.
+ */
+concept Vocabulary {
+  o String label optional
+  o AdditionalTermMap additionalTerms optional
+}
+
+/**
+ * Represents an additional term in a vocabulary.
+ */
+map AdditionalTermMap {
+  o String
+  o String
+}
+
+/**
+ * Represents a metadata map (i.e. non-vocabulary declarations).
+ */
+map MetadataMap {
+  o String
+  o SimpleDecorator
+}
+
+concept SimpleDecorator {
+    o String[] arguments
+}
