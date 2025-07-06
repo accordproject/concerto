@@ -21,92 +21,18 @@ const yaml = require('yaml');
 const chai = require('chai');
 chai.should();
 
-// const { jsonToYaml } = require('../lib/dcsconverter');
+const { jsonToYaml } = require('../lib/dcsconverter');
 
 describe('DCS Converter', function(){
 
     describe('#jsonToYaml', function(){
-        let outputYaml;
-        let parsedYaml;
+        let outputYaml; // the output YAML string returned from jsonToYaml function
+        let parsedYaml; // the parsed object from outputYaml
         const dcsFilePath = path.join(__dirname, 'data', 'decoratorcommands', 'dcs-with-all-possible-fields.json' );
         const dcsJson = fs.readFileSync(dcsFilePath, 'utf8');
 
         beforeEach(function(){
-            // outputYaml = jsonToYaml(dcs);
-            outputYaml = `decoratorCommandsVersion: 0.4.0
-name: possiblefieldDCS
-version: 1.0.0
-includes:
-  - name: example
-    version: 0.1.0
-commands:
-  - action: UPSERT
-    target:
-      namespace: test@1.0.0
-      declaration: Person
-      property: email
-      type: concerto.metamodel@1.0.0.StringProperty
-    decorator:
-      name: Form
-      arguments:
-        - type: String
-          value: emailInput
-        - type: Number
-          value: 2.5
-        - type: Boolean
-          value: true
-        - typeReference:
-            name: Contact
-            namespace: test@1.0.0
-            isArray: false
-    decoratorNamespace: org.example.forms
-  - action: APPEND
-    target:
-      declaration: Person
-      property: name
-    decorator:
-      name: Hide
-      arguments:
-  - action: UPSERT
-    target:
-      namespace: test@1.0.0
-      declaration: Person
-      properties:
-        - address
-        - phone
-      type: concerto.metamodel@1.0.0.StringProperty
-    decorator:
-      name: PII
-      arguments:
-        - type: String
-          value: sensitive
-    decoratorNamespace: org.example.pii
-  - action: UPSERT
-    target:
-      declaration: Person
-      properties:
-        - country
-      type: concerto.metamodel@1.0.0.StringProperty
-    decorator:
-      name: DeclarationProperties
-      arguments:
-  - action: UPSERT
-    target:
-      namespace: test@1.0.0
-      declaration: Dictionary
-      type: concerto.metamodel@1.0.0.StringMapValueType
-      mapElement: KEY_VALUE
-    decorator:
-      name: NamespaceDeclarationTypeMapElement
-      arguments:
-  - action: UPSERT
-    target:
-      namespace: test@1.0.0
-      declaration: Person
-      type: concerto.metamodel@1.0.0.ConceptDeclaration
-    decorator:
-      name: NamespaceDeclarationType
-      arguments:`;
+            outputYaml = jsonToYaml(dcsJson); // jsonToYaml expects a JSON string
             parsedYaml = yaml.parse(outputYaml);
         });
 
@@ -219,20 +145,39 @@ commands:
         });
 
         it('should handle multiple commands in the input', function(){
+            parsedYaml.should.have.property('commands');
+            parsedYaml.commands.should.be.an('array');
+            parsedYaml.commands.should.have.length((JSON.parse(dcsJson)).commands.length);
         });
 
-        it('should not modify the original JSON input', function(){
-
+        it('should be a pure function (same input produces same output)', function(){
+            const inputDcsJson = fs.readFileSync(dcsFilePath, 'utf8');
+            const outputYaml1 = jsonToYaml(inputDcsJson);
+            const outputYaml2 = jsonToYaml(inputDcsJson);
+            outputYaml1.should.equal(outputYaml2);
         });
+
         it('should output a valid YAML string', function(){
-
+            outputYaml.should.be.a('string');
+            (()=> yaml.parse(outputYaml)).should.not.throw();
         });
-        it('should throw error for invalid DCS JSON input', function(){
 
+        it('should throw error for invalid DCS JSON input', function(){
+            const invalidDcsJson = [
+                null,
+                undefined,
+                '',
+                'not a json string',
+                '{"invalid": "dcsJson"}',
+                '{"version": "1.0.0", "commands": []}',
+                '{"name": "test", "commands": []}',
+                '{"name": "test", "version": "1.0.0"}'
+            ];
+            invalidDcsJson.forEach((value)=>{
+                (()=> jsonToYaml(value)).should.throw();
+            });
         });
 
     });
 
 });
-
-

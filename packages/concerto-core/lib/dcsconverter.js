@@ -13,3 +13,10 @@
  */
 
 'use strict';
+
+// eslint-disable-next-line require-jsdoc
+function jsonToYaml(jsonString){
+
+}
+
+module.exports = { jsonToYaml };
