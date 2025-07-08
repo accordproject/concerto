@@ -1,5 +1,4 @@
-import { lintAST } from '../../src/index';
-import { ModelManager } from '@accordproject/concerto-core';
+import { lintModel } from '../../src/index';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -7,14 +6,7 @@ async function getModelAST(fileName: string)
 {
     const filePath = path.resolve(__dirname,'../fixtures/',fileName);
     const model = await fs.readFile(filePath, 'utf-8');
-    const modelManager = new ModelManager();
-    modelManager.addCTOModel(model);
-
-    const ast = modelManager.getAst();
-    const jsonString = JSON.stringify(ast);
-
-    const results = await lintAST(jsonString);
-
+    const results = await lintModel(model);
     return results;
 }
 
