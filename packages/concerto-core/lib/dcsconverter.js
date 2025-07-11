@@ -14,9 +14,115 @@
 
 'use strict';
 
-// eslint-disable-next-line require-jsdoc
-function jsonToYaml(jsonString){
+const yaml = require('yaml');
 
+/**
+ * handles the target field of a command
+ * @param {object} target the value of target
+ * @returns {object} the simplified target object
+ */
+function handleTarget(target){
+    const targetKeys = Object.keys(target);
+    const newTarget = {};
+    targetKeys.forEach((key) => {
+        if (key !== '$class') {
+            newTarget[key] = target[key];
+        }
+    });
+    return newTarget;
+}
+
+
+/**
+ * handles each arguments field in a decorator
+ * @param {object} argument the argument object from the decorator
+ * @param {string} argument.$class the class property of each argument
+ * @param {boolean|string|number} [argument.value] the value of each argument
+ * @param {object} [argument.type] the type identifier for type reference arguments
+ * @param {boolean} [argument.isArray] whether the type reference is an array
+ * @returns {object} simplified argument object
+ */
+function handleArguments(argument){
+    if (argument.$class.endsWith('TypeReference')) {
+        return {
+            typeReference: {
+                name: argument.type.name,
+                namespace: argument.type.namespace,
+                isArray: argument.isArray,
+            }
+        };
+    }
+    const simplifiedType = argument.$class.split('.').at(-1).replace('Decorator', '');
+    return {
+        type: simplifiedType,
+        value: argument.value,
+    };
+}
+
+/**
+ * handles the decorator field of a command
+ * @param {object} decorator the original value of decorator from DCS JSON
+ * @param {string} decorator.name the name of the decorator
+ * @param {object[]} [decorator.arguments] the list of arguments
+ * @returns {object} simplified decorator object with name and arguments
+ */
+function handleDecorator(decorator){
+    return {
+        name: decorator.name,
+        arguments: (decorator.arguments.length === 0) ? undefined : decorator.arguments.map(handleArguments)
+        // empty arguments are just omitted in YAML
+    };
+}
+
+
+/**
+ * handles a single command by simplifying its structure
+ * @param {object} command the command object from DCS JSON
+ * @param {string} command.type the type of the command ('UPSERT' or 'APPEND')
+ * @param {object} command.target the target to apply decorator to
+ * @param {object} command.decorator the decorator to apply
+ * @returns {object} simplified commands object
+ */
+function handleCommands(command){
+    return {
+        action: command.type,
+        target: handleTarget(command.target),
+        decorator: handleDecorator(command.decorator)
+    };
+}
+
+/**
+ * converts DCS JSON string or object to YAML string
+ * @param {string|object} dcsJson the DCS JSON as string or parsed object
+ * @returns {string} the DCS YAML string
+ * @throws {Error} if the input is not a valid DCS JSON
+ */
+function jsonToYaml(dcsJson){
+    const jsonObject = (typeof dcsJson === 'string') ? JSON.parse(dcsJson) : dcsJson;
+
+    if(!jsonObject.name || !jsonObject.version || !jsonObject.commands) {
+        throw new Error('Invalid DCS JSON: missing required fields');
+    }
+    jsonObject.commands.forEach((command)=> {
+        if(!command.type || !command.target || !command.decorator) {
+            throw new Error('Invalid DCS JSON: missing required fields in commands');
+        }
+    });
+
+    const simplifiedJson = {
+        decoratorCommandsVersion: jsonObject.$class.match(/@(\d+\.\d+\.\d+)/)[1],
+        name: jsonObject.name,
+        version: jsonObject.version,
+        commands: jsonObject.commands.map(handleCommands)
+    };
+
+    let yamlString = yaml.stringify(simplifiedJson);
+
+    // change stringified booleans, numbers (if present) to non stringified values
+    yamlString = yamlString.replace(/: "(true|false)"/g, ': $1');
+    yamlString = yamlString.replace(/: "(\d+(\.\d+)?)"/g, ': $1');
+
+    return yamlString;
 }
 
 module.exports = { jsonToYaml };
