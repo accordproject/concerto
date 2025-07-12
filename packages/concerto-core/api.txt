@@ -75,7 +75,7 @@ class DecoratorManager {
    + void executeCommand(string,declaration,command,property?,object?,boolean?) 
    + void executePropertyCommand(property,command) 
    + Boolean isNamespaceTargetEnabled(boolean?) 
-   + string jsonToYaml(string|object) 
+   + string jsonToYaml(object) 
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
