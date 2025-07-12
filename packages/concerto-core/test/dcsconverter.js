@@ -26,23 +26,59 @@ const { jsonToYaml } = require('../lib/dcsconverter');
 describe('DCS Converter', function(){
 
     describe('#jsonToYaml', function(){
-        let outputYaml;
-        let parsedYaml;
-        const dcsFilePath = path.join(__dirname, 'data', 'decoratorcommands', 'possible-decorator-command-targets-arguments.json' );
+        const dcsFilePath = path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.json' );
         const dcsJson = fs.readFileSync(dcsFilePath, 'utf8');
 
-        beforeEach(()=>{
-            outputYaml = jsonToYaml(dcsJson);
-            parsedYaml = yaml.parse(outputYaml);
-        });
-
         it('should convert DCS JSON to expected YAML format', function(){
-            const expectedYaml = fs.readFileSync(path.join(__dirname, 'data', 'decoratorcommands', 'possible-decorator-command-targets-arguments.yaml'), 'utf8');
-            const expectedParsedYaml = yaml.parse(expectedYaml);
-            parsedYaml.should.deep.equal(expectedParsedYaml);
+            const outputYaml = jsonToYaml(JSON.parse(dcsJson));
+            const parsedYaml = yaml.parse(outputYaml);
+            const expectedYaml = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.yaml'), 'utf8');
+            const parsedExpectedYaml = yaml.parse(expectedYaml);
+            parsedYaml.should.deep.equal(parsedExpectedYaml);
             outputYaml.should.equal(expectedYaml);
         });
 
+        it('should handle DecoratorTypeReference properly', function(){
+            const dcsWithTypeReference = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "name": "Info",
+                                        "namespace": "test@1.0.0"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+            const outputYaml = jsonToYaml(JSON.parse(dcsWithTypeReference));
+            const parsedYaml = yaml.parse(outputYaml);
+            parsedYaml.commands[0].decorator.arguments[0].should.deep.equal({
+                typeReference:{
+                    name: 'Info',
+                    namespace: 'test@1.0.0',
+                    isArray: false
+                }
+
+            });
+        });
+
     });
+
 
 });

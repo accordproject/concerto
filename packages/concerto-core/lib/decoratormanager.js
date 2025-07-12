@@ -855,13 +855,14 @@ class DecoratorManager {
     }
 
     /**
-     * convert DCS JSON string or object into YAML string
-     * uses the jsonToYaml function from the dcsconverter.js
-     * @param {string|object} json the DCS JSON input (string or object)
+     * converts DCS JSON object into YAML string
+     * validates the input DCS JSON against the DCS model
+     * @param {object} jsonInput the DCS JSON as parsed object
      * @return {string} the corresponding YAML string
      */
-    static jsonToYaml(json){
-        return jsonToYaml(json);
+    static jsonToYaml(jsonInput){
+        this.validate(jsonInput);
+        return jsonToYaml(jsonInput);
     }
 }
 

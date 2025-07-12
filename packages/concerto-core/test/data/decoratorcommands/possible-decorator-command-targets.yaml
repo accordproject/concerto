@@ -219,11 +219,17 @@ commands:
       arguments:
         - type: String
           value: MapValue
-  - action: APPEND
+  - action: UPSERT
     target:
       namespace: test@1.0.0
     decorator:
       name: Namespace
+  - action: APPEND
+    target:
+      namespace: test@1.0.0
+      declaration: SSN
+    decorator:
+      name: argumentsTest
       arguments:
         - type: String
           value: inputString
@@ -231,7 +237,3 @@ commands:
           value: 2.5
         - type: Boolean
           value: true
-        - typeReference:
-            name: Info
-            namespace: test@1.0.0
-            isArray: false

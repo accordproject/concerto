@@ -473,6 +473,33 @@
                 "name" : "Namespace",
                 "arguments" : []
             }
+        },
+        {
+            "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
+            "type": "APPEND",
+            "target": {
+                "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                "namespace": "test@1.0.0",
+                "declaration": "SSN"
+            },
+            "decorator": {
+                "$class": "concerto.metamodel@1.0.0.Decorator",
+                "name": "argumentsTest",
+                "arguments": [
+                    {
+                        "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                        "value": "inputString"
+                    },
+                    {
+                        "$class": "concerto.metamodel@1.0.0.DecoratorNumber",
+                        "value": 2.5
+                    },
+                    {
+                        "$class": "concerto.metamodel@1.0.0.DecoratorBoolean",
+                        "value": true
+                    }
+                ]
+            }
         }
     ]
 }

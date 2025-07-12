@@ -69,7 +69,7 @@ function handleArguments(argument){
 function handleDecorator(decorator){
     return {
         name: decorator.name,
-        arguments: (decorator.arguments.length === 0) ? undefined : decorator.arguments.map(handleArguments)
+        arguments: (decorator.arguments?.length === 0) ? undefined : decorator.arguments?.map(handleArguments)
         // empty arguments are just omitted in YAML
     };
 }
@@ -92,31 +92,21 @@ function handleCommands(command){
 }
 
 /**
- * converts DCS JSON string or object to YAML string
- * @param {string|object} dcsJson the DCS JSON as string or parsed object
+ * converts DCS JSON to YAML string
+ * @param {object} dcsJson the DCS JSON as parsed object
  * @returns {string} the DCS YAML string
  * @throws {Error} if the input is not a valid DCS JSON
  */
 function jsonToYaml(dcsJson){
-    const jsonObject = (typeof dcsJson === 'string') ? JSON.parse(dcsJson) : dcsJson;
 
-    if(!jsonObject.name || !jsonObject.version || !jsonObject.commands) {
-        throw new Error('Invalid DCS JSON: missing required fields');
-    }
-    jsonObject.commands.forEach((command)=> {
-        if(!command.type || !command.target || !command.decorator) {
-            throw new Error('Invalid DCS JSON: missing required fields in commands');
-        }
-    });
-
-    const simplifiedJson = {
-        decoratorCommandsVersion: jsonObject.$class.match(/@(\d+\.\d+\.\d+)/)[1],
-        name: jsonObject.name,
-        version: jsonObject.version,
-        commands: jsonObject.commands.map(handleCommands)
+    const simplifiedDcsJson = {
+        decoratorCommandsVersion: dcsJson.$class.match(/@(\d+\.\d+\.\d+)/)[1],
+        name: dcsJson.name,
+        version: dcsJson.version,
+        commands: dcsJson.commands.map(handleCommands)
     };
 
-    let yamlString = yaml.stringify(simplifiedJson);
+    let yamlString = yaml.stringify(simplifiedDcsJson);
 
     // change stringified booleans, numbers (if present) to non stringified values
     yamlString = yamlString.replace(/: "(true|false)"/g, ': $1');
