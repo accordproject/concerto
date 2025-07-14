@@ -11,7 +11,7 @@
     "typings": "dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist",
-        "prebuild": "npm-run-all clean",
+        "prebuild": "npm-run-all clean && cd ./default-ruleset && npm run build",
         "build": "tsc -p tsconfig.build.json",
         "pretest": "npm-run-all lint",
         "lint": "eslint .",
