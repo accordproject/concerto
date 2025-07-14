@@ -1,4 +1,4 @@
-import { lintModel } from '../../src/index';
+import { lintModel } from '@accordproject/concerto-linter';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

@@ -47,7 +47,7 @@ const ast = modelManager.getAst();
 ```
 
 ### Linting with Automatic Ruleset Discovery
-To lint your model using the default behavior, simply call lintModel without specifying a ruleset path. It will search for ruleset files in the following order: .spectral.yaml, .spectral.yml, .spectral.json, .spectral.js. If none are found, it defaults to the @accordproject/concerto-linter-default-ruleset.
+To lint your model using the default behavior, simply call lintModel without specifying a ruleset path. It will search for ruleset files in the following order: `.spectral.yaml`, `.spectral.yml`, `.spectral.json`, or `.spectral.js` If none are found, it defaults to the @accordproject/concerto-linter-default-ruleset.
 ```javascript
 import { lintModel } from '@accordproject/concerto-linter';
 
@@ -57,8 +57,20 @@ const results = lintModel(model); // Pass the CTO string directly
 ```
 
 ### Linting with a Custom Ruleset
-For custom linting rules, provide the path to your Spectral ruleset file:
+
+First, you will have to create your own custom ruleset. For guidance on how to create them, follow this -> [link to the README of default-ruleset](../concerto-linter-default-ruleset/README.md).
+
+After that, our linter will be able to detect if there are any `.spectral.yaml`, `.spectral.yml`, `.spectral.json`, or `.spectral.js` files and pick them up automatically. You can also pass the path for this ruleset file directly to the lint function if you want to specify a particular one.
+
+**Example with automatic detection:**
 ```javascript
+// The linter will automatically find and use ruleset files in your project
+const results = lintModel(ast);
+```
+
+**Example with explicit path:**
+```javascript
+// Specify a custom ruleset file path
 const results = lintModel(ast, "D:\\linter-test\\my-ruleset.yaml");
 ```
 
@@ -67,13 +79,6 @@ const results = lintModel(ast, "D:\\linter-test\\my-ruleset.yaml");
 1. **Explicit Path**: Custom ruleset file specified as parameter
 2. **Project Detection**: Automatic discovery in current and parent directories
 3. **Default Fallback**: `@accordproject/concerto-linter-default-ruleset`
-
-## Creating Custom Rulesets
-
-To develop your own validation rules for Concerto models, you can extend the default ruleset or create entirely custom rules.
-
-> **📖 Complete Guide Coming Soon**: Detailed instructions on how to extend rulesets and create your own custom validation rules will be provided in the `@accordproject/concerto-linter-default-ruleset` README documentation after the package is published.
-
 
 
 ## License

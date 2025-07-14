@@ -16,7 +16,7 @@ import { Spectral, Document, IRuleResult, RulesetDefinition, Ruleset } from '@st
 import { Json as JsonParsers } from '@stoplight/spectral-parsers';
 import { resolveRulesetPath } from './config-loader';
 import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/getRuleset';
-import { concertoRuleset } from './rulesets/core-ruleset';
+import  concertoRuleset  from '@accordproject/concerto-linter-default-ruleset';
 import { ModelManager } from '@accordproject/concerto-core';
 
 /**
