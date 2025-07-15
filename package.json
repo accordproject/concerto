@@ -23,7 +23,8 @@
     "packages/concerto-types",
     "packages/concerto-util",
     "packages/concerto-vocabulary",
-    "packages/concerto-linter"
+    "packages/concerto-linter",
+    "packages/concerto-linter/default-ruleset"
   ],
   "name": "concerto",
   "description": "Monorepo for concerto packages",

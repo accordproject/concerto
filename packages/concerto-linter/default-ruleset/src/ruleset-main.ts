@@ -13,8 +13,9 @@
  */
 
 import { RulesetDefinition } from '@stoplight/spectral-core';
-import { namingRules } from './naming-ruleset';
-
-export const concertoRuleset: RulesetDefinition = {
+import  {default as namingRules}  from './naming-ruleset';
+const concertoRuleset: RulesetDefinition = {
     ...namingRules,
 };
+
+export default concertoRuleset;
