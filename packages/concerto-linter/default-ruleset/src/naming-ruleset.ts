@@ -15,7 +15,7 @@
 import { RulesetDefinition } from '@stoplight/spectral-core';
 import { casing, pattern } from '@stoplight/spectral-functions';
 
-export const namingRules: RulesetDefinition = {
+const namingRules: RulesetDefinition = {
     rules: {
         'camel-case-declarations': {
             description: 'Declaration names (scalar, enum, concept, asset, participant, transaction, event) should be camelCase.',
@@ -55,3 +55,4 @@ export const namingRules: RulesetDefinition = {
         }
     }
 };
+export default namingRules;
