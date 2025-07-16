@@ -1,13 +1,24 @@
-import { lintModel } from '@accordproject/concerto-linter';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { ModelManager } from '@accordproject/concerto-core';
+import { Json as JsonParsers } from '@stoplight/spectral-parsers';
+import { default as namingRules } from '../../src/naming-ruleset';
+import { Spectral, Document } from '@stoplight/spectral-core';
 
 async function getModelAST(fileName: string)
 {
     const filePath = path.resolve(__dirname,'../fixtures/',fileName);
     const model = await fs.readFile(filePath, 'utf-8');
-    const results = await lintModel(model);
-    return results;
+
+    const manager = new ModelManager();
+    manager.addCTOModel(model);
+    const jsonAST = JSON.stringify(manager.getAst());
+
+    const spectral = new Spectral();
+    spectral.setRuleset(namingRules);
+
+    const document = new Document(jsonAST, JsonParsers);
+    return await spectral.run(document);
 }
 
 describe ('Naming Convention Linting Rules' , () => {

@@ -27,19 +27,23 @@ const glob = require('glob');
  * node ./script/bump_version.js <tag>
  */
 
-const workspacesPattern = 'packages/*/package.json'; // Adjust this pattern based on your workspace setup
+const workspacesPattern = 'packages/**/package.json'; // Adjust this pattern based on your workspace setup
 const packageNames = [
     "@accordproject/concerto-analysis",
     "@accordproject/concerto-core",
     "@accordproject/concerto-cto",
     "@accordproject/concerto-types",
     "@accordproject/concerto-util",
-    "@accordproject/concerto-vocabulary"
+    "@accordproject/concerto-vocabulary",
+    "@accordproject/concerto-linter",
+    "@accordproject/concerto-linter-default-ruleset",
 ];
 
 function bumpDependencies() {
     const targetPackageVersion = process.argv[2].replace(/^v/, '');
-    const workspacePackages = glob.sync(workspacesPattern);
+    const workspacePackages = glob.sync(workspacesPattern, {
+        ignore: ['**/node_modules/**', '**/test/**'],
+    });
 
     workspacePackages.forEach((packagePath) => {
         const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));

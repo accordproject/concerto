@@ -33,7 +33,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@accordproject/concerto-core": "3.21.0",
-        "@accordproject/concerto-linter-default-ruleset": "1.0.0",
+        "@accordproject/concerto-linter-default-ruleset": "file:./default-ruleset",
         "find-up": "5.0.0",
         "@stoplight/spectral-cli": "6.15.0",
         "@stoplight/spectral-core": "1.20.0",
