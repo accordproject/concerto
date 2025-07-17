@@ -66,19 +66,31 @@ describe('DCS Converter', function(){
                     }
                 ]
             }`;
+
+            const expectedYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
+            namespace: test@1.0.0
+            isArray: false
+`;
+
             const outputYaml = jsonToYaml(JSON.parse(dcsWithTypeReference));
             const parsedYaml = yaml.parse(outputYaml);
-            parsedYaml.commands[0].decorator.arguments[0].should.deep.equal({
-                typeReference:{
-                    name: 'Info',
-                    namespace: 'test@1.0.0',
-                    isArray: false
-                }
-
-            });
+            const parsedExpectedYaml = yaml.parse(expectedYaml);
+            parsedYaml.should.deep.equal(parsedExpectedYaml);
+            outputYaml.should.equal(expectedYaml);
         });
 
     });
-
 
 });
