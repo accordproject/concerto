@@ -15,6 +15,7 @@
 'use strict';
 
 const yaml = require('yaml');
+const ModelUtil  = require('./modelutil');
 
 /**
  * handles the target field of a command
@@ -43,6 +44,11 @@ function handleTarget(target){
  * @returns {object} simplified argument object
  */
 function handleArguments(argument){
+    const mapClassToType = {
+        'concerto.metamodel@1.0.0.DecoratorString': 'String',
+        'concerto.metamodel@1.0.0.DecoratorNumber': 'Number',
+        'concerto.metamodel@1.0.0.DecoratorBoolean': 'Boolean',
+    };
     if (argument.$class.endsWith('TypeReference')) {
         return {
             typeReference: {
@@ -52,9 +58,8 @@ function handleArguments(argument){
             }
         };
     }
-    const simplifiedType = argument.$class.split('.').at(-1).replace('Decorator', '');
     return {
-        type: simplifiedType,
+        type: mapClassToType[argument.$class],
         value: argument.value,
     };
 }
@@ -98,9 +103,9 @@ function handleCommands(command){
  * @throws {Error} if the input is not a valid DCS JSON
  */
 function jsonToYaml(dcsJson){
-
+    const dcsNamespace = ModelUtil.getNamespace(dcsJson.$class);
     const simplifiedDcsJson = {
-        decoratorCommandsVersion: dcsJson.$class.match(/@(\d+\.\d+\.\d+)/)[1],
+        decoratorCommandsVersion: ModelUtil.parseNamespace(dcsNamespace).version,
         name: dcsJson.name,
         version: dcsJson.version,
         commands: dcsJson.commands.map(handleCommands)
