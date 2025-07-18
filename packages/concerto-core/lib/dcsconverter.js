@@ -54,6 +54,7 @@ function handleArguments(argument){
             typeReference: {
                 name: argument.type.name,
                 namespace: argument.type.namespace,
+                resolvedName: argument.type.resolvedName,
                 isArray: argument.isArray,
             }
         };

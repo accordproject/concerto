@@ -38,7 +38,7 @@ describe('DCS Converter', function(){
             outputYaml.should.equal(expectedYaml);
         });
 
-        it('should handle DecoratorTypeReference properly', function(){
+        it('should handle resolved but unalised DecoratorTypeReference properly', function(){
             const dcsWithTypeReference = `{
                 "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
                 "name": "exampleDCS",
@@ -81,6 +81,112 @@ commands:
         - typeReference:
             name: Info
             namespace: test@1.0.0
+            isArray: false
+`;
+
+            const outputYaml = jsonToYaml(JSON.parse(dcsWithTypeReference));
+            const parsedYaml = yaml.parse(outputYaml);
+            const parsedExpectedYaml = yaml.parse(expectedYaml);
+            parsedYaml.should.deep.equal(parsedExpectedYaml);
+            outputYaml.should.equal(expectedYaml);
+        });
+
+        it('should handle resolved and alised DecoratorTypeReference properly', function(){
+            const dcsWithTypeReference = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "name": "Info",
+                                        "namespace": "test@1.0.0",
+                                        "resolvedName": "Data"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+
+            const expectedYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
+            namespace: test@1.0.0
+            resolvedName: Data
+            isArray: false
+`;
+
+            const outputYaml = jsonToYaml(JSON.parse(dcsWithTypeReference));
+            const parsedYaml = yaml.parse(outputYaml);
+            const parsedExpectedYaml = yaml.parse(expectedYaml);
+            parsedYaml.should.deep.equal(parsedExpectedYaml);
+            outputYaml.should.equal(expectedYaml);
+        });
+
+        it('should handle unresolved and unalised DecoratorTypeReference properly', function(){
+            const dcsWithTypeReference = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "name": "Info"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+
+            const expectedYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
             isArray: false
 `;
 
