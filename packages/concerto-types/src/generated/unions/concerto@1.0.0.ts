@@ -26,6 +26,14 @@ import type {
 	IModel,
 	IModels
 } from './concerto.metamodel@1.0.0';
+import type {
+	IDecoratorCommandSetReference,
+	CommandType,
+	ICommandTarget,
+	MapElement,
+	ICommand,
+	IDecoratorCommandSet
+} from './org.accordproject.decoratorcommands@0.4.0';
 
 // interfaces
 export interface IConcept {
@@ -51,7 +59,11 @@ ILongDomainValidator |
 IAliasedType | 
 IImport | 
 IModel | 
-IModels;
+IModels | 
+IDecoratorCommandSetReference | 
+ICommandTarget | 
+ICommand | 
+IDecoratorCommandSet;
 
 export interface IAsset extends IConcept {
    $identifier: string;
