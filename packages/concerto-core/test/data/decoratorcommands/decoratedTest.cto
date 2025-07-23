@@ -6,6 +6,7 @@ import concerto.decorator@1.0.0.Decorator
 @NamespaceDeclaration()
 @NamespaceDeprecated()
 @Namespace()
+@argumentsTest("inputString",2.5,true)
 scalar SSN extends String
 
 @NamespaceDeprecated()
