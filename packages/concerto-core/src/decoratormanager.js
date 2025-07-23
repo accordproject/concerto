@@ -28,6 +28,8 @@ const rfdc = require('rfdc')({
     proto: false,
 });
 
+const { jsonToYaml } = require('./dcsconverter');
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -853,6 +855,17 @@ class DecoratorManager {
             );
             return false;
         }
+    }
+
+    /**
+     * converts DCS JSON object into YAML string
+     * validates the input DCS JSON against the DCS model
+     * @param {object} jsonInput the DCS JSON as parsed object
+     * @return {string} the corresponding YAML string
+     */
+    static jsonToYaml(jsonInput){
+        this.validate(jsonInput);
+        return jsonToYaml(jsonInput);
     }
 }
 
