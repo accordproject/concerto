@@ -345,7 +345,8 @@ class ModelUtil {
             `${MetaModelNamespace}.IntegerMapValueType`,
             `${MetaModelNamespace}.LongMapValueType`,
             `${MetaModelNamespace}.DoubleMapValueType`,
-            `${MetaModelNamespace}.ObjectMapValueType`
+            `${MetaModelNamespace}.ObjectMapValueType`,
+            `${MetaModelNamespace}.RelationshipMapValueType`
         ].includes(value.$class);
     }
 }

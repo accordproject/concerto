@@ -1,0 +1,25 @@
+namespace org.example.sample@1.0.0
+
+concept Person {
+  o String firstName
+
+  @Term("surname")
+  o String lastName 
+  o Address address
+  o ContactInfo[] contacts optional
+}
+
+concept Address {
+  @description("Street name and number")
+  o String street 
+  o String city
+
+  @Crud("Create,Read")
+  o String country 
+  o String postalCode
+}
+
+concept ContactInfo {
+  o String type
+  o String value
+}

@@ -1,0 +1,21 @@
+namespace com.test.another@1.0.0
+
+
+// Used
+scalar Fee extends String regex=/^[A-Za-z]+$/
+
+// Used
+abstract concept Fi {
+ o String someString optional
+}
+
+// Used
+concept Fo identified by personId extends Fi {
+ o String personId
+}
+
+
+// Unused
+concept Fum identified {
+ o String someString
+}

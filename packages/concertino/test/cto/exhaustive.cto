@@ -1,0 +1,79 @@
+concerto version "^3.0.0"
+
+@NamespaceScopedDecorator
+namespace com.test.models@1.2.3
+
+// import com.test.another@1.0.0.Fee // Primitive - Scalar
+// import com.test.another@1.0.0.Fi // Concept
+import com.test.another@1.0.0.{Fee, Fi, Fo as Fo, Fum} // Aliased Concept
+// import com.test.another@1.0.0.Fum  // Unused Import (Ignored)
+
+@Term()
+@Decorated()
+scalar Qux extends String
+scalar Quux extends String regex=/^[A-Za-z]+$/ length=[1,100]
+scalar Quuux extends Integer default=10 range=[0, 100]
+
+@Term()
+@Decorated
+enum MyEnum {
+ @Term("first")
+ @Term_Description("first description")
+ o FIRST
+ @Term("second")
+ @Decorated("some value")
+ o SECOND
+}
+
+concept Xyc extends Fo {
+ o Qux qux
+}
+
+map Dictionary {
+ o String
+ o String
+}
+
+@Decorated
+map RelationshipMap {
+  o Qux
+  --> Fo
+}
+
+@Term("bar")
+@Term_Description("bar")
+@Decoratored()
+concept Bar {
+ @Term("some string")
+ o String someString
+}
+
+@Term("foo")
+@Term_tooltip("foo tooltip")
+concept Foo {
+ @Term("bar prop")
+ o Bar bar
+ @Term("some double")
+ o Double someDouble default=5.0
+ o Integer[] someInts
+ o Boolean someBoolean
+ o DateTime someTime
+ o Long someLong optional
+ o Qux qux
+ o Quux quux
+ o Quuux quuux
+ o String x regex=/[A-Z]/ length=[0,1]
+ o Integer y range=[0,1]
+ @Term("my enum")
+ @Term_Description("my enum description")
+ @Decoratored(1, true, "a")
+ @Decoratored2(Bar)
+ @Decoratored3
+ o MyEnum myEnum
+ @Term("my relationship")
+ @Term_tooltip("my relationship tooltip")
+ @Decorated("my relationship decorator")
+ --> Fum[] fum optional
+}
+
+transaction AuditEvent {}
