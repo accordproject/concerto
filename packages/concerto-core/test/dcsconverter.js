@@ -45,17 +45,20 @@ describe('DCS Converter', function(){
                 "version": "1.0.0",
                 "commands": [
                     {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
                         "type": "UPSERT",
                         "target": {
                             "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                             "namespace": "test@1.0.0"
                         },
                         "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
                             "name": "exampleDecorator",
                             "arguments": [
                                 {
                                     "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
                                     "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                                         "name": "Info",
                                         "namespace": "test@1.0.0"
                                     },
@@ -98,17 +101,20 @@ commands:
                 "version": "1.0.0",
                 "commands": [
                     {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
                         "type": "UPSERT",
                         "target": {
                             "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                             "namespace": "test@1.0.0"
                         },
                         "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
                             "name": "exampleDecorator",
                             "arguments": [
                                 {
                                     "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
                                     "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                                         "name": "Info",
                                         "namespace": "test@1.0.0",
                                         "resolvedName": "Data"
@@ -153,17 +159,20 @@ commands:
                 "version": "1.0.0",
                 "commands": [
                     {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
                         "type": "UPSERT",
                         "target": {
                             "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
                             "namespace": "test@1.0.0"
                         },
                         "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
                             "name": "exampleDecorator",
                             "arguments": [
                                 {
                                     "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
                                     "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                                         "name": "Info"
                                     },
                                     "isArray": false
