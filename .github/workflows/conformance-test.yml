@@ -1,0 +1,46 @@
+name: Concerto Conformance Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Target Project
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install and Build Target Project
+        run: |
+          npm install
+          npm run build
+
+      - name: Checkout Conformance Suite
+        uses: actions/checkout@v3
+        with:
+          repository: accordproject/concerto-conformance
+          path: concerto-conformance
+
+      - name: Install Conformance Suite Dependencies
+        working-directory: concerto-conformance
+        run: npm install
+
+      - name: Run Conformance Tests
+        working-directory: concerto-conformance
+        env:
+          PARSER_PATH: ../../../../../../packages/concerto-cto/index.js
+          MODELFILE_PATH: ../../../../../../packages/concerto-core/index.js
+          MODELMANAGER_PATH: ../../../../../../packages/concerto-core/index.js
+        run: npm test
+        
