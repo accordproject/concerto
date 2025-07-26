@@ -279,6 +279,13 @@ declare class DecoratorManager {
      * @return {string} the corresponding YAML string
      */
     static jsonToYaml(jsonInput: object): string;
+    /**
+     * converts DCS YAML string into JSON object
+     * validates the output DCS JSON against the DCS model
+     * @param {string} yamlInput the DCS JSON as parsed object
+     * @return {object} the corresponding JSON object
+     */
+    static yamlToJson(yamlInput: string): object;
 }
 import ModelFile = require("./introspect/modelfile");
 import ModelManager = require("./modelmanager");

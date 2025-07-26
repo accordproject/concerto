@@ -16,6 +16,7 @@
 
 const yaml = require('yaml');
 const ModelUtil  = require('./modelutil');
+const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
 /**
  * handles the target field of a command
@@ -45,9 +46,9 @@ function handleTarget(target){
  */
 function handleArguments(argument){
     const mapClassToType = {
-        'concerto.metamodel@1.0.0.DecoratorString': 'String',
-        'concerto.metamodel@1.0.0.DecoratorNumber': 'Number',
-        'concerto.metamodel@1.0.0.DecoratorBoolean': 'Boolean',
+        [`${MetaModelNamespace}.DecoratorString`]: 'String',
+        [`${MetaModelNamespace}.DecoratorNumber`]: 'Number',
+        [`${MetaModelNamespace}.DecoratorBoolean`]: 'Boolean',
     };
     if (argument.$class.endsWith('TypeReference')) {
         return {
@@ -121,4 +122,92 @@ function jsonToYaml(dcsJson){
     return yamlString;
 }
 
-module.exports = { jsonToYaml };
+
+/**
+ * handles each argument of the decorator
+ * converts simplified argument objects back to full JSON representation
+ * @param {string} MetaModelNamespace - the metamodel namespace
+ * @param {object} argument - the simplified argument object
+ * @param {string} [argument.type] - the argument type for primitive values
+ * @param {*} [argument.value] - the argument value
+ * @param {object} [argument.typeReference] - the type reference object for complex types
+ * @returns {object} - the fully qualified argument object after restoring required fields
+ */
+function restoreArguments(MetaModelNamespace, argument){
+    const mapTypeToClass = {
+        'String': `${MetaModelNamespace}.DecoratorString`,
+        'Number': `${MetaModelNamespace}.DecoratorNumber`,
+        'Boolean': `${MetaModelNamespace}.DecoratorBoolean`,
+    };
+    if ( Object.keys(argument)[0] === 'typeReference' ) {
+        return {
+            $class: ModelUtil.getFullyQualifiedName(MetaModelNamespace, 'DecoratorTypeReference'),
+            type: {
+                $class: ModelUtil.getFullyQualifiedName(MetaModelNamespace, 'TypeIdentifier'),
+                name: argument.typeReference.name,
+                ... ( argument.typeReference.namespace !== undefined ? { namespace: argument.typeReference.namespace } : {} ),
+                ... ( argument.typeReference.resolvedName !== undefined ? { resolvedName: argument.typeReference.resolvedName } : {} ),
+            },
+            isArray: argument.typeReference.isArray
+        };
+    }
+    return {
+        $class: mapTypeToClass[argument.type],
+        value: argument.type === 'String' ? String(argument.value) : argument.value  ,
+    };
+}
+
+
+/**
+ * handles the decorator of each command for yaml to json
+ * @param {object} decorator - the decorator to convert
+ * @returns {object} - the decorator object after restoring required fields
+ */
+function restoreDecorator(decorator){
+    return {
+        $class: ModelUtil.getFullyQualifiedName(MetaModelNamespace, 'Decorator'),
+        name: decorator.name,
+        arguments: decorator.arguments ? decorator.arguments.map((argument) => restoreArguments(MetaModelNamespace, argument)) : [],
+    };
+}
+
+
+/**
+ * handles the command for yaml to json method
+ * @param {string} dcsNamespace - the namespace of the DCS
+ * @param {object} command - the command to convert
+ * @returns {object} - the command object after restoring required fields
+ */
+function restoreCommands(dcsNamespace, command){
+    return {
+        $class: ModelUtil.getFullyQualifiedName(dcsNamespace, 'Command'),
+        type: command.action,
+        target: {
+            $class: ModelUtil.getFullyQualifiedName(dcsNamespace, 'CommandTarget'),
+            ... command.target
+        },
+        decorator: restoreDecorator(command.decorator)
+    };
+}
+
+
+/**
+ * converts DCS YAML string to JSON format
+ * @param {string} yamlString the YAML string to convert
+ * @returns {object} the DCS JSON
+ */
+function yamlToJson(yamlString){
+    const parsedJson = yaml.parse(yamlString);
+    const dcsNamespace = 'org.accordproject.decoratorcommands@' + parsedJson.decoratorCommandsVersion;
+    const dcsJson = {
+        $class: ModelUtil.getFullyQualifiedName(dcsNamespace, 'DecoratorCommandSet'),
+        name: parsedJson.name,
+        version: parsedJson.version,
+        commands: parsedJson.commands.map((command) => restoreCommands(dcsNamespace, command)),
+    };
+
+    return dcsJson;
+}
+
+
+module.exports = { jsonToYaml, yamlToJson };

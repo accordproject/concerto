@@ -24,8 +24,9 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.22.0 {59de1f67703a76ab4a0f0c986775e889} 2025-07-12
+Version 3.22.0 {f9906fecbb071af456002ae2f8e006bc} 2025-07-26
 - added jsonToYaml method in DecoratorManager
+- added yamlToJson method in DecoratorManager
 
 Version 3.20.5 {a18e77c836e19a4badcbe83d6c7e7c1e} 2025-02-03
 - vocabulary support for namespace scoped decorators

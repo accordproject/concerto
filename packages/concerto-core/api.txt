@@ -61,6 +61,10 @@ class Concerto {
    + object handleDecorator() 
    + object handleCommands() 
    + string jsonToYaml() throws Error
+   + object restoreArguments() 
+   + object restoreDecorator() 
+   + object restoreCommands() 
+   + object yamlToJson() 
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
    + object migrateTo(decoratorCommandSet,string) 
@@ -76,6 +80,7 @@ class DecoratorManager {
    + void executePropertyCommand(property,command) 
    + Boolean isNamespaceTargetEnabled(boolean?) 
    + string jsonToYaml(object) 
+   + object yamlToJson(string) 
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 
