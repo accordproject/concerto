@@ -21,7 +21,7 @@ const yaml = require('yaml');
 const chai = require('chai');
 chai.should();
 
-const { jsonToYaml } = require('../lib/dcsconverter');
+const { jsonToYaml, yamlToJson } = require('../lib/dcsconverter');
 
 describe('DCS Converter', function(){
 
@@ -204,6 +204,180 @@ commands:
             const parsedExpectedYaml = yaml.parse(expectedYaml);
             parsedYaml.should.deep.equal(parsedExpectedYaml);
             outputYaml.should.equal(expectedYaml);
+        });
+
+    });
+
+
+    describe('#yamlToJson', function(){
+        const yamlFilePath = path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.yaml' );
+        const yamlString = fs.readFileSync(yamlFilePath, 'utf8');
+
+        it('should convert YAML formatted DCS to expected JSON format', function(){
+            const outputJson = yamlToJson(yamlString);
+            const expectedJson = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.json'), 'utf8');
+            const parsedExpectedJson = JSON.parse(expectedJson);
+            outputJson.should.deep.equal(parsedExpectedJson);
+        });
+
+        it('should handle resolved but unalised DecoratorTypeReference properly', function(){
+            const inputYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
+            namespace: test@1.0.0
+            isArray: false
+`;
+
+            const expectedDcsJson = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                        "name": "Info",
+                                        "namespace": "test@1.0.0"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+
+            const outputJson = yamlToJson(inputYaml);
+            outputJson.should.deep.equal(JSON.parse(expectedDcsJson));
+        });
+
+        it('should handle resolved and alised DecoratorTypeReference properly', function(){
+            const inputYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
+            namespace: test@1.0.0
+            resolvedName: Data
+            isArray: false
+`;
+
+            const expectedDcsJson = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                        "name": "Info",
+                                        "namespace": "test@1.0.0",
+                                        "resolvedName": "Data"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+
+            const outputJson = yamlToJson(inputYaml);
+            outputJson.should.deep.equal(JSON.parse(expectedDcsJson));
+
+        });
+
+        it('should handle unresolved and unalised DecoratorTypeReference properly', function(){
+            const inputYaml =
+`decoratorCommandsVersion: 0.4.0
+name: exampleDCS
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: exampleDecorator
+      arguments:
+        - typeReference:
+            name: Info
+            isArray: false
+`;
+
+            const expectedDcsJson = `{
+                "$class": "org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet",
+                "name": "exampleDCS",
+                "version": "1.0.0",
+                "commands": [
+                    {
+                        "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
+                        "type": "UPSERT",
+                        "target": {
+                            "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
+                            "namespace": "test@1.0.0"
+                        },
+                        "decorator": {
+                            "$class": "concerto.metamodel@1.0.0.Decorator",
+                            "name": "exampleDecorator",
+                            "arguments": [
+                                {
+                                    "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                                    "type": {
+                                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                                        "name": "Info"
+                                    },
+                                    "isArray": false
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }`;
+
+            const outputJson = yamlToJson(inputYaml);
+            outputJson.should.deep.equal(JSON.parse(expectedDcsJson));
         });
 
     });

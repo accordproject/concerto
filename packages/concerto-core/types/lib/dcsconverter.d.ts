@@ -5,3 +5,9 @@
  * @throws {Error} if the input is not a valid DCS JSON
  */
 export function jsonToYaml(dcsJson: object): string;
+/**
+ * converts DCS YAML string to JSON format
+ * @param {string} yamlString the YAML string to convert
+ * @returns {object} the DCS JSON
+ */
+export function yamlToJson(yamlString: string): object;
