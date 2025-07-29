@@ -274,18 +274,11 @@ class ModelFile extends Decorated {
         // Check that no locally declared type conflicts with imported type names
         this.declarations.forEach(declaration => {
             const localName = declaration.getName();
-            const localNamespace = this.getNamespace();
-        
             this.getImports().forEach((importFqn) => {
                 if (importFqn.endsWith('*')) {
-                    // Skip wildcard imports for now
                     return;
                 }
-            
-                const importNamespace = ModelUtil.getNamespace(importFqn);
                 const importShortName = ModelUtil.getShortName(importFqn);
-                const importedModel = this.getModelManager().getModelFile(importNamespace);
-            
                 // Check if the imported type has the same short name as the local declaration
                 if (importShortName === localName) {
                     throw new IllegalModelException(
@@ -295,8 +288,6 @@ class ModelFile extends Decorated {
                 }
             });
         });
-
-        
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
@@ -312,8 +303,6 @@ class ModelFile extends Decorated {
                 }
             }
         );
-
-        
         // Run validations on class declarations
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
