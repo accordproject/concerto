@@ -296,6 +296,7 @@ class ModelFile extends Decorated {
             });
         });
 
+        
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
