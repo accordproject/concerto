@@ -1,6 +1,6 @@
 namespace org.example@1.0.0
 
-enum myCardSuit {
+enum MyCardSuit {
   o Clubs
   o DiamondsSuit
   o hearts

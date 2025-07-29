@@ -13,9 +13,25 @@
  */
 
 import { RulesetDefinition } from '@stoplight/spectral-core';
-import  {default as namingRules}  from './naming-ruleset';
+
+import namespaceVersion from './namespace-version';
+import pascalCaseDeclarations from './pascal-case-declarations';
+import camelCaseProperties from './camel-case-properties';
+import upperSnakeCaseEnumConst from './upper-snake-case-enum-const';
+import noEmptyDeclarations from './no-empty-declarations';
+import abstractMustSubclassed from './abstract-must-subclassed';
+import noRedundantScalar from './no-redundant-scalar';
+
 const concertoRuleset: RulesetDefinition = {
-    ...namingRules,
+    rules: {
+        'namespace-version': namespaceVersion,
+        'no-empty-declarations': noEmptyDeclarations,
+        'pascal-case-declarations': pascalCaseDeclarations,
+        'camel-case-properties': camelCaseProperties,
+        'upper-snake-case-enum-constants': upperSnakeCaseEnumConst,
+        'abstract-must-subclassed': abstractMustSubclassed,
+        'no-Redundant-Scalar': noRedundantScalar
+    }
 };
 
 export default concertoRuleset;
