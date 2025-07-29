@@ -289,7 +289,7 @@ class ModelFile extends Decorated {
                 // Check if the imported type has the same short name as the local declaration
                 if (importShortName === localName) {
                     throw new IllegalModelException(
-                        `Type name conflict: local declaration '${localName}' conflicts with imported type '${importFqn}'`,
+                        `already defined in an imported model`,
                         this
                     );
                 }
