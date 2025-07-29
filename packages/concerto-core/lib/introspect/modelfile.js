@@ -313,6 +313,7 @@ class ModelFile extends Decorated {
             }
         );
 
+        
         // Run validations on class declarations
         for(let n=0; n < this.declarations.length; n++) {
             let classDeclaration = this.declarations[n];
