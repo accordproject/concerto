@@ -271,6 +271,30 @@ class ModelFile extends Decorated {
                 }), this);
             }
         });
+        // Check that no locally declared type conflicts with imported type names
+        this.declarations.forEach(declaration => {
+            const localName = declaration.getName();
+            const localNamespace = this.getNamespace();
+        
+            this.getImports().forEach((importFqn) => {
+                if (importFqn.endsWith('*')) {
+                    // Skip wildcard imports for now
+                    return;
+                }
+            
+                const importNamespace = ModelUtil.getNamespace(importFqn);
+                const importShortName = ModelUtil.getShortName(importFqn);
+                const importedModel = this.getModelManager().getModelFile(importNamespace);
+            
+                // Check if the imported type has the same short name as the local declaration
+                if (importShortName === localName) {
+                    throw new IllegalModelException(
+                        `Type name conflict: local declaration '${localName}' conflicts with imported type '${importFqn}'`,
+                        this
+                    );
+                }
+            });
+        });
 
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
