@@ -5,7 +5,7 @@ scalar ssnNumber extends String default="000-00-0000"
 concept myProduct {
 }
 
-asset paymentOrder {
+asset pAYmentOrder {
 }
 
 participant customer {
