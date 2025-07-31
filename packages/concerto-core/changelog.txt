@@ -24,7 +24,7 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
-Version 3.22.0 {f9906fecbb071af456002ae2f8e006bc} 2025-07-26
+Version 3.22.0 {677eac41f1ef471977d3e301e46ef480} 2025-07-26
 - added jsonToYaml method in DecoratorManager
 - added yamlToJson method in DecoratorManager
 

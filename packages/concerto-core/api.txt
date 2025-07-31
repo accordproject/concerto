@@ -56,14 +56,7 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
-   + object handleTarget() 
-   + object handleArguments() 
-   + object handleDecorator() 
-   + object handleCommands() 
-   + string jsonToYaml() throws Error
-   + object restoreArguments() 
-   + object restoreDecorator() 
-   + object restoreCommands() 
+   + string jsonToYaml() 
    + object yamlToJson() 
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error

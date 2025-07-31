@@ -22,6 +22,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * handles the target field of a command
  * @param {object} target the value of target
  * @returns {object} the simplified target object
+ * @private
  */
 function handleTarget(target){
     const targetKeys = Object.keys(target);
@@ -43,6 +44,7 @@ function handleTarget(target){
  * @param {object} [argument.type] the type identifier for type reference arguments
  * @param {boolean} [argument.isArray] whether the type reference is an array
  * @returns {object} simplified argument object
+ * @private
  */
 function handleArguments(argument){
     const mapClassToType = {
@@ -72,6 +74,7 @@ function handleArguments(argument){
  * @param {string} decorator.name the name of the decorator
  * @param {object[]} [decorator.arguments] the list of arguments
  * @returns {object} simplified decorator object with name and arguments
+ * @private
  */
 function handleDecorator(decorator){
     return {
@@ -89,6 +92,7 @@ function handleDecorator(decorator){
  * @param {object} command.target the target to apply decorator to
  * @param {object} command.decorator the decorator to apply
  * @returns {object} simplified commands object
+ * @private
  */
 function handleCommands(command){
     return {
@@ -102,7 +106,6 @@ function handleCommands(command){
  * converts DCS JSON to YAML string
  * @param {object} dcsJson the DCS JSON as parsed object
  * @returns {string} the DCS YAML string
- * @throws {Error} if the input is not a valid DCS JSON
  */
 function jsonToYaml(dcsJson){
     const dcsNamespace = ModelUtil.getNamespace(dcsJson.$class);
@@ -132,6 +135,7 @@ function jsonToYaml(dcsJson){
  * @param {*} [argument.value] - the argument value
  * @param {object} [argument.typeReference] - the type reference object for complex types
  * @returns {object} - the fully qualified argument object after restoring required fields
+ * @private
  */
 function restoreArguments(MetaModelNamespace, argument){
     const mapTypeToClass = {
@@ -162,6 +166,7 @@ function restoreArguments(MetaModelNamespace, argument){
  * handles the decorator of each command for yaml to json
  * @param {object} decorator - the decorator to convert
  * @returns {object} - the decorator object after restoring required fields
+ * @private
  */
 function restoreDecorator(decorator){
     return {
@@ -177,6 +182,7 @@ function restoreDecorator(decorator){
  * @param {string} dcsNamespace - the namespace of the DCS
  * @param {object} command - the command to convert
  * @returns {object} - the command object after restoring required fields
+ * @private
  */
 function restoreCommands(dcsNamespace, command){
     return {
