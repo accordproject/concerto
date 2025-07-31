@@ -20,7 +20,6 @@ import camelCaseProperties from './camel-case-properties';
 import upperSnakeCaseEnumConst from './upper-snake-case-enum-const';
 import noEmptyDeclarations from './no-empty-declarations';
 import abstractMustSubclassed from './abstract-must-subclassed';
-import noRedundantScalar from './no-redundant-scalar';
 
 const concertoRuleset: RulesetDefinition = {
     rules: {
@@ -30,7 +29,6 @@ const concertoRuleset: RulesetDefinition = {
         'camel-case-properties': camelCaseProperties,
         'upper-snake-case-enum-constants': upperSnakeCaseEnumConst,
         'abstract-must-subclassed': abstractMustSubclassed,
-        'no-Redundant-Scalar': noRedundantScalar
     }
 };
 
