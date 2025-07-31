@@ -1,6 +1,6 @@
 namespace org.example@1.0.0
 
-asset myProduct {
+asset MyProduct {
   o String Model 
   o Integer Year 
   o Double Price
