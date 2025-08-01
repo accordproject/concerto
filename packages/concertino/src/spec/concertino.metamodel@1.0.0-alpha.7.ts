@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-// Generated code for namespace: concertino.metamodel@0.1.0-alpha.3
+// Generated code for namespace: concertino.metamodel@1.0.0-alpha.7
 
 // imports
 
@@ -37,15 +37,8 @@ export interface IModelMetadata extends IConcept {
    decorators?: IDecorator[];
 }
 
-export interface IParsedFullyQualifiedName extends IConcept {
-   namespace: string;
-   localName: string;
-   version: string;
-}
-
 export interface IConcertinoDeclaration extends IConcept {
    type: string;
-   name: IParsedFullyQualifiedName;
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
 }
