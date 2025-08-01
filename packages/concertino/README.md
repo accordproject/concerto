@@ -34,6 +34,7 @@ npm install @accordproject/concertino
 
 ### Using the ConcertinoConverter Class
 
+[Try it in Replit](https://replit.com/@mttrbrts/AccordProjectConcertino?v=1)
 ```javascript
 const { ModelManager } = require('@accordproject/concerto-core');
 const { ConcertinoConverter } = require('@accordproject/concertino');
