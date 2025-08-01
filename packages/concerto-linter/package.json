@@ -34,6 +34,7 @@
     "dependencies": {
         "@accordproject/concerto-core": "3.21.0",
         "@accordproject/concerto-linter-default-ruleset": "file:./default-ruleset",
+        "@accordproject/concerto-metamodel": "3.12.3",
         "find-up": "5.0.0",
         "@stoplight/spectral-cli": "6.15.0",
         "@stoplight/spectral-core": "1.20.0",
@@ -42,7 +43,7 @@
     "devDependencies": {
         "eslint": "8.57.1",
         "@typescript-eslint/eslint-plugin": "8.16.0",
-        "@typescript-eslint/parser": "8.16.0",        
+        "@typescript-eslint/parser": "8.16.0",
         "npm-run-all": "^4.1.5",
         "rimraf": "^6.0.1",
         "typescript": "5.7.2",
