@@ -69,7 +69,14 @@
                                 { "type": "string" },
                                 { "type": "number" },
                                 { "type": "boolean" },
-                                { "type": "object" }
+                                {
+                                    "type": "object",
+                                    "required": ["type"],
+                                    "properties": {
+                                        "type": {"type": "string" },
+                                        "isArray": {"type": "boolean"}
+                                    }
+                                }
                             ]
                         }
                     },

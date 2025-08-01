@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concertino",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Object-centric serialization of Concerto models",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -16,7 +16,8 @@
     "pretest": "#npm-run-all lint",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "generate-types": "ENABLE_MAP_TYPE=true node --experimental-modules scripts/generateTypes.js"
   },
   "repository": {
     "type": "git",
@@ -30,13 +31,16 @@
   ],
   "author": "accordproject.org",
   "license": "Apache-2.0",
+  "type": "module",
   "dependencies": {
     "@accordproject/concerto-core": "3.22.0",
     "@accordproject/concerto-types": "3.22.0",
     "semver": "7.6.3"
   },
   "devDependencies": {
+    "@accordproject/concerto-codegen": "^3.22.0",
     "@accordproject/concerto-cto": "3.22.0",
+    "@accordproject/concerto-util": "^3.22.0",
     "@types/semver": "7.5.8",
     "@typescript-eslint/eslint-plugin": "8.16.0",
     "@typescript-eslint/parser": "8.16.0",

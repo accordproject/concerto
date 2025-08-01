@@ -12,8 +12,8 @@ import concerto.metamodel@1.0.0.{Decorator, Import}
  * Represents the Concertino format.
  */
 concept Concertino {
-  o Metadata metadata
   o DeclarationMap declarations
+  o Metadata metadata
 }
 
 /** Common scalar definitions */
@@ -36,7 +36,12 @@ map DeclarationMap {
  */
 concept Metadata {
   o SemanticVersion concertinoVersion
-  o ModelMetadata[] models
+  o ModelMetadataMap models
+}
+
+map ModelMetadataMap {
+  o Namespace
+  o ModelMetadata
 }
 
 /**
@@ -92,7 +97,20 @@ enum Prototype {
  * Represents an EnumDeclaration.
  */
 concept EnumDeclaration extends Declaration {
-  o EnumValue[] values
+  o EnumValueMap values
+}
+
+map EnumValueMap {
+  o String
+  o EnumValue
+}
+
+/**
+ * Represents an enum value in an EnumDeclaration.
+ */
+concept EnumValue {
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
 }
 
 /**
@@ -158,6 +176,7 @@ concept MapValue {
 abstract concept Property {
   o Identifier name
   o String type // Fully qualified type name or primitive type
+  o String scalarType optional // For properties referring to scalars
   o Boolean isArray optional
   o Boolean isOptional optional
   o Boolean isRelationship optional
@@ -194,20 +213,11 @@ concept DateTimeProperty extends Property {
 }
 
 /**
- * Represents an enum value in an EnumDeclaration.
- */
-concept EnumValue {
-  o Identifier name
-  o Vocabulary vocabulary optional
-  o MetadataMap metadata optional
-}
-
-/**
  * Represents a vocabulary object.
  */
 concept Vocabulary {
   o String label optional
-  o PathTerms path
+  o PathTerms path optional
   o AdditionalTermMap additionalTerms optional
 }
 
@@ -215,8 +225,8 @@ concept Vocabulary {
  * A map from parent identifiers to localized terms (labels)
  */
 map PathTerms {
-  o String
-  o String
+  o String // key
+  o String // optional, value can be null
 }
 
 /**
@@ -224,7 +234,7 @@ map PathTerms {
  */
 map AdditionalTermMap {
   o String
-  o String // optional
+  o String // optional, value can be null
 }
 
 /**
@@ -232,9 +242,23 @@ map AdditionalTermMap {
  */
 map MetadataMap {
   o String
-  o SimpleDecorator
+  o Decorators
 }
 
-concept SimpleDecorator {
-    o String[] arguments
+concept Decorators {
+    o DecoratorValue[] values
+}
+abstract concept DecoratorValue {}
+concept StringDecoratorValue extends DecoratorValue {
+  o String value
+}
+concept NumberDecoratorValue extends DecoratorValue {
+  o Double value
+}
+concept BooleanDecoratorValue extends DecoratorValue {
+  o Boolean value
+}
+concept DecoratorTypeLiteral extends DecoratorValue {
+  o String type
+  o Boolean isArray optional
 }

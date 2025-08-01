@@ -1,3 +1,4 @@
+/* eslint-disable valid-jsdoc */
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelUtil } from '@accordproject/concerto-core';
-import { Concertino, Declaration, Property, EnumDeclaration, ConceptDeclaration, MapDeclaration, ScalarDeclaration, MapValue } from './types';
+import { Concertino, Declaration, Property, EnumDeclaration, ConceptDeclaration, MapDeclaration, ScalarDeclaration, MapValue, StringScalarDeclaration, IntegerScalarDeclaration, StringProperty, IntegerProperty } from './types';
 import {
     IBooleanProperty,
     IBooleanScalar,
     IConceptDeclaration,
-    IDateTimeScalar,
     IDecorator,
     IDoubleDomainValidator,
     IDoubleProperty,
@@ -49,7 +49,7 @@ import {
     PropertyUnion,
     ScalarDeclarationUnion,
 } from '@accordproject/concerto-types';
-import { EnumOption as EnumValue, MetadataMap, Vocabulary } from './types';
+import { EnumValue as EnumValue, MetadataMap, Vocabulary } from './types';
 
 /**
  * Extracts scalar validators (regex, range, length) from a ScalarDeclaration.
@@ -61,17 +61,16 @@ function extractScalarValidators(declaration: ScalarDeclaration) {
     lengthValidator?: IStringLengthValidator;
     validator?: IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator | IStringRegexValidator;
   } = {};
-
-
-    if (declaration.regex) {
+    const stringDeclaration = declaration as StringScalarDeclaration;
+    if ('regex' in declaration && stringDeclaration.regex) {
         const regexValidator: IStringRegexValidator = {
             $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
-            pattern: declaration.regex,
+            pattern: stringDeclaration.regex,
             flags: ''
         };
 
         // Check if it's already in the form /pattern/flags
-        const match = declaration.regex.match(/^\/(.*)\/([gimuy]*)$/);
+        const match = stringDeclaration.regex.match(/^\/(.*)\/([gimuy]*)$/);
         if (match) {
             regexValidator.pattern = match[1];
             regexValidator.flags = match[2];
@@ -79,23 +78,24 @@ function extractScalarValidators(declaration: ScalarDeclaration) {
         result.validator = regexValidator;
     }
 
-    if (declaration.range) {
+    const integerDeclaration = declaration as IntegerScalarDeclaration;
+    if ('range' in integerDeclaration && integerDeclaration.range) {
         result.validator = { $class: `concerto.metamodel@1.0.0.${declaration.type.replace('Scalar', '')}DomainValidator` };
-        if (declaration.range[0] !== undefined && declaration.range[0] !== null) {
-            (result.validator as IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator).lower = declaration.range[0];
+        if (integerDeclaration.range[0] !== undefined && integerDeclaration.range[0] !== null) {
+            (result.validator as IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator).lower = integerDeclaration.range[0];
         }
-        if (declaration.range[1] !== undefined && declaration.range[1] !== null) {
-            (result.validator as IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator).upper = declaration.range[1];
+        if (integerDeclaration.range[1] !== undefined && integerDeclaration.range[1] !== null) {
+            (result.validator as IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator).upper = integerDeclaration.range[1];
         }
     }
 
-    if (declaration.length) {
+    if ('length' in stringDeclaration && stringDeclaration.length) {
         result.lengthValidator = { $class: 'concerto.metamodel@1.0.0.StringLengthValidator' };
-        if (declaration.length[0] !== undefined && declaration.length[0] !== null) {
-            result.lengthValidator.minLength = declaration.length[0];
+        if (stringDeclaration.length[0] !== undefined && stringDeclaration.length[0] !== null) {
+            result.lengthValidator.minLength = stringDeclaration.length[0];
         }
-        if (declaration.length[1] !== undefined && declaration.length[1] !== null) {
-            result.lengthValidator.maxLength = declaration.length[1];
+        if (stringDeclaration.length[1] !== undefined && stringDeclaration.length[1] !== null) {
+            result.lengthValidator.maxLength = stringDeclaration.length[1];
         }
     }
 
@@ -317,15 +317,17 @@ function transformProperties(properties: Record<string, Property>): { properties
                 };
 
                 if (!isScalarDeclarationType) {
-                    if (property.regex) {
+
+                    const stringProperty = property as StringProperty;
+                    if (stringProperty.regex) {
                         const regexValidator: IStringRegexValidator = {
                             $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
-                            pattern: property.regex,
+                            pattern: stringProperty.regex,
                             flags: ''
                         };
 
                         // Check if it's already in the form /pattern/flags
-                        const match = property.regex.match(/^\/(.*)\/([gimuy]*)$/);
+                        const match = stringProperty.regex.match(/^\/(.*)\/([gimuy]*)$/);
                         if (match) {
                             regexValidator.pattern = match[1];
                             regexValidator.flags = match[2];
@@ -333,24 +335,25 @@ function transformProperties(properties: Record<string, Property>): { properties
                         validator = regexValidator;
                     }
 
-                    if (property.range) {
+                    const integerProperty = property as IntegerProperty;
+                    if (integerProperty.range) {
                         validator = { $class: `concerto.metamodel@1.0.0.${property.type.replace('Scalar', '')}DomainValidator` };
-                        if (property.range[0] !== undefined && property.range[0] !== null) {
-                            validator.lower = property.range[0];
+                        if (integerProperty.range[0] !== undefined && integerProperty.range[0] !== null) {
+                            validator.lower = integerProperty.range[0];
                         }
-                        if (property.range[1] !== undefined && property.range[1] !== null) {
-                            validator.upper = property.range[1];
+                        if (integerProperty.range[1] !== undefined && integerProperty.range[1] !== null) {
+                            validator.upper = integerProperty.range[1];
                         }
                     }
 
                     let lengthValidator: IStringLengthValidator | undefined;
-                    if (property.length) {
+                    if (stringProperty.length) {
                         lengthValidator = { $class: 'concerto.metamodel@1.0.0.StringLengthValidator' };
-                        if (property.length[0] !== undefined && property.length[0] !== null) {
-                            lengthValidator.minLength = property.length[0];
+                        if (stringProperty.length[0] !== undefined && stringProperty.length[0] !== null) {
+                            lengthValidator.minLength = stringProperty.length[0];
                         }
-                        if (property.length[1] !== undefined && property.length[1] !== null) {
-                            lengthValidator.maxLength = property.length[1];
+                        if (stringProperty.length[1] !== undefined && stringProperty.length[1] !== null) {
+                            lengthValidator.maxLength = stringProperty.length[1];
                         }
                     }
 
@@ -362,8 +365,8 @@ function transformProperties(properties: Record<string, Property>): { properties
                         (result as IStringProperty).lengthValidator = lengthValidator;
                     }
 
-                    if (property.default !== undefined) {
-                        (result as IStringProperty | IIntegerProperty | ILongProperty | IDoubleProperty | IBooleanProperty).defaultValue = property.default;
+                    if (stringProperty.default !== undefined) {
+                        (result as IStringProperty | IIntegerProperty | ILongProperty | IDoubleProperty | IBooleanProperty).defaultValue = stringProperty.default;
                     }
                 }
 
@@ -439,13 +442,10 @@ function transformScalar(namespace: string, name: string, declaration: ScalarDec
         ...extractScalarValidators(declaration),
     };
 
-    if (declaration.default !== undefined) {
-        (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = declaration.default;
-    }
-    // TODO remove following line
-    // NOTE: Match strange behaviour in Concerto where missing default values for DateTime scalars default to null
-    if (result.$class === 'concerto.metamodel@1.0.0.DateTimeScalar' && declaration.default === undefined) {
-        // (result as IDateTimeScalar).defaultValue = null;
+    const stringDeclaration = declaration as StringScalarDeclaration;
+
+    if (stringDeclaration.default !== undefined) {
+        (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = stringDeclaration.default;
     }
 
     const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);

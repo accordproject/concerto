@@ -40,14 +40,19 @@ export interface Vocabulary {
   additionalTerms?: Record<string, string>;
 }
 
+export interface DecoratorTypeLiteral {
+  type: string;
+  isArray?: boolean
+}
+
 /**
  * Represents a metadata map.
  */
 export interface MetadataMap {
-  [key: string]: (string | number | boolean | object)[];
+  [key: string]: (string | number | boolean | DecoratorTypeLiteral)[];
 }
 
-export type EnumOption = { vocabulary?: Vocabulary; metadata?: MetadataMap }
+export type EnumValue = { vocabulary?: Vocabulary; metadata?: MetadataMap }
 
 /**
  * Unique identifier for a declaration.
@@ -59,6 +64,16 @@ export interface FullyQualifiedName {
 }
 
 /**
+ * Represents a generic declaration.
+ */
+export interface Declaration {
+  type: string;
+  name: FullyQualifiedName;
+  vocabulary?: Vocabulary;
+  metadata?: MetadataMap;
+}
+
+/**
  * Represents the Concertino format.
  */
 export interface Concertino {
@@ -67,53 +82,73 @@ export interface Concertino {
 }
 
 /**
- * Represents a generic declaration.
- */
-export type Declaration =
-  | ConceptDeclaration
-  | EnumDeclaration
-  | ScalarDeclaration
-  | MapDeclaration;
-
-/**
- * Represents a ConceptDeclaration.
- */
-export interface ConceptDeclaration {
-  type: 'ConceptDeclaration';
-  properties?: Record<string, Property>;
-  extends?: string[];
-  isAbstract?: boolean;
-  vocabulary?: Vocabulary;
-  metadata?: MetadataMap;
-  prototype?: string;
-  name?: FullyQualifiedName;
-}
-
-/**
  * Represents an EnumDeclaration.
  */
-export interface EnumDeclaration {
+export interface EnumDeclaration extends Declaration {
   type: 'EnumDeclaration';
-  values: Record<string, EnumOption>;
-  vocabulary?: Vocabulary;
-  metadata?: MetadataMap;
-  name?: FullyQualifiedName;
+  values: Record<string, EnumValue>;
 }
 
 export type ScalarType = 'StringScalar' | 'IntegerScalar' | 'BooleanScalar' | 'DoubleScalar' | 'LongScalar' | 'DateTimeScalar';
 
 /**
- * Represents a ScalarDeclaration.
+ * Represents a generic scalar declaration.
  */
-export interface ScalarDeclaration {
+export interface ScalarDeclaration extends Declaration {
   type: ScalarType;
-  vocabulary?: Vocabulary;
-  metadata?: MetadataMap;
-  regex?: string; // For StringScalar
-  length?: [number | null , number | null]; // For String properties
-  range?: [number | null , number | null]; // Only for Integer, Double & Long types
-  default?: string | number | boolean | null; // Default value for scalars
-  name?: FullyQualifiedName;
+}
+
+/**
+ * String scalar declaration
+ */
+export interface StringScalarDeclaration extends ScalarDeclaration {
+  type: 'StringScalar';
+  regex?: string;
+  length?: [number | null, number | null];
+  default?: string;
+}
+
+/**
+ * Integer scalar declaration
+ */
+export interface IntegerScalarDeclaration extends ScalarDeclaration {
+  type: 'IntegerScalar';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * Boolean scalar declaration
+ */
+export interface BooleanScalarDeclaration extends ScalarDeclaration {
+  type: 'BooleanScalar';
+  default?: boolean;
+}
+
+/**
+ * Double scalar declaration
+ */
+export interface DoubleScalarDeclaration extends ScalarDeclaration {
+  type: 'DoubleScalar';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * Long scalar declaration
+ */
+export interface LongScalarDeclaration extends ScalarDeclaration {
+  type: 'LongScalar';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * DateTime scalar declaration
+ */
+export interface DateTimeScalarDeclaration extends ScalarDeclaration {
+  type: 'DateTimeScalar';
+  default?: string;
 }
 
 /**
@@ -138,13 +173,10 @@ export interface MapValue {
 /**
  * Represents a MapDeclaration.
  */
-export interface MapDeclaration {
+export interface MapDeclaration extends Declaration {
   type: 'MapDeclaration';
   key: MapKey;
   value: MapValue;
-  vocabulary?: Vocabulary;
-  metadata?: MetadataMap;
-  name?: FullyQualifiedName;
 }
 
 /**
@@ -192,11 +224,100 @@ export interface Property {
    */
   metadata?: MetadataMap;
 
-  /**
-   * Metaproperties
-   */
-  regex?: string; // For String properties
-  length?: [number | null , number | null]; // For String properties
-  range?: [number | null , number | null]; // Only for Integer, Double & Long types
-  default?: string | number | boolean; // // Only for Integer, Double & Long types
 }
+
+/**
+ * String property
+ */
+export interface StringProperty extends Property {
+  type: 'String';
+  regex?: string;
+  length?: [number | null, number | null];
+  default?: string;
+}
+
+/**
+ * Integer property
+ */
+export interface IntegerProperty extends Property {
+  type: 'Integer';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * Boolean property
+ */
+export interface BooleanProperty extends Property {
+  type: 'Boolean';
+  default?: boolean;
+}
+
+/**
+ * Double property
+ */
+export interface DoubleProperty extends Property {
+  type: 'Double';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * Long property
+ */
+export interface LongProperty extends Property {
+  type: 'Long';
+  range?: [number | null, number | null];
+  default?: number;
+}
+
+/**
+ * DateTime property
+ */
+export interface DateTimeProperty extends Property {
+  type: 'DateTime';
+  default?: string;
+}
+
+/**
+ * Object property (for non-primitive types)
+ */
+export type ObjectProperty = Property
+
+/**
+ * Relationship property
+ */
+export interface RelationshipProperty extends Property {
+  isRelationship: true;
+}
+
+/**
+ * Represents a ConceptDeclaration.
+ */
+export interface ConceptDeclaration extends Declaration {
+  type: 'ConceptDeclaration';
+  properties?: Record<string,
+    StringProperty |
+    IntegerProperty |
+    BooleanProperty |
+    DoubleProperty |
+    LongProperty |
+    DateTimeProperty |
+    ObjectProperty |
+    RelationshipProperty
+  >;
+  extends?: string[];
+  isAbstract?: boolean;
+  prototype?: string;
+}
+
+export type DeclarationUnion =
+  | ConceptDeclaration
+  | EnumDeclaration
+  | StringScalarDeclaration
+  | IntegerScalarDeclaration
+  | BooleanScalarDeclaration
+  | DoubleScalarDeclaration
+  | LongScalarDeclaration
+  | DateTimeScalarDeclaration
+  | MapDeclaration;

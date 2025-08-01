@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable valid-jsdoc */
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +34,21 @@ import {
     Declaration, Property,
     ConceptDeclaration,
     ScalarDeclaration,
-    EnumOption,
+    EnumValue,
     MetadataMap,
     Vocabulary,
     FullyQualifiedName,
-    ScalarType
+    ScalarType,
+    MapDeclaration,
+    EnumDeclaration,
+    StringProperty,
+    IntegerProperty,
+    DoubleProperty,
+    LongProperty,
+    BooleanProperty,
+    DateTimeProperty,
+    StringScalarDeclaration,
+    IntegerScalarDeclaration
 } from './types';
 
 const SCALAR_TYPES = new Set<ScalarType>([
@@ -60,6 +72,15 @@ const PROPERTY_TYPE_MAP: Record<string, string> = {
     'concerto.metamodel@1.0.0.BooleanProperty': 'Boolean',
     'concerto.metamodel@1.0.0.DateTimeProperty': 'DateTime',
 };
+
+const SCALAR_TYPE_MAP: Record<ScalarType, string> = {
+    'BooleanScalar': 'Boolean',
+    'IntegerScalar': 'Integer',
+    'LongScalar': 'Long',
+    'DoubleScalar': 'Double',
+    'StringScalar': 'String',
+    'DateTimeScalar': 'DateTime',
+}
 
 const KEY_TYPE_MAP: Record<string, string> = {
     'concerto.metamodel@1.0.0.StringMapKeyType': 'String',
@@ -137,8 +158,8 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: Vocabular
  * @param properties The enum properties.
  * @returns The enum values object.
  */
-function transformEnumValues(properties: IEnumProperty[]): Record<string, EnumOption> {
-    const result: Record<string, EnumOption> = {};
+function transformEnumValues(properties: IEnumProperty[]): Record<string, EnumValue> {
+    const result: Record<string, EnumValue> = {};
     properties.forEach((property) => {
         result[property.name] = extractDecoratorsInfo(property.decorators);
     });
@@ -171,8 +192,9 @@ export function determinePropertyType(property: PropertyUnion, { modelNamespace 
 function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion, propertyEntry: Property | ScalarDeclaration): void {
     if ('validator' in property && property.validator) {
         if (['String', 'StringScalar'].includes(propertyEntry.type)) {
+            const stringPropertyEntry = (propertyEntry as StringProperty);
             if ('pattern' in property.validator && property.validator?.pattern) {
-                propertyEntry.regex = `/${property.validator?.pattern}/${property.validator?.flags}`;
+                stringPropertyEntry.regex = `/${property.validator?.pattern}/${property.validator?.flags}`;
             }
         } else if (
             ['Integer', 'IntegerScalar', 'Long', 'LongScalar', 'Double', 'DoubleScalar'].includes(propertyEntry.type) &&
@@ -180,16 +202,17 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
         ) {
             const lower = property.validator.lower === undefined ? null : property.validator.lower;
             const upper = property.validator.upper === undefined ? null : property.validator.upper;
-            propertyEntry.range = [lower, upper];
+            (propertyEntry as IntegerProperty | DoubleProperty | LongProperty).range = [lower, upper];
         }
     }
     if ('lengthValidator' in property && property.lengthValidator && ['String', 'StringScalar'].includes(propertyEntry.type)){
         const min = property.lengthValidator.minLength === undefined ? null : property.lengthValidator.minLength;
         const max = property.lengthValidator.maxLength === undefined ? null : property.lengthValidator.maxLength;
-        propertyEntry.length = [min, max];
+        (propertyEntry as StringProperty).length = [min, max];
     }
     if ('defaultValue' in property && property.defaultValue !== undefined && property.defaultValue !== null) {
-        propertyEntry.default = property.defaultValue;
+        (propertyEntry as StringProperty | IntegerProperty | DoubleProperty | LongProperty | BooleanProperty | DateTimeProperty)
+            .default = property.defaultValue;
     }
 }
 
@@ -267,7 +290,7 @@ function mapValueTypeToObject(
  * @param context The context object.
  * @returns The Concertino map declaration.
  */
-function transformMapDeclaration(declaration: IMapDeclaration, context: { modelNamespace: string }): Declaration {
+function transformMapDeclaration(declaration: IMapDeclaration, context: { modelNamespace: string }): MapDeclaration {
     return {
         type: 'MapDeclaration',
         key: {
@@ -305,7 +328,7 @@ function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context
  * @param context The context object.
  * @returns The Concertino enum declaration.
  */
-function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): Declaration {
+function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): EnumDeclaration {
     return {
         type: 'EnumDeclaration',
         values: transformEnumValues(declaration.properties),
@@ -320,9 +343,9 @@ function transformEnumDeclaration(declaration: IEnumDeclaration, context: { mode
  * @param context The context object.
  * @returns The Concertino concept declaration.
  */
-function transformConceptDeclaration(declaration: IConceptDeclaration, context: { modelNamespace: string }): Declaration {
+function transformConceptDeclaration(declaration: IConceptDeclaration, context: { modelNamespace: string }): ConceptDeclaration {
     const declarationClass = declaration.$class.split('.').pop() as string;
-    const result: Declaration = {
+    const result: ConceptDeclaration = {
         type: 'ConceptDeclaration',
         properties: transformProperties(declaration.properties, { ...context, declaration }),
         ...extractDecoratorsInfo(declaration.decorators),
@@ -442,11 +465,14 @@ function convertToConcertino(metamodel: IModels): Concertino {
         };
     });
     Object.values(concertino.declarations).forEach((declaration) => {
+
+        // Denormalize inherited properties
         if (declaration.type === 'ConceptDeclaration') {
-            if (declaration.extends) {
-                declaration.extends = getInheritanceChain(declaration, concertino);
+            const concept = (declaration as ConceptDeclaration);
+            if (concept.extends) {
+                concept.extends = getInheritanceChain(concept, concertino);
                 const inheritedProperties: Record<string, Property> = {};
-                declaration.extends.forEach((parent) => {
+                concept.extends.forEach((parent) => {
                     const currentParent = concertino.declarations[parent];
                     if (currentParent && 'properties' in currentParent && currentParent.properties) {
                         const currentParentProperties = Object.fromEntries(
@@ -457,26 +483,38 @@ function convertToConcertino(metamodel: IModels): Concertino {
                         Object.assign(inheritedProperties, currentParentProperties);
                     }
                 });
-                declaration.properties = {
+                concept.properties = {
                     ...inheritedProperties,
-                    ...declaration.properties,
+                    ...concept.properties,
                 };
             }
-            declaration.properties = Object.fromEntries(
-                Object.entries(declaration.properties || {}).map(([key, value]) => {
+
+            // Denormalize metaproperties for scalar declarations
+            concept.properties = Object.fromEntries(
+                Object.entries(concept.properties || {}).map(([key, value]) => {
                     if (value !== undefined) {
                         const scalarDecl = concertino.declarations[value.type] as ScalarDeclaration;
                         if (scalarDecl && SCALAR_TYPES.has(scalarDecl.type as ScalarType)) {
-                            const newDecl = {
+                            const newProperty: Property = {
                                 ...value,
                                 scalarType: value.type,
-                                type: scalarDecl.type.replace('Scalar', ''),
+                                type: SCALAR_TYPE_MAP[scalarDecl.type],
                             };
-                            if (scalarDecl.regex) {newDecl.regex = scalarDecl.regex;}
-                            if (scalarDecl.length) {newDecl.length = scalarDecl.length;}
-                            if (scalarDecl.range) {newDecl.range = scalarDecl.range;}
-                            if (scalarDecl.default) {newDecl.default = scalarDecl.default;}
-                            return [key, newDecl];
+                            if ('regex' in scalarDecl && scalarDecl.regex) {
+                                (newProperty as StringProperty).regex = (scalarDecl as StringScalarDeclaration).regex;
+                            }
+                            if ('length' in scalarDecl && scalarDecl.length) {
+                                (newProperty as StringProperty).length = (scalarDecl as StringScalarDeclaration).length;
+                            }
+                            if ('range' in scalarDecl && scalarDecl.range) {
+                                // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
+                                (newProperty as IntegerProperty).range = (scalarDecl as IntegerScalarDeclaration).range;
+                            }
+                            if ('default' in scalarDecl && scalarDecl.default) {
+                                // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
+                                (newProperty as IntegerProperty).default = (scalarDecl as IntegerScalarDeclaration).default;
+                            }
+                            return [key, newProperty];
                         }
                     }
                     return [key, value];
