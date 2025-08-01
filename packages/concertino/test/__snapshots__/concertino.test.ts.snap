@@ -2396,6 +2396,114 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
       "type": "ConceptDeclaration",
     },
+    "readme@1.0.0.Address": {
+      "name": {
+        "localName": "Address",
+        "namespace": "readme",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "city": {
+          "name": "city",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "City/Town",
+          },
+        },
+        "country": {
+          "name": "country",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "street": {
+          "name": "street",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "Street Address",
+          },
+        },
+        "zipCode": {
+          "name": "zipCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+      "vocabulary": {
+        "label": "Physical Address",
+      },
+    },
+    "readme@1.0.0.Email": {
+      "name": {
+        "localName": "Email",
+        "namespace": "readme",
+        "version": "1.0.0",
+      },
+      "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+      "type": "StringScalar",
+    },
+    "readme@1.0.0.Person": {
+      "name": {
+        "localName": "Person",
+        "namespace": "readme",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "address": {
+          "isOptional": true,
+          "name": "address",
+          "type": "readme@1.0.0.Address",
+          "vocabulary": {
+            "label": "Mailing Address",
+          },
+        },
+        "age": {
+          "isOptional": true,
+          "name": "age",
+          "range": [
+            0,
+            null,
+          ],
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "email": {
+          "isOptional": true,
+          "metadata": {
+            "sensitive": null,
+          },
+          "name": "email",
+          "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+          "scalarType": "readme@1.0.0.Email",
+          "type": "String",
+        },
+        "firstName": {
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "Given Name",
+          },
+        },
+        "lastName": {
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+          "vocabulary": {
+            "label": "Family Name",
+          },
+        },
+      },
+      "type": "ConceptDeclaration",
+      "vocabulary": {
+        "additionalTerms": {
+          "plural": "People",
+        },
+        "label": "Individual",
+      },
+    },
     "xx.yy.zz@1.0.0.AXZCOM": {
       "extends": [
         "xx.yy.zz@1.0.0.SomeComment",
@@ -4054,6 +4162,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "sourceUri": undefined,
       },
       "org.example.sample@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "readme@1.0.0": {
         "concertoVersion": undefined,
         "decorators": [],
         "imports": [],
