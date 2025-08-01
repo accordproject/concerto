@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,16 +13,13 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { ModelManager, ModelUtil } from '@accordproject/concerto-core';
-import { FileWriter } from '@accordproject/concerto-util';
-import { CodeGen } from '@accordproject/concerto-codegen';
-import { fileURLToPath } from 'url';
+'use strict';
 
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fs = require('fs');
+const path = require('path');
+const { ModelManager, ModelUtil } = require('@accordproject/concerto-core');
+const { FileWriter } = require('@accordproject/concerto-util');
+const { CodeGen } = require('@accordproject/concerto-codegen');
 
 const OVERRIDE_DECORATOR = 'CodeGen_TypeScript_Override';
 

@@ -37,7 +37,6 @@ import {
     IConcertinoScalarDeclaration,
     MetadataMap,
     IVocabulary,
-    IParsedFullyQualifiedName,
     IConcertinoMapDeclaration,
     IConcertinoEnumDeclaration,
     IConcertinoStringProperty,
@@ -51,7 +50,7 @@ import {
     EnumValueMap,
     PropertyMap,
     Prototype
-} from './spec/concertino.metamodel@0.1.0-alpha.3';
+} from './spec/concertino.metamodel@1.0.0-alpha.7';
 
 // Type definition for scalar types as strings for easier mapping
 type ScalarType = 'BooleanScalar' | 'IntegerScalar' | 'LongScalar' | 'DoubleScalar' | 'StringScalar' | 'DateTimeScalar';
@@ -232,16 +231,12 @@ function transformProperties(
     { modelNamespace, declaration }: { modelNamespace: string; declaration: IConceptDeclaration }
 ): PropertyMap {
     const result: PropertyMap = {};
-    const primitiveTypes = new Set(['String', 'Integer', 'Long', 'Double', 'Boolean', 'DateTime']);
     for (const property of properties) {
         const propertyEntry: IConcertinoProperty = {
             name: property.name,
             type: determinePropertyType(property, { modelNamespace }),
             ...extractDecoratorsInfo(property.decorators),
         };
-        if (primitiveTypes.has(propertyEntry.type)) {
-            propertyEntry.scalarType = propertyEntry.type;
-        }
         if (property.isArray) {propertyEntry.isArray = true;}
         if (property.isOptional) {propertyEntry.isOptional = true;}
         if (property.$class.endsWith('RelationshipProperty')) {propertyEntry.isRelationship = true;}
@@ -307,7 +302,6 @@ function transformMapDeclaration(declaration: IMapDeclaration, context: { modelN
             ...extractDecoratorsInfo(declaration.value.decorators),
         },
         ...extractDecoratorsInfo(declaration.decorators),
-        name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
 }
 
@@ -321,7 +315,6 @@ function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context
     const result: IConcertinoScalarDeclaration = {
         type: determineScalarType(declaration),
         ...extractDecoratorsInfo(declaration.decorators),
-        name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
     extractMetaProperties(declaration, result);
     return result;
@@ -338,7 +331,6 @@ function transformEnumDeclaration(declaration: IEnumDeclaration, context: { mode
         type: 'EnumDeclaration',
         values: transformEnumValues(declaration.properties),
         ...extractDecoratorsInfo(declaration.decorators),
-        name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
 }
 
@@ -354,16 +346,13 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context: 
         type: 'ConceptDeclaration',
         properties: transformProperties(declaration.properties, { ...context, declaration }),
         ...extractDecoratorsInfo(declaration.decorators),
-        name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
     if (declarationClass !== 'ConceptDeclaration') {
         result.prototype = declarationClass as Prototype;
     }
     if (declaration.superType) {
-        if (!declaration.superType.namespace) {
-            throw new Error(`Missing namespace for superType in declaration: ${declaration.name}`);
-        }
-        result.extends = [`${declaration.superType.namespace}.${declaration.superType.name}`];
+        const superTypeNamespace = declaration.superType.namespace || context.modelNamespace;
+        result.extends = [`${superTypeNamespace}.${declaration.superType.name}`];
     }
     if (declaration.isAbstract) {
         result.isAbstract = true;
@@ -383,17 +372,6 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context: 
         };
     }
     return result;
-}
-
-/**
- * Creates a fully qualified name from namespace and local name.
- * @param modelNamespace The namespace string.
- * @param localName The local name.
- * @returns The fully qualified name object.
- */
-function createFullyQualifiedName(modelNamespace: string, localName: string): IParsedFullyQualifiedName {
-    const [namespace, version] = modelNamespace.split('@');
-    return { namespace, version, localName };
 }
 
 /**
@@ -452,7 +430,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
     const concertino: IConcertino = {
         declarations: {},
         metadata: {
-            concertinoVersion: '0.1.0-alpha.3',
+            concertinoVersion: '1.0.0-alpha.7',
             models: {},
         },
     };

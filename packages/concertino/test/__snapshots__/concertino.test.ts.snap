@@ -4,7 +4,7 @@ exports[`concertino edge cases and error handling > should roundtrip sourceUri 1
 {
   "declarations": {},
   "metadata": {
-    "concertinoVersion": "0.1.0-alpha.3",
+    "concertinoVersion": "1.0.0-alpha.7",
     "models": {
       "sourceUriTest@1.0.0": {
         "concertoVersion": undefined,
@@ -21,26 +21,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
 {
   "declarations": {
     "com.test.another@1.0.0.Fee": {
-      "name": {
-        "localName": "Fee",
-        "namespace": "com.test.another",
-        "version": "1.0.0",
-      },
       "regex": "/^[A-Za-z]+$/",
       "type": "StringScalar",
     },
     "com.test.another@1.0.0.Fi": {
       "isAbstract": true,
-      "name": {
-        "localName": "Fi",
-        "namespace": "com.test.another",
-        "version": "1.0.0",
-      },
       "properties": {
         "someString": {
           "isOptional": true,
           "name": "someString",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -50,34 +39,22 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "com.test.another@1.0.0.Fi",
       ],
-      "name": {
-        "localName": "Fo",
-        "namespace": "com.test.another",
-        "version": "1.0.0",
-      },
       "properties": {
         "personId": {
           "isIdentifier": true,
           "name": "personId",
-          "scalarType": "String",
           "type": "String",
         },
         "someString": {
           "inheritedFrom": "com.test.another@1.0.0.Fi",
           "isOptional": true,
           "name": "someString",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "com.test.another@1.0.0.Fum": {
-      "name": {
-        "localName": "Fum",
-        "namespace": "com.test.another",
-        "version": "1.0.0",
-      },
       "properties": {
         "$identifier": {
           "isIdentifier": true,
@@ -86,18 +63,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "someString": {
           "name": "someString",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "com.test.models@1.2.3.AuditEvent": {
-      "name": {
-        "localName": "AuditEvent",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -111,15 +82,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "metadata": {
         "Decoratored": [],
       },
-      "name": {
-        "localName": "Bar",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "properties": {
         "someString": {
           "name": "someString",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "some string",
@@ -138,22 +103,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "key": {
         "type": "String",
       },
-      "name": {
-        "localName": "Dictionary",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "String",
       },
     },
     "com.test.models@1.2.3.Foo": {
-      "name": {
-        "localName": "Foo",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "properties": {
         "bar": {
           "name": "bar",
@@ -230,13 +185,11 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "someBoolean": {
           "name": "someBoolean",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "someDouble": {
           "default": 5,
           "name": "someDouble",
-          "scalarType": "Double",
           "type": "Double",
           "vocabulary": {
             "label": "some double",
@@ -245,18 +198,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "someInts": {
           "isArray": true,
           "name": "someInts",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "someLong": {
           "isOptional": true,
           "name": "someLong",
-          "scalarType": "Long",
           "type": "Long",
         },
         "someTime": {
           "name": "someTime",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "x": {
@@ -266,7 +216,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           ],
           "name": "x",
           "regex": "/[A-Z]/",
-          "scalarType": "String",
           "type": "String",
         },
         "y": {
@@ -275,7 +224,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             0,
             1,
           ],
-          "scalarType": "Integer",
           "type": "Integer",
         },
       },
@@ -290,11 +238,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "com.test.models@1.2.3.MyEnum": {
       "metadata": {
         "Decorated": null,
-      },
-      "name": {
-        "localName": "MyEnum",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
       },
       "type": "EnumDeclaration",
       "values": {
@@ -323,11 +266,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "com.test.models@1.2.3.Quuux": {
       "default": 10,
-      "name": {
-        "localName": "Quuux",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "range": [
         0,
         100,
@@ -339,22 +277,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         1,
         100,
       ],
-      "name": {
-        "localName": "Quux",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "regex": "/^[A-Za-z]+$/",
       "type": "StringScalar",
     },
     "com.test.models@1.2.3.Qux": {
       "metadata": {
         "Decorated": [],
-      },
-      "name": {
-        "localName": "Qux",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
       },
       "type": "StringScalar",
       "vocabulary": {
@@ -368,11 +296,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "metadata": {
         "Decorated": null,
       },
-      "name": {
-        "localName": "RelationshipMap",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "type": "MapDeclaration",
       "value": {
         "isRelationship": true,
@@ -384,17 +307,11 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "com.test.another@1.0.0.Fo",
         "com.test.another@1.0.0.Fi",
       ],
-      "name": {
-        "localName": "Xyc",
-        "namespace": "com.test.models",
-        "version": "1.2.3",
-      },
       "properties": {
         "personId": {
           "inheritedFrom": "com.test.another@1.0.0.Fo",
           "isIdentifier": true,
           "name": "personId",
-          "scalarType": "String",
           "type": "String",
         },
         "qux": {
@@ -406,7 +323,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "com.test.another@1.0.0.Fi",
           "isOptional": true,
           "name": "someString",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -414,17 +330,11 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.base@1.0.0.AbstractAsset": {
       "isAbstract": true,
-      "name": {
-        "localName": "AbstractAsset",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "stringProperty": {
           "default": "defaultString",
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -433,114 +343,90 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.base@1.0.0.Address": {
       "isAbstract": true,
-      "name": {
-        "localName": "Address",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "default": "Winchester",
           "name": "city",
-          "scalarType": "String",
           "type": "String",
         },
         "country": {
           "default": "UK",
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "counts": {
           "isArray": true,
           "isOptional": true,
           "name": "counts",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "street": {
           "name": "street",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.BaseAsset": {
-      "name": {
-        "localName": "BaseAsset",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "booleanArrayProperty": {
           "isArray": true,
           "isOptional": true,
           "name": "booleanArrayProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "booleanProperty": {
           "default": true,
           "isOptional": true,
           "name": "booleanProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "dateTimeArrayProperty": {
           "isArray": true,
           "isOptional": true,
           "name": "dateTimeArrayProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "dateTimeProperty": {
           "default": "2008-09-15T15:53:00",
           "isOptional": true,
           "name": "dateTimeProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "doubleArrayProperty": {
           "isArray": true,
           "isOptional": true,
           "name": "doubleArrayProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "doubleProperty": {
           "default": 999,
           "isOptional": true,
           "name": "doubleProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "integerArrayProperty": {
           "isArray": true,
           "isOptional": true,
           "name": "integerArrayProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "integerProperty": {
           "default": 10,
           "isOptional": true,
           "name": "integerProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "longArrayProperty": {
           "isArray": true,
           "isOptional": true,
           "name": "longArrayProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "longProperty": {
           "default": 1000,
           "isOptional": true,
           "name": "longProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "myPeople": {
@@ -581,14 +467,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "stringArrayProperty",
-          "scalarType": "String",
           "type": "String",
         },
         "stringProperty": {
           "default": "defaultString",
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -613,11 +497,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         ],
       },
-      "name": {
-        "localName": "Bloke",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "stringProperty": {
           "isIdentifier": true,
@@ -630,7 +509,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             ],
           },
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -641,16 +519,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.acme.base@1.0.0.BaseAsset",
       ],
-      "name": {
-        "localName": "DerivedAsset",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "anotherStringProperty": {
           "default": "defaultString",
           "name": "anotherStringProperty",
-          "scalarType": "String",
           "type": "String",
         },
         "booleanArrayProperty": {
@@ -658,7 +530,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "booleanArrayProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "booleanProperty": {
@@ -666,7 +537,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "booleanProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "dateTimeArrayProperty": {
@@ -674,7 +544,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "dateTimeArrayProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "dateTimeProperty": {
@@ -682,7 +551,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "dateTimeProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "doubleArrayProperty": {
@@ -690,7 +558,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "doubleArrayProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "doubleProperty": {
@@ -698,7 +565,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "doubleProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "integerArrayProperty": {
@@ -706,7 +572,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "integerArrayProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "integerProperty": {
@@ -714,7 +579,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "integerProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "longArrayProperty": {
@@ -722,7 +586,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "longArrayProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "longProperty": {
@@ -730,7 +593,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "longProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "myPeople": {
@@ -778,7 +640,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "stringArrayProperty",
-          "scalarType": "String",
           "type": "String",
         },
         "stringProperty": {
@@ -786,7 +647,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -798,17 +658,11 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.base@1.0.0.DerivedAsset",
         "org.acme.base@1.0.0.BaseAsset",
       ],
-      "name": {
-        "localName": "DerivedDerivedAsset",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "anotherStringProperty": {
           "default": "defaultString",
           "inheritedFrom": "org.acme.base@1.0.0.DerivedAsset",
           "name": "anotherStringProperty",
-          "scalarType": "String",
           "type": "String",
         },
         "booleanArrayProperty": {
@@ -816,7 +670,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "booleanArrayProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "booleanProperty": {
@@ -824,7 +677,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "booleanProperty",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "dateTimeArrayProperty": {
@@ -832,7 +684,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "dateTimeArrayProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "dateTimeProperty": {
@@ -840,7 +691,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "dateTimeProperty",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "doubleArrayProperty": {
@@ -848,7 +698,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "doubleArrayProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "doubleProperty": {
@@ -856,7 +705,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "doubleProperty",
-          "scalarType": "Double",
           "type": "Double",
         },
         "includedTransaction": {
@@ -868,7 +716,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "integerArrayProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "integerProperty": {
@@ -876,7 +723,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "integerProperty",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "longArrayProperty": {
@@ -884,7 +730,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "longArrayProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "longProperty": {
@@ -892,7 +737,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isOptional": true,
           "name": "longProperty",
-          "scalarType": "Long",
           "type": "Long",
         },
         "myPeople": {
@@ -940,7 +784,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "stringArrayProperty",
-          "scalarType": "String",
           "type": "String",
         },
         "stringProperty": {
@@ -948,7 +791,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -956,11 +798,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.MyBasicTransaction": {
-      "name": {
-        "localName": "MyBasicTransaction",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -971,11 +808,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.MyTransaction": {
-      "name": {
-        "localName": "MyTransaction",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -993,11 +825,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.acme.base@1.0.0.MyTransaction",
       ],
-      "name": {
-        "localName": "MyTransactionEx",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -1029,11 +856,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "manager",
         ],
       },
-      "name": {
-        "localName": "Person",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "address": {
           "name": "address",
@@ -1042,7 +864,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "stringProperty": {
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1050,16 +871,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.SimpleAsset": {
-      "name": {
-        "localName": "SimpleAsset",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "stringProperty": {
           "isIdentifier": true,
           "name": "stringProperty",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1067,11 +882,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.acme.base@1.0.0.State": {
-      "name": {
-        "localName": "State",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "BRONZE": {},
@@ -1083,24 +893,17 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.acme.base@1.0.0.Address",
       ],
-      "name": {
-        "localName": "UnitedStatesAddress",
-        "namespace": "org.acme.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "default": "Winchester",
           "inheritedFrom": "org.acme.base@1.0.0.Address",
           "name": "city",
-          "scalarType": "String",
           "type": "String",
         },
         "country": {
           "default": "UK",
           "inheritedFrom": "org.acme.base@1.0.0.Address",
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "counts": {
@@ -1108,38 +911,28 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "isArray": true,
           "isOptional": true,
           "name": "counts",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "street": {
           "inheritedFrom": "org.acme.base@1.0.0.Address",
           "name": "street",
-          "scalarType": "String",
           "type": "String",
         },
         "zipcode": {
           "name": "zipcode",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.Address": {
-      "name": {
-        "localName": "Address",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "name": "city",
-          "scalarType": "String",
           "type": "String",
         },
         "country": {
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "state": {
@@ -1149,12 +942,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "street": {
           "name": "street",
-          "scalarType": "String",
           "type": "String",
         },
         "zipCode": {
           "name": "zipCode",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1162,22 +953,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
     "org.acme.hr.base@1.0.0.Category": {
       "isAbstract": true,
-      "name": {
-        "localName": "Category",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "properties": {},
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.EmployeeTShirtSizes": {
       "key": {
         "type": "org.acme.hr.base@1.0.0.SSN",
-      },
-      "name": {
-        "localName": "EmployeeTShirtSizes",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
       },
       "type": "MapDeclaration",
       "value": {
@@ -1189,39 +970,19 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr.base@1.0.0.Category",
       ],
       "isAbstract": true,
-      "name": {
-        "localName": "GeneralCategory",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "properties": {},
       "type": "ConceptDeclaration",
     },
     "org.acme.hr.base@1.0.0.Level": {
-      "name": {
-        "localName": "Level",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {},
     },
     "org.acme.hr.base@1.0.0.SSN": {
       "default": "000-00-0000",
-      "name": {
-        "localName": "SSN",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
       "type": "StringScalar",
     },
     "org.acme.hr.base@1.0.0.State": {
-      "name": {
-        "localName": "State",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "CA": {},
@@ -1233,11 +994,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "org.acme.hr.base@1.0.0.TShirtSizeType": {
-      "name": {
-        "localName": "TShirtSizeType",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "LARGE": {},
@@ -1246,28 +1002,13 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "org.acme.hr.base@1.0.0.Time": {
-      "name": {
-        "localName": "Time",
-        "namespace": "org.acme.hr.base",
-        "version": "1.0.0",
-      },
       "type": "DateTimeScalar",
     },
     "org.acme.hr@1.0.0.Category": {
-      "name": {
-        "localName": "Category",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {},
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.ChangeOfAddress": {
-      "name": {
-        "localName": "ChangeOfAddress",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -1291,11 +1032,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "description": [
           "A company",
         ],
-      },
-      "name": {
-        "localName": "Company",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
       },
       "properties": {
         "companyProperties": {
@@ -1342,18 +1078,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
           "name": "name",
           "regex": "/abc.*/",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.CompanyEvent": {
-      "name": {
-        "localName": "CompanyEvent",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -1367,11 +1097,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "key": {
         "type": "String",
       },
-      "name": {
-        "localName": "CompanyProperties",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "String",
@@ -1381,11 +1106,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.acme.hr@1.0.0.Person",
       ],
-      "name": {
-        "localName": "Contractor",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "company": {
           "name": "company",
@@ -1394,7 +1114,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "dob": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "dob",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "email": {
@@ -1405,19 +1124,16 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             254,
           ],
           "name": "email",
-          "scalarType": "String",
           "type": "String",
         },
         "firstName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
         },
         "height": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "height",
-          "scalarType": "Double",
           "type": "Double",
         },
         "homeAddress": {
@@ -1428,7 +1144,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "lastName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
         },
         "manager": {
@@ -1448,7 +1163,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "isOptional": true,
           "name": "middleNames",
-          "scalarType": "String",
           "type": "String",
         },
         "nextOfKin": {
@@ -1479,11 +1193,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "A department",
         ],
       },
-      "name": {
-        "localName": "Department",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "Design": {},
@@ -1513,11 +1222,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         ],
       },
-      "name": {
-        "localName": "Employee",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "companyAssets": {
           "isArray": true,
@@ -1531,7 +1235,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "dob": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "dob",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "email": {
@@ -1542,24 +1245,20 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             254,
           ],
           "name": "email",
-          "scalarType": "String",
           "type": "String",
         },
         "employeeId": {
           "name": "employeeId",
-          "scalarType": "String",
           "type": "String",
         },
         "firstName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
         },
         "height": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "height",
-          "scalarType": "Double",
           "type": "Double",
         },
         "homeAddress": {
@@ -1570,7 +1269,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "lastName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
         },
         "manager": {
@@ -1583,7 +1281,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "isOptional": true,
           "name": "middleNames",
-          "scalarType": "String",
           "type": "String",
         },
         "nextOfKin": {
@@ -1593,7 +1290,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "numDependents": {
           "name": "numDependents",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "officeAddress": {
@@ -1602,7 +1298,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "retired": {
           "name": "retired",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "salary": {
@@ -1611,7 +1306,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             1,
             10,
           ],
-          "scalarType": "Long",
           "type": "Long",
         },
         "ssn": {
@@ -1637,11 +1331,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "type": "org.acme.hr.base@1.0.0.SSN",
       },
-      "name": {
-        "localName": "EmployeeDirectory",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "org.acme.hr@1.0.0.Employee",
@@ -1654,11 +1343,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "metadata": {
         "decorated": null,
       },
-      "name": {
-        "localName": "EmployeeLoginTimes",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "org.acme.hr.base@1.0.0.Time",
@@ -1667,11 +1351,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     "org.acme.hr@1.0.0.EmployeeProfiles": {
       "key": {
         "type": "String",
-      },
-      "name": {
-        "localName": "EmployeeProfiles",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
       },
       "type": "MapDeclaration",
       "value": {
@@ -1696,11 +1375,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         ],
       },
-      "name": {
-        "localName": "EmployeeSocialSecurityNumbers",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "org.acme.hr.base@1.0.0.SSN",
@@ -1711,16 +1385,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "metadata": {
         "resource": null,
       },
-      "name": {
-        "localName": "Equipment",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "serialNumber": {
           "isIdentifier": true,
           "name": "serialNumber",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1728,11 +1396,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.acme.hr@1.0.0.Info": {
-      "name": {
-        "localName": "Info",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "name": {
           "metadata": {
@@ -1744,7 +1407,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             ],
           },
           "name": "name",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1758,30 +1420,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           },
         ],
       },
-      "name": {
-        "localName": "KinName",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "StringScalar",
     },
     "org.acme.hr@1.0.0.KinTelephone": {
-      "name": {
-        "localName": "KinTelephone",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "StringScalar",
     },
     "org.acme.hr@1.0.0.Laptop": {
       "extends": [
         "org.acme.hr@1.0.0.Equipment",
       ],
-      "name": {
-        "localName": "Laptop",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "make": {
           "name": "make",
@@ -1791,7 +1438,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.hr@1.0.0.Equipment",
           "isIdentifier": true,
           "name": "serialNumber",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -1804,11 +1450,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "one",
         ],
       },
-      "name": {
-        "localName": "LaptopMake",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "Apple": {},
@@ -1820,11 +1461,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "org.acme.hr@1.0.0.Employee",
         "org.acme.hr@1.0.0.Person",
       ],
-      "name": {
-        "localName": "Manager",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "companyAssets": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
@@ -1840,7 +1476,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "dob": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "dob",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "email": {
@@ -1851,25 +1486,21 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             254,
           ],
           "name": "email",
-          "scalarType": "String",
           "type": "String",
         },
         "employeeId": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
           "name": "employeeId",
-          "scalarType": "String",
           "type": "String",
         },
         "firstName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
         },
         "height": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "height",
-          "scalarType": "Double",
           "type": "Double",
         },
         "homeAddress": {
@@ -1880,7 +1511,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "lastName": {
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
         },
         "manager": {
@@ -1894,7 +1524,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "org.acme.hr@1.0.0.Person",
           "isOptional": true,
           "name": "middleNames",
-          "scalarType": "String",
           "type": "String",
         },
         "nextOfKin": {
@@ -1905,7 +1534,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "numDependents": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
           "name": "numDependents",
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "officeAddress": {
@@ -1923,7 +1551,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "retired": {
           "inheritedFrom": "org.acme.hr@1.0.0.Employee",
           "name": "retired",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "salary": {
@@ -1933,7 +1560,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             1,
             10,
           ],
-          "scalarType": "Long",
           "type": "Long",
         },
         "ssn": {
@@ -1952,11 +1578,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "key": {
         "type": "org.acme.hr@1.0.0.KinName",
       },
-      "name": {
-        "localName": "NextOfKin",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "type": "MapDeclaration",
       "value": {
         "type": "org.acme.hr@1.0.0.KinTelephone",
@@ -1966,11 +1587,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.acme.hr@1.0.0.CompanyEvent",
       ],
-      "name": {
-        "localName": "Onboarded",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -1990,15 +1606,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "metadata": {
         "resource": null,
       },
-      "name": {
-        "localName": "Person",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "dob": {
           "name": "dob",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "email": {
@@ -2008,17 +1618,14 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             254,
           ],
           "name": "email",
-          "scalarType": "String",
           "type": "String",
         },
         "firstName": {
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
         },
         "height": {
           "name": "height",
-          "scalarType": "Double",
           "type": "Double",
         },
         "homeAddress": {
@@ -2027,13 +1634,11 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "lastName": {
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
         },
         "middleNames": {
           "isOptional": true,
           "name": "middleNames",
-          "scalarType": "String",
           "type": "String",
         },
         "nextOfKin": {
@@ -2063,11 +1668,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "Everyone",
         ],
       },
-      "name": {
-        "localName": "pii",
-        "namespace": "org.acme.hr",
-        "version": "1.0.0",
-      },
       "properties": {
         "category": {
           "name": "category",
@@ -2075,18 +1675,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "isPii": {
           "name": "isPii",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.acme@1.2.3.SampleModel": {
-      "name": {
-        "localName": "SampleModel",
-        "namespace": "org.acme",
-        "version": "1.2.3",
-      },
       "properties": {
         "stringLengthWithRegex": {
           "length": [
@@ -2095,7 +1689,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           ],
           "name": "stringLengthWithRegex",
           "regex": "/^[^?\\/:<>|]*$/",
-          "scalarType": "String",
           "type": "String",
         },
         "stringWithMaxLength": {
@@ -2104,7 +1697,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             10,
           ],
           "name": "stringWithMaxLength",
-          "scalarType": "String",
           "type": "String",
         },
         "stringWithMinLength": {
@@ -2113,7 +1705,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             null,
           ],
           "name": "stringWithMinLength",
-          "scalarType": "String",
           "type": "String",
         },
         "stringWithSameMinMaxLength": {
@@ -2122,46 +1713,35 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             10,
           ],
           "name": "stringWithSameMinMaxLength",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.agreement@1.2.3.AgreementBase": {
-      "name": {
-        "localName": "AgreementBase",
-        "namespace": "org.agreement",
-        "version": "1.2.3",
-      },
       "properties": {
         "agreementType": {
           "name": "agreementType",
-          "scalarType": "String",
           "type": "String",
         },
         "externalId": {
           "name": "externalId",
           "regex": "/^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$/",
-          "scalarType": "String",
           "type": "String",
         },
         "externalSource": {
           "name": "externalSource",
           "regex": "/^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$/",
-          "scalarType": "String",
           "type": "String",
         },
         "name": {
           "name": "name",
           "regex": "/^[^?\\/:<>|]*$/",
-          "scalarType": "String",
           "type": "String",
         },
         "requestor": {
           "name": "requestor",
           "regex": "/^[^\\<\\>]*$/",
-          "scalarType": "String",
           "type": "String",
         },
         "value": {
@@ -2172,22 +1752,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             ],
           },
           "name": "value",
-          "scalarType": "Double",
           "type": "Double",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.Department": {
-      "name": {
-        "localName": "Department",
-        "namespace": "org.example.complex",
-        "version": "1.0.0",
-      },
       "properties": {
         "code": {
           "name": "code",
-          "scalarType": "String",
           "type": "String",
         },
         "manager": {
@@ -2196,7 +1769,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "name": {
           "name": "name",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2206,38 +1778,28 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "org.example.complex@1.0.0.DocumentBase",
       ],
-      "name": {
-        "localName": "Document",
-        "namespace": "org.example.complex",
-        "version": "1.0.0",
-      },
       "properties": {
         "docusignId": {
           "inheritedFrom": "org.example.complex@1.0.0.DocumentBase",
           "name": "docusignId",
-          "scalarType": "String",
           "type": "String",
         },
         "expiryDate": {
           "isOptional": true,
           "name": "expiryDate",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "id": {
           "isIdentifier": true,
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "issueDate": {
           "name": "issueDate",
-          "scalarType": "DateTime",
           "type": "DateTime",
         },
         "number": {
           "name": "number",
-          "scalarType": "String",
           "type": "String",
         },
         "type": {
@@ -2248,26 +1810,15 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.DocumentBase": {
-      "name": {
-        "localName": "DocumentBase",
-        "namespace": "org.example.complex",
-        "version": "1.0.0",
-      },
       "properties": {
         "docusignId": {
           "name": "docusignId",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.example.complex@1.0.0.DocumentType": {
-      "name": {
-        "localName": "DocumentType",
-        "namespace": "org.example.complex",
-        "version": "1.0.0",
-      },
       "type": "EnumDeclaration",
       "values": {
         "DRIVING_LICENSE": {},
@@ -2276,11 +1827,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "org.example.complex@1.0.0.Employee": {
-      "name": {
-        "localName": "Employee",
-        "namespace": "org.example.complex",
-        "version": "1.0.0",
-      },
       "properties": {
         "department": {
           "name": "department",
@@ -2288,7 +1834,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "employeeId": {
           "name": "employeeId",
-          "scalarType": "String",
           "type": "String",
         },
         "identificationDocuments": {
@@ -2304,15 +1849,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.Address": {
-      "name": {
-        "localName": "Address",
-        "namespace": "org.example.sample",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "name": "city",
-          "scalarType": "String",
           "type": "String",
         },
         "country": {
@@ -2322,12 +1861,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             ],
           },
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "postalCode": {
           "name": "postalCode",
-          "scalarType": "String",
           "type": "String",
         },
         "street": {
@@ -2337,38 +1874,25 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             ],
           },
           "name": "street",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.ContactInfo": {
-      "name": {
-        "localName": "ContactInfo",
-        "namespace": "org.example.sample",
-        "version": "1.0.0",
-      },
       "properties": {
         "type": {
           "name": "type",
-          "scalarType": "String",
           "type": "String",
         },
         "value": {
           "name": "value",
-          "scalarType": "String",
           "type": "String",
         },
       },
       "type": "ConceptDeclaration",
     },
     "org.example.sample@1.0.0.Person": {
-      "name": {
-        "localName": "Person",
-        "namespace": "org.example.sample",
-        "version": "1.0.0",
-      },
       "properties": {
         "address": {
           "name": "address",
@@ -2382,12 +1906,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "firstName": {
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
         },
         "lastName": {
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "surname",
@@ -2397,15 +1919,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "readme@1.0.0.Address": {
-      "name": {
-        "localName": "Address",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "name": "city",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "City/Town",
@@ -2413,12 +1929,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "country": {
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "street": {
           "name": "street",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Street Address",
@@ -2426,7 +1940,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "zipCode": {
           "name": "zipCode",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2436,20 +1949,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "readme@1.0.0.Email": {
-      "name": {
-        "localName": "Email",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
       "type": "StringScalar",
     },
     "readme@1.0.0.Person": {
-      "name": {
-        "localName": "Person",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "properties": {
         "address": {
           "isOptional": true,
@@ -2466,7 +1969,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
             0,
             null,
           ],
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "email": {
@@ -2481,7 +1983,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "firstName": {
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Given Name",
@@ -2489,7 +1990,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "lastName": {
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Family Name",
@@ -2511,41 +2011,31 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZCOM",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
-          "scalarType": "String",
           "type": "String",
         },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2556,39 +2046,29 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZDS1",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "axyAddress": {
           "name": "axyAddress",
-          "scalarType": "String",
           "type": "String",
         },
         "axyName": {
           "name": "axyName",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2599,50 +2079,38 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZDS2",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "clientName": {
           "name": "clientName",
-          "scalarType": "String",
           "type": "String",
         },
         "estimateDescription": {
           "name": "estimateDescription",
-          "scalarType": "String",
           "type": "String",
         },
         "extraDmxxs": {
           "isArray": true,
           "name": "extraDmxxs",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "targetDmxx": {
           "name": "targetDmxx",
-          "scalarType": "String",
           "type": "String",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2653,39 +2121,29 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZDS3",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "prxOneName": {
           "name": "prxOneName",
-          "scalarType": "String",
           "type": "String",
         },
         "prxTwoName": {
           "name": "prxTwoName",
-          "scalarType": "String",
           "type": "String",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2696,49 +2154,37 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZDS4",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "bxberCode": {
           "name": "bxberCode",
-          "scalarType": "String",
           "type": "String",
         },
         "bxberExtension": {
           "name": "bxberExtension",
-          "scalarType": "String",
           "type": "String",
         },
         "bxberName": {
           "name": "bxberName",
-          "scalarType": "String",
           "type": "String",
         },
         "bxberTelephone": {
           "name": "bxberTelephone",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2752,122 +2198,96 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeModifier",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZHDR",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "billWeekStartDay": {
           "name": "billWeekStartDay",
-          "scalarType": "Long",
           "type": "Long",
         },
         "cashOrTrade": {
           "name": "cashOrTrade",
-          "scalarType": "String",
           "type": "String",
         },
         "clientCode": {
           "name": "clientCode",
-          "scalarType": "String",
           "type": "String",
         },
         "cn": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "cn",
-          "scalarType": "String",
           "type": "String",
         },
         "dt": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "dt",
-          "scalarType": "String",
           "type": "String",
         },
         "endDate": {
           "name": "endDate",
-          "scalarType": "String",
           "type": "String",
         },
         "estimateNumber": {
           "name": "estimateNumber",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "mdaCode": {
           "name": "mdaCode",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "originalOrderNumber": {
           "name": "originalOrderNumber",
-          "scalarType": "String",
           "type": "String",
         },
         "previousSssCallLetters": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomePreviousSssModifier",
           "name": "previousSssCallLetters",
-          "scalarType": "String",
           "type": "String",
         },
         "prxOneCode": {
           "name": "prxOneCode",
-          "scalarType": "String",
           "type": "String",
         },
         "prxTwoCode": {
           "name": "prxTwoCode",
-          "scalarType": "String",
           "type": "String",
         },
         "revisionNumber": {
           "name": "revisionNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "routingCode": {
           "name": "routingCode",
-          "scalarType": "String",
           "type": "String",
         },
         "rts": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "rts",
-          "scalarType": "String",
           "type": "String",
         },
         "scheduleStartDate": {
           "name": "scheduleStartDate",
-          "scalarType": "String",
           "type": "String",
         },
         "scheduleType": {
           "name": "scheduleType",
-          "scalarType": "String",
           "type": "String",
         },
         "sss": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "sss",
-          "scalarType": "String",
           "type": "String",
         },
         "startDate": {
           "name": "startDate",
-          "scalarType": "String",
           "type": "String",
         },
         "tpar1": {
@@ -2884,12 +2304,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
         "version": {
           "name": "version",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2901,41 +2319,31 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZHIA",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "dates": {
           "isArray": true,
           "name": "dates",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2949,41 +2357,31 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZSTD",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
-          "scalarType": "String",
           "type": "String",
         },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -2994,44 +2392,33 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "AXZTLR",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "numberOfRecords": {
           "name": "numberOfRecords",
-          "scalarType": "Long",
           "type": "Long",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "totalOrderedDollars": {
           "name": "totalOrderedDollars",
-          "scalarType": "Long",
           "type": "Long",
         },
         "totalOrderedSpx": {
           "name": "totalOrderedSpx",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3042,11 +2429,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.Some",
       ],
-      "name": {
-        "localName": "AgencyOrder",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "agycoms": {
           "isArray": true,
@@ -3096,7 +2478,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "xx.yy.zz@1.0.0.Some",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3110,41 +2491,31 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "BXBCOM",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "comment": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
           "name": "comment",
-          "scalarType": "String",
           "type": "String",
         },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3155,35 +2526,26 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "BXBDEM",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "demos": {
           "isArray": true,
           "name": "demos",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3195,55 +2557,42 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "BXBDTL",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "cost": {
           "name": "cost",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "numberOfWeeks": {
           "name": "numberOfWeeks",
-          "scalarType": "Long",
           "type": "Long",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "spxPerWeek": {
           "name": "spxPerWeek",
-          "scalarType": "Long",
           "type": "Long",
         },
         "startDate": {
           "name": "startDate",
-          "scalarType": "String",
           "type": "String",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3255,106 +2604,85 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeBxbRecord",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "BXBHDR",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "cost": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "cost",
-          "scalarType": "Long",
           "type": "Long",
         },
         "costQualifier": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "costQualifier",
-          "scalarType": "String",
           "type": "String",
         },
         "endTime": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "endTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "lengthInUnits": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "lengthInUnits",
-          "scalarType": "String",
           "type": "String",
         },
         "makegoodForBxbline": {
           "name": "makegoodForBxbline",
-          "scalarType": "Long",
           "type": "Long",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "pppName": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "pppName",
-          "scalarType": "String",
           "type": "String",
         },
         "prxOneTimeShare": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "prxOneTimeShare",
-          "scalarType": "Long",
           "type": "Long",
         },
         "sbx": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "sbx",
-          "scalarType": "String",
           "type": "String",
         },
         "sbxStartDay": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "sbxStartDay",
-          "scalarType": "Long",
           "type": "Long",
         },
         "scheduleType": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "scheduleType",
-          "scalarType": "String",
           "type": "String",
         },
         "sequenceNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "sequenceNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "startTime": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "startTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "totalspxyLength": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
           "name": "totalspxyLength",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3366,60 +2694,46 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "BXBORB",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "endTime": {
           "name": "endTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "pppName": {
           "name": "pppName",
-          "scalarType": "String",
           "type": "String",
         },
         "sbx": {
           "name": "sbx",
-          "scalarType": "String",
           "type": "String",
         },
         "sbxStartDay": {
           "name": "sbxStartDay",
-          "scalarType": "Long",
           "type": "Long",
         },
         "startTime": {
           "name": "startTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3427,11 +2741,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BaseTransaction": {
-      "name": {
-        "localName": "BaseTransaction",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -3442,11 +2751,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.BxblineTransmission": {
-      "name": {
-        "localName": "BxblineTransmission",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "bxbcoms": {
           "isArray": true,
@@ -3474,7 +2778,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "uuid": {
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3482,46 +2785,34 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Par1": {
-      "name": {
-        "localName": "Par1",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "bool1": {
           "name": "bool1",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "bool2": {
           "name": "bool2",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "bool3": {
           "name": "bool3",
-          "scalarType": "Boolean",
           "type": "Boolean",
         },
         "code": {
           "isIdentifier": true,
           "name": "code",
-          "scalarType": "String",
           "type": "String",
         },
         "mmm": {
           "name": "mmm",
-          "scalarType": "String",
           "type": "String",
         },
         "name": {
           "name": "name",
-          "scalarType": "String",
           "type": "String",
         },
         "prefix": {
           "name": "prefix",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3529,26 +2820,18 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Par2": {
-      "name": {
-        "localName": "Par2",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "address": {
           "name": "address",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "isIdentifier": true,
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "name": {
           "name": "name",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3556,16 +2839,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.Some": {
-      "name": {
-        "localName": "Some",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "uuid": {
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3576,89 +2853,69 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "SomeBxbRecord",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "cost": {
           "name": "cost",
-          "scalarType": "Long",
           "type": "Long",
         },
         "costQualifier": {
           "name": "costQualifier",
-          "scalarType": "String",
           "type": "String",
         },
         "endTime": {
           "name": "endTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "lengthInUnits": {
           "name": "lengthInUnits",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "pppName": {
           "name": "pppName",
-          "scalarType": "String",
           "type": "String",
         },
         "prxOneTimeShare": {
           "name": "prxOneTimeShare",
-          "scalarType": "Long",
           "type": "Long",
         },
         "sbx": {
           "name": "sbx",
-          "scalarType": "String",
           "type": "String",
         },
         "sbxStartDay": {
           "name": "sbxStartDay",
-          "scalarType": "Long",
           "type": "Long",
         },
         "scheduleType": {
           "name": "scheduleType",
-          "scalarType": "String",
           "type": "String",
         },
         "sequenceNumber": {
           "name": "sequenceNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "startTime": {
           "name": "startTime",
-          "scalarType": "Long",
           "type": "Long",
         },
         "totalspxyLength": {
           "name": "totalspxyLength",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3670,40 +2927,30 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeMultiple",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "SomeComment",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "comment": {
           "name": "comment",
-          "scalarType": "String",
           "type": "String",
         },
         "continuation": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3714,42 +2961,31 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "SomeModifier",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "cn": {
           "name": "cn",
-          "scalarType": "String",
           "type": "String",
         },
         "dt": {
           "name": "dt",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "rts": {
           "name": "rts",
-          "scalarType": "String",
           "type": "String",
         },
         "sss": {
           "name": "sss",
-          "scalarType": "String",
           "type": "String",
         },
         "tpar1": {
@@ -3764,7 +3000,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3775,34 +3010,25 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "SomeMultiple",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "continuation": {
           "name": "continuation",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3814,51 +3040,39 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "xx.yy.zz@1.0.0.SomeModifier",
         "xx.yy.zz@1.0.0.SomeRecord",
       ],
-      "name": {
-        "localName": "SomePreviousSssModifier",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "cn": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "cn",
-          "scalarType": "String",
           "type": "String",
         },
         "dt": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "dt",
-          "scalarType": "String",
           "type": "String",
         },
         "id": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "previousSssCallLetters": {
           "name": "previousSssCallLetters",
-          "scalarType": "String",
           "type": "String",
         },
         "rts": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "rts",
-          "scalarType": "String",
           "type": "String",
         },
         "sss": {
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
           "name": "sss",
-          "scalarType": "String",
           "type": "String",
         },
         "tpar1": {
@@ -3875,7 +3089,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3883,26 +3096,18 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeRecord": {
-      "name": {
-        "localName": "SomeRecord",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "id": {
           "name": "id",
-          "scalarType": "String",
           "type": "String",
         },
         "orderNumber": {
           "name": "orderNumber",
-          "scalarType": "Long",
           "type": "Long",
         },
         "uuid": {
           "isIdentifier": true,
           "name": "uuid",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3910,11 +3115,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeSss": {
-      "name": {
-        "localName": "SomeSss",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "bb": {
           "isRelationship": true,
@@ -3923,7 +3123,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "mmm": {
           "name": "mmm",
-          "scalarType": "String",
           "type": "String",
         },
         "rep2": {
@@ -3934,7 +3133,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "sss": {
           "isIdentifier": true,
           "name": "sss",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3942,11 +3140,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.SomeTransmission": {
-      "name": {
-        "localName": "SomeTransmission",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "aa": {
           "isRelationship": true,
@@ -3966,7 +3159,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "orderNumber": {
           "isIdentifier": true,
           "name": "orderNumber",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -3974,11 +3166,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "type": "ConceptDeclaration",
     },
     "xx.yy.zz@1.0.0.UpdateOrderEvent": {
-      "name": {
-        "localName": "UpdateOrderEvent",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -3997,11 +3184,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       "extends": [
         "xx.yy.zz@1.0.0.BaseTransaction",
       ],
-      "name": {
-        "localName": "UpdateOrderTransaction",
-        "namespace": "xx.yy.zz",
-        "version": "1.0.0",
-      },
       "properties": {
         "$timestamp": {
           "name": "$timestamp",
@@ -4019,7 +3201,6 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         },
         "orderId": {
           "name": "orderId",
-          "scalarType": "String",
           "type": "String",
         },
         "transmission": {
@@ -4032,7 +3213,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
   },
   "metadata": {
-    "concertinoVersion": "0.1.0-alpha.3",
+    "concertinoVersion": "1.0.0-alpha.7",
     "models": {
       "com.test.another@1.0.0": {
         "concertoVersion": undefined,
