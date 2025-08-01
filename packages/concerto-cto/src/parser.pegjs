@@ -1190,10 +1190,13 @@ StringScalar
 
 DateTimeScalar
    = DateTimeType __ d:StringDefault? __ {
-      return {
+     const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
-        defaultValue: d
       };
+      if (d) {
+        result.defaultValue = d;
+      }
+      return result;
   }
 
 ScalarType

@@ -1,0 +1,144 @@
+@category(GeneralCategory)
+namespace org.acme.hr@1.0.0
+
+import org.acme.hr.base@1.0.0.{Address, State, SSN, Time, EmployeeTShirtSizes, Level, GeneralCategory}
+import concerto.decorator@1.0.0.{Decorator}
+
+@example("@pii(true, GeneralCategory)")
+@usedBy("Everyone")
+concept pii extends Decorator {
+   o Boolean isPii
+   o Category category
+}
+
+concept Category {}
+
+concept Info {
+   @pii(false, Category)
+   o String name
+}
+
+map CompanyProperties {
+    o String
+    o String
+}
+
+@decorated
+map EmployeeLoginTimes {
+    o String
+    o Time
+}
+
+@category(GeneralCategory)
+map EmployeeSocialSecurityNumbers {
+    o String
+    o SSN
+}
+
+map NextOfKin {
+    o KinName
+    o KinTelephone
+}
+
+map EmployeeProfiles {
+    o String
+    @category(GeneralCategory)
+    o Concept
+}
+
+map EmployeeDirectory {
+    @category(GeneralCategory)
+    o SSN
+    o Employee
+}
+
+@description('A company')
+concept Company {
+    @description('The name of the company')
+    o String name regex=/abc.*/
+    o Address headquarters
+    o CompanyProperties companyProperties optional
+    @category(GeneralCategory)
+    o EmployeeDirectory employeeDirectory optional
+    o EmployeeTShirtSizes employeeTShirtSizes optional
+    o EmployeeProfiles employeeProfiles optional
+    o EmployeeSocialSecurityNumbers employeeSocialSecurityNumbers optional
+}
+
+@category(GeneralCategory)
+@description('A department')
+enum Department {
+    @category(GeneralCategory)
+    o Sales
+    o Marketing
+    o Finance
+    o HR
+    o Engineering
+    o Design
+}
+
+@resource
+abstract asset Equipment identified by serialNumber {
+    o String serialNumber
+}
+
+@test("one")
+enum LaptopMake {
+    o Apple
+    o Microsoft
+}
+
+asset Laptop extends Equipment {
+    o LaptopMake make
+}
+
+@resource
+abstract participant Person identified by email {
+    o String email length=[0,254]
+    o String firstName
+    o String lastName
+    o String middleNames optional
+    o Address homeAddress
+    o SSN ssn
+    o Double height
+    o DateTime dob
+    o NextOfKin nextOfKin
+}
+
+@category(GeneralCategory)
+participant Employee extends Person {
+    o String employeeId
+    o Long salary range=[1,10]
+    o Integer numDependents
+    o Boolean retired
+    o Department department
+    o Address officeAddress
+    o Equipment[] companyAssets
+    --> Manager manager optional
+}
+
+participant Contractor extends Person {
+    o Company company
+    @level(Level)
+    --> Manager manager optional
+}
+
+participant Manager extends Employee {
+    --> Person[] reports optional
+}
+
+event CompanyEvent {
+}
+
+event Onboarded extends CompanyEvent {
+    --> Employee employee
+}
+
+transaction ChangeOfAddress {
+    --> Person Person
+    o Address newAddress
+}
+
+@category(GeneralCategory)
+scalar KinName extends String
+scalar KinTelephone extends String

@@ -802,11 +802,14 @@ function peg$parse(input, options) {
       }
       return result;
   };
-  var peg$f70 = function(d) {
-      return {
+  var peg$f65 = function(d) {
+     const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
-        defaultValue: d
       };
+      if (d) {
+        result.defaultValue = d;
+      }
+      return result;
   };
   var peg$f71 = function(decorators, id, scalarType) {
       const result = {

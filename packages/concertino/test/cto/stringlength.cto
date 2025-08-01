@@ -1,0 +1,8 @@
+namespace org.acme@1.2.3
+
+concept SampleModel {
+   o String stringLengthWithRegex regex=/^[^?\/:<>|]*$/ length=[1,10]
+   o String stringWithMinLength length=[1,]
+   o String stringWithMaxLength length=[,10]
+   o String stringWithSameMinMaxLength length=[10,10]
+}
