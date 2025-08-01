@@ -30,7 +30,6 @@ import type {
 	IConcertino,
 	IMetadata,
 	IModelMetadata,
-	IParsedFullyQualifiedName,
 	IConcertinoDeclaration,
 	Prototype,
 	IConcertinoEnumValue,
@@ -40,7 +39,7 @@ import type {
 	IVocabulary,
 	IDecoratorValues,
 	IDecoratorValue
-} from './concertino.metamodel@0.1.0-alpha.3';
+} from './concertino.metamodel@1.0.0-alpha.7';
 
 // interfaces
 export interface IConcept {
@@ -70,7 +69,6 @@ IModels |
 IConcertino | 
 IMetadata | 
 IModelMetadata | 
-IParsedFullyQualifiedName | 
 IConcertinoDeclaration | 
 IConcertinoEnumValue | 
 IMapKey | 
