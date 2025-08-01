@@ -1,0 +1,239 @@
+decoratorCommandsVersion: 0.4.0
+name: web
+version: 1.0.0
+commands:
+  - action: UPSERT
+    target:
+      declaration: SSN
+    decorator:
+      name: Declaration
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      declaration: SSN
+    decorator:
+      name: NamespaceDeclaration
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: NamespaceDeprecated
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      declaration: Person
+      type: concerto.metamodel@1.0.0.ConceptDeclaration
+    decorator:
+      name: NamespaceDeclarationType
+  - action: UPSERT
+    target:
+      declaration: SSN
+      type: concerto.metamodel@1.0.0.ConceptDeclaration
+    decorator:
+      name: DeclarationType
+  - action: UPSERT
+    target:
+      property: country
+    decorator:
+      name: Property
+  - action: UPSERT
+    target:
+      declaration: Person
+      property: country
+    decorator:
+      name: DeclarationProperty
+  - action: UPSERT
+    target:
+      namespace: test
+      declaration: Person
+      property: country
+    decorator:
+      name: NamespaceDeclarationProperty
+  - action: UPSERT
+    target:
+      namespace: test
+      property: country
+    decorator:
+      name: NamespaceProperty
+  - action: UPSERT
+    target:
+      namespace: test
+      declaration: Person
+      property: country
+      type: concerto.metamodel@1.0.0.StringProperty
+    decorator:
+      name: NamespaceDeclarationPropertyType
+  - action: UPSERT
+    target:
+      namespace: test
+      property: country
+      type: concerto.metamodel@1.0.0.StringProperty
+    decorator:
+      name: NamespacePropertyType
+  - action: UPSERT
+    target:
+      declaration: Person
+      property: country
+      type: concerto.metamodel@1.0.0.StringProperty
+    decorator:
+      name: DeclarationPropertyType
+  - action: UPSERT
+    target:
+      property: country
+      type: concerto.metamodel@1.0.0.StringProperty
+    decorator:
+      name: PropertyType
+  - action: UPSERT
+    target:
+      type: concerto.metamodel@1.0.0.StringProperty
+    decorator:
+      name: Type
+      arguments:
+        - type: String
+          value: Property
+  - action: UPSERT
+    target:
+      namespace: test
+      declaration: Person
+      type: concerto.metamodel@1.0.0.StringProperty
+      properties:
+        - country
+        - zip
+    decorator:
+      name: NamespaceDeclarationTypeProperties
+  - action: UPSERT
+    target:
+      properties:
+        - country
+        - zip
+    decorator:
+      name: Properties
+  - action: UPSERT
+    target:
+      declaration: Person
+      properties:
+        - country
+        - zip
+    decorator:
+      name: DeclarationProperties
+  - action: UPSERT
+    target:
+      namespace: test
+      declaration: Person
+      properties:
+        - country
+        - zip
+    decorator:
+      name: NamespaceDeclarationProperties
+  - action: UPSERT
+    target:
+      namespace: test
+      properties:
+        - country
+        - zip
+    decorator:
+      name: NamespaceProperties
+  - action: UPSERT
+    target:
+      namespace: test
+      type: concerto.metamodel@1.0.0.StringProperty
+      properties:
+        - country
+        - zip
+    decorator:
+      name: NamespaceTypeProperties
+  - action: UPSERT
+    target:
+      declaration: Person
+      type: concerto.metamodel@1.0.0.IntegerProperty
+      properties:
+        - country
+        - zip
+    decorator:
+      name: DeclarationTypeProperties
+  - action: UPSERT
+    target:
+      type: concerto.metamodel@1.0.0.EnumProperty
+      properties:
+        - country
+        - zip
+    decorator:
+      name: PropertiesType
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      declaration: Dictionary
+      type: concerto.metamodel@1.0.0.StringMapValueType
+      mapElement: KEY_VALUE
+    decorator:
+      name: NamespaceDeclarationTypeMapElement
+  - action: UPSERT
+    target:
+      mapElement: KEY_VALUE
+    decorator:
+      name: MapElement
+  - action: UPSERT
+    target:
+      declaration: Dictionary
+      mapElement: KEY
+    decorator:
+      name: DeclarationMapElement
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      declaration: Dictionary
+      mapElement: KEY
+    decorator:
+      name: NamespaceDeclarationMapElement
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      mapElement: KEY
+    decorator:
+      name: NamespaceMapElement
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+      type: concerto.metamodel@1.0.0.StringMapValueType
+      mapElement: KEY_VALUE
+    decorator:
+      name: NamespaceTypeMapElement
+  - action: UPSERT
+    target:
+      declaration: Dictionary
+      type: concerto.metamodel@1.0.0.StringMapValueType
+      mapElement: KEY_VALUE
+    decorator:
+      name: DeclarationTypeMapElement
+  - action: UPSERT
+    target:
+      type: concerto.metamodel@1.0.0.StringMapValueType
+      mapElement: KEY
+    decorator:
+      name: TypeMapElement
+  - action: UPSERT
+    target:
+      type: concerto.metamodel@1.0.0.StringMapValueType
+    decorator:
+      name: Type
+      arguments:
+        - type: String
+          value: MapValue
+  - action: UPSERT
+    target:
+      namespace: test@1.0.0
+    decorator:
+      name: Namespace
+  - action: APPEND
+    target:
+      namespace: test@1.0.0
+      declaration: SSN
+    decorator:
+      name: argumentsTest
+      arguments:
+        - type: String
+          value: inputString
+        - type: Number
+          value: 2.5
+        - type: Boolean
+          value: true

@@ -12,27 +12,64 @@
  * limitations under the License.
  */
 
-import { Spectral, Document } from '@stoplight/spectral-core';
+import { Spectral, Document, IRuleResult, RulesetDefinition, Ruleset } from '@stoplight/spectral-core';
 import { Json as JsonParsers } from '@stoplight/spectral-parsers';
-import { concertoRuleset } from './rulesets/core-ruleset';
+import { resolveRulesetPath } from './config-loader';
+import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/getRuleset';
+import  concertoRuleset  from '@accordproject/concerto-linter-default-ruleset';
+import { ModelManager } from '@accordproject/concerto-core';
 
 /**
- * Lints a Concerto model's JSON AST using the defined rulesets
- * @param ast - The JSON AST generated from a Concerto model.
- * @returns An array on linting results (e.g., errors or warnings).
+ * Converts Concerto model to JSON AST representation
+ * @param {string | object} model - Concerto model as string or parsed object
+ * @returns {string} JSON string of the AST
+ * @throws {Error} For invalid model inputs
  */
-
-export function lintAST(ast: string) {
-
-    const spectral = new Spectral();
-
-    spectral.setRuleset(concertoRuleset);
-
-    const document = new Document(ast,JsonParsers,'/virtual/concerto-ast.json');
-
-    const results = spectral.run(document);
-    return results;
-
+function convertToJsonAST(model: string | object): string {
+    try {
+        if (typeof model === 'string') {
+            const manager = new ModelManager();
+            manager.addCTOModel(model);
+            return JSON.stringify(manager.getAst());
+        }
+        return JSON.stringify(model);
+    } catch (error) {
+        throw new Error(`Model conversion failed: ${error instanceof Error ? error.message : error}`);
+    }
 }
 
-export { concertoRuleset } from './rulesets/core-ruleset';
+/**
+ * Loads Spectral ruleset based on configuration options
+ * @param {string} [rulesetOption] - Custom ruleset path or 'default'
+ * @returns {Promise<Ruleset | RulesetDefinition>} Loaded ruleset
+ */
+async function loadRuleset(rulesetOption?: string): Promise<Ruleset | RulesetDefinition> {
+    try {
+        const rulesetPath = await resolveRulesetPath(rulesetOption);
+        return rulesetPath ? await getRuleset(rulesetPath) : concertoRuleset;
+    } catch (error) {
+        throw new Error(`Ruleset loading failed: ${error instanceof Error ? error.message : error}`);
+    }
+}
+
+/**
+ * Lints Concerto models using Spectral and Concerto rules
+ * @param {string | object} model - Model to lint (string CTO or parsed AST)
+ * @param {string} [rulesetOption] - Path to custom ruleset or 'default'
+ * @returns {Promise<IRuleResult[]>} Linting results
+ * @throws {Error} For critical processing failures
+ */
+export async function lintModel(model: string | object, rulesetOption?: string): Promise<IRuleResult[]> {
+    try {
+        const jsonAST = convertToJsonAST(model);
+        const ruleset = await loadRuleset(rulesetOption);
+
+        const spectral = new Spectral();
+        spectral.setRuleset(ruleset);
+
+        const document = new Document(jsonAST, JsonParsers);
+        return await spectral.run(document);
+    } catch (error) {
+        throw new Error(`Linting process failed: ${error instanceof Error ? error.message : error}`);
+    }
+}

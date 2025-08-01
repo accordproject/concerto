@@ -997,4 +997,28 @@ describe('DecoratorManager', () => {
             chai.expect(property.decorators[0].name).to.equal('Form');
         });
     });
+
+    describe('#jsonToYaml', function(){
+        it('should convert DCS JSON to YAML via DecoratorManager', function(){
+            const dcsJson = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.json'), 'utf8');
+            const outputYaml = DecoratorManager.jsonToYaml(JSON.parse(dcsJson));
+            const expectedYaml = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.yaml'), 'utf8');
+            outputYaml.should.equal(expectedYaml);
+        });
+
+        it('should throw error if input is not valid DCS JSON', function(){
+            const invalidDcsJson = [
+                '{"invalid": "dcsJson"}',
+                '{"version": "1.0.0", "commands": []}',
+                '{"name": "test", "commands": []}',
+                '{"name": "test", "version": "1.0.0"}'
+            ];
+            invalidDcsJson.forEach((value) => {
+                (() => {
+                    DecoratorManager.jsonToYaml(JSON.parse(value));
+                }).should.throw();
+            });
+        });
+    });
+
 });

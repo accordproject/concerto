@@ -11,10 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { hasConcreteSubclass } from './functions/find-abstract-declaration';
 
-import { RulesetDefinition } from '@stoplight/spectral-core';
-import { namingRules } from './naming-ruleset';
-
-export const concertoRuleset: RulesetDefinition = {
-    ...namingRules,
+/**
+ * Rule: Abstract Must Be Subclassed
+ * ---------------------------------
+ * Ensures that every abstract declaration in the model has at least one concrete subclass.
+ * This helps prevent unused or orphaned abstract types, enforcing better model design.
+ */
+export default {
+    given: '$.models[*]',
+    severity: 0, // 0 = error, 1 = warning, 2 = info, 3 = hint
+    then: {
+        function: hasConcreteSubclass,
+    },
 };
+

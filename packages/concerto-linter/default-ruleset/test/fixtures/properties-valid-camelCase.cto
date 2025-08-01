@@ -1,0 +1,10 @@
+namespace org.example@1.0.0
+
+asset MyProduct {
+  o String model 
+  o Integer year 
+  o Double price
+  o Long serialNumber
+  o DateTime expiryDate
+  o Boolean freshProduct
+}

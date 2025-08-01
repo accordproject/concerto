@@ -74,7 +74,8 @@
     "rfdc": "1.4.1",
     "semver": "7.6.3",
     "urijs": "1.19.11",
-    "uuid": "11.0.3"
+    "uuid": "11.0.3",
+    "yaml": "^2.8.0"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {

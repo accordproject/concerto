@@ -272,6 +272,13 @@ declare class DecoratorManager {
      *  @returns {Boolean} true if either of the flags is enabled
      */
     static isNamespaceTargetEnabled(enableDcsNamespaceTarget?: boolean): boolean;
+    /**
+     * converts DCS JSON object into YAML string
+     * validates the input DCS JSON against the DCS model
+     * @param {object} jsonInput the DCS JSON as parsed object
+     * @return {string} the corresponding YAML string
+     */
+    static jsonToYaml(jsonInput: object): string;
 }
 import ModelFile = require("./introspect/modelfile");
 import ModelManager = require("./modelmanager");
