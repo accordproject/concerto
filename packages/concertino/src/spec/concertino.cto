@@ -2,12 +2,6 @@ namespace concertino.metamodel@0.1.0-alpha.3
 
 import concerto.metamodel@1.0.0.{Decorator, Import}
 
-// IMPORTANT NOTE
-// This model is not a specification for the Concertino metamodel because Concertino
-// does not use $class discriminators. Therefore, this model cannot be used to validate Concertino files
-// without a feature such as https://github.com/accordproject/concerto/issues/542
-// Nevertheless, this model is useful for understanding the structure of Concertino files and for generating code.
-
 /**
  * Represents the Concertino format.
  */
@@ -28,7 +22,15 @@ scalar URI extends String
  */
 map DeclarationMap {
   o FullyQualifiedName
-  o Declaration
+  o ConcertinoDeclaration
+}
+
+/**
+ * Represents a map of properties.
+ */
+map PropertyMap {
+  o FullyQualifiedName
+  o ConcertinoProperty
 }
 
 /**
@@ -48,7 +50,6 @@ map ModelMetadataMap {
  * Represents metadata for a model.
  */
 concept ModelMetadata {
-  o Namespace namespace
   o SemanticVersion concertoVersion optional
   o URI sourceUri optional
   o Import[] imports optional
@@ -67,8 +68,9 @@ concept ParsedFullyQualifiedName {
 /**
  * Represents a generic declaration.
  */
-abstract concept Declaration {
-  o FullyQualifiedName name
+abstract concept ConcertinoDeclaration {
+  o String type
+  o ParsedFullyQualifiedName name
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }
@@ -76,8 +78,8 @@ abstract concept Declaration {
 /**
  * Represents a ConceptDeclaration.
  */
-concept ConceptDeclaration extends Declaration {
-  o Property[] properties
+concept ConcertinoConceptDeclaration extends ConcertinoDeclaration {
+  o PropertyMap properties
   o FullyQualifiedName[] extends optional
   o Boolean isAbstract optional
   o Prototype prototype optional // only specified, if the concept uses a prototype
@@ -96,19 +98,19 @@ enum Prototype {
 /**
  * Represents an EnumDeclaration.
  */
-concept EnumDeclaration extends Declaration {
+concept ConcertinoEnumDeclaration extends ConcertinoDeclaration {
   o EnumValueMap values
 }
 
 map EnumValueMap {
   o String
-  o EnumValue
+  o ConcertinoEnumValue
 }
 
 /**
  * Represents an enum value in an EnumDeclaration.
  */
-concept EnumValue {
+concept ConcertinoEnumValue {
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }
@@ -116,38 +118,42 @@ concept EnumValue {
 /**
  * Represents a ScalarDeclaration.
  */
-abstract concept ScalarDeclaration extends Declaration {}
+abstract concept ConcertinoScalarDeclaration extends ConcertinoDeclaration {}
 
-concept StringScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoStringScalarDeclaration extends ConcertinoScalarDeclaration {
   o String regex optional // For StringScalar
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] length optional // For StringScalar
   o String default optional // Default value for StringScalar
 }
-concept IntegerScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoIntegerScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] range optional // For IntegerScalar
   o Integer default optional // Default value for IntegerScalar
 }
-concept BooleanScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoBooleanScalarDeclaration extends ConcertinoScalarDeclaration {
   o Boolean default optional // Default value for BooleanScalar
 }
-concept DoubleScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoDoubleScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Double[] range optional // For DoubleScalar
   o Double default optional // Default value for DoubleScalar
 }
-concept LongScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoLongScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Long[] range optional // For LongScalar
   o Long default optional // Default value for LongScalar
 }
-concept DateTimeScalarDeclaration extends ScalarDeclaration {
+concept ConcertinoDateTimeScalarDeclaration extends ConcertinoScalarDeclaration {
   o String default optional // Default value for DateTimeScalar
 }
 
 /**
  * Represents a MapDeclaration.
  */
-concept MapDeclaration extends Declaration {
-  o MapKey keyType // e.g., "String", "DateTime"
-  o MapValue valueType // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
+concept ConcertinoMapDeclaration extends ConcertinoDeclaration {
+  o MapKey key // e.g., "String", "DateTime"
+  o MapValue value // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
 }
 
 /**
@@ -173,7 +179,7 @@ concept MapValue {
 /**
  * Represents a property in a ConceptDeclaration.
  */
-abstract concept Property {
+abstract concept ConcertinoProperty {
   o Identifier name
   o String type // Fully qualified type name or primitive type
   o String scalarType optional // For properties referring to scalars
@@ -188,27 +194,31 @@ abstract concept Property {
   o MetadataMap metadata optional
 }
 
-concept StringProperty extends Property {
+concept ConcertinoStringProperty extends ConcertinoProperty {
   o String regex optional // For String properties
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] length optional // For String properties
   o String default optional // Default value for StringProperty
 }
-concept IntegerProperty extends Property {
+concept ConcertinoIntegerProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Integer[] range optional // For Integer properties
   o Integer default optional // Default value for IntegerProperty
 }
-concept BooleanProperty extends Property {
+concept ConcertinoBooleanProperty extends ConcertinoProperty {
   o Boolean default optional // Default value for BooleanProperty
 }
-concept DoubleProperty extends Property {
+concept ConcertinoDoubleProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Double[] range optional // For Double properties
   o Double default optional // Default value for DoubleProperty
 }
-concept LongProperty extends Property {
+concept ConcertinoLongProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
   o Long[] range optional // For Long properties
   o Long default optional // Default value for LongProperty
 }
-concept DateTimeProperty extends Property {
+concept ConcertinoDateTimeProperty extends ConcertinoProperty {
   o String default optional // Default value for DateTimeProperty
 }
 
@@ -240,12 +250,13 @@ map AdditionalTermMap {
 /**
  * Represents a metadata map (i.e. non-vocabulary declarations).
  */
+@CodeGen_TypeScript_Override("Record<string, IDecoratorValue[]>")
 map MetadataMap {
   o String
-  o Decorators
+  o DecoratorValues
 }
 
-concept Decorators {
+concept DecoratorValues {
     o DecoratorValue[] values
 }
 abstract concept DecoratorValue {}

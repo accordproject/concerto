@@ -30,26 +30,31 @@ import {
     DecoratorLiteralUnion
 } from '@accordproject/concerto-types';
 import {
-    Concertino,
-    Declaration, Property,
-    ConceptDeclaration,
-    ScalarDeclaration,
-    EnumValue,
+    IConcertino,
+    IConcertinoDeclaration,
+    IConcertinoProperty,
+    IConcertinoConceptDeclaration,
+    IConcertinoScalarDeclaration,
     MetadataMap,
-    Vocabulary,
-    FullyQualifiedName,
-    ScalarType,
-    MapDeclaration,
-    EnumDeclaration,
-    StringProperty,
-    IntegerProperty,
-    DoubleProperty,
-    LongProperty,
-    BooleanProperty,
-    DateTimeProperty,
-    StringScalarDeclaration,
-    IntegerScalarDeclaration
-} from './types';
+    IVocabulary,
+    IParsedFullyQualifiedName,
+    IConcertinoMapDeclaration,
+    IConcertinoEnumDeclaration,
+    IConcertinoStringProperty,
+    IConcertinoIntegerProperty,
+    IConcertinoDoubleProperty,
+    IConcertinoLongProperty,
+    IConcertinoBooleanProperty,
+    IConcertinoDateTimeProperty,
+    IConcertinoStringScalarDeclaration,
+    IConcertinoIntegerScalarDeclaration,
+    EnumValueMap,
+    PropertyMap,
+    Prototype
+} from './spec/concertino.metamodel@0.1.0-alpha.3';
+
+// Type definition for scalar types as strings for easier mapping
+type ScalarType = 'BooleanScalar' | 'IntegerScalar' | 'LongScalar' | 'DoubleScalar' | 'StringScalar' | 'DateTimeScalar';
 
 const SCALAR_TYPES = new Set<ScalarType>([
     'BooleanScalar',
@@ -80,7 +85,7 @@ const SCALAR_TYPE_MAP: Record<ScalarType, string> = {
     'DoubleScalar': 'Double',
     'StringScalar': 'String',
     'DateTimeScalar': 'DateTime',
-}
+};
 
 const KEY_TYPE_MAP: Record<string, string> = {
     'concerto.metamodel@1.0.0.StringMapKeyType': 'String',
@@ -114,8 +119,8 @@ export function determineScalarType(declaration: IScalarDeclaration): ScalarType
  * @param decorators The decorators array.
  * @returns The extracted info.
  */
-function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: Vocabulary; metadata?: MetadataMap } {
-    const vocabulary: Vocabulary = {};
+function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: IVocabulary; metadata?: MetadataMap } {
+    const vocabulary: IVocabulary = {};
     const metadata: MetadataMap = {};
 
     decorators.forEach((decorator) => {
@@ -143,7 +148,7 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: Vocabular
         }
     });
 
-    const result: { vocabulary?: Vocabulary; metadata?: MetadataMap } = {};
+    const result: { vocabulary?: IVocabulary; metadata?: MetadataMap } = {};
     if (Object.keys(vocabulary).length > 0) {
         result.vocabulary = vocabulary;
     }
@@ -158,8 +163,8 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: Vocabular
  * @param properties The enum properties.
  * @returns The enum values object.
  */
-function transformEnumValues(properties: IEnumProperty[]): Record<string, EnumValue> {
-    const result: Record<string, EnumValue> = {};
+function transformEnumValues(properties: IEnumProperty[]): EnumValueMap {
+    const result: EnumValueMap = {};
     properties.forEach((property) => {
         result[property.name] = extractDecoratorsInfo(property.decorators);
     });
@@ -189,10 +194,10 @@ export function determinePropertyType(property: PropertyUnion, { modelNamespace 
  * @param property The property or scalar declaration.
  * @param propertyEntry The target entry to mutate.
  */
-function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion, propertyEntry: Property | ScalarDeclaration): void {
+function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion, propertyEntry: IConcertinoProperty | IConcertinoScalarDeclaration): void {
     if ('validator' in property && property.validator) {
         if (['String', 'StringScalar'].includes(propertyEntry.type)) {
-            const stringPropertyEntry = (propertyEntry as StringProperty);
+            const stringPropertyEntry = (propertyEntry as IConcertinoStringProperty);
             if ('pattern' in property.validator && property.validator?.pattern) {
                 stringPropertyEntry.regex = `/${property.validator?.pattern}/${property.validator?.flags}`;
             }
@@ -202,16 +207,16 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
         ) {
             const lower = property.validator.lower === undefined ? null : property.validator.lower;
             const upper = property.validator.upper === undefined ? null : property.validator.upper;
-            (propertyEntry as IntegerProperty | DoubleProperty | LongProperty).range = [lower, upper];
+            (propertyEntry as IConcertinoIntegerProperty | IConcertinoDoubleProperty | IConcertinoLongProperty).range = [lower, upper];
         }
     }
     if ('lengthValidator' in property && property.lengthValidator && ['String', 'StringScalar'].includes(propertyEntry.type)){
         const min = property.lengthValidator.minLength === undefined ? null : property.lengthValidator.minLength;
         const max = property.lengthValidator.maxLength === undefined ? null : property.lengthValidator.maxLength;
-        (propertyEntry as StringProperty).length = [min, max];
+        (propertyEntry as IConcertinoStringProperty).length = [min, max];
     }
     if ('defaultValue' in property && property.defaultValue !== undefined && property.defaultValue !== null) {
-        (propertyEntry as StringProperty | IntegerProperty | DoubleProperty | LongProperty | BooleanProperty | DateTimeProperty)
+        (propertyEntry as IConcertinoStringProperty | IConcertinoIntegerProperty | IConcertinoDoubleProperty | IConcertinoLongProperty | IConcertinoBooleanProperty | IConcertinoDateTimeProperty)
             .default = property.defaultValue;
     }
 }
@@ -225,11 +230,11 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
 function transformProperties(
     properties: PropertyUnion[],
     { modelNamespace, declaration }: { modelNamespace: string; declaration: IConceptDeclaration }
-): Record<string, Property> {
-    const result: Record<string, Property> = {};
+): PropertyMap {
+    const result: PropertyMap = {};
     const primitiveTypes = new Set(['String', 'Integer', 'Long', 'Double', 'Boolean', 'DateTime']);
     for (const property of properties) {
-        const propertyEntry: Property = {
+        const propertyEntry: IConcertinoProperty = {
             name: property.name,
             type: determinePropertyType(property, { modelNamespace }),
             ...extractDecoratorsInfo(property.decorators),
@@ -290,7 +295,7 @@ function mapValueTypeToObject(
  * @param context The context object.
  * @returns The Concertino map declaration.
  */
-function transformMapDeclaration(declaration: IMapDeclaration, context: { modelNamespace: string }): MapDeclaration {
+function transformMapDeclaration(declaration: IMapDeclaration, context: { modelNamespace: string }): IConcertinoMapDeclaration {
     return {
         type: 'MapDeclaration',
         key: {
@@ -312,8 +317,8 @@ function transformMapDeclaration(declaration: IMapDeclaration, context: { modelN
  * @param context The context object.
  * @returns The Concertino scalar declaration.
  */
-function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context: { modelNamespace: string }): ScalarDeclaration {
-    const result: ScalarDeclaration = {
+function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context: { modelNamespace: string }): IConcertinoScalarDeclaration {
+    const result: IConcertinoScalarDeclaration = {
         type: determineScalarType(declaration),
         ...extractDecoratorsInfo(declaration.decorators),
         name: createFullyQualifiedName(context.modelNamespace, declaration.name),
@@ -328,7 +333,7 @@ function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context
  * @param context The context object.
  * @returns The Concertino enum declaration.
  */
-function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): EnumDeclaration {
+function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): IConcertinoEnumDeclaration {
     return {
         type: 'EnumDeclaration',
         values: transformEnumValues(declaration.properties),
@@ -343,16 +348,16 @@ function transformEnumDeclaration(declaration: IEnumDeclaration, context: { mode
  * @param context The context object.
  * @returns The Concertino concept declaration.
  */
-function transformConceptDeclaration(declaration: IConceptDeclaration, context: { modelNamespace: string }): ConceptDeclaration {
+function transformConceptDeclaration(declaration: IConceptDeclaration, context: { modelNamespace: string }): IConcertinoConceptDeclaration {
     const declarationClass = declaration.$class.split('.').pop() as string;
-    const result: ConceptDeclaration = {
+    const result: IConcertinoConceptDeclaration = {
         type: 'ConceptDeclaration',
         properties: transformProperties(declaration.properties, { ...context, declaration }),
         ...extractDecoratorsInfo(declaration.decorators),
         name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
     if (declarationClass !== 'ConceptDeclaration') {
-        result.prototype = declarationClass;
+        result.prototype = declarationClass as Prototype;
     }
     if (declaration.superType) {
         if (!declaration.superType.namespace) {
@@ -386,7 +391,7 @@ function transformConceptDeclaration(declaration: IConceptDeclaration, context: 
  * @param localName The local name.
  * @returns The fully qualified name object.
  */
-function createFullyQualifiedName(modelNamespace: string, localName: string): FullyQualifiedName {
+function createFullyQualifiedName(modelNamespace: string, localName: string): IParsedFullyQualifiedName {
     const [namespace, version] = modelNamespace.split('@');
     return { namespace, version, localName };
 }
@@ -397,7 +402,7 @@ function createFullyQualifiedName(modelNamespace: string, localName: string): Fu
  * @param context The context object.
  * @returns The transformed declaration.
  */
-export function dispatchDeclaration(object: any, context: { modelNamespace: string }): Declaration {
+export function dispatchDeclaration(object: any, context: { modelNamespace: string }): IConcertinoDeclaration {
     if (!object || !object.$class) {
         throw new Error('Invalid object: Missing $class property.');
     }
@@ -421,7 +426,7 @@ export function dispatchDeclaration(object: any, context: { modelNamespace: stri
  * @param concertino The concertino object.
  * @returns The inheritance chain.
  */
-export function getInheritanceChain(declaration: ConceptDeclaration, concertino: Concertino): string[] {
+export function getInheritanceChain(declaration: IConcertinoConceptDeclaration, concertino: IConcertino): string[] {
     const chain: string[] = [];
     const stack = [...(declaration.extends || [])];
     while (stack.length > 0) {
@@ -430,7 +435,7 @@ export function getInheritanceChain(declaration: ConceptDeclaration, concertino:
             throw new Error('Parent is undefined');
         }
         chain.push(parent);
-        const parentDeclaration = concertino.declarations[parent] as ConceptDeclaration;
+        const parentDeclaration = concertino.declarations[parent] as IConcertinoConceptDeclaration;
         if (parentDeclaration && parentDeclaration.extends) {
             stack.push(...parentDeclaration.extends);
         }
@@ -443,8 +448,8 @@ export function getInheritanceChain(declaration: ConceptDeclaration, concertino:
  * @param metamodel The Concerto metamodel.
  * @returns The Concertino format object.
  */
-function convertToConcertino(metamodel: IModels): Concertino {
-    const concertino: Concertino = {
+function convertToConcertino(metamodel: IModels): IConcertino {
+    const concertino: IConcertino = {
         declarations: {},
         metadata: {
             concertinoVersion: '0.1.0-alpha.3',
@@ -468,10 +473,10 @@ function convertToConcertino(metamodel: IModels): Concertino {
 
         // Denormalize inherited properties
         if (declaration.type === 'ConceptDeclaration') {
-            const concept = (declaration as ConceptDeclaration);
+            const concept = (declaration as IConcertinoConceptDeclaration);
             if (concept.extends) {
                 concept.extends = getInheritanceChain(concept, concertino);
-                const inheritedProperties: Record<string, Property> = {};
+                const inheritedProperties: Record<string, IConcertinoProperty> = {};
                 concept.extends.forEach((parent) => {
                     const currentParent = concertino.declarations[parent];
                     if (currentParent && 'properties' in currentParent && currentParent.properties) {
@@ -493,32 +498,32 @@ function convertToConcertino(metamodel: IModels): Concertino {
             concept.properties = Object.fromEntries(
                 Object.entries(concept.properties || {}).map(([key, value]) => {
                     if (value !== undefined) {
-                        const scalarDecl = concertino.declarations[value.type] as ScalarDeclaration;
+                        const scalarDecl = concertino.declarations[value.type] as IConcertinoScalarDeclaration;
                         if (scalarDecl && SCALAR_TYPES.has(scalarDecl.type as ScalarType)) {
-                            const newProperty: Property = {
+                            const newProperty: IConcertinoProperty = {
                                 ...value,
                                 scalarType: value.type,
-                                type: SCALAR_TYPE_MAP[scalarDecl.type],
+                                type: SCALAR_TYPE_MAP[scalarDecl.type as ScalarType],
                             };
                             if ('regex' in scalarDecl && scalarDecl.regex) {
-                                (newProperty as StringProperty).regex = (scalarDecl as StringScalarDeclaration).regex;
+                                (newProperty as IConcertinoStringProperty).regex = (scalarDecl as IConcertinoStringScalarDeclaration).regex;
                             }
                             if ('length' in scalarDecl && scalarDecl.length) {
-                                (newProperty as StringProperty).length = (scalarDecl as StringScalarDeclaration).length;
+                                (newProperty as IConcertinoStringProperty).length = (scalarDecl as IConcertinoStringScalarDeclaration).length;
                             }
                             if ('range' in scalarDecl && scalarDecl.range) {
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
-                                (newProperty as IntegerProperty).range = (scalarDecl as IntegerScalarDeclaration).range;
+                                (newProperty as IConcertinoIntegerProperty).range = (scalarDecl as IConcertinoIntegerScalarDeclaration).range;
                             }
                             if ('default' in scalarDecl && scalarDecl.default) {
                                 // Works for other number scalar types too. We pick the Integer type to satisfy the compiler
-                                (newProperty as IntegerProperty).default = (scalarDecl as IntegerScalarDeclaration).default;
+                                (newProperty as IConcertinoIntegerProperty).default = (scalarDecl as IConcertinoIntegerScalarDeclaration).default;
                             }
                             return [key, newProperty];
                         }
                     }
                     return [key, value];
-                })
+                }).filter((entry): entry is [string, IConcertinoProperty] => entry !== undefined)
             );
         }
     });

@@ -18,9 +18,9 @@
  * This module provides a standardized way to convert between Concerto metamodel and Concertino format.
  */
 import { IModels } from '@accordproject/concerto-types';
-import { Concertino } from './types';
-import { convertToConcertino } from './concertino';
-import { convertToMetamodel } from './metamodel';
+import { IConcertino } from './spec/concertino.metamodel@0.1.0-alpha.3';
+import { convertToConcertino } from './concertinoSerializer';
+import { convertToMetamodel } from './metamodelSerializer';
 import Ajv, { ValidateFunction } from 'ajv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -63,7 +63,7 @@ export class ConcertinoConverter {
      * @param metamodel - The Concerto metamodel to convert.
      * @returns The converted Concertino representation.
      */
-    public fromConcertoMetamodel(metamodel: IModels): Concertino {
+    public fromConcertoMetamodel(metamodel: IModels): IConcertino {
         const concertino = convertToConcertino(metamodel);
         if (this.options.version) {
             concertino.metadata.concertinoVersion = this.options.version;
@@ -76,11 +76,11 @@ export class ConcertinoConverter {
      * @param concertino - The Concertino format to convert.
      * @returns The converted Concerto metamodel.
      */
-    public toConcertoMetamodel(concertino: Concertino): IModels {
+    public toConcertoMetamodel(concertino: IConcertino): IModels {
         return convertToMetamodel(concertino);
     }
 
-    public isValid(concertino: Concertino): boolean {
+    public isValid(concertino: IConcertino): boolean {
         return this.validate(concertino);
     }
 
@@ -94,4 +94,4 @@ export class ConcertinoConverter {
 export { convertToConcertino, convertToMetamodel };
 
 // Export types
-export * from './types';
+export * from './spec/concertino.metamodel@0.1.0-alpha.3';

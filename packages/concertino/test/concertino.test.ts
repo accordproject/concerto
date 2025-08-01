@@ -4,7 +4,7 @@ import { join } from 'path';
 import { ModelManager } from '@accordproject/concerto-core';
 import { Parser } from '@accordproject/concerto-cto';
 import { ConcertinoConverter } from '../src/';
-import { determineScalarType, dispatchDeclaration, getInheritanceChain, determinePropertyType } from '../src/concertino';
+import { determineScalarType, dispatchDeclaration, getInheritanceChain, determinePropertyType } from '../src/concertinoSerializer';
 import { readdirSync, statSync } from 'fs';
 import { IModel, IModels } from '@accordproject/concerto-types';
 import { it, expect, describe } from 'vitest';

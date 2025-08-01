@@ -15,7 +15,25 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelUtil } from '@accordproject/concerto-core';
-import { Concertino, Declaration, Property, EnumDeclaration, ConceptDeclaration, MapDeclaration, ScalarDeclaration, MapValue, StringScalarDeclaration, IntegerScalarDeclaration, StringProperty, IntegerProperty } from './types';
+import {
+    IConcertino,
+    IConcertinoDeclaration,
+    IConcertinoProperty,
+    IConcertinoEnumDeclaration,
+    IConcertinoConceptDeclaration,
+    IConcertinoMapDeclaration,
+    IConcertinoScalarDeclaration,
+    IMapValue as MapValue,
+    IConcertinoStringScalarDeclaration,
+    IConcertinoIntegerScalarDeclaration,
+    IConcertinoStringProperty,
+    IConcertinoIntegerProperty,
+    IConcertinoEnumValue,
+    MetadataMap,
+    IVocabulary,
+    IStringDecoratorValue,
+    IDecoratorValues
+} from './spec/concertino.metamodel@0.1.0-alpha.3';
 import {
     IBooleanProperty,
     IBooleanScalar,
@@ -49,19 +67,18 @@ import {
     PropertyUnion,
     ScalarDeclarationUnion,
 } from '@accordproject/concerto-types';
-import { EnumValue as EnumValue, MetadataMap, Vocabulary } from './types';
 
 /**
  * Extracts scalar validators (regex, range, length) from a ScalarDeclaration.
- * @param {ScalarDeclaration} declaration - The scalar declaration to extract validators from.
+ * @param {IConcertinoScalarDeclaration} declaration - The scalar declaration to extract validators from.
  * @returns {{ lengthValidator?: IStringLengthValidator; validator?: IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator | IStringRegexValidator }}
  */
-function extractScalarValidators(declaration: ScalarDeclaration) {
+function extractScalarValidators(declaration: IConcertinoScalarDeclaration) {
     const result: {
     lengthValidator?: IStringLengthValidator;
     validator?: IDoubleDomainValidator | IIntegerDomainValidator | ILongDomainValidator | IStringRegexValidator;
   } = {};
-    const stringDeclaration = declaration as StringScalarDeclaration;
+    const stringDeclaration = declaration as IConcertinoStringScalarDeclaration;
     if ('regex' in declaration && stringDeclaration.regex) {
         const regexValidator: IStringRegexValidator = {
             $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
@@ -78,7 +95,7 @@ function extractScalarValidators(declaration: ScalarDeclaration) {
         result.validator = regexValidator;
     }
 
-    const integerDeclaration = declaration as IntegerScalarDeclaration;
+    const integerDeclaration = declaration as IConcertinoIntegerScalarDeclaration;
     if ('range' in integerDeclaration && integerDeclaration.range) {
         result.validator = { $class: `concerto.metamodel@1.0.0.${declaration.type.replace('Scalar', '')}DomainValidator` };
         if (integerDeclaration.range[0] !== undefined && integerDeclaration.range[0] !== null) {
@@ -104,11 +121,11 @@ function extractScalarValidators(declaration: ScalarDeclaration) {
 
 /**
  * Converts vocabulary and metadata into Concerto decorators.
- * @param {Vocabulary} [vocabulary] - The vocabulary object.
+ * @param {IVocabulary} [vocabulary] - The vocabulary object.
  * @param {MetadataMap} [metadata] - The metadata map.
  * @returns {any[] | undefined} The decorators array or undefined if none.
  */
-function decoratorsFromVocabularyAndMetadata(vocabulary?: Vocabulary, metadata?: MetadataMap): any[] | undefined {
+function decoratorsFromVocabularyAndMetadata(vocabulary?: IVocabulary, metadata?: MetadataMap): any[] | undefined {
     const decorators: any[] = [];
 
     if (vocabulary?.label === null) {
@@ -136,18 +153,19 @@ function decoratorsFromVocabularyAndMetadata(vocabulary?: Vocabulary, metadata?:
     }
 
     if (metadata) {
-        Object.entries(metadata).forEach(([name, args]) => {
+        Object.entries(metadata).forEach(([name, decoratorValues]) => {
             const decorator : IDecorator = {
                 $class: 'concerto.metamodel@1.0.0.Decorator',
                 name,
             };
-            if (args) {
-                decorator.arguments = args.map((arg) => {
-                    if (typeof arg === 'string') {
+            if (decoratorValues) {
+                decorator.arguments = (decoratorValues || []).map((arg) => {
+                    const stringArg = arg as IStringDecoratorValue;
+                    if (typeof stringArg === 'string') {
                         return { $class: 'concerto.metamodel@1.0.0.DecoratorString', value: arg };
-                    } else if (typeof arg === 'number') {
+                    } else if (typeof stringArg === 'number') {
                         return { $class: 'concerto.metamodel@1.0.0.DecoratorNumber', value: arg };
-                    } else if (typeof arg === 'boolean') {
+                    } else if (typeof stringArg === 'boolean') {
                         return { $class: 'concerto.metamodel@1.0.0.DecoratorBoolean', value: arg };
                     } else if (typeof arg === 'object' && arg !== null && 'type' in arg) {
                         return {
@@ -250,10 +268,10 @@ function mapKeyType(key: MapValue): MapKeyTypeUnion {
 
 /**
  * Converts enum values from Concertino to Concerto metamodel format.
- * @param {Record<string, EnumValue>} values - The enum values.
+ * @param {Record<string, IConcertinoEnumValue>} values - The enum values.
  * @returns {any[]} The array of Concerto enum properties.
  */
-function transformEnumValues(values: Record<string, EnumValue>): any[] {
+function transformEnumValues(values: Record<string, IConcertinoEnumValue>): any[] {
     return Object.entries(values).map(([name, value]) => {
         const result: IEnumProperty = {
             $class: 'concerto.metamodel@1.0.0.EnumProperty',
@@ -272,10 +290,10 @@ function transformEnumValues(values: Record<string, EnumValue>): any[] {
 
 /**
  * Converts properties from Concertino to Concerto metamodel format.
- * @param {Record<string, Property>} properties - The properties object.
+ * @param {Record<string, IConcertinoProperty>} properties - The properties object.
  * @returns {{ properties: any[], identifier?: string }} The properties array and optional identifier.
  */
-function transformProperties(properties: Record<string, Property>): { properties: any[], identifier?: string } {
+function transformProperties(properties: Record<string, IConcertinoProperty>): { properties: any[], identifier?: string } {
     let identifier = undefined;
     return {
         properties: Object.entries(properties)
@@ -318,7 +336,7 @@ function transformProperties(properties: Record<string, Property>): { properties
 
                 if (!isScalarDeclarationType) {
 
-                    const stringProperty = property as StringProperty;
+                    const stringProperty = property as IConcertinoStringProperty;
                     if (stringProperty.regex) {
                         const regexValidator: IStringRegexValidator = {
                             $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
@@ -335,7 +353,7 @@ function transformProperties(properties: Record<string, Property>): { properties
                         validator = regexValidator;
                     }
 
-                    const integerProperty = property as IntegerProperty;
+                    const integerProperty = property as IConcertinoIntegerProperty;
                     if (integerProperty.range) {
                         validator = { $class: `concerto.metamodel@1.0.0.${property.type.replace('Scalar', '')}DomainValidator` };
                         if (integerProperty.range[0] !== undefined && integerProperty.range[0] !== null) {
@@ -398,10 +416,10 @@ function transformProperties(properties: Record<string, Property>): { properties
 /**
  * Converts a Concertino MapDeclaration to Concerto metamodel format.
  * @param {string} name - The map name.
- * @param {MapDeclaration} declaration - The map declaration.
+ * @param {IConcertinoMapDeclaration} declaration - The map declaration.
  * @returns {IMapDeclaration} The Concerto map declaration.
  */
-function transformMap(name: string, declaration: MapDeclaration): any {
+function transformMap(name: string, declaration: IConcertinoMapDeclaration): any {
     const result: IMapDeclaration = {
         $class: 'concerto.metamodel@1.0.0.MapDeclaration',
         name,
@@ -421,10 +439,10 @@ function transformMap(name: string, declaration: MapDeclaration): any {
  * Converts a Concertino ScalarDeclaration to Concerto metamodel format.
  * @param {string} namespace - The namespace.
  * @param {string} name - The scalar name.
- * @param {ScalarDeclaration} declaration - The scalar declaration.
+ * @param {IConcertinoScalarDeclaration} declaration - The scalar declaration.
  * @returns {ScalarDeclarationUnion & { namespace: string }} The Concerto scalar declaration.
  */
-function transformScalar(namespace: string, name: string, declaration: ScalarDeclaration):  ScalarDeclarationUnion & { namespace : string} {
+function transformScalar(namespace: string, name: string, declaration: IConcertinoScalarDeclaration):  ScalarDeclarationUnion & { namespace : string} {
     const scalarTypeMap: Record<string, string> = {
         StringScalar: 'concerto.metamodel@1.0.0.StringScalar',
         IntegerScalar: 'concerto.metamodel@1.0.0.IntegerScalar',
@@ -442,7 +460,7 @@ function transformScalar(namespace: string, name: string, declaration: ScalarDec
         ...extractScalarValidators(declaration),
     };
 
-    const stringDeclaration = declaration as StringScalarDeclaration;
+    const stringDeclaration = declaration as IConcertinoStringScalarDeclaration;
 
     if (stringDeclaration.default !== undefined) {
         (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = stringDeclaration.default;
@@ -459,10 +477,10 @@ function transformScalar(namespace: string, name: string, declaration: ScalarDec
 /**
  * Converts a Concertino EnumDeclaration to Concerto metamodel format.
  * @param {string} name - The enum name.
- * @param {EnumDeclaration} declaration - The enum declaration.
+ * @param {IConcertinoEnumDeclaration} declaration - The enum declaration.
  * @returns {IEnumDeclaration} The Concerto enum declaration.
  */
-function transformEnum(name: string, declaration: EnumDeclaration): any {
+function transformEnum(name: string, declaration: IConcertinoEnumDeclaration): any {
     const result: IEnumDeclaration = {
         $class: 'concerto.metamodel@1.0.0.EnumDeclaration',
         name,
@@ -480,10 +498,10 @@ function transformEnum(name: string, declaration: EnumDeclaration): any {
 /**
  * Converts a Concertino ConceptDeclaration to Concerto metamodel format.
  * @param {string} name - The concept name.
- * @param {ConceptDeclaration} declaration - The concept declaration.
+ * @param {IConcertinoConceptDeclaration} declaration - The concept declaration.
  * @returns {IConceptDeclaration} The Concerto concept declaration.
  */
-function transformConcept(name: string, declaration: ConceptDeclaration): IConceptDeclaration {
+function transformConcept(name: string, declaration: IConcertinoConceptDeclaration): IConceptDeclaration {
     const { properties, identifier } = transformProperties(declaration.properties ?? {});
     const result: IConceptDeclaration = {
         $class: `concerto.metamodel@1.0.0.${declaration.prototype || 'ConceptDeclaration'}`,
@@ -526,25 +544,25 @@ function transformConcept(name: string, declaration: ConceptDeclaration): IConce
 /**
  * Converts a list of Concertino declarations to Concerto metamodel format.
  * @param {string} namespace - The namespace.
- * @param {[string, Declaration][]} declarations - The list of declarations.
+ * @param {[string, IConcertinoDeclaration][]} declarations - The list of declarations.
  * @returns {any[]} The array of Concerto declarations.
  */
-function transformDeclarations(namespace: string, declarations: [string, Declaration][]): any[] {
+function transformDeclarations(namespace: string, declarations: [string, IConcertinoDeclaration][]): any[] {
     return declarations.map(([name, declaration]) => {
         switch (declaration.type) {
         case 'ConceptDeclaration':
-            return transformConcept(name, declaration as ConceptDeclaration);
+            return transformConcept(name, declaration as IConcertinoConceptDeclaration);
         case 'EnumDeclaration':
-            return transformEnum(name, declaration as EnumDeclaration);
+            return transformEnum(name, declaration as IConcertinoEnumDeclaration);
         case 'StringScalar':
         case 'IntegerScalar':
         case 'BooleanScalar':
         case 'DoubleScalar':
         case 'LongScalar':
         case 'DateTimeScalar':
-            return transformScalar(namespace, name, declaration as ScalarDeclaration);
+            return transformScalar(namespace, name, declaration as IConcertinoScalarDeclaration);
         case 'MapDeclaration':
-            return transformMap(name, declaration as MapDeclaration);
+            return transformMap(name, declaration as IConcertinoMapDeclaration);
         }
     });
 }
@@ -552,10 +570,10 @@ function transformDeclarations(namespace: string, declarations: [string, Declara
 /**
  * Groups declarations by their namespace.
  * @param {Concertion} concertino - The Concertino object.
- * @returns {Record<string, [string, Declaration][]>} A map of namespaces to their declarations.
+ * @returns {Record<string, [string, IConcertinoDeclaration][]>} A map of namespaces to their declarations.
  */
-function groupDeclarationsByNamespace(concertino: Concertino): Record<string, [string, Declaration][]> {
-    const namespaces: Record<string, [string, Declaration][]> = {};
+function groupDeclarationsByNamespace(concertino: IConcertino): Record<string, [string, IConcertinoDeclaration][]> {
+    const namespaces: Record<string, [string, IConcertinoDeclaration][]> = {};
     Object.entries(concertino.declarations).forEach(([fullyQualifiedName, declaration]) => {
         const namespace = ModelUtil.getNamespace(fullyQualifiedName);
         if (!namespaces[namespace]) {
@@ -578,7 +596,7 @@ function groupDeclarationsByNamespace(concertino: Concertino): Record<string, [s
  * @param {Concertino} concertino - The Concertino JSON object.
  * @returns {IModels} A valid Concerto metamodel instance in JSON format.
  */
-function convertToMetamodel(concertino: Concertino): IModels {
+function convertToMetamodel(concertino: IConcertino): IModels {
     const metamodel: IModels = {
         $class: 'concerto.metamodel@1.0.0.Models',
         models: [],
@@ -599,11 +617,17 @@ function convertToMetamodel(concertino: Concertino): IModels {
         }
 
         if(concertino.metadata.models[namespace]?.imports) {
-            model.imports = concertino.metadata.models[namespace]?.imports;
+            model.imports = concertino.metadata.models[namespace]?.imports.map(imp => ({
+                ...imp,
+                $class: imp.$class || 'concerto.metamodel@1.0.0.Import'
+            }));
         }
 
         if(concertino.metadata.models[namespace]?.decorators) {
-            model.decorators = concertino.metadata.models[namespace]?.decorators;
+            model.decorators = concertino.metadata.models[namespace]?.decorators?.map(d => ({
+                ...d,
+                $class: d.$class || 'concerto.metamodel@1.0.0.Decorator' // TODO Fix
+            })) as IDecorator[];
         }
 
         if(concertino.metadata.models[namespace]?.concertoVersion) {
