@@ -135,14 +135,18 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "com.test.models@1.2.3.Dictionary": {
-      "keyType": "String",
+      "key": {
+        "type": "String",
+      },
       "name": {
         "localName": "Dictionary",
         "namespace": "com.test.models",
         "version": "1.2.3",
       },
       "type": "MapDeclaration",
-      "valueType": "String",
+      "value": {
+        "type": "String",
+      },
     },
     "com.test.models@1.2.3.Foo": {
       "name": {
@@ -358,8 +362,9 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
     },
     "com.test.models@1.2.3.RelationshipMap": {
-      "isRelationshipValue": true,
-      "keyType": "com.test.models@1.2.3.Qux",
+      "key": {
+        "type": "com.test.models@1.2.3.Qux",
+      },
       "metadata": {
         "Decorated": null,
       },
@@ -369,7 +374,10 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "version": "1.2.3",
       },
       "type": "MapDeclaration",
-      "valueType": "com.test.models@1.2.3.Fo",
+      "value": {
+        "isRelationship": true,
+        "type": "com.test.another@1.0.0.Fo",
+      },
     },
     "com.test.models@1.2.3.Xyc": {
       "extends": [
@@ -400,6 +408,1772 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
           "name": "someString",
           "scalarType": "String",
           "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.AbstractAsset": {
+      "isAbstract": true,
+      "name": {
+        "localName": "AbstractAsset",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "stringProperty": {
+          "default": "defaultString",
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.Address": {
+      "isAbstract": true,
+      "name": {
+        "localName": "Address",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "city": {
+          "default": "Winchester",
+          "name": "city",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "country": {
+          "default": "UK",
+          "name": "country",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "counts": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "counts",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "street": {
+          "name": "street",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.BaseAsset": {
+      "name": {
+        "localName": "BaseAsset",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "booleanArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "booleanArrayProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "booleanProperty": {
+          "default": true,
+          "isOptional": true,
+          "name": "booleanProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "dateTimeArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "dateTimeArrayProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "dateTimeProperty": {
+          "default": "2008-09-15T15:53:00",
+          "isOptional": true,
+          "name": "dateTimeProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "doubleArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "doubleArrayProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "doubleProperty": {
+          "default": 999,
+          "isOptional": true,
+          "name": "doubleProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "integerArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "integerArrayProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "integerProperty": {
+          "default": 10,
+          "isOptional": true,
+          "name": "integerProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "longArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "longArrayProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "longProperty": {
+          "default": 1000,
+          "isOptional": true,
+          "name": "longProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "myPeople": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "myPeople",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "myPerson": {
+          "isOptional": true,
+          "name": "myPerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "personArray": {
+          "isArray": true,
+          "isRelationship": true,
+          "name": "personArray",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "singlePerson": {
+          "isRelationship": true,
+          "name": "singlePerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "stateArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "stateArrayProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stateProperty": {
+          "default": "GOLD",
+          "isOptional": true,
+          "name": "stateProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stringArrayProperty": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "stringArrayProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringProperty": {
+          "default": "defaultString",
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.Bloke": {
+      "metadata": {
+        "custom": [
+          "string",
+          "foo",
+          "boolean",
+          false,
+          "intParam",
+          2,
+          "floatParam",
+          3.14,
+          "type",
+          {
+            "isArray": true,
+            "type": "org.acme.base@1.0.0.SimpleAsset",
+          },
+        ],
+      },
+      "name": {
+        "localName": "Bloke",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "stringProperty": {
+          "isIdentifier": true,
+          "metadata": {
+            "stuff": [
+              "two",
+              3,
+              "bool",
+              true,
+            ],
+          },
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.DerivedAsset": {
+      "extends": [
+        "org.acme.base@1.0.0.BaseAsset",
+      ],
+      "name": {
+        "localName": "DerivedAsset",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "anotherStringProperty": {
+          "default": "defaultString",
+          "name": "anotherStringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "booleanArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "booleanArrayProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "booleanProperty": {
+          "default": true,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "booleanProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "dateTimeArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "dateTimeArrayProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "dateTimeProperty": {
+          "default": "2008-09-15T15:53:00",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "dateTimeProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "doubleArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "doubleArrayProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "doubleProperty": {
+          "default": 999,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "doubleProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "integerArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "integerArrayProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "integerProperty": {
+          "default": 10,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "integerProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "longArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "longArrayProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "longProperty": {
+          "default": 1000,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "longProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "myPeople": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "myPeople",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "myPerson": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "myPerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "personArray": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isRelationship": true,
+          "name": "personArray",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "singlePerson": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isRelationship": true,
+          "name": "singlePerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "stateArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "stateArrayProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stateProperty": {
+          "default": "GOLD",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "stateProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stringArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "stringArrayProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringProperty": {
+          "default": "defaultString",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.DerivedDerivedAsset": {
+      "extends": [
+        "org.acme.base@1.0.0.DerivedAsset",
+        "org.acme.base@1.0.0.BaseAsset",
+      ],
+      "name": {
+        "localName": "DerivedDerivedAsset",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "anotherStringProperty": {
+          "default": "defaultString",
+          "inheritedFrom": "org.acme.base@1.0.0.DerivedAsset",
+          "name": "anotherStringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "booleanArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "booleanArrayProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "booleanProperty": {
+          "default": true,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "booleanProperty",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "dateTimeArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "dateTimeArrayProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "dateTimeProperty": {
+          "default": "2008-09-15T15:53:00",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "dateTimeProperty",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "doubleArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "doubleArrayProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "doubleProperty": {
+          "default": 999,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "doubleProperty",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "includedTransaction": {
+          "name": "includedTransaction",
+          "type": "org.acme.base@1.0.0.MyBasicTransaction",
+        },
+        "integerArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "integerArrayProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "integerProperty": {
+          "default": 10,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "integerProperty",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "longArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "longArrayProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "longProperty": {
+          "default": 1000,
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "longProperty",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "myPeople": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "myPeople",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "myPerson": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "myPerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "personArray": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isRelationship": true,
+          "name": "personArray",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "singlePerson": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isRelationship": true,
+          "name": "singlePerson",
+          "type": "org.acme.base@1.0.0.Person",
+        },
+        "stateArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "stateArrayProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stateProperty": {
+          "default": "GOLD",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isOptional": true,
+          "name": "stateProperty",
+          "type": "org.acme.base@1.0.0.State",
+        },
+        "stringArrayProperty": {
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isArray": true,
+          "isOptional": true,
+          "name": "stringArrayProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringProperty": {
+          "default": "defaultString",
+          "inheritedFrom": "org.acme.base@1.0.0.BaseAsset",
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.MyBasicTransaction": {
+      "name": {
+        "localName": "MyBasicTransaction",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.MyTransaction": {
+      "name": {
+        "localName": "MyTransaction",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "myAsset": {
+          "name": "myAsset",
+          "type": "org.acme.base@1.0.0.BaseAsset",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.MyTransactionEx": {
+      "extends": [
+        "org.acme.base@1.0.0.MyTransaction",
+      ],
+      "name": {
+        "localName": "MyTransactionEx",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "anotherBaseAsset": {
+          "name": "anotherBaseAsset",
+          "type": "org.acme.base@1.0.0.BaseAsset",
+        },
+        "arrayOfBaseAssets": {
+          "isArray": true,
+          "name": "arrayOfBaseAssets",
+          "type": "org.acme.base@1.0.0.BaseAsset",
+        },
+        "myAsset": {
+          "inheritedFrom": "org.acme.base@1.0.0.MyTransaction",
+          "name": "myAsset",
+          "type": "org.acme.base@1.0.0.BaseAsset",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.Person": {
+      "metadata": {
+        "important": null,
+        "role": [
+          "name",
+          "manager",
+        ],
+      },
+      "name": {
+        "localName": "Person",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "address": {
+          "name": "address",
+          "type": "org.acme.base@1.0.0.UnitedStatesAddress",
+        },
+        "stringProperty": {
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.SimpleAsset": {
+      "name": {
+        "localName": "SimpleAsset",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "stringProperty": {
+          "isIdentifier": true,
+          "name": "stringProperty",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.base@1.0.0.State": {
+      "name": {
+        "localName": "State",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "BRONZE": {},
+        "GOLD": {},
+        "SILVER": {},
+      },
+    },
+    "org.acme.base@1.0.0.UnitedStatesAddress": {
+      "extends": [
+        "org.acme.base@1.0.0.Address",
+      ],
+      "name": {
+        "localName": "UnitedStatesAddress",
+        "namespace": "org.acme.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "city": {
+          "default": "Winchester",
+          "inheritedFrom": "org.acme.base@1.0.0.Address",
+          "name": "city",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "country": {
+          "default": "UK",
+          "inheritedFrom": "org.acme.base@1.0.0.Address",
+          "name": "country",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "counts": {
+          "inheritedFrom": "org.acme.base@1.0.0.Address",
+          "isArray": true,
+          "isOptional": true,
+          "name": "counts",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "street": {
+          "inheritedFrom": "org.acme.base@1.0.0.Address",
+          "name": "street",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "zipcode": {
+          "name": "zipcode",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr.base@1.0.0.Address": {
+      "name": {
+        "localName": "Address",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "city": {
+          "name": "city",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "country": {
+          "name": "country",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "state": {
+          "isOptional": true,
+          "name": "state",
+          "type": "org.acme.hr.base@1.0.0.State",
+        },
+        "street": {
+          "name": "street",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "zipCode": {
+          "name": "zipCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr.base@1.0.0.Category": {
+      "isAbstract": true,
+      "name": {
+        "localName": "Category",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "properties": {},
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr.base@1.0.0.EmployeeTShirtSizes": {
+      "key": {
+        "type": "org.acme.hr.base@1.0.0.SSN",
+      },
+      "name": {
+        "localName": "EmployeeTShirtSizes",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "org.acme.hr.base@1.0.0.TShirtSizeType",
+      },
+    },
+    "org.acme.hr.base@1.0.0.GeneralCategory": {
+      "extends": [
+        "org.acme.hr.base@1.0.0.Category",
+      ],
+      "isAbstract": true,
+      "name": {
+        "localName": "GeneralCategory",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "properties": {},
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr.base@1.0.0.Level": {
+      "name": {
+        "localName": "Level",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {},
+    },
+    "org.acme.hr.base@1.0.0.SSN": {
+      "default": "000-00-0000",
+      "name": {
+        "localName": "SSN",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
+      "type": "StringScalar",
+    },
+    "org.acme.hr.base@1.0.0.State": {
+      "name": {
+        "localName": "State",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "CA": {},
+        "CO": {},
+        "IL": {},
+        "MA": {},
+        "NY": {},
+        "WA": {},
+      },
+    },
+    "org.acme.hr.base@1.0.0.TShirtSizeType": {
+      "name": {
+        "localName": "TShirtSizeType",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "LARGE": {},
+        "MEDIUM": {},
+        "SMALL": {},
+      },
+    },
+    "org.acme.hr.base@1.0.0.Time": {
+      "name": {
+        "localName": "Time",
+        "namespace": "org.acme.hr.base",
+        "version": "1.0.0",
+      },
+      "type": "DateTimeScalar",
+    },
+    "org.acme.hr@1.0.0.Category": {
+      "name": {
+        "localName": "Category",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {},
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.ChangeOfAddress": {
+      "name": {
+        "localName": "ChangeOfAddress",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "Person": {
+          "isRelationship": true,
+          "name": "Person",
+          "type": "org.acme.hr@1.0.0.Person",
+        },
+        "newAddress": {
+          "name": "newAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.Company": {
+      "metadata": {
+        "description": [
+          "A company",
+        ],
+      },
+      "name": {
+        "localName": "Company",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "companyProperties": {
+          "isOptional": true,
+          "name": "companyProperties",
+          "type": "org.acme.hr@1.0.0.CompanyProperties",
+        },
+        "employeeDirectory": {
+          "isOptional": true,
+          "metadata": {
+            "category": [
+              {
+                "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+              },
+            ],
+          },
+          "name": "employeeDirectory",
+          "type": "org.acme.hr@1.0.0.EmployeeDirectory",
+        },
+        "employeeProfiles": {
+          "isOptional": true,
+          "name": "employeeProfiles",
+          "type": "org.acme.hr@1.0.0.EmployeeProfiles",
+        },
+        "employeeSocialSecurityNumbers": {
+          "isOptional": true,
+          "name": "employeeSocialSecurityNumbers",
+          "type": "org.acme.hr@1.0.0.EmployeeSocialSecurityNumbers",
+        },
+        "employeeTShirtSizes": {
+          "isOptional": true,
+          "name": "employeeTShirtSizes",
+          "type": "org.acme.hr.base@1.0.0.EmployeeTShirtSizes",
+        },
+        "headquarters": {
+          "name": "headquarters",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "name": {
+          "metadata": {
+            "description": [
+              "The name of the company",
+            ],
+          },
+          "name": "name",
+          "regex": "/abc.*/",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.CompanyEvent": {
+      "name": {
+        "localName": "CompanyEvent",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+      },
+      "prototype": "EventDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.CompanyProperties": {
+      "key": {
+        "type": "String",
+      },
+      "name": {
+        "localName": "CompanyProperties",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "String",
+      },
+    },
+    "org.acme.hr@1.0.0.Contractor": {
+      "extends": [
+        "org.acme.hr@1.0.0.Person",
+      ],
+      "name": {
+        "localName": "Contractor",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "company": {
+          "name": "company",
+          "type": "org.acme.hr@1.0.0.Company",
+        },
+        "dob": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "dob",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "email": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isIdentifier": true,
+          "length": [
+            0,
+            254,
+          ],
+          "name": "email",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "firstName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "height": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "height",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "homeAddress": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "homeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "lastName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "manager": {
+          "isOptional": true,
+          "isRelationship": true,
+          "metadata": {
+            "level": [
+              {
+                "type": "org.acme.hr.base@1.0.0.Level",
+              },
+            ],
+          },
+          "name": "manager",
+          "type": "org.acme.hr@1.0.0.Manager",
+        },
+        "middleNames": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isOptional": true,
+          "name": "middleNames",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "nextOfKin": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "nextOfKin",
+          "type": "org.acme.hr@1.0.0.NextOfKin",
+        },
+        "ssn": {
+          "default": "000-00-0000",
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "ssn",
+          "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
+          "scalarType": "org.acme.hr.base@1.0.0.SSN",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.Department": {
+      "metadata": {
+        "category": [
+          {
+            "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+          },
+        ],
+        "description": [
+          "A department",
+        ],
+      },
+      "name": {
+        "localName": "Department",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "Design": {},
+        "Engineering": {},
+        "Finance": {},
+        "HR": {},
+        "Marketing": {},
+        "Sales": {
+          "metadata": {
+            "category": [
+              {
+                "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+              },
+            ],
+          },
+        },
+      },
+    },
+    "org.acme.hr@1.0.0.Employee": {
+      "extends": [
+        "org.acme.hr@1.0.0.Person",
+      ],
+      "metadata": {
+        "category": [
+          {
+            "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+          },
+        ],
+      },
+      "name": {
+        "localName": "Employee",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "companyAssets": {
+          "isArray": true,
+          "name": "companyAssets",
+          "type": "org.acme.hr@1.0.0.Equipment",
+        },
+        "department": {
+          "name": "department",
+          "type": "org.acme.hr@1.0.0.Department",
+        },
+        "dob": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "dob",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "email": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isIdentifier": true,
+          "length": [
+            0,
+            254,
+          ],
+          "name": "email",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "employeeId": {
+          "name": "employeeId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "firstName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "height": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "height",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "homeAddress": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "homeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "lastName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "manager": {
+          "isOptional": true,
+          "isRelationship": true,
+          "name": "manager",
+          "type": "org.acme.hr@1.0.0.Manager",
+        },
+        "middleNames": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isOptional": true,
+          "name": "middleNames",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "nextOfKin": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "nextOfKin",
+          "type": "org.acme.hr@1.0.0.NextOfKin",
+        },
+        "numDependents": {
+          "name": "numDependents",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "officeAddress": {
+          "name": "officeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "retired": {
+          "name": "retired",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "salary": {
+          "name": "salary",
+          "range": [
+            1,
+            10,
+          ],
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "ssn": {
+          "default": "000-00-0000",
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "ssn",
+          "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
+          "scalarType": "org.acme.hr.base@1.0.0.SSN",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.EmployeeDirectory": {
+      "key": {
+        "metadata": {
+          "category": [
+            {
+              "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+            },
+          ],
+        },
+        "type": "org.acme.hr.base@1.0.0.SSN",
+      },
+      "name": {
+        "localName": "EmployeeDirectory",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "org.acme.hr@1.0.0.Employee",
+      },
+    },
+    "org.acme.hr@1.0.0.EmployeeLoginTimes": {
+      "key": {
+        "type": "String",
+      },
+      "metadata": {
+        "decorated": null,
+      },
+      "name": {
+        "localName": "EmployeeLoginTimes",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "org.acme.hr.base@1.0.0.Time",
+      },
+    },
+    "org.acme.hr@1.0.0.EmployeeProfiles": {
+      "key": {
+        "type": "String",
+      },
+      "name": {
+        "localName": "EmployeeProfiles",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "metadata": {
+          "category": [
+            {
+              "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+            },
+          ],
+        },
+        "type": "concerto@1.0.0.Concept",
+      },
+    },
+    "org.acme.hr@1.0.0.EmployeeSocialSecurityNumbers": {
+      "key": {
+        "type": "String",
+      },
+      "metadata": {
+        "category": [
+          {
+            "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+          },
+        ],
+      },
+      "name": {
+        "localName": "EmployeeSocialSecurityNumbers",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "org.acme.hr.base@1.0.0.SSN",
+      },
+    },
+    "org.acme.hr@1.0.0.Equipment": {
+      "isAbstract": true,
+      "metadata": {
+        "resource": null,
+      },
+      "name": {
+        "localName": "Equipment",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "serialNumber": {
+          "isIdentifier": true,
+          "name": "serialNumber",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.Info": {
+      "name": {
+        "localName": "Info",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "name": {
+          "metadata": {
+            "pii": [
+              false,
+              {
+                "type": "org.acme.hr@1.0.0.Category",
+              },
+            ],
+          },
+          "name": "name",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.KinName": {
+      "metadata": {
+        "category": [
+          {
+            "type": "org.acme.hr.base@1.0.0.GeneralCategory",
+          },
+        ],
+      },
+      "name": {
+        "localName": "KinName",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "StringScalar",
+    },
+    "org.acme.hr@1.0.0.KinTelephone": {
+      "name": {
+        "localName": "KinTelephone",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "StringScalar",
+    },
+    "org.acme.hr@1.0.0.Laptop": {
+      "extends": [
+        "org.acme.hr@1.0.0.Equipment",
+      ],
+      "name": {
+        "localName": "Laptop",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "make": {
+          "name": "make",
+          "type": "org.acme.hr@1.0.0.LaptopMake",
+        },
+        "serialNumber": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Equipment",
+          "isIdentifier": true,
+          "name": "serialNumber",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.LaptopMake": {
+      "metadata": {
+        "test": [
+          "one",
+        ],
+      },
+      "name": {
+        "localName": "LaptopMake",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "EnumDeclaration",
+      "values": {
+        "Apple": {},
+        "Microsoft": {},
+      },
+    },
+    "org.acme.hr@1.0.0.Manager": {
+      "extends": [
+        "org.acme.hr@1.0.0.Employee",
+        "org.acme.hr@1.0.0.Person",
+      ],
+      "name": {
+        "localName": "Manager",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "companyAssets": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "isArray": true,
+          "name": "companyAssets",
+          "type": "org.acme.hr@1.0.0.Equipment",
+        },
+        "department": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "department",
+          "type": "org.acme.hr@1.0.0.Department",
+        },
+        "dob": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "dob",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "email": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isIdentifier": true,
+          "length": [
+            0,
+            254,
+          ],
+          "name": "email",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "employeeId": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "employeeId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "firstName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "height": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "height",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "homeAddress": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "homeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "lastName": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "manager": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "isOptional": true,
+          "isRelationship": true,
+          "name": "manager",
+          "type": "org.acme.hr@1.0.0.Manager",
+        },
+        "middleNames": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "isOptional": true,
+          "name": "middleNames",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "nextOfKin": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "nextOfKin",
+          "type": "org.acme.hr@1.0.0.NextOfKin",
+        },
+        "numDependents": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "numDependents",
+          "scalarType": "Integer",
+          "type": "Integer",
+        },
+        "officeAddress": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "officeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "reports": {
+          "isArray": true,
+          "isOptional": true,
+          "isRelationship": true,
+          "name": "reports",
+          "type": "org.acme.hr@1.0.0.Person",
+        },
+        "retired": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "retired",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "salary": {
+          "inheritedFrom": "org.acme.hr@1.0.0.Employee",
+          "name": "salary",
+          "range": [
+            1,
+            10,
+          ],
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "ssn": {
+          "default": "000-00-0000",
+          "inheritedFrom": "org.acme.hr@1.0.0.Person",
+          "name": "ssn",
+          "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
+          "scalarType": "org.acme.hr.base@1.0.0.SSN",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.NextOfKin": {
+      "key": {
+        "type": "org.acme.hr@1.0.0.KinName",
+      },
+      "name": {
+        "localName": "NextOfKin",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "org.acme.hr@1.0.0.KinTelephone",
+      },
+    },
+    "org.acme.hr@1.0.0.Onboarded": {
+      "extends": [
+        "org.acme.hr@1.0.0.CompanyEvent",
+      ],
+      "name": {
+        "localName": "Onboarded",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "employee": {
+          "isRelationship": true,
+          "name": "employee",
+          "type": "org.acme.hr@1.0.0.Employee",
+        },
+      },
+      "prototype": "EventDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.Person": {
+      "isAbstract": true,
+      "metadata": {
+        "resource": null,
+      },
+      "name": {
+        "localName": "Person",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "dob": {
+          "name": "dob",
+          "scalarType": "DateTime",
+          "type": "DateTime",
+        },
+        "email": {
+          "isIdentifier": true,
+          "length": [
+            0,
+            254,
+          ],
+          "name": "email",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "firstName": {
+          "name": "firstName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "height": {
+          "name": "height",
+          "scalarType": "Double",
+          "type": "Double",
+        },
+        "homeAddress": {
+          "name": "homeAddress",
+          "type": "org.acme.hr.base@1.0.0.Address",
+        },
+        "lastName": {
+          "name": "lastName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "middleNames": {
+          "isOptional": true,
+          "name": "middleNames",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "nextOfKin": {
+          "name": "nextOfKin",
+          "type": "org.acme.hr@1.0.0.NextOfKin",
+        },
+        "ssn": {
+          "default": "000-00-0000",
+          "name": "ssn",
+          "regex": "/(\\d{3}-\\d{2}-\\d{4})+/",
+          "scalarType": "org.acme.hr.base@1.0.0.SSN",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "org.acme.hr@1.0.0.pii": {
+      "extends": [
+        "concerto.decorator@1.0.0.Decorator",
+      ],
+      "metadata": {
+        "example": [
+          "@pii(true, GeneralCategory)",
+        ],
+        "usedBy": [
+          "Everyone",
+        ],
+      },
+      "name": {
+        "localName": "pii",
+        "namespace": "org.acme.hr",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "category": {
+          "name": "category",
+          "type": "org.acme.hr@1.0.0.Category",
+        },
+        "isPii": {
+          "name": "isPii",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.acme@1.2.3.SampleModel": {
+      "name": {
+        "localName": "SampleModel",
+        "namespace": "org.acme",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "stringLengthWithRegex": {
+          "length": [
+            1,
+            10,
+          ],
+          "name": "stringLengthWithRegex",
+          "regex": "/^[^?\\/:<>|]*$/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringWithMaxLength": {
+          "length": [
+            null,
+            10,
+          ],
+          "name": "stringWithMaxLength",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringWithMinLength": {
+          "length": [
+            1,
+            null,
+          ],
+          "name": "stringWithMinLength",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "stringWithSameMinMaxLength": {
+          "length": [
+            10,
+            10,
+          ],
+          "name": "stringWithSameMinMaxLength",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
+    "org.agreement@1.2.3.AgreementBase": {
+      "name": {
+        "localName": "AgreementBase",
+        "namespace": "org.agreement",
+        "version": "1.2.3",
+      },
+      "properties": {
+        "agreementType": {
+          "name": "agreementType",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "externalId": {
+          "name": "externalId",
+          "regex": "/^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "externalSource": {
+          "name": "externalSource",
+          "regex": "/^([^?\\/:<>|+=@-][^?\\/:<>|]*)?$/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "name": {
+          "name": "name",
+          "regex": "/^[^?\\/:<>|]*$/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "requestor": {
+          "name": "requestor",
+          "regex": "/^[^\\<\\>]*$/",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "value": {
+          "isOptional": true,
+          "metadata": {
+            "DotNetType": [
+              "decimal",
+            ],
+          },
+          "name": "value",
+          "scalarType": "Double",
+          "type": "Double",
         },
       },
       "type": "ConceptDeclaration",
@@ -622,6 +2396,1532 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
       "type": "ConceptDeclaration",
     },
+    "xx.yy.zz@1.0.0.AXZCOM": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeComment",
+        "xx.yy.zz@1.0.0.SomeRecord",
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZCOM",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "comment": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
+          "name": "comment",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZDS1": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZDS1",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "axyAddress": {
+          "name": "axyAddress",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "axyName": {
+          "name": "axyName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZDS2": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZDS2",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "clientName": {
+          "name": "clientName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "estimateDescription": {
+          "name": "estimateDescription",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "extraDmxxs": {
+          "isArray": true,
+          "name": "extraDmxxs",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "targetDmxx": {
+          "name": "targetDmxx",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZDS3": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZDS3",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "prxOneName": {
+          "name": "prxOneName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prxTwoName": {
+          "name": "prxTwoName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZDS4": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZDS4",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "bxberCode": {
+          "name": "bxberCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "bxberExtension": {
+          "name": "bxberExtension",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "bxberName": {
+          "name": "bxberName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "bxberTelephone": {
+          "name": "bxberTelephone",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZHDR": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomePreviousSssModifier",
+        "xx.yy.zz@1.0.0.SomeRecord",
+        "xx.yy.zz@1.0.0.SomeModifier",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZHDR",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "billWeekStartDay": {
+          "name": "billWeekStartDay",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "cashOrTrade": {
+          "name": "cashOrTrade",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "clientCode": {
+          "name": "clientCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "cn": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "cn",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "dt": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "dt",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "endDate": {
+          "name": "endDate",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "estimateNumber": {
+          "name": "estimateNumber",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "mdaCode": {
+          "name": "mdaCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "originalOrderNumber": {
+          "name": "originalOrderNumber",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "previousSssCallLetters": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomePreviousSssModifier",
+          "name": "previousSssCallLetters",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prxOneCode": {
+          "name": "prxOneCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prxTwoCode": {
+          "name": "prxTwoCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "revisionNumber": {
+          "name": "revisionNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "routingCode": {
+          "name": "routingCode",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "rts": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "rts",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "scheduleStartDate": {
+          "name": "scheduleStartDate",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "scheduleType": {
+          "name": "scheduleType",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sss": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "sss",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "startDate": {
+          "name": "startDate",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "tpar1": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "tpar1",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "tpar2": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "tpar2",
+          "type": "xx.yy.zz@1.0.0.Par2",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "version": {
+          "name": "version",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZHIA": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZHIA",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "dates": {
+          "isArray": true,
+          "name": "dates",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZSTD": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeComment",
+        "xx.yy.zz@1.0.0.SomeRecord",
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZSTD",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "comment": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
+          "name": "comment",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AXZTLR": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "AXZTLR",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "numberOfRecords": {
+          "name": "numberOfRecords",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "totalOrderedDollars": {
+          "name": "totalOrderedDollars",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "totalOrderedSpx": {
+          "name": "totalOrderedSpx",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.AgencyOrder": {
+      "extends": [
+        "xx.yy.zz@1.0.0.Some",
+      ],
+      "name": {
+        "localName": "AgencyOrder",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "agycoms": {
+          "isArray": true,
+          "name": "agycoms",
+          "type": "xx.yy.zz@1.0.0.AXZCOM",
+        },
+        "agyds1": {
+          "name": "agyds1",
+          "type": "xx.yy.zz@1.0.0.AXZDS1",
+        },
+        "agyds2": {
+          "name": "agyds2",
+          "type": "xx.yy.zz@1.0.0.AXZDS2",
+        },
+        "agyds3": {
+          "name": "agyds3",
+          "type": "xx.yy.zz@1.0.0.AXZDS3",
+        },
+        "agyds4": {
+          "name": "agyds4",
+          "type": "xx.yy.zz@1.0.0.AXZDS4",
+        },
+        "agyhdr": {
+          "name": "agyhdr",
+          "type": "xx.yy.zz@1.0.0.AXZHDR",
+        },
+        "agyhias": {
+          "isArray": true,
+          "name": "agyhias",
+          "type": "xx.yy.zz@1.0.0.AXZHIA",
+        },
+        "agystds": {
+          "isArray": true,
+          "name": "agystds",
+          "type": "xx.yy.zz@1.0.0.AXZSTD",
+        },
+        "agytlr": {
+          "name": "agytlr",
+          "type": "xx.yy.zz@1.0.0.AXZTLR",
+        },
+        "bxblines": {
+          "isArray": true,
+          "name": "bxblines",
+          "type": "xx.yy.zz@1.0.0.BxblineTransmission",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.Some",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BXBCOM": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeComment",
+        "xx.yy.zz@1.0.0.SomeRecord",
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "BXBCOM",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "comment": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeComment",
+          "name": "comment",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BXBDEM": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "BXBDEM",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "demos": {
+          "isArray": true,
+          "name": "demos",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BXBDTL": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "BXBDTL",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "cost": {
+          "name": "cost",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "numberOfWeeks": {
+          "name": "numberOfWeeks",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "spxPerWeek": {
+          "name": "spxPerWeek",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "startDate": {
+          "name": "startDate",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BXBHDR": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeBxbRecord",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "BXBHDR",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "cost": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "cost",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "costQualifier": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "costQualifier",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "endTime": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "endTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "lengthInUnits": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "lengthInUnits",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "makegoodForBxbline": {
+          "name": "makegoodForBxbline",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "pppName": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "pppName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prxOneTimeShare": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "prxOneTimeShare",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "sbx": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "sbx",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sbxStartDay": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "sbxStartDay",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "scheduleType": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "scheduleType",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sequenceNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "sequenceNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "startTime": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "startTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "totalspxyLength": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeBxbRecord",
+          "name": "totalspxyLength",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BXBORB": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "BXBORB",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "endTime": {
+          "name": "endTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "pppName": {
+          "name": "pppName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sbx": {
+          "name": "sbx",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sbxStartDay": {
+          "name": "sbxStartDay",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "startTime": {
+          "name": "startTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BaseTransaction": {
+      "name": {
+        "localName": "BaseTransaction",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.BxblineTransmission": {
+      "name": {
+        "localName": "BxblineTransmission",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "bxbcoms": {
+          "isArray": true,
+          "name": "bxbcoms",
+          "type": "xx.yy.zz@1.0.0.BXBCOM",
+        },
+        "bxbdem": {
+          "name": "bxbdem",
+          "type": "xx.yy.zz@1.0.0.BXBDEM",
+        },
+        "bxbdtls": {
+          "isArray": true,
+          "name": "bxbdtls",
+          "type": "xx.yy.zz@1.0.0.BXBDTL",
+        },
+        "bxbhdr": {
+          "name": "bxbhdr",
+          "type": "xx.yy.zz@1.0.0.BXBHDR",
+        },
+        "bxborbs": {
+          "isArray": true,
+          "name": "bxborbs",
+          "type": "xx.yy.zz@1.0.0.BXBORB",
+        },
+        "uuid": {
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.Par1": {
+      "name": {
+        "localName": "Par1",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "bool1": {
+          "name": "bool1",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "bool2": {
+          "name": "bool2",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "bool3": {
+          "name": "bool3",
+          "scalarType": "Boolean",
+          "type": "Boolean",
+        },
+        "code": {
+          "isIdentifier": true,
+          "name": "code",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "mmm": {
+          "name": "mmm",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "name": {
+          "name": "name",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prefix": {
+          "name": "prefix",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.Par2": {
+      "name": {
+        "localName": "Par2",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "address": {
+          "name": "address",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "isIdentifier": true,
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "name": {
+          "name": "name",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.Some": {
+      "name": {
+        "localName": "Some",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "uuid": {
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeBxbRecord": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "SomeBxbRecord",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "cost": {
+          "name": "cost",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "costQualifier": {
+          "name": "costQualifier",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "endTime": {
+          "name": "endTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "lengthInUnits": {
+          "name": "lengthInUnits",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "pppName": {
+          "name": "pppName",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "prxOneTimeShare": {
+          "name": "prxOneTimeShare",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "sbx": {
+          "name": "sbx",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sbxStartDay": {
+          "name": "sbxStartDay",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "scheduleType": {
+          "name": "scheduleType",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sequenceNumber": {
+          "name": "sequenceNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "startTime": {
+          "name": "startTime",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "totalspxyLength": {
+          "name": "totalspxyLength",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeComment": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeMultiple",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "SomeComment",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "comment": {
+          "name": "comment",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "continuation": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeMultiple",
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeModifier": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "SomeModifier",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "cn": {
+          "name": "cn",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "dt": {
+          "name": "dt",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "rts": {
+          "name": "rts",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sss": {
+          "name": "sss",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "tpar1": {
+          "name": "tpar1",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "tpar2": {
+          "name": "tpar2",
+          "type": "xx.yy.zz@1.0.0.Par2",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeMultiple": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "SomeMultiple",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "continuation": {
+          "name": "continuation",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomePreviousSssModifier": {
+      "extends": [
+        "xx.yy.zz@1.0.0.SomeModifier",
+        "xx.yy.zz@1.0.0.SomeRecord",
+      ],
+      "name": {
+        "localName": "SomePreviousSssModifier",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "cn": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "cn",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "dt": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "dt",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "id": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "previousSssCallLetters": {
+          "name": "previousSssCallLetters",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "rts": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "rts",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "sss": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "sss",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "tpar1": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "tpar1",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "tpar2": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeModifier",
+          "name": "tpar2",
+          "type": "xx.yy.zz@1.0.0.Par2",
+        },
+        "uuid": {
+          "inheritedFrom": "xx.yy.zz@1.0.0.SomeRecord",
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeRecord": {
+      "name": {
+        "localName": "SomeRecord",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "id": {
+          "name": "id",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "orderNumber": {
+          "name": "orderNumber",
+          "scalarType": "Long",
+          "type": "Long",
+        },
+        "uuid": {
+          "isIdentifier": true,
+          "name": "uuid",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeSss": {
+      "name": {
+        "localName": "SomeSss",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "bb": {
+          "isRelationship": true,
+          "name": "bb",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "mmm": {
+          "name": "mmm",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "rep2": {
+          "isRelationship": true,
+          "name": "rep2",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "sss": {
+          "isIdentifier": true,
+          "name": "sss",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "ParticipantDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.SomeTransmission": {
+      "name": {
+        "localName": "SomeTransmission",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "aa": {
+          "isRelationship": true,
+          "name": "aa",
+          "type": "xx.yy.zz@1.0.0.Par2",
+        },
+        "bb": {
+          "isRelationship": true,
+          "name": "bb",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "messages": {
+          "isArray": true,
+          "name": "messages",
+          "type": "xx.yy.zz@1.0.0.SomeTransmission",
+        },
+        "orderNumber": {
+          "isIdentifier": true,
+          "name": "orderNumber",
+          "scalarType": "String",
+          "type": "String",
+        },
+      },
+      "prototype": "AssetDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.UpdateOrderEvent": {
+      "name": {
+        "localName": "UpdateOrderEvent",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "transmission": {
+          "isRelationship": true,
+          "name": "transmission",
+          "type": "xx.yy.zz@1.0.0.SomeTransmission",
+        },
+      },
+      "prototype": "EventDeclaration",
+      "type": "ConceptDeclaration",
+    },
+    "xx.yy.zz@1.0.0.UpdateOrderTransaction": {
+      "extends": [
+        "xx.yy.zz@1.0.0.BaseTransaction",
+      ],
+      "name": {
+        "localName": "UpdateOrderTransaction",
+        "namespace": "xx.yy.zz",
+        "version": "1.0.0",
+      },
+      "properties": {
+        "$timestamp": {
+          "name": "$timestamp",
+          "type": "DateTime",
+        },
+        "aa": {
+          "isRelationship": true,
+          "name": "aa",
+          "type": "xx.yy.zz@1.0.0.Par2",
+        },
+        "bb": {
+          "isRelationship": true,
+          "name": "bb",
+          "type": "xx.yy.zz@1.0.0.Par1",
+        },
+        "orderId": {
+          "name": "orderId",
+          "scalarType": "String",
+          "type": "String",
+        },
+        "transmission": {
+          "name": "transmission",
+          "type": "xx.yy.zz@1.0.0.SomeTransmission",
+        },
+      },
+      "prototype": "TransactionDeclaration",
+      "type": "ConceptDeclaration",
+    },
   },
   "metadata": {
     "concertinoVersion": "0.1.0-alpha.3",
@@ -661,6 +3961,84 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         ],
         "sourceUri": undefined,
       },
+      "org.acme.base@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "org.acme.hr.base@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorString",
+                "value": "hr base namespace",
+              },
+            ],
+            "name": "description",
+          },
+        ],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "org.acme.hr@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [
+          {
+            "$class": "concerto.metamodel@1.0.0.Decorator",
+            "arguments": [
+              {
+                "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
+                "isArray": false,
+                "type": {
+                  "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                  "name": "GeneralCategory",
+                  "namespace": "org.acme.hr.base@1.0.0",
+                },
+              },
+            ],
+            "name": "category",
+          },
+        ],
+        "imports": [
+          {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "org.acme.hr.base@1.0.0",
+            "types": [
+              "Address",
+              "State",
+              "SSN",
+              "Time",
+              "EmployeeTShirtSizes",
+              "Level",
+              "GeneralCategory",
+            ],
+          },
+          {
+            "$class": "concerto.metamodel@1.0.0.ImportTypes",
+            "namespace": "concerto.decorator@1.0.0",
+            "types": [
+              "Decorator",
+            ],
+          },
+        ],
+        "sourceUri": undefined,
+      },
+      "org.acme@1.2.3": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "org.agreement@1.2.3": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
       "org.example.complex@1.0.0": {
         "concertoVersion": undefined,
         "decorators": [],
@@ -676,6 +4054,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "sourceUri": undefined,
       },
       "org.example.sample@1.0.0": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "xx.yy.zz@1.0.0": {
         "concertoVersion": undefined,
         "decorators": [],
         "imports": [],

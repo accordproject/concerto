@@ -35,8 +35,7 @@ export interface ConcertinoOptions {
   version?: string;
 }
 
-const schema = JSON.parse(readFileSync(join(__dirname, 'concertino.schema.json'), 'utf-8'));
-const ajv = new Ajv();
+const schema = JSON.parse(readFileSync(join(__dirname, 'spec/concertino.schema.json'), 'utf-8'));
 
 /**
  * Concertino utility class for converting between Concerto metamodel and Concertino format.
@@ -44,6 +43,7 @@ const ajv = new Ajv();
 export class ConcertinoConverter {
     private options: ConcertinoOptions;
     private validate: ValidateFunction;
+    private ajv: Ajv;
 
     /**
      * Creates a new instance of ConcertinoConverter.
@@ -54,7 +54,8 @@ export class ConcertinoConverter {
             version: '0.1.0-alpha.3',
             ...options
         };
-        this.validate = ajv.compile(schema);
+        this.ajv = new Ajv();
+        this.validate = this.ajv.compile(schema);
     }
 
     /**
@@ -79,9 +80,12 @@ export class ConcertinoConverter {
         return convertToMetamodel(concertino);
     }
 
-
-    public isValidateStructure(concertino: Concertino): boolean {
+    public isValid(concertino: Concertino): boolean {
         return this.validate(concertino);
+    }
+
+    public getValidationErrors() {
+        return this.validate.errors;
     }
 
 }

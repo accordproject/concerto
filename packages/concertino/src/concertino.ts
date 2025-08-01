@@ -108,7 +108,11 @@ function extractDecoratorsInfo(decorators: any[] = []): { vocabulary?: Vocabular
             metadata[decorator.name] = (decorator.arguments
                 ? decorator.arguments.map((arg: DecoratorLiteralUnion) => {
                     if ('type' in arg && arg.$class === 'concerto.metamodel@1.0.0.DecoratorTypeReference') {
-                        return { type: `${arg.type.namespace}.${arg.type.name}` };
+                        const result: {type: string, isArray?: boolean } = { type: `${arg.type.namespace}.${arg.type.name}` };
+                        if (arg.isArray){
+                            result.isArray = true;
+                        }
+                        return result;
                     } else if ('value' in arg) {
                         return arg.value;
                     }
@@ -160,6 +164,7 @@ export function determinePropertyType(property: PropertyUnion, { modelNamespace 
 
 /**
  * Extracts meta properties (regex, length, range, default) from a property or scalar declaration.
+ * Note: mutates propertyEntry
  * @param property The property or scalar declaration.
  * @param propertyEntry The target entry to mutate.
  */
@@ -169,17 +174,21 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
             if ('pattern' in property.validator && property.validator?.pattern) {
                 propertyEntry.regex = `/${property.validator?.pattern}/${property.validator?.flags}`;
             }
-            if ('lengthValidator' in property) {
-                propertyEntry.length = [property.lengthValidator?.minLength, property.lengthValidator?.maxLength];
-            }
         } else if (
             ['Integer', 'IntegerScalar', 'Long', 'LongScalar', 'Double', 'DoubleScalar'].includes(propertyEntry.type) &&
             'lower' in property.validator
         ) {
-            propertyEntry.range = [property.validator.lower, property.validator.upper];
+            const lower = property.validator.lower === undefined ? null : property.validator.lower;
+            const upper = property.validator.upper === undefined ? null : property.validator.upper;
+            propertyEntry.range = [lower, upper];
         }
     }
-    if ('defaultValue' in property && property.defaultValue !== undefined) {
+    if ('lengthValidator' in property && property.lengthValidator && ['String', 'StringScalar'].includes(propertyEntry.type)){
+        const min = property.lengthValidator.minLength === undefined ? null : property.lengthValidator.minLength;
+        const max = property.lengthValidator.maxLength === undefined ? null : property.lengthValidator.maxLength;
+        propertyEntry.length = [min, max];
+    }
+    if ('defaultValue' in property && property.defaultValue !== undefined && property.defaultValue !== null) {
         propertyEntry.default = property.defaultValue;
     }
 }
@@ -205,9 +214,9 @@ function transformProperties(
         if (primitiveTypes.has(propertyEntry.type)) {
             propertyEntry.scalarType = propertyEntry.type;
         }
-        if (property.isArray) propertyEntry.isArray = true;
-        if (property.isOptional) propertyEntry.isOptional = true;
-        if (property.$class.endsWith('RelationshipProperty')) propertyEntry.isRelationship = true;
+        if (property.isArray) {propertyEntry.isArray = true;}
+        if (property.isOptional) {propertyEntry.isOptional = true;}
+        if (property.$class.endsWith('RelationshipProperty')) {propertyEntry.isRelationship = true;}
         extractMetaProperties(property, propertyEntry);
         if (declaration.identified && 'name' in declaration.identified && property.name === declaration.identified.name) {
             propertyEntry.isIdentifier = true;
@@ -240,14 +249,14 @@ function mapKeyTypeToString(key: MapKeyTypeUnion, { modelNamespace }: { modelNam
 function mapValueTypeToObject(
     value: MapValueTypeUnion,
     { modelNamespace }: { modelNamespace: string }
-): { valueType: string; isRelationshipValue?: boolean } {
+): { type: string; isRelationship?: boolean } {
     let valueType = VALUE_TYPE_MAP[value.$class];
     if (!valueType && 'type' in value) {
         valueType = `${value.type.namespace || modelNamespace}.${value.type.name}`;
     }
-    const result: { valueType: string; isRelationshipValue?: boolean } = { valueType };
+    const result: { type: string; isRelationship?: boolean } = { type: valueType };
     if (value.$class.endsWith('RelationshipMapValueType')) {
-        result.isRelationshipValue = true;
+        result.isRelationship = true;
     }
     return result;
 }
@@ -261,8 +270,14 @@ function mapValueTypeToObject(
 function transformMapDeclaration(declaration: IMapDeclaration, context: { modelNamespace: string }): Declaration {
     return {
         type: 'MapDeclaration',
-        keyType: mapKeyTypeToString(declaration.key, context),
-        ...mapValueTypeToObject(declaration.value, context),
+        key: {
+            type: mapKeyTypeToString(declaration.key, context),
+            ...extractDecoratorsInfo(declaration.key.decorators),
+        },
+        value: {
+            ...mapValueTypeToObject(declaration.value, context),
+            ...extractDecoratorsInfo(declaration.value.decorators),
+        },
         ...extractDecoratorsInfo(declaration.decorators),
         name: createFullyQualifiedName(context.modelNamespace, declaration.name),
     };
@@ -409,7 +424,7 @@ function convertToConcertino(metamodel: IModels): Concertino {
     const concertino: Concertino = {
         declarations: {},
         metadata: {
-            concertinoVersion: '0.1.0-alpha.1',
+            concertinoVersion: '0.1.0-alpha.3',
             models: {},
         },
     };
@@ -457,10 +472,10 @@ function convertToConcertino(metamodel: IModels): Concertino {
                                 scalarType: value.type,
                                 type: scalarDecl.type.replace('Scalar', ''),
                             };
-                            if (scalarDecl.regex) newDecl.regex = scalarDecl.regex;
-                            if (scalarDecl.length) newDecl.length = scalarDecl.length;
-                            if (scalarDecl.range) newDecl.range = scalarDecl.range;
-                            if (scalarDecl.default) newDecl.default = scalarDecl.default;
+                            if (scalarDecl.regex) {newDecl.regex = scalarDecl.regex;}
+                            if (scalarDecl.length) {newDecl.length = scalarDecl.length;}
+                            if (scalarDecl.range) {newDecl.range = scalarDecl.range;}
+                            if (scalarDecl.default) {newDecl.default = scalarDecl.default;}
                             return [key, newDecl];
                         }
                     }

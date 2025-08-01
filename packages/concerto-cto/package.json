@@ -52,7 +52,7 @@
     "typescript": "5.7.2"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "3.11.0",
+    "@accordproject/concerto-metamodel": "3.12.3",
     "@accordproject/concerto-util": "3.22.0"
   },
   "browserslist": "> 0.25%, not dead",

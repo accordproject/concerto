@@ -17,6 +17,8 @@ import {
     IImport
 } from '@accordproject/concerto-types';
 
+// TODO generate these from the model-spec
+
 /**
  * Metadata for the Concertino format.
  */
@@ -108,10 +110,29 @@ export interface ScalarDeclaration {
   vocabulary?: Vocabulary;
   metadata?: MetadataMap;
   regex?: string; // For StringScalar
-  length?: [number | undefined, number | undefined]; // For StringScalar
-  range?: [number | undefined, number | undefined]; // For IntegerScalar, DoubleScalar, LongScalar
-  default?: string | number | boolean; // Default value for scalars
+  length?: [number | null , number | null]; // For String properties
+  range?: [number | null , number | null]; // Only for Integer, Double & Long types
+  default?: string | number | boolean | null; // Default value for scalars
   name?: FullyQualifiedName;
+}
+
+/**
+ * Represents a Key type in a MapDeclaration.
+ */
+export interface MapKey {
+  type: string; // e.g., "String", "DateTime"
+  vocabulary?: Vocabulary;
+  metadata?: MetadataMap;
+}
+
+/**
+ * Represents a Value type in a MapDeclaration.
+ */
+export interface MapValue {
+  type: string; // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
+  vocabulary?: Vocabulary;
+  metadata?: MetadataMap;
+  isRelationship?: boolean; // For relationship map values
 }
 
 /**
@@ -119,9 +140,8 @@ export interface ScalarDeclaration {
  */
 export interface MapDeclaration {
   type: 'MapDeclaration';
-  keyType: string; // e.g., "String", "DateTime"
-  valueType: string; // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
-  isRelationshipValue?: boolean; // For relationship map values
+  key: MapKey;
+  value: MapValue;
   vocabulary?: Vocabulary;
   metadata?: MetadataMap;
   name?: FullyQualifiedName;
@@ -176,7 +196,7 @@ export interface Property {
    * Metaproperties
    */
   regex?: string; // For String properties
-  length?: [number | undefined , number | undefined]; // For String properties
-  range?: [number | undefined , number | undefined]; // Only for Integer, Double & Long types
+  length?: [number | null , number | null]; // For String properties
+  range?: [number | null , number | null]; // Only for Integer, Double & Long types
   default?: string | number | boolean; // // Only for Integer, Double & Long types
 }

@@ -9,12 +9,15 @@ Concertino is a lightweight variant of the Concerto metamodel format, optimized 
 - **Denormalized Properties**: Inherited properties are fully denormalized with references to their source types
 - **Extended Inheritance Chain**: Concepts list their full inheritance chain, not just immediate parent
 - **Scalar Type Denormalization**: For convenience in client applications
+- **Strict Mode By Default**: Namespaces are always versioned.
 
 ## Lossless Conversion
 
 Concertino is designed for 100% lossless roundtrip conversion:
 
 Concerto (Metamodel) → Concertino → Concerto (Metamodel)
+
+Note that namespaces in the source Concerto model should be fully resolved (including for local type references).
 
 ## Installation
 
@@ -31,7 +34,7 @@ const { ConcertinoConverter } = require('@accordproject/concertino');
 
 // Create a converter with custom options
 const converter = new ConcertinoConverter({
-  version: '0.1.0-alpha.2' // Specify concertino version
+  version: '0.1.0-alpha.3' // Specify concertino version
 });
 
 // Convert from Concerto metamodel to Concertino
@@ -57,7 +60,3 @@ const metamodel = convertToMetamodel(concertino);
 ## File Size Reduction
 
 Basic testing with pretty-printed, uncompressed files shows a 70-80% reduction in file size without loss of expressiveness.
-
-## Note
-
-The Concertino format is compatible with the Concerto Modeling Language (CML, .cto files) via the Concerto CLI's `parse` and `print` commands.

@@ -189,12 +189,28 @@
         },
         "MapDeclaration": {
             "type": "object",
-            "required": ["type", "keyType", "valueType"],
+            "required": ["type", "key", "value"],
             "properties": {
                 "type": { "const": "MapDeclaration" },
-                "keyType": { "type": "string" },
-                "valueType": { "type": "string" },
-                "isRelationshipValue": { "type": "boolean" },
+                "key": {
+                    "type": "object",
+                    "required": ["type"],
+                    "properties": {
+                        "type": { "type": "string" },
+                        "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                        "metadata": { "$ref": "#/definitions/MetadataMap" }
+                    }
+                },
+                "value": {
+                    "type": "object",
+                    "required": ["type"],
+                    "properties": {
+                        "type": { "type": "string" },
+                        "vocabulary": { "$ref": "#/definitions/Vocabulary" },
+                        "metadata": { "$ref": "#/definitions/MetadataMap" },
+                        "isRelationship": { "type": "boolean" }
+                    }
+                },
                 "vocabulary": { "$ref": "#/definitions/Vocabulary" },
                 "metadata": { "$ref": "#/definitions/MetadataMap" },
                 "name": { "$ref": "#/definitions/FullyQualifiedName" }

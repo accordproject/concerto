@@ -44,12 +44,18 @@ describe('concertino roundtripping (sample models)', () => {
     modelManager.fromAst({ models });
     const ast: IModels = modelManager.getAst(true);
 
+    ast.models = ast.models.map(model => {
+        return modelManager.resolveMetaModel(model) as IModel;
+    });
+
     const converter = new ConcertinoConverter();
     const concertino = converter.fromConcertoMetamodel(ast);
     const metamodel = converter.toConcertoMetamodel(concertino);
 
     it('should produce valid concertino', () => {
-        expect(converter.isValidateStructure(concertino)).toBe(true);
+        const isValid = converter.isValid(concertino);
+        expect(converter.getValidationErrors()).toBeNull();
+        expect(isValid).toBe(true);
         expect(concertino).toMatchSnapshot();
     });
 
@@ -74,7 +80,7 @@ describe('concertino edge cases and error handling', () => {
         };
         const concertino = converter.fromConcertoMetamodel(ast);
         const metamodel = converter.toConcertoMetamodel(concertino);
-        expect(converter.isValidateStructure(concertino)).toBe(true);
+        expect(converter.isValid(concertino)).toBe(true);
         expect(concertino).toMatchSnapshot();
         expect(metamodel).toStrictEqual(ast);
     });

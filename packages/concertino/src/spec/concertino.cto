@@ -1,4 +1,4 @@
-namespace concertino.metamodel@0.1.0-alpha.2
+namespace concertino.metamodel@0.1.0-alpha.3
 
 import concerto.metamodel@1.0.0.{Decorator, Import}
 
@@ -16,11 +16,18 @@ concept Concertino {
   o DeclarationMap declarations
 }
 
+/** Common scalar definitions */
+scalar FullyQualifiedName extends String
+scalar Identifier extends String regex=/^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u
+scalar Namespace extends String
+scalar SemanticVersion extends String
+scalar URI extends String
+
 /**
  * Represents a map of declarations.
  */
 map DeclarationMap {
-  o String
+  o FullyQualifiedName
   o Declaration
 }
 
@@ -28,7 +35,7 @@ map DeclarationMap {
  * Metadata for the Concertino format.
  */
 concept Metadata {
-  o String concertinoVersion
+  o SemanticVersion concertinoVersion
   o ModelMetadata[] models
 }
 
@@ -36,9 +43,9 @@ concept Metadata {
  * Represents metadata for a model.
  */
 concept ModelMetadata {
-  o String namespace
-  o String concertoVersion optional
-  o String sourceUri optional
+  o Namespace namespace
+  o SemanticVersion concertoVersion optional
+  o URI sourceUri optional
   o Import[] imports optional
   o Decorator[] decorators optional
 }
@@ -46,17 +53,17 @@ concept ModelMetadata {
 /**
  * Represents a unique identifier for a declaration.
  */
-concept FullyQualifiedName {
-  o String namespace
-  o String localName
-  o String version
+concept ParsedFullyQualifiedName {
+  o Namespace namespace
+  o Identifier localName
+  o SemanticVersion version
 }
 
 /**
  * Represents a generic declaration.
  */
 abstract concept Declaration {
-  o String name
+  o FullyQualifiedName name
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }
@@ -66,9 +73,9 @@ abstract concept Declaration {
  */
 concept ConceptDeclaration extends Declaration {
   o Property[] properties
-  o String[] extends optional
+  o FullyQualifiedName[] extends optional
   o Boolean isAbstract optional
-  o Prototype prototype optional
+  o Prototype prototype optional // only specified, if the concept uses a prototype
 }
 
 /**
@@ -95,22 +102,22 @@ abstract concept ScalarDeclaration extends Declaration {}
 
 concept StringScalarDeclaration extends ScalarDeclaration {
   o String regex optional // For StringScalar
-  o Integer[] length optional length=2 // For StringScalar
+  o Integer[] length optional // For StringScalar
   o String default optional // Default value for StringScalar
 }
 concept IntegerScalarDeclaration extends ScalarDeclaration {
-  o Integer[] range optional length=2  // For IntegerScalar
+  o Integer[] range optional // For IntegerScalar
   o Integer default optional // Default value for IntegerScalar
 }
 concept BooleanScalarDeclaration extends ScalarDeclaration {
   o Boolean default optional // Default value for BooleanScalar
 }
 concept DoubleScalarDeclaration extends ScalarDeclaration {
-  o Double[] range optional length=2  // For DoubleScalar
+  o Double[] range optional // For DoubleScalar
   o Double default optional // Default value for DoubleScalar
 }
 concept LongScalarDeclaration extends ScalarDeclaration {
-  o Long[] range optional length=2  // For LongScalar
+  o Long[] range optional // For LongScalar
   o Long default optional // Default value for LongScalar
 }
 concept DateTimeScalarDeclaration extends ScalarDeclaration {
@@ -121,22 +128,43 @@ concept DateTimeScalarDeclaration extends ScalarDeclaration {
  * Represents a MapDeclaration.
  */
 concept MapDeclaration extends Declaration {
-  o String keyType // e.g., "String", "DateTime"
-  o String valueType // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
-  o Boolean isRelationshipValue optional // For relationship map values
+  o MapKey keyType // e.g., "String", "DateTime"
+  o MapValue valueType // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
+}
+
+/**
+ * Represents a key in a MapDeclaration.
+ */
+concept MapKey {
+  o String type // Fully qualified type name or primitive type
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a value in a MapDeclaration.
+ */
+concept MapValue {
+  o String type // Fully qualified type name or primitive type
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+  o Boolean isRelationship optional // For relationship map values
+
 }
 
 /**
  * Represents a property in a ConceptDeclaration.
  */
 abstract concept Property {
-  o String name
+  o Identifier name
   o String type // Fully qualified type name or primitive type
   o Boolean isArray optional
   o Boolean isOptional optional
   o Boolean isRelationship optional
   o Boolean isIdentifier optional
-  o String inheritedFrom optional // For inherited properties
+  o Identifier inheritedFrom optional // For inherited properties
+  o Boolean isCircular optional
+  o Boolean isEnum optional
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }
@@ -147,18 +175,18 @@ concept StringProperty extends Property {
   o String default optional // Default value for StringProperty
 }
 concept IntegerProperty extends Property {
-  o Integer[] range optional length=2 // For Integer properties
+  o Integer[] range optional // For Integer properties
   o Integer default optional // Default value for IntegerProperty
 }
 concept BooleanProperty extends Property {
   o Boolean default optional // Default value for BooleanProperty
 }
 concept DoubleProperty extends Property {
-  o Double[] range optional length=2 // For Double properties
+  o Double[] range optional // For Double properties
   o Double default optional // Default value for DoubleProperty
 }
 concept LongProperty extends Property {
-  o Long[] range optional length=2 // For Long properties
+  o Long[] range optional // For Long properties
   o Long default optional // Default value for LongProperty
 }
 concept DateTimeProperty extends Property {
@@ -169,7 +197,7 @@ concept DateTimeProperty extends Property {
  * Represents an enum value in an EnumDeclaration.
  */
 concept EnumValue {
-  o String name
+  o Identifier name
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }
@@ -179,7 +207,16 @@ concept EnumValue {
  */
 concept Vocabulary {
   o String label optional
+  o PathTerms path
   o AdditionalTermMap additionalTerms optional
+}
+
+/**
+ * A map from parent identifiers to localized terms (labels)
+ */
+map PathTerms {
+  o String
+  o String
 }
 
 /**
@@ -187,7 +224,7 @@ concept Vocabulary {
  */
 map AdditionalTermMap {
   o String
-  o String
+  o String // optional
 }
 
 /**

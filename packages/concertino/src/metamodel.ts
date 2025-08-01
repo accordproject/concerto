@@ -14,11 +14,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ModelUtil } from '@accordproject/concerto-core';
-import { Concertino, Declaration, Property, EnumDeclaration, ConceptDeclaration, MapDeclaration, ScalarDeclaration } from './types';
+import { Concertino, Declaration, Property, EnumDeclaration, ConceptDeclaration, MapDeclaration, ScalarDeclaration, MapValue } from './types';
 import {
     IBooleanProperty,
     IBooleanScalar,
     IConceptDeclaration,
+    IDateTimeScalar,
     IDecorator,
     IDoubleDomainValidator,
     IDoubleProperty,
@@ -33,14 +34,17 @@ import {
     ILongProperty,
     ILongScalar,
     IMapDeclaration,
+    IMapKeyType,
     IModel,
     IModels,
+    IObjectMapKeyType,
     IObjectMapValueType,
     IObjectProperty,
     IStringLengthValidator,
     IStringProperty,
     IStringRegexValidator,
     IStringScalar,
+    MapKeyTypeUnion,
     MapValueTypeUnion,
     PropertyUnion,
     ScalarDeclarationUnion,
@@ -148,7 +152,7 @@ function decoratorsFromVocabularyAndMetadata(vocabulary?: Vocabulary, metadata?:
                     } else if (typeof arg === 'object' && arg !== null && 'type' in arg) {
                         return {
                             '$class': 'concerto.metamodel@1.0.0.DecoratorTypeReference',
-                            'isArray': false,
+                            'isArray': (arg as { isArray?: boolean}).isArray || false,
                             'type': {
                                 '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
                                 'name': ModelUtil.getShortName((arg as { type: string}).type),
@@ -172,11 +176,10 @@ function decoratorsFromVocabularyAndMetadata(vocabulary?: Vocabulary, metadata?:
 
 /**
  * Converts a value type string and relationship flag into a Concerto MapValueTypeUnion.
- * @param {string} valueType - The value type string.
- * @param {boolean} [isRelationshipValue] - Whether the value is a relationship.
+ * @param {string} value - The value type string.
  * @returns {MapValueTypeUnion} The Concerto map value type.
  */
-function mapValueType(valueType: string, isRelationshipValue?: boolean): MapValueTypeUnion {
+function mapValueType(value: MapValue): MapValueTypeUnion {
     const valueTypeMap: Record<string, string> = {
         String: 'concerto.metamodel@1.0.0.StringMapValueType',
         Integer: 'concerto.metamodel@1.0.0.IntegerMapValueType',
@@ -186,19 +189,27 @@ function mapValueType(valueType: string, isRelationshipValue?: boolean): MapValu
         DateTime: 'concerto.metamodel@1.0.0.DateTimeMapValueType',
     };
 
-    const valueClass = isRelationshipValue
+    const valueClass = value.isRelationship
         ? 'concerto.metamodel@1.0.0.RelationshipMapValueType'
-        : valueTypeMap[valueType] || 'concerto.metamodel@1.0.0.ObjectMapValueType';
+        : (valueTypeMap[value.type] || 'concerto.metamodel@1.0.0.ObjectMapValueType');
 
 
     const result: MapValueTypeUnion = { $class: valueClass };
 
     if (['concerto.metamodel@1.0.0.RelationshipMapValueType', 'concerto.metamodel@1.0.0.ObjectMapValueType'].includes(valueClass)) {
-        const typeName = ModelUtil.getShortName(valueType);
+        const typeName = ModelUtil.getShortName(value.type);
+        const namespace = ModelUtil.getNamespace(value.type);
+
         (result as IObjectMapValueType).type = {
             '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
-            'name': typeName,
+            name: typeName,
+            namespace
         };
+    }
+
+    const decorators = decoratorsFromVocabularyAndMetadata(value.vocabulary, value.metadata);
+    if (decorators !== undefined) {
+        result.decorators = decorators;
     }
 
     return result;
@@ -206,27 +217,35 @@ function mapValueType(valueType: string, isRelationshipValue?: boolean): MapValu
 
 /**
  * Converts a key type string into a Concerto map key type object.
- * @param {string} keyType - The key type string.
+ * @param {string} key - The key type.
  * @returns {object} The Concerto map key type.
  */
-function mapKeyType(keyType: string): any {
+function mapKeyType(key: MapValue): MapKeyTypeUnion {
     const keyTypeMap: Record<string, string> = {
         String: 'concerto.metamodel@1.0.0.StringMapKeyType',
         DateTime: 'concerto.metamodel@1.0.0.DateTimeMapKeyType',
     };
-    if (keyTypeMap[keyType]){
-        return { $class: keyTypeMap[keyType] };
-    }
-    const typeName = ModelUtil.getShortName(keyType);
-    const namespace = ModelUtil.getNamespace(keyType);
-    return {
-        $class:  'concerto.metamodel@1.0.0.ObjectMapKeyType',
-        type:  {
+    const result: IMapKeyType = {
+        $class: keyTypeMap[key.type]
+    };
+    if (!keyTypeMap[key.type]){
+        const typeName = ModelUtil.getShortName(key.type);
+        const namespace = ModelUtil.getNamespace(key.type);
+
+        result.$class = 'concerto.metamodel@1.0.0.ObjectMapKeyType';
+        (result as IObjectMapKeyType).type = {
             '$class': 'concerto.metamodel@1.0.0.TypeIdentifier',
             'name': typeName,
             namespace,
-        }
-    };
+        };
+    }
+
+    const decorators = decoratorsFromVocabularyAndMetadata(key.vocabulary, key.metadata);
+    if (decorators !== undefined) {
+        result.decorators = decorators;
+    }
+
+    return result;
 }
 
 /**
@@ -383,8 +402,8 @@ function transformMap(name: string, declaration: MapDeclaration): any {
     const result: IMapDeclaration = {
         $class: 'concerto.metamodel@1.0.0.MapDeclaration',
         name,
-        key: mapKeyType(declaration.keyType),
-        value: mapValueType(declaration.valueType, declaration.isRelationshipValue),
+        key: mapKeyType(declaration.key),
+        value: mapValueType(declaration.value),
     };
 
     const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
@@ -417,12 +436,16 @@ function transformScalar(namespace: string, name: string, declaration: ScalarDec
         $class: scalarTypeMap[declaration.type],
         name,
         namespace,
-        // defaultValue: declaration.default,
         ...extractScalarValidators(declaration),
     };
 
     if (declaration.default !== undefined) {
         (result as IStringScalar | IIntegerScalar | ILongScalar | IDoubleScalar | IBooleanScalar).defaultValue = declaration.default;
+    }
+    // TODO remove following line
+    // NOTE: Match strange behaviour in Concerto where missing default values for DateTime scalars default to null
+    if (result.$class === 'concerto.metamodel@1.0.0.DateTimeScalar' && declaration.default === undefined) {
+        // (result as IDateTimeScalar).defaultValue = null;
     }
 
     const decorators = decoratorsFromVocabularyAndMetadata(declaration.vocabulary, declaration.metadata);
