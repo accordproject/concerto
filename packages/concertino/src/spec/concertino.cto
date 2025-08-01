@@ -1,4 +1,4 @@
-namespace concertino.metamodel@0.1.0-alpha.3
+namespace concertino.metamodel@1.0.0-alpha.7
 
 import concerto.metamodel@1.0.0.{Decorator, Import}
 
@@ -57,20 +57,10 @@ concept ModelMetadata {
 }
 
 /**
- * Represents a unique identifier for a declaration.
- */
-concept ParsedFullyQualifiedName {
-  o Namespace namespace
-  o Identifier localName
-  o SemanticVersion version
-}
-
-/**
  * Represents a generic declaration.
  */
 abstract concept ConcertinoDeclaration {
   o String type
-  o ParsedFullyQualifiedName name
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }

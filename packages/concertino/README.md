@@ -2,6 +2,15 @@
 
 Concertino is a lightweight variant of the Concerto metamodel format, optimized for client applications that need to programmatically introspect declarations without taking a dependency on the full Concerto SDK.
 
+## Benefits of the Concertino Format
+The Concertino format provides several advantages:
+
+- Flatter structure: By denormalizing the inheritance hierarchy, consumers don't need to traverse the hierarchy to understand a definition.
+
+- More explicit metadata: Additional metadata makes it clearer how properties should be interpreted.
+
+- Ready for consumption: The transformation prepares the data for easier consumption by tools and renderers, without requiring additional processing.
+
 ## Features
 
 - **Fully Resolved Type References**: No ambiguous shortnames
@@ -10,14 +19,10 @@ Concertino is a lightweight variant of the Concerto metamodel format, optimized 
 - **Extended Inheritance Chain**: Concepts list their full inheritance chain, not just immediate parent
 - **Scalar Type Denormalization**: For convenience in client applications
 - **Strict Mode By Default**: Namespaces are always versioned.
+- **Support for Partial Models** Allowing client applications to filter models to tailor payloads for their use cases.
+- **Lossless Conversion** Concertino is designed for 100% lossless roundtrip conversion with Concerto models.
 
-## Lossless Conversion
-
-Concertino is designed for 100% lossless roundtrip conversion:
-
-Concerto (Metamodel) → Concertino → Concerto (Metamodel)
-
-Note that namespaces in the source Concerto model should be fully resolved (including for local type references).
+> Concerto (Metamodel) → Concertino → Concerto (Metamodel)
 
 ## Installation
 
@@ -30,36 +35,37 @@ npm install @accordproject/concertino
 ### Using the ConcertinoConverter Class
 
 ```javascript
+const { ModelManager } = require('@accordproject/concerto-core');
 const { ConcertinoConverter } = require('@accordproject/concertino');
 
-// Create a converter with custom options
-const converter = new ConcertinoConverter({
-  version: '0.1.0-alpha.3' // Specify concertino version
-});
+// Prepare the Concerto model
+const mm = new ModelManager();
+mm.addModel(MODEL_FILE_CONTENTS);
+const model = mm.getModelFile(MODEL_FILE_NAMESPACE).getAst();
+
+// Initialize Concertino
+const converter = new ConcertinoConverter();
+const models = { models: [model] };
 
 // Convert from Concerto metamodel to Concertino
-const concertino = converter.fromConcertoMetamodel(concertoMetamodel);
+const concertino = converter.fromConcertoMetamodel(models);
+console.log('#### Concertino:')
+console.log(JSON.stringify(concertino, null, 2));
+console.log();
 
 // Convert from Concertino back to Concerto metamodel
 const metamodel = converter.toConcertoMetamodel(concertino);
-
+console.log('#### Concerto AST (Full Metamodel Instance):')
+console.log(JSON.stringify(metamodel, null, 2));
 ```
 
-### Using Individual Functions
+## Model Size
 
-```javascript
-const { convertToConcertino, convertToMetamodel } = require('@accordproject/concertino');
+Despite the denormalization of metadata, the JSON serialization of Concertino models are often smaller in size than their Concerto AST equivalents due to a flatter, dictionary-like design and the removal of type-discriminators (i.e. `$class` properties).
 
-// Convert from Concerto metamodel to Concertino
-const concertino = convertToConcertino(concertoMetamodel);
+It is expected that models that make heavy use of inheritance would be larger than their equivalent Concerto AST.
 
-// Convert from Concertino back to Concerto metamodel
-const metamodel = convertToMetamodel(concertino);
-```
-
-## File Size Reduction
-
-Basic testing with pretty-printed, uncompressed files shows a 70-80% reduction in file size without loss of expressiveness.
+Note that when converting models, the namespaces in the source Concerto model should be fully resolved (including for local type references).
 
 ## Example Concertino JSON Format
 
@@ -69,15 +75,9 @@ Below is an example of how a simple Concerto model is represented in the Concert
 {
   "declarations": {
     "readme@1.0.0.Address": {
-      "name": {
-        "localName": "Address",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "properties": {
         "city": {
           "name": "city",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "City/Town",
@@ -85,12 +85,10 @@ Below is an example of how a simple Concerto model is represented in the Concert
         },
         "country": {
           "name": "country",
-          "scalarType": "String",
           "type": "String",
         },
         "street": {
           "name": "street",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Street Address",
@@ -98,7 +96,6 @@ Below is an example of how a simple Concerto model is represented in the Concert
         },
         "zipCode": {
           "name": "zipCode",
-          "scalarType": "String",
           "type": "String",
         },
       },
@@ -108,20 +105,10 @@ Below is an example of how a simple Concerto model is represented in the Concert
       },
     },
     "readme@1.0.0.Email": {
-      "name": {
-        "localName": "Email",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "regex": "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
       "type": "StringScalar",
     },
     "readme@1.0.0.Person": {
-      "name": {
-        "localName": "Person",
-        "namespace": "readme",
-        "version": "1.0.0",
-      },
       "properties": {
         "address": {
           "isOptional": true,
@@ -138,7 +125,6 @@ Below is an example of how a simple Concerto model is represented in the Concert
             0,
             null,
           ],
-          "scalarType": "Integer",
           "type": "Integer",
         },
         "email": {
@@ -153,7 +139,6 @@ Below is an example of how a simple Concerto model is represented in the Concert
         },
         "firstName": {
           "name": "firstName",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Given Name",
@@ -161,7 +146,6 @@ Below is an example of how a simple Concerto model is represented in the Concert
         },
         "lastName": {
           "name": "lastName",
-          "scalarType": "String",
           "type": "String",
           "vocabulary": {
             "label": "Family Name",
@@ -178,7 +162,7 @@ Below is an example of how a simple Concerto model is represented in the Concert
     },
   },
   "metadata": {
-    "concertinoVersion": "0.1.0-alpha.3",
+    "concertinoVersion": "1.0.0-alpha.7",
     "models": {
       "org.example.models@1.0.0": {
         "concertoVersion": "1.0.0",
@@ -194,22 +178,14 @@ Below is an example of how a simple Concerto model is represented in the Concert
   }
 }
 ```
-```
-
-This example demonstrates how Concertino represents:
-
-1. Fully qualified type names as object keys
-2. Denormalized properties with their constraints
-3. Flattened declarations outside of their model nesting
-4. Metadata including versioning information
-5. Decorators at the model, concept, and property level
-6. Vocabulary with labels and additional terms
 
 The equivalent Concerto CTO file would be:
 
-```cto
+```cs
 @license("Apache-2.0")
 namespace org.example.models@1.0.0
+
+scalar Email extends String regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
 @Term("Individual")
 @Term_plural("People")
@@ -220,10 +196,10 @@ concept Person {
   @Term("Family Name")
   o String lastName
   
-  o Integer age optional range=[0, 120]
+  o Integer age optional range=[0, ]
   
   @sensitive
-  o String email optional regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  o Email email optional 
   
   @Term("Mailing Address")
   o Address address optional

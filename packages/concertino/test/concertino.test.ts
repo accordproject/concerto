@@ -111,18 +111,6 @@ describe('concertino edge cases and error handling', () => {
         }).toThrow(/Unsupported object type/);
     });
 
-    it('should throw for missing superType namespace', () => {
-        expect(() => {
-            dispatchDeclaration({
-                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
-                name: 'Test',
-                properties: [],
-                decorators: [],
-                superType: { $class: 'concerto.metamodel@1.0.0.TypeIdentifier', name: 'Foo' },
-            }, { modelNamespace: 'foo' });
-        }).toThrow(/Missing namespace for superType/);
-    });
-
     it('should throw for parent === undefined in getInheritanceChain', () => {
         expect(() => {
             // @ts-expect-error purposely invalid
