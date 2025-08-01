@@ -1,0 +1,38 @@
+@description("hr base namespace")
+namespace org.acme.hr.base@1.0.0
+
+abstract concept Category {}
+abstract concept GeneralCategory extends Category {}
+
+enum State {
+    o MA
+    o NY
+    o CO
+    o WA
+    o IL
+    o CA
+}
+
+enum TShirtSizeType {
+    o SMALL
+    o MEDIUM
+    o LARGE
+}
+
+map EmployeeTShirtSizes {
+    o SSN
+    o TShirtSizeType
+}
+
+concept Address {
+    o String street
+    o String city
+    o State state optional
+    o String zipCode
+    o String country
+}
+
+enum Level {}
+
+scalar Time extends DateTime
+scalar SSN extends String default="000-00-0000" regex=/(\d{3}-\d{2}-\d{4})+/

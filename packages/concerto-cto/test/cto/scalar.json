@@ -93,7 +93,6 @@
         },
         {
             "$class": "concerto.metamodel@1.0.0.DateTimeScalar",
-            "defaultValue": null,
             "name": "DateTimeScalar"
         },
         {

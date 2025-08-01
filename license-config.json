@@ -24,6 +24,7 @@
         "LICENSE",
         "HEADER",
         "packages/concerto-core/api.txt",
+        "packages/concertino/src/spec/*.ts",
         "**/*.snap"
     ],
     "license": "HEADER",

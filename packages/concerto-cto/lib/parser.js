@@ -799,10 +799,13 @@ function peg$parse(input, options) {
       return result;
   };
   var peg$f65 = function(d) {
-      return {
+     const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
-        defaultValue: d
       };
+      if (d) {
+        result.defaultValue = d;
+      }
+      return result;
   };
   var peg$f66 = function(decorators, id, scalarType) {
       const result = {
