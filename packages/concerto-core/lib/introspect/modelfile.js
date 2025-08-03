@@ -242,7 +242,7 @@ class ModelFile extends Decorated {
             const existingNamespaceVersion = importsMap.get(name);
             // undefined means we haven't seen this namespace before,
             // null means we have seen it before but it didn't have a version
-            // const unseenNamespace = existingNamespaceVersion === undefined;
+            const unseenNamespace = existingNamespaceVersion === undefined;
             // if (seenImportNamespace.has(importNamespace)) {
             //     throw new IllegalModelException(
             //         'Import namespace is already defined',
