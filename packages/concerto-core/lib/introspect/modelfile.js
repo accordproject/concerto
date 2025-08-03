@@ -225,7 +225,7 @@ class ModelFile extends Decorated {
 
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
-        const seenImportNamespace=[];
+        const seenImportNamespace = new Set();
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
