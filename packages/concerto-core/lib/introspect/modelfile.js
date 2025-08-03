@@ -244,9 +244,10 @@ class ModelFile extends Decorated {
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
             if (seenImportNamespace.has(importNamespace)) {
-                throw new IllegalModelException(formatter({
-                    namespace: importNamespace
-                }), this);
+                throw new IllegalModelException(
+                    'Import namespace is already defined',
+                    this
+                );
             }
             seenImportNamespace.add(importNamespace);
             // This check is needed because we automatically add both versioned and unversioned versions of
