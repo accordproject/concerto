@@ -225,6 +225,7 @@ class ModelFile extends Decorated {
 
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
+        const seenImportNamespace=[];
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
@@ -242,7 +243,12 @@ class ModelFile extends Decorated {
             // undefined means we haven't seen this namespace before,
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
-
+            if (seenImportNamespace.has(importNamespace)) {
+                throw new IllegalModelException(formatter({
+                    namespace: importNamespace
+                }), this);
+            }
+            seenImportNamespace.add(importNamespace);
             // This check is needed because we automatically add both versioned and unversioned versions of
             // the root namespace for backwards compatibillity unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
