@@ -33,15 +33,15 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "3.22.0",
+    "@accordproject/concerto-core": "3.23.0",
     "ajv": "^8.17.1",
     "semver": "7.6.3"
   },
   "devDependencies": {
-    "@accordproject/concerto-types": "3.22.0",
+    "@accordproject/concerto-types": "3.23.0",
     "@accordproject/concerto-codegen": "^3.22.0",
-    "@accordproject/concerto-cto": "3.22.0",
-    "@accordproject/concerto-util": "^3.22.0",
+    "@accordproject/concerto-cto": "3.23.0",
+    "@accordproject/concerto-util": "3.23.0",
     "@types/semver": "7.5.8",
     "@typescript-eslint/eslint-plugin": "8.16.0",
     "@typescript-eslint/parser": "8.16.0",
