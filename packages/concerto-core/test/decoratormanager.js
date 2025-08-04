@@ -1010,4 +1010,27 @@ describe('DecoratorManager', () => {
         });
     });
 
+    describe('#yamlToJson', function(){
+        it('should convert YAML formatted DCS to JSON via DecoratorManager', function(){
+            const dcsYaml = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.yaml'), 'utf8');
+            const outputJson = DecoratorManager.yamlToJson(dcsYaml);
+            const expectedJson = fs.readFileSync(path.resolve(__dirname, 'data/decoratorcommands/possible-decorator-command-targets.json'), 'utf8');
+            outputJson.should.deep.equal(JSON.parse(expectedJson));
+        });
+
+        it('should throw error if input is not valid DCS YAML', function(){
+            const invalidDcsYaml = [
+                'decoratorCommandsVersion: 0.4.0\ncommands: []',
+                'decoratorCommandsVersion: 0.4.0\nname: test\ncommands: []',
+                'name: test\nversion: 1.0.0\ncommands: []'
+            ];
+            invalidDcsYaml.forEach((value) => {
+                (() => {
+                    DecoratorManager.yamlToJson(value);
+                }).should.throw();
+            });
+        });
+    });
+
+
 });
