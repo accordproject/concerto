@@ -226,6 +226,34 @@ class ModelFile extends Decorated {
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         // const seenImportNamespace = new Set();
+        let ast = this.ast;
+        // Check that no locally declared type conflicts with imported type names
+        const imports = ast.imports ? ast.imports.concat([]) : [];
+        this.imports = imports;
+        this.imports.forEach((imp) => {
+            this.declarations.forEach(declaration => {
+                const localDeclarationName = declaration.getName(); 
+                if(imp.types){
+                    imp.types.forEach((type) => {
+                        const importedName = aliasedTypes.get(type) || type;
+                        if (importedName === localDeclarationName) {
+                            throw new IllegalModelException(
+                                `already defined in an imported model`,
+                                this
+                            );
+                        }
+                    });
+                }
+                else{
+                    if (imp.name === localDeclarationName) {
+                        throw new IllegalModelException(
+                            `already defined in an imported model`,
+                            this
+                        );
+                    }
+                }
+            });
+        });
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
