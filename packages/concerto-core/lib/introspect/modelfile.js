@@ -757,6 +757,32 @@ class ModelFile extends Decorated {
         this.imports = imports;
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
+            // Check that no locally declared type conflicts with imported type names
+            this.declarations.forEach(declaration => {
+                const localDeclarationName = declaration.getName(); 
+                let conflict=false;
+                if(imp.types){
+                    imp.types.forEach((type) => {
+                        const importedName = aliasedTypes.get(type) || type;
+                        if (importedName === localDeclarationName) {
+                            conflict=true;
+                            throw new IllegalModelException(
+                                `already defined in an imported model`,
+                                this
+                            );
+                        }
+                    });
+                }
+                else{
+                    if (imp.name === localDeclarationName) {
+                        throw new IllegalModelException(
+                            `already defined in an imported model`,
+                            this
+                        );
+                    }
+                }
+                
+            });
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 if (this.getModelManager().isStrict()){
@@ -793,21 +819,7 @@ class ModelFile extends Decorated {
                                 `${imp.namespace}.${type}`
                             )
                     );
-                    // Check that no locally declared type conflicts with imported type names
-                    this.declarations.forEach(declaration => {
-                        const localDeclarationName = declaration.getName(); 
-                        let conflict=false;
-                        imp.types.forEach((type) => {
-                            const importedName = aliasedTypes.get(type) || type;
-                            if (importedName === localDeclarationName) {
-                                conflict=true;
-                                throw new IllegalModelException(
-                                    `already defined in an imported model`,
-                                    this
-                                );
-                            }
-                        });
-                    });
+                    
                 } else {
                     if (imp.aliasedTypes) {
                         throw new Error('Aliasing disabled, set importAliasing to true');
@@ -819,16 +831,6 @@ class ModelFile extends Decorated {
                 break;
             default:
                 this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
-                this.declarations.forEach(declaration => {
-                    const localDeclarationName = declaration.getName(); 
-                    let conflict=false;
-                    if (imp.name === localDeclarationName) {
-                        throw new IllegalModelException(
-                            `already defined in an imported model`,
-                            this
-                        );
-                    }
-                });
             }
             if(imp.uri) {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
