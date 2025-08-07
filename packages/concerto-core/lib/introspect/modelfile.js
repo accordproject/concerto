@@ -244,10 +244,10 @@ class ModelFile extends Decorated {
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
             if (seenImportNamespace.has(importNamespace)) {
-                let formatter = Globalize.messageFormatter('modelmanager-gettype-noregisteredns');
-                throw new IllegalModelException(formatter({
-                    type: importFqn
-                }), this);
+                throw new IllegalModelException(
+                    'Import namespace is already defined',
+                    this
+                );
             }
             seenImportNamespace.add(importNamespace);
             // This check is needed because we automatically add both versioned and unversioned versions of
