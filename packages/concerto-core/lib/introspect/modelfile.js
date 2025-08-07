@@ -222,29 +222,29 @@ class ModelFile extends Decorated {
         super.validate();
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
-        if (this.getModelManager().isAliasedTypeEnabled()) {
-            const aliasedTypes = new Map();
-            if (imp.aliasedTypes) {
-                imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                    if(ModelUtil.isPrimitiveType(aliasedName)){
-                        throw new Error('Types cannot be aliased to primitive type');
-                    }
-                    aliasedTypes.set(name, aliasedName);
-                });
-            }
-            // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-            imp.types.forEach((type) =>
-                aliasedTypes.has(type)
-                    ? this.importShortNames.set(
-                        aliasedTypes.get(type),
-                        `${imp.namespace}.${type}`
-                    )
-                    : this.importShortNames.set(
-                        type,
-                        `${imp.namespace}.${type}`
-                    )
-            );
-            this.imports.forEach((imp) => {
+        this.imports.forEach((imp) => {
+            if (this.getModelManager().isAliasedTypeEnabled()) {
+                const aliasedTypes = new Map();
+                if (imp.aliasedTypes) {
+                    imp.aliasedTypes.forEach(({ name, aliasedName }) => {
+                        if(ModelUtil.isPrimitiveType(aliasedName)){
+                            throw new Error('Types cannot be aliased to primitive type');
+                        }
+                        aliasedTypes.set(name, aliasedName);
+                    });
+                }
+                // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                imp.types.forEach((type) =>
+                    aliasedTypes.has(type)
+                        ? this.importShortNames.set(
+                            aliasedTypes.get(type),
+                            `${imp.namespace}.${type}`
+                        )
+                        : this.importShortNames.set(
+                            type,
+                            `${imp.namespace}.${type}`
+                        )
+                );
                 // Check that no locally declared type conflicts with imported type names
                 this.declarations.forEach(declaration => {
                     const localDeclarationName = declaration.getName(); 
@@ -269,10 +269,9 @@ class ModelFile extends Decorated {
                             );
                         }
                     }
-
                 });
-            });
-        }
+            }
+        });
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         // const seenImportNamespace = new Set();
