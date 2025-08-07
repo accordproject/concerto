@@ -795,22 +795,28 @@ class ModelFile extends Decorated {
                     );
                     // Check that no locally declared type conflicts with imported type names
                     this.declarations.forEach(declaration => {
-                        const localName = declaration.getName();
+                        const localDeclarationName = declaration.getName(); 
+                        let conflict=false;
                         imp.types.forEach((type) => {
                             const importedName = aliasedTypes.get(type) || type;
-                            if (importedName === localName) {
+                            if (importedName === localDeclarationName) {
+                                conflict=true;
                                 throw new IllegalModelException(
-                                    `Type '${localName}' is already defined in an imported model (conflict with ${imp.namespace}.${type})`,
+                                    `already defined in an imported model`,
                                     this
                                 );
                             }
                         });
-                        // Also check against any wildcard or unqualified imports
-                        if (imp.imports && imp.imports.includes(localName)) {
-                            throw new IllegalModelException(
-                                `Type '${localName}' is already defined in an imported model (via wildcard import)`,
-                                this
-                            );
+                        if(conflict===false){
+                            imp.imports.forEach((im) => {
+                                let importName=im;
+                                if(importName === localDeclarationName) {
+                                    throw new IllegalModelException(
+                                        `already defined in an imported model`,
+                                        this
+                                    );
+                                }
+                            });
                         }
                     });
                 } else {
