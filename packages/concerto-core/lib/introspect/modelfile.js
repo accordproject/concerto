@@ -244,35 +244,35 @@ class ModelFile extends Decorated {
                         `${imp.namespace}.${type}`
                     )
             );
-        }
-        this.imports.forEach((imp) => {
-            // Check that no locally declared type conflicts with imported type names
-            this.declarations.forEach(declaration => {
-                const localDeclarationName = declaration.getName(); 
-                let conflict=false;
-                if(imp.types){
-                    imp.types.forEach((type) => {
-                        const importedName = aliasedTypes.get(type) || type;
-                        if (importedName === localDeclarationName) {
-                            conflict=true;
+            this.imports.forEach((imp) => {
+                // Check that no locally declared type conflicts with imported type names
+                this.declarations.forEach(declaration => {
+                    const localDeclarationName = declaration.getName(); 
+                    let conflict=false;
+                    if(imp.types){
+                        imp.types.forEach((type) => {
+                            const importedName = aliasedTypes.get(type) || type;
+                            if (importedName === localDeclarationName) {
+                                conflict=true;
+                                throw new IllegalModelException(
+                                    `already defined in an imported model`,
+                                    this
+                                );
+                            }
+                        });
+                    }
+                    else{
+                        if (imp.name === localDeclarationName) {
                             throw new IllegalModelException(
                                 `already defined in an imported model`,
                                 this
                             );
                         }
-                    });
-                }
-                else{
-                    if (imp.name === localDeclarationName) {
-                        throw new IllegalModelException(
-                            `already defined in an imported model`,
-                            this
-                        );
                     }
-                }
-                
+
+                });
             });
-        });
+        }
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         // const seenImportNamespace = new Set();
