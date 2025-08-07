@@ -808,8 +808,8 @@ class ModelFile extends Decorated {
                             }
                         });
                         if(conflict===false){
-                            imp.imports.forEach((im) => {
-                                let importName=im;
+                            imp.forEach((im) => {
+                                let importName=im.name;
                                 if(importName === localDeclarationName) {
                                     throw new IllegalModelException(
                                         `already defined in an imported model`,
