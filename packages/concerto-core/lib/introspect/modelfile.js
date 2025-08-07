@@ -234,17 +234,19 @@ class ModelFile extends Decorated {
                     });
                 }
                 // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                imp.types.forEach((type) =>
-                    aliasedTypes.has(type)
-                        ? this.importShortNames.set(
-                            aliasedTypes.get(type),
-                            `${imp.namespace}.${type}`
-                        )
-                        : this.importShortNames.set(
-                            type,
-                            `${imp.namespace}.${type}`
-                        )
-                );
+                if(imp.types) {
+                    imp.types.forEach((type) =>
+                        aliasedTypes.has(type)
+                            ? this.importShortNames.set(
+                                aliasedTypes.get(type),
+                                `${imp.namespace}.${type}`
+                            )
+                            : this.importShortNames.set(
+                                type,
+                                `${imp.namespace}.${type}`
+                            )
+                    );
+                }
                 // Check that no locally declared type conflicts with imported type names
                 this.declarations.forEach(declaration => {
                     const localDeclarationName = declaration.getName(); 
