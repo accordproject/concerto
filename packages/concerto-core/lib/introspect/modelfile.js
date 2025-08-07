@@ -795,18 +795,23 @@ class ModelFile extends Decorated {
                     );
                     // Check that no locally declared type conflicts with imported type names
                     this.declarations.forEach(declaration => {
-                        const localDeclarationName = declaration.getName();
-                                    
+                        const localName = declaration.getName();
                         imp.types.forEach((type) => {
                             const importedName = aliasedTypes.get(type) || type;
-                        
-                            if (importedName === localDeclarationName) {
+                            if (importedName === localName) {
                                 throw new IllegalModelException(
-                                    `Type '${localDeclarationName}' is already defined in an imported model (conflict with ${imp.namespace}.${type})`,
+                                    `Type '${localName}' is already defined in an imported model (conflict with ${imp.namespace}.${type})`,
                                     this
                                 );
                             }
                         });
+                        // Also check against any wildcard or unqualified imports
+                        if (imp.imports && imp.imports.includes(localName)) {
+                            throw new IllegalModelException(
+                                `Type '${localName}' is already defined in an imported model (via wildcard import)`,
+                                this
+                            );
+                        }
                     });
                 } else {
                     if (imp.aliasedTypes) {
