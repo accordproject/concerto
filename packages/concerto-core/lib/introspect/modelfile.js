@@ -807,17 +807,6 @@ class ModelFile extends Decorated {
                                 );
                             }
                         });
-                        if(conflict===false){
-                            imp.forEach((im) => {
-                                let importName=im.name;
-                                if(importName === localDeclarationName) {
-                                    throw new IllegalModelException(
-                                        `already defined in an imported model`,
-                                        this
-                                    );
-                                }
-                            });
-                        }
                     });
                 } else {
                     if (imp.aliasedTypes) {
@@ -830,6 +819,16 @@ class ModelFile extends Decorated {
                 break;
             default:
                 this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
+                this.declarations.forEach(declaration => {
+                    const localDeclarationName = declaration.getName(); 
+                    let conflict=false;
+                    if (imp.name === localDeclarationName) {
+                        throw new IllegalModelException(
+                            `already defined in an imported model`,
+                            this
+                        );
+                    }
+                });
             }
             if(imp.uri) {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
