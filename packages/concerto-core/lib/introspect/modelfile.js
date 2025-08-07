@@ -225,7 +225,7 @@ class ModelFile extends Decorated {
 
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
-        const seenImportNamespace = new Set();
+        // const seenImportNamespace = new Set();
         this.getImports().forEach((importFqn) => {
             const importNamespace = ModelUtil.getNamespace(importFqn);
             const importShortName = ModelUtil.getShortName(importFqn);
@@ -243,13 +243,13 @@ class ModelFile extends Decorated {
             // undefined means we haven't seen this namespace before,
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
-            if (seenImportNamespace.has(importNamespace)) {
-                throw new IllegalModelException(
-                    'Import namespace is already defined',
-                    this
-                );
-            }
-            seenImportNamespace.add(importNamespace);
+            // if (seenImportNamespace.has(importNamespace)) {
+            //     throw new IllegalModelException(
+            //         'Import namespace is already defined',
+            //         this
+            //     );
+            // }
+            // seenImportNamespace.add(importNamespace);
             // This check is needed because we automatically add both versioned and unversioned versions of
             // the root namespace for backwards compatibillity unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
@@ -279,22 +279,6 @@ class ModelFile extends Decorated {
             }
         });
         // Check that no locally declared type conflicts with imported type names
-        this.declarations.forEach(declaration => {
-            const localName = declaration.getName();
-            this.getImports().forEach((importFqn) => {
-                if (importFqn.endsWith('*')) {
-                    return;
-                }
-                const importShortName = ModelUtil.getShortName(importFqn);
-                // Check if the imported type has the same short name as the local declaration
-                if (importShortName === localName) {
-                    throw new IllegalModelException(
-                        'already defined in an imported model',
-                        this
-                    );
-                }
-            });
-        });
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
@@ -809,6 +793,21 @@ class ModelFile extends Decorated {
                                 `${imp.namespace}.${type}`
                             )
                     );
+                    // Check that no locally declared type conflicts with imported type names
+                    this.declarations.forEach(declaration => {
+                        const localDeclarationName = declaration.getName();
+                                    
+                        imp.types.forEach((type) => {
+                            const importedName = aliasedTypes.get(type) || type;
+                        
+                            if (importedName === localDeclarationName) {
+                                throw new IllegalModelException(
+                                    `Type '${localDeclarationName}' is already defined in an imported model (conflict with ${imp.namespace}.${type})`,
+                                    this
+                                );
+                            }
+                        });
+                    });
                 } else {
                     if (imp.aliasedTypes) {
                         throw new Error('Aliasing disabled, set importAliasing to true');
