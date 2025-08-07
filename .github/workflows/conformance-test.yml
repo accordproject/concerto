@@ -21,6 +21,11 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install and Build Target Project
+        run: |
+          npm install
+          npm run build
+
       - name: Checkout Conformance Suite
         uses: actions/checkout@v3
         with:
