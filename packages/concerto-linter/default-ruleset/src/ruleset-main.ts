@@ -18,16 +18,22 @@ import namespaceVersion from './namespace-version';
 import pascalCaseDeclarations from './pascal-case-declarations';
 import camelCaseProperties from './camel-case-properties';
 import upperSnakeCaseEnumConst from './upper-snake-case-enum-const';
+import pascalCaseDecorators from './pascal-case-decorators';
+import propertyStringLength from './property-string-length';
+import scalarStringLength from './scalar-string-length';
 import noEmptyDeclarations from './no-empty-declarations';
 import abstractMustSubclassed from './abstract-must-subclassed';
 
 const concertoRuleset: RulesetDefinition = {
     rules: {
         'namespace-version': namespaceVersion,
-        'no-empty-declarations': noEmptyDeclarations,
         'pascal-case-declarations': pascalCaseDeclarations,
         'camel-case-properties': camelCaseProperties,
         'upper-snake-case-enum-constants': upperSnakeCaseEnumConst,
+        'pascal-case-decorators': pascalCaseDecorators,
+        'property-string-length': propertyStringLength,
+        'scalar-string-length': scalarStringLength,
+        'no-empty-declarations': noEmptyDeclarations,
         'abstract-must-subclassed': abstractMustSubclassed,
     }
 };
