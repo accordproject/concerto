@@ -294,13 +294,6 @@ class ModelFile extends Decorated {
             // undefined means we haven't seen this namespace before,
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
-            // if (seenImportNamespace.has(importNamespace)) {
-            //     throw new IllegalModelException(
-            //         'Import namespace is already defined',
-            //         this
-            //     );
-            // }
-            // seenImportNamespace.add(importNamespace);
             // This check is needed because we automatically add both versioned and unversioned versions of
             // the root namespace for backwards compatibillity unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
@@ -329,7 +322,6 @@ class ModelFile extends Decorated {
                 }), this);
             }
         });
-        // Check that no locally declared type conflicts with imported type names
         // Validate all of the types in this model file.
         // Check if names of the declarations are unique.
         const uniqueNames = new Set();
