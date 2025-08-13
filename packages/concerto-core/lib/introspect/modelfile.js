@@ -798,7 +798,6 @@ class ModelFile extends Decorated {
         this.imports = imports;
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
-            // Check that no locally declared type conflicts with imported type names
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 if (this.getModelManager().isStrict()){
@@ -835,7 +834,6 @@ class ModelFile extends Decorated {
                                 `${imp.namespace}.${type}`
                             )
                     );
-                    
                 } else {
                     if (imp.aliasedTypes) {
                         throw new Error('Aliasing disabled, set importAliasing to true');
