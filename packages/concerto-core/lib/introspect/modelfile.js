@@ -249,15 +249,13 @@ class ModelFile extends Decorated {
                 }
                 // Check that no locally declared type conflicts with imported type names
                 this.declarations.forEach(declaration => {
-                    const localDeclarationName = declaration.getName(); 
-                    let conflict=false;
+                    const localDeclarationName = declaration.getName();
                     if(imp.types){
                         imp.types.forEach((type) => {
                             const importedName = aliasedTypes.get(type) || type;
                             if (importedName === localDeclarationName) {
-                                conflict=true;
                                 throw new IllegalModelException(
-                                    `already defined in an imported model`,
+                                    'already defined in an imported model',
                                     this
                                 );
                             }
@@ -266,7 +264,7 @@ class ModelFile extends Decorated {
                     else{
                         if (imp.name === localDeclarationName) {
                             throw new IllegalModelException(
-                                `already defined in an imported model`,
+                                'already defined in an imported model',
                                 this
                             );
                         }
@@ -801,31 +799,6 @@ class ModelFile extends Decorated {
         this.imports.forEach((imp) => {
             this.enforceImportVersioning(imp);
             // Check that no locally declared type conflicts with imported type names
-            this.declarations.forEach(declaration => {
-                const localDeclarationName = declaration.getName(); 
-                let conflict=false;
-                if(imp.types){
-                    imp.types.forEach((type) => {
-                        const importedName = aliasedTypes.get(type) || type;
-                        if (importedName === localDeclarationName) {
-                            conflict=true;
-                            throw new IllegalModelException(
-                                `already defined in an imported model`,
-                                this
-                            );
-                        }
-                    });
-                }
-                else{
-                    if (imp.name === localDeclarationName) {
-                        throw new IllegalModelException(
-                            `already defined in an imported model`,
-                            this
-                        );
-                    }
-                }
-                
-            });
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 if (this.getModelManager().isStrict()){
