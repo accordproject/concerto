@@ -13,14 +13,18 @@
  */
 
 import { checkLengthValidator } from './functions/check-length-validator';
+
 /**
- * Rule: Scalar String Length
+ * Rule: String Length
  * ---------------------------
- * Ensures that all scalar string types within the data model must have a length validator applied.
- * Which helps  prevent inconsistent data length and ensure proper storage."
+ * Ensures that all string within the data model have a length validator applied.
+ * Which helps prevent inconsistent data length and ensure proper storage."
  */
 export default {
-    given: '$.models[*].declarations[?(@.$class=="concerto.metamodel@1.0.0.StringScalar")]',
+    given: [
+        '$.models[*].declarations[?(@.$class=="concerto.metamodel@1.0.0.StringScalar")]',
+        '$.models[*].declarations[*].properties[?(@.$class=="concerto.metamodel@1.0.0.StringProperty")]'
+    ],
     severity: 0, // 0 = error, 1 = warning, 2 = info, 3 = hint
     then: {
         function: checkLengthValidator,
