@@ -22,7 +22,11 @@ import { casing } from '@stoplight/spectral-functions';
  */
 export default {
     description: 'Decorators names should be PascalCase.',
-    given: '$.models[*].declarations[*].decorators[*].name',
+    given: [
+        '$.models[*].decorators[*].name',
+        '$.models[*].declarations[*].decorators[*].name',
+        '$.models[*].declarations[*].properties[*].decorators[*].name'
+    ],
     message: 'Decorator \'{{value}}\' should be PascalCase (e.g. \'MyDecorator\')',
     severity: 0, // 0 = error, 1 = warning, 2 = info, 3 = hint
     then: {
