@@ -224,42 +224,32 @@ class ModelFile extends Decorated {
         const importsMap = new Map();
         this.imports.forEach((imp) => {
             if (this.getModelManager().isAliasedTypeEnabled()) {
-                const aliasedTypes = new Map();
-                if (imp.aliasedTypes) {
-                    imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                        if(ModelUtil.isPrimitiveType(aliasedName)){
-                            throw new Error('Types cannot be aliased to primitive type');
-                        }
-                        aliasedTypes.set(name, aliasedName);
-                    });
-                }
-                // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                if(imp.types) {
-                    imp.types.forEach((type) =>
-                        aliasedTypes.has(type)
-                            ? this.importShortNames.set(
-                                aliasedTypes.get(type),
-                                `${imp.namespace}.${type}`
-                            )
-                            : this.importShortNames.set(
-                                type,
-                                `${imp.namespace}.${type}`
-                            )
-                    );
-                }
                 // Check that no locally declared type conflicts with imported type names
                 this.declarations.forEach(declaration => {
                     const localDeclarationName = declaration.getName();
                     if(imp.types){
-                        imp.types.forEach((type) => {
-                            const importedName = aliasedTypes.get(type) || type;
-                            if (importedName === localDeclarationName) {
-                                throw new IllegalModelException(
-                                    'already defined in an imported model',
-                                    this
-                                );
-                            }
-                        });
+                        if(imp.aliasedTypes){
+                            imp.aliasedTypes.forEach((atypes) => {
+                                const importedName=atypes.aliasedName;
+                                if (importedName === localDeclarationName) {
+                                    throw new IllegalModelException(
+                                        'already defined in an imported model',
+                                        this
+                                    );
+                                }
+                            });
+                        }
+                        else{
+                            imp.types.forEach((t) => {
+                                const importedName=t;
+                                if (importedName === localDeclarationName) {
+                                    throw new IllegalModelException(
+                                        'already defined in an imported model',
+                                        this
+                                    );
+                                }
+                            })
+                        }
                     }
                     else{
                         if (imp.name === localDeclarationName) {
