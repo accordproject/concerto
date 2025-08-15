@@ -248,7 +248,7 @@ class ModelFile extends Decorated {
                                         this
                                     );
                                 }
-                            })
+                            });
                         }
                     }
                     else{
