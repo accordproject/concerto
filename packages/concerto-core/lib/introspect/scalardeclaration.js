@@ -265,7 +265,11 @@ class ScalarDeclaration extends Declaration {
     isConcept() {
         return false;
     }
-
+  toJSON() {
+    const json = super.toJSON();
+    delete json.namespace; // scalars should not include namespace
+    return json;
+}
 }
 
 module.exports = ScalarDeclaration;
