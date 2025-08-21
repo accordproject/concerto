@@ -104,7 +104,7 @@ describe('Introspector', () => {
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-              // Added after discussion
+            // Added after discussion
             const introspector = new Introspector(modelManager);
             modelFile2.resolveImport('m').should.equal('org.example.ext.MyAsset2');
             introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
