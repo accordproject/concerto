@@ -86,6 +86,7 @@ describe('Introspector', () => {
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager({ importAliasing: true });
             // Util.addComposerModel(modelManager); // Commented after discussion
+            modelManager.validateModelFiles();
             modelManager.should.not.be.null;
 
             const model1 = `
@@ -103,7 +104,7 @@ describe('Introspector', () => {
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelManager.validateModelFiles();  // Added after discussion
+              // Added after discussion
             const introspector = new Introspector(modelManager);
             modelFile2.resolveImport('m').should.equal('org.example.ext.MyAsset2');
             introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
