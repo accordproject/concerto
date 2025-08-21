@@ -19,6 +19,35 @@ import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/g
 import  concertoRuleset  from '@accordproject/concerto-linter-default-ruleset';
 import { ModelManager } from '@accordproject/concerto-core';
 
+interface options {
+    /** Path to a custom Spectral ruleset or 'default' to use the built-in ruleset */
+    ruleset?: string;
+
+    /** One or more namespaces to exclude from linting results */
+    excludeNamespaces?: string | string[];
+}
+
+interface lintResult {
+  /** Unique rule identifier (e.g. 'no-reserved-keywords') */
+  code: string;
+
+  /** Human-readable description of the violation */
+  message: string;
+
+  /** Severity level ('error' | 'warning' | 'info' | 'hint') */
+  severity: string;
+
+  /**
+   * JSONPath-style pointer as an array of keys/indices
+   * (e.g. ['declarations', 3])
+   */
+  path: Array<string | number>;
+
+  /** Namespace where the violation occurred */
+  namespace: string;
+
+}
+
 /**
  * Converts Concerto model to JSON AST representation
  * @param {string | object} model - Concerto model as string or parsed object
@@ -40,12 +69,16 @@ function convertToJsonAST(model: string | object): string {
 
 /**
  * Loads Spectral ruleset based on configuration options
- * @param {string} [rulesetOption] - Custom ruleset path or 'default'
+ * @param {string} [ruleset] - Custom ruleset path or 'default'
  * @returns {Promise<Ruleset | RulesetDefinition>} Loaded ruleset
  */
-async function loadRuleset(rulesetOption?: string): Promise<Ruleset | RulesetDefinition> {
+async function loadRuleset(ruleset?: string): Promise<Ruleset | RulesetDefinition> {
     try {
-        const rulesetPath = await resolveRulesetPath(rulesetOption);
+
+        if (typeof ruleset === 'string' && ruleset.toLowerCase() === 'default') {
+            return concertoRuleset;
+        }
+        const rulesetPath = await resolveRulesetPath(ruleset);
         return rulesetPath ? await getRuleset(rulesetPath) : concertoRuleset;
     } catch (error) {
         throw new Error(`Ruleset loading failed: ${error instanceof Error ? error.message : error}`);
@@ -53,22 +86,89 @@ async function loadRuleset(rulesetOption?: string): Promise<Ruleset | RulesetDef
 }
 
 /**
- * Lints Concerto models using Spectral and Concerto rules
- * @param {string | object} model - Model to lint (string CTO or parsed AST)
- * @param {string} [rulesetOption] - Path to custom ruleset or 'default'
- * @returns {Promise<IRuleResult[]>} Linting results
- * @throws {Error} For critical processing failures
+ * Formats Spectral linting results by mapping them to a standardized lint result structure,
+ * extracting namespaces from the provided JSON AST, and filtering out results based on excluded namespaces.
+ *
+ * @param spectralResults - An array of Spectral rule results to be formatted.
+ * @param jsonAST - A JSON string representing the AST, used to extract model namespaces.
+ * @param excludeNamespaces - A string or array of strings specifying namespace patterns to exclude from the results.
+ *                            Patterns ending with `.*` will match any namespace starting with the given prefix.
+ *                            Defaults to `['concerto.*', 'org.accord.*']`.
+ * @returns An array of formatted lint results, excluding those matching the specified namespaces.
  */
-export async function lintModel(model: string | object, rulesetOption?: string): Promise<IRuleResult[]> {
+
+function formatResults(
+    spectralResults: IRuleResult[],
+    jsonAST: string,
+    excludeNamespaces: string | string[] = ['concerto.*', 'org.accordproject.*']
+): lintResult[] {
+    try {
+        const ast = JSON.parse(jsonAST);
+
+        const severityMap: { [key: number]: string } = {
+            0: 'error',
+            1: 'warning',
+            2: 'info',
+            3: 'hint',
+        };
+
+        const results: lintResult[] = spectralResults.map(r => {
+            let namespace = 'unknown';
+
+            if (Array.isArray(r.path) && r.path.length >= 2 && r.path[0] === 'models') {
+                const modelIndex = r.path[1] as number;
+                const modelEntry = ast.models?.[modelIndex];
+                if (modelEntry && modelEntry.namespace) {
+                    namespace = modelEntry.namespace;
+                }
+            }
+
+            return {
+                code: r.code as string,
+                message: r.message,
+                path: r.path,
+                severity: severityMap[r.severity],
+                namespace: namespace,
+            };
+        });
+
+        const exclusionPatterns = Array.isArray(excludeNamespaces) ? excludeNamespaces : [excludeNamespaces];
+
+        return results.filter(result => {
+            return !exclusionPatterns.some(pattern => {
+                if (pattern.endsWith('.*')) {
+                    return result.namespace.startsWith(pattern.slice(0, pattern.length - 2));
+                }
+                return result.namespace === pattern;
+            });
+        });
+    } catch (error) {
+        throw new Error(`Formatting lint results failed: ${error instanceof Error ? error.message : error}`);
+    }
+}
+
+/**
+ * Lints Concerto models using Spectral and Concerto rules.
+ *
+ * @param {string | object} model - The Concerto model to lint, either as a CTO string or a parsed AST object.
+ * @param {options} [config] - Linting configuration options.
+ * @param {string} [config.ruleset] - Path to a custom Spectral ruleset or 'default' to use the built-in ruleset.
+ * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results. Defaults to excluding 'concerto.*' and 'org.accord.*'.
+ * @returns {Promise<lintResult[]>} Promise resolving to an array of formatted linting results as an JSON object.
+ * @throws {Error} Throws if linting or model conversion fails.
+ */
+export async function lintModel(model: string | object, config?: options): Promise<lintResult[]> {
     try {
         const jsonAST = convertToJsonAST(model);
-        const ruleset = await loadRuleset(rulesetOption);
+        const ruleset = await loadRuleset(config?.ruleset);
 
         const spectral = new Spectral();
         spectral.setRuleset(ruleset);
 
         const document = new Document(jsonAST, JsonParsers);
-        return await spectral.run(document);
+        const spectralResults = await spectral.run(document);
+        return formatResults(spectralResults, jsonAST, config?.excludeNamespaces);
+
     } catch (error) {
         throw new Error(`Linting process failed: ${error instanceof Error ? error.message : error}`);
     }

@@ -36,13 +36,13 @@ async function findLocalRuleset(): Promise<string | null> {
 
 /**
  * Resolves the Spectral ruleset location based on user input or directory search
- * @param {string} [rulesetOption] - User-provided ruleset path or 'default'
+ * @param {string} [customPath] User-provided ruleset path
  * @returns {Promise<string | null>} Path to custom ruleset, null for default ruleset
  */
-export async function resolveRulesetPath(rulesetOption?: string): Promise<string | null> {
-    if (!rulesetOption) {
+export async function resolveRulesetPath(customPath?: string): Promise<string | null> {
+    if (!customPath) {
         return await findLocalRuleset();
     }
 
-    return rulesetOption === 'default' ? null : rulesetOption;
+    return customPath;
 }
