@@ -1,0 +1,18 @@
+namespace org.example@1.0.0
+
+abstract concept Vehicle {
+  o String make
+  o String model
+}
+
+concept Car extends Vehicle {
+  o Integer numberOfDoors
+}
+
+abstract asset Product {
+  o String productId
+}
+
+asset Electronics extends Product {
+  o String brand
+}
