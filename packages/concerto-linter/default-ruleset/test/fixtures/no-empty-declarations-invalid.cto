@@ -1,0 +1,10 @@
+namespace org.example@1.0.0
+
+concept EmptyConcept {
+}
+
+asset EmptyAsset {
+}
+
+enum EmptyEnum {
+}

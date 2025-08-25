@@ -1,0 +1,5 @@
+namespace org.example
+
+concept Product {
+  o String name
+}
