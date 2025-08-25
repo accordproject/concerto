@@ -58,13 +58,13 @@ function handleArguments(argument){
                 name: argument.type.name,
                 namespace: argument.type.namespace,
                 resolvedName: argument.type.resolvedName,
-                isArray: argument.isArray,
+                isArray: String(argument.isArray), // store as string for failsafe
             }
         };
     }
     return {
         type: mapClassToType[argument.$class],
-        value: argument.value,
+        value: String(argument.value) // store all scalars as string for failsafe
     };
 }
 
@@ -116,13 +116,7 @@ function jsonToYaml(dcsJson){
         commands: dcsJson.commands.map(handleCommands)
     };
 
-    let yamlString = yaml.stringify(simplifiedDcsJson);
-
-    // change stringified booleans, numbers (if present) to non stringified values
-    yamlString = yamlString.replace(/: "(true|false)"/g, ': $1');
-    yamlString = yamlString.replace(/: "(\d+(\.\d+)?)"/g, ': $1');
-
-    return yamlString;
+    return yaml.stringify(simplifiedDcsJson, { schema: 'failsafe' });
 }
 
 
@@ -152,15 +146,25 @@ function restoreArguments(MetaModelNamespace, argument){
                 ... ( argument.typeReference.namespace !== undefined ? { namespace: argument.typeReference.namespace } : {} ),
                 ... ( argument.typeReference.resolvedName !== undefined ? { resolvedName: argument.typeReference.resolvedName } : {} ),
             },
-            isArray: argument.typeReference.isArray
+            isArray: argument.typeReference.isArray === 'true' || argument.typeReference.isArray === true
         };
     }
+    const type = argument.type;
+    let value = argument.value;
+    if (type === 'Number')
+    {
+        value = Number(value);
+    }
+    else if (type === 'Boolean')
+    {
+        value = value === 'true';
+    }
+
     return {
-        $class: mapTypeToClass[argument.type],
-        value: argument.type === 'String' ? String(argument.value) : argument.value  ,
+        $class: mapTypeToClass[type],
+        value,
     };
 }
-
 
 /**
  * handles the decorator of each command for yaml to json
@@ -203,7 +207,7 @@ function restoreCommands(dcsNamespace, command){
  * @returns {object} the DCS JSON
  */
 function yamlToJson(yamlString){
-    const parsedJson = yaml.parse(yamlString);
+    const parsedJson = yaml.parse(yamlString, { schema: 'failsafe' });
     const dcsNamespace = 'org.accordproject.decoratorcommands@' + parsedJson.decoratorCommandsVersion;
     const dcsJson = {
         $class: ModelUtil.getFullyQualifiedName(dcsNamespace, 'DecoratorCommandSet'),
