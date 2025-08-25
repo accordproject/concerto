@@ -1,0 +1,10 @@
+namespace org.example@1.0.0
+
+scalar Email extends String length=[5, 100]
+
+
+concept Person {
+  o String firstName length=[1, 50]
+  o String lastName length=[1, 50]
+  o String email length=[5, 100]
+}

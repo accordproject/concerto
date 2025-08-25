@@ -1,0 +1,16 @@
+namespace org.example@1.0.0
+
+concept ValidProduct {
+  o String productId
+  o Double price
+  o Integer quantity
+}
+
+asset ValidAsset {
+  o String assetId
+}
+
+enum ValidEnum {
+  o FIRST_VALUE
+  o SECOND_VALUE
+}

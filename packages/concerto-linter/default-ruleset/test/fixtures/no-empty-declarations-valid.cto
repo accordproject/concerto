@@ -1,0 +1,16 @@
+namespace org.example@1.0.0
+
+concept Person {
+  o String firstName
+  o String lastName
+}
+
+asset Product {
+  o String productId
+  o Double price
+}
+
+enum Status {
+  o ACTIVE
+  o INACTIVE
+}

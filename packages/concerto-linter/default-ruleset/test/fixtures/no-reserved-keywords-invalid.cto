@@ -1,0 +1,16 @@
+namespace org.example@1.0.0
+
+concept String {
+  o String string
+  o Double double
+}
+
+asset Asset {
+  o Integer integer
+  o Boolean boolean
+}
+
+enum DateTime {
+  o EVENT
+  o TRANSACTION
+}
