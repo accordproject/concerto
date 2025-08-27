@@ -23,7 +23,7 @@
   ],
   "name": "concerto",
   "description": "Define and introspect data models",
-  "version": "3.23.0",
+  "version": "3.24.0",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
