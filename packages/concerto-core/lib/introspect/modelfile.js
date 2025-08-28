@@ -222,7 +222,46 @@ class ModelFile extends Decorated {
         super.validate();
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
-
+        this.imports.forEach((imp) => {
+            if (this.getModelManager().isAliasedTypeEnabled()) {
+                // Check that no locally declared type conflicts with imported type names
+                this.declarations.forEach(declaration => {
+                    const localDeclarationName = declaration.getName();
+                    if(imp.types){
+                        if(imp.aliasedTypes){
+                            imp.aliasedTypes.forEach((atypes) => {
+                                const importedName=atypes.aliasedName;
+                                if (importedName === localDeclarationName) {
+                                    throw new IllegalModelException(
+                                        'already defined in an imported model',
+                                        this
+                                    );
+                                }
+                            });
+                        }
+                        else{
+                            imp.types.forEach((t) => {
+                                const importedName=t;
+                                if (importedName === localDeclarationName) {
+                                    throw new IllegalModelException(
+                                        'already defined in an imported model',
+                                        this
+                                    );
+                                }
+                            });
+                        }
+                    }
+                    else{
+                        if (imp.name === localDeclarationName) {
+                            throw new IllegalModelException(
+                                'already defined in an imported model',
+                                this
+                            );
+                        }
+                    }
+                });
+            }
+        });
         // Validate all of the imports to check that they reference
         // namespaces or types that actually exist.
         this.getImports().forEach((importFqn) => {
