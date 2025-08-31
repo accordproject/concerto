@@ -32,9 +32,8 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "3.24.0",
     "@accordproject/concerto-linter-default-ruleset": "3.24.0",
-    "@accordproject/concerto-metamodel": "3.12.4",
+    "@accordproject/concerto-cto": "3.24.0",
     "find-up": "5.0.0",
     "@stoplight/spectral-cli": "6.15.0",
     "@stoplight/spectral-core": "1.20.0",
