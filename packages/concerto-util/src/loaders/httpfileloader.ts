@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const axios = require('axios');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const url = require('url');
 
 /**
@@ -24,31 +24,33 @@ const url = require('url');
  * @memberof module:concerto-util
  */
 class HTTPFileLoader {
+    private processFile: any;
+
     /**
      * Create the HTTPFileLoader.
-     * @param {*} processFile - a function to apply to the content of the file
+     * @param processFile - a function to apply to the content of the file
      */
-    constructor(processFile) {
+    constructor(processFile: any) {
         this.processFile = processFile;
     }
 
     /**
      * Returns true if this ModelLoader can process the URL
-     * @param {string} url - the URL
-     * @return {boolean} true if this ModelLoader accepts the URL
+     * @param url - the URL
+     * @returns true if this ModelLoader accepts the URL
      * @abstract
      */
-    accepts(url) {
+    accepts(url: string): boolean {
         return url.startsWith('http://') || url.startsWith('https://');
     }
 
     /**
      * Load a File from a URL and return it
-     * @param {string} requestUrl - the url to get
-     * @param {object} options - additional options
-     * @return {Promise} a promise to the File
+     * @param requestUrl - the url to get
+     * @param options - additional options
+     * @returns a promise to the File
      */
-    load(requestUrl, options) {
+    load(requestUrl: string, options?: any): Promise<any> {
 
         if(!options) {
             options = {};
@@ -59,8 +61,8 @@ class HTTPFileLoader {
         request.method = 'get';
         request.responseType = 'text';
         return axios(request)
-            .then((response) => {
-                let parsedUrl = url.parse(requestUrl);
+            .then((response: any) => {
+                const parsedUrl = url.parse(requestUrl);
                 // external Files have a name that starts with '@'
                 // (so that they are identified as external when an archive is read back in)
                 const name = '@' + (parsedUrl.host + parsedUrl.pathname).replace(/\//g, '.');
@@ -69,4 +71,5 @@ class HTTPFileLoader {
     }
 }
 
+export { HTTPFileLoader };
 module.exports = HTTPFileLoader;

@@ -12,55 +12,66 @@
  * limitations under the License.
  */
 
-'use strict';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const BaseException = require('./baseexception');
 
 /**
  * Exception throws when a Concerto file is semantically invalid
  * @extends BaseException
- * @see {@link BaseException}
+ * @see See  {@link BaseException}
  * @class
  * @memberof module:concerto-core
  */
-class BaseFileException extends BaseException {
+export class BaseFileException extends BaseException {
+    private fileLocation?: any;
+    private shortMessage: string;
+    private fileName?: string;
+
     /**
      * Create an BaseFileException
-     * @param {string} message - the message for the exception
-     * @param {string} fileLocation - the optional file location associated with the exception
-     * @param {string} fullMessage - the optional full message text
-     * @param {string} [fileName] - the file name
-     * @param {string} [component] - the component which throws this error
+     * @param message - the message for the exception
+     * @param fileLocation - the file location
+     * @param fullMessage - the full message text
+     * @param fileName - the file name
+     * @param component - the component which throws this exception
      */
-    constructor(message, fileLocation, fullMessage, fileName, component) {
-        super(fullMessage ? fullMessage : message, component);
+    constructor(message: string, fileLocation?: any, fullMessage?: string, fileName?: string, component?: string) {
+        let messageWithFileLocation = message;
+        if (fileLocation && typeof fileLocation === 'string') {
+            messageWithFileLocation += ' File location: ' + fileLocation;
+        }
+        super(messageWithFileLocation, component);
         this.fileLocation = fileLocation;
         this.shortMessage = message;
         this.fileName = fileName;
+
+        if (fullMessage) {
+            this.message = fullMessage;
+        }
     }
 
     /**
      * Returns the file location associated with the exception or null
-     * @return {string} the optional location associated with the exception
+     * @returns the optional file location associated with the exception
      */
-    getFileLocation() {
+    getFileLocation(): any {
         return this.fileLocation;
     }
 
     /**
-     * Returns the error message without the location of the error
-     * @returns {string} the error message
+     * Returns the file name associated with the exception or null
+     * @returns the optional file name associated with the exception
      */
-    getShortMessage() {
-        return this.shortMessage;
+    getFileName(): string | undefined {
+        return this.fileName;
     }
 
     /**
-     * Returns the fileName for the error
-     * @returns {string} the file name or null
+     * Returns the shortened version of the error message (without the file location)
+     * @returns the short error message
      */
-    getFileName() {
-        return this.fileName;
+    getShortMessage(): string {
+        return this.shortMessage;
     }
 }
 

@@ -12,7 +12,8 @@
  * limitations under the License.
  */
 
-import { ErrorCodes } from './errorcodes';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ErrorCodes = require('./errorcodes');
 
 /**
 * A base class for all Concerto exceptions
@@ -41,3 +42,5 @@ export class BaseException extends Error {
         }
     }
 }
+
+module.exports = BaseException;

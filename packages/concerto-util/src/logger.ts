@@ -12,19 +12,18 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const colors = require('colors/safe');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const jsonColorize = require('json-colorizer');
 
 /**
  * Default levels for the npm configuration.
- * @type {Object}
  */
-const levels = {
+const levels: Record<string, number> = {
     error: 0,
     warn: 1,
     info: 2,
@@ -36,9 +35,8 @@ const levels = {
 
 /**
  * Default levels for the npm configuration.
- * @type {Object}
  */
-const colorMap = {
+const colorMap: Record<string, string> = {
     error: 'red',
     warn: 'yellow',
     info: 'green',
@@ -47,16 +45,16 @@ const colorMap = {
     silly: 'magenta'
 };
 
-const timestamp = () => (new Date()).toLocaleTimeString();
-const colorize = level => colors[colorMap[level]](level.toUpperCase());
+const timestamp = (): string => (new Date()).toLocaleTimeString();
+const colorize = (level: string): string => colors[colorMap[level]](level.toUpperCase());
 
 /**
 * Helper function to test if a string is a stringified version of a JSON object
-* @param {string} str - the input string to test
-* @returns {boolean} - true iff the string can be parsed as JSON
+* @param str - the input string to test
+* @returns true iff the string can be parsed as JSON
 * @private
 */
-const isJson = (str) => {
+const isJson = (str: any): boolean => {
     try {
         return (JSON.parse(str) && !!str);
     } catch (e) {
@@ -66,11 +64,11 @@ const isJson = (str) => {
 
 /**
 * Helper function to color and format JSON objects
-* @param {any} obj - the input obj to prettify
-* @returns {any} - the prettified object
+* @param obj - the input obj to prettify
+* @returns the prettified object
 * @private
 */
-const prettifyJson = (obj) => {
+const prettifyJson = (obj: any): any => {
     if(typeof obj === 'object' || isJson(obj)) {
         return jsonColorize(obj, { pretty: true, colors });
     }
@@ -79,12 +77,12 @@ const prettifyJson = (obj) => {
 
 /**
 * The default transport for logging at multiple levels to the console
-* @param {string} level - the required log level. e.g. error, warn, info, debug, etc.
-* @param {any} obj - the input obj to prettify
-* @returns {void} -
+* @param level - the required log level. e.g. error, warn, info, debug, etc.
+* @param args - the input args to prettify
+* @returns void
 * @private
 */
-const defaultTransportShim = (level, ...args) => {
+const defaultTransportShim = (level: string, ...args: any[]): void => {
     let mutatedLevel = level;
     let data = args;
     let first = data.shift();
@@ -113,29 +111,32 @@ const defaultTransportShim = (level, ...args) => {
             .map(prettifyJson)
     );
 };
-const defaultTransport = {};
+const defaultTransport: Record<string, (...args: any[]) => void> = {};
 Object.keys(levels).forEach(level => {
-    defaultTransport[level] = (...args) => defaultTransportShim(level, ...args);
+    defaultTransport[level] = (...args: any[]) => defaultTransportShim(level, ...args);
 });
 
 /**
  * A utility class with static function that print to the console
  * @private
  */
-class Logger {
+export class Logger {
+    static level: string = 'info';
+    static transports: any[] = [defaultTransport];
+
     /**
     * A reusable function for logging at multiple levels
-    * @param {string} level - the required log level. e.g. error, warn, info, debug, etc.
-    * @param {any} obj - the input obj to prettify
-    * @returns {void} -
+    * @param level - the required log level. e.g. error, warn, info, debug, etc.
+    * @param args - the input args to prettify
+    * @returns void
     * @private
     */
-    static dispatch(level, ...args) {
+    static dispatch(level: string, ...args: any[]): void {
         if (levels[level] > levels[this.level]){
             return;
         }
 
-        this.transports.forEach(t => {
+        this.transports.forEach((t: any) => {
             if(t[level]){
                 t[level](...args);
             }
@@ -144,11 +145,11 @@ class Logger {
 
     /**
     * Add a custom transport for logging
-    * @param {Object} transport - The transport object should have function for the usual logging operations e.g. error, warn, info, debug, etc.
-    * @returns {void} -
+    * @param transport - The transport object should have function for the usual logging operations e.g. error, warn, info, debug, etc.
+    * @returns void
     * @private
     */
-    static add(transport) {
+    static add(transport: any): void {
         this.transports.push(transport);
     }
 
@@ -156,95 +157,81 @@ class Logger {
      * Write an error statement to the console.
      *
      * Prints to `stderr` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static error(...args){ return this.dispatch('error', ...args); }
+    static error(...args: any[]): void { return this.dispatch('error', ...args); }
 
     /**
      * Write a warning statement to the console.
      *
      * Prints to `stderr` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static warn(...args){ return this.dispatch('warn', ...args); }
+    static warn(...args: any[]): void { return this.dispatch('warn', ...args); }
 
     /**
      * Write an info statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static info(...args){ return this.dispatch('info', ...args); }
+    static info(...args: any[]): void { return this.dispatch('info', ...args); }
 
     /**
      * Write an info statement to the console. Alias for `logger.log`
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static log(...args){ return this.info(...args); }
+    static log(...args: any[]): void { return this.info(...args); }
 
     /**
      * Write an http statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static http(...args){ return this.dispatch('http', ...args); }
+    static http(...args: any[]): void { return this.dispatch('http', ...args); }
 
     /**
      * Write a verbose log statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static verbose(...args){ return this.dispatch('verbose', ...args); }
+    static verbose(...args: any[]): void { return this.dispatch('verbose', ...args); }
 
     /**
      * Write a debug statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static debug(...args){ return this.dispatch('debug', ...args); }
+    static debug(...args: any[]): void { return this.dispatch('debug', ...args); }
 
     /**
      * Write a silly level statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
+     * @param args - if this is an object with properties `level` and `message` it will be flattened first
+     * @returns void
      * @private
      */
-    static silly(...args){ return this.dispatch('silly', ...args); }
+    static silly(...args: any[]): void { return this.dispatch('silly', ...args); }
 }
-
-// Set the default logging level
-Logger.level = 'info';
-
-// A list of user-provided logging tranports
-Logger.transports = [ defaultTransport ];
 
 module.exports = Logger;

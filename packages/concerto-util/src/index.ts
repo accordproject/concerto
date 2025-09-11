@@ -52,3 +52,44 @@ export { Identifiers } from './identifiers';
 
 // ErrorCodes
 export { ErrorCodes } from './errorcodes';
+
+// ModelWriter functions
+export { writeModelsToFileSystem } from './modelwriter';
+
+// CommonJS exports for test compatibility
+const BaseException = require('./baseexception');
+const BaseFileException = require('./basefileexception');
+const FileDownloader = require('./filedownloader');
+const CompositeFileLoader = require('./loaders/compositefileloader');
+const DefaultFileLoader = require('./loaders/defaultfileloader');
+const GitHubFileLoader = require('./loaders/githubfileloader');
+const HTTPFileLoader = require('./loaders/httpfileloader');
+const Writer = require('./writer');
+const FileWriter = require('./filewriter');
+const ModelWriter = require('./modelwriter');
+const InMemoryWriter = require('./inmemorywriter');
+const Logger = require('./logger');
+const TypedStack = require('./typedstack');
+const { labelToSentence, sentenceToLabel } = require('./label');
+const { isValidIdentifier, normalizeIdentifier } = require('./identifiers');
+const ErrorCodes = require('./errorcodes');
+
+module.exports = {
+    BaseException,
+    BaseFileException,
+    FileDownloader,
+    CompositeFileLoader,
+    DefaultFileLoader,
+    GitHubFileLoader,
+    HTTPFileLoader,
+    Writer,
+    FileWriter,
+    ModelWriter,
+    InMemoryWriter,
+    Logger,
+    TypedStack,
+    Label: { labelToSentence, sentenceToLabel },
+    Identifiers: { isValidIdentifier, normalizeIdentifier },
+    ErrorCodes,
+    writeModelsToFileSystem: ModelWriter.writeModelsToFileSystem
+};

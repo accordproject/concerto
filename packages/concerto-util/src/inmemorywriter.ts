@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Writer = require('./writer');
 
 /**
@@ -26,7 +25,9 @@ const Writer = require('./writer');
  * @class
  * @memberof module:concerto-core
  */
-class InMemoryWriter extends Writer {
+export class InMemoryWriter extends Writer {
+    private fileName: string;
+    private data: Map<string, string>;
 
     /**
      * Create a FileWriter.
@@ -41,16 +42,16 @@ class InMemoryWriter extends Writer {
     /**
      * Creates the filename which will be used for association with its string content.
      *
-     * @param {string} fileName - the name of the file.
+     * @param fileName - the name of the file.
      */
-    openFile(fileName) {
+    openFile(fileName: string): void {
         this.fileName = fileName;
     }
 
     /**
      * Writes the contents of the buffer to the Map store.
      */
-    closeFile() {
+    closeFile(): void {
         this.data.set(this.fileName, this.getBuffer());
         this.clearBuffer();
     }
@@ -58,10 +59,11 @@ class InMemoryWriter extends Writer {
     /**
      * Returns the content of the Map store.
      *
-     * @return {Map} - a Map containing the string representation of files. (k,v) => (filename, file content).
+     * @returns a Map containing the string representation of files. (k,v) => (filename, file content).
      */
-    getFilesInMemory() {
+    getFilesInMemory(): Map<string, string> {
         return this.data;
     }
 }
+
 module.exports = InMemoryWriter;
