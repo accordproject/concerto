@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Concerto utility module. Concerto is a framework for defining domain
  * specific models.
@@ -22,37 +20,58 @@
  */
 
 // Exceptions
-const BaseException = require('./baseexception');
-const BaseFileException = require('./basefileexception');
+export { BaseException } from './baseexception';
+export { BaseFileException } from './basefileexception';
 
 // Transitive closure downloader
-const FileDownloader = require('./filedownloader');
+export { FileDownloader } from './filedownloader';
 
 // File Loaders
+export { CompositeFileLoader } from './loaders/compositefileloader';
+export { DefaultFileLoader } from './loaders/defaultfileloader';
+export { GitHubFileLoader } from './loaders/githubfileloader';
+export { HTTPFileLoader } from './loaders/httpfileloader';
+
+// Writers
+export { Writer } from './writer';
+export { FileWriter } from './filewriter';
+export { ModelWriter } from './modelwriter';
+export { InMemoryWriter } from './inmemorywriter';
+
+// Logger
+export { Logger } from './logger';
+
+// TypedStack
+export { TypedStack } from './typedstack';
+
+// Label
+export { Label } from './label';
+
+// Identifiers
+export { Identifiers } from './identifiers';
+
+// ErrorCodes
+export { ErrorCodes } from './errorcodes';
+
+// ModelWriter functions
+export { writeModelsToFileSystem } from './modelwriter';
+
+// CommonJS exports for test compatibility
+const BaseException = require('./baseexception');
+const BaseFileException = require('./basefileexception');
+const FileDownloader = require('./filedownloader');
 const CompositeFileLoader = require('./loaders/compositefileloader');
 const DefaultFileLoader = require('./loaders/defaultfileloader');
 const GitHubFileLoader = require('./loaders/githubfileloader');
 const HTTPFileLoader = require('./loaders/httpfileloader');
-
-// Writers
 const Writer = require('./writer');
 const FileWriter = require('./filewriter');
 const ModelWriter = require('./modelwriter');
 const InMemoryWriter = require('./inmemorywriter');
-
-// Logger
 const Logger = require('./logger');
-
-// TypedStack
 const TypedStack = require('./typedstack');
-
-// Label
-const Label = require('./label');
-
-// Identifiers
-const Identifiers = require('./identifiers');
-
-//errorcodes
+const { labelToSentence, sentenceToLabel } = require('./label');
+const { isValidIdentifier, normalizeIdentifier } = require('./identifiers');
 const ErrorCodes = require('./errorcodes');
 
 module.exports = {
@@ -65,11 +84,12 @@ module.exports = {
     HTTPFileLoader,
     Writer,
     FileWriter,
-    InMemoryWriter,
     ModelWriter,
+    InMemoryWriter,
     Logger,
     TypedStack,
-    Label,
-    Identifiers,
-    ErrorCodes
+    Label: { labelToSentence, sentenceToLabel },
+    Identifiers: { isValidIdentifier, normalizeIdentifier },
+    ErrorCodes,
+    writeModelsToFileSystem: ModelWriter.writeModelsToFileSystem
 };

@@ -12,10 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const CompositeFileLoader = require('./compositefileloader');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const HTTPFileLoader = require('./httpfileloader');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const GitHubFileLoader = require('./githubfileloader');
 
 /**
@@ -31,9 +32,9 @@ const GitHubFileLoader = require('./githubfileloader');
 class DefaultFileLoader extends CompositeFileLoader {
     /**
      * Create the DefaultFileLoader.
-     * @param {*} processFile - a function to apply to the content of the file
+     * @param processFile - a function to apply to the content of the file
      */
-    constructor(processFile) {
+    constructor(processFile: any) {
         super();
         const http = new HTTPFileLoader(processFile);
         const github = new GitHubFileLoader(processFile);
@@ -42,4 +43,5 @@ class DefaultFileLoader extends CompositeFileLoader {
     }
 }
 
+export { DefaultFileLoader };
 module.exports = DefaultFileLoader;

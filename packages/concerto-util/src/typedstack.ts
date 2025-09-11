@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Tracks a stack of typed instances. The type information is used to detect
  * overflow / underflow bugs by the caller. It also performs basic sanity
@@ -21,23 +19,24 @@
  * @class
  * @memberof module:concerto-core
  */
-class TypedStack {
+export class TypedStack {
+    private stack: any[];
 
     /**
    * Create the Stack with the resource at the head.
-   * @param {Object} resource - the resource to be put at the head of the stack
+   * @param resource - the resource to be put at the head of the stack
    */
-    constructor(resource) {
+    constructor(resource: any) {
         this.stack = [];
         this.push(resource);
     }
 
     /**
      * Push a new object.
-     * @param {Object} obj - the object being visited
-     * @param {Object} expectedType - the expected type of the object being pushed
+     * @param obj - the object being visited
+     * @param expectedType - the expected type of the object being pushed
      */
-    push(obj, expectedType) {
+    push(obj: any, expectedType?: any): void {
         if(expectedType && !(obj instanceof expectedType)) {
             throw new Error('Did not find expected type ' + expectedType.constructor.name + ' as argument to push. Found: ' + obj.toString());
         }
@@ -47,21 +46,21 @@ class TypedStack {
     }
 
     /**
-     * Push a new object.
-     * @param {Object} expectedType - the type that should be the result of pop
-     * @return {Object} the result of pop
+     * Pop an object from the stack.
+     * @param expectedType - the type that should be the result of pop
+     * @returns the result of pop
      */
-    pop(expectedType) {
+    pop(expectedType?: any): any {
         this.peek(expectedType);
         return this.stack.pop();
     }
 
     /**
      * Peek the top of the stack
-     * @param {Object} expectedType - the type that should be the result of pop
-     * @return {Object} the result of peek
+     * @param expectedType - the type that should be the result of pop
+     * @returns the result of peek
      */
-    peek(expectedType) {
+    peek(expectedType?: any): any {
 
         // console.log( 'pop ' );
 
@@ -80,7 +79,7 @@ class TypedStack {
     /**
      * Clears the stack
      */
-    clear() {
+    clear(): void {
         this.stack = [];
     }
 }

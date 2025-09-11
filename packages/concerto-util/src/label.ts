@@ -12,14 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Inserts correct spacing and capitalization to a camelCase label
- * @param {string} labelName - the label text to be transformed
- * @returns {string} - The label text formatted for rendering
+ * @param labelName - the label text to be transformed
+ * @returns The label text formatted for rendering
  */
-function labelToSentence(labelName = '') {
+function labelToSentence(labelName: string = ''): string {
     return labelName
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/([A-Z])([a-z])/g, ' $1$2')
@@ -30,10 +28,10 @@ function labelToSentence(labelName = '') {
 
 /**
  * Create a camelCase label from a sentence
- * @param {string} sentence - the sentence
- * @returns {string} - The camelCase label
+ * @param sentence - the sentence
+ * @returns The camelCase label
  */
-function sentenceToLabel(sentence = '') {
+function sentenceToLabel(sentence: string = ''): string {
     const split = sentence.split(/[^A-Za-z0-9_-]+/);
     split.forEach((word, index) => {
         split[index] = split[index].replace(/^./, str => str.toUpperCase());
@@ -41,6 +39,11 @@ function sentenceToLabel(sentence = '') {
     const joined = split.join('');
     return joined.replace(/^./, str => str.toLowerCase());
 }
+
+export const Label = {
+    labelToSentence,
+    sentenceToLabel,
+};
 
 module.exports = {
     labelToSentence,

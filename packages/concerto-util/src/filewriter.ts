@@ -12,11 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Writer = require('./writer');
 
 /**
@@ -30,15 +29,18 @@ const Writer = require('./writer');
  * @class
  * @memberof module:concerto-core
  */
-class FileWriter extends Writer {
+export class FileWriter extends Writer {
+    private outputDirectory: string;
+    private relativeDir: string | null;
+    private fileName: string | null;
 
     /**
      * Create a FileWriter.
      *
-     * @param {string} outputDirectory - the path to an output directory
+     * @param outputDirectory - the path to an output directory
      * that will be used to store generated files.
      */
-    constructor(outputDirectory) {
+    constructor(outputDirectory: string) {
         super();
         this.outputDirectory = outputDirectory;
         this.relativeDir = null;
@@ -50,9 +52,9 @@ class FileWriter extends Writer {
      * Opens a file for writing. The file will be created in the
      * root directory of this FileWriter.
      *
-     * @param {string} fileName - the name of the file to open
+     * @param fileName - the name of the file to open
      */
-    openFile(fileName) {
+    openFile(fileName: string): void {
         this.fileName = fileName;
         this.relativeDir = null;
     }
@@ -61,20 +63,20 @@ class FileWriter extends Writer {
      * Opens a file for writing, with a location relative to the
      * root directory of this FileWriter.
      *
-     * @param {string} relativeDir - the relative directory to use
-     * @param {string} fileName - the name of the file to open
+     * @param relativeDir - the relative directory to use
+     * @param fileName - the name of the file to open
      */
-    openRelativeFile(relativeDir, fileName) {
+    openRelativeFile(relativeDir: string, fileName: string): void {
         this.relativeDir = relativeDir;
         this.fileName = fileName;
     }
 
     /**
      * Writes text to the current open file
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeLine(tabs,text) {
+    writeLine(tabs: number, text: string): void {
         if (this.fileName) {
             super.writeLine(tabs,text);
         } else {
@@ -84,10 +86,10 @@ class FileWriter extends Writer {
 
     /**
      * Writes text to the start of the current open file
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeBeforeLine(tabs,text) {
+    writeBeforeLine(tabs: number, text: string): void {
         if (this.fileName) {
             super.writeBeforeLine(tabs,text);
         } else {
@@ -98,7 +100,7 @@ class FileWriter extends Writer {
     /**
      * Closes the current open file
      */
-    closeFile() {
+    closeFile(): void {
         if (!this.fileName) {
             throw new Error('No file open');
         }

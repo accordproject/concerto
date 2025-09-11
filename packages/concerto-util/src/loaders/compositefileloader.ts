@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * <p>
  * Manages a set of model file loaders, delegating to the first model file
@@ -24,6 +22,8 @@
  * @memberof module:concerto-util
  */
 class CompositeFileLoader {
+    private fileLoaders: any[];
+
     /**
      * Create the CompositeFileLoader. Used to delegate to a set of FileLoaders.
      */
@@ -33,35 +33,35 @@ class CompositeFileLoader {
 
     /**
      * Adds a FileLoader implemenetation to the FileLoader
-     * @param {*} fileLoader - The script to add to the ScriptManager
+     * @param fileLoader - The script to add to the ScriptManager
      */
-    addFileLoader(fileLoader) {
+    addFileLoader(fileLoader: any): void {
         this.fileLoaders.push(fileLoader);
     }
 
     /**
      * Get the array of FileLoader instances
-     * @return {*} The FileLoader registered
+     * @returns The FileLoader registered
      * @private
      */
-    getFileLoaders() {
+    getFileLoaders(): any[] {
         return this.fileLoaders;
     }
 
     /**
      * Remove all registered FileLoaders
      */
-    clearFileLoaders() {
+    clearFileLoaders(): void {
         this.fileLoaders = [];
     }
 
     /**
      * Returns true if this ModelLoader can process the URL
-     * @param {string} url - the URL
-     * @return {boolean} true if this ModelLoader accepts the URL
+     * @param url - the URL
+     * @returns true if this ModelLoader accepts the URL
      * @abstract
      */
-    accepts(url) {
+    accepts(url: string): boolean {
         for (let n = 0; n < this.fileLoaders.length; n++) {
             const ml = this.fileLoaders[n];
 
@@ -75,11 +75,11 @@ class CompositeFileLoader {
 
     /**
      * Load a File from a URL and return it
-     * @param {string} url - the url to get
-     * @param {object} options - additional options
-     * @return {Promise} a promise to the File
+     * @param url - the url to get
+     * @param options - additional options
+     * @returns a promise to the File
      */
-    load(url, options) {
+    load(url: string, options?: any): Promise<any> {
         for (let n = 0; n < this.fileLoaders.length; n++) {
             const ml = this.fileLoaders[n];
 
@@ -92,4 +92,5 @@ class CompositeFileLoader {
     }
 }
 
+export { CompositeFileLoader };
 module.exports = CompositeFileLoader;
