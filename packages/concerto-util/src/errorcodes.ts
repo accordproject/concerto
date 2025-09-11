@@ -12,15 +12,16 @@
  * limitations under the License.
  */
 
-'use strict';
-
-//default base exception
-const DEFAULT_BASE_EXCEPTION = 'DefaultBaseException';
-//default validator exception which is being used when there is no specified validator exception in introspect
-const DEFAULT_VALIDATOR_EXCEPTION = 'DefaultValidatorException';
-// exception code for regex validator format error
-const REGEX_VALIDATOR_EXCEPTION = 'RegexValidatorException';
-// base exception for Type not found
-const TYPE_NOT_FOUND_EXCEPTION = 'TypeNotFoundException';
-
-module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION};
+/**
+ * Error codes for Concerto exceptions
+ */
+export const ErrorCodes = {
+    //default base exception
+    DEFAULT_BASE_EXCEPTION: 'DefaultBaseException',
+    //default validator exception which is being used when there is no specified validator exception in introspect
+    DEFAULT_VALIDATOR_EXCEPTION: 'DefaultValidatorException',
+    // exception code for regex validator format error
+    REGEX_VALIDATOR_EXCEPTION: 'RegexValidatorException',
+    // base exception for Type not found
+    TYPE_NOT_FOUND_EXCEPTION: 'TypeNotFoundException'
+} as const;

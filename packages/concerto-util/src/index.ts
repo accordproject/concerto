@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Concerto utility module. Concerto is a framework for defining domain
  * specific models.
@@ -22,54 +20,35 @@
  */
 
 // Exceptions
-const BaseException = require('./baseexception');
-const BaseFileException = require('./basefileexception');
+export { BaseException } from './baseexception';
+export { BaseFileException } from './basefileexception';
 
 // Transitive closure downloader
-const FileDownloader = require('./filedownloader');
+export { FileDownloader } from './filedownloader';
 
 // File Loaders
-const CompositeFileLoader = require('./loaders/compositefileloader');
-const DefaultFileLoader = require('./loaders/defaultfileloader');
-const GitHubFileLoader = require('./loaders/githubfileloader');
-const HTTPFileLoader = require('./loaders/httpfileloader');
+export { CompositeFileLoader } from './loaders/compositefileloader';
+export { DefaultFileLoader } from './loaders/defaultfileloader';
+export { GitHubFileLoader } from './loaders/githubfileloader';
+export { HTTPFileLoader } from './loaders/httpfileloader';
 
 // Writers
-const Writer = require('./writer');
-const FileWriter = require('./filewriter');
-const ModelWriter = require('./modelwriter');
-const InMemoryWriter = require('./inmemorywriter');
+export { Writer } from './writer';
+export { FileWriter } from './filewriter';
+export { ModelWriter } from './modelwriter';
+export { InMemoryWriter } from './inmemorywriter';
 
 // Logger
-const Logger = require('./logger');
+export { Logger } from './logger';
 
 // TypedStack
-const TypedStack = require('./typedstack');
+export { TypedStack } from './typedstack';
 
 // Label
-const Label = require('./label');
+export { Label } from './label';
 
 // Identifiers
-const Identifiers = require('./identifiers');
+export { Identifiers } from './identifiers';
 
-//errorcodes
-const ErrorCodes = require('./errorcodes');
-
-module.exports = {
-    BaseException,
-    BaseFileException,
-    FileDownloader,
-    CompositeFileLoader,
-    DefaultFileLoader,
-    GitHubFileLoader,
-    HTTPFileLoader,
-    Writer,
-    FileWriter,
-    InMemoryWriter,
-    ModelWriter,
-    Logger,
-    TypedStack,
-    Label,
-    Identifiers,
-    ErrorCodes
-};
+// ErrorCodes
+export { ErrorCodes } from './errorcodes';
