@@ -17,7 +17,7 @@ import { Json as JsonParsers } from '@stoplight/spectral-parsers';
 import { resolveRulesetPath } from './config-loader';
 import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/getRuleset';
 import  concertoRuleset  from '@accordproject/concerto-linter-default-ruleset';
-import { ModelManager } from '@accordproject/concerto-core';
+import { Parser } from '@accordproject/concerto-cto';
 
 interface options {
     /** Path to a custom Spectral ruleset or 'default' to use the built-in ruleset */
@@ -57,9 +57,8 @@ interface lintResult {
 function convertToJsonAST(model: string | object): string {
     try {
         if (typeof model === 'string') {
-            const manager = new ModelManager();
-            manager.addCTOModel(model);
-            return JSON.stringify(manager.getAst());
+            const modelFile = Parser.parseModels([model]);
+            return JSON.stringify(modelFile);
         }
         return JSON.stringify(model);
     } catch (error) {
@@ -149,13 +148,12 @@ function formatResults(
 
 /**
  * Lints Concerto models using Spectral and Concerto rules.
- *
- * @param {string | object} model - The Concerto model to lint, either as a CTO string or a parsed AST object.
- * @param {options} [config] - Linting configuration options.
- * @param {string} [config.ruleset] - Path to a custom Spectral ruleset or 'default' to use the built-in ruleset.
- * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results. Defaults to excluding 'concerto.*' and 'org.accord.*'.
- * @returns {Promise<lintResult[]>} Promise resolving to an array of formatted linting results as an JSON object.
- * @throws {Error} Throws if linting or model conversion fails.
+ * @param {string | object} model - The Concerto model to lint, either as a CTO string or a parsed AST object. Note: No external dependency resolution is performed.
+ * @param {options} [config] - Configuration options for customizing the linting process.
+ * @param {string} [config.ruleset] - Path to a custom Spectral ruleset file or 'default' to use the built-in ruleset.
+ * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results (defaults to 'concerto.*' and 'org.accord.*').
+ * @returns {Promise<lintResult[]>} Promise resolving to an array of formatted linting results as a JSON object.
+ * @throws {Error} Throws an error if linting or model conversion fails.
  */
 export async function lintModel(model: string | object, config?: options): Promise<lintResult[]> {
     try {
