@@ -106,7 +106,7 @@ Top level repository (concerto), with sub packages. Each sub-package is publishe
 
 Accord Project is an open source, non-profit, initiative working to transform contract management and contract automation by digitizing contracts. Accord Project operates under the umbrella of the [Linux Foundation][linuxfound]. The technical charter for the Accord Project can be found [here][charter].
 
-## Learn More About Accord Project
+## Learn More About The Accord Project
 
 ### [Overview][apmain]
 
@@ -138,11 +138,11 @@ Accord Project documentation files are made available under the [Creative Common
 Copyright 2018-2019 Clause, Inc. All trademarks are the property of their respective owners. See [LF Projects Trademark Policy](https://lfprojects.org/policies/trademark-policy/).
 
 [linuxfound]: https://www.linuxfoundation.org
-[charter]: https://github.com/accordproject/governance/blob/master/accord-project-technical-charter.md
+[charter]: https://github.com/accordproject/governance/blob/master/accord-project-technical-charter.md/
 [apmain]: https://accordproject.org/ 
-[apblog]: https://medium.com/@accordhq
+[apblog]: https://medium.com/@accordhq/
 [apdoc]: https://docs.accordproject.org/
-[apdiscord]: https://discord.com/invite/Zm99SKhhtA
+[apdiscord]: https://discord.com/invite/Zm99SKhhtA/
 
 [contributing]: https://github.com/accordproject/concerto/blob/master/CONTRIBUTING.md
 [developers]: https://github.com/accordproject/concerto/blob/master/DEVELOPERS.md
