@@ -15,6 +15,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const DecoratorManager = require('../src/decoratormanager');
 const ModelManager = require('../src/modelmanager');
 const VocabularyManager = require('@accordproject/concerto-vocabulary').VocabularyManager;

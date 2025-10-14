@@ -22,6 +22,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const IllegalModelException = require('./introspect/illegalmodelexception');
 const rfdc = require('rfdc')({
     circles: true,
     proto: false,

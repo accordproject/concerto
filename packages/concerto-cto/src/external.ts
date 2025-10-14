@@ -14,7 +14,7 @@
 
 import debug from 'debug';
 import * as pathBrowserify from 'path-browserify';
-const { DefaultFileLoader, FileDownloader } = require('@accordproject/concerto-util');
+import { DefaultFileLoader, FileDownloader } from '@accordproject/concerto-util';
 import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { IModel, IModels } from '@accordproject/concerto-types';
 
@@ -65,7 +65,7 @@ async function resolveExternal(models: IModels, options?: any, fileDownloader?: 
 
     // Create default file downloader if none provided
     const downloader = fileDownloader || createDefaultFileDownloader();
-    
+
     const externalModelFiles = await downloader.downloadExternalDependencies(models.models, options);
 
     let result = models;
@@ -96,4 +96,4 @@ function createDefaultFileDownloader(): any {
 export = {
     resolveExternal,
     createDefaultFileDownloader,
-}; 
+};

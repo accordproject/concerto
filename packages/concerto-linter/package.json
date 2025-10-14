@@ -32,6 +32,7 @@
     "author": "accordproject.org",
     "license": "Apache-2.0",
     "dependencies": {
+        "ajv": "^8.17.1",
         "@accordproject/concerto-core": "3.21.0",
         "@accordproject/concerto-linter-default-ruleset": "file:./default-ruleset",
         "@accordproject/concerto-metamodel": "3.12.4",
