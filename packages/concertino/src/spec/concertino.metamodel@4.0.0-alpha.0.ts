@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-// Generated code for namespace: concertino.metamodel@1.0.0-alpha.7
+// Generated code for namespace: concertino.metamodel@4.0.0-alpha.0
 
 // imports
 
@@ -43,9 +43,9 @@ export interface IConcertinoDeclaration extends IConcept {
    metadata?: MetadataMap;
 }
 
-export type ConcertinoDeclarationUnion = IConcertinoConceptDeclaration | 
-IConcertinoEnumDeclaration | 
-IConcertinoScalarDeclaration | 
+export type ConcertinoDeclarationUnion = IConcertinoConceptDeclaration |
+IConcertinoEnumDeclaration |
+IConcertinoScalarDeclaration |
 IConcertinoMapDeclaration;
 
 export interface IConcertinoConceptDeclaration extends IConcertinoDeclaration {
@@ -76,11 +76,11 @@ export interface IConcertinoEnumValue extends IConcept {
 export interface IConcertinoScalarDeclaration extends IConcertinoDeclaration {
 }
 
-export type ConcertinoScalarDeclarationUnion = IConcertinoStringScalarDeclaration | 
-IConcertinoIntegerScalarDeclaration | 
-IConcertinoBooleanScalarDeclaration | 
-IConcertinoDoubleScalarDeclaration | 
-IConcertinoLongScalarDeclaration | 
+export type ConcertinoScalarDeclarationUnion = IConcertinoStringScalarDeclaration |
+IConcertinoIntegerScalarDeclaration |
+IConcertinoBooleanScalarDeclaration |
+IConcertinoDoubleScalarDeclaration |
+IConcertinoLongScalarDeclaration |
 IConcertinoDateTimeScalarDeclaration;
 
 export interface IConcertinoStringScalarDeclaration extends IConcertinoScalarDeclaration {
@@ -145,11 +145,11 @@ export interface IConcertinoProperty extends IConcept {
    metadata?: MetadataMap;
 }
 
-export type ConcertinoPropertyUnion = IConcertinoStringProperty | 
-IConcertinoIntegerProperty | 
-IConcertinoBooleanProperty | 
-IConcertinoDoubleProperty | 
-IConcertinoLongProperty | 
+export type ConcertinoPropertyUnion = IConcertinoStringProperty |
+IConcertinoIntegerProperty |
+IConcertinoBooleanProperty |
+IConcertinoDoubleProperty |
+IConcertinoLongProperty |
 IConcertinoDateTimeProperty;
 
 export interface IConcertinoStringProperty extends IConcertinoProperty {
@@ -199,9 +199,9 @@ export interface IDecoratorValues extends IConcept {
 export interface IDecoratorValue extends IConcept {
 }
 
-export type DecoratorValueUnion = IStringDecoratorValue | 
-INumberDecoratorValue | 
-IBooleanDecoratorValue | 
+export type DecoratorValueUnion = IStringDecoratorValue |
+INumberDecoratorValue |
+IBooleanDecoratorValue |
 IDecoratorTypeLiteral;
 
 export interface IStringDecoratorValue extends IDecoratorValue {

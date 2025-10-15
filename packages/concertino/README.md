@@ -163,7 +163,7 @@ Below is an example of how a simple Concerto model is represented in the Concert
     },
   },
   "metadata": {
-    "concertinoVersion": "1.0.0-alpha.7",
+    "concertinoVersion": "4.0.0-alpha.0",
     "models": {
       "org.example.models@1.0.0": {
         "concertoVersion": "1.0.0",

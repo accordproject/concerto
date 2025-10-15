@@ -1,4 +1,4 @@
-concerto version "^4.0.0"
+concerto version "4.x"
 
 @NamespaceScopedDecorator
 namespace com.test.models@1.2.3

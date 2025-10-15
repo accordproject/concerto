@@ -39,43 +39,43 @@ import type {
 	IVocabulary,
 	IDecoratorValues,
 	IDecoratorValue
-} from './concertino.metamodel@1.0.0-alpha.7';
+} from './concertino.metamodel@4.0.0-alpha.0';
 
 // interfaces
 export interface IConcept {
    $class?: string;
 }
 
-export type ConceptUnion = IPosition | 
-IRange | 
-ITypeIdentifier | 
-IDecoratorLiteral | 
-IDecorator | 
-IIdentified | 
-IDeclaration | 
-IMapKeyType | 
-IMapValueType | 
-IEnumProperty | 
-IProperty | 
-IStringRegexValidator | 
-IStringLengthValidator | 
-IDoubleDomainValidator | 
-IIntegerDomainValidator | 
-ILongDomainValidator | 
-IAliasedType | 
-IImport | 
-IModel | 
-IModels | 
-IConcertino | 
-IMetadata | 
-IModelMetadata | 
-IConcertinoDeclaration | 
-IConcertinoEnumValue | 
-IMapKey | 
-IMapValue | 
-IConcertinoProperty | 
-IVocabulary | 
-IDecoratorValues | 
+export type ConceptUnion = IPosition |
+IRange |
+ITypeIdentifier |
+IDecoratorLiteral |
+IDecorator |
+IIdentified |
+IDeclaration |
+IMapKeyType |
+IMapValueType |
+IEnumProperty |
+IProperty |
+IStringRegexValidator |
+IStringLengthValidator |
+IDoubleDomainValidator |
+IIntegerDomainValidator |
+ILongDomainValidator |
+IAliasedType |
+IImport |
+IModel |
+IModels |
+IConcertino |
+IMetadata |
+IModelMetadata |
+IConcertinoDeclaration |
+IConcertinoEnumValue |
+IMapKey |
+IMapValue |
+IConcertinoProperty |
+IVocabulary |
+IDecoratorValues |
 IDecoratorValue;
 
 export interface IAsset extends IConcept {

@@ -19,6 +19,7 @@
   "workspaces": [
     "packages/concerto-analysis",
     "packages/concerto-core",
+    "packages/concertino",
     "packages/concerto-cto",
     "packages/concerto-types",
     "packages/concerto-util",
