@@ -31,13 +31,6 @@ chai.use(require('chai-as-promised'));
 
 describe('DecoratorManager', () => {
 
-    beforeEach(() => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
-    });
-
-    afterEach(() => {
-    });
-
     describe('#falsyOrEqual', function() {
         it('should match null', async function() {
             DecoratorManager.falsyOrEqual( null, ['one']).should.be.true;
@@ -72,7 +65,7 @@ describe('DecoratorManager', () => {
         });
 
         it('should support syntax validation with model files', async function() {
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -96,7 +89,7 @@ describe('DecoratorManager', () => {
 
     describe('#decorateModels', function() {
         it('should produce same result for test.cto model', async function() {
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
@@ -111,7 +104,7 @@ describe('DecoratorManager', () => {
         });
 
         it('should support no validation', async function() {
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -120,7 +113,7 @@ describe('DecoratorManager', () => {
         });
 
         it('should support syntax validation', async function() {
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -130,7 +123,7 @@ describe('DecoratorManager', () => {
         });
 
         it('should support semantic validation', async function() {
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
@@ -141,7 +134,7 @@ describe('DecoratorManager', () => {
 
         it('should add decorators that target declarations', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -160,7 +153,7 @@ describe('DecoratorManager', () => {
 
         it('should add decorators that target declarations, with decorator validation', async function() {
             // create a model manager with decorator validation ON
-            const testModelManager = new ModelManager({strict:true, decoratorValidation: {missingDecorator: 'error', invalidDecorator: 'error'} });
+            const testModelManager = new ModelManager({decoratorValidation: {missingDecorator: 'error', invalidDecorator: 'error'} });
 
             // add a model that defines types that are *referenced* by decorators
             // declared in the decorator command set web.json
@@ -214,7 +207,7 @@ describe('DecoratorManager', () => {
                 chai.expect(warning.detail).to.be.equals('Please refer to https://concerto.accordproject.org/deprecation/001');
             });
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -242,7 +235,7 @@ describe('DecoratorManager', () => {
         it('should add decorators that target namespace - updated behaviour using environment variable', async function() {
             process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -266,7 +259,7 @@ describe('DecoratorManager', () => {
         */
         it('should add decorators that target namespace - updated behaviour using options parameter', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -285,7 +278,7 @@ describe('DecoratorManager', () => {
 
         it('should add decorators that target properties', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -349,7 +342,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified MapDeclaration', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true, enableMapType: true});
+            const testModelManager = new ModelManager({ skipLocationNodes: true });
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -364,7 +357,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified element on the specified Map Declaration (Map Key)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -380,7 +373,7 @@ describe('DecoratorManager', () => {
 
         it('should auto upgrade decoratorcommands $class minor version if it is below DCS_VERSION (asserts decorators are correctly applied)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -397,7 +390,7 @@ describe('DecoratorManager', () => {
 
         it('should auto upgrade decoratorcommands $class minor version if it is below DCS_VERSION (asserts correct upgrade on DCS $class properties)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -413,7 +406,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified type on the specified Map Declaration (Map Key)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -428,7 +421,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified element on the specified Map Declaration (Map Value)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -445,7 +438,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate the specified type on the specified Map Declaration (Map Value)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -460,7 +453,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate Declaration, Key and Value elements on the specified Map Declaration', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -478,7 +471,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate a Key and Value element on an unspecified Map Declaration when a type is specified (type takes precedence over element value KEY_VALUE)', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -495,7 +488,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate all Map Declaration Key and Value elements on the model when a declaration is not specified', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true, skipLocationNodes: true});
+            const testModelManager = new ModelManager({skipLocationNodes: true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -518,7 +511,7 @@ describe('DecoratorManager', () => {
 
         it('should fail with invalid command', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -531,7 +524,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate resolved model without resolving the model again', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
             const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
             testModelManager.addModelFile(modelFile);
@@ -545,7 +538,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate validated model without validating the model again', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
             const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
             testModelManager.addModelFile(modelFile);
@@ -559,7 +552,7 @@ describe('DecoratorManager', () => {
 
         it('should decorate validated and resolved model using fast mode', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
             const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
             testModelManager.addModelFile(modelFile);
@@ -573,7 +566,7 @@ describe('DecoratorManager', () => {
 
         it('should throw error if fast mode is enabled and disableModelResoltion and disableModelValidation are set as false', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
             const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
             testModelManager.addModelFile(modelFile);
@@ -587,7 +580,7 @@ describe('DecoratorManager', () => {
 
         it('should check for duplicate while appending a decorator from DCS', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
             const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
             testModelManager.addModelFile(modelFile);
@@ -603,7 +596,7 @@ describe('DecoratorManager', () => {
     describe('#validateCommand', function() {
         it('should detect invalid type', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -617,7 +610,7 @@ describe('DecoratorManager', () => {
 
         it('should detect invalid target namespace', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -631,7 +624,7 @@ describe('DecoratorManager', () => {
 
         it('should detect invalid target declaration', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -645,7 +638,7 @@ describe('DecoratorManager', () => {
 
         it('should detect invalid target property', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -659,7 +652,7 @@ describe('DecoratorManager', () => {
 
         it('should detect invalid target properties', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -673,7 +666,7 @@ describe('DecoratorManager', () => {
 
         it('should detect target referencing both property and properties', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -689,7 +682,7 @@ describe('DecoratorManager', () => {
     describe('#validate', function() {
         it('should detect decorator command set that is invalid', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -702,7 +695,7 @@ describe('DecoratorManager', () => {
 
         it('should detect decorator command set with an invalid command type', async function() {
             // load a model to decorate
-            const testModelManager = new ModelManager({strict:true});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
 
@@ -717,7 +710,7 @@ describe('DecoratorManager', () => {
 
     describe('#extractDecorators', function() {
         it('should be able to extract decorators and vocabs from a model without options', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const resp = DecoratorManager.extractDecorators( testModelManager);
@@ -819,7 +812,7 @@ describe('DecoratorManager', () => {
             process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
         });
         it('should give proper response in there is no vocabulary on any model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/model-without-vocab.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const resp = DecoratorManager.extractDecorators( testModelManager);
@@ -827,7 +820,7 @@ describe('DecoratorManager', () => {
             vocab.should.be.deep.equal([]);
         });
         it('should be able to extract vocabs from a model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
             const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -841,7 +834,7 @@ describe('DecoratorManager', () => {
             vocab[0].should.not.include('custom');
         });
         it('should be able to extract vocabs from a model without Declaration Term ', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-without-declaration-term.cto'), 'utf-8');
             const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-without-declaration-term.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -855,7 +848,7 @@ describe('DecoratorManager', () => {
             vocab[0].should.not.include('custom');
         });
         it('should be able to extract vocabs from a model with terms for namespace', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-term.cto'), 'utf-8');
             const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-2.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -870,7 +863,7 @@ describe('DecoratorManager', () => {
             vocab[0].should.not.include('custom');
         });
         it('should be able to extract vocabs from a model with only terms for namespace', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-only-namespace-term.cto'), 'utf-8');
             const expectedVocabs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-vocab-3.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
@@ -885,7 +878,7 @@ describe('DecoratorManager', () => {
             vocab[0].should.not.include('custom');
         });
         it('should throw error if namespace level reserved terms found in a model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-namespace-invalid-term.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
@@ -898,7 +891,7 @@ describe('DecoratorManager', () => {
             }).should.throw(/Invalid vocabulary key/);
         });
         it('should throw error if declaration level reserved terms found in a model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-declaration-invalid-term.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
@@ -911,7 +904,7 @@ describe('DecoratorManager', () => {
             }).should.throw(/Invalid vocabulary key/);
         });
         it('should throw error if property level reserved terms found in a model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-with-property-invalid-term.cto'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
@@ -924,7 +917,7 @@ describe('DecoratorManager', () => {
             }).should.throw(/Invalid vocabulary key/);
         });
         it('should be able to extract non-vocab decorators from a model', async function() {
-            const testModelManager = new ModelManager({strict:true,});
+            const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test.cto'), 'utf-8');
             const expectedDcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-dcs.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');

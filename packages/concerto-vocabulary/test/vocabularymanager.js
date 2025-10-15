@@ -33,7 +33,6 @@ let vocabularyManager = null;
 
 describe('VocabularyManager', () => {
     beforeEach(() => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
         modelManager = new ModelManager();
         const model = fs.readFileSync('./test/org.acme@1.0.0.cto', 'utf-8');
         modelManager.addCTOModel(model);

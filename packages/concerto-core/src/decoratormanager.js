@@ -320,12 +320,9 @@ class DecoratorManager {
         }
 
         if (shouldValidate) {
-            const enableMapType = modelManager?.enableMapType ? true : false;
             const validationModelManager = new ModelManager({
                 metamodelValidation: true,
                 addMetamodel: true,
-                enableMapType,
-                importAliasing: modelManager.isAliasedTypeEnabled(),
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -459,11 +456,9 @@ class DecoratorManager {
             });
         });
 
-        const enableMapType = modelManager?.enableMapType ? true : false;
         const newModelManager = new ModelManager({
-            enableMapType,
-            importAliasing: modelManager.isAliasedTypeEnabled(),
-            decoratorValidation: modelManager.getDecoratorValidation()});
+            decoratorValidation: modelManager.getDecoratorValidation()
+        });
         newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
         return newModelManager;
     }

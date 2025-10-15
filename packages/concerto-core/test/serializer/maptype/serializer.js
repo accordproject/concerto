@@ -31,7 +31,6 @@ describe('Serializer', () => {
     let serializer;
 
     beforeEach(() => {
-        process.env.ENABLE_MAP_TYPE = 'true';
         sandbox = sinon.createSandbox();
 
         modelManager = new ModelManager();

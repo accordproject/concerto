@@ -91,7 +91,6 @@ class BaseModelManager {
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
-     * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
@@ -107,11 +106,6 @@ class BaseModelManager {
         this.addDecoratorModel();
         this.addRootModel();
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
-
-        // TODO Remove on release of MapType
-        // Supports both env var and property based flag
-        this.enableMapType = !!options?.enableMapType;
-        this.importAliasing = process?.env?.IMPORT_ALIASING === 'true' || !!options?.importAliasing;
 
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
@@ -144,10 +138,10 @@ class BaseModelManager {
 
     /**
      * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} true if the importAliasing has been set
+     * @returns {boolean} true
      */
     isAliasedTypeEnabled() {
-        return this.importAliasing;
+        return true;
     }
 
     /**

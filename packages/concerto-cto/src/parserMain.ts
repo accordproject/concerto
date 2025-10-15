@@ -32,6 +32,10 @@ interface ParseOptions {
  */
 function parse(cto: string, fileName?: string, options?: ParseOptions): any {
     try {
+        // Set default for skipLocationNodes to true if not specified
+        if (!options || options?.skipLocationNodes === undefined) {
+            options = { ...options, skipLocationNodes: true };
+        }
         return Parser.parse(cto, options);
     } catch(err: any) {
         if(err.location && err.location.start) {
@@ -65,4 +69,4 @@ function parseModels(files: string[], options?: ParseOptions): IModels {
 export = {
     parse,
     parseModels,
-}; 
+};

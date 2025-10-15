@@ -35,10 +35,7 @@ const loadAllCtoFiles = (dir: string, models: object[]): void => {
 describe('concertino roundtripping (sample models)', () => {
     const models: IModel[] = [];
 
-    const modelManager = new ModelManager({
-        importAliasing: true,
-        enableMapType: true,
-    });
+    const modelManager = new ModelManager();
     loadAllCtoFiles(join(__dirname, './cto/'), models);
     modelManager.fromAst({ models });
     const ast: IModels = modelManager.getAst(true);

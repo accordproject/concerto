@@ -726,38 +726,30 @@ class ModelFile extends Decorated {
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 throw new Error('Wilcard Imports are not permitted.');
-            case `${MetaModelNamespace}.ImportTypes`:
-                if (this.getModelManager().isAliasedTypeEnabled()) {
-                    const aliasedTypes = new Map();
-                    if (imp.aliasedTypes) {
-                        imp.aliasedTypes.forEach(({ name, aliasedName }) => {
-                            if(ModelUtil.isPrimitiveType(aliasedName)){
-                                throw new Error('Types cannot be aliased to primitive type');
-                            }
-                            aliasedTypes.set(name, aliasedName);
-                        });
-                    }
-                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                    imp.types.forEach((type) =>
-                        aliasedTypes.has(type)
-                            ? this.importShortNames.set(
-                                aliasedTypes.get(type),
-                                `${imp.namespace}.${type}`
-                            )
-                            : this.importShortNames.set(
-                                type,
-                                `${imp.namespace}.${type}`
-                            )
-                    );
-                } else {
-                    if (imp.aliasedTypes) {
-                        throw new Error('Aliasing disabled, set importAliasing to true');
-                    }
-                    imp.types.forEach((type) => {
-                        this.importShortNames.set(type,`${imp.namespace}.${type}`);
+            case `${MetaModelNamespace}.ImportTypes`: {
+                const aliasedTypes = new Map();
+                if (imp.aliasedTypes) {
+                    imp.aliasedTypes.forEach(({ name, aliasedName }) => {
+                        if(ModelUtil.isPrimitiveType(aliasedName)){
+                            throw new Error('Types cannot be aliased to primitive type');
+                        }
+                        aliasedTypes.set(name, aliasedName);
                     });
                 }
+                // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                imp.types.forEach((type) =>
+                    aliasedTypes.has(type)
+                        ? this.importShortNames.set(
+                            aliasedTypes.get(type),
+                            `${imp.namespace}.${type}`
+                        )
+                        : this.importShortNames.set(
+                            type,
+                            `${imp.namespace}.${type}`
+                        )
+                );
                 break;
+            }
             default:
                 this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
             }

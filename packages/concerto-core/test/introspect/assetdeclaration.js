@@ -31,9 +31,9 @@ describe('AssetDeclaration', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        mockModelManager =  sinon.createStubInstance(ModelManager);
+        mockModelManager = sinon.createStubInstance(ModelManager);
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
-        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
+        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system@1.0.0.Asset');
         mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);
@@ -85,6 +85,7 @@ describe('AssetDeclaration', () => {
 
         it('should throw when identifying field is not a string', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.numid.cto');
+            mockModelManager.getType.returns(mockClassDeclaration);
             (() => {
                 asset.validate();
             }).should.throw(/Class "TestAsset" is identified by field "assetId", but the type of the field is not "String". Line 19 column 1, to line 21 column 2. /);

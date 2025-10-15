@@ -58,8 +58,6 @@ class ModelManager extends BaseModelManager {
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
-     * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
-     * @param {boolean} [options.importAliasing] - When true, the Concerto Map Type feature is enabled
      */
     constructor(options) {
         super(options, ctoProcessFile(options));

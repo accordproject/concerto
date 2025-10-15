@@ -498,10 +498,6 @@ describe('ModelFile', () => {
     });
 
     describe('#aliasedImport', () => {
-
-        beforeEach(()=>{
-            modelManager.importAliasing=true;
-        });
         it('should resolve aliased name of import type', () => {
             const model = `
             namespace org.acme@1.0.0
