@@ -76,14 +76,6 @@ describe('ClassDeclaration', () => {
             }).should.throw(/Super class com.testing@1.0.0.p1 has an explicit identifier a1 that cannot be redeclared/);
         });
 
-        // TODO: This has been disabled pending major version bump and/or confirmation that this is illegal
-        it.skip('should throw when a class attempts to override the identifier', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.classoverridesidentifier.cto', AssetDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Identifier defined in super class/);
-        });
-
         it('should throw when not abstract, not enum and not concept without an identifier', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.noidentifier.cto', AssetDeclaration);
             asset.superType = null;

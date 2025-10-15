@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v4.0.0 # Temporary, while we prepare for merge to main
   pull_request:
     branches:
       - main
