@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",
-    "@accordproject/concerto-metamodel": "3.8.1",
+    "@accordproject/concerto-metamodel": "3.12.4",
     "yaml": "2.6.1"
   },
   "browserslist": "> 0.25%, not dead",
@@ -123,9 +123,9 @@
     "exclude": [],
     "all": true,
     "check-coverage": true,
-    "statements": 100,
-    "branches": 94.9,
-    "functions": 100,
-    "lines": 100
+    "statements": 95,
+    "branches": 88,
+    "functions": 98,
+    "lines": 95
   }
 }

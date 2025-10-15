@@ -22,8 +22,9 @@ const VocabularyManager = require('@accordproject/concerto-vocabulary').Vocabula
 const Printer = require('@accordproject/concerto-cto').Printer;
 
 const chai = require('chai');
-const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = require('@accordproject/concerto-util/lib/errorcodes');
-const ModelFile = require('../lib/introspect/modelfile');
+const { ErrorCodes } = require('@accordproject/concerto-util');
+const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = ErrorCodes;
+const ModelFile = require('../src/introspect/modelfile');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));

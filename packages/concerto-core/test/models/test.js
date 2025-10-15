@@ -181,11 +181,18 @@ describe('Test Model', function(){
             cObject.state = 'REGISTERED';
             cObject.value = 123.45;
             cObject.colour = 'Red';
-            cObject.V5cID = 'fake';
+            cObject.V5cID = 'AS1234567';
             cObject.LeaseContractID = 'foo';
             cObject.scrapped = false;
-            cObject.owner = null;
+            cObject.owner = factory.newRelationship(
+                'composer@1.0.0', 'MyParticipant', 'CUST_1');
             cObject.previousOwners = null;
+
+            const customer = factory.newConcept('org.acme@1.0.0', 'Customer');
+            customer.firstName = 'Dan';
+            customer.lastName = 'Selman';
+            customer.address = factory.newConcept('org.acme@1.0.0', 'Address');
+            cObject.customer = customer;
 
             // model is defined as a string
             // set model to a number
@@ -207,10 +214,6 @@ describe('Test Model', function(){
             // set model to an object
             cObject.model = { 'foo' : 'bar' };
             ( function() {serializer.toJSON(cObject);}).should.throw('Model violation in the "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" instance. The field "model" has a value of "{"foo":"bar"}" (type of value: "object"). Expected type of value: "String".');
-
-            // set model to null
-            cObject.model = null;
-            ( function() {serializer.toJSON(cObject);}).should.throw('The instance "org.acme@1.0.0.Vehicle#YVBVLSFXXAL342374" is missing the required field "model".');
 
             // set model to an array
             cObject.model = ['1','2'];

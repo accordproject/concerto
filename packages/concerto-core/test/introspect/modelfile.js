@@ -504,22 +504,22 @@ describe('ModelFile', () => {
         });
         it('should resolve aliased name of import type', () => {
             const model = `
-            namespace org.acme
-            import org.saluja.{doc as d}`;
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{doc as d}`;
 
             let modelFile = ParserUtil.newModelFile(modelManager, model);
-            modelFile.resolveImport('d').should.equal('org.saluja.doc');
+            modelFile.resolveImport('d').should.equal('org.saluja@1.0.0.doc');
         });
 
         it('should not throw if an aliased import exists for a type that exists in a valid namespace', () => {
             const model1 = `
-            namespace org.saluja.ext
+            namespace org.saluja.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.ext.{MyAsset2 as m}
+            namespace org.acme@1.0.0
+            import org.saluja.ext@1.0.0.{MyAsset2 as m}
             asset MyAsset identified by assetId {
                 o String assetId
                 o m[] arr
@@ -532,20 +532,20 @@ describe('ModelFile', () => {
 
         it('should not throw if an duplicate types aliased to distinct aliased names', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
 
             const model3 = `
-            namespace org.acme2
-            import org.saluja.{MyAsset as m1}
-            import org.acme.{MyAsset as m2}
+            namespace org.acme2@1.0.0
+            import org.saluja@1.0.0.{MyAsset as m1}
+            import org.acme@1.0.0.{MyAsset as m2}
 
             asset MyAsset identified by assetId {
                 o String assetId
@@ -562,13 +562,13 @@ describe('ModelFile', () => {
 
         it('should not throw if map value is an aliased type', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
             asset Student identified by rollno {
                 o String rollno
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.{Student as stud}
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{Student as stud}
 
             map StudMap{
             o DateTime
@@ -582,15 +582,15 @@ describe('ModelFile', () => {
 
         it('should not throw if declaration is extended on a aliased type declaration', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
 
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.{Vehicle as V,nickname as nk}
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{Vehicle as V,nickname as nk}
 
             asset Car extends V{
                 o String company
@@ -604,15 +604,15 @@ describe('ModelFile', () => {
 
         it('should return the actual type name of the imported type', () => {
             const model1 = `
-            namespace org.example1
+            namespace org.example1@1.0.0
 
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
             }`;
             const model2 = `
-            namespace org.example2
-            import org.example1.{Vehicle as V,nickname}
+            namespace org.example2@1.0.0
+            import org.example1@1.0.0.{Vehicle as V,nickname}
 
             asset Car extends V{
                 o String company

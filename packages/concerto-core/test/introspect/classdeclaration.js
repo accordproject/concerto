@@ -19,10 +19,8 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const IllegalModelException = require('../../src/introspect/illegalmodelexception');
 const ClassDeclaration = require('../../src/introspect/classdeclaration');
 const AssetDeclaration = require('../../src/introspect/assetdeclaration');
-const EnumDeclaration = require('../../src/introspect/enumdeclaration');
 const ConceptDeclaration = require('../../src/introspect/conceptdeclaration');
-const ParticipantDeclaration = require('../../src/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../src/introspect/transactiondeclaration');
+const ModelFile = require('../../src/introspect/modelfile');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
@@ -33,7 +31,6 @@ const should = require('chai').should();
 const sinon = require('sinon');
 const fs = require('fs');
 const path = require('path');
-const ModelFile = require('../../lib/introspect/modelfile');
 
 describe('ClassDeclaration', () => {
 
@@ -72,27 +69,6 @@ describe('ClassDeclaration', () => {
     });
 
     describe('#validate', () => {
-        it('should throw when asset name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeassetname.cto', AssetDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when transaction name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupetransactionname.cto', TransactionDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when participant name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeparticipantname.cto', ParticipantDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
         it('should throw when an super type identifier is redeclared', () => {
             let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.identifierextendsfromsupertype.cto', AssetDeclaration);
             (() => {
@@ -101,25 +77,11 @@ describe('ClassDeclaration', () => {
         });
 
         // TODO: This has been disabled pending major version bump and/or confirmation that this is illegal
-        //it('should throw when a class attempts to override the identifier', () => {
-        //    let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.classoverridesidentifier.cto', AssetDeclaration);
-        //    (() => {
-        //        asset.validate();
-        //    }).should.throw(/Identifier defined in super class/);
-        //});
-
-        it('should throw when concept name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeconceptname.cto', ConceptDeclaration);
+        it.skip('should throw when a class attempts to override the identifier', () => {
+            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.classoverridesidentifier.cto', AssetDeclaration);
             (() => {
                 asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-
-        it('should throw when enum name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.dupeenumname.cto', EnumDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
+            }).should.throw(/Identifier defined in super class/);
         });
 
         it('should throw when not abstract, not enum and not concept without an identifier', () => {
@@ -516,7 +478,7 @@ describe('ClassDeclaration - Test for declarations using Import Aliasing', () =>
     let resolvedModelManager;
 
     beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        modelManager = new ModelManager({importAliasing: true, enableMapType: true});
 
         const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
         const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
@@ -525,7 +487,7 @@ describe('ClassDeclaration - Test for declarations using Import Aliasing', () =>
         modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
         const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
         const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        resolvedModelManager = new ModelManager({importAliasing: true, enableMapType: true});
         const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
         const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);

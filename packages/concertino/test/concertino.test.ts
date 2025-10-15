@@ -36,7 +36,6 @@ describe('concertino roundtripping (sample models)', () => {
     const models: IModel[] = [];
 
     const modelManager = new ModelManager({
-        strict: true,
         importAliasing: true,
         enableMapType: true,
     });

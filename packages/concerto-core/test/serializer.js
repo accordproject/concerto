@@ -494,7 +494,7 @@ describe('Serializer', () => {
         it('should not error for boolean properties with default values without optional modifier', () => {
             serializer.setDefaultOptions({ validate: false });
             let json = {
-                $class: 'org.acme.sample.Address',
+                $class: 'org.acme.sample@1.0.0.Address',
                 country: 'UK',
                 elevation: 3.14,
                 city: 'Winchester',

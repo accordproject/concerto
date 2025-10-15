@@ -68,7 +68,7 @@ describe('Typed', () => {
         });
 
         it('should return true for a matching nested super type', () => {
-            let typed = new Typed(modelManager, asset2ClassDecl, 'org.acme.ext', 'Asset2');
+            let typed = new Typed(modelManager, asset2ClassDecl, 'org.acme.ext@1.0.0', 'Asset2');
             typed.instanceOf('org.acme.base@1.0.0.BaseAsset').should.be.true;
         });
 
@@ -114,15 +114,15 @@ describe('Typed', () => {
         });
 
         it('should assign the default value for falsy values', () => {
-            modelManager.addCTOModel(`namespace org.acme.defaults
+            modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
             concept DefaultAsset {
                 o Boolean bool default=false
                 o Integer int default=0
                 o Long long default=0
                 o Double double default=0.0
             }`);
-            const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
-            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
+            const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
             typed.assignFieldDefaults();
             typed.bool.should.equal(false);
             typed.int.should.equal(0);

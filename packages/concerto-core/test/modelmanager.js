@@ -721,7 +721,7 @@ concept Bar {
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
             // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Unable to download external model dependency \'github://external.cto\'');
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 400');
         });
 
         it('should fail using bad protocol and default model file loader', () => {

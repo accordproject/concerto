@@ -22,7 +22,8 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
 
-const { Agent, setGlobalDispatcher } = require('undici');
+const { Agent, MockAgent, setGlobalDispatcher } = require('undici');
+const model = 'namespace org.accordproject.usa.business';
 
 const defaultProcessFile = (name, data) => {
     return { name, data };
@@ -30,17 +31,28 @@ const defaultProcessFile = (name, data) => {
 
 describe('HTTPModeFilelLoader', () => {
     let sandbox;
-
-    let model = `namespace test@1.0.0
-    enum Test {
-        o ONE
-    }`;
+    let mockAgent;
 
     beforeEach(() => {
+        mockAgent = new MockAgent();
+
+        mockAgent
+            .get('https://raw.githubusercontent.com')
+            .intercept({ path: '/accordproject/business.cto' })
+            .reply(200, model);
+
+        mockAgent
+            .get('https://missing.com')
+            .intercept({ path: '/test' })
+            .reply(404);
+
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
         sandbox = sinon.createSandbox();
     });
 
     afterEach(async () => {
+        await mockAgent.close();
         setGlobalDispatcher(new Agent());
         sandbox.restore();
     });

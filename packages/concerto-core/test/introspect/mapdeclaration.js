@@ -19,17 +19,17 @@ const IllegalModelException = require('../../src/introspect/illegalmodelexceptio
 const MapDeclaration = require('../../src/introspect/mapdeclaration');
 const MapKeyType = require('../../src/introspect/mapkeytype');
 const MapValueType = require('../../src/introspect/mapvaluetype');
+const ModelManager = require('../../src/modelmanager');
+const ModelFile = require('../../src/introspect/modelfile');
 
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 const fs = require('fs');
 const path = require('path');
 
 const sinon = require('sinon');
-const ModelFile = require('../../lib/introspect/modelfile');
 const expect = require('chai').expect;
 
 
@@ -796,7 +796,7 @@ describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => 
     let resolvedModelManager;
 
     beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        modelManager = new ModelManager({importAliasing: true, enableMapType: true});
 
         const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
         const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
@@ -805,7 +805,7 @@ describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => 
         modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
         const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
         const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        resolvedModelManager = new ModelManager({importAliasing: true, enableMapType: true});
         const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
         const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);

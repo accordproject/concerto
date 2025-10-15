@@ -89,13 +89,13 @@ describe('Introspector', () => {
             modelManager.should.not.be.null;
 
             const model1 = `
-            namespace org.example.ext
+            namespace org.example.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.example.ext.{MyAsset2 as m}
+            namespace org.acme@1.0.0
+            import org.example.ext@1.0.0.{MyAsset2 as m}
             asset MyAsset identified by assetId {
                 o String assetId
                 o m[] arr
@@ -104,8 +104,8 @@ describe('Introspector', () => {
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             const introspector = new Introspector(modelManager);
-            modelFile2.resolveImport('m').should.equal('org.example.ext.MyAsset2');
-            introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
+            modelFile2.resolveImport('m').should.equal('org.example.ext@1.0.0.MyAsset2');
+            introspector.getClassDeclaration('org.example.ext@1.0.0.MyAsset2').should.not.be.null;
         });
     });
 

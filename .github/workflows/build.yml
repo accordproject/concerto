@@ -8,7 +8,6 @@ on:
     branches:
       - main
       - v4.0.0 # Temporary, while we prepare for merge to main
-      - v4.0.0 # Temporary, while we prepare for merge to main
 
 jobs:
   build:
@@ -17,8 +16,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 18.x
-          - 20.x
+          - 24.x
+          - 22.x
         os:
           - windows-latest
           - macos-latest
@@ -89,10 +88,10 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
 
       - run: npm ci
       - run: npm run build --if-present

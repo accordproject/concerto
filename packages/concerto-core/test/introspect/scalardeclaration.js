@@ -14,12 +14,12 @@
 
 'use strict';
 
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception'); // ADDED MISSING IMPORT
+const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const ModelManager = require('../../src/modelmanager');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
@@ -153,7 +153,7 @@ describe('ScalarDeclaration', () => {
         });
         it('should return the validator', () => {
             const testClass = modelManager.getType('com.testing@1.0.0.SSN');
-            should.equal(testClass.getValidator().validator.pattern, '\\d{3}-\\d{2}-\\{4}+');
+            should.equal(testClass.getValidator().validator.pattern, '\\d{3}-\\d{2}-\\d{4}');
         });
     });
 
@@ -168,7 +168,7 @@ describe('ScalarDeclaration', () => {
         it('should return the default value for falsy cases', () => {
             const modelFiles = introspectUtils.loadModelFiles(['test/data/parser/scalardeclaration.ssn.cto'], modelManager);
             modelManager.addModelFiles(modelFiles);
-            const testClass = modelManager.getType('com.testing.BoolWithDefault');
+            const testClass = modelManager.getType('com.testing@1.0.0.BoolWithDefault');
             should.equal(testClass.getDefaultValue(), false);
         });
 

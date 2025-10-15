@@ -76,7 +76,7 @@ describe('JSONPopulator', () => {
             }
         `);
         modelManager.addCTOModel(`
-            namespace org.acme.abstract
+            namespace org.acme.abstract@1.0.0
             abstract asset Asset3 {
                 o String assetId
             }
@@ -89,9 +89,9 @@ describe('JSONPopulator', () => {
                 o AssetByName assetByName
             }
         `);
-        assetDeclaration1 = modelManager.getType('org.acme.MyContainerAsset1').getProperty('myAsset');
-        relationshipDeclaration1 = modelManager.getType('org.acme.MyTx1').getProperty('myAsset');
-        relationshipDeclaration2 = modelManager.getType('org.acme.MyTx2').getProperty('myAssets');
+        assetDeclaration1 = modelManager.getType('org.acme@1.0.0.MyContainerAsset1').getProperty('myAsset');
+        relationshipDeclaration1 = modelManager.getType('org.acme@1.0.0.MyTx1').getProperty('myAsset');
+        relationshipDeclaration2 = modelManager.getType('org.acme@1.0.0.MyTx2').getProperty('myAssets');
     });
 
     beforeEach(() => {
@@ -179,7 +179,7 @@ describe('JSONPopulator', () => {
         });
 
         it('should convert unqualified date-time strings when strictQualifiedDateTimes is false', () => {
-            let jsonPopulatorNonStrict = new JSONPopulator(false, 0, false); // acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes
+            let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false); // acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
@@ -187,7 +187,7 @@ describe('JSONPopulator', () => {
         });
 
         it('should convert date-only strings when strictQualifiedDateTimes is false', () => {
-            let jsonPopulatorNonStrict = new JSONPopulator(false, 0, false);
+            let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false);
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let value = jsonPopulatorNonStrict.convertToObject(field, '2020-01-01');
@@ -195,7 +195,7 @@ describe('JSONPopulator', () => {
         });
 
         it('should apply utcOffset to unqualified date-time strings when strictQualifiedDateTimes is false', () => {
-            let jsonPopulatorNonStrict = new JSONPopulator(false, 120, false); // utcOffset=120 minutes (+2 hours)
+            let jsonPopulatorNonStrict = new JSONPopulator(false, false, 120, false); // utcOffset=120 minutes (+2 hours)
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
@@ -537,10 +537,10 @@ describe('JSONPopulator', () => {
         it('should be able to deserialise a map that uses abstract types as values', () => {
             let options = {
                 jsonStack: new TypedStack({
-                    $class: 'org.acme.abstract.MyContainerAsset3',
+                    $class: 'org.acme.abstract@1.0.0.MyContainerAsset3',
                     assetByName: {
                         'asset3': {
-                            $class: 'org.acme.abstract.Asset4'
+                            $class: 'org.acme.abstract@1.0.0.Asset4'
                         }
                     }
                 }),
@@ -550,9 +550,9 @@ describe('JSONPopulator', () => {
             };
 
             let mockResource1 = sinon.createStubInstance(Resource);
-            mockFactory.newResource.withArgs('org.acme.abstract', 'MyAsset4', 'asset3').returns(mockResource1);
+            mockFactory.newResource.withArgs('org.acme.abstract@1.0.0', 'MyAsset4', 'asset3').returns(mockResource1);
             (() => {
-                jsonPopulator.visit(modelManager.getType('org.acme.abstract.MyContainerAsset3'), options);
+                jsonPopulator.visit(modelManager.getType('org.acme.abstract@1.0.0.MyContainerAsset3'), options);
             }).should.not.throw();
         });
 
