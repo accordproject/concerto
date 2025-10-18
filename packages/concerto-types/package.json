@@ -10,7 +10,7 @@
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "scripts": {
-        "clean": "rimraf src/generated dist",
+        "clean": "rimraf dist",
         "codegen": "node scripts/codegen.js",
         "prebuild": "npm-run-all clean codegen",
         "build": "tsc",

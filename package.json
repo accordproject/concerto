@@ -39,7 +39,7 @@
     "build": "npm run build:ordered",
     "build:ordered": "npm run build:level0 && npm run build:level1 && npm run build:level2",
     "build:level0": "npm run build -w packages/concerto-util && npm run build -w packages/concerto-linter",
-    "build:level1": "npm run build -w packages/concerto-core && npm run build -w packages/concerto-types && npm run build -w packages/concerto-cto",
+    "build:level1": "npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core && npm run build -w packages/concerto-types",
     "build:level2": "npm run build -w packages/concerto-analysis -w packages/concerto-vocabulary -w packages/concertino",
     "build:parallel": "npm run build --workspaces --if-present"
   },
