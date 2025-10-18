@@ -89,7 +89,7 @@
     "semver": "7.6.3",
     "urijs": "1.19.11",
     "uuid": "11.0.3",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

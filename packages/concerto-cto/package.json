@@ -71,8 +71,10 @@
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",
     "@accordproject/concerto-metamodel": "3.12.4",
-    "@accordproject/concerto-types": "^3.8.1",
-    "@accordproject/concerto-util": "3.9.1"
+    "@accordproject/concerto-types": "^4.0.0-alpha.0",
+    "@accordproject/concerto-util": "^4.0.0-alpha.0",
+    "acorn": "^8.15.0",
+    "schema-utils": "^4.3.3"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {

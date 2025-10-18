@@ -22,62 +22,41 @@
  */
 
 // Exceptions
-const BaseException = require('./baseexception');
-const BaseFileException = require('./basefileexception');
+export const BaseException = require('./baseexception');
+export const BaseFileException = require('./basefileexception');
 
 // Transitive closure downloader
-const FileDownloader = require('./filedownloader');
+export const FileDownloader = require('./filedownloader');
 
 // File Loaders
-const CompositeFileLoader = require('./loaders/compositefileloader');
-const DefaultFileLoader = require('./loaders/defaultfileloader');
-const GitHubFileLoader = require('./loaders/githubfileloader');
-const HTTPFileLoader = require('./loaders/httpfileloader');
+export const CompositeFileLoader = require('./loaders/compositefileloader');
+export const DefaultFileLoader = require('./loaders/defaultfileloader');
+export const GitHubFileLoader = require('./loaders/githubfileloader');
+export const HTTPFileLoader = require('./loaders/httpfileloader');
 
 // Writers
-const Writer = require('./writer');
-const FileWriter = require('./filewriter');
-const ModelWriter = require('./modelwriter');
-const InMemoryWriter = require('./inmemorywriter');
+export const Writer = require('./writer');
+export const FileWriter = require('./filewriter');
+export const ModelWriter = require('./modelwriter');
+export const InMemoryWriter = require('./inmemorywriter');
 
 // Logger
-const Logger = require('./logger');
+export const Logger = require('./logger');
 
 // TypedStack
-const TypedStack = require('./typedstack');
+export const TypedStack = require('./typedstack');
 
 // Label
-const Label = require('./label');
+export const Label = require('./label');
 
 // Identifiers
-const Identifiers = require('./identifiers');
+export const Identifiers = require('./identifiers');
 
 //errorcodes
-const ErrorCodes = require('./errorcodes');
+export const ErrorCodes = require('./errorcodes');
 
 // NullUtil
-const NullUtil = require('./null');
+export const NullUtil = require('./null');
 
 // Warning
-const Warning = require('./warning');
-
-module.exports = {
-    BaseException,
-    BaseFileException,
-    FileDownloader,
-    CompositeFileLoader,
-    DefaultFileLoader,
-    GitHubFileLoader,
-    HTTPFileLoader,
-    Writer,
-    FileWriter,
-    InMemoryWriter,
-    ModelWriter,
-    Logger,
-    TypedStack,
-    Label,
-    Identifiers,
-    ErrorCodes,
-    NullUtil,
-    Warning
-};
+export const Warning = require('./warning');

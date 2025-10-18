@@ -63,7 +63,7 @@
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",
     "@accordproject/concerto-metamodel": "3.12.4",
-    "yaml": "2.6.1"
+    "yaml": "2.8.1"
   },
   "browserslist": "> 0.25%, not dead",
   "license-check-and-add-config": {
