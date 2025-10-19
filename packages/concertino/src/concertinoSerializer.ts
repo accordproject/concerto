@@ -28,7 +28,7 @@ import {
     PropertyUnion,
     ScalarDeclarationUnion,
     DecoratorLiteralUnion
-} from '@accordproject/concerto-types';
+} from '@accordproject/concerto-metamodel';
 import {
     IConcertino,
     IConcertinoDeclaration,

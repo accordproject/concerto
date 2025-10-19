@@ -15,8 +15,7 @@
 import debug from 'debug';
 import * as pathBrowserify from 'path-browserify';
 import { DefaultFileLoader, FileDownloader } from '@accordproject/concerto-util';
-import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import { IModel, IModels } from '@accordproject/concerto-types';
+import { MetaModelUtil, MetaModelNamespace, IModel, IModels  } from '@accordproject/concerto-metamodel';
 
 import Parser = require('./parser');
 

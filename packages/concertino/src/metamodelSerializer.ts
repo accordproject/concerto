@@ -65,7 +65,7 @@ import {
     MapValueTypeUnion,
     PropertyUnion,
     ScalarDeclarationUnion,
-} from '@accordproject/concerto-types';
+} from '@accordproject/concerto-metamodel';
 
 /**
  * Extracts scalar validators (regex, range, length) from a ScalarDeclaration.

@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import {
+    MetaModelNamespace,
     IDeclaration,
     IDecorator,
     IDecoratorLiteral,
@@ -29,7 +29,7 @@ import {
     IImportType,
     IDecoratorBoolean,
     IDecoratorNumber
-} from '@accordproject/concerto-types';
+} from '@accordproject/concerto-metamodel';
 
 /**
  * Returns true if the metamodel is a MapDeclaration

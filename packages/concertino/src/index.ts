@@ -17,7 +17,7 @@
  *
  * This module provides a standardized way to convert between Concerto metamodel and Concertino format.
  */
-import { IModels } from '@accordproject/concerto-types';
+import { IModels } from '@accordproject/concerto-metamodel';
 import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.0';
 import { convertToConcertino } from './concertinoSerializer';
 import { convertToMetamodel } from './metamodelSerializer';

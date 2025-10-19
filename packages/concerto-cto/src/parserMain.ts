@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
-import { IModels } from '@accordproject/concerto-types';
+import { MetaModelNamespace, IModels } from '@accordproject/concerto-metamodel';
 
 import Parser = require('./parser');
 import ParseException = require('./parseexception');
