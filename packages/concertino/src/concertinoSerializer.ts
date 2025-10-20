@@ -50,7 +50,7 @@ import {
     EnumValueMap,
     PropertyMap,
     Prototype
-} from './spec/concertino.metamodel@4.0.0-alpha.0';
+} from './spec/concertino.metamodel@4.0.0-alpha.1';
 
 // Type definition for scalar types as strings for easier mapping
 type ScalarType = 'BooleanScalar' | 'IntegerScalar' | 'LongScalar' | 'DoubleScalar' | 'StringScalar' | 'DateTimeScalar';
@@ -430,7 +430,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
     const concertino: IConcertino = {
         declarations: {},
         metadata: {
-            concertinoVersion: '4.0.0-alpha.0',
+            concertinoVersion: '4.0.0-alpha.1',
             models: {},
         },
     };

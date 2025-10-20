@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-// Generated code for namespace: concertino.metamodel@4.0.0-alpha.0
+// Generated code for namespace: concertino.metamodel@4.0.0-alpha.1
 
 // imports
 

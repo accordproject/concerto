@@ -4,7 +4,7 @@ exports[`concertino edge cases and error handling > should roundtrip sourceUri 1
 {
   "declarations": {},
   "metadata": {
-    "concertinoVersion": "4.0.0-alpha.0",
+    "concertinoVersion": "4.0.0-alpha.1",
     "models": {
       "sourceUriTest@1.0.0": {
         "concertoVersion": undefined,
@@ -3213,7 +3213,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
     },
   },
   "metadata": {
-    "concertinoVersion": "4.0.0-alpha.0",
+    "concertinoVersion": "4.0.0-alpha.1",
     "models": {
       "com.test.another@1.0.0": {
         "concertoVersion": undefined,
