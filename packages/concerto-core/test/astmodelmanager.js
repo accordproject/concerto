@@ -41,4 +41,41 @@ describe('AstModelManager', () => {
         });
     });
 
+    describe('#addModelFile and #astProcessFile', () => {
+        it('should add a model file and process it with AstProcessFile', () => {
+            const modelContent = {
+                '$class': 'concerto.metamodel@1.0.0.Model',
+                'decorators': [],
+                'namespace': 'org.example.test@1.0.0',
+                'imports': [],
+                'declarations': [
+                    {
+                        '$class': 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                        'name': 'TestConcept',
+                        'isAbstract': false,
+                        'properties': [
+                            {
+                                '$class': 'concerto.metamodel@1.0.0.StringProperty',
+                                'name': 'name',
+                                'isArray': false,
+                                'isOptional': false
+                            },
+                            {
+                                '$class': 'concerto.metamodel@1.0.0.IntegerProperty',
+                                'name': 'value',
+                                'isArray': false,
+                                'isOptional': false
+                            }
+                        ],
+                        'decorators': []
+                    }
+                ]
+            };
+
+            modelManager.addModel(modelContent, null, 'test.cto');
+
+            modelManager.getModelFile('org.example.test@1.0.0').should.not.be.undefined;
+        });
+    });
+
 });

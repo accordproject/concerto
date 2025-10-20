@@ -97,6 +97,12 @@ describe('Factory', function() {
             }).should.throw(/AbstractAsset/);
         });
 
+        it('should throw creating an instance with an ID that is non-identifiable', function() {
+            (() => {
+                factory.newResource(namespace, 'MyConcept', 'MY_ID_1');
+            }).should.throw(/Type is not identifiable/);
+        });
+
         it('should create a new instance with a specified ID', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1');
             resource.assetId.should.equal('MY_ID_1');
@@ -272,6 +278,14 @@ describe('Factory', function() {
             sinon.assert.calledOnce(spy);
             sinon.assert.calledWith(spy, namespace, 'MyTransaction', '111', { hello: 'world' });
             resource.transactionId.should.equal('111');
+        });
+
+    });
+
+    describe('#newId', () => {
+
+        it('should return a UUID', () => {
+            Factory.newId().should.not.be.undefined;
         });
 
     });

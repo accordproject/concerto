@@ -163,6 +163,7 @@ describe('ModelManager', () => {
         it('should support associating a file name with a model file', () => {
             let res = modelManager.addCTOModel(modelBase, 'model-base.cto');
             modelManager.getModelFile('org.acme.base@1.0.0').getNamespace().should.equal('org.acme.base@1.0.0');
+            modelManager.getModelFileByFileName('model-base.cto').getNamespace().should.equal('org.acme.base@1.0.0');
             res.should.be.an.instanceOf(ModelFile);
             res.getName().should.equal('model-base.cto');
         });
