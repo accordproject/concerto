@@ -46,7 +46,7 @@ describe('AssetDeclaration', () => {
 
     let loadAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions);
+        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions, null, false);
         let assets = modelFile.getAssetDeclarations();
         assets.should.have.lengthOf(1);
 

@@ -14,8 +14,6 @@
 
 'use strict';
 
-const { DecoratorManager } = require('@accordproject/concerto-core');
-
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 /* istanbul ignore next */
@@ -113,9 +111,6 @@ class Vocabulary {
      * @private
      */
     getNamespaceTerms(){
-        if(!DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget)){
-            return null;
-        }
         const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
         return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
     }
@@ -219,7 +214,7 @@ class Vocabulary {
                 : k ).filter( i => i !== null)
         };
 
-        if(DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget) && !this.content.term){
+        if(!this.content.term){
             result.missingTerms.push('namespace');
         }
 

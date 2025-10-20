@@ -121,7 +121,6 @@ describe('Vocabulary', () => {
     });
 
     it('getTerm - namespace term', () => {
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
         const vocabularyManager = {};
         const obj = {
             declarations: [],
@@ -132,6 +131,5 @@ describe('Vocabulary', () => {
         const voc = new Vocabulary(vocabularyManager, obj);
         const term = voc.getTerm();
         should.equal(term, obj.term);
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
     });
 });

@@ -22,8 +22,6 @@ const VocabularyManager = require('@accordproject/concerto-vocabulary').Vocabula
 const Printer = require('@accordproject/concerto-cto').Printer;
 
 const chai = require('chai');
-const { ErrorCodes } = require('@accordproject/concerto-util');
-const { DEPRECATION_WARNING, CONCERTO_DEPRECATION_001 } = ErrorCodes;
 const ModelFile = require('../src/introspect/modelfile');
 require('chai').should();
 chai.use(require('chai-things'));
@@ -95,12 +93,9 @@ describe('DecoratorManager', () => {
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/possible-decorator-command-targets.json'), 'utf-8');
             let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs), {validate: true, validateCommands: true});
             const decoratedAst = decoratedModelManager.getModelFile('test@1.0.0').getAst();
-            const decoratedCTO = Printer.toCTO(decoratedAst);
-            const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8');
-            const result = decoratedCTO === decoratedTest;
-            console.log(decoratedCTO);
-            console.log(decoratedTest);
-            chai.expect(result).to.be.true;
+            const decoratedCTO = Printer.toCTO(decoratedAst).trimEnd();
+            const decoratedTest = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/decoratedTest.cto'), 'utf-8').trimEnd();
+            chai.expect(decoratedCTO).to.equal(decoratedTest);
         });
 
         it('should support no validation', async function() {
@@ -194,46 +189,7 @@ describe('DecoratorManager', () => {
             personDecl.getProperty('firstName').getDecorator('Form').should.not.be.null;
         });
 
-        /*
-        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to
-        all the declarations within the namespace, which has been identified as bug and will be deprecated.
-        */
-        it('should add decorators that target namespace and catch warning - behaviour to be deprecated', async function() {
-            // event listner to catch the warning
-            process.once('warning', (warning) => {
-                chai.expect(warning.message).to.be.equals('DEPRECATED: Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.');
-                chai.expect(warning.name).to.be.equals(DEPRECATION_WARNING);
-                chai.expect(warning.code).to.be.equals(CONCERTO_DEPRECATION_001);
-                chai.expect(warning.detail).to.be.equals('Please refer to https://concerto.accordproject.org/deprecation/001');
-            });
-            // load a model to decorate
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-
-            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
-            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true, validateCommands: true});
-
-            const modelFile = decoratedModelManager.getModelFile('test@1.0.0');
-            modelFile.should.not.be.null;
-            chai.expect(modelFile.getDecorator('IsValid')).to.be.null;
-
-            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
-            ssnDecl.should.not.be.null;
-            ssnDecl.getDecorator('IsValid').should.not.be.null;
-
-            const decl = decoratedModelManager.getType('test@1.0.0.Person');
-            decl.should.not.be.null;
-            decl.getDecorator('IsValid').should.not.be.null;
-        });
-
-        /*
-        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to the
-        namespace, which is the new feature added can be accessed using the feature flag: ENABLE_DCS_NAMESPACE_TARGET.
-        */
-        it('should add decorators that target namespace - updated behaviour using environment variable', async function() {
-            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
+        it('should add decorators that target namespace', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
@@ -250,13 +206,8 @@ describe('DecoratorManager', () => {
             const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
             ssnDecl.should.not.be.null;
             chai.expect(ssnDecl.getDecorator('IsValid')).to.be.null;
-            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
         });
 
-        /*
-        This test is target to the functionality wherein if there exists a namespace targeted decorator, it applies the decorator to the
-        namespace, which is the new feature added can be accessed using the option parameter: enableDcsNamespaceTarget.
-        */
         it('should add decorators that target namespace - updated behaviour using options parameter', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager();
@@ -265,7 +216,7 @@ describe('DecoratorManager', () => {
 
             const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
             const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
-                {validate: true, validateCommands: true, enableDcsNamespaceTarget: true});
+                {validate: true, validateCommands: true});
 
             const modelFile = decoratedModelManager.getModelFile('test@1.0.0');
             modelFile.should.not.be.null;
@@ -764,7 +715,6 @@ describe('DecoratorManager', () => {
             sourceCTO.should.be.deep.equal(updatedCTO);
         });
         it('should ensure that extraction and re-application of decorators and vocabs from a model is an identity operation including namespace terms', async function() {
-            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
             const testModelManager = new ModelManager();
             const sourceCTO = [];
             const updatedCTO = [];
@@ -809,7 +759,6 @@ describe('DecoratorManager', () => {
                 updatedCTO.push(data);
             });
             sourceCTO.should.be.deep.equal(updatedCTO);
-            process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
         });
         it('should give proper response in there is no vocabulary on any model', async function() {
             const testModelManager = new ModelManager();
@@ -855,7 +804,6 @@ describe('DecoratorManager', () => {
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en',
-                enableDcsNamespaceTarget:true
             };
             const resp = DecoratorManager.extractVocabularies( testModelManager, options);
             const vocab = resp.vocabularies;
@@ -870,7 +818,6 @@ describe('DecoratorManager', () => {
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en',
-                enableDcsNamespaceTarget:true
             };
             const resp = DecoratorManager.extractVocabularies( testModelManager, options);
             const vocab = resp.vocabularies;
@@ -884,7 +831,6 @@ describe('DecoratorManager', () => {
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en',
-                enableDcsNamespaceTarget:true
             };
             (() => {
                 DecoratorManager.extractVocabularies( testModelManager, options);
@@ -897,7 +843,6 @@ describe('DecoratorManager', () => {
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en',
-                enableDcsNamespaceTarget:true
             };
             (() => {
                 DecoratorManager.extractVocabularies( testModelManager, options);
@@ -910,7 +855,6 @@ describe('DecoratorManager', () => {
             const options = {
                 removeDecoratorsFromModel:true,
                 locale:'en',
-                enableDcsNamespaceTarget:true
             };
             (() => {
                 DecoratorManager.extractVocabularies( testModelManager, options);
@@ -922,7 +866,6 @@ describe('DecoratorManager', () => {
             const expectedDcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-dcs.json'), 'utf-8');
             testModelManager.addCTOModel(modelText, 'test.cto');
             const options = {
-                removeDecoratorsFromModel:true,
                 locale:'en'
             };
             const resp = DecoratorManager.extractNonVocabDecorators( testModelManager, options);

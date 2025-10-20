@@ -26,7 +26,7 @@ interface ParseOptions {
  * @param {string} cto - the Concerto string
  * @param {string} [fileName] - an optional file name
  * @param {Object} [options] - an optional options parameter or filename
- * @param {boolean} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
+ * @param {boolean} [options.skipLocationNodes] - default true, when true location nodes will be skipped in the metamodel AST
  * @return {object} the metamodel instance for the cto argument
  */
 function parse(cto: string, fileName?: string, options?: ParseOptions): any {

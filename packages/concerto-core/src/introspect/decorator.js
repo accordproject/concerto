@@ -183,7 +183,6 @@ class Decorator {
                 }
             }
             catch (err) {
-                console.log(err);
                 this.handleError(validationOptions.missingDecorator, err);
             }
         }

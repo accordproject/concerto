@@ -2,12 +2,11 @@
   "devDependencies": {
     "@types/path-browserify": "^1.0.3",
     "colors": "1.4.0",
-    "coveralls": "3.1.0",
+    "coveralls-next": "^5.0.0",
     "dayjs": "1.11.10",
-    "eslint": "8.2.0",
+    "eslint": "8.57.1",
     "glob": "^7.2.0",
     "jsdoc": "^4.0.2",
-    "lerna": "^5.6.2",
     "license-check-and-add": "2.3.6",
     "nyc": "15.1.0",
     "semver": "7.5.4"

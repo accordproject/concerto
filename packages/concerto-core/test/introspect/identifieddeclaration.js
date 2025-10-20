@@ -21,12 +21,6 @@ require('chai').should();
 
 describe('IdentifiedDeclaration', () => {
 
-    beforeEach(() => {
-    });
-
-    afterEach(() => {
-    });
-
     describe('#hasInstance', () => {
 
         it('should identify instance', () => {
@@ -118,7 +112,7 @@ asset Order identified by sku {
         });
 
         it('should not allow overriding system identifier', () => {
-            const mm = new ModelManager();
+            const mm = new ModelManager({ skipLocationNodes: false });
 
             (() => {
                 mm.addCTOModel( `

@@ -1,27 +1,21 @@
+@NamespaceDeprecated()
+@Namespace()
 namespace test@1.0.0
 
 import concerto.decorator@1.0.0.Decorator
 
 @Declaration()
 @NamespaceDeclaration()
-@NamespaceDeprecated()
-@Namespace()
 @argumentsTest("inputString",2.5,true)
 scalar SSN extends String
 
-@NamespaceDeprecated()
-@Namespace()
 concept Editable extends Decorator {
 }
 
-@NamespaceDeprecated()
-@Namespace()
 concept Custom extends Decorator {
 }
 
 @Editable
-@NamespaceDeprecated()
-@Namespace()
 concept Person {
   @Custom
   @Type("Property")
@@ -62,8 +56,6 @@ concept Person {
   o Dictionary dictionary
 }
 
-@NamespaceDeprecated()
-@Namespace()
 map Dictionary {
   @MapElement()
   @DeclarationMapElement()
@@ -78,8 +70,6 @@ map Dictionary {
   o String
 }
 
-@NamespaceDeprecated()
-@Namespace()
 map Rolodex {
   @MapElement()
   @NamespaceMapElement()
@@ -90,8 +80,6 @@ map Rolodex {
   o String
 }
 
-@NamespaceDeprecated()
-@Namespace()
 enum Miscellaneous {
   @Property()
   @NamespaceProperty()

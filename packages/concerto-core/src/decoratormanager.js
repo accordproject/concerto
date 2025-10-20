@@ -21,7 +21,6 @@ const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
-const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 const IllegalModelException = require('./introspect/illegalmodelexception');
 const rfdc = require('rfdc')({
     circles: true,
@@ -367,7 +366,6 @@ class DecoratorManager {
      * the validate option must also be true
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
-     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
      * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
@@ -421,9 +419,7 @@ class DecoratorManager {
                 const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
                 sortedDeclarationDecoratorCommandSets.forEach(dcsWithIndex => {
                     this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options);
-                    if(this.isNamespaceTargetEnabled(options?.enableDcsNamespaceTarget)) {
-                        this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
-                    }
+                    this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
                 });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
@@ -475,18 +471,16 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
-     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
     static extractDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
-            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -500,18 +494,16 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
-     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
     static extractVocabularies(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
-            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -524,18 +516,16 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
-     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
     static extractNonVocabDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
-            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -741,8 +731,6 @@ class DecoratorManager {
      * @param {*} command the Command object from the dcs
      * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
      * @param {object} [options] - execute command options
-     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
-     * org.accordproject.decoratorcommands model
      */
     static executeCommand(namespace, declaration, command, property, options) {
         const { target, decorator, type } = command;
@@ -771,10 +759,10 @@ class DecoratorManager {
                         this.applyDecorator(declaration.value, type, decorator);
                     }
                 } else {
-                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
+                    this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
                 }
             } else if (!(target.property || target.properties || target.type)) {
-                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, options?.enableDcsNamespaceTarget);
+                this.checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target);
             } else {
                 if(property) {
                     this.executePropertyCommand(property, command);
@@ -806,44 +794,26 @@ class DecoratorManager {
     }
 
     /**
-     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
-     * if enabled, applies the decorator on top of the namespace or else on all declarations
+     * Applies the decorator on top of the namespace or else on all declarations
      * within the namespace.
      * @private
      * @param {*} declaration the type to apply the decorator to
      * @param {string} type the command type
      * @param {*} decorator the decorator to add
      * @param {*} target the target object for the decorator
-     * @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
-    static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target, enableDcsNamespaceTarget) {
-        if(this.isNamespaceTargetEnabled(enableDcsNamespaceTarget)) {
-            if (target.declaration) {
-                this.applyDecorator(declaration, type, decorator);
-            }
-        } else {
+    static checkForNamespaceTargetAndApplyDecorator(declaration, type, decorator, target) {
+        if (target.declaration) {
             this.applyDecorator(declaration, type, decorator);
         }
     }
 
     /**
-     * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
-     * and print deprecation warning if not enabled and return boolean value as well
-     *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
-     *  @returns {Boolean} true if either of the flags is enabled
+     * Legacy method. Kept for compatibility. Returns true.
+     *  @returns {Boolean} true
      */
-    static isNamespaceTargetEnabled(enableDcsNamespaceTarget) {
-        if(enableDcsNamespaceTarget || process.env.ENABLE_DCS_NAMESPACE_TARGET === 'true') {
-            return true;
-        } else {
-            Warning.printDeprecationWarning(
-                'Functionality for namespace targeted Decorator Command Sets has beed changed. Using namespace targets to apply decorators on all declarations in a namespace will be deprecated soon.',
-                ErrorCodes.DEPRECATION_WARNING,
-                ErrorCodes.CONCERTO_DEPRECATION_001,
-                'Please refer to https://concerto.accordproject.org/deprecation/001'
-            );
-            return false;
-        }
+    static isNamespaceTargetEnabled() {
+        return true;
     }
 
     /**
