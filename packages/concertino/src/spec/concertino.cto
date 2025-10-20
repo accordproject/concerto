@@ -1,4 +1,4 @@
-namespace concertino.metamodel@4.0.0-alpha.1
+namespace concertino.metamodel@4.0.0-alpha.2
 
 import concerto.metamodel@1.0.0.{Decorator, Import}
 

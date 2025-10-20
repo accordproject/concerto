@@ -27,7 +27,7 @@
   ],
   "name": "concerto",
   "description": "Monorepo for concerto packages",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",

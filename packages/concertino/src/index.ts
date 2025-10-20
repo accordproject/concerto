@@ -18,7 +18,7 @@
  * This module provides a standardized way to convert between Concerto metamodel and Concertino format.
  */
 import { IModels } from '@accordproject/concerto-metamodel';
-import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.1';
+import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.2';
 import { convertToConcertino } from './concertinoSerializer';
 import { convertToMetamodel } from './metamodelSerializer';
 import Ajv, { ValidateFunction } from 'ajv';
@@ -51,7 +51,7 @@ export class ConcertinoConverter {
      */
     constructor(options: ConcertinoOptions = {}) {
         this.options = {
-            version: '4.0.0-alpha.1',
+            version: '4.0.0-alpha.2',
             ...options
         };
         this.ajv = new Ajv();
@@ -94,4 +94,4 @@ export class ConcertinoConverter {
 export { convertToConcertino, convertToMetamodel };
 
 // Export types
-export * from './spec/concertino.metamodel@4.0.0-alpha.1';
+export * from './spec/concertino.metamodel@4.0.0-alpha.2';

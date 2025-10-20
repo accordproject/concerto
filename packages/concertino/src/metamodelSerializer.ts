@@ -32,7 +32,7 @@ import {
     MetadataMap,
     IVocabulary,
     IStringDecoratorValue,
-} from './spec/concertino.metamodel@4.0.0-alpha.1';
+} from './spec/concertino.metamodel@4.0.0-alpha.2';
 import {
     IBooleanProperty,
     IBooleanScalar,
