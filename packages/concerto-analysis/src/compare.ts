@@ -130,8 +130,7 @@ export class Compare {
         if(a instanceof ScalarDeclaration || b instanceof ScalarDeclaration) {
             return;
         }
-        // const propsA = a.getProperties();
-        // const propsB = b.getProperties();
+
         let propsA = a.getOwnProperties();
         let propsB = b.getOwnProperties();
         if (a.getProperties()) {
