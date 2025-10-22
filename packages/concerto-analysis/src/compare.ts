@@ -130,7 +130,9 @@ export class Compare {
         if(a instanceof ScalarDeclaration || b instanceof ScalarDeclaration) {
             return;
         }
-        this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
+        const propsA = this.config.includeInherited ? a.getProperties() : a.getOwnProperties();
+        const propsB = this.config.includeInherited ? b.getProperties() : b.getOwnProperties();
+        this.compareProperties(comparers, propsA, propsB);
     }
 
     private compareClassDeclarations(comparers: Comparer[], a: ClassDeclaration[], b: ClassDeclaration[]) {
