@@ -1,0 +1,161 @@
+# Dependabot configuration for automated dependency updates
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Root package.json (workspace root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "accordproject/concerto-maintainers"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Ignore major version updates for stable dependencies
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "accordproject/concerto-maintainers"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-analysis workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-analysis"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-analysis"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-core workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-core"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-core"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-cto workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-cto"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-cto"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-types workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-types"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-types"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-util workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-util"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-util"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-vocabulary workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-vocabulary"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-vocabulary"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concerto-linter workspace
+  - package-ecosystem: "npm"
+    directory: "/packages/concerto-linter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concerto-linter"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # concertino workspace (CLI tool)
+  - package-ecosystem: "npm"
+    directory: "/packages/concertino"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "concertino"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

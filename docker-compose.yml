@@ -1,0 +1,75 @@
+# Docker Compose configuration for Concerto development
+# Usage:
+#   docker-compose up -d        # Start services in background
+#   docker-compose down         # Stop services
+#   docker-compose logs -f      # View logs
+#   docker-compose exec dev sh  # Access shell in dev container
+
+version: '3.8'
+
+services:
+  # Development environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: concerto-dev
+    working_dir: /app
+    volumes:
+      # Mount source code for live development
+      - .:/app
+      # Persist node_modules for faster rebuilds
+      - node_modules:/app/node_modules
+      # Persist npm cache
+      - npm_cache:/home/concerto/.npm
+    environment:
+      - NODE_ENV=development
+      - NPM_CONFIG_LOGLEVEL=info
+    command: sh -c "npm install && npm run build && tail -f /dev/null"
+    networks:
+      - concerto-network
+
+  # Production-ready CLI environment
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: concerto-cli
+    working_dir: /app
+    environment:
+      - NODE_ENV=production
+    # Override entrypoint for interactive use
+    entrypoint: ["/sbin/tini", "--", "sh"]
+    stdin_open: true
+    tty: true
+    networks:
+      - concerto-network
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: concerto-test
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=test
+      - NODE_OPTIONS=--max_old_space_size=4096
+    command: npm test
+    networks:
+      - concerto-network
+
+networks:
+  concerto-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+    driver: local
+  npm_cache:
+    driver: local
