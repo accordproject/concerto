@@ -746,6 +746,17 @@ semver
     return { versionCore, pre, build };
   }
 
+// Support limited semver range selectors for imports: 1.x or 1.1.x
+semverMajorX
+  = numericIdentifier '.' 'x'
+
+semverMajorMinorX
+  = numericIdentifier '.' numericIdentifier '.' 'x'
+
+// Capture either a full semver or the limited wildcard forms as a raw string
+versionSelector
+  = $(semver / semverMajorMinorX / semverMajorX)
+
 versionCore
   = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier
   {
@@ -1669,12 +1680,12 @@ QualifiedName
   }
 
 VersionedQualifiedName
-  = ns:QualifiedName '@' version:$semver '.' name:$Identifier {
+  = ns:QualifiedName '@' version:versionSelector '.' name:$Identifier {
   	return `${ns}@${version}.${name}`;
   }
 
 VersionedQualifiedNamespace
-  = ns:QualifiedName '@' version:$semver {
+  = ns:QualifiedName '@' version:versionSelector {
   	return `${ns}@${version}`;
   }
 
