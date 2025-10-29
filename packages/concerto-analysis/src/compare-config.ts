@@ -41,6 +41,7 @@ export function compareResultToString(result: CompareResult) {
 export type CompareConfig = {
   comparerFactories: ComparerFactory[];
   rules: Record<string, CompareResult>;
+  includeInherited?: boolean;
 };
 
 export const defaultCompareConfig: CompareConfig = {
