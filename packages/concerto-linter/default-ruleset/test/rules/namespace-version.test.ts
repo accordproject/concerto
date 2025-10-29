@@ -21,4 +21,13 @@ describe('Namespace Version Rule', () => {
         expect(results[0].code).toBe('namespace-version');
         expect(results[0].message).toContain('should specify a version');
     });
+
+    test('should not report violations when imports use wildcard semver selectors', async () => {
+        const results = await testRules({
+            rules: {
+                'namespace-version': namespaceVersion,
+            },
+        }, 'namespace-wildcard-imports.cto');
+        expect(results).toHaveLength(0);
+    });
 });
