@@ -130,7 +130,15 @@ export class Compare {
         if(a instanceof ScalarDeclaration || b instanceof ScalarDeclaration) {
             return;
         }
-        this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
+        let propsA = a.getOwnProperties();
+        let propsB = b.getOwnProperties();
+        if (a.getProperties()) {
+            propsA = a.getProperties();
+        }
+        if (b.getProperties()) {
+            propsB = b.getProperties();
+        }
+        this.compareProperties(comparers, propsA, propsB);
     }
 
     private compareClassDeclarations(comparers: Comparer[], a: ClassDeclaration[], b: ClassDeclaration[]) {
