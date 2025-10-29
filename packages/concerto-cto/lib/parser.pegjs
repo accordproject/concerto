@@ -747,15 +747,15 @@ semver
   }
 
 // Support limited semver range selectors for imports: 1.x or 1.1.x
-semverMajorX
+semverMinorWildcard
   = numericIdentifier '.' 'x'
 
-semverMajorMinorX
+semverPatchWildcard
   = numericIdentifier '.' numericIdentifier '.' 'x'
 
 // Capture either a full semver or the limited wildcard forms as a raw string
 versionSelector
-  = $(semver / semverMajorMinorX / semverMajorX)
+  = $(semver / semverPatchWildcard / semverMinorWildcard)
 
 versionCore
   = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier

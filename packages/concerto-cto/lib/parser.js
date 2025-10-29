@@ -6262,7 +6262,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parsesemverMajorX() {
+  function peg$parsesemverMinorWildcard() {
     var s0, s1, s2, s3;
 
     s0 = peg$currPos;
@@ -6302,7 +6302,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parsesemverMajorMinorX() {
+  function peg$parsesemverPatchWildcard() {
     var s0, s1, s2, s3, s4, s5;
 
     s0 = peg$currPos;
@@ -6366,9 +6366,9 @@ function peg$parse(input, options) {
     s0 = peg$currPos;
     s1 = peg$parsesemver();
     if (s1 === peg$FAILED) {
-      s1 = peg$parsesemverMajorMinorX();
+      s1 = peg$parsesemverPatchWildcard();
       if (s1 === peg$FAILED) {
-        s1 = peg$parsesemverMajorX();
+        s1 = peg$parsesemverMinorWildcard();
       }
     }
     if (s1 !== peg$FAILED) {
