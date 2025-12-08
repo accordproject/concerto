@@ -22,11 +22,16 @@ declare class DecoratorExtractor {
      * @param {string} dcs_version - version string
      * @param {Object} sourceModelAst - the ast of source models
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
+     * @param {object} [options] - decorator extractor options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
-    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: any, action?: int);
+    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: any, action?: int, options?: {
+        enableDcsNamespaceTarget?: boolean;
+    });
     extractionDictionary: {};
     removeDecoratorsFromModel: boolean;
     locale: string;
+    enableDcsNamespaceTarget: boolean;
     dcs_version: string;
     sourceModelAst: any;
     updatedModelAst: any;
@@ -70,6 +75,15 @@ declare class DecoratorExtractor {
      */
     private transformVocabularyDecorators;
     /**
+     * Transforms the collected vocabularies into proper vocabulary command sets
+     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
+     * @returns {Array<Object>} - the collection of vocabularies command sets
+     * @private
+     */
+    private transformVocabularyDecoratorsV2;
+    /**
      * Constructs Target object for a given model
      * @param {string} namespace - the current namespace
      * @param {Object} obj - the ast of the model
@@ -95,6 +109,14 @@ declare class DecoratorExtractor {
      * @private
      */
     private parseVocabularies;
+    /**
+     * @param {Object} vocabObject - the collection of collected vocabularies
+     * @param {Object} vocabTarget - the declaration object
+     * @param {Object} dcs - the current dcs json to be parsed
+     * @returns {Object} - the collection of collected vocabularies with current dcs
+     * @private
+     */
+    private parseVocabulariesV2;
     /**
     * parses the extracted decorators and generates arrays of decorator command set and vocabularies
     *

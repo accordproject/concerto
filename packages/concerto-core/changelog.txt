@@ -24,6 +24,16 @@
 # Note that the latest public API is documented using JSDocs and is available in api.txt.
 #
 
+Version 3.22.0 {677eac41f1ef471977d3e301e46ef480} 2025-07-26
+- added jsonToYaml method in DecoratorManager
+- added yamlToJson method in DecoratorManager
+
+Version 3.20.5 {a18e77c836e19a4badcbe83d6c7e7c1e} 2025-02-03
+- vocabulary support for namespace scoped decorators
+
+Version 3.20.4 {335406876b7005f0a2e6f9ca3e0d0dbf} 2025-01-21
+- expose canMigrate and MigrateTo methods from decorator manager
+
 Version 3.19.2 {844c910d1f8f61ab31c34e85d8c51546} 2024-10-21
 - update options for ModelManager
 

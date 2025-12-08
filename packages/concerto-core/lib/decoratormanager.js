@@ -22,6 +22,13 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
+const IllegalModelException = require('./introspect/illegalmodelexception');
+const rfdc = require('rfdc')({
+    circles: true,
+    proto: false,
+});
+
+const { jsonToYaml, yamlToJson } = require('./dcsconverter');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -199,7 +206,6 @@ class DecoratorManager {
 
     /**
      * Rewrites the $class property on decoratorCommandSet classes.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {string} version the DCS version upgrade target
      * @returns {object} the migrated DecoratorCommandSet object
@@ -224,7 +230,6 @@ class DecoratorManager {
     /**
      * Checks if the supplied decoratorCommandSet can be migrated.
      * Migrations should only take place across minor versions of the same major version.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {*} DCS_VERSION the DecoratorCommandSet version
      * @returns {boolean} returns true if major versions are equal
@@ -321,7 +326,8 @@ class DecoratorManager {
                 strict: true,
                 metamodelValidation: true,
                 addMetamodel: true,
-                enableMapType
+                enableMapType,
+                importAliasing: modelManager.isAliasedTypeEnabled(),
             });
             validationModelManager.addModelFiles(modelManager.getModelFiles());
             validationModelManager.addCTOModel(
@@ -350,9 +356,8 @@ class DecoratorManager {
      * @private
      */
     static pushMapValues(array, map, key) {
-        const targetCommands = map.get(key);
-        if (targetCommands) {
-            array.push(...targetCommands);
+        for (const value of map.get(key) || []) {
+            array.push(value);
         }
     }
 
@@ -368,15 +373,26 @@ class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
+
+        if (options?.skipValidationAndResolution) {
+            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
+                throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
+            }
+            options.disableMetamodelResolution = true;
+            options.disableMetamodelValidation = true;
+        }
 
         this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
 
         // we create synthetic imports for all decorator declarations
         // along with any of their type reference arguments
-        const decoratorImports = decoratorCommandSet.commands.map(command => {
+        const decoratorImports = decoratorCommandSet.commands.flatMap(command => {
             return [{
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
@@ -390,21 +406,21 @@ class DecoratorManager {
                     };
                 })
                 : []);
-        }).flat().filter(i => i.namespace);
+        }).filter(i => i.namespace);
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
-        const ast = modelManager.getAst(true, true);
-        const decoratedAst = JSON.parse(JSON.stringify(ast));
+        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
+        const decoratedAst = rfdc(ast);
         decoratedAst.models.forEach((model) => {
             // remove the imports for types defined in this namespace
             const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
             // add the imports for decorators, in case they get added below
             model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
+            const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
             model.declarations.forEach((decl) => {
                 const declarationDecoratorCommandSets = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
                 this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
-                const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
                 this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
                 const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
@@ -449,8 +465,9 @@ class DecoratorManager {
         const newModelManager = new ModelManager({
             strict: modelManager.isStrict(),
             enableMapType,
+            importAliasing: modelManager.isAliasedTypeEnabled(),
             decoratorValidation: modelManager.getDecoratorValidation()});
-        newModelManager.fromAst(decoratedAst);
+        newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
         return newModelManager;
     }
     /**
@@ -466,16 +483,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
     static extractDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_ALL, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -489,16 +508,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
     static extractVocabularies(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true, true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -511,16 +532,18 @@ class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
     static extractNonVocabDecorators(modelManager,options) {
         options = {
             removeDecoratorsFromModel: false,
             locale:'en',
+            enableDcsNamespaceTarget: false,
             ...options
         };
         const sourceAst = modelManager.getAst(true);
-        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB);
+        const decoratorExtrator = new DecoratorExtractor(options.removeDecoratorsFromModel, options.locale, DCS_VERSION, sourceAst, DecoratorExtractor.Action.EXTRACT_NON_VOCAB, {enableDcsNamespaceTarget: this.isNamespaceTargetEnabled(options.enableDcsNamespaceTarget)});
         const collectionResp = decoratorExtrator.extract();
         return {
             modelManager: collectionResp.updatedModelManager,
@@ -674,9 +697,31 @@ class DecoratorManager {
             decorated.decorators
                 ? decorated.decorators.push(newDecorator)
                 : (decorated.decorators = [newDecorator]);
+            this.checkForDuplicateDecorators(decorated);
         } else {
             throw new Error(`Unknown command type ${type}`);
         }
+    }
+
+    /**
+     * Checks for duplicate decorators added to a decorated model element.
+     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
+     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
+     * @private
+     */
+    static checkForDuplicateDecorators(decoratedAst) {
+        const uniqueDecoratorNames = new Set();
+        decoratedAst.decorators.forEach(d => {
+            const decoratorName = d.name;
+            if(!uniqueDecoratorNames.has(decoratorName)) {
+                uniqueDecoratorNames.add(decoratorName);
+            } else {
+                throw new IllegalModelException(
+                    `Duplicate decorator ${decoratorName}`,
+                    decoratedAst.location,
+                );
+            }
+        });
     }
 
     /**
@@ -709,7 +754,8 @@ class DecoratorManager {
      */
     static executeCommand(namespace, declaration, command, property, options) {
         const { target, decorator, type } = command;
-        const { name } = ModelUtil.parseNamespace( namespace );
+        // the namespace version is already validated in the decorateModels method
+        const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );
         if (this.falsyOrEqual(target.namespace, [namespace,name]) &&
             this.falsyOrEqual(target.declaration, [declaration.name])) {
 
@@ -791,7 +837,6 @@ class DecoratorManager {
     /**
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
      * and print deprecation warning if not enabled and return boolean value as well
-     *  @private
      *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      *  @returns {Boolean} true if either of the flags is enabled
      */
@@ -808,6 +853,30 @@ class DecoratorManager {
             return false;
         }
     }
+
+    /**
+     * converts DCS JSON object into YAML string
+     * validates the input DCS JSON against the DCS model
+     * @param {object} jsonInput the DCS JSON as parsed object
+     * @return {string} the corresponding YAML string
+     */
+    static jsonToYaml(jsonInput){
+        this.validate(jsonInput);
+        return jsonToYaml(jsonInput);
+    }
+
+    /**
+     * converts DCS YAML string into JSON object
+     * validates the output DCS JSON against the DCS model
+     * @param {string} yamlInput the DCS JSON as parsed object
+     * @return {object} the corresponding JSON object
+     */
+    static yamlToJson(yamlInput){
+        const jsonOutput = yamlToJson(yamlInput);
+        this.validate(jsonOutput);
+        return jsonOutput;
+    }
+
 }
 
 module.exports = DecoratorManager;

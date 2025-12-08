@@ -26,8 +26,10 @@ const ParserUtil = require('./parserutility');
 const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
 const fs = require('fs');
+const path = require('path');
 
 const sinon = require('sinon');
+const ModelFile = require('../../lib/introspect/modelfile');
 const expect = require('chai').expect;
 
 
@@ -784,6 +786,43 @@ describe('MapDeclaration', () => {
             let declaration = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.string.cto', MapDeclaration);
             declaration.getKey().getNamespace().should.equal('com.acme@1.0.0');
             declaration.getValue().getNamespace().should.equal('com.acme@1.0.0');
+        });
+    });
+});
+
+describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => {
+
+    let modelManager;
+    let resolvedModelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+
+        const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
+        const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
+
+        modelManager.addCTOModel(childModelCTO, 'child@1.0.0.cto');
+        modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
+        const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
+        const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
+        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
+        const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
+        resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
+    });
+
+    describe('#validate', () => {
+
+        it('should be able get validate a map key which is an imported scalar type which is aliased', () => {
+            const mapDeclaration = resolvedModelManager.getType('parent@1.0.0.KidIndex');
+            const key = mapDeclaration.getKey();
+            expect(key.validate.bind(key)).to.not.throw();
+        });
+
+        it('should be able get validate a map value which is an imported type which is aliased', () => {
+            const mapDeclaration = resolvedModelManager.getType('parent@1.0.0.KidIndex');
+            const value = mapDeclaration.getValue();
+            expect(value.validate.bind(value)).to.not.throw();
         });
     });
 });

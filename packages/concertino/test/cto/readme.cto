@@ -1,0 +1,34 @@
+
+namespace readme@1.0.0
+
+scalar Email extends String regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
+@Term("Individual")
+@Term_plural("People")
+concept Person {
+  @Term("Given Name")
+  o String firstName
+
+  @Term("Family Name")
+  o String lastName
+
+  o Integer age range=[0,] optional
+
+  @sensitive
+  o Email email optional
+
+  @Term("Mailing Address")
+  o Address address optional
+}
+
+@Term("Physical Address")
+concept Address {
+  @Term("Street Address")
+  o String street
+
+  @Term("City/Town")
+  o String city
+
+  o String zipCode
+  o String country
+}

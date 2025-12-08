@@ -35,7 +35,7 @@ class BaseModelManager {
    + void addDecoratorFactory(DecoratorFactory) 
    + boolean derivesFrom(string,string) 
    + object resolveMetaModel(object) 
-   + void fromAst(ast) 
+   + void fromAst(ast,object?,object?) 
    + void getAst(boolean?,boolean?) 
    + BaseModelManager filter(FilterFunction) 
 }
@@ -56,17 +56,24 @@ class Concerto {
    + string getNamespace(obj) 
 }
    + object setCurrentTime() 
+   + string jsonToYaml() 
+   + object yamlToJson() 
 class DecoratorManager {
    + ModelManager validate(decoratorCommandSet,ModelFile[]) throws Error
-   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?,boolean?) 
-   + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string) 
-   + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string) 
-   + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string) 
+   + object migrateTo(decoratorCommandSet,string) 
+   + boolean canMigrate(decoratorCommandSet,DCS_VERSION) 
+   + ModelManager decorateModels(ModelManager,decoratorCommandSet,object?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?,boolean?) 
+   + ExtractDecoratorsResult extractDecorators(ModelManager,object,boolean,string,boolean) 
+   + ExtractDecoratorsResult extractVocabularies(ModelManager,object,boolean,string,boolean) 
+   + ExtractDecoratorsResult extractNonVocabDecorators(ModelManager,object,boolean,string,boolean) 
    + void validateCommand(ModelManager,command) 
    + Boolean falsyOrEqual(string||,string[]) 
    + void applyDecorator(decorated,string,newDecorator) 
    + void executeCommand(string,declaration,command,property?,object?,boolean?) 
    + void executePropertyCommand(property,command) 
+   + Boolean isNamespaceTargetEnabled(boolean?) 
+   + string jsonToYaml(object) 
+   + object yamlToJson(string) 
 }
    + string[] intersect() 
    + boolean isUnversionedNamespaceEqual() 

@@ -1,0 +1,8 @@
+@Hide
+namespace com.example
+
+@Term
+concept Person {
+  @Security
+  o String ssn
+}

@@ -69,4 +69,35 @@ const scalarValidatorChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const scalarDeclarationComparerFactories = [scalarDeclarationExtendsChanged, scalarValidatorChanged];
+const scalarDefaultValueChanged: ComparerFactory = (context) => ({
+    compareScalarDeclaration: (a, b) => {
+        if (!a || !b) {return;}
+
+        const aDefaultValue = a.getDefaultValue() ?? null;
+        const bDefaultValue = b.getDefaultValue() ?? null;
+
+        if (aDefaultValue === bDefaultValue) {return;}
+
+        if (!aDefaultValue && bDefaultValue) {
+            context.report({
+                key: 'scalar-default-value-added',
+                message: `Default value "${bDefaultValue}" added to scalar "${a.getName()}"`,
+                element: a.getName()
+            });
+        } else if (aDefaultValue && !bDefaultValue) {
+            context.report({
+                key: 'scalar-default-value-removed',
+                message: `Default value "${aDefaultValue}" removed from scalar "${a.getName()}"`,
+                element: a.getName()
+            });
+        } else {
+            context.report({
+                key: 'scalar-default-value-changed',
+                message: `Default value changed from "${aDefaultValue}" to "${bDefaultValue}" in scalar "${a.getName()}"`,
+                element: a.getName()
+            });
+        }
+    }
+});
+
+export const scalarDeclarationComparerFactories = [scalarDeclarationExtendsChanged, scalarValidatorChanged, scalarDefaultValueChanged];

@@ -1,0 +1,34 @@
+namespace org.example.complex@1.0.0
+
+import org.example.sample@1.0.0.{Person}
+
+enum DocumentType {
+  o PASSPORT
+  o DRIVING_LICENSE
+  o NATIONAL_ID
+}
+
+concept DocumentBase {
+  o String docusignId
+}
+
+concept Document identified by id extends DocumentBase{
+  o String id
+  o DocumentType type
+  o String number
+  o DateTime issueDate
+  o DateTime expiryDate optional
+}
+
+concept Employee {
+  o String employeeId
+  o Person personalInfo
+  o Document[] identificationDocuments
+  o Department department
+}
+
+concept Department {
+  o String name
+  o String code
+  o Employee manager
+}

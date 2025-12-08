@@ -93,7 +93,6 @@
         },
         {
             "$class": "concerto.metamodel@1.0.0.DateTimeScalar",
-            "defaultValue": null,
             "name": "DateTimeScalar"
         },
         {
@@ -384,7 +383,7 @@
             "defaultValue": "000-00-0000",
             "validator": {
                 "$class": "concerto.metamodel@1.0.0.StringRegexValidator",
-                "pattern": "\\d{3}-\\d{2}-\\{4}+",
+                "pattern": "\\d{3}-\\d{2}-\\d{4}",
                 "flags": ""
             },
             "lengthValidator": {

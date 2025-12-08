@@ -32,12 +32,14 @@ declare class VocabularyManager {
      * Create the VocabularyManager
      * @param {*} [options] options to configure vocabulary lookup
      * @param {*} [options.missingTermGenerator] A function to call for missing terms. The function
+     * @param {*} [options.enableDcsNamespaceTarget] A boolean to enable the namespace target in the DCS
      * should accept namespace, locale, declarationName, propertyName as arguments
      * @constructor
      */
     constructor(options?: any);
     vocabularies: {};
     missingTermGenerator: any;
+    enableDcsNamespaceTarget: any;
     /**
      * Removes all vocabularies
      */

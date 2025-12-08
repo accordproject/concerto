@@ -21,21 +21,19 @@ declare class DecoratorManager {
     static validate(decoratorCommandSet: any, modelFiles?: ModelFile[]): ModelManager;
     /**
      * Rewrites the $class property on decoratorCommandSet classes.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {string} version the DCS version upgrade target
      * @returns {object} the migrated DecoratorCommandSet object
      */
-    private static migrateTo;
+    static migrateTo(decoratorCommandSet: any, version: string): object;
     /**
      * Checks if the supplied decoratorCommandSet can be migrated.
      * Migrations should only take place across minor versions of the same major version.
-     * @private
      * @param {*} decoratorCommandSet the DecoratorCommandSet object
      * @param {*} DCS_VERSION the DecoratorCommandSet version
      * @returns {boolean} returns true if major versions are equal
      */
-    private static canMigrate;
+    static canMigrate(decoratorCommandSet: any, DCS_VERSION: any): boolean;
     /**
      * Add decorator commands set with index object to the coresponding target map
      * @param {*} targetMap the target map to add the command to
@@ -83,6 +81,9 @@ declare class DecoratorManager {
      * @param {boolean} [options.migrate] - migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} [options.defaultNamespace] - the default namespace to use for decorator commands that include a decorator without a namespace
      * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
+     * @param {boolean} [options.skipValidationAndResolution] - optional flag to disable both metamodel resolution and validation, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelResolution] - flag to disable metamodel resolution, only use if you are sure that the model manager has fully resolved models
+     * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager: ModelManager, decoratorCommandSet: any, options?: {
@@ -91,6 +92,9 @@ declare class DecoratorManager {
         migrate?: boolean;
         defaultNamespace?: boolean;
         enableDcsNamespaceTarget?: boolean;
+        skipValidationAndResolution?: boolean;
+        disableMetamodelResolution?: boolean;
+        disableMetamodelValidation?: boolean;
     }): ModelManager;
     /**
      * @typedef ExtractDecoratorsResult
@@ -105,11 +109,13 @@ declare class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with the decorations removed and a list of extracted decorator jsons and vocab yamls
      */
     static extractDecorators(modelManager: ModelManager, options: {
         removeDecoratorsFromModel: boolean;
         locale: string;
+        enableDcsNamespaceTarget: boolean;
     }): {
         /**
          * - A model manager containing models stripped without decorators
@@ -130,11 +136,13 @@ declare class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and vocab yamls
      */
     static extractVocabularies(modelManager: ModelManager, options: {
         removeDecoratorsFromModel: boolean;
         locale: string;
+        enableDcsNamespaceTarget: boolean;
     }): {
         /**
          * - A model manager containing models stripped without decorators
@@ -155,11 +163,13 @@ declare class DecoratorManager {
      * @param {object} options - decorator models options
      * @param {boolean} options.removeDecoratorsFromModel - flag to strip out non-vocab decorators from models
      * @param {string} options.locale - locale for extracted vocabulary set
+     * @param {boolean} options.enableDcsNamespaceTarget - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      * @returns {ExtractDecoratorsResult} - a new model manager with/without the decorators and a list of extracted decorator jsons
      */
     static extractNonVocabDecorators(modelManager: ModelManager, options: {
         removeDecoratorsFromModel: boolean;
         locale: string;
+        enableDcsNamespaceTarget: boolean;
     }): {
         /**
          * - A model manager containing models stripped without decorators
@@ -207,6 +217,13 @@ declare class DecoratorManager {
      */
     static applyDecorator(decorated: any, type: string, newDecorator: any): void;
     /**
+     * Checks for duplicate decorators added to a decorated model element.
+     * @param {*} decoratedAst ast of the property or the declaration to apply the decorator to
+     * @throws {IllegalModelException} if the decoratedAst has duplicate decorators
+     * @private
+     */
+    private static checkForDuplicateDecorators;
+    /**
      * Executes a Command against a Model Namespace, adding
      * decorators to the Namespace.
      * @private
@@ -251,11 +268,24 @@ declare class DecoratorManager {
     /**
      * Checks if enableDcsNamespaceTarget or ENABLE_DCS_TARGET_NAMESPACE is enabled or not
      * and print deprecation warning if not enabled and return boolean value as well
-     *  @private
      *  @param {boolean} [enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      *  @returns {Boolean} true if either of the flags is enabled
      */
-    private static isNamespaceTargetEnabled;
+    static isNamespaceTargetEnabled(enableDcsNamespaceTarget?: boolean): boolean;
+    /**
+     * converts DCS JSON object into YAML string
+     * validates the input DCS JSON against the DCS model
+     * @param {object} jsonInput the DCS JSON as parsed object
+     * @return {string} the corresponding YAML string
+     */
+    static jsonToYaml(jsonInput: object): string;
+    /**
+     * converts DCS YAML string into JSON object
+     * validates the output DCS JSON against the DCS model
+     * @param {string} yamlInput the DCS JSON as parsed object
+     * @return {object} the corresponding JSON object
+     */
+    static yamlToJson(yamlInput: string): object;
 }
 import ModelFile = require("./introspect/modelfile");
 import ModelManager = require("./modelmanager");

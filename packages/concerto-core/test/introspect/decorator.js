@@ -21,6 +21,12 @@ const Decorator = require('../../lib/introspect/decorator');
 
 require('chai').should();
 const sinon = require('sinon');
+const ModelManager = require('../../lib/modelmanager');
+const ModelFile = require('../../lib/introspect/modelfile');
+
+const fs = require('fs');
+const path = require('path');
+const { expect } = require('chai');
 
 describe('Decorator', () => {
 
@@ -74,5 +80,42 @@ describe('Decorator', () => {
             sinon.assert.calledWith(visitor.visit, d, ['some', 'args']);
         });
 
+    });
+});
+
+describe('Decorator - Test for Decorator arguments using Import Aliasing', () => {
+
+    let modelManager;
+    let resolvedModelManager;
+
+    beforeEach(() => {
+        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+
+        const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
+        const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
+
+        modelManager.addCTOModel(childModelCTO, 'child@1.0.0.cto');
+        modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
+        const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
+        const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
+        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
+        const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
+        resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);
+    });
+
+    describe('#validate', () => {
+
+        it('should be able get validate a decorator on a classDeclaration whose argument is an imported type which is aliased', () => {
+            const classDeclaration = resolvedModelManager.getType('parent@1.0.0.Child');
+            const decorator = classDeclaration.getDecorators()[0];
+            expect(decorator.validate.bind(decorator)).to.not.throw();
+        });
+
+        it('should be able get validate a decorator on a namespace whose argument is an imported type which is aliased', () => {
+            const classDeclaration = resolvedModelManager.getModelFile('parent@1.0.0');
+            const decorator = classDeclaration.getDecorators()[0];
+            expect(decorator.validate.bind(decorator)).to.not.throw();
+        });
     });
 });

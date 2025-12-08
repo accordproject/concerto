@@ -746,6 +746,17 @@ semver
     return { versionCore, pre, build };
   }
 
+// Support limited semver range selectors for imports: 1.x or 1.1.x
+semverMinorWildcard
+  = numericIdentifier '.' 'x'
+
+semverPatchWildcard
+  = numericIdentifier '.' numericIdentifier '.' 'x'
+
+// Capture either a full semver or the limited wildcard forms as a raw string
+versionSelector
+  = $(semver / semverPatchWildcard / semverMinorWildcard)
+
 versionCore
   = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier
   {
@@ -1161,10 +1172,13 @@ StringScalar
 
 DateTimeScalar
    = DateTimeType __ d:StringDefault? __ {
-      return {
+     const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
-        defaultValue: d
       };
+      if (d) {
+        result.defaultValue = d;
+      }
+      return result;
   }
 
 ScalarType
@@ -1666,12 +1680,12 @@ QualifiedName
   }
 
 VersionedQualifiedName
-  = ns:QualifiedName '@' version:$semver '.' name:$Identifier {
+  = ns:QualifiedName '@' version:versionSelector '.' name:$Identifier {
   	return `${ns}@${version}.${name}`;
   }
 
 VersionedQualifiedNamespace
-  = ns:QualifiedName '@' version:$semver {
+  = ns:QualifiedName '@' version:versionSelector {
   	return `${ns}@${version}`;
   }
 

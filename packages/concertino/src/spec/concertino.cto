@@ -1,0 +1,265 @@
+namespace concertino.metamodel@1.0.0-alpha.7
+
+import concerto.metamodel@1.0.0.{Decorator, Import}
+
+/**
+ * Represents the Concertino format.
+ */
+concept Concertino {
+  o DeclarationMap declarations
+  o Metadata metadata
+}
+
+/** Common scalar definitions */
+scalar FullyQualifiedName extends String
+scalar Identifier extends String regex=/^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u
+scalar Namespace extends String
+scalar SemanticVersion extends String
+scalar URI extends String
+
+/**
+ * Represents a map of declarations.
+ */
+map DeclarationMap {
+  o FullyQualifiedName
+  o ConcertinoDeclaration
+}
+
+/**
+ * Represents a map of properties.
+ */
+map PropertyMap {
+  o FullyQualifiedName
+  o ConcertinoProperty
+}
+
+/**
+ * Metadata for the Concertino format.
+ */
+concept Metadata {
+  o SemanticVersion concertinoVersion
+  o ModelMetadataMap models
+}
+
+map ModelMetadataMap {
+  o Namespace
+  o ModelMetadata
+}
+
+/**
+ * Represents metadata for a model.
+ */
+concept ModelMetadata {
+  o SemanticVersion concertoVersion optional
+  o URI sourceUri optional
+  o Import[] imports optional
+  o Decorator[] decorators optional
+}
+
+/**
+ * Represents a generic declaration.
+ */
+abstract concept ConcertinoDeclaration {
+  o String type
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a ConceptDeclaration.
+ */
+concept ConcertinoConceptDeclaration extends ConcertinoDeclaration {
+  o PropertyMap properties
+  o FullyQualifiedName[] extends optional
+  o Boolean isAbstract optional
+  o Prototype prototype optional // only specified, if the concept uses a prototype
+}
+
+/**
+ * Indicates a prototype for a ConceptDeclaration.
+ */
+enum Prototype {
+  o AssetDeclaration
+  o EventDeclaration
+  o TransactionDeclaration
+  o ParticipantDeclaration
+}
+
+/**
+ * Represents an EnumDeclaration.
+ */
+concept ConcertinoEnumDeclaration extends ConcertinoDeclaration {
+  o EnumValueMap values
+}
+
+map EnumValueMap {
+  o String
+  o ConcertinoEnumValue
+}
+
+/**
+ * Represents an enum value in an EnumDeclaration.
+ */
+concept ConcertinoEnumValue {
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a ScalarDeclaration.
+ */
+abstract concept ConcertinoScalarDeclaration extends ConcertinoDeclaration {}
+
+concept ConcertinoStringScalarDeclaration extends ConcertinoScalarDeclaration {
+  o String regex optional // For StringScalar
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Integer[] length optional // For StringScalar
+  o String default optional // Default value for StringScalar
+}
+concept ConcertinoIntegerScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Integer[] range optional // For IntegerScalar
+  o Integer default optional // Default value for IntegerScalar
+}
+concept ConcertinoBooleanScalarDeclaration extends ConcertinoScalarDeclaration {
+  o Boolean default optional // Default value for BooleanScalar
+}
+concept ConcertinoDoubleScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Double[] range optional // For DoubleScalar
+  o Double default optional // Default value for DoubleScalar
+}
+concept ConcertinoLongScalarDeclaration extends ConcertinoScalarDeclaration {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Long[] range optional // For LongScalar
+  o Long default optional // Default value for LongScalar
+}
+concept ConcertinoDateTimeScalarDeclaration extends ConcertinoScalarDeclaration {
+  o String default optional // Default value for DateTimeScalar
+}
+
+/**
+ * Represents a MapDeclaration.
+ */
+concept ConcertinoMapDeclaration extends ConcertinoDeclaration {
+  o MapKey key // e.g., "String", "DateTime"
+  o MapValue value // e.g., "String", "Boolean", "com.test.models@1.2.3.Xyc"
+}
+
+/**
+ * Represents a key in a MapDeclaration.
+ */
+concept MapKey {
+  o String type // Fully qualified type name or primitive type
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+/**
+ * Represents a value in a MapDeclaration.
+ */
+concept MapValue {
+  o String type // Fully qualified type name or primitive type
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+  o Boolean isRelationship optional // For relationship map values
+
+}
+
+/**
+ * Represents a property in a ConceptDeclaration.
+ */
+abstract concept ConcertinoProperty {
+  o Identifier name
+  o String type // Fully qualified type name or primitive type
+  o String scalarType optional // For properties referring to scalars
+  o Boolean isArray optional
+  o Boolean isOptional optional
+  o Boolean isRelationship optional
+  o Boolean isIdentifier optional
+  o Identifier inheritedFrom optional // For inherited properties
+  o Boolean isCircular optional
+  o Boolean isEnum optional
+  o Vocabulary vocabulary optional
+  o MetadataMap metadata optional
+}
+
+concept ConcertinoStringProperty extends ConcertinoProperty {
+  o String regex optional // For String properties
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Integer[] length optional // For String properties
+  o String default optional // Default value for StringProperty
+}
+concept ConcertinoIntegerProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Integer[] range optional // For Integer properties
+  o Integer default optional // Default value for IntegerProperty
+}
+concept ConcertinoBooleanProperty extends ConcertinoProperty {
+  o Boolean default optional // Default value for BooleanProperty
+}
+concept ConcertinoDoubleProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Double[] range optional // For Double properties
+  o Double default optional // Default value for DoubleProperty
+}
+concept ConcertinoLongProperty extends ConcertinoProperty {
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Long[] range optional // For Long properties
+  o Long default optional // Default value for LongProperty
+}
+concept ConcertinoDateTimeProperty extends ConcertinoProperty {
+  o String default optional // Default value for DateTimeProperty
+}
+
+/**
+ * Represents a vocabulary object.
+ */
+concept Vocabulary {
+  o String label optional
+  o PathTerms path optional
+  o AdditionalTermMap additionalTerms optional
+}
+
+/**
+ * A map from parent identifiers to localized terms (labels)
+ */
+map PathTerms {
+  o String // key
+  o String // optional, value can be null
+}
+
+/**
+ * Represents an additional term in a vocabulary.
+ */
+map AdditionalTermMap {
+  o String
+  o String // optional, value can be null
+}
+
+/**
+ * Represents a metadata map (i.e. non-vocabulary declarations).
+ */
+@CodeGen_TypeScript_Override("Record<string, IDecoratorValue[]>")
+map MetadataMap {
+  o String
+  o DecoratorValues
+}
+
+concept DecoratorValues {
+    o DecoratorValue[] values
+}
+abstract concept DecoratorValue {}
+concept StringDecoratorValue extends DecoratorValue {
+  o String value
+}
+concept NumberDecoratorValue extends DecoratorValue {
+  o Double value
+}
+concept BooleanDecoratorValue extends DecoratorValue {
+  o Boolean value
+}
+concept DecoratorTypeLiteral extends DecoratorValue {
+  o String type
+  o Boolean isArray optional
+}
