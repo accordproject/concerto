@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-linter-default-ruleset",
-  "version": "3.24.0",
+  "version": "3.25.0",
   "description": "Default ruleset for the Accord Project Concerto Linter",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -33,7 +33,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-cto": "3.24.0",
+    "@accordproject/concerto-cto": "3.25.0",
     "@stoplight/spectral-core": "1.20.0",
     "@stoplight/spectral-functions": "1.10.1",
     "@stoplight/spectral-parsers": "1.0.5"
