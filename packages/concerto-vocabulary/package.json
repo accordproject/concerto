@@ -39,16 +39,16 @@
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
     "eslint": "8.57.1",
-    "jsdoc": "^4.0.4",
+    "jsdoc": "4.0.4",
     "mocha": "10.8.2",
     "mocha-chai-jest-snapshot": "1.1.6",
     "nyc": "17.1.0",
     "typescript": "5.7.2",
-    "@types/webgl-ext": "^0.0.37"
+    "@types/webgl-ext": "0.0.37"
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.12.6",
-    "yaml": "2.6.1"
+    "yaml": "2.8.0"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {

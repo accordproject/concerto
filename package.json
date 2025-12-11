@@ -1,11 +1,13 @@
 {
   "devDependencies": {
-    "@types/jest": "^29.5.14",
+    "@types/jest": "29.5.14",
     "dayjs": "1.11.13",
-    "glob": "^11.1.0",
+    "glob": "11.1.0",
     "license-check-and-add": "4.0.5",
+    "lockfile-lint": "4.14.1",
     "nyc": "17.1.0",
-    "semver": "7.6.3"
+    "semver": "7.6.3",
+    "syncpack": "14.0.0-alpha.32"
   },
   "engines": {
     "node": ">=18",
@@ -30,7 +32,11 @@
     "pretest": "npm run licchk",
     "licchk": "license-check-and-add check -f license-config.json",
     "test": "npm test -ws",
-    "build": "npm run build -ws"
+    "build": "npm run build -ws",
+    "lint:deps": "syncpack lint",
+    "lint:deps:fix": "syncpack fix",
+    "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https",
+    "preinstall": "npm run lint:lockfile && npm run lint:deps"
   },
   "repository": {
     "type": "git",
