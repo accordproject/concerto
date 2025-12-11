@@ -50,7 +50,7 @@
     "doctrine": "3.0.0",
     "eslint": "8.57.1",
     "fs-extra": "11.2.0",
-    "jsdoc": "^4.0.4",
+    "jsdoc": "4.0.4",
     "klaw": "4.1.0",
     "mocha": "10.8.2",
     "node-polyfill-webpack-plugin": "4.0.0",
@@ -59,7 +59,7 @@
     "tmp-promise": "3.0.3",
     "typescript": "5.7.2",
     "webpack": "5.96.1",
-    "webpack-cli": "^5.1.4",
+    "webpack-cli": "5.1.4",
     "xregexp": "5.1.1",
     "yargs": "17.7.2"
   },
@@ -75,7 +75,7 @@
     "semver": "7.6.3",
     "urijs": "1.19.11",
     "uuid": "11.0.3",
-    "yaml": "^2.8.0"
+    "yaml": "2.8.0"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {
