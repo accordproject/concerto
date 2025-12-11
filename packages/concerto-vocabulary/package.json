@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.12.6",
-    "yaml": "^2.8.0"
+    "yaml": "2.8.0"
   },
   "browserslist": "> 0.25%, not dead",
   "nyc": {
