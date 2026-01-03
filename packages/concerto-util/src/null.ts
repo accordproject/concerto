@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,20 +11,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * Internal Utility Class
  * @class
  * @memberof module:concerto-util
  */
 class NullUtil {
+
     /**
      * Returns true if the typeof the object === 'undefined' or
      * the object === null.
      * @param obj - the object to be tested
      * @returns true if the object is null or undefined
      */
-    static isNull(obj) {
-        return (typeof (obj) === 'undefined' || obj === null);
+    static isNull(obj: unknown): boolean {
+        return(typeof(obj) === 'undefined' || obj === null);
     }
 }
-module.exports = NullUtil;
+
+export = NullUtil;
