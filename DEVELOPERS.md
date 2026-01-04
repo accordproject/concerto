@@ -12,17 +12,21 @@ We'd love for you to help develop improvements to Concerto technology! Please re
 To build Concerto, you clone the source code repository and use npm to build:
 
 ```shell
-# Clone your Github repository:
+# 1️⃣ Clone your fork of the Concerto repository
 git clone https://github.com/<GITHUB_USERNAME>/concerto.git
 
-# Go to the Concerto directory:
+# 2️⃣ Navigate into the Concerto directory
 cd concerto
 
-# Add the main Concerto repository as an upstream remote to your repository:
-git remote add upstream "https://github.com/accordproject/concerto.git"
+# 3️⃣ Add the main Concerto repository as an upstream remote
+git remote add upstream https://github.com/accordproject/concerto.git
 
-# Install node.js dependencies:
-npm i
+# 4️⃣ Install Node.js dependencies
+npm install
+
+# 5️⃣ Verify the installation by running tests
+npm test
+
 ```
 
 [apdev]: https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md
