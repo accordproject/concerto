@@ -1,0 +1,52 @@
+# Labeler configuration for automatic PR labeling based on file paths
+
+# Package labels
+pkg:core:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-core/**'
+
+pkg:analysis:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-analysis/**'
+
+pkg:cto:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-cto/**'
+
+pkg:linter:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-linter/**'
+
+pkg:util:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-util/**'
+
+pkg:vocabulary:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-vocabulary/**'
+
+pkg:types:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/concerto-types/**'
+
+# File type labels
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - '**/*.test.js'
+      - '**/test/**'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+      - '**/package.json'
