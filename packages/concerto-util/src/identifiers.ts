@@ -15,21 +15,22 @@
 'use strict';
 
 // Conforms to Concerto Spec for identifiers
-const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
+export const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
 /**
  * Function that attempts to normalize arbitrary strings
  * into valid Concerto identifiers
  *
- * @param {string} identifier - the input value
- * @param {number} [truncateLength] - Length at which to truncate the identifier
- * @returns {string} - An identifier that meets the Concerto specification
+ * @param identifier - the input value
+ * @param truncateLength - Length at which to truncate the identifier
+ * @returns - An identifier that meets the Concerto specification
  */
-function normalizeIdentifier(identifier, truncateLength = -1) {
-    const replacer = (_match, group1) => {
+export function normalizeIdentifier(identifier: any, truncateLength: number = -1): string {
+    const replacer = (_match: string, group1: string) => {
         let escapedChar = '';
         // Loop through characters with multiple code points
         for (const codePoint of group1) {
+            // @ts-ignore
             escapedChar += `_${codePoint.codePointAt(0).toString(16)}`;
         }
         return escapedChar;
@@ -67,8 +68,3 @@ function normalizeIdentifier(identifier, truncateLength = -1) {
     }
     return result;
 }
-
-module.exports = {
-    normalizeIdentifier,
-    ID_REGEX
-};

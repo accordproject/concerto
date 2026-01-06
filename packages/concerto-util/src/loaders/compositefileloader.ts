@@ -24,6 +24,9 @@
  * @memberof module:concerto-util
  */
 class CompositeFileLoader {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public fileLoaders: any[];
+
     /**
      * Create the CompositeFileLoader. Used to delegate to a set of FileLoaders.
      */
@@ -33,35 +36,37 @@ class CompositeFileLoader {
 
     /**
      * Adds a FileLoader implemenetation to the FileLoader
-     * @param {*} fileLoader - The script to add to the ScriptManager
+     * @param fileLoader - The script to add to the ScriptManager
      */
-    addFileLoader(fileLoader) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    addFileLoader(fileLoader: any): void {
         this.fileLoaders.push(fileLoader);
     }
 
     /**
      * Get the array of FileLoader instances
-     * @return {*} The FileLoader registered
+     * @return The FileLoader registered
      * @private
      */
-    getFileLoaders() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getFileLoaders(): any[] {
         return this.fileLoaders;
     }
 
     /**
      * Remove all registered FileLoaders
      */
-    clearFileLoaders() {
+    clearFileLoaders(): void {
         this.fileLoaders = [];
     }
 
     /**
      * Returns true if this ModelLoader can process the URL
-     * @param {string} url - the URL
-     * @return {boolean} true if this ModelLoader accepts the URL
+     * @param url - the URL
+     * @return true if this ModelLoader accepts the URL
      * @abstract
      */
-    accepts(url) {
+    accepts(url: string): boolean {
         for (let n = 0; n < this.fileLoaders.length; n++) {
             const ml = this.fileLoaders[n];
 
@@ -75,11 +80,12 @@ class CompositeFileLoader {
 
     /**
      * Load a File from a URL and return it
-     * @param {string} url - the url to get
-     * @param {object} options - additional options
-     * @return {Promise} a promise to the File
+     * @param url - the url to get
+     * @param options - additional options
+     * @return a promise to the File
      */
-    load(url, options) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    load(url: string, options: any): Promise<any> {
         for (let n = 0; n < this.fileLoaders.length; n++) {
             const ml = this.fileLoaders[n];
 
@@ -92,4 +98,4 @@ class CompositeFileLoader {
     }
 }
 
-module.exports = CompositeFileLoader;
+export = CompositeFileLoader;

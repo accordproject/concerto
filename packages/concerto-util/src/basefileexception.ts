@@ -14,7 +14,7 @@
 
 'use strict';
 
-const BaseException = require('./baseexception');
+import BaseException = require('./baseexception');
 
 /**
  * Exception throws when a Concerto file is semantically invalid
@@ -24,15 +24,19 @@ const BaseException = require('./baseexception');
  * @memberof module:concerto-core
  */
 class BaseFileException extends BaseException {
+    public fileLocation: string | null;
+    public shortMessage: string;
+    public fileName: string | null;
+
     /**
      * Create an BaseFileException
-     * @param {string} message - the message for the exception
-     * @param {string} fileLocation - the optional file location associated with the exception
-     * @param {string} fullMessage - the optional full message text
-     * @param {string} [fileName] - the file name
-     * @param {string} [component] - the component which throws this error
+     * @param message - the message for the exception
+     * @param fileLocation - the optional file location associated with the exception
+     * @param fullMessage - the optional full message text
+     * @param fileName - the file name
+     * @param component - the component which throws this error
      */
-    constructor(message, fileLocation, fullMessage, fileName, component) {
+    constructor(message: string, fileLocation: string | null = null, fullMessage: string | null = null, fileName: string | null = null, component?: string) {
         super(fullMessage ? fullMessage : message, component);
         this.fileLocation = fileLocation;
         this.shortMessage = message;
@@ -41,27 +45,27 @@ class BaseFileException extends BaseException {
 
     /**
      * Returns the file location associated with the exception or null
-     * @return {string} the optional location associated with the exception
+     * @return the optional location associated with the exception
      */
-    getFileLocation() {
+    getFileLocation(): string | null {
         return this.fileLocation;
     }
 
     /**
      * Returns the error message without the location of the error
-     * @returns {string} the error message
+     * @returns the error message
      */
-    getShortMessage() {
+    getShortMessage(): string {
         return this.shortMessage;
     }
 
     /**
      * Returns the fileName for the error
-     * @returns {string} the file name or null
+     * @returns the file name or null
      */
-    getFileName() {
+    getFileName(): string | null {
         return this.fileName;
     }
 }
 
-module.exports = BaseFileException;
+export = BaseFileException;

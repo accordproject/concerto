@@ -14,6 +14,9 @@
 
 'use strict';
 
+// Ensure fetch is recognized if not in global types
+declare const fetch: any;
+
 /**
  * Loads Files from an HTTP(S) URL using fetch.
  * @class
@@ -21,31 +24,36 @@
  * @memberof module:concerto-util
  */
 class HTTPFileLoader {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public processFile: (name: string, text: string) => any;
+
     /**
      * Create the HTTPFileLoader.
-     * @param {*} processFile - a function to apply to the content of the file
+     * @param processFile - a function to apply to the content of the file
      */
-    constructor(processFile) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(processFile: (name: string, text: string) => any) {
         this.processFile = processFile;
     }
 
     /**
      * Returns true if this ModelLoader can process the URL
-     * @param {string} url - the URL
-     * @return {boolean} true if this ModelLoader accepts the URL
+     * @param url - the URL
+     * @return true if this ModelLoader accepts the URL
      * @abstract
      */
-    accepts(url) {
+    accepts(url: string): boolean {
         return url.startsWith('http://') || url.startsWith('https://');
     }
 
     /**
      * Load a text File from a URL and return it
-     * @param {string} requestUrl - the url to get
-     * @param {object} options - additional options
-     * @return {Promise} a promise to the File
+     * @param requestUrl - the url to get
+     * @param options - additional options
+     * @return a promise to the File
      */
-    async load(requestUrl, options) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async load(requestUrl: string, options: any): Promise<any> {
         if (!options) {
             options = {
                 method: 'GET',
@@ -55,6 +63,8 @@ class HTTPFileLoader {
             };
         }
 
+        // eslint-disable-next-line no-console
+        console.log(requestUrl);
         const response = await fetch(requestUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP request failed with status: ${response.status}`);
@@ -68,4 +78,4 @@ class HTTPFileLoader {
     }
 }
 
-module.exports = HTTPFileLoader;
+export = HTTPFileLoader;
