@@ -15,12 +15,17 @@
 'use strict';
 
 //default base exception
-const DEFAULT_BASE_EXCEPTION = 'DefaultBaseException';
+export const DEFAULT_BASE_EXCEPTION = 'DefaultBaseException';
 //default validator exception which is being used when there is no specified validator exception in introspect
-const DEFAULT_VALIDATOR_EXCEPTION = 'DefaultValidatorException';
+export const DEFAULT_VALIDATOR_EXCEPTION = 'DefaultValidatorException';
 // exception code for regex validator format error
-const REGEX_VALIDATOR_EXCEPTION = 'RegexValidatorException';
+export const REGEX_VALIDATOR_EXCEPTION = 'RegexValidatorException';
 // base exception for Type not found
-const TYPE_NOT_FOUND_EXCEPTION = 'TypeNotFoundException';
+export const TYPE_NOT_FOUND_EXCEPTION = 'TypeNotFoundException';
+// deprecation warning type for process.emitWarning
+export const DEPRECATION_WARNING = 'DeprecationWarning';
 
-module.exports = {DEFAULT_BASE_EXCEPTION, DEFAULT_VALIDATOR_EXCEPTION, REGEX_VALIDATOR_EXCEPTION, TYPE_NOT_FOUND_EXCEPTION};
+
+//deprecation codes
+export const CONCERTO_DEPRECATION_001 = 'concerto-dep:001';
+export const CONCERTO_DEPRECATION_002 = 'concerto-dep:002';

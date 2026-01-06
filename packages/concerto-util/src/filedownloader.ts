@@ -14,18 +14,24 @@
 
 'use strict';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const debug = require('debug')('concerto:FileDownloader');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const PromisePool = require('@supercharge/promise-pool');
 
-const flatten = arr => [].concat(...arr);
-const filterUndefined = arr => arr.filter(Boolean);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const flatten = <T>(arr: any[]): T[] => [].concat(...arr);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const filterUndefined = <T>(arr: any[]): T[] => arr.filter(Boolean);
 
-const handleJobError = async (error, job) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleJobError = async (error: any, job: any) => {
     const badHttpResponse = error.response && error.response.status && error.response.status !== 200;
     const dnsFailure = error.code && error.code === 'ENOTFOUND';
     if(badHttpResponse || dnsFailure){
         const err = new Error(`Unable to download external model dependency '${job.url}'`);
-        err.code = 'MISSING_DEPENDENCY';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (err as any).code = 'MISSING_DEPENDENCY';
         throw err;
     }
     throw new Error('Failed to load model file. Job: ' + job.url + ' Details: ' + error);
@@ -36,13 +42,20 @@ const handleJobError = async (error, job) => {
  * @memberof module:concerto-core
  */
 class FileDownloader {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public fileLoader: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public getExternalImports: any;
+    public concurrency: number;
+
     /**
      * Create a FileDownloader and bind to a FileLoader.
-     * @param {*} fileLoader - the loader to use to download model files
-     * @param {*} getExternalImports - a function taking a file and returning new files
-     * @param {Number} concurrency - the number of model files to download concurrently
+     * @param fileLoader - the loader to use to download model files
+     * @param getExternalImports - a function taking a file and returning new files
+     * @param concurrency - the number of model files to download concurrently
      */
-    constructor(fileLoader, getExternalImports, concurrency = 10) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(fileLoader: any, getExternalImports: any, concurrency = 10) {
         this.fileLoader = fileLoader;
         this.concurrency = concurrency;
         this.getExternalImports = getExternalImports;
@@ -50,11 +63,12 @@ class FileDownloader {
 
     /**
      * Download all external dependencies for an array of model files
-     * @param {File[]} files - the model files
-     * @param {Object} [options] - Options object passed to FileLoaders
-     * @return {Promise} a promise that resolves to Files[] for the external model files
+     * @param files - the model files
+     * @param options - Options object passed to FileLoaders
+     * @return a promise that resolves to Files[] for the external model files
      */
-    downloadExternalDependencies(files, options) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    downloadExternalDependencies(files: any[], options: any): Promise<any> {
         const method = 'downloadExternalDependencies';
         debug(method);
 
@@ -77,17 +91,20 @@ class FileDownloader {
             .withConcurrency(this.concurrency)
             .for(jobs)
             .handleError(handleJobError)
-            .process(x => this.runJob(x, this.fileLoader))
-            .then(({ results }) => filterUndefined(flatten(results)));
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .process((x: any) => this.runJob(x, this.fileLoader))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .then(({ results }: any) => filterUndefined(flatten(results)));
     }
 
     /**
      * Execute a Job
-     * @param {Object} job - the job to execute
-     * @param {Object} fileLoader - the loader to use to download model files.
-     * @return {Promise} a promise to the job results
+     * @param job - the job to execute
+     * @param fileLoader - the loader to use to download model files.
+     * @return a promise to the job results
      */
-    runJob(job, fileLoader) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    runJob(job: any, fileLoader: any): Promise<any> {
         const downloadedUris = job.downloadedUris;
         const options = job.options;
         const url = job.url;
@@ -97,7 +114,8 @@ class FileDownloader {
 
         debug('runJob', 'Loading', url);
         return fileLoader.load(url, options).
-            then(async file => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            then(async (file: any) => {
                 debug('runJob', 'Loaded', url, );
 
                 // get the external imports
@@ -114,7 +132,8 @@ class FileDownloader {
                     .withConcurrency(this.concurrency)
                     .for(importedUris)
                     .handleError(handleJobError)
-                    .process(uri => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .process((uri: any) => {
                         if (!downloadedUris.has(uri)) {
                             // recurse and add a new job for the referenced URI
                             return this.runJob({
@@ -124,11 +143,12 @@ class FileDownloader {
                             }, fileLoader);
                         }
                     })
-                    .then(({ results }) => filterUndefined(flatten(results)));
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .then(({ results }: any) => filterUndefined(flatten(results)));
 
                 return externalImportsFiles.concat([file]);
             });
     }
 }
 
-module.exports = FileDownloader;
+export = FileDownloader;

@@ -14,9 +14,9 @@
 
 'use strict';
 
-const CompositeFileLoader = require('./compositefileloader');
-const HTTPFileLoader = require('./httpfileloader');
-const GitHubFileLoader = require('./githubfileloader');
+import CompositeFileLoader = require('./compositefileloader');
+import HTTPFileLoader = require('./httpfileloader');
+import GitHubFileLoader = require('./githubfileloader');
 
 /**
  * <p>
@@ -31,9 +31,10 @@ const GitHubFileLoader = require('./githubfileloader');
 class DefaultFileLoader extends CompositeFileLoader {
     /**
      * Create the DefaultFileLoader.
-     * @param {*} processFile - a function to apply to the content of the file
+     * @param processFile - a function to apply to the content of the file
      */
-    constructor(processFile) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(processFile: (name: string, text: string) => any) {
         super();
         const http = new HTTPFileLoader(processFile);
         const github = new GitHubFileLoader(processFile);
@@ -42,4 +43,4 @@ class DefaultFileLoader extends CompositeFileLoader {
     }
 }
 
-module.exports = DefaultFileLoader;
+export = DefaultFileLoader;

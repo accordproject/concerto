@@ -19,9 +19,8 @@
 
 /**
  * Default levels for the npm configuration.
- * @type {Object}
  */
-const levels = {
+const levels: Record<string, number> = {
     error: 0,
     warn: 1,
     info: 2,
@@ -35,24 +34,23 @@ const timestamp = () => (new Date()).toLocaleTimeString();
 
 /**
 * Helper function to format JSON objects
-* @param {any} obj - the input obj to prettify
-* @returns {any} - the prettified object
-* @private
+* @param obj - the input obj to prettify
+* @returns - the prettified object
 */
-const prettifyJson = (obj) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prettifyJson = (obj: any): any => {
     return obj;
 };
 
 /**
 * The default transport for logging at multiple levels to the console
-* @param {string} level - the required log level. e.g. error, warn, info, debug, etc.
-* @param {any} obj - the input obj to prettify
-* @returns {void} -
-* @private
+* @param level - the required log level. e.g. error, warn, info, debug, etc.
+* @param args - the input obj to prettify
 */
-const defaultTransportShim = (level, ...args) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const defaultTransportShim = (level: string, ...args: any[]): void => {
     let mutatedLevel = level;
-    let data = args;
+    const data = args;
     let first = data.shift();
 
     // Flatten log object
@@ -79,24 +77,29 @@ const defaultTransportShim = (level, ...args) => {
             .map(prettifyJson)
     );
 };
-const defaultTransport = {};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const defaultTransport: Record<string, any> = {};
 Object.keys(levels).forEach(level => {
-    defaultTransport[level] = (...args) => defaultTransportShim(level, ...args);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    defaultTransport[level] = (...args: any[]) => defaultTransportShim(level, ...args);
 });
 
 /**
  * A utility class with static function that print to the console
- * @private
  */
 class Logger {
+    static level = 'info';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static transports: any[] = [ defaultTransport ];
+
     /**
     * A reusable function for logging at multiple levels
-    * @param {string} level - the required log level. e.g. error, warn, info, debug, etc.
-    * @param {any} obj - the input obj to prettify
-    * @returns {void} -
-    * @private
+    * @param level - the required log level. e.g. error, warn, info, debug, etc.
+    * @param args - the input obj to prettify
     */
-    static dispatch(level, ...args) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static dispatch(level: string, ...args: any[]): void {
         if (levels[level] > levels[this.level]){
             return;
         }
@@ -110,11 +113,10 @@ class Logger {
 
     /**
     * Add a custom transport for logging
-    * @param {Object} transport - The transport object should have function for the usual logging operations e.g. error, warn, info, debug, etc.
-    * @returns {void} -
-    * @private
+    * @param transport - The transport object should have function for the usual logging operations e.g. error, warn, info, debug, etc.
     */
-    static add(transport) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static add(transport: any): void {
         this.transports.push(transport);
     }
 
@@ -122,95 +124,73 @@ class Logger {
      * Write an error statement to the console.
      *
      * Prints to `stderr` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static error(...args){ return this.dispatch('error', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static error(...args: any[]): void{ this.dispatch('error', ...args); }
 
     /**
      * Write a warning statement to the console.
      *
      * Prints to `stderr` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static warn(...args){ return this.dispatch('warn', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static warn(...args: any[]): void{ this.dispatch('warn', ...args); }
 
     /**
      * Write an info statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static info(...args){ return this.dispatch('info', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static info(...args: any[]): void{ this.dispatch('info', ...args); }
 
     /**
      * Write an info statement to the console. Alias for `logger.log`
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static log(...args){ return this.info(...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static log(...args: any[]): void{ this.info(...args); }
 
     /**
      * Write an http statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static http(...args){ return this.dispatch('http', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static http(...args: any[]): void{ this.dispatch('http', ...args); }
 
     /**
      * Write a verbose log statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static verbose(...args){ return this.dispatch('verbose', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static verbose(...args: any[]): void{ this.dispatch('verbose', ...args); }
 
     /**
      * Write a debug statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static debug(...args){ return this.dispatch('debug', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static debug(...args: any[]): void{ this.dispatch('debug', ...args); }
 
     /**
      * Write a silly level statement to the console.
      *
      * Prints to `stdout` with newline.
-     * @param {any|object} data - if this is an object with properties `level` and `message` it will be flattened first
-     * @param {any} args -
-     * @returns {void} -
-     * @private
+     * @param args - args
      */
-    static silly(...args){ return this.dispatch('silly', ...args); }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static silly(...args: any[]): void{ this.dispatch('silly', ...args); }
 }
 
-// Set the default logging level
-Logger.level = 'info';
-
-// A list of user-provided logging tranports
-Logger.transports = [ defaultTransport ];
-
-module.exports = Logger;
+export = Logger;
