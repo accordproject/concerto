@@ -41,7 +41,9 @@ class TypeNotFoundException extends BaseException {
             });
         }
 
-        super(message, component, errorType);
+        // FIX: Explicitly default to '@accordproject/concerto-core' if component is not provided.
+        // This prevents the BaseException from defaulting to '@accordproject/concerto-util'.
+        super(message, component || '@accordproject/concerto-core', errorType);
         this.typeName = typeName;
     }
 

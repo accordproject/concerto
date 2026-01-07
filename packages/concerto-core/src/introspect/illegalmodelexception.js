@@ -61,7 +61,7 @@ class IllegalModelException extends BaseFileException {
         // First character to be uppercase
         messageSuffix = messageSuffix.charAt(0).toUpperCase() + messageSuffix.slice(1);
 
-        super(message, fileLocation, message + ' ' + messageSuffix, fileName, component);
+        super(message, fileLocation, message + ' ' + messageSuffix, fileName, component || '@accordproject/concerto-core');
     }
 }
 
