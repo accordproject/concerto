@@ -23,6 +23,30 @@ git remote add upstream "https://github.com/accordproject/concerto.git"
 
 # Install node.js dependencies:
 npm i
+
+# Build all packages:
+npm run build
+```
+
+#### Running Tests
+
+Before running tests, you must first build the project to compile all workspace dependencies:
+
+```shell
+# Build all packages (required before testing):
+npm run build
+
+# Run all tests:
+npm run test
+```
+
+> **Note:** The build step is required because some packages (like `concerto-linter`) depend on other workspace packages that need to be compiled first. The CI workflows follow this same pattern: build first, then test.
+
+If you're working on a specific package, you can run tests for just that package:
+
+```shell
+# Run tests for a specific package:
+npm run test -w @accordproject/concerto-core
 ```
 
 [apdev]: https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md
