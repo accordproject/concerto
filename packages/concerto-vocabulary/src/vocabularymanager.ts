@@ -12,29 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const YAML = require('yaml');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const Vocabulary = require('./vocabulary');
-const { ModelUtil } = require('@accordproject/concerto-core');
+import YAML from 'yaml';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import Vocabulary = require('./vocabulary');
+import { ModelUtil, ModelManager } from '@accordproject/concerto-core';
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
-
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const { ModelManager } = require('@accordproject/concerto-core');
-}
-/* eslint-enable no-unused-vars */
 
 /**
  * Converts a camel case string to a sentence
  * @param {string} text input
  * @returns {string} modified string
  */
-function camelCaseToSentence(text) {
+function camelCaseToSentence(text: string): string {
     const result = text.replace(/([A-Z]+)/g, ' $1').trim();
     return result.charAt(0).toUpperCase() + result.slice(1);
 }
@@ -48,6 +38,9 @@ function camelCaseToSentence(text) {
 * @memberof module:concerto-vocabulary
 */
 class VocabularyManager {
+    public vocabularies: Record<string, Vocabulary>;
+    public missingTermGenerator: any;
+
     /**
      * Create the VocabularyManager
      * @param {*} [options] options to configure vocabulary lookup
@@ -55,7 +48,7 @@ class VocabularyManager {
      * should accept namespace, locale, declarationName, propertyName as arguments
      * @constructor
      */
-    constructor(options) {
+    constructor(options?: any) {
         this.vocabularies = {}; // key is namespace/locale, value is a Vocabulary object
         this.missingTermGenerator = options ? options.missingTermGenerator : null;
     }
@@ -68,7 +61,7 @@ class VocabularyManager {
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {string} the term or null if it does not exist
      */
-    static englishMissingTermGenerator(namespace, locale, declarationName, propertyName) {
+    static englishMissingTermGenerator(namespace: string, locale: string, declarationName: string, propertyName?: string): string {
         if(!declarationName){
             return camelCaseToSentence(ModelUtil.parseNamespace(namespace).name);
         }
@@ -88,7 +81,7 @@ class VocabularyManager {
      * @param {string} namespace the namespace for the vocabulary
      * @param {string} locale the BCP-47 locale identifier
      */
-    removeVocabulary(namespace, locale) {
+    removeVocabulary(namespace: string, locale: string) {
         delete this.vocabularies[`${namespace}/${locale}`];
     }
 
@@ -97,7 +90,7 @@ class VocabularyManager {
      * @param {string} contents the YAML string for the vocabulary
      * @returns {Vocabulary} the vocabulary the was added
      */
-    addVocabulary(contents) {
+    addVocabulary(contents: any): Vocabulary {
         if (!contents) {
             throw new Error('Vocabulary contents must be specified');
         }
@@ -121,7 +114,7 @@ class VocabularyManager {
      * @param {*} [options.localeMatcher] Pass 'lookup' to find a general vocabulary, if available
      * @returns {Vocabulary} the most specific vocabulary, or null
      */
-    static findVocabulary(requestedLocale, vocabularies, options) {
+    static findVocabulary(requestedLocale: string, vocabularies: Vocabulary[], options?: any): Vocabulary | null {
         let locale = requestedLocale;
         let done = false;
         do {
@@ -153,7 +146,7 @@ class VocabularyManager {
      * @param {*} [options.localeMatcher] Pass 'lookup' to find a general vocabulary, if available
      * @returns {Vocabulary} the vocabulary or null if no vocabulary exists for the locale
      */
-    getVocabulary(namespace, locale, options) {
+    getVocabulary(namespace: string, locale: string, options?: any): Vocabulary | null {
         const vocs = this.getVocabulariesForNamespace(namespace);
         return VocabularyManager.findVocabulary(locale.toLowerCase(), vocs, options);
     }
@@ -163,7 +156,7 @@ class VocabularyManager {
      * @param {string} namespace the namespace
      * @returns {Vocabulary[]} the array of vocabularies
      */
-    getVocabulariesForNamespace(namespace) {
+    getVocabulariesForNamespace(namespace: string): Vocabulary[] {
         return Object.values(this.vocabularies).filter(v => v.getNamespace() === namespace);
     }
 
@@ -172,7 +165,7 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @returns {Vocabulary[]} the array of vocabularies
      */
-    getVocabulariesForLocale(locale) {
+    getVocabulariesForLocale(locale: string): Vocabulary[] {
         return Object.values(this.vocabularies).filter(v => v.getLocale() === locale.toLowerCase());
     }
 
@@ -188,11 +181,12 @@ class VocabularyManager {
      * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    resolveTerm(modelManager, namespace, locale, declarationName, propertyName, identifier) {
+    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | null {
         const modelFile = modelManager.getModelFile(namespace);
-        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
+        // @ts-ignore
+        const classDecl = modelFile ? (modelFile as any).getType(declarationName) : null;
         const property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
-        return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName, identifier);
+        return this.getTerm(property ? property.getNamespace() : namespace, locale, property ? (property.getParent() as any).getName() : declarationName, propertyName, identifier);
     }
 
     /**
@@ -206,9 +200,10 @@ class VocabularyManager {
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {*} the terms or null if it does not exist
      */
-    resolveTerms(modelManager, namespace, locale, declarationName, propertyName) {
+    resolveTerms(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string) {
         const modelFile = modelManager.getModelFile(namespace);
-        const classDecl = modelFile ? modelFile.getType(declarationName) : null;
+        // @ts-ignore
+        const classDecl = modelFile ? (modelFile as any).getType(declarationName) : null;
         let property;
         if(classDecl && !classDecl.isScalarDeclaration()) {
             if(classDecl.isMapDeclaration()) {
@@ -221,7 +216,7 @@ class VocabularyManager {
                 property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
             }
         }
-        return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? property.getParent().getName() : declarationName, propertyName);
+        return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? (property.getParent() as any).getName() : declarationName, propertyName);
     }
 
     /**
@@ -234,7 +229,7 @@ class VocabularyManager {
      * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(namespace, locale, declarationName, propertyName, identifier) {
+    getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | null {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
@@ -263,7 +258,7 @@ class VocabularyManager {
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {*} the terms or null if it does not exist
      */
-    getTerms(namespace, locale, declarationName, propertyName) {
+    getTerms(namespace: string, locale: string, declarationName: string, propertyName?: string): any {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
@@ -294,17 +289,17 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the decorator command set used to decorate the model.
      */
-    generateDecoratorCommands(modelManager, locale) {
-        const decoratorCommandSet = {
+    generateDecoratorCommands(modelManager: ModelManager, locale: string): any {
+        const decoratorCommandSet: any = {
             '$class': `${DC_NAMESPACE}.DecoratorCommandSet`,
             'name': `terms-${locale}`,
             'version': '1.0.0',
             'commands': []
         };
 
-        const getPropertyNames = (declaration) => {
+        const getPropertyNames = (declaration: any) => {
             if (declaration.getProperties) {
-                return declaration.getProperties().map(property => property.getName());
+                return declaration.getProperties().map((property: any) => property.getName());
             } else if(declaration.isMapDeclaration?.()) {
                 return ['KEY', 'VALUE'];
             } else {
@@ -312,8 +307,9 @@ class VocabularyManager {
             }
         };
 
-        modelManager.getModelFiles().forEach(model => {
-            const terms = this.resolveTerms(modelManager, model.getNamespace(), locale);
+        // @ts-ignore
+        (modelManager as any).getModelFiles().forEach((model: any) => {
+            const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, ''); // Corrected args
             if (terms) {
                 Object.keys(terms).forEach( term => {
                     if(term === 'term') {
@@ -358,7 +354,7 @@ class VocabularyManager {
                     }
                 });
             }
-            model.getAllDeclarations().forEach(decl => {
+            model.getAllDeclarations().forEach((decl: any) => {
                 const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
                 if (terms) {
                     Object.keys(terms).forEach( term => {
@@ -408,7 +404,7 @@ class VocabularyManager {
                 }
 
                 const propertyNames = getPropertyNames(decl);
-                propertyNames.forEach(propertyName => {
+                propertyNames.forEach((propertyName: string) => {
                     const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), propertyName);
                     if (propertyTerms) {
                         Object.keys(propertyTerms).forEach( term => {
@@ -472,17 +468,18 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the result of validation
      */
-    validate(modelManager) {
+    validate(modelManager: ModelManager): any {
         // missing vocabularies
-        const missingVocabularies = modelManager.getModelFiles()
-            .map(m => this.getVocabulariesForNamespace(m.getNamespace()).length === 0 ? m.getNamespace() : null)
-            .filter(m => m !== null);
+        // @ts-ignore
+        const missingVocabularies = (modelManager as any).getModelFiles()
+            .map((m: any) => this.getVocabulariesForNamespace(m.getNamespace()).length === 0 ? m.getNamespace() : null)
+            .filter((m: any) => m !== null);
 
         // additional vocabularies
         const additionalVocabularies = Object.values(this.vocabularies)
             .filter(v => !modelManager.getModelFile(v.getNamespace()));
 
-        const result = {
+        const result: any = {
             missingVocabularies,
             additionalVocabularies,
             vocabularies: {}
@@ -491,7 +488,7 @@ class VocabularyManager {
         // validate the models against the vocs
         Object.values(this.vocabularies)
             .forEach(voc => {
-                const vocResult = {
+                const vocResult: any = {
                     locale: voc.getLocale(),
                     namespace: voc.getNamespace(),
                     missingTerms: [],
@@ -515,4 +512,4 @@ class VocabularyManager {
     }
 }
 
-module.exports = VocabularyManager;
+export = VocabularyManager;

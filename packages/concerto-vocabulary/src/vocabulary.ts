@@ -12,16 +12,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const VocabularyManager = require('./vocabularymanager');
-    const { ModelFile } = require('@accordproject/concerto-core');
-}
-/* eslint-enable no-unused-vars */
+import { ModelFile, ClassDeclaration, Property } from '@accordproject/concerto-core';
+import VocabularyManager = require('./vocabularymanager');
 
 /**
 * A vocabulary for a concerto model
@@ -29,13 +21,16 @@ if (global === undefined) {
 * @memberof module:concerto-vocabulary
 */
 class Vocabulary {
+    public vocabularyManager: VocabularyManager;
+    public content: any;
+
     /**
      * Create the Vocabulary
      * @constructor
      * @param {VocabularyManager} vocabularyManager - the manager for this vocabulary
      * @param {object} voc - the JSON representation of the vocabulary
      */
-    constructor(vocabularyManager, voc) {
+    constructor(vocabularyManager: VocabularyManager, voc: any) {
         if(!vocabularyManager) {
             throw new Error('VocabularyManager must be specified');
         }
@@ -65,7 +60,7 @@ class Vocabulary {
      * Returns the namespace for the vocabulary
      * @returns {string} the namespace for this vocabulary
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.content.namespace;
     }
 
@@ -74,7 +69,8 @@ class Vocabulary {
      * @param {string} locale the locale to validate
      * @throws {Error} if the locale is invalid
      */
-    static validateLocale(locale) {
+    static validateLocale(locale: string) {
+        // @ts-ignore
         new Intl.Locale(locale);
         if(locale !== locale.toLowerCase()) {
             throw new Error('Locale should be lowercase with dashes');
@@ -85,7 +81,7 @@ class Vocabulary {
      * Returns the locale for the vocabulary
      * @returns {string} the locale for this vocabulary
      */
-    getLocale() {
+    getLocale(): string {
         return this.content.locale;
     }
 
@@ -93,7 +89,7 @@ class Vocabulary {
      * Returns the identifier for the vocabulary, composed of the namespace plus the locale
      * @returns {string} the identifier for this vocabulary
      */
-    getIdentifier() {
+    getIdentifier(): string {
         return `${this.getNamespace()}/${this.content.locale}`;
     }
 
@@ -101,7 +97,7 @@ class Vocabulary {
      * Returns all the declarations for this vocabulary
      * @returns {Array} an array of objects
      */
-    getTerms() {
+    getTerms(): any[] {
         return this.content.declarations;
     }
 
@@ -110,7 +106,7 @@ class Vocabulary {
      * @returns {string} the term or null if it does not exist
      * @private
      */
-    getNamespaceTerms(){
+    getNamespaceTerms(): any {
         const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
         return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
     }
@@ -122,12 +118,12 @@ class Vocabulary {
      * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getTerm(declarationName, propertyName, identifier) {
+    getTerm(declarationName?: string, propertyName?: string, identifier?: string): string | null {
         if(!declarationName){
             const namespaceTerms = this.getNamespaceTerms();
             return identifier ? namespaceTerms?.[identifier]:namespaceTerms?.term;
         }
-        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
+        const decl = this.content.declarations.find((d: any) => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
         }
@@ -135,7 +131,7 @@ class Vocabulary {
             return identifier ? decl[identifier] : decl[declarationName];
         }
         else {
-            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => d[propertyName]) : null;
             return property ? identifier ? property[identifier] : property[propertyName] : null;
         }
     }
@@ -146,11 +142,11 @@ class Vocabulary {
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {string} the term or null if it does not exist
      */
-    getElementTerms(declarationName, propertyName) {
+    getElementTerms(declarationName: string, propertyName?: string): any {
         if(!declarationName){
             return this.getNamespaceTerms();
         }
-        const decl = this.content.declarations.find(d => Object.keys(d)[0] === declarationName);
+        const decl = this.content.declarations.find((d: any) => Object.keys(d)[0] === declarationName);
         if(!decl) {
             return null;
         }
@@ -158,7 +154,7 @@ class Vocabulary {
             return decl;
         }
         else {
-            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => d[propertyName]) : null;
             return property;
         }
     }
@@ -169,8 +165,8 @@ class Vocabulary {
      * @param {ModelFile} modelFile the model file for this vocabulary
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
-    validate(modelFile) {
-        const getOwnProperties = (declaration) => {
+    validate(modelFile: ModelFile): any {
+        const getOwnProperties = (declaration: any) => {
             // ensures we have a valid return, even for scalars and map-declarations
             if(declaration.isMapDeclaration()) {
                 return [declaration.getKey(), declaration.getValue()];
@@ -179,7 +175,7 @@ class Vocabulary {
             }
         };
 
-        const getPropertyName = (property) => {
+        const getPropertyName = (property: any) => {
             if(property.isKey?.()) {
                 return 'KEY';
             } else if(property.isValue?.()) {
@@ -189,7 +185,7 @@ class Vocabulary {
             }
         };
 
-        const checkPropertyExists = (k, p) => {
+        const checkPropertyExists = (k: any, p: any) => {
             const declaration = modelFile.getLocalType(Object.keys(k)[0]);
             const property = Object.keys(p)[0];
             if(declaration.isMapDeclaration()) {
@@ -206,12 +202,12 @@ class Vocabulary {
         };
 
         const result = {
-            missingTerms: modelFile.getAllDeclarations().flatMap( d => this.getTerm(d.getName())
-                ? getOwnProperties(d).flatMap( p => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
-                : d.getName() ).filter( i => i !== null),
-            additionalTerms: this.content.declarations.flatMap( k => modelFile.getLocalType(Object.keys(k)[0])
-                ? Array.isArray(k.properties) ? k.properties.flatMap( p => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
-                : k ).filter( i => i !== null)
+            missingTerms: modelFile.getAllDeclarations().flatMap( (d: ClassDeclaration) => this.getTerm(d.getName())
+                ? getOwnProperties(d).flatMap( (p: Property) => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
+                : d.getName() ).filter( (i: any) => i !== null),
+            additionalTerms: this.content.declarations.flatMap( (k: any) => modelFile.getLocalType(Object.keys(k)[0])
+                ? Array.isArray(k.properties) ? k.properties.flatMap( (p: any) => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
+                : k ).filter( (i: any) => i !== null)
         };
 
         if(!this.content.term){
@@ -230,4 +226,4 @@ class Vocabulary {
     }
 }
 
-module.exports = Vocabulary;
+export = Vocabulary;
