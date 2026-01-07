@@ -1,4 +1,3 @@
-export = MonetaryUtil;
 /**
  * Utilities for monetary and number formatting.
  * @class
@@ -13,3 +12,5 @@ declare class MonetaryUtil {
      */
     static toWords(number: number, lang?: string): string;
 }
+
+export = MonetaryUtil;
