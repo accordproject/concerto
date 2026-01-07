@@ -32,12 +32,20 @@ class BaseFileException extends BaseException {
      * Create an BaseFileException
      * @param message - the message for the exception
      * @param fileLocation - the optional file location associated with the exception
+     * @param fullMessage - the optional full message text
      * @param fileName - the file name
      * @param component - the component which throws this error
-     * @param fullMessage - the optional full message text
      */
-    constructor(message: string, fileLocation: string | null = null, fileName: string | null = null, component?: string, fullMessage: string | null = null) {
-        // We moved fullMessage to the end, but we still use it in the super call if it exists
+    constructor(message: string, fileLocation: string | null = null, fullMessage: string | null = null, fileName: string | null = null, component?: string) {
+        // DETECT SHIFTED ARGUMENTS (The Fix):
+        // Some legacy callers (like IllegalModelException) pass (msg, loc, fullMsg, component)
+        // leaving fileName as the component string and component as undefined.
+        // We detect this by checking if 'fileName' looks like a package name.
+        if (!component && fileName && fileName.startsWith('@')) {
+            component = fileName;
+            fileName = null;
+        }
+
         super(fullMessage ? fullMessage : message, component);
         this.fileLocation = fileLocation;
         this.shortMessage = message;
