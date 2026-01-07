@@ -16,4 +16,5 @@ import Identifiers = require("./lib/identifiers");
 import ErrorCodes = require("./lib/errorcodes");
 import NullUtil = require("./lib/null");
 import Warning = require("./lib/warning");
-export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label, Identifiers, ErrorCodes, NullUtil, Warning };
+import MonetaryUtil = require("./lib/monetary");
+export { BaseException, BaseFileException, FileDownloader, CompositeFileLoader, DefaultFileLoader, GitHubFileLoader, HTTPFileLoader, Writer, FileWriter, InMemoryWriter, ModelWriter, Logger, TypedStack, Label, Identifiers, ErrorCodes, NullUtil, Warning, MonetaryUtil };
