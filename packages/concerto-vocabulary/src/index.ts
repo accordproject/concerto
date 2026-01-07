@@ -12,19 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
+import VocabularyManager = require('./vocabularymanager');
+import Vocabulary = require('./vocabulary');
 
-/**
- * Concerto vocabulary module. Concerto is a framework for defining domain
- * specific models.
- *
- * @module concerto-vocabulary
- */
-
-const VocabularyManager = require('./vocabularymanager');
-const Vocabulary = require('./vocabulary');
-
-module.exports = {
+export {
     VocabularyManager,
     Vocabulary
 };
