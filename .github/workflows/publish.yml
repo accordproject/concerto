@@ -11,6 +11,7 @@ permissions:
 jobs:
   publish:
     name: Publish to npm
+    timeout-minutes: 30
     if: ${{ github.repository_owner == 'accordproject' }}
     runs-on: ubuntu-latest
     environment: production
