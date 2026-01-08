@@ -14,7 +14,9 @@
 
 'use strict';
 
-const ErrorCodes  = require('./errorcodes');
+import * as ErrorCodes from './errorcodes';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const packageJson = require('../package.json');
 
 /**
 * A base class for all Concerto exceptions
@@ -23,15 +25,18 @@ const ErrorCodes  = require('./errorcodes');
 * @memberof module:concerto-core
 */
 class BaseException extends Error {
+    public component: string;
+    public errorType: string;
+
     /**
      * Create the BaseException.
-     * @param {string} message - The exception message.
-     * @param {string} component - The optional component which throws this error.
-     * @param {string} errorType - The optional error code regarding the error
+     * @param message - The exception message.
+     * @param component - The optional component which throws this error.
+     * @param errorType - The optional error code regarding the error
      */
-    constructor(message, component, errorType) {
+    constructor(message: string, component?: string, errorType?: string) {
         super(message);
-        this.component = component || process.env.npm_package_name;
+        this.component = component || packageJson.name;
         this.name = this.constructor.name;
         this.message = message;
         this.errorType = errorType || ErrorCodes.DEFAULT_BASE_EXCEPTION;
@@ -39,7 +44,6 @@ class BaseException extends Error {
             Error.captureStackTrace(this, this.constructor);
         }
     }
-
 }
 
-module.exports = BaseException;
+export = BaseException;

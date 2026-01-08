@@ -22,48 +22,51 @@
  * @memberof module:concerto-core
  */
 class TypedStack {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public stack: any[];
 
     /**
    * Create the Stack with the resource at the head.
-   * @param {Object} resource - the resource to be put at the head of the stack
+   * @param resource - the resource to be put at the head of the stack
    */
-    constructor(resource) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(resource: any) {
         this.stack = [];
         this.push(resource);
     }
 
     /**
      * Push a new object.
-     * @param {Object} obj - the object being visited
-     * @param {Object} expectedType - the expected type of the object being pushed
+     * @param obj - the object being visited
+     * @param expectedType - the expected type of the object being pushed
      */
-    push(obj, expectedType) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    push(obj: any, expectedType?: any): void {
         if(expectedType && !(obj instanceof expectedType)) {
             throw new Error('Did not find expected type ' + expectedType.constructor.name + ' as argument to push. Found: ' + obj.toString());
         }
 
         this.stack.push(obj);
-        //console.log('Push depth is: ' + this.stack.length + ', contents: ' + this.stack.toString() );
     }
 
     /**
      * Push a new object.
-     * @param {Object} expectedType - the type that should be the result of pop
-     * @return {Object} the result of pop
+     * @param expectedType - the type that should be the result of pop
+     * @return the result of pop
      */
-    pop(expectedType) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pop(expectedType?: any): any {
         this.peek(expectedType);
         return this.stack.pop();
     }
 
     /**
      * Peek the top of the stack
-     * @param {Object} expectedType - the type that should be the result of pop
-     * @return {Object} the result of peek
+     * @param expectedType - the type that should be the result of pop
+     * @return the result of peek
      */
-    peek(expectedType) {
-
-        //console.log( 'pop ' );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    peek(expectedType?: any): any {
 
         if(this.stack.length < 1) {
             throw new Error('Stack is empty!');
@@ -80,9 +83,9 @@ class TypedStack {
     /**
      * Clears the stack
      */
-    clear() {
+    clear(): void {
         this.stack = [];
     }
 }
 
-module.exports = TypedStack;
+export = TypedStack;

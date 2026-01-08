@@ -14,7 +14,7 @@
 
 'use strict';
 
-const HTTPFileLoader = require('./httpfileloader');
+import HTTPFileLoader = require('./httpfileloader');
 
 /**
  * Loads Files from an external source, such as a URL.
@@ -26,33 +26,35 @@ const HTTPFileLoader = require('./httpfileloader');
 class GitHubFileLoader extends HTTPFileLoader {
     /**
      * Create the GitHubFileLoader.
-     * @param {*} processFile - a function to apply to the content of the file
+     * @param processFile - a function to apply to the content of the file
      */
-    constructor(processFile) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    constructor(processFile: (name: string, text: string) => any) {
         super(processFile);
     }
 
     /**
      * Returns true if this ModelLoader can process the URL
-     * @param {string} url - the URL
-     * @return {boolean} true if this ModelLoader accepts the URL
+     * @param url - the URL
+     * @return true if this ModelLoader accepts the URL
      * @abstract
      */
-    accepts(url) {
+    accepts(url: string): boolean {
         return url.startsWith('github://');
     }
 
     /**
      * Load a File from a URL and return it
-     * @param {string} url - the url to get
-     * @param {object} options - additional options
-     * @return {Promise} a promise to the File
+     * @param url - the url to get
+     * @param options - additional options
+     * @return a promise to the File
      */
-    load(url, options) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    load(url: string, options: any): Promise<any> {
         const rewrittenUrl = 'https://raw.githubusercontent.com/' + url.substring(9);
         const result = super.load(rewrittenUrl, options);
         return result;
     }
 }
 
-module.exports = GitHubFileLoader;
+export = GitHubFileLoader;
