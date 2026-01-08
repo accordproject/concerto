@@ -63,8 +63,6 @@ class HTTPFileLoader {
             };
         }
 
-        // eslint-disable-next-line no-console
-        console.log(requestUrl);
         const response = await fetch(requestUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP request failed with status: ${response.status}`);
