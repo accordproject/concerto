@@ -30,6 +30,11 @@ const Util = require('@accordproject/concerto-util').NullUtil;
  * @memberof module:concerto-core
  */
 class JSONGenerator {
+    convertResourcesToRelationships: any;
+    permitResourcesForRelationships: any;
+    deduplicateResources: any;
+    convertResourcesToId: any;
+    utcOffset: any;
 
     /**
      * Constructor.
@@ -129,7 +134,7 @@ class JSONGenerator {
             throw new Error('Expected a Resource, but found ' + obj);
         }
 
-        let result = {};
+        let result: any = {};
         let id = null;
 
         if (obj.isIdentifiable() && this.deduplicateResources) {
@@ -172,7 +177,7 @@ class JSONGenerator {
         const obj = parameters.stack.pop();
         let result;
         if (field.isArray()) {
-            let array = [];
+            let array: any[] = [];
             // Walk the object
             for (let index in obj) {
                 const item = obj[index];
@@ -243,7 +248,7 @@ class JSONGenerator {
         let result;
 
         if (relationshipDeclaration.isArray()) {
-            let array = [];
+            let array: any[] = [];
             // walk the object
             for (let index in obj) {
                 const item = obj[index];

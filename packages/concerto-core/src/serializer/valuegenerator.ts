@@ -160,6 +160,7 @@ const getRegexString = (regex, minLength, maxLength) => {
  * @private
  */
 class EmptyValueGenerator {
+    currentDate: any;
     /**
      * This constructor should not be called directly.
      * @private
@@ -243,8 +244,8 @@ class EmptyValueGenerator {
      * @param {Function} valueSupplier - callback to obtain values.
      * @return {Array} an array
      */
-    getArray(valueSupplier) {
-        return [];
+    getArray(valueSupplier: any): any[] {
+            return [];
     }
 
     /**
@@ -349,7 +350,7 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @param {Function} valueSupplier - callback to obtain values.
      * @return {Array} an array
      */
-    getArray(valueSupplier) {
+    getArray(valueSupplier){
         return [valueSupplier()];
     }
 

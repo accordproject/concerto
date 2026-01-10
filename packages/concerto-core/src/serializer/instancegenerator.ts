@@ -164,7 +164,7 @@ class InstanceGenerator {
         declaration = this.findConcreteSubclass(declaration);
 
         if (!declaration.isMapDeclaration?.()) {
-            let id = null;
+            let id: string | null = null;
             if (declaration.isIdentified()) {
                 let idFieldName = declaration.getIdentifierFieldName();
                 let idField = declaration.getProperty(idFieldName);

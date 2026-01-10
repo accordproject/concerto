@@ -51,6 +51,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Factory {
+    modelManager: any;
     /**
      * Create a new ID for an object.
      * @returns {string} a new ID
@@ -134,7 +135,7 @@ class Factory {
             throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
         }
 
-        let newObj = null;
+        let newObj: any = null;
         let timestamp = null;
         if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
@@ -219,7 +220,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let transaction = this.newResource(ns, type, id, options);
+        let transaction: any = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
 
         if (!classDeclaration.isTransaction()) {
@@ -249,7 +250,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let event = this.newResource(ns, type, id, options);
+        let event: any = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
 
         if (!classDeclaration.isEvent()) {
@@ -269,7 +270,7 @@ class Factory {
      * @param {Object} clientOptions - field generation options supplied by the caller.
      */
     initializeNewObject(newObject, classDeclaration, clientOptions) {
-        const generateParams = this.parseGenerateOptions(clientOptions);
+        const generateParams: any = this.parseGenerateOptions(clientOptions);
         if (generateParams) {
             generateParams.stack = new TypedStack(newObject);
             generateParams.seen = [newObject.getFullyQualifiedType()];
@@ -292,7 +293,7 @@ class Factory {
             return null;
         }
 
-        const generateParams = { };
+        const generateParams: any = { };
         generateParams.modelManager = this.modelManager;
         generateParams.factory = this;
 

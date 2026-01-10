@@ -14,7 +14,6 @@
 
 'use strict';
 
-/** @type unknown */
 const rootModelAst = require('./rootmodel.json');
 
 /**
@@ -38,4 +37,5 @@ function getRootModel() {
     return { rootModelFile, rootModelCto, rootModelAst: ast };
 }
 
-module.exports = { getRootModel };
+// FIX: Use CommonJS export style compatible with the consumer
+export = { getRootModel };

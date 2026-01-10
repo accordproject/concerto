@@ -34,6 +34,10 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Decorator {
+    ast: any;
+    parent: any;
+    arguments: any[];
+    name!: string;
     /**
      * Create a Decorator.
      * @param {ClassDeclaration | Property} parent - the owner of this property
@@ -43,7 +47,7 @@ class Decorator {
     constructor(parent, ast) {
         this.ast = ast;
         this.parent = parent;
-        this.arguments = null;
+        this.arguments = [];
         this.process();
     }
 

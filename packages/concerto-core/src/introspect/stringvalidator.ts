@@ -70,7 +70,7 @@ class StringValidator extends Validator{
                 const CustomRegExp = field?.parent?.getModelFile()?.getModelManager()?.options?.regExp || RegExp;
                 this.regex = new CustomRegExp(validator.pattern, validator.flags);
             }
-            catch(exception) {
+            catch (exception: any) {
                 this.reportError(field.getName(), exception.message, ErrorCodes.REGEX_VALIDATOR_EXCEPTION);
             }
         }

@@ -27,6 +27,7 @@ const Resource = require('./resource');
  * @memberof module:concerto-core
  */
 class ValidatedResource extends Resource {
+    $validator: any;
     /**
      * This constructor should not be called directly.
      * Use the Factory class to create instances.
@@ -68,7 +69,7 @@ class ValidatedResource extends Resource {
         //     this.log( 'Validating field ' + field + ' with data ' + value );
         // }
 
-        const parameters = {};
+        const parameters:any = {};
         parameters.stack = new TypedStack(value);
         parameters.modelManager = this.getModelManager();
         parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
@@ -98,8 +99,8 @@ class ValidatedResource extends Resource {
                 propName + ' which is not declared as an array in the model.');
         }
 
-        const parameters = {};
-        let newArray = [];
+        const parameters:any = {};
+        let newArray: any[] = [];
         if(this[propName]) {
             newArray = this[propName].slice(0);
         }
@@ -118,7 +119,7 @@ class ValidatedResource extends Resource {
      */
     validate() {
         const classDeclaration = this.getClassDeclaration();
-        const parameters = {};
+        const parameters:any = {};
         parameters.stack = new TypedStack(this);
         parameters.modelManager = this.getModelManager();
         parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();

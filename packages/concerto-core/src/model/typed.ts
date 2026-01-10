@@ -38,6 +38,10 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Typed {
+    $modelManager: any;
+    $classDeclaration: any;
+    $namespace: any;
+    $type: any;
     /**
      * Create an instance.
      * <p>

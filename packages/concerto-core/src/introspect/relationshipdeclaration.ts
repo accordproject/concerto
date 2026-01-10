@@ -58,7 +58,7 @@ class RelationshipDeclaration extends Property {
             throw new IllegalModelException('Relationship must have a type', classDecl.getModelFile(), this.ast.location);
         }
 
-        let classDeclaration = null;
+        let classDeclaration: any = null;
 
         // you can't have a relationship with a primitive...
         if(ModelUtil.isPrimitiveType(this.getType())) {

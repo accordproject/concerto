@@ -135,6 +135,8 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
  * @private
  */
 class DcsIndexWrapper {
+    command: any;
+    index: any;
 
     /**
      * Create the DcsIndexWrapper.
@@ -184,7 +186,7 @@ class DecoratorManager {
      * @returns {ModelManager} the model manager created for validation
      * @throws {Error} throws an error if the decoratorCommandSet is invalid
      */
-    static validate(decoratorCommandSet, modelFiles) {
+    static validate(decoratorCommandSet, modelFiles?) {
         const validationModelManager = new ModelManager({
             metamodelValidation: true,
             addMetamodel: true,
@@ -410,7 +412,7 @@ class DecoratorManager {
             model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
             const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
             model.declarations.forEach((decl) => {
-                const declarationDecoratorCommandSets = [];
+                const declarationDecoratorCommandSets: any[] = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
                 this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
@@ -423,7 +425,7 @@ class DecoratorManager {
                 });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const mapDecoratorCommandSets = [];
+                    const mapDecoratorCommandSets: any = [];
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
                     this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
@@ -438,7 +440,7 @@ class DecoratorManager {
                 // scalars are declarations but do not have properties
                 if (decl.properties) {
                     decl.properties.forEach((property) => {
-                        const propertyDecoratorCommandSets = [];
+                        const propertyDecoratorCommandSets: any[] = [];
                         const { name: propertyName, $class: $classForProperty } = property;
                         this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
                         this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
@@ -544,7 +546,7 @@ class DecoratorManager {
                 command.target.type
             );
         }
-        let modelFile = null;
+        let modelFile: any = null;
         if (command.target.namespace) {
             modelFile = validationModelManager.getModelFile(
                 command.target.namespace
@@ -732,7 +734,7 @@ class DecoratorManager {
      * @param {*} [property] the property of a declaration, optional, to be passed if the command is for a property
      * @param {object} [options] - execute command options
      */
-    static executeCommand(namespace, declaration, command, property, options) {
+    static executeCommand(namespace, declaration, command, property?, options?) {
         const { target, decorator, type } = command;
         // the namespace version is already validated in the decorateModels method
         const { name } = ModelUtil.parseNamespace( namespace, { disableVersionParsing: true } );

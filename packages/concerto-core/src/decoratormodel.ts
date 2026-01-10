@@ -14,7 +14,6 @@
 
 'use strict';
 
-/** @type unknown */
 const decoratorModelAst = require('./decoratormodel.json');
 
 /**
@@ -23,12 +22,14 @@ const decoratorModelAst = require('./decoratormodel.json');
  */
 function getDecoratorModel() {
     const decoratorModelFile = 'concerto_decorator_1.0.0.cto';
-    const decoratorModelCto = `namespace concerto.decorator@1.0.0
+    const ns = 'concerto.decorator@1.0.0'; // Define namespace variable
+    const decoratorModelCto = `namespace ${ns}
     abstract concept Decorator {}
     concept DotNetNamespace extends Decorator {
        o String namespace
     }`;
     const ast = JSON.parse(JSON.stringify(decoratorModelAst));
+    ast.namespace = ns; // <--- FIX: Explicitly set the namespace
     return { decoratorModelFile, decoratorModelCto, decoratorModelAst: ast };
 }
 

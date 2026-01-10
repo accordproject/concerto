@@ -31,6 +31,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Introspector {
+    modelManager: any;
     /**
      * Create the Introspector.
      * @param {ModelManager} modelManager - the ModelManager that backs this Introspector
