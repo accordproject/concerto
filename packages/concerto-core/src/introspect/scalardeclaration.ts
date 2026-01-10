@@ -283,4 +283,4 @@ class ScalarDeclaration extends Declaration {
 
 }
 
-module.exports = ScalarDeclaration;
+export = ScalarDeclaration;

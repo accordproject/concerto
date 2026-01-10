@@ -134,7 +134,7 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
-        const rootModelModule = require('./rootmodel.ts');
+        const rootModelModule = require('./rootmodelhelper');
         const getRootModel = rootModelModule.getRootModel || rootModelModule;
 
         if (typeof getRootModel !== 'function') {
@@ -195,7 +195,7 @@ class BaseModelManager {
      * @private
      */
     addDecoratorModel() {
-        const decoratorModelModule = require('./decoratormodel.ts');
+        const decoratorModelModule = require('./decoratormodelhelper');
         const getDecoratorModel = decoratorModelModule.getDecoratorModel || decoratorModelModule;
 
         if (typeof getDecoratorModel !== 'function') {

@@ -16,7 +16,7 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const Property = require('./property');
+import Property = require('./property');
 const NumberValidator = require('./numbervalidator');
 const StringValidator = require('./stringvalidator');
 const Util = require('@accordproject/concerto-util').NullUtil;
@@ -201,4 +201,4 @@ class Field extends Property {
     }
 }
 
-module.exports = Field;
+export = Field;

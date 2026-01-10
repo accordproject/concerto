@@ -167,4 +167,4 @@ class StringValidator extends Validator{
     }
 }
 
-module.exports = StringValidator;
+export = StringValidator;

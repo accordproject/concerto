@@ -155,4 +155,4 @@ class NumberValidator extends Validator{
     }
 }
 
-module.exports = NumberValidator;
+export = NumberValidator;

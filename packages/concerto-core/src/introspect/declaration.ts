@@ -165,7 +165,7 @@ class Declaration extends Decorated {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string | null {
         return null;
     }
 
@@ -206,4 +206,4 @@ class Declaration extends Decorated {
     }
 }
 
-module.exports = Declaration;
+export = Declaration;

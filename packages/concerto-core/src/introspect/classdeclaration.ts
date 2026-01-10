@@ -16,7 +16,7 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const Declaration = require('./declaration');
+import Declaration = require('./declaration');
 const EnumValueDeclaration = require('./enumvaluedeclaration');
 const Field = require('./field');
 const Globalize = require('../globalize');
@@ -667,4 +667,4 @@ class ClassDeclaration extends Declaration {
     }
 }
 
-module.exports = ClassDeclaration;
+export = ClassDeclaration;

@@ -882,4 +882,4 @@ class ModelFile extends Decorated {
     }
 }
 
-module.exports = ModelFile;
+export = ModelFile;

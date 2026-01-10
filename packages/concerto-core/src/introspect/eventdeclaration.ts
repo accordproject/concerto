@@ -14,7 +14,7 @@
 
 'use strict';
 
-const IdentifiedDeclaration = require('./identifieddeclaration');
+import IdentifiedDeclaration = require('./identifieddeclaration');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -61,4 +61,4 @@ class EventDeclaration extends IdentifiedDeclaration {
     }
 }
 
-module.exports = EventDeclaration;
+export = EventDeclaration;
