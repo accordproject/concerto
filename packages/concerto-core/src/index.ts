@@ -54,7 +54,7 @@ import Factory = require("./factory");
 import Globalize = require("./globalize");
 import Introspector = require("./introspect/introspector");
 import ModelFile = require("./introspect/modelfile");
-import ModelManager = require("./modelmanager");
+export import ModelManager = require("./modelmanager");
 import Serializer = require("./serializer");
 import ModelUtil = require("./modelutil");
 import ModelLoader = require("./modelloader");
@@ -64,4 +64,4 @@ export type version = {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, Declaration, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, MapDeclaration, MapKeyType, MapValueType, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, MetaModel };
+export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, Declaration, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, MapDeclaration, MapKeyType, MapValueType, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, Serializer, ModelUtil, ModelLoader, DateTimeUtil, MetaModel };
