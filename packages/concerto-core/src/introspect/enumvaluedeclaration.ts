@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Property = require('./property');
+import Property = require('./property');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -63,4 +63,4 @@ class EnumValueDeclaration extends Property {
     }
 }
 
-module.exports = EnumValueDeclaration;
+export = EnumValueDeclaration;

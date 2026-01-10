@@ -240,4 +240,4 @@ class Property extends Decorated {
     }
 }
 
-module.exports = Property;
+export = Property;

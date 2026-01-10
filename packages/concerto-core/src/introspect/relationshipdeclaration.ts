@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Property = require('./property');
+import Property = require('./property');
 const IllegalModelException = require('./illegalmodelexception');
 const ModelUtil = require('../modelutil');
 
@@ -110,4 +110,4 @@ class RelationshipDeclaration extends Property {
     }
 }
 
-module.exports = RelationshipDeclaration;
+export = RelationshipDeclaration;

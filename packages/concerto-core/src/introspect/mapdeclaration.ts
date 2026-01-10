@@ -14,7 +14,7 @@
 
 'use strict';
 
-const Declaration = require('./declaration');
+import Declaration = require('./declaration');
 const IllegalModelException = require('./illegalmodelexception');
 const MapValueType = require('./mapvaluetype');
 const MapKeyType = require('./mapkeytype');
@@ -163,4 +163,4 @@ class MapDeclaration extends Declaration {
     }
 }
 
-module.exports = MapDeclaration;
+export = MapDeclaration;

@@ -351,4 +351,4 @@ static parseNamespace(ns: any, options?: any) {
     }
 }
 
-module.exports = ModelUtil;
+export = ModelUtil;

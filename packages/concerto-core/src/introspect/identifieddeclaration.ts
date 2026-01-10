@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ClassDeclaration = require('./classdeclaration');
+import ClassDeclaration = require('./classdeclaration');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -46,4 +46,4 @@ class IdentifiedDeclaration extends ClassDeclaration {
     }
 }
 
-module.exports = IdentifiedDeclaration;
+export = IdentifiedDeclaration;
