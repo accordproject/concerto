@@ -898,4 +898,4 @@ class BaseModelManager {
     }
 }
 
-module.exports = BaseModelManager;
+export = BaseModelManager;

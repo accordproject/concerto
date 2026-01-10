@@ -16,7 +16,7 @@
 
 const Parser = require('@accordproject/concerto-cto').Parser;
 
-const BaseModelManager = require('./basemodelmanager');
+import BaseModelManager = require('./basemodelmanager');
 
 const debug = require('debug')('concerto:BaseModelManager');
 
