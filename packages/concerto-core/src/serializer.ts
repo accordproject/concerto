@@ -46,6 +46,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Serializer {
+    factory: any;        
+    modelManager: any;   
+    defaultOptions: any;
     /**
      * Create a Serializer.
      * @param {Factory} factory - The Factory to use to create instances
@@ -102,7 +105,7 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
-        const parameters = {};
+        const parameters: any = {};
         parameters.stack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.seenResources = new Set();
@@ -186,7 +189,7 @@ class Serializer {
 
         // populate the resource based on the jsonObject
         // by walking the classDeclaration
-        const parameters = {};
+        const parameters: any = {};
         parameters.jsonStack = new TypedStack(jsonObject);
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;

@@ -33,6 +33,8 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Validator {
+    validator: any;
+    field: any;
     /**
      * Create a Property.
      * @param {Object} field - the field or scalar declaration this validator is attached to

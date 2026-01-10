@@ -55,7 +55,7 @@ class Relationship extends Identifiable {
      * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+    constructor(modelManager: any, classDeclaration: any, ns: string, type: string, id: string, timestamp?: string) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
         // we use this metatag to identify the instance as a relationship
         this.$class = 'Relationship';

@@ -40,7 +40,7 @@ class ModelLoader {
      * @private
      */
     static async addModel(modelFileLoader, modelManager, ctoFile) {
-        let modelFile = null;
+        let modelFile: any = null;
         if (modelFileLoader.accepts(ctoFile)) {
             modelFile = await modelFileLoader.load(ctoFile);
         } else {

@@ -90,6 +90,9 @@ function validateProperties(properties, classDeclaration) {
  * @memberof module:concerto-core
  */
 class JSONPopulator {
+    acceptResourcesForRelationships: any;
+    utcOffset: any;
+    strictQualifiedDateTimes: any;
     /**
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
@@ -116,7 +119,7 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing, parameters = {}) {
+    visit(thing, parameters: any = {}) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
         if (thing.isClassDeclaration?.()) {
@@ -247,7 +250,7 @@ class JSONPopulator {
     visitField(field, parameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
         let jsonObj = parameters.jsonStack.pop();
-        let result = null;
+        let result: any = null;
 
         if(field.isArray()) {
             result = [];
@@ -320,8 +323,8 @@ class JSONPopulator {
      * @param {Object} parameters - the parameters
      * @return {string} the text representation
      */
-    convertToObject(field, json, parameters = {}) {
-        let result = null;
+    convertToObject(field, json, parameters: any = {}) {
+        let result: any = null;
         parameters.path ?? (parameters.path = new TypedStack('$'));
         const path = parameters.path.stack.join('');
 
@@ -361,7 +364,7 @@ class JSONPopulator {
             break;
         case 'Double': {
             if (typeof json === 'number') {
-                result = parseFloat(json);
+                result = result = json;
             } else {
                 throw new ValidationException(`Expected value at path \`${path}\` to be of type \`${field.getType()}\``);
             }
@@ -400,7 +403,7 @@ class JSONPopulator {
     visitRelationshipDeclaration(relationshipDeclaration, parameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
         let jsonObj = parameters.jsonStack.pop();
-        let result = null;
+        let result: any = null;
 
         let typeFQN = relationshipDeclaration.getFullyQualifiedTypeName();
         let defaultNamespace = ModelUtil.getNamespace(typeFQN);

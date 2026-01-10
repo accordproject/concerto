@@ -45,6 +45,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class ClassDeclaration extends Declaration {
+    modelFile: any;
     /**
      * Process the AST and build the model
      *
@@ -130,7 +131,7 @@ class ClassDeclaration extends Declaration {
      * @private
      */
     addTimestampField() {
-        const definition = {};
+        const definition: any = {};
         definition.$class = `${MetaModelNamespace}.DateTimeProperty`;
         definition.name = '$timestamp';
         this.properties.push(new Field(this, definition));
@@ -142,7 +143,7 @@ class ClassDeclaration extends Declaration {
      * @private
      */
     addIdentifierField() {
-        const definition = {};
+        const definition: any = {};
         definition.$class = `${MetaModelNamespace}.StringProperty`;
         definition.name = '$identifier';
         this.properties.push(new Field(this, definition));
@@ -158,7 +159,7 @@ class ClassDeclaration extends Declaration {
         }
         // Clear out any old resolved super types.
         this.superTypeDeclaration = null;
-        let classDecl = null;
+        let classDecl: any = null;
         if (this.getModelFile().isImportedType(this.superType)) {
             let fqnSuper = this.getModelFile().resolveImport(this.superType);
             classDecl = this.modelFile.getModelManager().getType(fqnSuper);
@@ -417,7 +418,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} subclass declarations.
      */
     getAssignableClassDeclarations() {
-        const results = new Set();
+        const results = new Set<any>();
         const modelManager = this.getModelFile().getModelManager();
         const introspector = new Introspector(modelManager);
         const allClassDeclarations = introspector.getClassDeclarations();
@@ -484,7 +485,7 @@ class ClassDeclaration extends Declaration {
      * @return {ClassDeclaration[]} super-type declarations.
      */
     getAllSuperTypeDeclarations() {
-        const results = [];
+        const results: any[] = [];
         for (let type = this;
             (type = type.getSuperTypeDeclaration());) {
             results.push(type);
@@ -502,7 +503,7 @@ class ClassDeclaration extends Declaration {
      */
     getProperty(name) {
         let result = this.getOwnProperty(name);
-        let classDecl = null;
+        let classDecl: any = null;
 
         if (result === null && this.superType !== null) {
             if (this.getModelFile().isImportedType(this.superType)) {
@@ -524,7 +525,7 @@ class ClassDeclaration extends Declaration {
      */
     getProperties() {
         let result = this.getOwnProperties();
-        let classDecl = null;
+        let classDecl: any = null;
         if (this.superType !== null) {
             if (this.getModelFile().isImportedType(this.superType)) {
                 let fqnSuper = this.getModelFile().resolveImport(this.superType);
@@ -557,7 +558,7 @@ class ClassDeclaration extends Declaration {
 
         const propertyNames = propertyPath.split('.');
         let classDeclaration = this;
-        let result = null;
+        let result: any = null;
 
         for (let n = 0; n < propertyNames.length; n++) {
 

@@ -45,6 +45,7 @@ dayjs.extend(utc);
  * @memberof module:concerto-core
  */
 class ResourceValidator {
+    options: any;
 
     /**
      * ResourceValidator constructor

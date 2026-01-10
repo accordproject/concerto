@@ -26,8 +26,6 @@ const ModelFile = require('./introspect/modelfile');
 const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
-const { getRootModel } = require('./rootmodel');
-const { getDecoratorModel } = require('./decoratormodel');
 const MetamodelException = require('./metamodelexception');
 
 // Types needed for TypeScript generation.
@@ -84,7 +82,15 @@ const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
  * @memberof module:concerto-core
  */
 class BaseModelManager {
-    /**
+     modelFiles: any;
+     processFile: any;
+     factory: any;
+     serializer: any;
+     decoratorFactories: any[];
+     options: any;
+     decoratorValidation: any;
+     metamodelModelFile: any;
+     /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
@@ -128,11 +134,16 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
-        // create the versioned concerto namespace
+        const rootModelModule = require('./rootmodel.ts');
+        const getRootModel = rootModelModule.getRootModel || rootModelModule;
+
+        if (typeof getRootModel !== 'function') {
+            throw new Error(`Failed to load getRootModel. Got: ${typeof getRootModel}. Module keys: ${Object.keys(rootModelModule)}`);
+        }
+
         const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
-        // add the versioned concerto namespace
         this.addModelFile(m, rootModelCto, rootModelFile, true);
     }
 
@@ -179,9 +190,21 @@ class BaseModelManager {
      * Adds decorator types
      * @private
      */
+    /**
+     * Adds decorator types
+     * @private
+     */
     addDecoratorModel() {
+        const decoratorModelModule = require('./decoratormodel.ts');
+        const getDecoratorModel = decoratorModelModule.getDecoratorModel || decoratorModelModule;
+
+        if (typeof getDecoratorModel !== 'function') {
+             throw new Error(`Failed to load getDecoratorModel. Got: ${typeof getDecoratorModel}`);
+        }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
+        
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
+ 
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
@@ -213,8 +236,8 @@ class BaseModelManager {
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-    addModelFile(modelFile, cto, fileName, disableValidation) {
-        const NAME = 'addModelFile';
+        addModelFile(modelFile: any, cto?: string | null, fileName?: string | null, disableValidation?: boolean) {
+            const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
         if(!modelFile.getVersion()) {
@@ -262,7 +285,7 @@ class BaseModelManager {
         try {
             // Use deserialization to validate the AST
             this.getSerializer().fromJSON(modelFile.getAst());
-        } catch (err) {
+        } catch (err: any) {
             throw new MetamodelException(err.message);
         }
 
@@ -349,18 +372,18 @@ class BaseModelManager {
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles, fileNames, disableValidation) {
+    addModelFiles(modelFiles: any, fileNames?: string[] | null, disableValidation?: boolean) {
         const NAME = 'addModelFiles';
         debug(NAME, 'addModelFiles', modelFiles, fileNames);
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
-        let newModelFiles = [];
+        let newModelFiles: any[] = [];
 
         try {
             // create the model files
             for (let n = 0; n < modelFiles.length; n++) {
                 const modelFile = modelFiles[n];
-                let fileName = null;
+                let fileName: string | null = null;
 
                 if (fileNames) {
                     fileName = fileNames[n];
@@ -414,7 +437,7 @@ class BaseModelManager {
      * @throws {IllegalModelException} if the models fail validation
      * @return {Promise} a promise when the download and update operation is completed.
      */
-    async updateExternalModels(options, fileDownloader) {
+    async updateExternalModels(options: any, fileDownloader?: any) {
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
@@ -428,7 +451,7 @@ class BaseModelManager {
         try {
             const externalModels = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            const externalModelFiles = [];
+            const externalModelFiles: any[] = [];
             externalModels.forEach((file) => {
                 const mf = new ModelFile(this, file.ast, file.definitions, file.fileName);
                 const existing = this.modelFiles[mf.getNamespace()];
@@ -478,9 +501,9 @@ class BaseModelManager {
      * @return {ModelFile[]} The ModelFiles registered
      * @private
      */
-    getModelFiles(includeConcertoNamespace) {
+    getModelFiles(includeConcertoNamespace?: boolean) {
         let keys = Object.keys(this.modelFiles);
-        let result = [];
+        let result: any[] = [];
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
@@ -501,7 +524,7 @@ class BaseModelManager {
      */
     getModels(options) {
         const modelFiles = this.getModelFiles();
-        let models = [];
+        let models: any[] = [];
         const opts = Object.assign({
             includeExternalModels: true,
         }, options);
@@ -786,7 +809,7 @@ class BaseModelManager {
     getAst(resolve,includeConcertoNamespaces) {
         const result = {
             $class: `${MetaModelNamespace}.Models`,
-            models: [],
+            models: [] as any[],
         };
         const modelFiles = this.getModelFiles(includeConcertoNamespaces);
         modelFiles.forEach((thisModelFile) => {
@@ -822,7 +845,7 @@ class BaseModelManager {
 
         // remove the types from model files, populating removedFqns
         let filteredModels = Object.values(this.modelFiles)
-            .map((modelFile) => modelFile.filter(predicate, modelManager, removedFqns))
+            .map((modelFile: any) => modelFile.filter(predicate, modelManager, removedFqns))
             .filter(Boolean);
 
         // remove concerto model files - as these are automatically added

@@ -118,8 +118,8 @@ class ModelUtil {
      * @param {boolean} [options.disableVersionParsing] if false, the version will be parsed
      * @returns {ParseNamespaceResult} the result of parsing
      */
-    static parseNamespace(ns, options) {
-        if(!ns) {
+static parseNamespace(ns: any, options?: any) {
+            if(!ns) {
             throw new Error('Namespace is null or undefined.');
         }
 

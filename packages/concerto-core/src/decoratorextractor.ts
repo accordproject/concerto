@@ -25,6 +25,13 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
  * @private
  */
 class DecoratorExtractor {
+    extractionDictionary: any;
+    removeDecoratorsFromModel: any;
+    locale: any;
+    dcs_version: any;
+    sourceModelAst: any;
+    updatedModelAst: any;
+    action: any;
     /**
      * The action to be performed to extract all, only vocab or only non-vocab decorators
      */
@@ -179,7 +186,7 @@ class DecoratorExtractor {
      * @private
      */
     constructTarget(namespace, obj){
-        const target = {
+        const target: any = {
             '$class': `org.accordproject.decoratorcommands@${this.dcs_version}.CommandTarget`,
             'namespace':namespace
         };
@@ -205,7 +212,7 @@ class DecoratorExtractor {
      * @private
      */
     parseNonVocabularyDecorators(dcsObjects, dcs, DCS_VERSION, target){
-        const decotatorObj = {
+        const decotatorObj: any = {
             '$class': 'concerto.metamodel@1.0.0.Decorator',
             'name': dcs.name,
         };

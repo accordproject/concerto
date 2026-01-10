@@ -34,6 +34,8 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Decorated {
+    ast: any;
+    decorators: any[] = [];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -81,7 +83,7 @@ class Decorated {
         if(this.ast.decorators) {
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];
-                let modelFile = this.getModelFile();
+                let modelFile: any = this.getModelFile();
                 let modelManager = modelFile.getModelManager();
                 let factories = modelManager.getDecoratorFactories();
                 let decorator;

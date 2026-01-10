@@ -49,6 +49,10 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class ModelFile extends Decorated {
+    modelManager: any;
+    ast: any;
+    definitions: any;
+    fileName: any;
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -620,7 +624,7 @@ class ModelFile extends Decorated {
      * @return {Object[]} the ClassDeclaration defined in the model file
      */
     getDeclarations(type) {
-        let result = [];
+        let result: any[] = [];
         for(let n=0; n < this.declarations.length; n++) {
             let declaration = this.declarations[n];
             if(declaration instanceof type) {
@@ -856,7 +860,7 @@ class ModelFile extends Decorated {
      * @private
      */
     filter(predicate, modelManager, removedDeclarations){
-        let declarations = []; // ast for all included declarations
+        let declarations: any[] = []; // ast for all included declarations
         this.declarations?.forEach( declaration => {
             const included = predicate(declaration);
             if(!included) {
