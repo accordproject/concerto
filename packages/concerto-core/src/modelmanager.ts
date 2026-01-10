@@ -82,3 +82,4 @@ class ModelManager extends BaseModelManager {
 }
 
 module.exports = ModelManager;
+ 
