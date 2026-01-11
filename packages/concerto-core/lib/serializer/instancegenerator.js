@@ -96,7 +96,7 @@ class InstanceGenerator {
                 throw new Error('Model is recursive.');
             }
             parameters.seen.push(fqn);
-        } else { parameters.seen.push('Primitve');
+        } else { parameters.seen.push('Primitive');
         }
         let result;
         if (field.isArray()) {

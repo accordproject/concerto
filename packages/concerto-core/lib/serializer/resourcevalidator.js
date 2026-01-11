@@ -205,7 +205,7 @@ class ResourceValidator {
 
         const obj = parameters.stack.pop();
 
-        // are we dealing with a Resouce?
+        // are we dealing with a Resource?
         if(!((obj instanceof Resource))) {
             ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
         }
@@ -233,7 +233,7 @@ class ResourceValidator {
                 const field = toBeAssignedClassDeclaration.getProperty(propName);
                 if (!field) {
                     if(classDeclaration.isIdentified() &&
-                        // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
+                        // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
                         propName !== '$identifier'
                     ){
                         ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
@@ -273,7 +273,7 @@ class ResourceValidator {
             }
             else {
                 if(!property.isOptional()) {
-                    // Allow shadowing of the $identifer field to normalize lookup of the identifying field.
+                    // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
                     if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
                     ) {
                         continue;
@@ -631,7 +631,7 @@ class ResourceValidator {
 
     /**
      * Throw a validation exception for an abstract class
-     * @param {string} resourceId - the id of the resouce being validated
+     * @param {string} resourceId - the id of the resource being validated
      * @param {string} propertyName - the name of the property that is not declared
      * @param {string} fullyQualifiedTypeName - the fully qualified type being validated
      * @throws {ValidationException} the validation exception
@@ -648,7 +648,7 @@ class ResourceValidator {
 
     /**
      * Throw a validation exception for an invalid field assignment
-     * @param {string} resourceId - the id of the resouce being validated
+     * @param {string} resourceId - the id of the resource being validated
      * @param {string} propName - the name of the property that is being assigned
      * @param {*} obj - the Field
      * @param {Field} field - the Field

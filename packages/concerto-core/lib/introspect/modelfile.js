@@ -244,7 +244,7 @@ class ModelFile extends Decorated {
             const unseenNamespace = existingNamespaceVersion === undefined;
 
             // This check is needed because we automatically add both versioned and unversioned versions of
-            // the root namespace for backwards compatibillity unless we're running in strict mode
+            // the root namespace for backwards compatibility unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
 
             const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;
@@ -754,10 +754,10 @@ class ModelFile extends Decorated {
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
                 if (this.getModelManager().isStrict()){
-                    throw new Error('Wilcard Imports are not permitted in strict mode.');
+                    throw new Error('Wildcard Imports are not permitted in strict mode.');
                 }
                 Warning.printDeprecationWarning(
-                    'Wilcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
+                    'Wildcard Imports are deprecated in this version of Concerto and will be removed in a future version.',
                     ErrorCodes.DEPRECATION_WARNING,
                     ErrorCodes.CONCERTO_DEPRECATION_002,
                     'Please refer to https://concerto.accordproject.org/deprecation/002'
