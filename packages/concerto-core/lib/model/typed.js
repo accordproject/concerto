@@ -201,7 +201,7 @@ class Typed {
     }
 
     /**
-     * Overriden to prevent people accidentally converting a resource to JSON
+     * Overridden to prevent people accidentally converting a resource to JSON
      * without using the Serializer.
      * @protected
      */

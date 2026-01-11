@@ -128,7 +128,7 @@ class Serializer {
         parameters.stack.clear();
         parameters.stack.push(resource);
 
-        // this performs the conversion of the resouce into a standard JSON object
+        // this performs the conversion of the resource into a standard JSON object
         let result = classDeclaration.accept(generator, parameters);
         return result;
     }
