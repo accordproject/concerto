@@ -173,7 +173,7 @@ describe('ModelFile', () => {
 
             (() => {
                 ParserUtil.newModelFile(strictModelManager, 'fake definitions');
-            }).should.throw(/Wilcard Imports are not permitted./);
+            }).should.throw(/Wildcard Imports are not permitted./);
         });
 
         it('should throw for an unrecognized body element', () => {
