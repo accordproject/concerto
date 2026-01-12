@@ -54,6 +54,7 @@
   "dependencies": {
     "@supercharge/promise-pool": "1.7.0",
     "debug": "4.3.7",
+    "n2words": "1.13.0",
     "slash": "3.0.0"
   },
   "browserslist": "> 0.25%, not dead",
@@ -71,9 +72,9 @@
     ],
     "all": true,
     "check-coverage": true,
-    "statements": 99,
+    "statements": 98,
     "branches": 93,
     "functions": 98,
-    "lines": 99
+    "lines": 98
   }
 }

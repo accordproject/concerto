@@ -61,6 +61,9 @@ const NullUtil = require('./lib/null');
 // Warning
 const Warning = require('./lib/warning');
 
+// MonetaryUtil
+const MonetaryUtil = require('./lib/monetary');
+
 module.exports = {
     BaseException,
     BaseFileException,
@@ -79,5 +82,6 @@ module.exports = {
     Identifiers,
     ErrorCodes,
     NullUtil,
-    Warning
+    Warning,
+    MonetaryUtil
 };
