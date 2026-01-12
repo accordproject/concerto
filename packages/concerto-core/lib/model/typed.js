@@ -189,7 +189,7 @@ class Typed {
         if (classDeclaration.getFullyQualifiedName() === fqt) {
             return true;
         }
-        // Now walk the class hierachy looking to see if it's an instance of the specified type.
+        // Now walk the class hierarchy looking to see if it's an instance of the specified type.
         let superTypeDeclaration = classDeclaration.getSuperTypeDeclaration();
         while (superTypeDeclaration) {
             if (superTypeDeclaration.getFullyQualifiedName() === fqt) {
