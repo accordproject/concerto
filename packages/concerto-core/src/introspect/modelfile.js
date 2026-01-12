@@ -725,7 +725,7 @@ class ModelFile extends Decorated {
             this.enforceImportVersioning(imp);
             switch(imp.$class) {
             case `${MetaModelNamespace}.ImportAll`:
-                throw new Error('Wilcard Imports are not permitted.');
+                throw new Error('Wildcard Imports are not permitted.');
             case `${MetaModelNamespace}.ImportTypes`: {
                 const aliasedTypes = new Map();
                 if (imp.aliasedTypes) {

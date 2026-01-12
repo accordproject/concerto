@@ -233,7 +233,7 @@ class JSONPopulator {
             parameters.resourceStack.push(subResource);
             return decl.accept(this, parameters);
         }
-        // otherwise its a scalar value, we only need to return the primitve value of the scalar.
+        // otherwise its a scalar value, we only need to return the primitive value of the scalar.
         return value;
     }
 
