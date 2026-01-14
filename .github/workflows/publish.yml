@@ -6,7 +6,10 @@ on:
       - published
 
 permissions:
-  id-token: write  # Required for OIDC / npmjs publish
+  id-token: write
+  contents: write
+  pull-requests: write
+
 
 jobs:
   publish:
