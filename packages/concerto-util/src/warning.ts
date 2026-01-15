@@ -28,7 +28,7 @@ let isWarningEmitted = false;
  * @param detail - detail of the deprecation warning
  */
 export function printDeprecationWarning(message: string, type: string, code: string, detail: string): void {
-    // This will get pollyfilled in the webpack.config.js as process.emitWarning is not available in the browser
+    // This will get polyfilled in the webpack.config.js as process.emitWarning is not available in the browser
     const customEmitWarning = process.emitWarning;
     if (!isWarningEmitted) {
         isWarningEmitted = true;
