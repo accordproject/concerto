@@ -29,7 +29,7 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 // How to create a modelfile from a cto file
-const ctoProcessFile = (options) => (name, data) => {
+const ctoProcessFile = (options: any) => (name: any, data: any) => {
     // Clone individual properties to avoid options injection to Peggy.
     const parserOptions = { skipLocationNodes: options?.skipLocationNodes };
     return {
@@ -59,7 +59,7 @@ class ModelManager extends BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      */
-    constructor(options) {
+    constructor(options: any) {
         super(options, ctoProcessFile(options));
     }
 
@@ -72,7 +72,7 @@ class ModelManager extends BaseModelManager {
      * @throws {IllegalModelException}
      * @return {ModelFile} The newly added model file (internal).
      */
-    addCTOModel(cto, fileName, disableValidation) {
+    addCTOModel(cto: string, fileName?: string, disableValidation?: boolean) {
         const NAME = 'addCTOModel';
         debug(NAME, 'addCTOModel', cto, fileName);
 
@@ -80,6 +80,4 @@ class ModelManager extends BaseModelManager {
     }
 
 }
-
-module.exports = ModelManager;
- 
+export = ModelManager;

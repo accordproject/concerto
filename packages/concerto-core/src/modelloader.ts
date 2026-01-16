@@ -14,12 +14,13 @@
 
 'use strict';
 
-const fs = require('fs');
+import * as fs from 'fs';
+import { Parser } from '@accordproject/concerto-cto';
+import { DefaultFileLoader } from '@accordproject/concerto-util';
 
-const Parser = require('@accordproject/concerto-cto').Parser;
-const DefaultFileLoader = require('@accordproject/concerto-util').DefaultFileLoader;
-const ModelFile = require('./introspect/modelfile');
-const ModelManager = require('./modelmanager');
+// USE require syntax to handle the 'export =' from these files
+import ModelFile = require('./introspect/modelfile');
+import ModelManager = require('./modelmanager');
 
 /**
  * Create a ModelManager from model files, with an optional system model.
@@ -39,7 +40,7 @@ class ModelLoader {
      * @return {Promise<ModelManager>} the model manager
      * @private
      */
-    static async addModel(modelFileLoader, modelManager, ctoFile) {
+    static async addModel(modelFileLoader: any, modelManager: any, ctoFile: string) {
         let modelFile: any = null;
         if (modelFileLoader.accepts(ctoFile)) {
             modelFile = await modelFileLoader.load(ctoFile);
@@ -63,10 +64,14 @@ class ModelLoader {
     * @param {number} [options.utcOffset] - UTC Offset for this execution
      * @return {Promise<ModelManager>} the model manager
      */
-    static async loadModelManager(ctoFiles, options = { offline: false }) {
-        let modelManager = new ModelManager(options);
+    static async loadModelManager(ctoFiles: string[], options: any = { offline: false }) {
+        const opts = options || { offline: false };
+        
+        
+        let modelManager = new (ModelManager as any)(opts);
+        
         // How to create a modelfile from the external content
-        const processFile = (name, data) => {
+        const processFile = (name: any, data: any) => {
             const ast = Parser.parse(data);
             return new ModelFile(modelManager, ast, data, name);
         };
@@ -78,7 +83,7 @@ class ModelLoader {
         }
 
         // Validate the models, either offline or with external model resolution
-        if(options && options.offline) {
+        if(opts && opts.offline) {
             modelManager.validateModelFiles();
             return modelManager;
         } else {
@@ -97,14 +102,17 @@ class ModelLoader {
      * @param {number} [options.utcOffset] - UTC Offset for this execution
      * @return {Promise<ModelManager>} the model manager
      */
-    static async loadModelManagerFromModelFiles(modelFiles, fileNames, options = { offline: false }) {
-        let modelManager = new ModelManager(options);
+    static async loadModelManagerFromModelFiles(modelFiles: any[], fileNames?: string[], options: any = { offline: false }) {
+        const opts = options || { offline: false };
+        
+        // FIX: Cast to 'any' to bypass strict constructor signature check
+        let modelManager = new (ModelManager as any)(opts);
 
         // Load system model
         modelManager.addModelFiles(modelFiles, fileNames, true);
 
         // Validate the models, either offline or with external model resolution
-        if(options && options.offline) {
+        if(opts && opts.offline) {
             modelManager.validateModelFiles();
             return modelManager;
         } else {
@@ -115,4 +123,4 @@ class ModelLoader {
 
 }
 
-module.exports = ModelLoader;
+export = ModelLoader;
