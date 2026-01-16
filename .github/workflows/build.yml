@@ -15,6 +15,7 @@ jobs:
     name: Unit Tests
 
     strategy:
+      fail-fast: false # <--- This stops Windows form cancelling Linux/Mac
       matrix:
         node-version:
           - 24.x
