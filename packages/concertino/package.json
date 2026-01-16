@@ -14,7 +14,7 @@
     "prebuild": "npm-run-all clean generate-types",
     "build": "tsc -p tsconfig.build.json",
     "postbuild": "cp -R src/spec/*.json dist/spec/",
-    "pretest": "#npm-run-all lint",
+    "pretest": "#echo 'skipping lint' ",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

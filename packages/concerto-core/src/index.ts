@@ -12,13 +12,6 @@
  * limitations under the License.
  */
 
-/**
- * Concerto core module. Concerto is a framework for defining domain
- * specific models.
- *
- * @module concerto-core
- */
-
 import SecurityException = require("./securityexception");
 import IllegalModelException = require("./introspect/illegalmodelexception");
 import TypeNotFoundException = require("./typenotfoundexception");
@@ -54,14 +47,61 @@ import Factory = require("./factory");
 import Globalize = require("./globalize");
 import Introspector = require("./introspect/introspector");
 import ModelFile = require("./introspect/modelfile");
+
 import ModelManager = require("./modelmanager");
+
+import ModelLoader = require("./modelloader");
 import Serializer = require("./serializer");
 import ModelUtil = require("./modelutil");
-import ModelLoader = require("./modelloader");
 import DateTimeUtil = require("./datetimeutil");
 import MetaModel = require("./introspect/metamodel");
+
 export type version = {
     name: string;
     version: string;
 };
-export { SecurityException, IllegalModelException, TypeNotFoundException, MetamodelException, Decorator, DecoratorFactory, DecoratorManager, Declaration, ClassDeclaration, IdentifiedDeclaration, AssetDeclaration, ConceptDeclaration, EnumValueDeclaration, EventDeclaration, ParticipantDeclaration, TransactionDeclaration, ScalarDeclaration, MapDeclaration, MapKeyType, MapValueType, Property, Field, EnumDeclaration, RelationshipDeclaration, Validator, NumberValidator, StringValidator, Typed, Identifiable, Relationship, Resource, Factory, Globalize, Introspector, ModelFile, ModelManager, Serializer, ModelUtil, ModelLoader, DateTimeUtil, MetaModel };
+
+// Re-exporting ModelManager here makes it available as 'import { ModelManager }' to the outside world
+export { 
+    SecurityException, 
+    IllegalModelException, 
+    TypeNotFoundException, 
+    MetamodelException, 
+    Decorator, 
+    DecoratorFactory, 
+    DecoratorManager, 
+    Declaration, 
+    ClassDeclaration, 
+    IdentifiedDeclaration, 
+    AssetDeclaration, 
+    ConceptDeclaration, 
+    EnumValueDeclaration, 
+    EventDeclaration, 
+    ParticipantDeclaration, 
+    TransactionDeclaration, 
+    ScalarDeclaration, 
+    MapDeclaration, 
+    MapKeyType, 
+    MapValueType, 
+    Property, 
+    Field, 
+    EnumDeclaration, 
+    RelationshipDeclaration, 
+    Validator, 
+    NumberValidator, 
+    StringValidator, 
+    Typed, 
+    Identifiable, 
+    Relationship, 
+    Resource, 
+    Factory, 
+    Globalize, 
+    Introspector, 
+    ModelFile, 
+    ModelManager, 
+    Serializer, 
+    ModelUtil, 
+    ModelLoader, 
+    DateTimeUtil, 
+    MetaModel 
+};
