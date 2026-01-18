@@ -5,7 +5,7 @@
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=18",
-    "npm": ">=9"
+    "npm": ">=10"
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -17,9 +17,6 @@
     "parser": "peggy -o src/parser.js src/parser.pegjs",
     "pretest": "npm run lint && npm run parser",
     "lint": "eslint .",
-    "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
@@ -51,17 +48,18 @@
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "chai-things": "0.2.0",
-    "debug": "4.3.4",
+    "debug": "4.3.7",
     "eslint": "8.57.1",
     "jsdoc": "^4.0.2",
     "license-check-and-add": "2.3.6",
     "mocha": "^10.8.2",
+    "node-polyfill-webpack-plugin": "4.0.0",
     "npm-run-all": "4.1.5",
     "nyc": "15.1.0",
     "path-browserify": "^1.0.1",
-    "peggy": "2.0.1",
+    "peggy": "4.2.0",
     "rimraf": "3.0.2",
-    "sinon": "12.0.0",
+    "sinon": "19.0.2",
     "sinon-chai": "3.7.0",
     "ts-jest": "28.0.4",
     "ts-node": "10.9.1",
@@ -76,47 +74,6 @@
     "schema-utils": "^4.3.3"
   },
   "browserslist": "> 0.25%, not dead",
-  "license-check-and-add-config": {
-    "folder": "./src",
-    "license": "HEADER",
-    "exact_paths_method": "EXCLUDE",
-    "exact_paths": [
-      "api.txt",
-      "composer-logs",
-      "coverage",
-      "./parser.js",
-      "LICENSE",
-      "node_modules",
-      ".nyc-output",
-      "out",
-      ".tern-project"
-    ],
-    "file_type_method": "EXCLUDE",
-    "file_types": [
-      ".yml",
-      ".yaml",
-      ".zip",
-      ".tgz"
-    ],
-    "insert_license": false,
-    "license_formats": {
-      "js|ts|njk|pegjs|cto|acl|qry": {
-        "prepend": "/*",
-        "append": " */",
-        "eachLine": {
-          "prepend": " * "
-        }
-      },
-      "npmrc|editorconfig|txt": {
-        "eachLine": {
-          "prepend": "# "
-        }
-      },
-      "md": {
-        "file": "HEADER.md"
-      }
-    }
-  },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",

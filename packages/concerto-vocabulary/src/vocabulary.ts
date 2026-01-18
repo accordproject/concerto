@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ModelFile, ClassDeclaration, Property } from '@accordproject/concerto-core';
+import { ModelFile, ClassDeclaration, Property, DecoratorManager } from '@accordproject/concerto-core';
 import VocabularyManager = require('./vocabularymanager');
 
 /**
@@ -107,6 +107,11 @@ class Vocabulary {
      * @private
      */
     getNamespaceTerms(): any {
+        // @ts-ignore
+        if(this.vocabularyManager.enableDcsNamespaceTarget && !DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget)){
+            return null;
+        }
+
         const namespaceTerms = Object.entries(this.content).filter(([key]) => key !== 'namespace' && key !== 'locale' && key !== 'declarations');
         return namespaceTerms.length > 0 ? Object.fromEntries(namespaceTerms) : null;
     }
@@ -209,8 +214,8 @@ class Vocabulary {
                 ? Array.isArray(k.properties) ? k.properties.flatMap( (p: any) => checkPropertyExists(k, p) ? null : `${Object.keys(k)[0]}.${Object.keys(p)[0]}`) : null
                 : k ).filter( (i: any) => i !== null)
         };
-
-        if(!this.content.term){
+// @ts-ignore
+        if((this.vocabularyManager.enableDcsNamespaceTarget && DecoratorManager.isNamespaceTargetEnabled(this.vocabularyManager.enableDcsNamespaceTarget)) && !this.content.term){
             result.missingTerms.push('namespace');
         }
 

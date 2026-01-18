@@ -6,6 +6,12 @@ export = Vocabulary;
 */
 declare class Vocabulary {
     /**
+     * Validates a locale
+     * @param {string} locale the locale to validate
+     * @throws {Error} if the locale is invalid
+     */
+    static validateLocale(locale: string): void;
+    /**
      * Create the Vocabulary
      * @constructor
      * @param {VocabularyManager} vocabularyManager - the manager for this vocabulary
@@ -34,6 +40,12 @@ declare class Vocabulary {
      * @returns {Array} an array of objects
      */
     getTerms(): any[];
+    /**
+     * Gets the terms of Namespace
+     * @returns {string} the term or null if it does not exist
+     * @private
+     */
+    private getNamespaceTerms;
     /**
      * Gets the term for a concept, enum or property
      * @param {string} declarationName the name of a concept or enum

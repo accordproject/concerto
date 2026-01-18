@@ -16,11 +16,12 @@
 
 let path = require('path');
 const webpack = require('webpack');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const packageJson = require('./package.json');
 
 module.exports = {
-    entry: './dist/index.js',
+    entry: './dist/index.js', // CHANGED: Points to the compiled output
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-cto.js',
@@ -45,12 +46,13 @@ module.exports = {
                 'NODE_ENV': JSON.stringify('production')
             }
         }),
+        new NodePolyfillPlugin(),
     ],
     module: {
         rules: [
             {
                 test: /\.js$/,
-                include: [path.join(__dirname, 'lib')],
+                include: [path.join(__dirname, 'dist')], // CHANGED: Points to dist instead of lib
                 use: ['babel-loader']
             },
             {
@@ -64,9 +66,18 @@ module.exports = {
             // Webpack 5 no longer polyfills Node.js core modules automatically.
             // see https://webpack.js.org/configuration/resolve/#resolvefallback
             // for the list of Node.js core module polyfills.
-            os: false,
-            path: require.resolve('path-browserify'),
-            fs: false,
+            'fs': false,
+            'tls': false,
+            'net': false,
+            'child_process': false,
+            'os': false,
+            'path': false,
+            // 'crypto': require.resolve('crypto-browserify'),
+            // 'stream': require.resolve('stream-browserify'),
+            // 'http': require.resolve('stream-http'),
+            // 'https': require.resolve('https-browserify'),
+            // 'zlib': require.resolve('browserify-zlib'),
+            // 'vm2': require.resolve('vm-browserify'),
         }
     }
 };

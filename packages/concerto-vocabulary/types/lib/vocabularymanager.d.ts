@@ -39,7 +39,7 @@ declare class VocabularyManager {
     constructor(options?: any);
     vocabularies: {};
     missingTermGenerator: any;
-    enableDcsNamespaceTarget: boolean;
+    enableDcsNamespaceTarget: any;
     /**
      * Removes all vocabularies
      */

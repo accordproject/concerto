@@ -32,7 +32,7 @@ import {
     MetadataMap,
     IVocabulary,
     IStringDecoratorValue,
-} from './spec/concertino.metamodel@4.0.0-alpha.2';
+} from './spec/concertino.metamodel@1.0.0-alpha.7';
 import {
     IBooleanProperty,
     IBooleanScalar,
@@ -65,7 +65,7 @@ import {
     MapValueTypeUnion,
     PropertyUnion,
     ScalarDeclarationUnion,
-} from '@accordproject/concerto-metamodel';
+} from '@accordproject/concerto-types';
 
 /**
  * Extracts scalar validators (regex, range, length) from a ScalarDeclaration.

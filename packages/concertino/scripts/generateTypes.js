@@ -181,6 +181,7 @@ class ConcertinoTypescriptVisitor extends CodeGen.TypescriptVisitor {
 async function generateTypes() {
     try {
         const modelManager = new ModelManager({
+            strict: true,
             addMetamodel: true,
         });
 

@@ -5,7 +5,7 @@
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=18",
-    "npm": ">=9"
+    "npm": ">=10"
   },
   "main": "dist/index.js",
   "browser": "dist/concerto-util.js",
@@ -16,9 +16,6 @@
     "prepublishOnly": "npm run webpack",
     "pretest": "npm run lint",
     "lint": "eslint .",
-    "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "postlicchk": "npm run doc",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
@@ -50,7 +47,6 @@
     "chai-things": "0.2.0",
     "eslint": "8.57.1",
     "jsdoc": "^4.0.2",
-    "license-check-and-add": "2.3.6",
     "mocha": "^10.8.2",
     "nock": "^13.3.8",
     "node-polyfill-webpack-plugin": "2.0.1",
@@ -60,56 +56,17 @@
     "tmp-promise": "3.0.2",
     "ts-jest": "28.0.4",
     "ts-node": "10.9.1",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "webpack": "5.96.1",
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@accordproject/concerto-codegen": "^3.16.2",
     "@supercharge/promise-pool": "1.7.0",
     "colors": "1.4.0",
     "debug": "4.3.4",
     "slash": "3.0.0"
   },
   "browserslist": "> 0.25%, not dead",
-  "license-check-and-add-config": {
-    "folder": "./src",
-    "license": "HEADER",
-    "exact_paths_method": "EXCLUDE",
-    "exact_paths": [
-      "api.txt",
-      "composer-logs",
-      "coverage",
-      "LICENSE",
-      "node_modules",
-      ".nyc-output",
-      "out",
-      ".tern-project"
-    ],
-    "file_type_method": "EXCLUDE",
-    "file_types": [
-      ".yml",
-      ".yaml",
-      ".zip",
-      ".tgz"
-    ],
-    "insert_license": false,
-    "license_formats": {
-      "js|ts|njk|pegjs|cto|acl|qry": {
-        "prepend": "/*",
-        "append": " */",
-        "eachLine": {
-          "prepend": " * "
-        }
-      },
-      "npmrc|editorconfig|txt": {
-        "eachLine": {
-          "prepend": "# "
-        }
-      },
-      "md": {
-        "file": "HEADER.md"
-      }
-    }
-  },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",

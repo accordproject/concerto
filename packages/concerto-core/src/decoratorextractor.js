@@ -43,11 +43,13 @@ class DecoratorExtractor {
      * @param {Object} sourceModelAst - the ast of source models
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      * @param {object} [options] - decorator extractor options
+     * @param {boolean} [options.enableDcsNamespaceTarget] - flag to control applying namespace targeted decorators on top of the namespace instead of all declarations in that namespace
      */
     constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, options) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
+        this.enableDcsNamespaceTarget = options?.enableDcsNamespaceTarget? true : false;
         this.dcs_version = dcs_version;
         this.sourceModelAst = sourceModelAst;
         this.updatedModelAst = sourceModelAst;
@@ -120,6 +122,73 @@ class DecoratorExtractor {
      * @private
      */
     transformVocabularyDecorators(vocabObject, namespace, vocabData){
+        if (Object.keys(vocabObject).length > 0 ){
+            let strVoc = '';
+            strVoc = strVoc + `locale: ${this.locale}\n`;
+            strVoc = strVoc + `namespace: ${namespace}\n`;
+// 1. Namespace Logic (Preserving v4 structure)
+            if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
+                if (vocabObject.namespace.term){
+                    strVoc += `term: ${vocabObject.namespace.term}\n`;
+                }
+                let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term');
+                otherProps.forEach(key =>{
+                    strVoc += `${key}: ${vocabObject.namespace[key]}\n`;
+                });
+            }
+
+            // 2. Declaration Logic (Preserving v4 structure)
+            if (vocabObject.declarations && Object.keys(vocabObject.declarations).length > 0 ){
+                strVoc = strVoc + 'declarations:\n';
+                Object.keys(vocabObject.declarations).forEach(decl =>{
+                    if (vocabObject.declarations[decl].term){
+                        strVoc += `  - ${decl}: ${vocabObject.declarations[decl].term}\n`;
+                    }
+                    const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                    
+                    // 3. Other Properties Logic (Reconstructed)
+                    if(otherProps.length > 0){
+                        if (!vocabObject.declarations[decl].term){
+                            strVoc += `  - ${decl}: ${decl}\n`;
+                        }
+                        otherProps.forEach(key =>{
+                            strVoc += `    ${key}: ${vocabObject.declarations[decl][key]}\n`;
+                        });
+                    }
+
+                    // 4. New Property Vocabs Logic (From Main, adapted to v4 structure)
+                    if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
+                        if (!vocabObject.declarations[decl].term && otherProps.length === 0){
+                            strVoc += `  - ${decl}: ${decl}\n`;
+                        }
+                        strVoc += '    properties:\n';
+                        Object.keys(vocabObject.declarations[decl].propertyVocabs).forEach(prop =>{
+                            strVoc += `      - ${prop}: ${vocabObject.declarations[decl].propertyVocabs[prop].term || ''}\n`;
+                            const propOtherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
+                            propOtherProps.forEach(key =>{
+                                strVoc += `        ${key}: ${vocabObject.declarations[decl].propertyVocabs[prop][key]}\n`;
+                            });
+                        });
+                    }
+
+                });
+            }
+            else{
+                strVoc = strVoc + 'declarations: []\n';
+            }
+            vocabData.push(strVoc);
+        }
+        return vocabData;
+    }
+    /**
+     * Transforms the collected vocabularies into proper vocabulary command sets
+     * @param {Array<Object>} vocabObject - the collection of collected vocabularies
+     * @param {string} namespace - the current namespace
+     * @param {Array<Object>} vocabData - the collection of existing vocabularies command sets
+     * @returns {Array<Object>} - the collection of vocabularies command sets
+     * @private
+     */
+    transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData){
         if (Object.keys(vocabObject).length > 0 ){
             let strVoc = '';
             strVoc = strVoc + `locale: ${this.locale}\n`;
@@ -282,6 +351,87 @@ class DecoratorExtractor {
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
             }
         }
+        else if (decl.mapElement !== ''){
+            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
+            }
+            if (dcs.name === 'Term'){
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        else {
+            if (dcs.name === 'Term'){
+                vocabObject.declarations[vocabTarget.declaration].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === 'properties' || extensionKey === vocabTarget.declaration){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key cannot be a reserved word such as "properties" or the name of the current declaration.`);
+                }
+                vocabObject.declarations[vocabTarget.declaration][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        return vocabObject;
+    }
+    /**
+     * @param {Object} vocabObject - the collection of collected vocabularies
+     * @param {Object} vocabTarget - the declaration object
+     * @param {Object} dcs - the current dcs json to be parsed
+     * @returns {Object} - the collection of collected vocabularies with current dcs
+     * @private
+     */
+    parseVocabulariesV2(vocabObject, vocabTarget, dcs){
+        //If the vocabTarget declaration is empty, then it is a namespace level vocabulary
+        if(vocabTarget.declaration === ''){
+            vocabObject.namespace = vocabObject.namespace || {};
+            if (dcs.name === 'Term'){
+                vocabObject.namespace.term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === 'namespace' || extensionKey === 'locale' || extensionKey === 'declarations'){
+                    throw new Error(`Invalid vocabulary key: ${extensionKey}. The key should not be one of the reserved keys: namespace, locale, declarations`);
+                }
+                vocabObject.namespace[extensionKey] = dcs.arguments[0].value;
+            }
+            return vocabObject;
+        }
+        vocabObject.declarations = vocabObject.declarations || {};
+        vocabObject.declarations[vocabTarget.declaration] = vocabObject.declarations[vocabTarget.declaration] || { propertyVocabs: {} };
+        if (vocabTarget.property !== ''){
+            if (!vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property]){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property] = {};
+            }
+            if (dcs.name === 'Term'){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === vocabTarget.property){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
+                }
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][extensionKey] = dcs.arguments[0].value;
+            }
+        }
+        else if (vocabTarget.mapElement !== ''){
+            if (!vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement]){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement] = {};
+            }
+            if (dcs.name === 'Term'){
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement].term = dcs.arguments[0].value;
+            }
+            else {
+                const extensionKey = dcs.name.split('Term_')[1];
+                if(extensionKey === vocabTarget.mapElement){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
+                }
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
+            }
+        }
         else {
             if (dcs.name === 'Term'){
                 vocabObject.declarations[vocabTarget.declaration].term = dcs.arguments[0].value;
@@ -318,7 +468,7 @@ class DecoratorExtractor {
                         dcsObjects = this.parseNonVocabularyDecorators(dcsObjects, dcs, this.dcs_version, target);
                     }
                     if (isVocab && this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                        vocabObject = this.parseVocabularies(vocabObject, obj, dcs);
+                        vocabObject = this.enableDcsNamespaceTarget ? this.parseVocabulariesV2(vocabObject, obj, dcs) : this.parseVocabularies(vocabObject, obj, dcs);
                     }
                 });
             });
@@ -326,7 +476,7 @@ class DecoratorExtractor {
                 decoratorData = this.transformNonVocabularyDecorators(dcsObjects, namespace, decoratorData);
             }
             if(this.action !== DecoratorExtractor.Action.EXTRACT_NON_VOCAB){
-                vocabData = this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
+                vocabData = this.enableDcsNamespaceTarget ? this.transformVocabularyDecoratorsV2(vocabObject, namespace, vocabData) : this.transformVocabularyDecorators(vocabObject, namespace, vocabData);
             }
         });
         return {

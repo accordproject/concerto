@@ -1,0 +1,9 @@
+namespace ns.parent@1.2.3
+
+import dep@1.x.{Foo}
+import dep@1.1.x.*
+import dep@1.x.Foo
+
+concept Dummy {}
+
+

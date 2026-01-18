@@ -310,6 +310,7 @@ export interface IModels extends IConcept {
 }
 
 export interface IScalarDeclaration extends IDeclaration {
+   namespace?: string;
 }
 
 export type ScalarDeclarationUnion = IBooleanScalar | 

@@ -8,18 +8,23 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   conformance:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Target Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install and Build Target Project
         run: |
@@ -27,7 +32,7 @@ jobs:
           npm run build
 
       - name: Checkout Conformance Suite
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: accordproject/concerto-conformance
           path: concerto-conformance

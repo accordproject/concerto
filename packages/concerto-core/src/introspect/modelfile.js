@@ -30,6 +30,7 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
+const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -218,7 +219,6 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
-
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 
@@ -242,6 +242,8 @@ class ModelFile extends Decorated {
             // null means we have seen it before but it didn't have a version
             const unseenNamespace = existingNamespaceVersion === undefined;
 
+            // This check is needed because we automatically add both versioned and unversioned versions of
+            // the root namespace for backwards compatibility unless we're running in strict mode
             const isGlobalModel = name === 'concerto';
 
             const differentVersionsOfSameNamespace = !unseenNamespace && existingNamespaceVersion !== importVersion;

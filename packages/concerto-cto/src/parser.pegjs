@@ -746,6 +746,17 @@ semver
     return { versionCore, pre, build };
   }
 
+// Support limited semver range selectors for imports: 1.x or 1.1.x
+semverMinorWildcard
+  = numericIdentifier '.' 'x'
+
+semverPatchWildcard
+  = numericIdentifier '.' numericIdentifier '.' 'x'
+
+// Capture either a full semver or the limited wildcard forms as a raw string
+versionSelector
+  = $(semver / semverPatchWildcard / semverMinorWildcard)
+
 versionCore
   = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier
   {
@@ -764,35 +775,6 @@ preRelease
 
 build
   = head:$buildIdentifier tail:('.' @$buildIdentifier)*
-  {
-    return [head, ...tail];
-  }
-
-semverWithTrailingPeriod
-  = versionCore:versionCore
-    pre:('-' @preRelease)?
-    build:('+' @buildWithTrailingPeriod)
-  {
-    return { versionCore, pre, build };
-  }
-  / versionCore:versionCore
-    pre:('-' @preReleaseWithTrailingPeriod)
-  {
-    return { versionCore, pre };
-  }
-  / versionCore:versionCore '.'
-  {
-    return { versionCore };
-  }
-
-preReleaseWithTrailingPeriod
-  = head:$preReleaseIdentifier '.' tail:( @$preReleaseIdentifier '.')*
-  {
-    return [head, ...tail];
-  }
-
-buildWithTrailingPeriod
-  = head:$buildIdentifier '.' tail:( @$buildIdentifier '.')*
   {
     return [head, ...tail];
   }
@@ -1698,13 +1680,12 @@ QualifiedName
   }
 
 VersionedQualifiedName
-  = ns:QualifiedName '@' version:$semverWithTrailingPeriod name:$Identifier
-   {
-  	return `${ns}@${version}${name}`;
+  = ns:QualifiedName '@' version:versionSelector '.' name:$Identifier {
+  	return `${ns}@${version}.${name}`;
   }
 
 VersionedQualifiedNamespace
-  = ns:QualifiedName '@' version:$semver {
+  = ns:QualifiedName '@' version:versionSelector {
   	return `${ns}@${version}`;
   }
 
@@ -1725,6 +1706,16 @@ FromUri
   = FromToken __ u:$URI __ {
     return u;
   }
+
+ImportAll
+    = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
+    	const result = {
+            $class: "concerto.metamodel@1.0.0.ImportAll",
+            namespace: ns,
+        };
+        u && (result.uri = u);
+        return result;
+    }
 
 ImportType
     = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
@@ -1781,6 +1772,7 @@ commaSeparatedTypes
     }
 Import
     =  ImportTypes /
+       ImportAll /
        ImportType
 
 Version

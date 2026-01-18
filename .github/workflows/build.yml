@@ -4,11 +4,14 @@ on:
   push:
     branches:
       - main
-      - v4.0.0 # Temporary, while we prepare for merge to main
   pull_request:
     branches:
       - main
       - v4.0.0 # Temporary, while we prepare for merge to main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -17,8 +20,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 24.x
-          - 22.x
+          - 18.x
+          - 20.x
         os:
           - windows-latest
           - macos-latest
@@ -34,6 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - run: npm ci
       - run: npm run build --if-present
@@ -52,7 +56,7 @@ jobs:
         run: npm run coverage
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{ matrix.os }}
@@ -68,7 +72,7 @@ jobs:
 
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
@@ -89,10 +93,11 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 24.x
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
-          node-version: 24.x
+          node-version: 18.x
+          cache: 'npm'
 
       - run: npm ci
       - run: npm run build --if-present
@@ -105,5 +110,6 @@ jobs:
       - name: build and publish
         run: |
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          node ./scripts/bump_version.js ${{ steps.timestamp.outputs.stamp }}
           npm version --workspaces --include-workspace-root --no-git-tag-version --yes --exact ${{ steps.timestamp.outputs.stamp }}
           npm publish --workspaces --access public --tag=unstable 2>&1
