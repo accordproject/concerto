@@ -1,42 +1,24 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "3.25.0",
   "description": "Core Implementation for the Concerto Modeling Language",
-  "homepage": "https://github.com/accordproject/concerto",
-  "engines": {
-    "node": ">=18",
-    "npm": ">=10"
-  },
-  "main": "index.js",
-  "browser": "dist/concerto-core.js",
-  "typings": "types/index.d.ts",
-  "scripts": {
-    "prepublishOnly": "npm run webpack",
-    "pretest": "npm run lint",
-    "lint": "eslint .",
-    "postlicchk": "npm run doc",
-    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "node ./scripts/api-changelog.js && cross-env TZ=UTC nyc mocha --recursive -t 10000",
-    "test:watch": "cross-env TZ=UTC nyc mocha --watch --recursive -t 10000",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "build": "npm run build:types",
-    "postbuild": "npm run webpack",
-    "webpack": "webpack --config webpack.config.js --mode production",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-cto"
-  },
-  "keywords": [
-    "schema",
-    "data model",
-    "verification"
-  ],
+  "version": "3.25.0",
   "author": "accordproject.org",
-  "license": "Apache-2.0",
+  "browser": "dist/concerto-core.js",
+  "browserslist": "> 0.25%, not dead",
+  "dependencies": {
+    "@accordproject/concerto-cto": "3.25.0",
+    "@accordproject/concerto-metamodel": "3.12.6",
+    "@accordproject/concerto-util": "3.25.0",
+    "dayjs": "1.11.13",
+    "debug": "4.3.7",
+    "lorem-ipsum": "2.0.8",
+    "randexp": "0.5.3",
+    "rfdc": "1.4.1",
+    "semver": "7.6.3",
+    "urijs": "1.19.11",
+    "uuid": "11.0.3",
+    "yaml": "2.8.0"
+  },
   "devDependencies": {
     "@babel/preset-env": "7.26.0",
     "acorn": "8.14.0",
@@ -63,21 +45,18 @@
     "xregexp": "5.1.1",
     "yargs": "17.7.2"
   },
-  "dependencies": {
-    "@accordproject/concerto-cto": "3.25.0",
-    "@accordproject/concerto-metamodel": "3.12.6",
-    "@accordproject/concerto-util": "3.25.0",
-    "dayjs": "1.11.13",
-    "debug": "4.3.7",
-    "lorem-ipsum": "2.0.8",
-    "randexp": "0.5.3",
-    "rfdc": "1.4.1",
-    "semver": "7.6.3",
-    "urijs": "1.19.11",
-    "uuid": "11.0.3",
-    "yaml": "2.8.0"
+  "engines": {
+    "node": ">=18",
+    "npm": ">=10"
   },
-  "browserslist": "> 0.25%, not dead",
+  "homepage": "https://github.com/accordproject/concerto",
+  "keywords": [
+    "data model",
+    "schema",
+    "verification"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
   "nyc": {
     "produce-source-map": "true",
     "sourceMap": "inline",
@@ -97,5 +76,26 @@
     "branches": 97,
     "functions": 98,
     "lines": 99
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-cto"
+  },
+  "scripts": {
+    "build": "npm run build:types",
+    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types",
+    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
+    "lint": "eslint .",
+    "mocha": "mocha --recursive -t 10000",
+    "nyc": "nyc mocha --recursive -t 10000",
+    "postbuild": "npm run webpack",
+    "postlicchk": "npm run doc",
+    "prepublishOnly": "npm run webpack",
+    "pretest": "npm run lint",
+    "test": "node ./scripts/api-changelog.js && cross-env TZ=UTC nyc mocha --recursive -t 10000",
+    "test:watch": "cross-env TZ=UTC nyc mocha --watch --recursive -t 10000",
+    "webpack": "webpack --config webpack.config.js --mode production"
+  },
+  "typings": "types/index.d.ts"
 }

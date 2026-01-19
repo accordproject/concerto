@@ -1,36 +1,8 @@
 {
   "name": "@accordproject/concerto-types",
-  "version": "3.25.0",
   "description": "Types for the Concerto Modeling Language",
-  "homepage": "https://github.com/accordproject/concerto",
-  "engines": {
-    "node": ">=18",
-    "npm": ">=10"
-  },
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "scripts": {
-    "clean": "rimraf src/generated dist",
-    "codegen": "node scripts/codegen.js",
-    "prebuild": "npm-run-all clean codegen",
-    "build": "tsc",
-    "pretest": "npm-run-all prebuild lint",
-    "lint": "eslint .",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watchAll"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-types"
-  },
-  "keywords": [
-    "concerto",
-    "tools",
-    "modeling"
-  ],
+  "version": "3.25.0",
   "author": "accordproject.org",
-  "license": "Apache-2.0",
   "devDependencies": {
     "@accordproject/concerto-codegen": "3.30.1",
     "@accordproject/concerto-core": "3.25.0",
@@ -41,6 +13,11 @@
     "rimraf": "6.0.1",
     "ts-jest": "29.2.5"
   },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=10"
+  },
+  "homepage": "https://github.com/accordproject/concerto",
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
@@ -52,5 +29,28 @@
     "collectCoverageFrom": [
       "src/**/*.ts"
     ]
-  }
+  },
+  "keywords": [
+    "concerto",
+    "modeling",
+    "tools"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-types"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf src/generated dist",
+    "codegen": "node scripts/codegen.js",
+    "lint": "eslint .",
+    "prebuild": "npm-run-all clean codegen",
+    "pretest": "npm-run-all prebuild lint",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watchAll"
+  },
+  "typings": "dist/index.d.ts"
 }

@@ -1,35 +1,8 @@
 {
   "name": "@accordproject/concerto-analysis",
-  "version": "3.25.0",
   "description": "Analysis of Concerto model files",
-  "homepage": "https://github.com/accordproject/concerto",
-  "engines": {
-    "node": ">=18",
-    "npm": ">=10"
-  },
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "scripts": {
-    "clean": "rimraf dist",
-    "prebuild": "npm-run-all clean",
-    "build": "tsc -p tsconfig.build.json",
-    "pretest": "npm-run-all lint",
-    "lint": "eslint .",
-    "test": "jest",
-    "test:watch": "jest --watchAll"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-analysis"
-  },
-  "keywords": [
-    "concerto",
-    "tools",
-    "modeling"
-  ],
+  "version": "3.25.0",
   "author": "accordproject.org",
-  "license": "Apache-2.0",
   "dependencies": {
     "@accordproject/concerto-core": "3.25.0",
     "semver": "7.6.3"
@@ -44,5 +17,32 @@
     "npm-run-all": "4.1.5",
     "ts-jest": "29.2.5",
     "typescript": "5.7.2"
-  }
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=10"
+  },
+  "homepage": "https://github.com/accordproject/concerto",
+  "keywords": [
+    "concerto",
+    "modeling",
+    "tools"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-analysis"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "lint": "eslint .",
+    "prebuild": "npm-run-all clean",
+    "pretest": "npm-run-all lint",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
+  "typings": "dist/index.d.ts"
 }
