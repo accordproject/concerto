@@ -1,4 +1,7 @@
 {
+  "name": "concerto",
+  "description": "Define and introspect data models",
+  "version": "3.25.0",
   "devDependencies": {
     "@types/jest": "29.5.14",
     "dayjs": "1.11.13",
@@ -13,6 +16,19 @@
     "node": ">=18",
     "npm": ">=10"
   },
+  "private": true,
+  "repository": "accordproject/concerto",
+  "scripts": {
+    "build": "npm run build -ws",
+    "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
+    "licchk": "license-check-and-add check -f license-config.json",
+    "lint:deps": "syncpack lint",
+    "lint:deps:fix": "syncpack fix",
+    "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https",
+    "preinstall": "npm run lint:lockfile && npm run lint:deps",
+    "pretest": "npm run licchk",
+    "test": "npm test -ws"
+  },
   "workspaces": [
     "packages/concerto-analysis",
     "packages/concerto-core",
@@ -22,24 +38,5 @@
     "packages/concerto-vocabulary",
     "packages/concerto-linter",
     "packages/concerto-linter/default-ruleset"
-  ],
-  "name": "concerto",
-  "description": "Define and introspect data models",
-  "version": "3.25.0",
-  "private": true,
-  "scripts": {
-    "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
-    "pretest": "npm run licchk",
-    "licchk": "license-check-and-add check -f license-config.json",
-    "test": "npm test -ws",
-    "build": "npm run build -ws",
-    "lint:deps": "syncpack lint",
-    "lint:deps:fix": "syncpack fix",
-    "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https",
-    "preinstall": "npm run lint:lockfile && npm run lint:deps"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/accordproject/concerto"
-  }
+  ]
 }
