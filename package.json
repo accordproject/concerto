@@ -15,7 +15,7 @@
     "semver": "7.6.3",
     "syncpack": "14.0.0-alpha.32"
   },
-"overrides": {
+  "overrides": {
     "concerto-metamodel": "$@accordproject/concerto-metamodel",
     "@accordproject/concerto-metamodel": "$@accordproject/concerto-metamodel"
   },
@@ -44,9 +44,9 @@
     "licchk": "license-check-and-add check -f license-config.json",
     "build": "npm run build:ordered",
     "build:ordered": "npm run build:level0 && npm run build:level1 && npm run build:level2",
-    "build:level0": "npm run build -w packages/concerto-util && npm run build -w packages/concerto-linter",
+    "build:level0": "npm run build -w packages/concerto-util",
     "build:level1": "npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core",
-    "build:level2": "npm run build -w packages/concerto-analysis -w packages/concerto-vocabulary -w packages/concertino",
+    "build:level2": "npm run build -w packages/concerto-analysis -w packages/concerto-vocabulary -w packages/concertino -w packages/concerto-linter",
     "build:parallel": "npm run build --workspaces --if-present",
     "lint:deps": "syncpack lint",
     "lint:deps:fix": "syncpack fix",
