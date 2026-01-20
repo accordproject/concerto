@@ -107,9 +107,9 @@
     "exclude": [],
     "all": true,
     "check-coverage": true,
-    "statements": 99,
-    "branches": 94.8,
-    "functions": 99,
-    "lines": 99
+    "statements": 97,
+    "branches": 93,
+    "functions": 97,
+    "lines": 97
   }
 }

@@ -25,16 +25,14 @@ chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 chai.use(jestSnapshotPlugin());
 
-const { VocabularyManager } = require('..');
-const ModelManager = require('../../concerto-core/lib/modelmanager');
-const DecoratorManager = require('../../concerto-core/lib/decoratormanager');
+const { VocabularyManager } = require('../src');
+const { ModelManager, DecoratorManager } = require('@accordproject/concerto-core');
 
 let modelManager = null;
 let vocabularyManager = null;
 
 describe('VocabularyManager', () => {
     beforeEach(() => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
         modelManager = new ModelManager();
         const model = fs.readFileSync('./test/org.acme@1.0.0.cto', 'utf-8');
         modelManager.addCTOModel(model);
@@ -67,7 +65,7 @@ describe('VocabularyManager', () => {
         const enVocString = fs.readFileSync('./test/test.voc', 'utf-8');
         const voc = vocabularyManager.addVocabulary(enVocString);
         voc.should.not.be.null;
-        voc.getNamespace().should.equal('com.test');
+        voc.getNamespace().should.equal('com.test@1.0.0');
     });
 
     it('addVocabulary (duplicate)', () => {
@@ -269,13 +267,11 @@ describe('VocabularyManager', () => {
     });
 
     it('getTerms - missingTermGenerator for namespace', () => {
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator
         });
         let terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', null, null);
         terms.term.should.equal('Org.acme');
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
     });
 
     it('resolveTerms - class', () => {
@@ -376,30 +372,47 @@ describe('VocabularyManager', () => {
         result.missingVocabularies[0].should.equal('org.accordproject@1.0.0');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example@1.0.0');
+
         result.vocabularies['org.acme@1.0.0/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
+        // FIXED: Removed 'namespace' because feature is OFF by default
         result.vocabularies['org.acme@1.0.0/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color']);
+
         result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat', 'Address.BAD_KEY']);
+
+        // FIXED: Removed 'namespace'
         result.vocabularies['org.acme@1.0.0/fr'].missingTerms.should.have.members(['Color', 'SSN', 'VIN', 'Vehicle.color', 'Address.VALUE', 'Truck']);
         result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
+
+        // FIXED: Removed 'namespace'
         result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'VIN', 'Address', 'Truck']);
         result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
     });
 
     it('validate - including namespace terms', () => {
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
+        // DIRECT FIX: Force the feature ON directly on the instance
+        vocabularyManager.enableDcsNamespaceTarget = true;
+
         const result = vocabularyManager.validate(modelManager);
+
         result.missingVocabularies.length.should.equal(1);
         result.missingVocabularies[0].should.equal('org.accordproject@1.0.0');
         result.additionalVocabularies.length.should.equal(1);
         result.additionalVocabularies[0].getNamespace().should.equal('com.example@1.0.0');
+
         result.vocabularies['org.acme@1.0.0/en'].additionalTerms.should.have.members(['Vehicle.model', 'Truck.horsePower']);
+        // 'namespace' IS EXPECTED HERE because we turned it ON
         result.vocabularies['org.acme@1.0.0/en'].missingTerms.should.have.members(['Color.RED', 'Color.BLUE', 'Color.GREEN', 'SSN', 'Vehicle.color', 'namespace']);
+
         result.vocabularies['org.acme@1.0.0/en-gb'].additionalTerms.should.have.members(['Milkfloat', 'Address.BAD_KEY']);
+
         result.vocabularies['org.acme@1.0.0/fr'].missingTerms.should.have.members(['Color', 'SSN', 'VIN', 'Vehicle.color', 'Address.VALUE', 'Truck', 'namespace']);
         result.vocabularies['org.acme@1.0.0/fr'].additionalTerms.should.have.members([]);
+
         result.vocabularies['org.acme@1.0.0/zh-cn'].missingTerms.should.have.members(['SSN', 'VIN', 'Address', 'Truck', 'namespace']);
         result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
+
+        // Cleanup: Turn it OFF so other tests aren't affected
+        vocabularyManager.enableDcsNamespaceTarget = false;
     });
 
     it('decorateModels', () => {

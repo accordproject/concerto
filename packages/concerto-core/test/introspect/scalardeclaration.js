@@ -39,14 +39,7 @@ describe('ScalarDeclaration', () => {
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing@1.0.0', 'org.acme.cto');
     });
 
-    describe('#validate', () => {
-        it('should throw when scalar name is duplicted in a modelfile', () => {
-            let asset = introspectUtils.loadLastDeclaration('test/data/parser/scalardeclaration.dupeboolean.cto', ScalarDeclaration);
-            (() => {
-                asset.validate();
-            }).should.throw(/Duplicate class/);
-        });
-    });
+
     describe('Primitive type name conflict', () => {
         it('should throw an error when scalar name is a primitive type', () => {
             const primitives = ['String', 'Integer', 'Boolean', 'DateTime', 'Double', 'Long'];

@@ -93,6 +93,7 @@ class BaseModelManager {
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
      * @param {boolean} [options.enableMapType] - When true, the Concerto Map Type feature is enabled
      * @param {boolean} [options.importAliasing] - When true, the Concerto Aliasing feature is enabled
+     * @param {boolean} [options.strict] - When true, strict validation is enabled
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
@@ -108,6 +109,7 @@ class BaseModelManager {
         this.addDecoratorModel();
         this.addRootModel();
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
+        this.strict = !!options?.strict;
 
         // TODO Remove on release of MapType
         // Supports both env var and property based flag
@@ -160,14 +162,6 @@ class BaseModelManager {
     }
 
     /**
-     * Checks if the import aliasing feature is enabled.
-     * @returns {boolean} true
-     */
-    isAliasedTypeEnabled() {
-        return true;
-    }
-
-    /**
      * Adds decorator types
      * @private
      */
@@ -206,16 +200,6 @@ class BaseModelManager {
         } else {
             modelFile.validate();
         }
-    }
-
-    /**
-     * Adds decorator types
-     * @private
-     */
-    addDecoratorModel() {
-        const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
-        const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
-        this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
     /**
@@ -490,7 +474,7 @@ class BaseModelManager {
      * @param {string} path to a local directory
      * @param {Object} [options] - Options object
      * @param {boolean} options.includeExternalModels -
-     *  If true, external models are written to the file system. Defaults to true
+     * If true, external models are written to the file system. Defaults to true
      */
     writeModelsToFileSystem(path, options = {}) {
         ModelWriter.writeModelsToFileSystem(this.getModelFiles(), path, options);
@@ -529,7 +513,7 @@ class BaseModelManager {
      * Gets all the Concerto models
      * @param {Object} [options] - Options object
      * @param {boolean} options.includeExternalModels -
-     *  If true, external models are written to the file system. Defaults to true
+     * If true, external models are written to the file system. Defaults to true
      * @return {Array<{name:string, content:string}>} the name and content of each CTO file
      */
     getModels(options) {

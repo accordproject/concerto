@@ -126,7 +126,7 @@ class DecoratorExtractor {
             let strVoc = '';
             strVoc = strVoc + `locale: ${this.locale}\n`;
             strVoc = strVoc + `namespace: ${namespace}\n`;
-// 1. Namespace Logic (Preserving v4 structure)
+            // 1. Namespace Logic (Preserving v4 structure)
             if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
                 if (vocabObject.namespace.term){
                     strVoc += `term: ${vocabObject.namespace.term}\n`;
@@ -145,7 +145,7 @@ class DecoratorExtractor {
                         strVoc += `  - ${decl}: ${vocabObject.declarations[decl].term}\n`;
                     }
                     const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
-                    
+
                     // 3. Other Properties Logic (Reconstructed)
                     if(otherProps.length > 0){
                         if (!vocabObject.declarations[decl].term){
@@ -349,18 +349,6 @@ class DecoratorExtractor {
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
-            }
-        }
-        else if (decl.mapElement !== ''){
-            if (!dictVoc[decl.declaration].propertyVocabs[decl.mapElement]){
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement] = {};
-            }
-            if (dcs.name === 'Term'){
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement].term = dcs.arguments[0].value;
-            }
-            else {
-                const extensionKey = dcs.name.split('Term_')[1];
-                dictVoc[decl.declaration].propertyVocabs[decl.mapElement][extensionKey] = dcs.arguments[0].value;
             }
         }
         else {

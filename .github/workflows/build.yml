@@ -18,6 +18,7 @@ jobs:
     name: Unit Tests
 
     strategy:
+      fail-fast: false
       matrix:
         node-version:
           - 18.x

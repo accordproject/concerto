@@ -362,16 +362,16 @@ RegularExpressionFlags
  *
  * Extracted from the following Unicode Character Database file:
  *
- *   https://unicode.org/Public/15.0.0/ucd/extracted/DerivedGeneralCategory.txt
+ * https://unicode.org/Public/15.0.0/ucd/extracted/DerivedGeneralCategory.txt
  *
  * Unix magic used:
  *
- *   grep "; $CATEGORY" DerivedGeneralCategory.txt |   # Filter characters
- *     cut -f1 -d " " |                                # Extract code points
- *     grep -v '[0-9a-fA-F]\{5\}' |                    # Exclude non-BMP characters
- *     sed -e 's/\.\./-/' |                            # Adjust formatting
- *     sed -e 's/\([0-9a-fA-F]\{4\}\)/\\u\1/g' |       # Adjust formatting
- *     tr -d '\n'                                      # Join lines
+ * grep "; $CATEGORY" DerivedGeneralCategory.txt |   # Filter characters
+ * cut -f1 -d " " |                               # Extract code points
+ * grep -v '[0-9a-fA-F]\{5\}' |                   # Exclude non-BMP characters
+ * sed -e 's/\.\./-/' |                           # Adjust formatting
+ * sed -e 's/\([0-9a-fA-F]\{4\}\)/\\u\1/g' |      # Adjust formatting
+ * tr -d '\n'                                     # Join lines
  *
  * ECMA-262 allows using Unicode 3.0 or later, version 15.0.0 was the latest one
  * at the time of writing.
@@ -398,7 +398,7 @@ Lt = [\u01C5\u01C8\u01CB\u01F2\u1F88-\u1F8F\u1F98-\u1F9F\u1FA8-\u1FAF\u1FBC\u1FC
 Lu = [\u0041-\u005A\u00C0-\u00D6\u00D8-\u00DE\u0100\u0102\u0104\u0106\u0108\u010A\u010C\u010E\u0110\u0112\u0114\u0116\u0118\u011A\u011C\u011E\u0120\u0122\u0124\u0126\u0128\u012A\u012C\u012E\u0130\u0132\u0134\u0136\u0139\u013B\u013D\u013F\u0141\u0143\u0145\u0147\u014A\u014C\u014E\u0150\u0152\u0154\u0156\u0158\u015A\u015C\u015E\u0160\u0162\u0164\u0166\u0168\u016A\u016C\u016E\u0170\u0172\u0174\u0176\u0178-\u0179\u017B\u017D\u0181-\u0182\u0184\u0186-\u0187\u0189-\u018B\u018E-\u0191\u0193-\u0194\u0196-\u0198\u019C-\u019D\u019F-\u01A0\u01A2\u01A4\u01A6-\u01A7\u01A9\u01AC\u01AE-\u01AF\u01B1-\u01B3\u01B5\u01B7-\u01B8\u01BC\u01C4\u01C7\u01CA\u01CD\u01CF\u01D1\u01D3\u01D5\u01D7\u01D9\u01DB\u01DE\u01E0\u01E2\u01E4\u01E6\u01E8\u01EA\u01EC\u01EE\u01F1\u01F4\u01F6-\u01F8\u01FA\u01FC\u01FE\u0200\u0202\u0204\u0206\u0208\u020A\u020C\u020E\u0210\u0212\u0214\u0216\u0218\u021A\u021C\u021E\u0220\u0222\u0224\u0226\u0228\u022A\u022C\u022E\u0230\u0232\u023A-\u023B\u023D-\u023E\u0241\u0243-\u0246\u0248\u024A\u024C\u024E\u0370\u0372\u0376\u037F\u0386\u0388-\u038A\u038C\u038E-\u038F\u0391-\u03A1\u03A3-\u03AB\u03CF\u03D2-\u03D4\u03D8\u03DA\u03DC\u03DE\u03E0\u03E2\u03E4\u03E6\u03E8\u03EA\u03EC\u03EE\u03F4\u03F7\u03F9-\u03FA\u03FD-\u042F\u0460\u0462\u0464\u0466\u0468\u046A\u046C\u046E\u0470\u0472\u0474\u0476\u0478\u047A\u047C\u047E\u0480\u048A\u048C\u048E\u0490\u0492\u0494\u0496\u0498\u049A\u049C\u049E\u04A0\u04A2\u04A4\u04A6\u04A8\u04AA\u04AC\u04AE\u04B0\u04B2\u04B4\u04B6\u04B8\u04BA\u04BC\u04BE\u04C0-\u04C1\u04C3\u04C5\u04C7\u04C9\u04CB\u04CD\u04D0\u04D2\u04D4\u04D6\u04D8\u04DA\u04DC\u04DE\u04E0\u04E2\u04E4\u04E6\u04E8\u04EA\u04EC\u04EE\u04F0\u04F2\u04F4\u04F6\u04F8\u04FA\u04FC\u04FE\u0500\u0502\u0504\u0506\u0508\u050A\u050C\u050E\u0510\u0512\u0514\u0516\u0518\u051A\u051C\u051E\u0520\u0522\u0524\u0526\u0528\u052A\u052C\u052E\u0531-\u0556\u10A0-\u10C5\u10C7\u10CD\u13A0-\u13F5\u1C90-\u1CBA\u1CBD-\u1CBF\u1E00\u1E02\u1E04\u1E06\u1E08\u1E0A\u1E0C\u1E0E\u1E10\u1E12\u1E14\u1E16\u1E18\u1E1A\u1E1C\u1E1E\u1E20\u1E22\u1E24\u1E26\u1E28\u1E2A\u1E2C\u1E2E\u1E30\u1E32\u1E34\u1E36\u1E38\u1E3A\u1E3C\u1E3E\u1E40\u1E42\u1E44\u1E46\u1E48\u1E4A\u1E4C\u1E4E\u1E50\u1E52\u1E54\u1E56\u1E58\u1E5A\u1E5C\u1E5E\u1E60\u1E62\u1E64\u1E66\u1E68\u1E6A\u1E6C\u1E6E\u1E70\u1E72\u1E74\u1E76\u1E78\u1E7A\u1E7C\u1E7E\u1E80\u1E82\u1E84\u1E86\u1E88\u1E8A\u1E8C\u1E8E\u1E90\u1E92\u1E94\u1E9E\u1EA0\u1EA2\u1EA4\u1EA6\u1EA8\u1EAA\u1EAC\u1EAE\u1EB0\u1EB2\u1EB4\u1EB6\u1EB8\u1EBA\u1EBC\u1EBE\u1EC0\u1EC2\u1EC4\u1EC6\u1EC8\u1ECA\u1ECC\u1ECE\u1ED0\u1ED2\u1ED4\u1ED6\u1ED8\u1EDA\u1EDC\u1EDE\u1EE0\u1EE2\u1EE4\u1EE6\u1EE8\u1EEA\u1EEC\u1EEE\u1EF0\u1EF2\u1EF4\u1EF6\u1EF8\u1EFA\u1EFC\u1EFE\u1F08-\u1F0F\u1F18-\u1F1D\u1F28-\u1F2F\u1F38-\u1F3F\u1F48-\u1F4D\u1F59\u1F5B\u1F5D\u1F5F\u1F68-\u1F6F\u1FB8-\u1FBB\u1FC8-\u1FCB\u1FD8-\u1FDB\u1FE8-\u1FEC\u1FF8-\u1FFB\u2102\u2107\u210B-\u210D\u2110-\u2112\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u2130-\u2133\u213E-\u213F\u2145\u2183\u2C00-\u2C2F\u2C60\u2C62-\u2C64\u2C67\u2C69\u2C6B\u2C6D-\u2C70\u2C72\u2C75\u2C7E-\u2C80\u2C82\u2C84\u2C86\u2C88\u2C8A\u2C8C\u2C8E\u2C90\u2C92\u2C94\u2C96\u2C98\u2C9A\u2C9C\u2C9E\u2CA0\u2CA2\u2CA4\u2CA6\u2CA8\u2CAA\u2CAC\u2CAE\u2CB0\u2CB2\u2CB4\u2CB6\u2CB8\u2CBA\u2CBC\u2CBE\u2CC0\u2CC2\u2CC4\u2CC6\u2CC8\u2CCA\u2CCC\u2CCE\u2CD0\u2CD2\u2CD4\u2CD6\u2CD8\u2CDA\u2CDC\u2CDE\u2CE0\u2CE2\u2CEB\u2CED\u2CF2\uA640\uA642\uA644\uA646\uA648\uA64A\uA64C\uA64E\uA650\uA652\uA654\uA656\uA658\uA65A\uA65C\uA65E\uA660\uA662\uA664\uA666\uA668\uA66A\uA66C\uA680\uA682\uA684\uA686\uA688\uA68A\uA68C\uA68E\uA690\uA692\uA694\uA696\uA698\uA69A\uA722\uA724\uA726\uA728\uA72A\uA72C\uA72E\uA732\uA734\uA736\uA738\uA73A\uA73C\uA73E\uA740\uA742\uA744\uA746\uA748\uA74A\uA74C\uA74E\uA750\uA752\uA754\uA756\uA758\uA75A\uA75C\uA75E\uA760\uA762\uA764\uA766\uA768\uA76A\uA76C\uA76E\uA779\uA77B\uA77D-\uA77E\uA780\uA782\uA784\uA786\uA78B\uA78D\uA790\uA792\uA796\uA798\uA79A\uA79C\uA79E\uA7A0\uA7A2\uA7A4\uA7A6\uA7A8\uA7AA-\uA7AE\uA7B0-\uA7B4\uA7B6\uA7B8\uA7BA\uA7BC\uA7BE\uA7C0\uA7C2\uA7C4-\uA7C7\uA7C9\uA7D0\uA7D6\uA7D8\uA7F5\uFF21-\uFF3A]
 
 // Mark, Spacing Combining
-Mc = [\u0903\u093B\u093E-\u0940\u0949-\u094C\u094E-\u094F\u0982-\u0983\u09BE-\u09C0\u09C7-\u09C8\u09CB-\u09CC\u09D7\u0A03\u0A3E-\u0A40\u0A83\u0ABE-\u0AC0\u0AC9\u0ACB-\u0ACC\u0B02-\u0B03\u0B3E\u0B40\u0B47-\u0B48\u0B4B-\u0B4C\u0B57\u0BBE-\u0BBF\u0BC1-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCC\u0BD7\u0C01-\u0C03\u0C41-\u0C44\u0C82-\u0C83\u0CBE\u0CC0-\u0CC4\u0CC7-\u0CC8\u0CCA-\u0CCB\u0CD5-\u0CD6\u0CF3\u0D02-\u0D03\u0D3E-\u0D40\u0D46-\u0D48\u0D4A-\u0D4C\u0D57\u0D82-\u0D83\u0DCF-\u0DD1\u0DD8-\u0DDF\u0DF2-\u0DF3\u0F3E-\u0F3F\u0F7F\u102B-\u102C\u1031\u1038\u103B-\u103C\u1056-\u1057\u1062-\u1064\u1067-\u106D\u1083-\u1084\u1087-\u108C\u108F\u109A-\u109C\u1715\u1734\u17B6\u17BE-\u17C5\u17C7-\u17C8\u1923-\u1926\u1929-\u192B\u1930-\u1931\u1933-\u1938\u1A19-\u1A1A\u1A55\u1A57\u1A61\u1A63-\u1A64\u1A6D-\u1A72\u1B04\u1B35\u1B3B\u1B3D-\u1B41\u1B43-\u1B44\u1B82\u1BA1\u1BA6-\u1BA7\u1BAA\u1BE7\u1BEA-\u1BEC\u1BEE\u1BF2-\u1BF3\u1C24-\u1C2B\u1C34-\u1C35\u1CE1\u1CF7\u302E-\u302F\uA823-\uA824\uA827\uA880-\uA881\uA8B4-\uA8C3\uA952-\uA953\uA983\uA9B4-\uA9B5\uA9BA-\uA9BB\uA9BE-\uA9C0\uAA2F-\uAA30\uAA33-\uAA34\uAA4D\uAA7B\uAA7D\uAAEB\uAAEE-\uAAEF\uAAF5\uABE3-\uABE4\uABE6-\uABE7\uABE9-\uABEA\uABEC]
+Mc = [\u0903\u093B\u093E-\u0940\u0949-\u094C\u094E-\u094F\u0982-\u0983\u09BE-\u09C0\u09C7-\u09C8\u09CB-\u09CC\u09D7\u0A03\u0A3E-\u0A40\u0A83\u0ABE-\u0AC0\u0AC9\u0ACB-\u0ACC\u0B02-\u0B03\u0B3E\u0B40\u0B47-\u0B48\u0B4B-\u0B4C\u0B57\u0BBE-\u0BBF\u0BC1-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCC\u0BD7\u0C01-\u0C03\u0C41-\u0C44\u0C82-\u0C83\u0CBE\u0CC0-\u0CC4\u0CC7-\u0CC8\u0CCA-\u0CCB\u0CD5-\u0CD6\u0CF3\u0D02-\u0D03\u0D3E-\u0D40\u0D46-\u0D48\u0D4A-\u0D4C\u0D57\u0D82-\u0D83\u0DCF-\u0DD1\u0DD8-\u0DDF\u0DF2-\u0DF3\u0F3E-\u0F3F\u0F7F\u102B-\u102C\u1031\u1038\u103B-\u103C\u1056-\u1057\u1062-\u1064\u1067-\u106D\u1083-\u1084\u1087-\u108C\u108F\u109A-\u109C\u1715\u1734\u17B6\u17BE-\u17C5\u17C7-\u17C8\u1923-\u1926\u1929-\u192B\u1930-\u1931\u1933-\u1938\u1A19-\u1A1A\u1A55\u1A57\u1A61\u1A63-\u1A64\u1A6D-\u1A72\u1B04\u1B35\u1B3B\u1B3D-\u1B41\u1B43-\u1B44\u1B82\u1BA1\u1BA6-\u1BA7\u1BAA\u1BE7\u1BEA-\u1BEC\u1BEE\u1BF2-\u1BF3\u1C24-\u1C2B\u1C34-\u1C35\u1CE1\u1CF7\u302E-\u302F\uA823-\uA824\uA827\uA880-\uA881\uA8B4-\uA8C3\uA952-\uA953\uA983\uA9B4-\uA9B5\uA9BA-\uA9BB\uA9BE-\uA9C0\uAA2F\uAA30\uAA33-\uAA34\uAA4D\uAA7B\uAA7D\uAAEB\uAAEE-\uAAEF\uAAF5\uABE3-\uABE4\uABE6-\uABE7\uABE9-\uABEA\uABEC]
 
 // Mark, Nonspacing
 Mn = [\u0300-\u036F\u0483-\u0487\u0591-\u05BD\u05BF\u05C1-\u05C2\u05C4-\u05C5\u05C7\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7-\u06E8\u06EA-\u06ED\u0711\u0730-\u074A\u07A6-\u07B0\u07EB-\u07F3\u07FD\u0816-\u0819\u081B-\u0823\u0825-\u0827\u0829-\u082D\u0859-\u085B\u0898-\u089F\u08CA-\u08E1\u08E3-\u0902\u093A\u093C\u0941-\u0948\u094D\u0951-\u0957\u0962-\u0963\u0981\u09BC\u09C1-\u09C4\u09CD\u09E2-\u09E3\u09FE\u0A01-\u0A02\u0A3C\u0A41-\u0A42\u0A47-\u0A48\u0A4B-\u0A4D\u0A51\u0A70-\u0A71\u0A75\u0A81-\u0A82\u0ABC\u0AC1-\u0AC5\u0AC7-\u0AC8\u0ACD\u0AE2-\u0AE3\u0AFA-\u0AFF\u0B01\u0B3C\u0B3F\u0B41-\u0B44\u0B4D\u0B55-\u0B56\u0B62-\u0B63\u0B82\u0BC0\u0BCD\u0C00\u0C04\u0C3C\u0C3E-\u0C40\u0C46-\u0C48\u0C4A-\u0C4D\u0C55-\u0C56\u0C62-\u0C63\u0C81\u0CBC\u0CBF\u0CC6\u0CCC-\u0CCD\u0CE2-\u0CE3\u0D00-\u0D01\u0D3B-\u0D3C\u0D41-\u0D44\u0D4D\u0D62-\u0D63\u0D81\u0DCA\u0DD2-\u0DD4\u0DD6\u0E31\u0E34-\u0E3A\u0E47-\u0E4E\u0EB1\u0EB4-\u0EBC\u0EC8-\u0ECE\u0F18-\u0F19\u0F35\u0F37\u0F39\u0F71-\u0F7E\u0F80-\u0F84\u0F86-\u0F87\u0F8D-\u0F97\u0F99-\u0FBC\u0FC6\u102D-\u1030\u1032-\u1037\u1039-\u103A\u103D-\u103E\u1058-\u1059\u105E-\u1060\u1071-\u1074\u1082\u1085-\u1086\u108D\u109D\u135D-\u135F\u1712-\u1714\u1732-\u1733\u1752-\u1753\u1772-\u1773\u17B4-\u17B5\u17B7-\u17BD\u17C6\u17C9-\u17D3\u17DD\u180B-\u180D\u180F\u1885-\u1886\u18A9\u1920-\u1922\u1927-\u1928\u1932\u1939-\u193B\u1A17-\u1A18\u1A1B\u1A56\u1A58-\u1A5E\u1A60\u1A62\u1A65-\u1A6C\u1A73-\u1A7C\u1A7F\u1AB0-\u1ABD\u1ABF-\u1ACE\u1B00-\u1B03\u1B34\u1B36-\u1B3A\u1B3C\u1B42\u1B6B-\u1B73\u1B80-\u1B81\u1BA2-\u1BA5\u1BA8-\u1BA9\u1BAB-\u1BAD\u1BE6\u1BE8-\u1BE9\u1BED\u1BEF-\u1BF1\u1C2C-\u1C33\u1C36-\u1C37\u1CD0-\u1CD2\u1CD4-\u1CE0\u1CE2-\u1CE8\u1CED\u1CF4\u1CF8-\u1CF9\u1DC0-\u1DFF\u20D0-\u20DC\u20E1\u20E5-\u20F0\u2CEF-\u2CF1\u2D7F\u2DE0-\u2DFF\u302A-\u302D\u3099-\u309A\uA66F\uA674-\uA67D\uA69E-\uA69F\uA6F0-\uA6F1\uA802\uA806\uA80B\uA825-\uA826\uA82C\uA8C4-\uA8C5\uA8E0-\uA8F1\uA8FF\uA926-\uA92D\uA947-\uA951\uA980-\uA982\uA9B3\uA9B6-\uA9B9\uA9BC-\uA9BD\uA9E5\uAA29-\uAA2E\uAA31-\uAA32\uAA35-\uAA36\uAA43\uAA4C\uAA7C\uAAB0\uAAB2-\uAAB4\uAAB7-\uAAB8\uAABE-\uAABF\uAAC1\uAAEC-\uAAED\uAAF6\uABE5\uABE8\uABED\uFB1E\uFE00-\uFE0F\uFE20-\uFE2F]
@@ -611,14 +611,14 @@ IPvFuture
                         )+
 
 IPv6address
-  = $(                                                            h16_ h16_ h16_ h16_ h16_ h16_ ls32
-     /                                                       "::"      h16_ h16_ h16_ h16_ h16_ ls32
-     / (                                               h16)? "::"           h16_ h16_ h16_ h16_ ls32
-     / (                               h16_?           h16)? "::"                h16_ h16_ h16_ ls32
-     / (                         (h16_ h16_?)?         h16)? "::"                     h16_ h16_ ls32
-     / (                   (h16_ (h16_ h16_?)?)?       h16)? "::"                          h16_ ls32
-     / (             (h16_ (h16_ (h16_ h16_?)?)?)?     h16)? "::"                               ls32
-     / (       (h16_ (h16_ (h16_ (h16_ h16_?)?)?)?)?   h16)? "::"                               h16
+  = $(                                                                h16_ h16_ h16_ h16_ h16_ h16_ ls32
+     /                                                               "::"       h16_ h16_ h16_ h16_ h16_ ls32
+     / (                                                      h16)? "::"            h16_ h16_ h16_ h16_ ls32
+     / (                                               h16_?            h16)? "::"                 h16_ h16_ h16_ ls32
+     / (                                 (h16_ h16_?)?        h16)? "::"                       h16_ h16_ ls32
+     / (                   (h16_ (h16_ h16_?)?)?        h16)? "::"                            h16_ ls32
+     / (             (h16_ (h16_ (h16_ h16_?)?)?)?      h16)? "::"                                 ls32
+     / (       (h16_ (h16_ (h16_ (h16_ h16_?)?)?)?)?    h16)? "::"                                 h16
      / ( (h16_ (h16_ (h16_ (h16_ (h16_ h16_?)?)?)?)?)? h16)? "::"
      )
 
@@ -639,11 +639,11 @@ IPv4address
 
 // CHANGE order in reverse for greedy matching
 dec_octet
-  = $( "25" [\x30-\x35]      // 250-255
+  = $( "25" [\x30-\x35]       // 250-255
      / "2" [\x30-\x34] DIGIT // 200-249
-     / "1" DIGIT DIGIT       // 100-199
-     / [\x31-\x39] DIGIT     // 10-99
-     / DIGIT                 // 0-9
+     / "1" DIGIT DIGIT        // 100-199
+     / [\x31-\x39] DIGIT      // 10-99
+     / DIGIT                  // 0-9
      )
 
 reg_name
@@ -746,17 +746,6 @@ semver
     return { versionCore, pre, build };
   }
 
-// Support limited semver range selectors for imports: 1.x or 1.1.x
-semverMinorWildcard
-  = numericIdentifier '.' 'x'
-
-semverPatchWildcard
-  = numericIdentifier '.' numericIdentifier '.' 'x'
-
-// Capture either a full semver or the limited wildcard forms as a raw string
-versionSelector
-  = $(semver / semverPatchWildcard / semverMinorWildcard)
-
 versionCore
   = major:$numericIdentifier '.' minor:$numericIdentifier '.' patch:$numericIdentifier
   {
@@ -775,6 +764,54 @@ preRelease
 
 build
   = head:$buildIdentifier tail:('.' @$buildIdentifier)*
+  {
+    return [head, ...tail];
+  }
+
+// Support limited semver range selectors for imports: 1.x or 1.1.x
+semverMinorWildcard
+  = numericIdentifier '.' 'x'
+
+semverPatchWildcard
+  = numericIdentifier '.' numericIdentifier '.' 'x'
+
+// Combined rule for matching versions OR wildcards (for Import types)
+semverOrWildcardWithTrailingPeriod
+  = semverWithTrailingPeriod
+  / $(semverPatchWildcard '.')
+  / $(semverMinorWildcard '.')
+
+// Combined rule for matching versions OR wildcards (for Namespace imports)
+semverOrWildcard
+  = semver
+  / $(semverPatchWildcard)
+  / $(semverMinorWildcard)
+
+semverWithTrailingPeriod
+  = versionCore:versionCore
+    pre:('-' @preRelease)?
+    build:('+' @buildWithTrailingPeriod)
+  {
+    return { versionCore, pre, build };
+  }
+  / versionCore:versionCore
+    pre:('-' @preReleaseWithTrailingPeriod)
+  {
+    return { versionCore, pre };
+  }
+  / versionCore:versionCore '.'
+  {
+    return { versionCore };
+  }
+
+preReleaseWithTrailingPeriod
+  = head:$preReleaseIdentifier '.' tail:( @$preReleaseIdentifier '.')*
+  {
+    return [head, ...tail];
+  }
+
+buildWithTrailingPeriod
+  = head:$buildIdentifier '.' tail:( @$buildIdentifier '.')*
   {
     return [head, ...tail];
   }
@@ -820,7 +857,7 @@ EventToken        = "event"       !IdentifierPart
 ParticipantToken  = "participant" !IdentifierPart
 ScalarToken       = "scalar"      !IdentifierPart
 FromToken         = "from"        !IdentifierPart
-AllToken          = "*"          !IdentifierPart
+AllToken          = "*"           !IdentifierPart
 
 /* Primitive Types */
 IntegerType       = "Integer"     !IdentifierPart {
@@ -895,7 +932,7 @@ IdentifierDeclaration
 DecoratorString =
   s:StringLiteral {
       return {
-      	$class: "concerto.metamodel@1.0.0.DecoratorString",
+          $class: "concerto.metamodel@1.0.0.DecoratorString",
         value: s.value,
         ...buildRange(location())
       }
@@ -904,7 +941,7 @@ DecoratorString =
 DecoratorNumber =
   n:SignedNumber {
       return {
-      	$class: "concerto.metamodel@1.0.0.DecoratorNumber",
+          $class: "concerto.metamodel@1.0.0.DecoratorNumber",
         value: +n,
         ...buildRange(location())
       }
@@ -913,7 +950,7 @@ DecoratorNumber =
 DecoratorBoolean =
   b:$BooleanLiteral {
       return {
-      	$class: "concerto.metamodel@1.0.0.DecoratorBoolean",
+          $class: "concerto.metamodel@1.0.0.DecoratorBoolean",
         value: (b == "true"),
         ...buildRange(location())
       }
@@ -1120,7 +1157,7 @@ IntegerScalar
         result.defaultValue = parseInt(d);
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
   }
@@ -1134,7 +1171,7 @@ LongScalar
         result.defaultValue = parseInt(d);
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
   }
@@ -1148,7 +1185,7 @@ RealScalar
         result.defaultValue = parseFloat(d);
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
   }
@@ -1162,7 +1199,7 @@ StringScalar
         result.defaultValue = d;
       }
       if (regex) {
-    		result.validator = regex;
+            result.validator = regex;
       }
       if (length) {
         result.lengthValidator = length;
@@ -1251,14 +1288,14 @@ ClassDeclarationBody
 
 ObjectFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:ObjectType __ array:"[]"? __ id:Identifier __ d:StringDefault? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.ObjectProperty",
-    		name: id.name,
-    		type: propertyType,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.ObjectProperty",
+            name: id.name,
+            type: propertyType,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = d;
       }
@@ -1270,13 +1307,13 @@ ObjectFieldDeclaration
 
 BooleanFieldDeclaration
     = decorators:Decorators __ "o" __ BooleanType __ array:"[]"? __ id:Identifier __  d:BooleanDefault? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.BooleanProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.BooleanProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = (d === 'true' ? true : false);
       }
@@ -1288,13 +1325,13 @@ BooleanFieldDeclaration
 
 DateTimeFieldDeclaration
     = decorators:Decorators __ "o" __ DateTimeType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.DateTimeProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.DateTimeProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = d;
       }
@@ -1306,13 +1343,13 @@ DateTimeFieldDeclaration
 
 StringFieldDeclaration
     = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.StringProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.StringProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = d;
       }
@@ -1320,7 +1357,7 @@ StringFieldDeclaration
         result.decorators = decorators;
       }
       if (regex) {
-    		result.validator = regex;
+            result.validator = regex;
       }
       if (length) {
         result.lengthValidator = length;
@@ -1330,7 +1367,7 @@ StringFieldDeclaration
 
 StringRegexValidator
    = "regex" __ "=" __ regex:RegularExpressionLiteral {
-   	return regex
+       return regex
   }
 
 StringLengthValidator
@@ -1344,7 +1381,7 @@ StringLengthValidator
     if (maxLength) {
       result.maxLength = parseInt(maxLength);
     }
-   	return result;
+       return result;
   }
 
 RealDomainValidator
@@ -1358,7 +1395,7 @@ RealDomainValidator
     if (upper) {
       result.upper = parseFloat(upper);
     }
-   	return result;
+       return result;
   }
 
 IntegerDomainValidator
@@ -1372,7 +1409,7 @@ IntegerDomainValidator
     if (upper) {
       result.upper = parseInt(upper);
     }
-   	return result;
+       return result;
   }
 
 LongDomainValidator
@@ -1386,18 +1423,18 @@ LongDomainValidator
     if (upper) {
       result.upper = parseInt(upper);
     }
-   	return result;
+       return result;
   }
 
 RealFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? __ range:RealDomainValidator? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.DoubleProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.DoubleProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = parseFloat(d);
       }
@@ -1405,20 +1442,20 @@ RealFieldDeclaration
         result.decorators = decorators;
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
     }
 
 IntegerFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:IntegerDomainValidator? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.IntegerProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.IntegerProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (d) {
         result.defaultValue = parseInt(d);
       }
@@ -1426,20 +1463,20 @@ IntegerFieldDeclaration
         result.decorators = decorators;
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
     }
 
 LongFieldDeclaration
     = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:LongDomainValidator? __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.LongProperty",
-    		name: id.name,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.LongProperty",
+            name: id.name,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	}
+        }
       if (d) {
         result.defaultValue = parseInt(d);
       }
@@ -1447,7 +1484,7 @@ LongFieldDeclaration
         result.decorators = decorators;
       }
       if (range) {
-    		result.validator = range;
+            result.validator = range;
       }
       return result;
     }
@@ -1525,10 +1562,10 @@ MapKeyType =
 
 BooleanMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ BooleanType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.BooleanMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.BooleanMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1537,10 +1574,10 @@ BooleanMapValueTypeDeclaration
 
 DateTimeMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ DateTimeType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.DateTimeMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.DateTimeMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1549,10 +1586,10 @@ DateTimeMapValueTypeDeclaration
 
 StringMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ StringType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.StringMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.StringMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1561,10 +1598,10 @@ StringMapValueTypeDeclaration
 
 IntegerMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ IntegerType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.IntegerMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.IntegerMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1573,10 +1610,10 @@ IntegerMapValueTypeDeclaration
 
 LongMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ LongType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.LongMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.LongMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1585,10 +1622,10 @@ LongMapValueTypeDeclaration
 
 DoubleMapValueTypeDeclaration
     = decorators:Decorators __ "o" __ DoubleType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.DoubleMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.DoubleMapValueType",
             ...buildRange(location())
-    	};
+        };
         if (decorators.length > 0) {
           result.decorators = decorators;
         }
@@ -1597,11 +1634,11 @@ DoubleMapValueTypeDeclaration
 
 ObjectMapValueTypeDeclaration
     = decorators:Decorators __ symbol:("o" / "-->") __ propertyType:ObjectType __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.ObjectMapValueType",
+        const result = {
+            $class: "concerto.metamodel@1.0.0.ObjectMapValueType",
             type: propertyType,
             ...buildRange(location())
-    	};
+        };
 
         if(symbol === "-->") {
           result.$class = "concerto.metamodel@1.0.0.RelationshipMapValueType";
@@ -1647,11 +1684,11 @@ EnumDeclarationBody
 
 EnumPropertyDeclaration
     = decorators:Decorators __ "o"__ id:Identifier __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.EnumProperty",
-    		name: id.name,
+        const result = {
+            $class: "concerto.metamodel@1.0.0.EnumProperty",
+            name: id.name,
             ...buildRange(location())
-    	};
+        };
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
@@ -1660,14 +1697,14 @@ EnumPropertyDeclaration
 
 RelationshipDeclaration
     = decorators:Decorators __ "-->" __ propertyType:Identifier __ array:"[]"? __ id:Identifier __ optional:Optional? __ {
-    	const result = {
-    		$class: "concerto.metamodel@1.0.0.RelationshipProperty",
-    		name: id.name,
-    		type: propertyType,
-    		isArray: buildBoolean(array),
-    		isOptional: buildBoolean(optional),
+        const result = {
+            $class: "concerto.metamodel@1.0.0.RelationshipProperty",
+            name: id.name,
+            type: propertyType,
+            isArray: buildBoolean(array),
+            isOptional: buildBoolean(optional),
             ...buildRange(location())
-    	};
+        };
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
@@ -1680,13 +1717,14 @@ QualifiedName
   }
 
 VersionedQualifiedName
-  = ns:QualifiedName '@' version:versionSelector '.' name:$Identifier {
-  	return `${ns}@${version}.${name}`;
+  = ns:QualifiedName '@' version:$semverOrWildcardWithTrailingPeriod name:$Identifier
+   {
+      return `${ns}@${version}${name}`;
   }
 
 VersionedQualifiedNamespace
-  = ns:QualifiedName '@' version:versionSelector {
-  	return `${ns}@${version}`;
+  = ns:QualifiedName '@' version:$semverOrWildcard {
+      return `${ns}@${version}`;
   }
 
 QualifiedNameDeclaration
@@ -1699,7 +1737,7 @@ QualifiedNamespaceDeclaration
 
 Namespace
   = NamespaceToken __ ns:QualifiedNamespaceDeclaration __ {
-  	return ns;
+      return ns;
   }
 
 FromUri
@@ -1709,7 +1747,7 @@ FromUri
 
 ImportAll
     = ImportToken __ ns:QualifiedNamespaceDeclaration '.' AllToken __ u:FromUri? {
-    	const result = {
+        const result = {
             $class: "concerto.metamodel@1.0.0.ImportAll",
             namespace: ns,
         };
@@ -1720,7 +1758,7 @@ ImportAll
 ImportType
     = ImportToken __ ns:QualifiedNameDeclaration __ u:FromUri? {
         const { namespace, name } = fullyQualifiedName(ns);
-    	const result = {
+        const result = {
             $class: `${metamodelNamespace}.ImportType`,
             name,
             namespace,
@@ -1731,7 +1769,7 @@ ImportType
 
 ImportTypes
     = ImportToken __ ns:QualifiedNamespaceDeclaration ".{" _ types:commaSeparatedTypes _ "}" __ u:FromUri? {
-    	const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
+        const { aliasedTypes, typesNames } = types.reduce((acc, type) => {
           if (type.$class === "concerto.metamodel@1.0.0.AliasedType") {
             acc.aliasedTypes.push(type);
             acc.typesNames.push(type.name);
@@ -1740,7 +1778,7 @@ ImportTypes
           }
           return acc;
         }, { aliasedTypes: [], typesNames: [] });
-    	const result = {
+        const result = {
             $class: "concerto.metamodel@1.0.0.ImportTypes",
             namespace: ns,
             types:typesNames,

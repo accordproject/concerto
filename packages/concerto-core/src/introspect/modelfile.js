@@ -30,7 +30,6 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
-const { Warning, ErrorCodes } = require('@accordproject/concerto-util');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -219,6 +218,10 @@ class ModelFile extends Decorated {
      */
     validate() {
         super.validate();
+        // [New V4 Logic] Enforce strict versioning if the manager requires it
+        if (this.getModelManager().isStrict() && !this.version) {
+            throw new IllegalModelException(`model file "${this.namespace}" does not have strict versioned namespaces`, this, this.ast.location);
+        }
         // A dictionary of imports to versions to track unique namespaces
         const importsMap = new Map();
 
@@ -708,6 +711,10 @@ class ModelFile extends Decorated {
 
         this.namespace = ast.namespace;
         this.version = nsInfo.version;
+        // [New V4 Logic] Enforce strict versioning if the manager requires it
+        if (this.getModelManager().isStrict() && !this.version) {
+            throw new IllegalModelException(`model file "${ast.namespace}" does not have strict versioned namespaces`, this, this.ast.location);
+        }
 
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];

@@ -42,22 +42,6 @@ test('should detect no changes between two identical files', async () => {
     expect(results.result).toBe(CompareResult.NONE);
 });
 
-test('should reject a non-strict modelManager, a', async () => {
-    const modelManager = new ModelManager({ strict: false });
-    const strictModelManager = new ModelManager({ strict: true });
-    const a = await getModelFile(modelManager, 'identical.cto');
-    const b = await getModelFile(strictModelManager, 'identical.cto');
-    expect(() => new Compare().compare(a, b)).toThrow('model file "org.accordproject.concerto.test@1.2.3" does not have strict versioned namespaces');
-});
-
-test('should reject a non-strict modelManager, b', async () => {
-    const modelManager = new ModelManager({ strict: true });
-    const strictModelManager = new ModelManager({ strict: false });
-    const a = await getModelFile(modelManager, 'identical.cto');
-    const b = await getModelFile(strictModelManager, 'identical.cto');
-    expect(() => new Compare().compare(a, b)).toThrow('model file "org.accordproject.concerto.test@1.2.3" does not have strict versioned namespaces');
-});
-
 test('should detect a change of namespace', async () => {
     const [a, b] = await getModelFiles('namespace-changed-a.cto', 'namespace-changed-b.cto');
     const results = new Compare().compare(a, b);

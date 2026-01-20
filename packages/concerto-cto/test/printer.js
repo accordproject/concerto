@@ -22,7 +22,8 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Printer } = require('..');
+// CHANGED: Point to src/index to ensure coverage tools see the TS source
+const { Printer } = require('../src/index');
 
 /**
  * Get the name and content of all cto files

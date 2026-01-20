@@ -84,11 +84,13 @@
       "json"
     ],
     "include": [
-      "src/**/*.js",
       "src/**/*.ts"
     ],
     "exclude": [
-      "src/parser.js"
+      "**/parser.js",
+      "src/parser.js",
+      "test/**",
+      "dist/**"
     ],
     "all": true,
     "check-coverage": true,
