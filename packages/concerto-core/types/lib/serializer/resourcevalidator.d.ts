@@ -35,7 +35,7 @@ declare class ResourceValidator {
      * @param {Object} value - the value of the field.
      * @private
      */
-    private static reportNotResouceViolation;
+    private static reportNotResourceViolation;
     /**
      * Throw a new error for a model violation.
      * @param {string} id - the identifier of this instance.
@@ -75,7 +75,7 @@ declare class ResourceValidator {
     private static reportAbstractClass;
     /**
      * Throw a validation exception for an abstract class
-     * @param {string} resourceId - the id of the resouce being validated
+     * @param {string} resourceId - the id of the resource being validated
      * @param {string} propertyName - the name of the property that is not declared
      * @param {string} fullyQualifiedTypeName - the fully qualified type being validated
      * @throws {ValidationException} the validation exception
@@ -84,7 +84,7 @@ declare class ResourceValidator {
     private static reportUndeclaredField;
     /**
      * Throw a validation exception for an invalid field assignment
-     * @param {string} resourceId - the id of the resouce being validated
+     * @param {string} resourceId - the id of the resource being validated
      * @param {string} propName - the name of the property that is being assigned
      * @param {*} obj - the Field
      * @param {Field} field - the Field
