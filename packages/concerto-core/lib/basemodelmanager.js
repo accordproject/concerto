@@ -433,9 +433,41 @@ class BaseModelManager {
     /**
      * Validates all models files in this model manager
      */
+    
     validateModelFiles() {
         for (let ns in this.modelFiles) {
-            this.modelFiles[ns].validate();
+            const modelFile = this.modelFiles[ns];
+            
+            
+            modelFile.validate();
+
+            
+            const ast = modelFile.getAst();
+            const seenNamespaces = new Set();
+            
+            if (ast.imports) {
+                ast.imports.forEach((imp) => {
+                    if (seenNamespaces.has(imp.namespace)) {
+                        throw new Error(`ModelFile ${modelFile.getNamespace()} contains duplicate import from namespace ${imp.namespace}`);
+                    }
+                    seenNamespaces.add(imp.namespace);
+                });
+            }
+
+           
+            const importedShortNames = new Set();
+            
+            modelFile.getImports().forEach(fqn => {
+                importedShortNames.add(ModelUtil.getShortName(fqn));
+            });
+
+            if (ast.declarations) {
+                ast.declarations.forEach(decl => {
+                    if (importedShortNames.has(decl.name)) {
+                         throw new Error(`Local declaration ${decl.name} in ${modelFile.getNamespace()} conflicts with imported type.`);
+                    }
+                });
+            }
         }
     }
 
