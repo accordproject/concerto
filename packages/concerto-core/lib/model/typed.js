@@ -127,7 +127,7 @@ class Typed {
      * @param {string} value - the value of the property
      */
     addArrayValue(propName, value) {
-        if(this[propName]) {
+        if (this[propName]) {
             this[propName].push(value);
         }
         else {
@@ -145,7 +145,7 @@ class Typed {
 
         for (let n = 0; n < fields.length; n++) {
             let field = fields[n];
-            if(field.isTypeScalar?.()) {
+            if (field.isTypeScalar?.()) {
                 field = field.getScalarField();
             }
             let defaultValue;
@@ -189,7 +189,7 @@ class Typed {
         if (classDeclaration.getFullyQualifiedName() === fqt) {
             return true;
         }
-        // Now walk the class hierachy looking to see if it's an instance of the specified type.
+        // Now walk the class hierarchy looking to see if it's an instance of the specified type.
         let superTypeDeclaration = classDeclaration.getSuperTypeDeclaration();
         while (superTypeDeclaration) {
             if (superTypeDeclaration.getFullyQualifiedName() === fqt) {
