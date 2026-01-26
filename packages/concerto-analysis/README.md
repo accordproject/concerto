@@ -4,7 +4,7 @@ Analysis of [Concerto](https://github.com/accordproject/concerto/) model files.
 ## Install
 
 ```
-npm install @accordproject/concerto-types --save
+npm install @accordproject/concerto-analysis --save
 ```
 
 ## License <a name="license"></a>
