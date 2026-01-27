@@ -17,6 +17,7 @@
  *
  * This module provides a standardized way to convert between Concerto metamodel and Concertino format.
  */
+/* eslint-disable valid-jsdoc */
 import { IModels } from '@accordproject/concerto-types';
 import { IConcertino } from './spec/concertino.metamodel@1.0.0-alpha.7';
 import { convertToConcertino } from './concertinoSerializer';

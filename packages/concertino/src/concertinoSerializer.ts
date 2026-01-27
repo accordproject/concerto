@@ -311,7 +311,7 @@ function transformMapDeclaration(declaration: IMapDeclaration, context: { modelN
  * @param context The context object.
  * @returns The Concertino scalar declaration.
  */
-function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context: { modelNamespace: string }): IConcertinoScalarDeclaration {
+function transformScalarDeclaration(declaration: ScalarDeclarationUnion, _context: { modelNamespace: string }): IConcertinoScalarDeclaration { // eslint-disable-line @typescript-eslint/no-unused-vars
     const result: IConcertinoScalarDeclaration = {
         type: determineScalarType(declaration),
         ...extractDecoratorsInfo(declaration.decorators),
@@ -326,7 +326,7 @@ function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context
  * @param context The context object.
  * @returns The Concertino enum declaration.
  */
-function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): IConcertinoEnumDeclaration {
+function transformEnumDeclaration(declaration: IEnumDeclaration, _context: { modelNamespace: string }): IConcertinoEnumDeclaration { // eslint-disable-line @typescript-eslint/no-unused-vars
     return {
         type: 'EnumDeclaration',
         values: transformEnumValues(declaration.properties),

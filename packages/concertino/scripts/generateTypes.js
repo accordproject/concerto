@@ -15,6 +15,7 @@
 
 'use strict';
 
+const util = require('util');
 const fs = require('fs');
 const path = require('path');
 const { ModelManager, ModelUtil } = require('@accordproject/concerto-core');
