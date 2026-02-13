@@ -94,17 +94,5 @@
                 "file": "./HEADER.md"
             }
         }
-    },
-    "jest": {
-        "preset": "ts-jest",
-        "testEnvironment": "node",
-        "testPathIgnorePatterns": [
-            "<rootDir>/dist/",
-            "/node_modules/"
-        ],
-        "collectCoverage": true,
-        "collectCoverageFrom": [
-            "src/**/*.ts"
-        ]
     }
 }
