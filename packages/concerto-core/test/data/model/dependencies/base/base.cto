@@ -16,7 +16,7 @@
   * A library of standard reusable types
   */
 
-namespace stdlib.base
+namespace stdlib.base@1.0.0
 
 enum Gender {
  o MALE

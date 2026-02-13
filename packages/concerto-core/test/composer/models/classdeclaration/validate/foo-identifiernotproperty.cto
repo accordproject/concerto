@@ -17,7 +17,7 @@
  * of the ClassDeclaration class
  */
 
-namespace bar
+namespace bar@1.0.0
 
 //fooID is not defined in the asset - Error will be thrown
 asset foo identified by fooID {

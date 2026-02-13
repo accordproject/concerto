@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace com.testing
+namespace com.testing@1.0.0
 
 participant P identified by pId {
   o String pId

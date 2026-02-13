@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace org.accordproject.organization
+namespace org.accordproject.organization@1.0.0
 
-import org.accordproject.address.PostalAddress from github://accordproject/models/master/address.cto
+import org.accordproject.address@1.0.0.PostalAddress from github://accordproject/models/master/address.cto
 
 participant Organization identified by identifier {
   o String identifier

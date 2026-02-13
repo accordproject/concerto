@@ -15,7 +15,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { printDeprecationWarning } = require('../lib/warning');
+const { printDeprecationWarning } = require('../src/warning');
 
 describe('printDeprecationWarning', () => {
 
@@ -31,6 +31,8 @@ describe('printDeprecationWarning', () => {
             expect(warning.detail).to.be.equals(detail);
         });
 
+        printDeprecationWarning(message, type, code, detail);
+        // Do it twice, to check it only emits once
         printDeprecationWarning(message, type, code, detail);
     });
 });

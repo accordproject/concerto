@@ -30,7 +30,7 @@ return Promise.resolve()
     .then(() => {
         return new Promise((resolve, reject) => {
             const parsejs = path.resolve(__dirname, 'parsejs.js');
-            const command = child_process.fork(parsejs, ['--format', 'APISignature', '--inputDir', path.resolve(parentDirectory, 'lib'), '--outputDir', parentDirectory]);
+            const command = child_process.fork(parsejs, ['--format', 'APISignature', '--inputDir', path.resolve(parentDirectory, 'dist'), '--outputDir', parentDirectory]);
             command.on('exit', (code) => {
                 if (code !== 0) {
                     process.exit(code);

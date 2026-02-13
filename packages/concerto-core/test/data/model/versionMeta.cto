@@ -1,6 +1,6 @@
 concerto version ">= 1.0.0"
 
-namespace test.version
+namespace test.version@1.0.0
 
 concept Foo {
 }

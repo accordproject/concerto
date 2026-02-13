@@ -17,11 +17,11 @@
  * http://www.fpml.org/spec/fpml-5-3-2-wd-2/html/reporting/schemaDocumentation/schemas/fpml-asset-5-3_xsd/elements/bond.html
  *
  */
-namespace org.acme.bond
+namespace org.acme.bond@1.0.0
 
-import stdlib.business.Business
-import stdlib.base.Address
-import stdlib.business.Manager
+import stdlib.business@1.0.0.Business
+import stdlib.base@1.0.0.Address
+import stdlib.business@1.0.0.Manager
 
 enum CouponType {
   o FIXED
@@ -71,7 +71,7 @@ asset BondAsset identified by ISINCode {
 }
 
 transaction PublishBond  {
-  
+
   o String ISINCode
   o Bond bond
 }

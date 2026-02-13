@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-namespace com.testing
+namespace com.testing@1.0.0
 
-concept Concept{
+concept MyConcept {
   o String id
   o String newValue
 }
 
-concept Concept{
+concept MyConcept {
   o String id
   o String newValue
 }

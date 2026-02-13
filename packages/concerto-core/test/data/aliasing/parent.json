@@ -4,21 +4,6 @@
     {
       "$class": "concerto.metamodel@1.0.0.Decorator",
       "name": "test",
-      "location": {
-        "$class": "concerto.metamodel@1.0.0.Range",
-        "start": {
-          "offset": 0,
-          "line": 1,
-          "column": 1,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        },
-        "end": {
-          "offset": 10,
-          "line": 1,
-          "column": 11,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        }
-      },
       "arguments": [
         {
           "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
@@ -26,22 +11,7 @@
             "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
             "name": "Kid"
           },
-          "isArray": false,
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 6,
-              "line": 1,
-              "column": 7,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 9,
-              "line": 1,
-              "column": 10,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          }
+          "isArray": false
         }
       ]
     }
@@ -84,40 +54,10 @@
           },
           "isArray": false,
           "isOptional": false,
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 135,
-              "line": 8,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 160,
-              "line": 10,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          },
           "decorators": [
             {
               "$class": "concerto.metamodel@1.0.0.Decorator",
               "name": "test",
-              "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                  "offset": 135,
-                  "line": 8,
-                  "column": 3,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                },
-                "end": {
-                  "offset": 145,
-                  "line": 8,
-                  "column": 13,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                }
-              },
               "arguments": [
                 {
                   "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
@@ -125,22 +65,7 @@
                     "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                     "name": "Kid"
                   },
-                  "isArray": false,
-                  "location": {
-                    "$class": "concerto.metamodel@1.0.0.Range",
-                    "start": {
-                      "offset": 141,
-                      "line": 8,
-                      "column": 9,
-                      "$class": "concerto.metamodel@1.0.0.Position"
-                    },
-                    "end": {
-                      "offset": 144,
-                      "line": 8,
-                      "column": 12,
-                      "$class": "concerto.metamodel@1.0.0.Position"
-                    }
-                  }
+                  "isArray": false
                 }
               ]
             }
@@ -154,39 +79,9 @@
             "name": "KidFullName"
           },
           "isArray": false,
-          "isOptional": false,
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 160,
-              "line": 10,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 179,
-              "line": 11,
-              "column": 1,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          }
+          "isOptional": false
         }
       ],
-      "location": {
-        "$class": "concerto.metamodel@1.0.0.Range",
-        "start": {
-          "offset": 94,
-          "line": 6,
-          "column": 1,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        },
-        "end": {
-          "offset": 180,
-          "line": 11,
-          "column": 2,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        }
-      },
       "superType": {
         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
         "name": "Kid"
@@ -195,21 +90,6 @@
         {
           "$class": "concerto.metamodel@1.0.0.Decorator",
           "name": "test",
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 94,
-              "line": 6,
-              "column": 1,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 104,
-              "line": 6,
-              "column": 11,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          },
           "arguments": [
             {
               "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
@@ -217,22 +97,7 @@
                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                 "name": "Kid"
               },
-              "isArray": false,
-              "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                  "offset": 100,
-                  "line": 6,
-                  "column": 7,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                },
-                "end": {
-                  "offset": 103,
-                  "line": 6,
-                  "column": 10,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                }
-              }
+              "isArray": false
             }
           ]
         }
@@ -247,22 +112,7 @@
           "$class": "concerto.metamodel@1.0.0.StringProperty",
           "name": "schoolName",
           "isArray": false,
-          "isOptional": false,
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 216,
-              "line": 14,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 238,
-              "line": 15,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          }
+          "isOptional": false
         },
         {
           "$class": "concerto.metamodel@1.0.0.ObjectProperty",
@@ -272,39 +122,9 @@
             "name": "Child"
           },
           "isArray": false,
-          "isOptional": false,
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 238,
-              "line": 15,
-              "column": 3,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 254,
-              "line": 16,
-              "column": 1,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          }
+          "isOptional": false
         }
       ],
-      "location": {
-        "$class": "concerto.metamodel@1.0.0.Range",
-        "start": {
-          "offset": 182,
-          "line": 13,
-          "column": 1,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        },
-        "end": {
-          "offset": 255,
-          "line": 16,
-          "column": 2,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        }
-      },
       "superType": {
         "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
         "name": "Child"
@@ -318,21 +138,6 @@
         "type": {
           "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
           "name": "KidFullName"
-        },
-        "location": {
-          "$class": "concerto.metamodel@1.0.0.Range",
-          "start": {
-            "offset": 285,
-            "line": 20,
-            "column": 3,
-            "$class": "concerto.metamodel@1.0.0.Position"
-          },
-          "end": {
-            "offset": 301,
-            "line": 21,
-            "column": 3,
-            "$class": "concerto.metamodel@1.0.0.Position"
-          }
         }
       },
       "value": {
@@ -341,40 +146,10 @@
           "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
           "name": "Kid"
         },
-        "location": {
-          "$class": "concerto.metamodel@1.0.0.Range",
-          "start": {
-            "offset": 301,
-            "line": 21,
-            "column": 3,
-            "$class": "concerto.metamodel@1.0.0.Position"
-          },
-          "end": {
-            "offset": 320,
-            "line": 23,
-            "column": 1,
-            "$class": "concerto.metamodel@1.0.0.Position"
-          }
-        },
         "decorators": [
           {
             "$class": "concerto.metamodel@1.0.0.Decorator",
             "name": "test",
-            "location": {
-              "$class": "concerto.metamodel@1.0.0.Range",
-              "start": {
-                "offset": 301,
-                "line": 21,
-                "column": 3,
-                "$class": "concerto.metamodel@1.0.0.Position"
-              },
-              "end": {
-                "offset": 311,
-                "line": 21,
-                "column": 13,
-                "$class": "concerto.metamodel@1.0.0.Position"
-              }
-            },
             "arguments": [
               {
                 "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
@@ -382,61 +157,16 @@
                   "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                   "name": "Kid"
                 },
-                "isArray": false,
-                "location": {
-                  "$class": "concerto.metamodel@1.0.0.Range",
-                  "start": {
-                    "offset": 307,
-                    "line": 21,
-                    "column": 9,
-                    "$class": "concerto.metamodel@1.0.0.Position"
-                  },
-                  "end": {
-                    "offset": 310,
-                    "line": 21,
-                    "column": 12,
-                    "$class": "concerto.metamodel@1.0.0.Position"
-                  }
-                }
+                "isArray": false
               }
             ]
           }
         ]
       },
-      "location": {
-        "$class": "concerto.metamodel@1.0.0.Range",
-        "start": {
-          "offset": 257,
-          "line": 18,
-          "column": 1,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        },
-        "end": {
-          "offset": 321,
-          "line": 23,
-          "column": 2,
-          "$class": "concerto.metamodel@1.0.0.Position"
-        }
-      },
       "decorators": [
         {
           "$class": "concerto.metamodel@1.0.0.Decorator",
           "name": "test",
-          "location": {
-            "$class": "concerto.metamodel@1.0.0.Range",
-            "start": {
-              "offset": 257,
-              "line": 18,
-              "column": 1,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            },
-            "end": {
-              "offset": 267,
-              "line": 18,
-              "column": 11,
-              "$class": "concerto.metamodel@1.0.0.Position"
-            }
-          },
           "arguments": [
             {
               "$class": "concerto.metamodel@1.0.0.DecoratorTypeReference",
@@ -444,22 +174,7 @@
                 "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
                 "name": "Kid"
               },
-              "isArray": false,
-              "location": {
-                "$class": "concerto.metamodel@1.0.0.Range",
-                "start": {
-                  "offset": 263,
-                  "line": 18,
-                  "column": 7,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                },
-                "end": {
-                  "offset": 266,
-                  "line": 18,
-                  "column": 10,
-                  "$class": "concerto.metamodel@1.0.0.Position"
-                }
-              }
+              "isArray": false
             }
           ]
         }

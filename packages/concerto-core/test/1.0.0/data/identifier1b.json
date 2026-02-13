@@ -1,5 +1,5 @@
 {
-    "$class": "org.test.A2",
+    "$class": "org.test@1.0.0.A2",
     "id": "123",
     "name": "John"
 }

@@ -17,7 +17,7 @@
  */
 
 // define the namespace for this model
-namespace org.acme.base
+namespace org.acme.base@1.0.0
 
 enum State {
   o GOLD

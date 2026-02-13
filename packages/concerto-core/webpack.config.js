@@ -21,7 +21,7 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const packageJson = require('./package.json');
 
 module.exports = {
-    entry: './index.js',
+    entry: './dist/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-core.js',
@@ -59,7 +59,7 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                include: [path.join(__dirname, 'lib')],
+                include: [path.join(__dirname, 'dist')],
                 use: ['babel-loader']
             },
             {

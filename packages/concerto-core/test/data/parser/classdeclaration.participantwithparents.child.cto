@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-namespace com.testing.child
+namespace com.testing.child@1.0.0
 
-import com.testing.parent.Super
+import com.testing.parent@1.0.0.Super
 
 participant Sub extends Super { }
 
 participant Sub2 extends Super { }
 
 concept Test {
-  
+
 }
