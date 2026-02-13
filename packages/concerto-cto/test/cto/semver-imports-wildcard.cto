@@ -1,0 +1,11 @@
+namespace test.person
+
+import test@1.x.{Foo,Bar}
+import test@1.x.Foo
+import test@1.x.* from github://foo
+
+participant Person identified by name {
+  o String name
+}
+
+

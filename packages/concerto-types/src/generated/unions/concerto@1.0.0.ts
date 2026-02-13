@@ -26,24 +26,10 @@ import type {
 	IModel,
 	IModels
 } from './concerto.metamodel@1.0.0';
-import type {
-	IConcertino,
-	IMetadata,
-	IModelMetadata,
-	IConcertinoDeclaration,
-	Prototype,
-	IConcertinoEnumValue,
-	IMapKey,
-	IMapValue,
-	IConcertinoProperty,
-	IVocabulary,
-	IDecoratorValues,
-	IDecoratorValue
-} from './concertino.metamodel@4.0.0-alpha.2';
 
 // interfaces
 export interface IConcept {
-   $class?: string;
+   $class: string;
 }
 
 export type ConceptUnion = IPosition | 
@@ -65,18 +51,7 @@ ILongDomainValidator |
 IAliasedType | 
 IImport | 
 IModel | 
-IModels | 
-IConcertino | 
-IMetadata | 
-IModelMetadata | 
-IConcertinoDeclaration | 
-IConcertinoEnumValue | 
-IMapKey | 
-IMapValue | 
-IConcertinoProperty | 
-IVocabulary | 
-IDecoratorValues | 
-IDecoratorValue;
+IModels;
 
 export interface IAsset extends IConcept {
    $identifier: string;
