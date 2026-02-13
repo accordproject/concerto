@@ -24,12 +24,12 @@ class NullUtil {
     /**
      * Returns true if the typeof the object === 'undefined' or
      * the object === null.
-     * @param {Object} obj - the object to be tested
-     * @returns {boolean} true if the object is null or undefined
+     * @param obj - the object to be tested
+     * @returns true if the object is null or undefined
      */
-    static isNull(obj) {
+    static isNull(obj: unknown): boolean {
         return(typeof(obj) === 'undefined' || obj === null);
     }
 }
 
-module.exports = NullUtil;
+export = NullUtil;

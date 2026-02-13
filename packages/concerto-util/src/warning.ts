@@ -14,17 +14,20 @@
 
 'use strict';
 
+// Tell TypeScript that 'process' exists globally (shims Node.js types)
+declare const process: any;
+
 let isWarningEmitted = false;
 
 /**
  * Emits DeprecationWaring to stderr only once and can be caught using an warning event listener as well, please define the code
  * and document the deprecation code on https://concerto.accordproject.org/deprecation
- * @param {string} message - message of the deprecation warning
- * @param {string} type - type of the deprecation warning
- * @param {string} code - code of the deprecation warning
- * @param {string} detail - detail of the deprecation warning
+ * @param message - message of the deprecation warning
+ * @param type - type of the deprecation warning
+ * @param code - code of the deprecation warning
+ * @param detail - detail of the deprecation warning
  */
-function printDeprecationWarning(message, type, code, detail) {
+export function printDeprecationWarning(message: string, type: string, code: string, detail: string): void {
     // This will get polyfilled in the webpack.config.js as process.emitWarning is not available in the browser
     const customEmitWarning = process.emitWarning;
     if (!isWarningEmitted) {
@@ -36,7 +39,3 @@ function printDeprecationWarning(message, type, code, detail) {
         });
     }
 }
-
-module.exports = {
-    printDeprecationWarning
-};

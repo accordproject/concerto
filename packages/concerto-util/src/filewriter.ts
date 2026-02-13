@@ -14,31 +14,26 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
-const Writer = require('./writer');
+import * as fs from 'fs';
+import * as path from 'path';
+import Writer = require('./writer');
 
 /**
- * FileWriter creates text files under a directory tree. It can be used
- * by code generators to create source files for example.
- * Basic usage is: openFile(fileName), writeLine(...), closeFile().
- *
+ * FileWriter buffers text to be written to a file.
  * @private
- * @extends Writer
- * @see See {@link Writer}
  * @class
- * @memberof module:concerto-core
+ * @memberof module:concerto-util
  */
 class FileWriter extends Writer {
+    public outputDirectory: string;
+    public fileName: string | null = null;
+    public relativeDir: string | null = null;
 
     /**
      * Create a FileWriter.
-     *
-     * @param {string} outputDirectory - the path to an output directory
-     * that will be used to store generated files.
+     * @param outputDirectory - the output directory
      */
-    constructor(outputDirectory) {
+    constructor(outputDirectory: string) {
         super();
         this.outputDirectory = outputDirectory;
         this.relativeDir = null;
@@ -47,58 +42,57 @@ class FileWriter extends Writer {
     }
 
     /**
-     * Opens a file for writing. The file will be created in the
-     * root directory of this FileWriter.
-     *
-     * @param {string} fileName - the name of the file to open
+     * Open a file for writing. The file is created in the
+     * output directory.
+     * @param fileName - the name of the file to open
      */
-    openFile(fileName) {
+    openFile(fileName: string): void {
         this.fileName = fileName;
         this.relativeDir = null;
     }
 
     /**
-     * Opens a file for writing, with a location relative to the
-     * root directory of this FileWriter.
-     *
-     * @param {string} relativeDir - the relative directory to use
-     * @param {string} fileName - the name of the file to open
+     * Open a file for writing. The file is created in the
+     * output directory, plus the relative directory path.
+     * @param relativeDir - the relative directory
+     * @param fileName - the name of the file to open
      */
-    openRelativeFile(relativeDir, fileName) {
-        this.relativeDir = relativeDir;
+    openRelativeFile(relativeDir: string, fileName: string): void {
         this.fileName = fileName;
+        this.relativeDir = relativeDir;
+        this.clearBuffer();
     }
 
     /**
      * Writes text to the current open file
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeLine(tabs,text) {
+    writeLine(tabs: number, text: string): void {
         if (this.fileName) {
             super.writeLine(tabs,text);
         } else {
-            throw Error('File has not been opened!');
+            throw new Error('File has not been opened!');
         }
     }
 
     /**
      * Writes text to the start of the current open file
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeBeforeLine(tabs,text) {
+    writeBeforeLine(tabs: number, text: string): void {
         if (this.fileName) {
             super.writeBeforeLine(tabs,text);
         } else {
-            throw Error('File has not been opened!');
+            throw new Error('File has not been opened!');
         }
     }
 
     /**
-     * Closes the current open file
+     * Closes the file, flushing the buffer to disk.
      */
-    closeFile() {
+    closeFile(): void {
         if (!this.fileName) {
             throw new Error('No file open');
         }
@@ -119,4 +113,4 @@ class FileWriter extends Writer {
     }
 }
 
-module.exports = FileWriter;
+export = FileWriter;

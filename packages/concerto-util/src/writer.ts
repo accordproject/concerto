@@ -22,6 +22,10 @@
  * @memberof module:concerto-util
  */
 class Writer {
+    public beforeBuffer: string;
+    public buffer: string;
+    public linesWritten: number;
+
     /**
      * Create a Writer.
      */
@@ -33,10 +37,10 @@ class Writer {
 
     /**
      * Writes text to the start of the buffer
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeBeforeLine(tabs, text) {
+    writeBeforeLine(tabs: number, text: string): void {
         for(let n=0; n < tabs; n++) {
             this.beforeBuffer += '   ';
         }
@@ -47,10 +51,10 @@ class Writer {
 
     /**
      * Append text to the buffer
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeLine(tabs, text) {
+    writeLine(tabs: number, text: string): void {
         for(let n=0; n < tabs; n++) {
             this.write('   ');
         }
@@ -61,19 +65,19 @@ class Writer {
 
     /**
      * Returns the number of lines that have been written to the buffer.
-     * @return {number} the number of lines written to the buffer.
+     * @return the number of lines written to the buffer.
      */
-    getLineCount() {
+    getLineCount(): number {
         return this.linesWritten;
     }
 
 
     /**
      * Append text to the buffer, prepending tabs
-     * @param {number} tabs - the number of tabs to use
-     * @param {string} text - the text to write
+     * @param tabs - the number of tabs to use
+     * @param text - the text to write
      */
-    writeIndented(tabs,text) {
+    writeIndented(tabs: number, text: string): void {
         for(let n=0; n < tabs; n++) {
             this.write('   ');
         }
@@ -84,9 +88,9 @@ class Writer {
      * Append text to the buffer (no automatic newline). The
      * text may contain newline, and these will increment the linesWritten
      * counter.
-     * @param {string} msg - the text to write
+     * @param msg - the text to write
      */
-    write(msg) {
+    write(msg: string): void {
         if(typeof msg !== 'string' ) {
             throw new Error('Can only append strings. Argument ' + msg + ' has type ' + typeof msg);
         }
@@ -97,20 +101,20 @@ class Writer {
 
     /**
      * Returns the text that has been buffered in this Writer.
-     * @return {string} the buffered text.
+     * @return the buffered text.
      */
-    getBuffer() {
+    getBuffer(): string {
         return this.beforeBuffer + this.buffer;
     }
 
     /**
      * Empties the underyling buffer and resets the line count.
      */
-    clearBuffer() {
+    clearBuffer(): void {
         this.beforeBuffer = '';
         this.buffer = '';
         this.linesWritten = 0;
     }
 }
 
-module.exports = Writer;
+export = Writer;

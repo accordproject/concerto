@@ -14,17 +14,19 @@
 
 'use strict';
 
-const fs = require('fs');
-const fsPath = require('path');
+import * as fs from 'fs';
+import * as fsPath from 'path';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const slash = require('slash');
 
 /**
  * Writes a set of model files to disk
- * @param {*} files - the set of files to write, with names and whether they are external
- * @param {string} path - a path to the directory where to write the files
- * @param {*} options - a set of options
+ * @param files - the set of files to write, with names and whether they are external
+ * @param path - a path to the directory where to write the files
+ * @param options - a set of options
  */
-function writeModelsToFileSystem(files, path, options = {}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function writeModelsToFileSystem(files: any[], path: string, options: any = {}): void {
     if(!path){
         throw new Error('`path` is a required parameter of writeModelsToFileSystem');
     }
@@ -41,5 +43,3 @@ function writeModelsToFileSystem(files, path, options = {}) {
         fs.writeFileSync(path + fsPath.sep + filename, file.definitions);
     });
 }
-
-module.exports = { writeModelsToFileSystem };
