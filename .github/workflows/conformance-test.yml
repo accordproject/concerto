@@ -44,8 +44,8 @@ jobs:
       - name: Run Conformance Tests
         working-directory: concerto-conformance
         env:
-          PARSER_PATH: ../../../../../../packages/concerto-cto/index.js
-          MODELFILE_PATH: ../../../../../../packages/concerto-core/index.js
-          MODELMANAGER_PATH: ../../../../../../packages/concerto-core/index.js
+          PARSER_PATH: ../../../../../../packages/concerto-cto/dist/index.js
+          MODELFILE_PATH: ../../../../../../packages/concerto-core/dist/index.js
+          MODELMANAGER_PATH: ../../../../../../packages/concerto-core/dist/index.js
         run: npm test
         
