@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/syncpack@14/schema.json",
+  "semverGroups": [
+    {
+      "label": "Enforce pinned versions (no ^ or ~)",
+      "dependencies": ["**"],
+      "dependencyTypes": ["prod", "dev", "peer"],
+      "packages": ["**"],
+      "range": ""
+    }
+  ]
+}
