@@ -112,7 +112,7 @@ describe('ModelManager', () => {
             }
         });
 
-        it('should cope with object as modelfile', ()=>{
+        it('should cope with object as modelfile', () => {
             let mockModelFile = sinon.createStubInstance(ModelFile);
             modelManager.validateModelFile(mockModelFile);
             sinon.assert.calledOnce(mockModelFile.validate);
@@ -173,7 +173,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge@1.0.0');
             mf1.getVersion.returns('1.0.0');
             mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf1.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
             modelManager.modelFiles['org.doge@1.0.0'].should.equal(mf1);
@@ -205,8 +205,8 @@ describe('ModelManager', () => {
         }`, 'internal.cto', true);
 
             const bar = {
-                $class : 'org.acme@1.0.0.Bar',
-                foo : '😊'
+                $class: 'org.acme@1.0.0.Bar',
+                foo: '😊'
             };
 
             const factory = new Factory(modelManagerWithOptions);
@@ -284,6 +284,19 @@ describe('ModelManager', () => {
             (() => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
+        });
+
+        it('should warn for a bad metamodel AST', () => {
+            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme',
+                undeclared: []
+            };
+            // Logs debug warning instead of throwing
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.not.throw();
         });
 
         it('should throw when using an unknown metamodel version', () => {
@@ -367,7 +380,7 @@ describe('ModelManager', () => {
             try {
                 modelManager.addModelFiles([composerModel, 'invalid file']);
             }
-            catch(err) {
+            catch (err) {
                 // ignore
             }
 
@@ -418,7 +431,7 @@ describe('ModelManager', () => {
             mf2.getNamespace.returns('org.doge.base@1.0.0');
             mf2.getVersion.returns('1.0.0');
             mf2.isModelFile.returns(true);
-            modelManager.addModelFiles([mf1,mf2]);
+            modelManager.addModelFiles([mf1, mf2]);
             (() => {
                 modelManager.addModelFiles([mf1]);
             }).should.throw(/Namespace org.doge@1.0.0 is already declared/);
@@ -440,7 +453,7 @@ describe('ModelManager', () => {
             mf3.getVersion.returns('1.0.0');
             mf3.getName.returns('mf1-again');
             mf3.isModelFile.returns(true);
-            modelManager.addModelFiles([mf1,mf2]);
+            modelManager.addModelFiles([mf1, mf2]);
             (() => {
                 modelManager.addModelFiles([mf3]);
             }).should.throw(/Namespace org.doge@1.0.0 specified in file mf1-again is already declared in file mf1/);
@@ -547,7 +560,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge@1.0.0');
             mf1.getVersion.returns('1.0.0');
             mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf1.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -557,7 +570,7 @@ describe('ModelManager', () => {
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.doge@1.0.0');
             mf2.isModelFile.returns(true);
-            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf2.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             mf2.$marker = 'mf2';
             res = modelManager.updateModelFile(mf2);
             sinon.assert.calledOnce(mf2.validate);
@@ -580,7 +593,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge@1.0.0');
             mf1.getVersion.returns('1.0.0');
             mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf1.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -629,7 +642,7 @@ describe('ModelManager', () => {
             mf1.getNamespace.returns('org.doge@1.0.0');
             mf1.getVersion.returns('1.0.0');
             mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf1.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             mf1.$marker = 'mf1';
             let res = modelManager.addModelFile(mf1);
             sinon.assert.calledOnce(mf1.validate);
@@ -662,7 +675,7 @@ concept Bar {
             const options = {};
             return modelManager.updateExternalModels(options, mfd)
                 .then(() => {
-                // model should be loaded and tagged as external
+                    // model should be loaded and tagged as external
                     modelManager.getModelFile('org.external@1.0.0').isExternal().should.be.true;
 
                     modelManager.getModelFile('org.external@1.0.0').isSystemModelFile().should.be.false;
@@ -763,7 +776,7 @@ concept Bar {
         });
 
         it('should write models to the file system', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             modelManager.writeModelsToFileSystem(dir.path);
             fs.readdirSync(dir.path).should.eql([
                 '@external.cto',
@@ -774,7 +787,7 @@ concept Bar {
         });
 
         it('should write models to the file system, without external models', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             modelManager.writeModelsToFileSystem(dir.path, {
                 includeExternalModels: false
             });
@@ -786,7 +799,7 @@ concept Bar {
         });
 
         it('should write models to the file system', async () => {
-            const dir = await tmp.dir({ unsafeCleanup: true});
+            const dir = await tmp.dir({ unsafeCleanup: true });
             modelManager.writeModelsToFileSystem(dir.path, {
             });
             fs.readdirSync(dir.path).should.eql([
@@ -867,13 +880,13 @@ concept Bar {
             mf1.getNamespace.returns('org.wow@1.0.0');
             mf1.getVersion.returns('1.0.0');
             mf1.isModelFile.returns(true);
-            mf1.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf1.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             modelManager.addModelFile(mf1);
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.such@1.0.0');
             mf2.getVersion.returns('1.0.0');
             mf2.isModelFile.returns(true);
-            mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
+            mf2.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
             modelManager.addModelFile(mf2);
             let ns = modelManager.getNamespaces();
             ns.should.include('org.wow@1.0.0');
@@ -995,36 +1008,36 @@ concept Bar {
 
     });
 
-    describe('#getType', function() {
-        it('should throw an error for a primitive type', function() {
+    describe('#getType', function () {
+        it('should throw an error for a primitive type', function () {
             modelManager.addCTOModel(modelBase);
-            (function() {
+            (function () {
                 modelManager.getType('String');
             }).should.throw(TypeNotFoundException);
         });
 
-        it('should throw an error for a namespace that does not exist', function() {
+        it('should throw an error for a namespace that does not exist', function () {
             modelManager.addCTOModel(modelBase);
-            (function() {
+            (function () {
                 modelManager.getType('org.acme.nosuchns.SimpleAsset');
             }).should.throw(TypeNotFoundException, /org.acme.nosuchns/);
         });
 
-        it('should throw an error for an empty namespace', function() {
+        it('should throw an error for an empty namespace', function () {
             modelManager.addCTOModel(modelBase);
-            (function() {
+            (function () {
                 modelManager.getType('NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
-        it('should throw an error for a type that does not exist', function() {
+        it('should throw an error for a type that does not exist', function () {
             modelManager.addCTOModel(modelBase);
-            (function() {
+            (function () {
                 modelManager.getType('org.acme.base@1.0.0.NoSuchAsset');
             }).should.throw(TypeNotFoundException, /NoSuchAsset/);
         });
 
-        it('should return the class declaration for a valid type', function() {
+        it('should return the class declaration for a valid type', function () {
             modelManager.addCTOModel(modelBase);
             const declaration = modelManager.getType('org.acme.base@1.0.0.AbstractAsset');
             declaration.getFullyQualifiedName().should.equal('org.acme.base@1.0.0.AbstractAsset');
@@ -1158,7 +1171,7 @@ concept Bar {
             }
             `, 'test.cto');
             const filtered = modelManager.filter(declaration =>
-                ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
+                ['concerto@1.0.0.Concept', 'test@1.0.0.Person', 'child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
             filtered.validateModelFiles();
         });
     });

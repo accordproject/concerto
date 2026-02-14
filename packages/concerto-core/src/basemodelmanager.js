@@ -110,7 +110,7 @@ class BaseModelManager {
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
         this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
 
-        if(options?.addMetamodel) {
+        if (options?.addMetamodel) {
             this.addModelFile(this.metamodelModelFile);
         }
     }
@@ -129,7 +129,7 @@ class BaseModelManager {
      */
     addRootModel() {
         // create the versioned concerto namespace
-        const {rootModelAst, rootModelCto, rootModelFile} = getRootModel();
+        const { rootModelAst, rootModelCto, rootModelFile } = getRootModel();
         const m = new ModelFile(this, rootModelAst, rootModelCto, rootModelFile);
 
         // add the versioned concerto namespace
@@ -180,7 +180,7 @@ class BaseModelManager {
      * @private
      */
     addDecoratorModel() {
-        const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
+        const { decoratorModelAst, decoratorModelCto, decoratorModelFile } = getDecoratorModel();
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
@@ -217,14 +217,14 @@ class BaseModelManager {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
-        if(!modelFile.getVersion()) {
+        if (!modelFile.getVersion()) {
             throw new Error(`Cannot add an unversioned namespace: ${modelFile.getNamespace()}`);
         }
 
         if (!this.modelFiles[modelFile.getNamespace()]) {
             if (!disableValidation) {
                 // Structural validation against the Metamodel
-                if(this.options?.metamodelValidation){
+                if (this.options?.metamodelValidation) {
                     this.validateAst(modelFile);
                 }
 
@@ -250,7 +250,7 @@ class BaseModelManager {
         const { version: modelFileVersion } = ModelUtil.parseNamespace(ModelUtil.getNamespace(modelFile.getAst().$class));
         const { version: metamodelVersion } = ModelUtil.parseNamespace(MetaModelNamespace);
 
-        if (modelFileVersion !== metamodelVersion){
+        if (modelFileVersion !== metamodelVersion) {
             throw new MetamodelException(`Model file version ${modelFileVersion} does not match metamodel version ${metamodelVersion}`);
         }
 
@@ -263,7 +263,12 @@ class BaseModelManager {
             // Use deserialization to validate the AST
             this.getSerializer().fromJSON(modelFile.getAst());
         } catch (err) {
-            throw new MetamodelException(err.message);
+            // Rethrow as a MetamodelException
+            if (this.isStrict()) {
+                throw new MetamodelException(err.message);
+            } else {
+                debug('Invalid metamodel found. This will throw an exception in a future release.', err.message);
+            }
         }
 
         if (!alreadyHasMetamodel) {
@@ -316,7 +321,7 @@ class BaseModelManager {
         if (typeof modelFile === 'string') {
             const { ast } = this.processFile(fileName, modelFile);
             let m = new ModelFile(this, ast, modelFile, fileName);
-            return this.updateModelFile(m,fileName,disableValidation);
+            return this.updateModelFile(m, fileName, disableValidation);
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
             if (!existing) {
@@ -418,7 +423,7 @@ class BaseModelManager {
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
-        if(!fileDownloader) {
+        if (!fileDownloader) {
             fileDownloader = new FileDownloader(new DefaultFileLoader(this.processFile), (file) => MetaModelUtil.getExternalImports(file.ast));
         }
 
@@ -484,7 +489,7 @@ class BaseModelManager {
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
-            if(includeConcertoNamespace || (!EXCLUDE_NS.includes(ns))) {
+            if (includeConcertoNamespace || (!EXCLUDE_NS.includes(ns))) {
                 result.push(this.modelFiles[ns]);
             }
         }
@@ -517,7 +522,7 @@ class BaseModelManager {
                 let fileIdentifier = file.fileName;
                 fileName = fsPath.basename(fileIdentifier);
             }
-            models.push({ 'name' : fileName, 'content' : file.definitions });
+            models.push({ 'name': fileName, 'content': file.definitions });
         });
         return models;
     }
@@ -766,10 +771,10 @@ class BaseModelManager {
      */
     fromAst(ast, options) {
         this.clearModelFiles();
-        ast.models.forEach( model => {
-            if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
-                const modelFile = new ModelFile( this, model );
-                this.addModelFile( modelFile, null, null, true );
+        ast.models.forEach(model => {
+            if (!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
+                const modelFile = new ModelFile(this, model);
+                this.addModelFile(modelFile, null, null, true);
             }
         });
         if (!options?.disableValidation) {
@@ -783,7 +788,7 @@ class BaseModelManager {
      * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve,includeConcertoNamespaces) {
+    getAst(resolve, includeConcertoNamespaces) {
         const result = {
             $class: `${MetaModelNamespace}.Models`,
             models: [],
@@ -816,8 +821,8 @@ class BaseModelManager {
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @returns {BaseModelManager} - the filtered ModelManager
      */
-    filter(predicate){
-        const modelManager = new BaseModelManager({...this.options}, this.processFile);
+    filter(predicate) {
+        const modelManager = new BaseModelManager({ ...this.options }, this.processFile);
         const removedFqns = []; // the list of FQN of types that have been removed
 
         // remove the types from model files, populating removedFqns
@@ -830,30 +835,30 @@ class BaseModelManager {
         filteredModels = filteredModels.filter(mf => !mf.isSystemModelFile());
 
         // now update filteredModels to remove any imports of removed types
-        const modelsWithValidImports = filteredModels.map( modelFile => {
+        const modelsWithValidImports = filteredModels.map(modelFile => {
             const ast = modelFile.getAst();
             let modified = false;
-            removedFqns.forEach( removedFqn => {
+            removedFqns.forEach(removedFqn => {
                 const ns = ModelUtil.getNamespace(removedFqn);
                 const isSystemImport = ns.startsWith('concerto@') || ns === 'concerto';
-                if(!isSystemImport && modelFile.getImports().includes(removedFqn)) {
+                if (!isSystemImport && modelFile.getImports().includes(removedFqn)) {
                     const removeName = ModelUtil.getShortName(removedFqn);
                     const removeNamespace = ModelUtil.getNamespace(removedFqn);
                     ast.imports = ast.imports.filter(imp => {
                         const remove = ModelUtil.getShortName(imp.$class) === 'ImportType' &&
                             imp.name === removeName &&
                             imp.namespace === removeNamespace;
-                        if(remove) {
+                        if (remove) {
                             modified = true;
                         }
                         return !remove;
                     });
-                    ast.imports.forEach( imp => {
-                        if(imp.namespace === removeNamespace) {
-                            if(ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
+                    ast.imports.forEach(imp => {
+                        if (imp.namespace === removeNamespace) {
+                            if (ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
                                 imp.types = imp.types.filter((type) => {
                                     const remove = (type === removeName);
-                                    if(remove) {
+                                    if (remove) {
                                         modified = true;
                                     }
                                     return !remove;
@@ -863,7 +868,7 @@ class BaseModelManager {
                     });
                 }
             });
-            if(modified) {
+            if (modified) {
                 return new ModelFile(this, ast, undefined, modelFile.fileName);
             }
             else {
