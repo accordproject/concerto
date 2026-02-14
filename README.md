@@ -13,7 +13,19 @@ Concerto
 <img src="https://img.shields.io/badge/Accord%20Project-Join%20Discord-blue" alt="Join the Accord Project Discord"/>
 </a>
 
+
 A lightweight schema language and runtime for business concepts.
+
+## Table of Contents
+
+- [Quick Example](#quick-example)
+- [Getting Started](#getting-started)
+- [Development](#development)
+- [Project Structure](#structure-of-the-code)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Quick Example
 
 ```cs
 concept Person identified by name  {
@@ -76,7 +88,43 @@ $ concerto compare --old model.cto --new model-with-changes.cto
 - Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
 - Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
 
+## Development
+
+Want to contribute? Here's how to get set up for development.
+
+### Prerequisites
+
+- Node.js >= 18
+- npm >= 10
+
+### Setup
+
+```bash
+# Fork and clone the repository
+git clone https://github.com/<YOUR_USERNAME>/concerto.git
+cd concerto
+
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+```
+
+### Running Tests
+
+```bash
+# Run all tests (must build first)
+npm test
+
+# Run tests for a specific package
+npm test -w @accordproject/concerto-core
+```
+
+For more details, check out the [DEVELOPERS.md](./DEVELOPERS.md) guide.
+
 ## Structure of the Code
+
 
 Top level repository (concerto), with sub packages. Each sub-package is published as an independent npm module using npm workspaces:
 * [concerto-core](https://github.com/accordproject/concerto/tree/master/packages/concerto-core) : core library for model management/parsing/validation/serialization
