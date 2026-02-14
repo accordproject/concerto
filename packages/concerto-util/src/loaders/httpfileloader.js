@@ -14,6 +14,8 @@
 
 'use strict';
 
+const debug = require('debug')('concerto:HTTPFileLoader');
+
 /**
  * Loads Files from an HTTP(S) URL using fetch.
  * @class
@@ -55,6 +57,7 @@ class HTTPFileLoader {
             };
         }
 
+        debug('loading', requestUrl);
         const response = await fetch(requestUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP request failed with status: ${response.status}`);
