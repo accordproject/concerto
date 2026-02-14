@@ -1202,8 +1202,14 @@ function peg$parse(input, options) {
   	return `${ns}@${version}`;
   };
   var peg$f104 = function(ns) {
-  	return ns;
-  };
+      if (ns.version) {
+        return {
+          name: ns.name,
+          namespace: ns.namespace
+        };
+      }
+      return ns;
+    };
   var peg$f105 = function(u) {
     return u;
   };

@@ -1699,8 +1699,14 @@ QualifiedNamespaceDeclaration
 
 Namespace
   = NamespaceToken __ ns:QualifiedNamespaceDeclaration __ {
-  	return ns;
-  }
+      if (ns.version) {
+        return {
+          name: ns.name,
+          namespace: ns.namespace
+        };
+      }
+      return ns;
+    }
 
 FromUri
   = FromToken __ u:$URI __ {
