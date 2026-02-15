@@ -275,19 +275,19 @@ describe('ModelManager', () => {
 
     describe('#addModel', () => {
         it('should throw for a bad metamodel AST', () => {
-            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const modelmanager = new ModelManager({ metamodelValidation: true, strict: true });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme@1.0.0',
                 undeclared: []
             };
             (() => {
-                basemodelmanager.addModel(ast, undefined, 'origFile');
+                modelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Unexpected properties for type concerto.metamodel@1.0.0.Model: undeclared');
         });
 
         it('should warn for a bad metamodel AST', () => {
-            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const modelmanager = new ModelManager({ metamodelValidation: true, strict: false });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
                 namespace: 'org.acme',
@@ -295,7 +295,7 @@ describe('ModelManager', () => {
             };
             // Logs debug warning instead of throwing
             (() => {
-                basemodelmanager.addModel(ast, undefined, 'origFile');
+                modelmanager.addModel(ast, undefined, 'origFile');
             }).should.not.throw();
         });
 
