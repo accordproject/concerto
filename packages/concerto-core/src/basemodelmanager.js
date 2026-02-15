@@ -225,7 +225,7 @@ class BaseModelManager {
         const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
-        if (!modelFile.getVersion()) {
+        if (this.isStrict() && !modelFile.getVersion()) {
             throw new Error(`Cannot add an unversioned namespace: ${modelFile.getNamespace()}`);
         }
 
