@@ -290,7 +290,7 @@ describe('ModelManager', () => {
             const modelmanager = new ModelManager({ metamodelValidation: true, strict: false });
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 undeclared: []
             };
             // Logs debug warning instead of throwing
