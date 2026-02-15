@@ -458,7 +458,7 @@ describe('ModelManager', () => {
             }`;
             (() => {
                 modelManager.addModelFiles([mf1, mf2]);
-            }).should.throw(/Expected.* Line 2 column 47/);
+            }).should.throw(/Expected.* line 2 column 47/);
         });
 
         it('should return the error message for an invalid model file with a file name', () => {

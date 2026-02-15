@@ -119,14 +119,14 @@ describe('JSONPopulator', () => {
         it('should convert to dates from ISO8601 strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519Z');
+            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519Z', {});
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal(dayjs.utc('2016-10-20T05:34:03.519Z').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
         });
 
         it('should convert to dates from fully qualified date-time strings with offset', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519+02:00');
+            let value = jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519+02:00', {});
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2016-10-20T03:34:03.519Z');
         });
 
@@ -134,7 +134,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519');
+                jsonPopulator.convertToObject(field, '2016-10-20T05:34:03.519', {});
             }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
         });
 
@@ -142,7 +142,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, '2020-01-01');
+                jsonPopulator.convertToObject(field, '2020-01-01', {});
             }).should.throw(ValidationException, /format YYYY-MM-DDTHH:mm:ss\[Z\]/);
         });
 
@@ -150,7 +150,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             let dayjsObj = dayjs.utc('2016-10-20T05:34:03Z');
-            let value = jsonPopulator.convertToObject(field, dayjsObj);
+            let value = jsonPopulator.convertToObject(field, dayjsObj, {});
             value.isSame(dayjsObj).should.be.true;
         });
 
@@ -158,7 +158,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, 'abc');
+                jsonPopulator.convertToObject(field, 'abc', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
@@ -166,7 +166,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
@@ -174,7 +174,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `DateTime`/);
         });
 
@@ -182,7 +182,7 @@ describe('JSONPopulator', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false); // acceptResourcesForRelationships, utcOffset, strictQualifiedDateTimes
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {});
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2016-10-20T05:34:03.519Z');
         });
 
@@ -190,7 +190,7 @@ describe('JSONPopulator', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 0, false);
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2020-01-01');
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2020-01-01', {});
             value.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]').should.equal('2020-01-01T00:00:00.000Z');
         });
 
@@ -198,7 +198,7 @@ describe('JSONPopulator', () => {
             let jsonPopulatorNonStrict = new JSONPopulator(false, false, 120, false); // utcOffset=120 minutes (+2 hours)
             let field = sinon.createStubInstance(Field);
             field.getType.returns('DateTime');
-            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519');
+            let value = jsonPopulatorNonStrict.convertToObject(field, '2016-10-20T05:34:03.519', {});
             value.format('YYYY-MM-DDTHH:mm:ss.SSSZ').should.equal('2016-10-20T07:34:03.519+02:00');
         });
 
@@ -206,7 +206,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
             (() => {
-                jsonPopulator.convertToObject(field, '32768');
+                jsonPopulator.convertToObject(field, '32768', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
@@ -214,7 +214,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
@@ -222,14 +222,14 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Integer`/);
         });
 
         it('should convert to integers from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Integer');
-            let value = jsonPopulator.convertToObject(field, 32768);
+            let value = jsonPopulator.convertToObject(field, 32768, {});
             value.should.equal(32768);
         });
 
@@ -237,7 +237,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             (() => {
-                jsonPopulator.convertToObject(field, '32768');
+                jsonPopulator.convertToObject(field, '32768', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
@@ -245,7 +245,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
@@ -253,14 +253,14 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
         it('should convert to longs from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
-            let value = jsonPopulator.convertToObject(field, 32768);
+            let value = jsonPopulator.convertToObject(field, 32768, {});
             value.should.equal(32768);
         });
 
@@ -268,7 +268,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Long');
             (() => {
-                jsonPopulator.convertToObject(field, 32.768);
+                jsonPopulator.convertToObject(field, 32.768, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Long`/);
         });
 
@@ -276,7 +276,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Double');
             (() => {
-                jsonPopulator.convertToObject(field, '32.768');
+                jsonPopulator.convertToObject(field, '32.768', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
@@ -284,7 +284,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Double');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
@@ -292,21 +292,21 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Double');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Double`/);
         });
 
         it('should convert to doubles from numbers', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Double');
-            let value = jsonPopulator.convertToObject(field, 32.768);
+            let value = jsonPopulator.convertToObject(field, 32.768, {});
             value.should.equal(32.768);
         });
 
         it('should convert to booleans from true', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
-            let value = jsonPopulator.convertToObject(field, true);
+            let value = jsonPopulator.convertToObject(field, true, {});
             value.should.equal(true);
         });
 
@@ -314,7 +314,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
             (() => {
-                jsonPopulator.convertToObject(field, 'true');
+                jsonPopulator.convertToObject(field, 'true', {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
@@ -322,7 +322,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
             (() => {
-                jsonPopulator.convertToObject(field, 32.768);
+                jsonPopulator.convertToObject(field, 32.768, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
@@ -330,7 +330,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
@@ -338,14 +338,14 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('Boolean');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `Boolean`/);
         });
 
         it('should convert to strings from strings', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
-            let value = jsonPopulator.convertToObject(field, 'hello world');
+            let value = jsonPopulator.convertToObject(field, 'hello world', {});
             value.should.equal('hello world');
         });
 
@@ -353,7 +353,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
             (() => {
-                jsonPopulator.convertToObject(field, 32.768);
+                jsonPopulator.convertToObject(field, 32.768, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
@@ -361,7 +361,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
             (() => {
-                jsonPopulator.convertToObject(field, null);
+                jsonPopulator.convertToObject(field, null, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
@@ -369,7 +369,7 @@ describe('JSONPopulator', () => {
             let field = sinon.createStubInstance(Field);
             field.getType.returns('String');
             (() => {
-                jsonPopulator.convertToObject(field, undefined);
+                jsonPopulator.convertToObject(field, undefined, {});
             }).should.throw(ValidationException, /Expected value at path `\$` to be of type `String`/);
         });
 
