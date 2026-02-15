@@ -24,7 +24,7 @@ describe('TypedStack', function () {
     describe('#push', function() {
         it('check push with wrong type', function() {
             const ts = new TypedStack('ROOT');
-            assert.throws(function() {ts.push(1, String);}, /.+Did not find expected type Function as argument to push. Found: 1/, 'did not throw with expected message');
+            assert.throws(function() {ts.push(1, String);}, /.+Did not find expected type String as argument to push. Found: 1/, 'did not throw with expected message');
         });
 
     });

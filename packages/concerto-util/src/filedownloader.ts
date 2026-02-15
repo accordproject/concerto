@@ -76,10 +76,6 @@ class FileDownloader<TFile = unknown> {
 
         const downloadedUris = new Set<string>();
 
-        if (!options) {
-            options = {};
-        }
-
         const jobs: Array<DownloadJob<TFile>> = flatten(files.map(file => {
             const externalImports = this.getExternalImports(file);
             return Object.keys(externalImports).map(importDeclaration => ({
