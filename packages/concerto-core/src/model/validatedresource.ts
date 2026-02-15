@@ -127,4 +127,4 @@ class ValidatedResource extends Resource {
     }
 }
 
-module.exports = ValidatedResource;
+export = ValidatedResource;

@@ -1,15 +1,11 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const { ModelFile, ModelManager } = require('@accordproject/concerto-core');
-/* eslint-enable @typescript-eslint/no-require-imports */
-
+import { ModelFile, ModelManager } from '@accordproject/concerto-core';
 import { Parser } from '@accordproject/concerto-cto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Compare, CompareResult, compareResultToString } from '../../src';
 import { defaultCompareConfig } from '../../src/compare-config';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-async function getModelFile(modelManager: any, fileName: string) {
+async function getModelFile(modelManager: ModelManager, fileName: string) {
     const filePath = path.resolve(__dirname, '..', 'fixtures', fileName);
     const fileContents = await fs.readFile(filePath, 'utf-8');
     const metamodel = Parser.parse(fileContents);
@@ -19,13 +15,12 @@ async function getModelFile(modelManager: any, fileName: string) {
 async function getModelFiles(
     aFileName: string,
     bFileName: string,
-): Promise<[a: any, b: any]> {
+): Promise<[a: ModelFile, b: ModelFile]> {
     const modelManager = new ModelManager();
     const a = await getModelFile(modelManager, aFileName);
     const b = await getModelFile(modelManager, bFileName);
     return [a, b];
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 test('should convert results into readable strings', () => {
     [

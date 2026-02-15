@@ -58,4 +58,4 @@ function Globalize(locale) {
 Globalize.messageFormatter = messageFormatter;
 Globalize.formatMessage = formatMessage;
 
-module.exports = Globalize;
+export = Globalize;

@@ -28,6 +28,35 @@ const minMax = require('dayjs/plugin/minMax');
 dayjs.extend(minMax);
 const duration = require('dayjs/plugin/duration');
 dayjs.extend(duration);
+import type Factory = require('../factory');
+import type ModelManager = require('../modelmanager');
+import type Declaration = require('../introspect/declaration');
+import type ClassDeclaration = require('../introspect/classdeclaration');
+import type RelationshipDeclaration = require('../introspect/relationshipdeclaration');
+import type MapDeclaration = require('../introspect/mapdeclaration');
+import type Resource = require('../model/resource');
+import Field = require('../introspect/field');
+
+
+type Stack<T> = {
+    push(value: T, expectedType?: unknown): void;
+    pop(expectedType?: unknown): T;
+    peek?(expectedType?: unknown): T;
+    stack: T[];
+};
+
+type JsonPopulatorParameters = {
+    jsonStack: Stack<String | { [key: string]: unknown; $class: string } | { [key: string]: unknown; $class: string }[]>;
+    resourceStack: Stack<Resource>;
+    path?: Stack<string>;
+    factory: Factory;
+    modelManager: ModelManager;
+    acceptResourcesForRelationships?: boolean;
+    utcOffset?: number;
+    strictQualifiedDateTimes?: boolean;
+};
+
+type VisitorTarget = Declaration | Field | ClassDeclaration | MapDeclaration | RelationshipDeclaration;
 
 /**
  * Get all properties on a resource object that both have a value and are not system properties.
@@ -90,9 +119,9 @@ function validateProperties(properties, classDeclaration) {
  * @memberof module:concerto-core
  */
 class JSONPopulator {
-    acceptResourcesForRelationships: any;
-    utcOffset: any;
-    strictQualifiedDateTimes: any;
+    acceptResourcesForRelationships: boolean | undefined;
+    utcOffset: number;
+    strictQualifiedDateTimes: boolean;
     /**
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
@@ -119,15 +148,15 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing, parameters: any = {}) {
+    visit(thing: VisitorTarget, parameters: JsonPopulatorParameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
         if (thing.isClassDeclaration?.()) {
-            return this.visitClassDeclaration(thing, parameters);
+            return this.visitClassDeclaration(thing as ClassDeclaration, parameters);
         } else if (thing.isMapDeclaration?.()) {
-            return this.visitMapDeclaration(thing, parameters);
+            return this.visitMapDeclaration(thing as MapDeclaration, parameters);
         } else if (thing.isRelationship?.()) {
-            return this.visitRelationshipDeclaration(thing, parameters);
+            return this.visitRelationshipDeclaration(thing as RelationshipDeclaration, parameters);
         } else if (thing.isTypeScalar?.()) {
             return this.visitField(thing.getScalarField(), parameters);
         } else if (thing.isField?.()) {
@@ -144,7 +173,7 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitClassDeclaration(classDeclaration, parameters) {
+    visitClassDeclaration(classDeclaration: ClassDeclaration, parameters: JsonPopulatorParameters) {
         const jsonObj = parameters.jsonStack.pop();
         const resourceObj = parameters.resourceStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
@@ -155,11 +184,11 @@ class JSONPopulator {
         properties.forEach((property) => {
             let value = jsonObj[property];
             if (value !== null) {
-                parameters.path.push(`.${property}`);
+                parameters.path?.push(`.${property}`);
                 parameters.jsonStack.push(value);
                 const classProperty = classDeclaration.getProperty(property);
                 resourceObj[property] = classProperty.accept(this,parameters);
-                parameters.path.pop();
+                parameters.path?.pop();
             }
         });
         return resourceObj;
@@ -172,18 +201,18 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitMapDeclaration(mapDeclaration, parameters) {
-        let jsonObj = parameters.jsonStack.pop();
+    visitMapDeclaration(mapDeclaration: MapDeclaration, parameters: JsonPopulatorParameters) {
+        const jsonObj = parameters.jsonStack.pop() as Record<string, unknown>;
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
         // Throws if Map contains reserved properties - a Map containing reserved Properties should not be serialized.
         getAssignableProperties(jsonObj, mapDeclaration);
 
-        jsonObj = new Map(Object.entries(jsonObj));
+        const objMap = new Map(Object.entries(jsonObj));
 
         let map = new Map();
 
-        jsonObj.forEach((value, key) => {
+        objMap.forEach((value, key) => {
 
             if (key === '$class') {
                 map.set(key, value);
@@ -213,7 +242,7 @@ class JSONPopulator {
      * @return {Object} value - the key or value belonging to the Map Entry.
      * @private
      */
-    processMapType(mapDeclaration, parameters, value, type) {
+    processMapType(mapDeclaration, parameters: JsonPopulatorParameters, value, type) {
         let decl;
         if (value && typeof value === 'object' && value.$class) {
             // Use the $class property to find the class declaration
@@ -247,18 +276,19 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitField(field, parameters) {
+    visitField(field, parameters: JsonPopulatorParameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
-        let jsonObj = parameters.jsonStack.pop();
+        let jsonObj = parameters.jsonStack.pop() as unknown;
         let result: any = null;
 
         if(field.isArray()) {
             result = [];
-            for(let n=0; n < jsonObj.length; n++) {
-                parameters.path.push(`[${n}]`);
-                const jsonItem = jsonObj[n];
-                result.push(this.convertItem(field,jsonItem, parameters));
-                parameters.path.pop();
+            const jsonArray = jsonObj as unknown[];
+            for(let n=0; n < jsonArray.length; n++) {
+                parameters.path?.push(`[${n}]`);
+                const jsonItem = jsonArray[n];
+                result.push(this.convertItem(field, jsonItem, parameters));
+                parameters.path?.pop();
             }
         } else {
             result = this.convertItem(field,jsonObj, parameters);
@@ -323,10 +353,10 @@ class JSONPopulator {
      * @param {Object} parameters - the parameters
      * @return {string} the text representation
      */
-    convertToObject(field, json, parameters: any = {}) {
+    convertToObject(field, json, parameters: JsonPopulatorParameters) {
         let result: any = null;
         parameters.path ?? (parameters.path = new TypedStack('$'));
-        const path = parameters.path.stack.join('');
+        const path = parameters.path?.stack.join('');
 
         switch(field.getType()) {
         case 'DateTime': {
@@ -400,7 +430,7 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visitRelationshipDeclaration(relationshipDeclaration, parameters) {
+    visitRelationshipDeclaration(relationshipDeclaration, parameters: JsonPopulatorParameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
         let jsonObj = parameters.jsonStack.pop();
         let result: any = null;
@@ -414,8 +444,9 @@ class JSONPopulator {
 
         if(relationshipDeclaration.isArray()) {
             result = [];
-            for(let n=0; n < jsonObj.length; n++) {
-                let jsonItem = jsonObj[n];
+            const jsonArray = jsonObj as { [key: string]: unknown, $class: string }[];
+            for(let n=0; n < jsonArray.length; n++) {
+                let jsonItem = jsonArray[n];
                 if (typeof jsonItem === 'string') {
                     result.push(Relationship.fromURI(parameters.modelManager, jsonItem, defaultNamespace, defaultType ));
                 } else {
@@ -443,28 +474,31 @@ class JSONPopulator {
         else {
             if (typeof jsonObj === 'string') {
                 result = Relationship.fromURI(parameters.modelManager, jsonObj, defaultNamespace, defaultType );
-            } else {
+            } else if (typeof jsonObj === 'object' && jsonObj !== null) {
+                const jsonObjAsObject = jsonObj as { [key: string]: unknown, $class: string };
                 if (!this.acceptResourcesForRelationships) {
                     throw new Error('Invalid JSON data. Found a value that is not a string: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
                 }
 
                 // this isn't a relationship, but it might be an object!
-                if(!jsonObj.$class) {
+                if(!jsonObjAsObject.$class) {
                     throw new Error('Invalid JSON data. Does not contain a $class type identifier: ' + jsonObj + ' for relationship ' + relationshipDeclaration );
                 }
-                const classDeclaration = parameters.modelManager.getType(jsonObj.$class);
+                const classDeclaration = parameters.modelManager.getType(jsonObjAsObject.$class);
 
                 // create a new instance, using the identifier field name as the ID.
                 let subResource = parameters.factory.newResource(classDeclaration.getNamespace(),
-                    classDeclaration.getName(), jsonObj[classDeclaration.getIdentifierFieldName()] );
-                parameters.jsonStack.push(jsonObj);
+                    classDeclaration.getName(), jsonObjAsObject[classDeclaration.getIdentifierFieldName()] );
+                parameters.jsonStack.push(jsonObjAsObject);
                 parameters.resourceStack.push(subResource);
                 classDeclaration.accept(this, parameters);
                 result = subResource;
+            } else {
+                throw new Error('Invalid JSON data. Found a value that is not a string or object: ' + jsonObj + ' for relationship ' + relationshipDeclaration);
             }
         }
         return result;
     }
 }
 
-module.exports = JSONPopulator;
+export = JSONPopulator;

@@ -14,6 +14,8 @@
 
 'use strict';
 
+type Constructor<T> = new (...args: unknown[]) => T;
+
 /**
  * Tracks a stack of typed instances. The type information is used to detect
  * overflow / underflow bugs by the caller. It also performs basic sanity
@@ -21,16 +23,15 @@
  * @class
  * @memberof module:concerto-core
  */
-class TypedStack {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public stack: any[];
+class TypedStack<T> {
+    public stack: T[];
 
     /**
    * Create the Stack with the resource at the head.
    * @param resource - the resource to be put at the head of the stack
    */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(resource: any) {
+    constructor(resource: T) {
         this.stack = [];
         this.push(resource);
     }
@@ -40,10 +41,9 @@ class TypedStack {
      * @param obj - the object being visited
      * @param expectedType - the expected type of the object being pushed
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    push(obj: any, expectedType?: any): void {
+    push(obj: T, expectedType?: Constructor<T>): void {
         if(expectedType && !(obj instanceof expectedType)) {
-            throw new Error('Did not find expected type ' + expectedType.constructor.name + ' as argument to push. Found: ' + obj.toString());
+            throw new Error('Did not find expected type ' + expectedType.name + ' as argument to push. Found: ' + obj?.toString());
         }
 
         this.stack.push(obj);
@@ -54,8 +54,7 @@ class TypedStack {
      * @param expectedType - the type that should be the result of pop
      * @return the result of pop
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pop(expectedType?: any): any {
+    pop(expectedType?: Constructor<T>): T | undefined {
         this.peek(expectedType);
         return this.stack.pop();
     }
@@ -65,8 +64,7 @@ class TypedStack {
      * @param expectedType - the type that should be the result of pop
      * @return the result of peek
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    peek(expectedType?: any): any {
+    peek(expectedType?: Constructor<T>): T {
 
         if(this.stack.length < 1) {
             throw new Error('Stack is empty!');
@@ -74,7 +72,7 @@ class TypedStack {
 
         const result = this.stack[this.stack.length-1];
         if(expectedType && !(result instanceof expectedType)) {
-            throw new Error('Did not find expected type ' + expectedType + ' on head of stack. Found: ' + result);
+            throw new Error('Did not find expected type ' + expectedType.name + ' on head of stack. Found: ' + result);
         }
 
         return result;

@@ -195,4 +195,4 @@ class MapValueType extends Decorated {
     }
 }
 
-module.exports = MapValueType;
+export = MapValueType;

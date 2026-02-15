@@ -49,4 +49,4 @@ class AstModelManager extends BaseModelManager {
     }
 }
 
-module.exports = AstModelManager;
+export = AstModelManager;

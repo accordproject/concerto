@@ -258,4 +258,4 @@ class InstanceGenerator {
 
 }
 
-module.exports = InstanceGenerator;
+export = InstanceGenerator;

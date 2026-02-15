@@ -160,4 +160,4 @@ class Decorated {
     }
 }
 
-module.exports = Decorated;
+export = Decorated;

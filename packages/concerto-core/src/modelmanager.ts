@@ -17,6 +17,7 @@
 const Parser = require('@accordproject/concerto-cto').Parser;
 
 import BaseModelManager = require('./basemodelmanager');
+import type { ModelFileSource, ModelManagerOptions } from './types';
 
 const debug = require('debug')('concerto:BaseModelManager');
 
@@ -29,13 +30,15 @@ if (global === undefined) {
 /* eslint-enable no-unused-vars */
 
 // How to create a modelfile from a cto file
-const ctoProcessFile = (options: any) => (name: any, data: any) => {
+const ctoProcessFile = (options: ModelManagerOptions = {}): ((name: string | null, data: unknown) => ModelFileSource) => (name: string | null, data: unknown) => {
     // Clone individual properties to avoid options injection to Peggy.
     const parserOptions = { skipLocationNodes: options?.skipLocationNodes };
+    const content = typeof data === 'string' ? data : String(data);
+    const fileName = name ?? 'UNKNOWN';
     return {
-        ast: Parser.parse(data, name, parserOptions),
-        definitions: data,
-        fileName: name,
+        ast: Parser.parse(content, fileName, parserOptions),
+        definitions: content,
+        fileName,
     };
 };
 
@@ -59,7 +62,7 @@ class ModelManager extends BaseModelManager {
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      */
-    constructor(options: any) {
+    constructor(options: ModelManagerOptions = {}) {
         super(options, ctoProcessFile(options));
     }
 

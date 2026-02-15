@@ -843,4 +843,4 @@ class DecoratorManager {
 
 }
 
-module.exports = DecoratorManager;
+export = DecoratorManager;

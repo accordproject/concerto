@@ -14,6 +14,8 @@
 
 'use strict';
 
+import type { FileLoader } from './fileloader';
+
 /**
  * <p>
  * Manages a set of model file loaders, delegating to the first model file
@@ -23,9 +25,8 @@
  * @class
  * @memberof module:concerto-util
  */
-class CompositeFileLoader {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public fileLoaders: any[];
+class CompositeFileLoader<T = unknown> {
+    public fileLoaders: Array<FileLoader<T>>;
 
     /**
      * Create the CompositeFileLoader. Used to delegate to a set of FileLoaders.
@@ -38,8 +39,7 @@ class CompositeFileLoader {
      * Adds a FileLoader implemenetation to the FileLoader
      * @param fileLoader - The script to add to the ScriptManager
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    addFileLoader(fileLoader: any): void {
+    addFileLoader(fileLoader: FileLoader<T>): void {
         this.fileLoaders.push(fileLoader);
     }
 
@@ -48,8 +48,7 @@ class CompositeFileLoader {
      * @return The FileLoader registered
      * @private
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getFileLoaders(): any[] {
+    getFileLoaders(): Array<FileLoader<T>> {
         return this.fileLoaders;
     }
 
@@ -84,8 +83,7 @@ class CompositeFileLoader {
      * @param options - additional options
      * @return a promise to the File
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(url: string, options: any): Promise<any> {
+    load(url: string, options?: RequestInit): Promise<T> {
         for (let n = 0; n < this.fileLoaders.length; n++) {
             const ml = this.fileLoaders[n];
 

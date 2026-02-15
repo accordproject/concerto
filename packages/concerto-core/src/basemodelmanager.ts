@@ -27,6 +27,9 @@ const ModelUtil = require('./modelutil');
 const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const MetamodelException = require('./metamodelexception');
+import type { ModelFileSource, ModelManagerOptions } from './types';
+type ModelFileInstance = InstanceType<typeof ModelFile>;
+type ModelFileInput = string | ModelFileInstance;
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -48,7 +51,7 @@ if (global === undefined) {
 const debug = require('debug')('concerto:BaseModelManager');
 
 // How to create a modelfile from the external content
-const defaultProcessFile = (name, data) => {
+const defaultProcessFile = (name: string, data: unknown): ModelFileSource => {
     return {
         ast: data, // AST is input
         definitions: null, // No CTO file
@@ -100,9 +103,9 @@ class BaseModelManager {
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
-     * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
-     */
-    constructor(options, processFile) {
+    * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
+    */
+    constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
         this.processFile = processFile ? processFile : defaultProcessFile;
         this.modelFiles = {};
         this.factory = new Factory(this);
@@ -236,7 +239,7 @@ class BaseModelManager {
      * @throws {IllegalModelException}
      * @return {Object} The newly added model file (internal).
      */
-        addModelFile(modelFile: any, cto?: string | null, fileName?: string | null, disableValidation?: boolean) {
+        addModelFile(modelFile: ModelFileInstance, cto?: string | null, fileName?: string | null, disableValidation?: boolean) {
             const NAME = 'addModelFile';
         debug(NAME, 'addModelFile', modelFile, fileName);
 
@@ -285,8 +288,9 @@ class BaseModelManager {
         try {
             // Use deserialization to validate the AST
             this.getSerializer().fromJSON(modelFile.getAst());
-        } catch (err: any) {
-            throw new MetamodelException(err.message);
+        } catch (err: unknown) {
+            const error = err as Error;
+            throw new MetamodelException(error.message);
         }
 
         if (!alreadyHasMetamodel) {
@@ -372,12 +376,12 @@ class BaseModelManager {
      * @param {boolean} [disableValidation] - If true then the model files are not validated
      * @returns {Object[]} The newly added model files (internal).
      */
-    addModelFiles(modelFiles: any, fileNames?: string[] | null, disableValidation?: boolean) {
+    addModelFiles(modelFiles: ModelFileInput[], fileNames?: string[] | null, disableValidation?: boolean) {
         const NAME = 'addModelFiles';
         debug(NAME, 'addModelFiles', modelFiles, fileNames);
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
-        let newModelFiles: any[] = [];
+        let newModelFiles: ModelFileInstance[] = [];
 
         try {
             // create the model files
@@ -389,7 +393,7 @@ class BaseModelManager {
                     fileName = fileNames[n];
                 }
 
-                let m;
+                let m: ModelFileInstance;
                 if (typeof modelFile === 'string') {
                     const { ast } = this.processFile(fileName, modelFile);
                     m = new ModelFile(this, ast, modelFile, fileName);
@@ -437,21 +441,22 @@ class BaseModelManager {
      * @throws {IllegalModelException} if the models fail validation
      * @return {Promise} a promise when the download and update operation is completed.
      */
-    async updateExternalModels(options: any, fileDownloader?: any) {
+    async updateExternalModels(options?: RequestInit, fileDownloader?: { downloadExternalDependencies(files: ModelFileInstance[], options?: RequestInit): Promise<ModelFileSource[]> }) {
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
-        if(!fileDownloader) {
-            fileDownloader = new FileDownloader(new DefaultFileLoader(this.processFile), (file) => MetaModelUtil.getExternalImports(file.ast));
-        }
+        const downloader = fileDownloader ?? new FileDownloader(
+            new DefaultFileLoader(this.processFile),
+            (file) => MetaModelUtil.getExternalImports(file.ast)
+        );
 
         const originalModelFiles = {};
         Object.assign(originalModelFiles, this.modelFiles);
 
         try {
-            const externalModels = await fileDownloader.downloadExternalDependencies(this.getModelFiles(), options);
+            const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
-            const externalModelFiles: any[] = [];
+            const externalModelFiles: ModelFileInstance[] = [];
             externalModels.forEach((file) => {
                 const mf = new ModelFile(this, file.ast, file.definitions, file.fileName);
                 const existing = this.modelFiles[mf.getNamespace()];
@@ -501,9 +506,9 @@ class BaseModelManager {
      * @return {ModelFile[]} The ModelFiles registered
      * @private
      */
-    getModelFiles(includeConcertoNamespace?: boolean) {
+    getModelFiles(includeConcertoNamespace?: boolean): ModelFileInstance[] {
         let keys = Object.keys(this.modelFiles);
-        let result: any[] = [];
+        let result: ModelFileInstance[] = [];
 
         for (let n = 0; n < keys.length; n++) {
             const ns = keys[n];
@@ -522,9 +527,9 @@ class BaseModelManager {
      *  If true, external models are written to the file system. Defaults to true
      * @return {Array<{name:string, content:string}>} the name and content of each CTO file
      */
-    getModels(options) {
+    getModels(options?: { includeExternalModels?: boolean }) {
         const modelFiles = this.getModelFiles();
-        let models: any[] = [];
+        let models: Array<{ name: string; content: string | null }> = [];
         const opts = Object.assign({
             includeExternalModels: true,
         }, options);
@@ -845,7 +850,7 @@ class BaseModelManager {
 
         // remove the types from model files, populating removedFqns
         let filteredModels = Object.values(this.modelFiles)
-            .map((modelFile: any) => modelFile.filter(predicate, modelManager, removedFqns))
+            .map((modelFile: ModelFileInstance) => modelFile.filter(predicate, modelManager, removedFqns))
             .filter(Boolean);
 
         // remove concerto model files - as these are automatically added

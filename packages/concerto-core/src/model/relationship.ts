@@ -17,6 +17,8 @@
 const Identifiable = require('./identifiable');
 const ModelUtil = require('../modelutil');
 const ResourceId = require('./resourceid');
+import type ModelManager = require('../modelmanager');
+import type ClassDeclaration = require('../introspect/classdeclaration');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -55,7 +57,7 @@ class Relationship extends Identifiable {
      * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager: any, classDeclaration: any, ns: string, type: string, id: string, timestamp?: string) {
+    constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp?: string) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
         // we use this metatag to identify the instance as a relationship
         this.$class = 'Relationship';
@@ -95,4 +97,4 @@ class Relationship extends Identifiable {
     }
 }
 
-module.exports = Relationship;
+export = Relationship;

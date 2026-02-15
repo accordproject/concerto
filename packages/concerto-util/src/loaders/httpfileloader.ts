@@ -14,8 +14,10 @@
 
 'use strict';
 
+import type { FileLoader } from './fileloader';
+
 // Ensure fetch is recognized if not in global types
-declare const fetch: any;
+declare const fetch: (input: string | URL, init?: RequestInit) => Promise<{ ok: boolean; status: number; text(): Promise<string> }>;
 
 /**
  * Loads Files from an HTTP(S) URL using fetch.
@@ -23,16 +25,14 @@ declare const fetch: any;
  * @private
  * @memberof module:concerto-util
  */
-class HTTPFileLoader {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public processFile: (name: string, text: string) => any;
+class HTTPFileLoader<T> implements FileLoader<T> {
+    public processFile: (name: string, text: string) => T;
 
     /**
      * Create the HTTPFileLoader.
      * @param processFile - a function to apply to the content of the file
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(processFile: (name: string, text: string) => any) {
+    constructor(processFile: (name: string, text: string) => T) {
         this.processFile = processFile;
     }
 
@@ -52,8 +52,7 @@ class HTTPFileLoader {
      * @param options - additional options
      * @return a promise to the File
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async load(requestUrl: string, options: any): Promise<any> {
+    async load(requestUrl: string, options?: RequestInit): Promise<T> {
         if (!options) {
             options = {
                 method: 'GET',

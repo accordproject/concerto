@@ -36,4 +36,4 @@ class ValidationException extends BaseException {
     }
 }
 
-module.exports = ValidationException;
+export = ValidationException;

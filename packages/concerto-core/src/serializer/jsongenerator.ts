@@ -311,4 +311,4 @@ class JSONGenerator {
     }
 }
 
-module.exports = JSONGenerator;
+export = JSONGenerator;

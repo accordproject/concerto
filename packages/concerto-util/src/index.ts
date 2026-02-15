@@ -33,6 +33,7 @@ export const CompositeFileLoader = require('./loaders/compositefileloader');
 export const DefaultFileLoader = require('./loaders/defaultfileloader');
 export const GitHubFileLoader = require('./loaders/githubfileloader');
 export const HTTPFileLoader = require('./loaders/httpfileloader');
+export type { FileLoader } from './loaders/fileloader';
 
 // Writers
 export const Writer = require('./writer');

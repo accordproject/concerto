@@ -488,4 +488,4 @@ class DecoratorExtractor {
         };
     }
 }
-module.exports = DecoratorExtractor;
+export = DecoratorExtractor;

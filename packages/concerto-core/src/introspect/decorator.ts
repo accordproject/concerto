@@ -218,4 +218,4 @@ class Decorator {
     }
 }
 
-module.exports = Decorator;
+export = Decorator;

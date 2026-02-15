@@ -25,7 +25,7 @@ export const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-
  * @param truncateLength - Length at which to truncate the identifier
  * @returns - An identifier that meets the Concerto specification
  */
-export function normalizeIdentifier(identifier: any, truncateLength: number = -1): string {
+export function normalizeIdentifier(identifier: string | null | undefined, truncateLength: number = -1): string {
     const replacer = (_match: string, group1: string) => {
         let escapedChar = '';
         // Loop through characters with multiple code points

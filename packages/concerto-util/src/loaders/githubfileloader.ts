@@ -23,13 +23,12 @@ import HTTPFileLoader = require('./httpfileloader');
  * @private
  * @memberof module:concerto-util
  */
-class GitHubFileLoader extends HTTPFileLoader {
+class GitHubFileLoader<T> extends HTTPFileLoader<T> {
     /**
      * Create the GitHubFileLoader.
      * @param processFile - a function to apply to the content of the file
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(processFile: (name: string, text: string) => any) {
+    constructor(processFile: (name: string, text: string) => T) {
         super(processFile);
     }
 
@@ -49,8 +48,7 @@ class GitHubFileLoader extends HTTPFileLoader {
      * @param options - additional options
      * @return a promise to the File
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(url: string, options: any): Promise<any> {
+    load(url: string, options?: RequestInit): Promise<T> {
         const rewrittenUrl = 'https://raw.githubusercontent.com/' + url.substring(9);
         const result = super.load(rewrittenUrl, options);
         return result;

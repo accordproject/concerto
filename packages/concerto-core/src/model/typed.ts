@@ -214,4 +214,4 @@ class Typed {
     }
 }
 
-module.exports = Typed;
+export = Typed;

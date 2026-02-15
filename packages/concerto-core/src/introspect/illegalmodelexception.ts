@@ -65,4 +65,4 @@ class IllegalModelException extends BaseFileException {
     }
 }
 
-module.exports = IllegalModelException;
+export = IllegalModelException;

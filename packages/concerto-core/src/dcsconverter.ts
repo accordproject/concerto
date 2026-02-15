@@ -220,4 +220,4 @@ function yamlToJson(yamlString){
 }
 
 
-module.exports = { jsonToYaml, yamlToJson };
+export = { jsonToYaml, yamlToJson };

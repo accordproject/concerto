@@ -115,4 +115,4 @@ class ResourceId {
 
 }
 
-module.exports = ResourceId;
+export = ResourceId;

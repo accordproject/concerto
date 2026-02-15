@@ -206,4 +206,4 @@ class Serializer {
     }
 }
 
-module.exports = Serializer;
+export = Serializer;

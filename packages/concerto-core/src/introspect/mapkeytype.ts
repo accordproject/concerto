@@ -164,4 +164,4 @@ class MapKeyType extends Decorated {
     }
 }
 
-module.exports = MapKeyType;
+export = MapKeyType;

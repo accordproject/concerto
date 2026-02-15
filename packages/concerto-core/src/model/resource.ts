@@ -102,4 +102,4 @@ class Resource extends Identifiable {
 
 }
 
-module.exports = Resource;
+export = Resource;

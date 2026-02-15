@@ -56,4 +56,4 @@ class ConceptDeclaration extends ClassDeclaration {
     }
 }
 
-module.exports = ConceptDeclaration;
+export = ConceptDeclaration;

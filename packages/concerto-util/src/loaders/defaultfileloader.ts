@@ -28,13 +28,12 @@ import GitHubFileLoader = require('./githubfileloader');
  * @see See {@link CompositeFileLoader}
  * @memberof module:concerto-util
  */
-class DefaultFileLoader extends CompositeFileLoader {
+class DefaultFileLoader<T> extends CompositeFileLoader<T> {
     /**
      * Create the DefaultFileLoader.
      * @param processFile - a function to apply to the content of the file
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(processFile: (name: string, text: string) => any) {
+    constructor(processFile: (name: string, text: string) => T) {
         super();
         const http = new HTTPFileLoader(processFile);
         const github = new GitHubFileLoader(processFile);

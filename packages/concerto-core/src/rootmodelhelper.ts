@@ -37,5 +37,4 @@ function getRootModel() {
     return { rootModelFile, rootModelCto, rootModelAst: ast };
 }
 
-// FIX: Use CommonJS export style compatible with the consumer
 export = { getRootModel };

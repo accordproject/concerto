@@ -25,8 +25,17 @@ const slash = require('slash');
  * @param path - a path to the directory where to write the files
  * @param options - a set of options
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function writeModelsToFileSystem(files: any[], path: string, options: any = {}): void {
+export interface WritableModelFile {
+    fileName: string;
+    definitions: string;
+    external?: boolean;
+}
+
+export interface WriteModelsOptions {
+    includeExternalModels?: boolean;
+}
+
+export function writeModelsToFileSystem(files: WritableModelFile[], path: string, options: WriteModelsOptions = {}): void {
     if(!path){
         throw new Error('`path` is a required parameter of writeModelsToFileSystem');
     }

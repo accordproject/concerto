@@ -22,15 +22,15 @@ const decoratorModelAst = require('./decoratormodel.json');
  */
 function getDecoratorModel() {
     const decoratorModelFile = 'concerto_decorator_1.0.0.cto';
-    const ns = 'concerto.decorator@1.0.0'; // Define namespace variable
+    const ns = 'concerto.decorator@1.0.0';
     const decoratorModelCto = `namespace ${ns}
     abstract concept Decorator {}
     concept DotNetNamespace extends Decorator {
        o String namespace
     }`;
     const ast = JSON.parse(JSON.stringify(decoratorModelAst));
-    ast.namespace = ns; // <--- FIX: Explicitly set the namespace
+    ast.namespace = ns;
     return { decoratorModelFile, decoratorModelCto, decoratorModelAst: ast };
 }
 
-module.exports = { getDecoratorModel };
+export = { getDecoratorModel };

@@ -57,4 +57,4 @@ class TypeNotFoundException extends BaseException {
 
 }
 
-module.exports = TypeNotFoundException;
+export = TypeNotFoundException;

@@ -74,7 +74,7 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     return modelManager;
 }
 
-module.exports = {
+export = {
     newMetaModelManager,
     validateMetaModel,
     modelManagerFromMetaModel

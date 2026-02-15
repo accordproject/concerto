@@ -61,4 +61,4 @@ class EnumDeclaration extends ClassDeclaration {
     }
 }
 
-module.exports = EnumDeclaration;
+export = EnumDeclaration;

@@ -85,7 +85,7 @@ class Factory {
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
-    newResource(ns, type, id, options) {
+    newResource(ns, type, id?, options?) {
         const method = 'newResource';
         options = options || {};
 
@@ -174,7 +174,7 @@ class Factory {
      * @return {Resource} the new instance
      * @throws {TypeNotFoundException} if the type is not registered with the ModelManager
      */
-    newConcept(ns, type, id, options) {
+    newConcept(ns, type, id?, options?) {
         return this.newResource(ns, type, id, options);
     }
 
@@ -214,7 +214,7 @@ class Factory {
      * is specified, whether optional fields should be generated.
      * @return {Resource} A resource for the new transaction.
      */
-    newTransaction(ns, type, id, options) {
+    newTransaction(ns, type, id?, options?) {
         if (!ns) {
             throw new Error('ns not specified');
         } else if (!type) {
@@ -244,7 +244,7 @@ class Factory {
      * is specified, whether optional fields should be generated.
      * @return {Resource} A resource for the new event.
      */
-    newEvent(ns, type, id, options) {
+    newEvent(ns, type, id?, options?) {
         if (!ns) {
             throw new Error('ns not specified');
         } else if (!type) {
@@ -310,4 +310,4 @@ class Factory {
     }
 }
 
-module.exports = Factory;
+export = Factory;

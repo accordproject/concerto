@@ -48,4 +48,4 @@ function setCurrentTime(currentTime, utcOffset) {
     };
 }
 
-module.exports = { setCurrentTime };
+export = { setCurrentTime };

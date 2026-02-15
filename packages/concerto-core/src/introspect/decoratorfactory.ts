@@ -45,4 +45,4 @@ class DecoratorFactory {
 
 }
 
-module.exports = DecoratorFactory;
+export = DecoratorFactory;

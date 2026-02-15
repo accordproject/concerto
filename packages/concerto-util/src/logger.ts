@@ -37,8 +37,7 @@ const timestamp = () => (new Date()).toLocaleTimeString();
 * @param obj - the input obj to prettify
 * @returns - the prettified object
 */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const prettifyJson = (obj: any): any => {
+const prettifyJson = (obj: unknown): unknown => {
     return obj;
 };
 
@@ -47,8 +46,10 @@ const prettifyJson = (obj: any): any => {
 * @param level - the required log level. e.g. error, warn, info, debug, etc.
 * @param args - the input obj to prettify
 */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const defaultTransportShim = (level: string, ...args: any[]): void => {
+type LogLevel = keyof typeof levels;
+type Transport = Partial<Record<LogLevel, (...args: unknown[]) => void>>;
+
+const defaultTransportShim = (level: LogLevel, ...args: any[]): void => {
     let mutatedLevel = level;
     const data = args;
     let first = data.shift();
@@ -78,11 +79,10 @@ const defaultTransportShim = (level: string, ...args: any[]): void => {
     );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const defaultTransport: Record<string, any> = {};
+const defaultTransport: Record<LogLevel, (...args: unknown[]) => void> = {} as Record<LogLevel, (...args: unknown[]) => void>;
 Object.keys(levels).forEach(level => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defaultTransport[level] = (...args: any[]) => defaultTransportShim(level, ...args);
+    const typedLevel = level as LogLevel;
+    defaultTransport[typedLevel] = (...args: unknown[]) => defaultTransportShim(typedLevel, ...args);
 });
 
 /**
@@ -90,16 +90,14 @@ Object.keys(levels).forEach(level => {
  */
 class Logger {
     static level = 'info';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static transports: any[] = [ defaultTransport ];
+    static transports: Transport[] = [ defaultTransport ];
 
     /**
     * A reusable function for logging at multiple levels
     * @param level - the required log level. e.g. error, warn, info, debug, etc.
     * @param args - the input obj to prettify
     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static dispatch(level: string, ...args: any[]): void {
+    static dispatch(level: LogLevel, ...args: unknown[]): void {
         if (levels[level] > levels[this.level]){
             return;
         }
@@ -115,8 +113,7 @@ class Logger {
     * Add a custom transport for logging
     * @param transport - The transport object should have function for the usual logging operations e.g. error, warn, info, debug, etc.
     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static add(transport: any): void {
+    static add(transport: Transport): void {
         this.transports.push(transport);
     }
 
@@ -126,8 +123,7 @@ class Logger {
      * Prints to `stderr` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static error(...args: any[]): void{ this.dispatch('error', ...args); }
+    static error(...args: unknown[]): void{ this.dispatch('error', ...args); }
 
     /**
      * Write a warning statement to the console.
@@ -135,8 +131,7 @@ class Logger {
      * Prints to `stderr` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static warn(...args: any[]): void{ this.dispatch('warn', ...args); }
+    static warn(...args: unknown[]): void{ this.dispatch('warn', ...args); }
 
     /**
      * Write an info statement to the console.
@@ -144,8 +139,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static info(...args: any[]): void{ this.dispatch('info', ...args); }
+    static info(...args: unknown[]): void{ this.dispatch('info', ...args); }
 
     /**
      * Write an info statement to the console. Alias for `logger.log`
@@ -153,8 +147,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static log(...args: any[]): void{ this.info(...args); }
+    static log(...args: unknown[]): void{ this.info(...args); }
 
     /**
      * Write an http statement to the console.
@@ -162,8 +155,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static http(...args: any[]): void{ this.dispatch('http', ...args); }
+    static http(...args: unknown[]): void{ this.dispatch('http', ...args); }
 
     /**
      * Write a verbose log statement to the console.
@@ -171,8 +163,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static verbose(...args: any[]): void{ this.dispatch('verbose', ...args); }
+    static verbose(...args: unknown[]): void{ this.dispatch('verbose', ...args); }
 
     /**
      * Write a debug statement to the console.
@@ -180,8 +171,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static debug(...args: any[]): void{ this.dispatch('debug', ...args); }
+    static debug(...args: unknown[]): void{ this.dispatch('debug', ...args); }
 
     /**
      * Write a silly level statement to the console.
@@ -189,8 +179,7 @@ class Logger {
      * Prints to `stdout` with newline.
      * @param args - args
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static silly(...args: any[]): void{ this.dispatch('silly', ...args); }
+    static silly(...args: unknown[]): void{ this.dispatch('silly', ...args); }
 }
 
 export = Logger;

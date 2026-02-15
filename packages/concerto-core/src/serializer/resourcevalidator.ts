@@ -673,4 +673,4 @@ class ResourceValidator {
     }
 }
 
-module.exports = ResourceValidator;
+export = ResourceValidator;

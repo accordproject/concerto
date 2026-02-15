@@ -244,7 +244,7 @@ class EmptyValueGenerator {
      * @param {Function} valueSupplier - callback to obtain values.
      * @return {Array} an array
      */
-    getArray(valueSupplier: any): any[] {
+        getArray<T>(valueSupplier: () => T): T[] {
             return [];
     }
 
@@ -350,7 +350,7 @@ class SampleValueGenerator extends EmptyValueGenerator {
      * @param {Function} valueSupplier - callback to obtain values.
      * @return {Array} an array
      */
-    getArray(valueSupplier){
+    getArray<T>(valueSupplier: () => T): T[] {
         return [valueSupplier()];
     }
 
@@ -400,4 +400,4 @@ class ValueGeneratorFactory {
     }
 }
 
-module.exports = ValueGeneratorFactory;
+export = ValueGeneratorFactory;

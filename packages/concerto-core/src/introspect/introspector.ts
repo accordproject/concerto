@@ -89,4 +89,4 @@ class Introspector {
     }
 }
 
-module.exports = Introspector;
+export = Introspector;

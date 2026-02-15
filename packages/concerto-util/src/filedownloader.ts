@@ -19,19 +19,25 @@ const debug = require('debug')('concerto:FileDownloader');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const PromisePool = require('@supercharge/promise-pool');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const flatten = <T>(arr: any[]): T[] => [].concat(...arr);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const filterUndefined = <T>(arr: any[]): T[] => arr.filter(Boolean);
+import type { FileLoader } from './loaders/fileloader';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handleJobError = async (error: any, job: any) => {
-    const badHttpResponse = error.response && error.response.status && error.response.status !== 200;
-    const dnsFailure = error.code && error.code === 'ENOTFOUND';
+type ExternalImportMap = Record<string, string>;
+type DownloadJob<TFile> = {
+    downloadedUris: Set<string>;
+    url: string;
+    options: RequestInit;
+};
+
+const flatten = <T>(arr: T[][]): T[] => ([] as T[]).concat(...arr);
+const filterUndefined = <T>(arr: Array<T | undefined | null>): T[] => arr.filter((value): value is T => Boolean(value));
+
+const handleJobError = async (error: unknown, job: DownloadJob<unknown>) => {
+    const errLike = error as { response?: { status?: number }; code?: string };
+    const badHttpResponse = errLike.response && errLike.response.status && errLike.response.status !== 200;
+    const dnsFailure = errLike.code && errLike.code === 'ENOTFOUND';
     if(badHttpResponse || dnsFailure){
         const err = new Error(`Unable to download external model dependency '${job.url}'`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (err as any).code = 'MISSING_DEPENDENCY';
+        (err as { code?: string }).code = 'MISSING_DEPENDENCY';
         throw err;
     }
     throw new Error('Failed to load model file. Job: ' + job.url + ' Details: ' + error);
@@ -41,11 +47,9 @@ const handleJobError = async (error: any, job: any) => {
  * Downloads the transitive closure of a set of model files.
  * @memberof module:concerto-core
  */
-class FileDownloader {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public fileLoader: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public getExternalImports: any;
+class FileDownloader<TFile = unknown> {
+    public fileLoader: FileLoader<TFile>;
+    public getExternalImports: (file: TFile) => ExternalImportMap;
     public concurrency: number;
 
     /**
@@ -54,8 +58,7 @@ class FileDownloader {
      * @param getExternalImports - a function taking a file and returning new files
      * @param concurrency - the number of model files to download concurrently
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(fileLoader: any, getExternalImports: any, concurrency = 10) {
+    constructor(fileLoader: FileLoader<TFile>, getExternalImports: (file: TFile) => ExternalImportMap, concurrency = 10) {
         this.fileLoader = fileLoader;
         this.concurrency = concurrency;
         this.getExternalImports = getExternalImports;
@@ -67,18 +70,17 @@ class FileDownloader {
      * @param options - Options object passed to FileLoaders
      * @return a promise that resolves to Files[] for the external model files
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    downloadExternalDependencies(files: any[], options: any): Promise<any> {
+    downloadExternalDependencies(files: TFile[], options: RequestInit = {} as RequestInit): Promise<TFile[]> {
         const method = 'downloadExternalDependencies';
         debug(method);
 
-        const downloadedUris = new Set();
+        const downloadedUris = new Set<string>();
 
         if (!options) {
             options = {};
         }
 
-        const jobs = flatten(files.map(file => {
+        const jobs: Array<DownloadJob<TFile>> = flatten(files.map(file => {
             const externalImports = this.getExternalImports(file);
             return Object.keys(externalImports).map(importDeclaration => ({
                 downloadedUris: downloadedUris,
@@ -91,10 +93,8 @@ class FileDownloader {
             .withConcurrency(this.concurrency)
             .for(jobs)
             .handleError(handleJobError)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .process((x: any) => this.runJob(x, this.fileLoader))
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .then(({ results }: any) => filterUndefined(flatten(results)));
+            .process((x: DownloadJob<TFile>) => this.runJob(x, this.fileLoader))
+            .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
     }
 
     /**
@@ -103,8 +103,7 @@ class FileDownloader {
      * @param fileLoader - the loader to use to download model files.
      * @return a promise to the job results
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    runJob(job: any, fileLoader: any): Promise<any> {
+    runJob(job: DownloadJob<TFile>, fileLoader: FileLoader<TFile>): Promise<TFile[]> {
         const downloadedUris = job.downloadedUris;
         const options = job.options;
         const url = job.url;
@@ -114,8 +113,7 @@ class FileDownloader {
 
         debug('runJob', 'Loading', url);
         return fileLoader.load(url, options).
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            then(async (file: any) => {
+            then(async (file: TFile) => {
                 debug('runJob', 'Loaded', url, );
 
                 // get the external imports
@@ -132,8 +130,7 @@ class FileDownloader {
                     .withConcurrency(this.concurrency)
                     .for(importedUris)
                     .handleError(handleJobError)
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .process((uri: any) => {
+                    .process((uri: string) => {
                         if (!downloadedUris.has(uri)) {
                             // recurse and add a new job for the referenced URI
                             return this.runJob({
@@ -143,8 +140,7 @@ class FileDownloader {
                             }, fileLoader);
                         }
                     })
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .then(({ results }: any) => filterUndefined(flatten(results)));
+                    .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
 
                 return externalImportsFiles.concat([file]);
             });

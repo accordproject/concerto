@@ -34,4 +34,4 @@ class SecurityException extends BaseException {
 
 }
 
-module.exports = SecurityException;
+export = SecurityException;

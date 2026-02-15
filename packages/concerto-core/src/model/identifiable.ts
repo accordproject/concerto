@@ -128,4 +128,4 @@ class Identifiable extends Typed {
     }
 }
 
-module.exports = Identifiable;
+export = Identifiable;
