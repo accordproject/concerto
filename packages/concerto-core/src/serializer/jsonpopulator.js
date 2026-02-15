@@ -29,6 +29,8 @@ dayjs.extend(minMax);
 const duration = require('dayjs/plugin/duration');
 dayjs.extend(duration);
 
+const debug = require('debug')('concerto:JSONPopulator');
+
 /**
  * Get all properties on a resource object that both have a value and are not system properties.
  * @param {Object} resourceData JSON object representation of a resource.
@@ -105,7 +107,7 @@ class JSONPopulator {
         this.strictQualifiedDateTimes = strictQualifiedDateTimes !== undefined ? strictQualifiedDateTimes : true;
 
         if (process.env.TZ){
-            console.warn(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
+            debug(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
         }
     }
 
