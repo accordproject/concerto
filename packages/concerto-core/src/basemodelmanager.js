@@ -124,6 +124,14 @@ class BaseModelManager {
     }
 
     /**
+     * Returns the value of the strict option
+     * @returns {boolean} true if the strict has been set
+     */
+    isStrict() {
+        return this.strict;
+    }
+
+    /**
      * Adds root types
      * @private
      */
