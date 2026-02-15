@@ -15,6 +15,7 @@
 'use strict';
 
 import type { FileLoader } from './fileloader';
+const debug = require('debug')('concerto:HTTPFileLoader');
 
 // Ensure fetch is recognized if not in global types
 declare const fetch: (input: string | URL, init?: RequestInit) => Promise<{ ok: boolean; status: number; text(): Promise<string> }>;
@@ -62,8 +63,7 @@ class HTTPFileLoader<T> implements FileLoader<T> {
             };
         }
 
-        // eslint-disable-next-line no-console
-        console.log(requestUrl);
+        debug('loading', requestUrl);
         const response = await fetch(requestUrl, options);
         if (!response.ok) {
             throw new Error(`HTTP request failed with status: ${response.status}`);
