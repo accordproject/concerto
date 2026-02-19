@@ -23,7 +23,7 @@
     "tmp-promise": "3.0.3",
     "typescript": "5.7.2",
     "undici": "7.16.0",
-    "webpack": "5.96.1"
+    "webpack": "5.104.1"
   },
   "engines": {
     "node": ">=18",
