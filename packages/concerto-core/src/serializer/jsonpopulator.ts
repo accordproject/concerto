@@ -14,6 +14,7 @@
 
 'use strict';
 
+const debug = require('debug')('concerto:JSONPopulator');
 const { TypedStack } = require('@accordproject/concerto-util');
 const Relationship = require('../model/relationship');
 const Util = require('@accordproject/concerto-util').NullUtil;
@@ -137,7 +138,7 @@ class JSONPopulator {
         this.strictQualifiedDateTimes = strictQualifiedDateTimes !== undefined ? strictQualifiedDateTimes : true;
 
         if (process.env.TZ){
-            console.warn(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
+            debug(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
         }
     }
 
