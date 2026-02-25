@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-util",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-beta.1",
   "description": "Utilities for Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {

@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-core",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-beta.1",
   "description": "Core Implementation for the Concerto Modeling Language",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -80,9 +80,9 @@
   },
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",
-    "@accordproject/concerto-cto": "^4.0.0-alpha.2",
+    "@accordproject/concerto-cto": "4.0.0-beta.1",
     "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
-    "@accordproject/concerto-util": "^4.0.0-alpha.2",
+    "@accordproject/concerto-util": "4.0.0-beta.1",
     "debug": "4.3.7",
     "lorem-ipsum": "2.0.8",
     "randexp": "0.5.3",

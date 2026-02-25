@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-vocabulary",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-beta.1",
   "description": "Associate human-readable text to model declarations",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -36,7 +36,7 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@accordproject/concerto-core": "^4.0.0-alpha.2",
+    "@accordproject/concerto-core": "4.0.0-beta.1",
     "@istanbuljs/nyc-config-typescript": "1.0.2",
     "@types/jest": "28.1.1",
     "@types/node": "18.11.18",

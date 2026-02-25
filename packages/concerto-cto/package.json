@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-cto",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-beta.1",
   "description": "Parser for Concerto CTO files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -71,7 +71,7 @@
   "dependencies": {
     "@accordproject/concerto-codegen": "^3.16.2",
     "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
-    "@accordproject/concerto-util": "^4.0.0-alpha.2",
+    "@accordproject/concerto-util": "4.0.0-beta.1",
     "acorn": "^8.15.0",
     "schema-utils": "^4.3.3"
   },
