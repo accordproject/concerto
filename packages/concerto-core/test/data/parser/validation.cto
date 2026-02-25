@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-namespace classdeclation.validation
+namespace classdeclation.validation@1.0.0
 
 asset A identified by id {
   o String id
 }
 
-participant B extends A 
+participant B extends A
 {
 
 }

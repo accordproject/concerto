@@ -14,22 +14,22 @@
 
 'use strict';
 
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
 
-const MapDeclaration = require('../../lib/introspect/mapdeclaration');
-const MapKeyType = require('../../lib/introspect/mapkeytype');
-const MapValueType = require('../../lib/introspect/mapvaluetype');
+const MapDeclaration = require('../../src/introspect/mapdeclaration');
+const MapKeyType = require('../../src/introspect/mapkeytype');
+const MapValueType = require('../../src/introspect/mapvaluetype');
+const ModelManager = require('../../src/modelmanager');
+const ModelFile = require('../../src/introspect/modelfile');
 
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../lib/modelmanager');
 const Util = require('../composer/composermodelutility');
 const fs = require('fs');
 const path = require('path');
 
 const sinon = require('sinon');
-const ModelFile = require('../../lib/introspect/modelfile');
 const expect = require('chai').expect;
 
 
@@ -44,7 +44,6 @@ describe('MapDeclaration', () => {
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
         modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.test', 'mapdeclaration.cto');
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
     });
 
     describe('#constructor', () => {
@@ -71,44 +70,6 @@ describe('MapDeclaration', () => {
                     }
                 });
             }).should.throw(IllegalModelException);
-        });
-
-        it('should throw if no feature flag', () => {
-            process.env.ENABLE_MAP_TYPE = 'false';
-            (() =>
-            {
-                new MapDeclaration(modelFile, {
-                    $class: 'concerto.metamodel@1.0.0.MapDeclaration',
-                    name: 'MapPermutation1',
-                    key: {
-                        $class: 'concerto.metamodel@1.0.0.StringMapKeyType'
-                    },
-                    value: {
-                        $class: 'concerto.metamodel@1.0.0.StringMapValueType'
-                    }
-                });
-            }).should.throw(/MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true", or add {enableMapType: true} to the ModelManger options, to access this functionality/);
-            process.env.ENABLE_MAP_TYPE = 'true'; // enable after the test run. This is necessary to ensure functioning of other tests.
-        });
-
-        it('should throw if Map Type not enabled in ModelManager options', () => {
-            process.env.ENABLE_MAP_TYPE = 'false';
-            const mm = new ModelManager({enableMapType: false});
-            Util.addComposerModel(mm);
-            const introspectUtils = new IntrospectUtils(mm);
-            try {
-                introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
-            } catch (error) {
-                expect(error.message).to.equal('MapType feature is not enabled. Please set the environment variable "ENABLE_MAP_TYPE=true", or add {enableMapType: true} to the ModelManger options, to access this functionality.');
-            }
-        });
-
-        it('should not throw if Map Type is enabled in ModelManager options', () => {
-            const mm = new ModelManager({enableMapType: true});
-            Util.addComposerModel(mm);
-            const introspectUtils = new IntrospectUtils(mm);
-            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodkey.primitive.datetime.cto', MapDeclaration);
-            decl.validate();
         });
 
         it('should throw if invalid $class provided for Map Key', () => {
@@ -796,7 +757,7 @@ describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => 
     let resolvedModelManager;
 
     beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        modelManager = new ModelManager();
 
         const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
         const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
@@ -805,7 +766,7 @@ describe('MapDeclration - Test for MapDeclrations using Import Aliasing', () => 
         modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
         const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
         const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        resolvedModelManager = new ModelManager();
         const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
         const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);

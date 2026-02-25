@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Factory = require('../lib/factory');
-const ModelManager = require('../lib/modelmanager');
-const TypeNotFoundException = require('../lib/typenotfoundexception');
+const Factory = require('../src/factory');
+const ModelManager = require('../src/modelmanager');
+const TypeNotFoundException = require('../src/typenotfoundexception');
 const uuid = require('uuid');
 const Util = require('./composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -25,7 +25,7 @@ const should = require('chai').should();
 const sinon = require('sinon');
 
 describe('Factory', function() {
-    const namespace = 'org.acme.test';
+    const namespace = 'org.acme.test@1.0.0';
     const assetName = 'MyAsset';
 
     let factory;
@@ -36,7 +36,7 @@ describe('Factory', function() {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-        namespace org.acme.test
+        namespace org.acme.test@1.0.0
         abstract concept AbstractConcept {
             o String newValue
         }
@@ -95,6 +95,12 @@ describe('Factory', function() {
             (() => {
                 factory.newResource(namespace, 'AbstractAsset', 'MY_ID_1');
             }).should.throw(/AbstractAsset/);
+        });
+
+        it('should throw creating an instance with an ID that is non-identifiable', function() {
+            (() => {
+                factory.newResource(namespace, 'MyConcept', 'MY_ID_1');
+            }).should.throw(/Type is not identifiable/);
         });
 
         it('should create a new instance with a specified ID', function() {
@@ -192,7 +198,7 @@ describe('Factory', function() {
         it('should throw if concept is abstract', () => {
             (() => {
                 factory.newConcept(namespace, 'AbstractConcept');
-            }).should.throw(/Cannot instantiate the abstract type "AbstractConcept" in the "org.acme.test" namespace./);
+            }).should.throw(/Cannot instantiate the abstract type "AbstractConcept" in the "org.acme.test@1.0.0" namespace./);
         });
 
         it('should create a new concept', () => {
@@ -272,6 +278,14 @@ describe('Factory', function() {
             sinon.assert.calledOnce(spy);
             sinon.assert.calledWith(spy, namespace, 'MyTransaction', '111', { hello: 'world' });
             resource.transactionId.should.equal('111');
+        });
+
+    });
+
+    describe('#newId', () => {
+
+        it('should return a UUID', () => {
+            Factory.newId().should.not.be.undefined;
         });
 
     });

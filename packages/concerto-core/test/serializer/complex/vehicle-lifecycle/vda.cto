@@ -15,9 +15,9 @@
 /**
  * Model based on the DVLA vehicle definition and registration process
  */
-namespace org.vda
+namespace org.vda@1.0.0
 
-import composer.base.Person
+import composer.base@1.0.0.Person
 
 /**
  * Based on DVLA document V355/1

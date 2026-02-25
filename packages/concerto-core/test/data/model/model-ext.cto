@@ -17,10 +17,10 @@
  */
 
 // define the namespace for this model
-namespace org.acme.ext
+namespace org.acme.ext@1.0.0
 
-import org.acme.base.DerivedAsset
-import org.acme.base.MyTransaction
+import org.acme.base@1.0.0.DerivedAsset
+import org.acme.base@1.0.0.MyTransaction
 
 enum TrafficLight {
   o RED

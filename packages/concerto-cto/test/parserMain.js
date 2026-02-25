@@ -23,9 +23,9 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const parser = require('../lib/parser');
-const Parser = require('..').Parser;
-const ParseException = require('..').ParseException;
+const parser = require('../src/parser');
+const Parser = require('../src').Parser;
+const ParseException = require('../src').ParseException;
 
 /**
  * Get the name and content of all cto files
@@ -211,7 +211,7 @@ describe('parser', () => {
         });
         rejectedIdentifiers.forEach(id => {
             it(`Should not parse identifier '${id}' for concept`, () => {
-                const content = `namespace com.test
+                const content = `namespace com.test@1.0.0
             concept ${id} {}`;
                 (() => {
                     Parser.parse(content);
@@ -219,7 +219,7 @@ describe('parser', () => {
             });
 
             it(`Should not parse identifier '${id}' for property`, () => {
-                const content = `namespace com.test
+                const content = `namespace com.test@1.0.0
             concept Test {
                 o String ${id}
             }`;

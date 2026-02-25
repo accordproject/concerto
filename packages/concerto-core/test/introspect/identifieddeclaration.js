@@ -14,32 +14,26 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const IdentifiedDeclaration = require('../../lib/introspect/identifieddeclaration');
+const ModelManager = require('../../src/modelmanager');
+const IdentifiedDeclaration = require('../../src/introspect/identifieddeclaration');
 
 require('chai').should();
 
 describe('IdentifiedDeclaration', () => {
-
-    beforeEach(() => {
-    });
-
-    afterEach(() => {
-    });
 
     describe('#hasInstance', () => {
 
         it('should identify instance', () => {
             const mm = new ModelManager();
             mm.addCTOModel( `
-namespace test
+namespace test@1.0.0
 
 asset Order {
     o Double price
 }
             `, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             (order instanceof IdentifiedDeclaration).should.be.true;
         });
@@ -50,14 +44,14 @@ asset Order {
         it('should create a system identifier', () => {
             const mm = new ModelManager();
             mm.addCTOModel( `
-namespace test
+namespace test@1.0.0
 
 asset Order {
     o Double price
 }
             `, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(2);
             order.getIdentifierFieldName().should.equal('$identifier');
@@ -66,14 +60,14 @@ asset Order {
         it('should allow declaring system identifier', () => {
             const mm = new ModelManager();
             mm.addCTOModel( `
-namespace test
+namespace test@1.0.0
 
 asset Order {
     o Double price
 }
             `, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(2);
             order.getIdentifierFieldName().should.equal('$identifier');
@@ -82,7 +76,7 @@ asset Order {
         it('should allow declaring explicit identifier', () => {
             const mm = new ModelManager();
             mm.addCTOModel( `
-namespace test
+namespace test@1.0.0
 
 asset Order identified by sku {
     o String sku
@@ -90,7 +84,7 @@ asset Order identified by sku {
 }
             `, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(3); // XXX Assets always have an identifier
             order.getIdentifierFieldName().should.equal('sku');
@@ -103,7 +97,7 @@ asset Order identified by sku {
 
             (() => {
                 mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset Order identified by sku {
                     o String sku
@@ -114,15 +108,15 @@ asset Order identified by sku {
                 }
 
                             `, 'test.cto');
-            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test@1.0.0.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow overriding system identifier', () => {
-            const mm = new ModelManager();
+            const mm = new ModelManager({ skipLocationNodes: false });
 
             (() => {
                 mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset FancyOrder identified {
                     o String sku
@@ -137,7 +131,7 @@ asset Order identified by sku {
 
             (() => {
                 mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset Order identified by sku {
                     o Double price
@@ -149,7 +143,7 @@ asset Order identified by sku {
                 }
 
                             `, 'test.cto');
-            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test@1.0.0.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow overriding explicit identifier with an explicit identifier', () => {
@@ -157,7 +151,7 @@ asset Order identified by sku {
 
             (() => {
                 mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset Order identified by sku {
                     o Double price
@@ -169,7 +163,7 @@ asset Order identified by sku {
                 }
 
                             `, 'test.cto');
-            }).should.throw(/Super class test.Order has an explicit identifier sku that cannot be redeclared./);
+            }).should.throw(/Super class test@1.0.0.Order has an explicit identifier sku that cannot be redeclared./);
         });
 
         it('should not allow field called $identifier', () => {
@@ -177,7 +171,7 @@ asset Order identified by sku {
 
             (() => {
                 mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset Order {
                     o String $identifier
@@ -189,13 +183,13 @@ asset Order identified by sku {
             const mm = new ModelManager();
 
             mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 asset Order {
                     o String $foo
                 }`, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(2); // XXX Assets always have an identifier
         });
@@ -203,7 +197,7 @@ asset Order identified by sku {
         it('should allow abstract assets without an identifier', () => {
             const mm = new ModelManager();
             mm.addCTOModel( `
-                namespace test
+                namespace test@1.0.0
 
                 abstract asset Order {
                     o Double price
@@ -214,7 +208,7 @@ asset Order identified by sku {
                 }
                 `, 'test.cto');
 
-            const order = mm.getType('test.Order');
+            const order = mm.getType('test@1.0.0.Order');
             order.should.not.be.null;
             order.getProperties().length.should.equal(2); // XXX Assets always have an identifier
             order.isSystemIdentified().should.be.true;

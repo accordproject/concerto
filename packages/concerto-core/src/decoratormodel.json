@@ -1,0 +1,31 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "concerto.decorator@1.0.0",
+    "imports": [],
+    "declarations": [
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "Decorator",
+            "isAbstract": true,
+            "properties": []
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "DotNetNamespace",
+            "superType": {
+                "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                "name": "Decorator"
+            },
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "namespace",
+                    "isArray": false,
+                    "isOptional": false
+                }
+            ]
+        }
+    ]
+}

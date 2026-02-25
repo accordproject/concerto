@@ -1,42 +1,110 @@
 {
-  "name": "concerto",
-  "description": "Define and introspect data models",
-  "version": "3.25.0",
   "devDependencies": {
-    "@types/jest": "29.5.14",
-    "dayjs": "1.11.13",
-    "glob": "11.1.0",
-    "license-check-and-add": "4.0.5",
-    "lockfile-lint": "4.14.1",
-    "nyc": "17.1.0",
-    "semver": "7.6.3",
-    "syncpack": "14.0.0-alpha.32"
+    "@types/path-browserify": "^1.0.3",
+    "colors": "1.4.0",
+    "coveralls-next": "^5.0.0",
+    "dayjs": "1.11.10",
+    "eslint": "8.57.1",
+    "glob": "^7.2.0",
+    "jsdoc": "^4.0.2",
+    "license-check-and-add": "2.3.6",
+    "nyc": "15.1.0",
+    "semver": "7.5.4"
   },
   "engines": {
     "node": ">=18",
-    "npm": ">=10"
-  },
-  "private": true,
-  "repository": "accordproject/concerto",
-  "scripts": {
-    "build": "npm run build -ws",
-    "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
-    "licchk": "license-check-and-add check -f license-config.json",
-    "lint:deps": "syncpack lint",
-    "lint:deps:fix": "syncpack fix",
-    "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https",
-    "preinstall": "npm run lint:lockfile && npm run lint:deps",
-    "pretest": "npm run licchk",
-    "test": "npm test -ws"
+    "npm": ">=9"
   },
   "workspaces": [
     "packages/concerto-analysis",
     "packages/concerto-core",
+    "packages/concertino",
     "packages/concerto-cto",
-    "packages/concerto-types",
     "packages/concerto-util",
     "packages/concerto-vocabulary",
     "packages/concerto-linter",
     "packages/concerto-linter/default-ruleset"
-  ]
+  ],
+  "name": "concerto",
+  "description": "Monorepo for concerto packages",
+  "version": "4.0.0-beta.1",
+  "private": true,
+  "scripts": {
+    "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
+    "pretest": "npm run licchk",
+    "test": "npm run test --workspaces --if-present",
+    "licchk": "license-check-and-add",
+    "build": "npm run build:ordered",
+    "build:ordered": "npm run build:level0 && npm run build:level1 && npm run build:level2",
+    "build:level0": "npm run build -w packages/concerto-util && npm run build -w packages/concerto-linter",
+    "build:level1": "npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core",
+    "build:level2": "npm run build -w packages/concerto-analysis -w packages/concerto-vocabulary -w packages/concertino",
+    "build:parallel": "npm run build --workspaces --if-present"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto"
+  },
+  "license-check-and-add-config": {
+    "folder": ".",
+    "license": "HEADER",
+    "exact_paths_method": "EXCLUDE",
+    "exact_paths": [
+      ".git",
+      ".github",
+      ".gitattributes",
+      ".tern-project",
+      "node_modules",
+      "packages",
+      "softhsm",
+      "build.cfg",
+      "README.md",
+      "CONTRIBUTING.md",
+      "DEVELOPERS.md",
+      "NOTICES.md",
+      "CHARTER.md",
+      "ISSUE_TEMPLATE.md",
+      "MAINTAINERS.md",
+      "SECURITY.md",
+      "contrib-notes",
+      "log",
+      "LICENSE",
+      "HEADER",
+      "docs/",
+      "umd/",
+      "coverage",
+      ".DS_Store",
+      "packages/concerto-core/api.txt",
+      "coverage",
+      "index.d.ts",
+      "packages/concerto-core/introspect/parser.js",
+      "node_modules",
+      ".nyc-output"
+    ],
+    "file_type_method": "EXCLUDE",
+    "file_types": [
+      ".yml",
+      ".yaml",
+      ".zip",
+      ".tgz"
+    ],
+    "insert_license": false,
+    "license_formats": {
+      "js|njk|pegjs|cto|acl|qry": {
+        "prepend": "/*",
+        "append": " */",
+        "eachLine": {
+          "prepend": " * "
+        }
+      },
+      "npmrc|editorconfig|txt": {
+        "eachLine": {
+          "prepend": "# "
+        }
+      },
+      "md": {
+        "file": "HEADER.md"
+      }
+    }
+  }
 }

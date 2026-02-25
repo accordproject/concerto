@@ -1,48 +1,98 @@
 {
   "name": "@accordproject/concerto-analysis",
+  "version": "4.0.0-beta.1",
   "description": "Analysis of Concerto model files",
-  "version": "3.25.0",
-  "author": "accordproject.org",
-  "dependencies": {
-    "@accordproject/concerto-core": "3.25.0",
-    "semver": "7.6.3"
-  },
-  "devDependencies": {
-    "@accordproject/concerto-cto": "3.25.0",
-    "@types/semver": "7.5.8",
-    "@typescript-eslint/eslint-plugin": "8.16.0",
-    "@typescript-eslint/parser": "8.16.0",
-    "eslint": "8.57.1",
-    "jest": "29.7.0",
-    "npm-run-all": "4.1.5",
-    "ts-jest": "29.2.5",
-    "typescript": "5.7.2"
-  },
+  "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=18",
     "npm": ">=10"
   },
-  "homepage": "https://github.com/accordproject/concerto",
-  "keywords": [
-    "concerto",
-    "modeling",
-    "tools"
-  ],
-  "license": "Apache-2.0",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
+    "build": "tsc -p tsconfig.build.json",
+    "pretest": "npm-run-all licchk lint",
+    "lint": "eslint .",
+    "licchk": "license-check-and-add",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/accordproject/concerto.git",
     "directory": "packages/concerto-analysis"
   },
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rimraf dist",
-    "lint": "eslint .",
-    "prebuild": "npm-run-all clean",
-    "pretest": "npm-run-all lint",
-    "test": "jest",
-    "test:watch": "jest --watchAll"
+  "keywords": [
+    "concerto",
+    "tools",
+    "modeling"
+  ],
+  "author": "accordproject.org",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@accordproject/concerto-core": "4.0.0-beta.1",
+    "semver": "7.5.4"
   },
-  "typings": "dist/index.d.ts"
+  "devDependencies": {
+    "@accordproject/concerto-cto": "4.0.0-beta.1",
+    "@types/jest": "28.1.1",
+    "@types/node": "18.11.18",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "8.57.1",
+    "jest": "^30.2.0",
+    "license-check-and-add": "2.3.6",
+    "npm-run-all": "4.1.5",
+    "rimraf": "6.0.1",
+    "ts-jest": "^29.4.5",
+    "typescript": "5.9.3"
+  },
+  "license-check-and-add-config": {
+    "folder": "./src",
+    "license": "HEADER",
+    "exact_paths_method": "EXCLUDE",
+    "exact_paths": [
+      "api.txt",
+      "composer-logs",
+      "coverage",
+      "index.d.ts",
+      "./system",
+      "./introspect/parser.js",
+      "LICENSE",
+      "node_modules",
+      ".nyc-output",
+      "out",
+      ".tern-project",
+      "./generated/concerto.ts",
+      "./generated/concerto.metamodel.ts"
+    ],
+    "file_type_method": "EXCLUDE",
+    "file_types": [
+      ".yml",
+      ".yaml",
+      ".zip",
+      ".tgz"
+    ],
+    "insert_license": false,
+    "license_formats": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
+        "prepend": "/*",
+        "append": " */",
+        "eachLine": {
+          "prepend": " * "
+        }
+      },
+      "npmrc|editorconfig|txt": {
+        "eachLine": {
+          "prepend": "# "
+        }
+      },
+      "md": {
+        "file": "./HEADER.md"
+      }
+    }
+  }
 }

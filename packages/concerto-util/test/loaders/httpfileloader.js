@@ -14,7 +14,7 @@
 
 'use strict';
 
-const HTTPFileLoader = require('../../lib/loaders/httpfileloader');
+const HTTPFileLoader = require('../../src/loaders/httpfileloader');
 
 const chai = require('chai');
 chai.should();

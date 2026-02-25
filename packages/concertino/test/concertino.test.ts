@@ -6,7 +6,7 @@ import { Parser } from '@accordproject/concerto-cto';
 import { ConcertinoConverter } from '../src/';
 import { determineScalarType, dispatchDeclaration, getInheritanceChain, determinePropertyType } from '../src/concertinoSerializer';
 import { readdirSync, statSync } from 'fs';
-import { IModel, IModels } from '@accordproject/concerto-types';
+import { IModel, IModels } from '@accordproject/concerto-metamodel';
 import { it, expect, describe } from 'vitest';
 
 const loadAllCtoFiles = (dir: string, models: object[]): void => {
@@ -35,11 +35,7 @@ const loadAllCtoFiles = (dir: string, models: object[]): void => {
 describe('concertino roundtripping (sample models)', () => {
     const models: IModel[] = [];
 
-    const modelManager = new ModelManager({
-        strict: true,
-        importAliasing: true,
-        enableMapType: true,
-    });
+    const modelManager = new ModelManager();
     loadAllCtoFiles(join(__dirname, './cto/'), models);
     modelManager.fromAst({ models });
     const ast: IModels = modelManager.getAst(true);

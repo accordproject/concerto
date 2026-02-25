@@ -1,4 +1,4 @@
-namespace test.field
+namespace test.field@1.0.0
 
 concept Foo {
   o String foo default="FOO" optional

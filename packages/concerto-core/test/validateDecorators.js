@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../lib/modelmanager');
+const ModelManager = require('../src/modelmanager');
 
 describe('ModelManager', () => {
 
@@ -23,12 +23,12 @@ describe('ModelManager', () => {
 
     beforeEach(() => {
         validatedModelManager = new ModelManager({
-            strict: true, decoratorValidation: {
+            decoratorValidation: {
                 missingDecorator: 'error',
                 invalidDecorator: 'error'
             }
         });
-        modelManager = new ModelManager({strict: true});
+        modelManager = new ModelManager();
     });
 
     afterEach(() => {

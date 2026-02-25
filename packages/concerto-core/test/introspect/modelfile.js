@@ -16,20 +16,20 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ParticipantDeclaration = require('../../lib/introspect/participantdeclaration');
-const TransactionDeclaration = require('../../lib/introspect/transactiondeclaration');
-const EventDeclaration = require('../../lib/introspect/eventdeclaration');
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const ModelFile = require('../../lib/introspect/modelfile');
-const ModelManager = require('../../lib/modelmanager');
-const IntrospectUtils = require('./introspectutils');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const ParticipantDeclaration = require('../../src/introspect/participantdeclaration');
+const TransactionDeclaration = require('../../src/introspect/transactiondeclaration');
+const EventDeclaration = require('../../src/introspect/eventdeclaration');
+const EnumDeclaration = require('../../src/introspect/enumdeclaration');
+const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const ModelFile = require('../../src/introspect/modelfile');
+const ModelManager = require('../../src/modelmanager');
 
 const fs = require('fs');
 const path = require('path');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('./parserutility');
+const IntrospectUtils = require('./introspectutils');
 
 const { Parser } = require('@accordproject/concerto-cto');
 
@@ -37,8 +37,8 @@ const chai = require('chai');
 const should = chai.should();
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const ScalarDeclaration = require('../../lib/introspect/scalardeclaration');
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
+const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
 
 describe('ModelFile', () => {
 
@@ -86,57 +86,58 @@ describe('ModelFile', () => {
 
         it('should call the parser with the definitions and save the abstract syntax tree', () => {
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
             mf.ast.should.equal(ast);
-            mf.namespace.should.equal('org.acme');
+            mf.namespace.should.equal('org.acme@1.0.0');
         });
 
         it('should call the parser with the definitions and save any imports', () => {
             const imports = [ {
                 $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.freddos',
+                namespace: 'org.freddo@1.0.0',
                 name: 'Bar',
             }, {
                 $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.doge',
+                namespace: 'org.doge@1.0.0',
                 name: 'Foo',
             } ];
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 imports: imports,
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.freddos.Bar', 'org.doge.Foo', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
+            mf.getImports().should.deep.equal(['org.freddo@1.0.0.Bar', 'org.doge@1.0.0.Foo', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
         });
 
         it('should call the parser with the definitions and save imports with uris', () => {
             const imports = [ {
                 $class: `${MetaModelNamespace}.ImportType`,
-                namespace: 'org.doge',
+                namespace: 'org.doge@1.0.0',
                 name:'Foo',
             }, {
-                $class: `${MetaModelNamespace}.ImportAll`,
-                namespace: 'org.freddos',
+                $class: `${MetaModelNamespace}.ImportType`,
+                namespace: 'org.freddos@1.0.0',
+                name: 'Bar',
                 uri: 'https://freddos.org/model.cto'
             } ];
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 imports: imports,
                 declarations: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake definitions');
-            mf.getImports().should.deep.equal(['org.doge.Foo', 'org.freddos.*', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
-            mf.getImportURI('org.freddos.*').should.equal('https://freddos.org/model.cto');
-            mf.getExternalImports()['org.freddos.*'].should.equal('https://freddos.org/model.cto');
+            mf.getImports().should.deep.equal(['org.doge@1.0.0.Foo', 'org.freddos@1.0.0.Bar', 'concerto@1.0.0.Concept', 'concerto@1.0.0.Asset', 'concerto@1.0.0.Transaction', 'concerto@1.0.0.Participant', 'concerto@1.0.0.Event']);
+            mf.getImportURI('org.freddos@1.0.0.Bar').should.equal('https://freddos.org/model.cto');
+            mf.getExternalImports()['org.freddos@1.0.0.Bar'].should.equal('https://freddos.org/model.cto');
             (mf.getImportURI('org.doge.Foo') === null).should.be.true;
         });
 
@@ -154,8 +155,8 @@ describe('ModelFile', () => {
             }).should.throw(/Invalid namespace part 'foo-bar'/);
         });
 
-        it('should throw for a wildcard import when strict is true', () => {
-            const strictModelManager = new ModelManager({ strict: true });
+        it('should throw for a wildcard import ', () => {
+            const strictModelManager = new ModelManager();
 
             const imports = [{
                 $class: `${MetaModelNamespace}.ImportAll`,
@@ -164,7 +165,7 @@ describe('ModelFile', () => {
             }];
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 imports: imports,
                 declarations: [ ]
             };
@@ -172,13 +173,13 @@ describe('ModelFile', () => {
 
             (() => {
                 ParserUtil.newModelFile(strictModelManager, 'fake definitions');
-            }).should.throw(/Wildcard Imports are not permitted in strict mode./);
+            }).should.throw(/Wildcard Imports are not permitted./);
         });
 
         it('should throw for an unrecognized body element', () => {
             const ast = {
                 $class: `${MetaModelNamespace}.Model`,
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 declarations: [ {
                     $class: 'BlahType'
                 } ]
@@ -250,21 +251,8 @@ describe('ModelFile', () => {
 
         it('should throw if an import exists for an invalid namespace', () => {
             const model = `
-            namespace org.acme
-            import org.acme.ext.MyAsset2
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile = ParserUtil.newModelFile(modelManager, model);
-            (() => {
-                modelFile.validate();
-            }).should.throw(IllegalModelException, /org.acme.ext/);
-        });
-
-        it('should throw if a wildcard import exists for an invalid namespace', () => {
-            const model = `
-            namespace org.acme
-            import org.acme.ext.*
+            namespace org.acme@1.0.0
+            import org.acme.ext@1.0.0.MyAsset2
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
@@ -276,13 +264,13 @@ describe('ModelFile', () => {
 
         it('should throw if an import exists for a type that does not exist in a valid namespace', () => {
             const model1 = `
-            namespace org.acme.ext
+            namespace org.acme.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.acme.ext.MyAsset3
+            namespace org.acme@1.0.0
+            import org.acme.ext@1.0.0.MyAsset3
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
@@ -296,31 +284,13 @@ describe('ModelFile', () => {
 
         it('should not throw if an import exists for a type that exists in a valid namespace', () => {
             const model1 = `
-            namespace org.acme.ext
+            namespace org.acme.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.acme.ext.MyAsset2
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            (() => modelFile2.validate()).should.not.throw();
-        });
-
-        it('should not throw if a wildcard import exists for a valid namespace', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.ext.*
+            namespace org.acme@1.0.0
+            import org.acme.ext@1.0.0.MyAsset2
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
@@ -357,32 +327,46 @@ describe('ModelFile', () => {
             }).should.throw('Importing types from different versions ("1.0.0", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
         });
 
-        it('should throw when attempting to import types from unversioned and versioned versions of the same namespace', () => {
+        it('should throw when declaring an ambiguous type', () => {
             const myModelManager = new ModelManager();
 
-            const freddo1 = `namespace org.freddos
-            concept Chocolate {}`;
+            const model1 = `namespace A@1.0.0
 
-            const freddo2 = `namespace org.freddos@2.0.0
-            concept Chocolate {}`;
+            concept B {
+                o String name
+            }`;
 
-            const acme = `namespace org.acme@1.0.0
-            import org.freddos.{ Chocolate }
-            import org.freddos@2.0.0.{ Chocolate }
-            `;
+            const model2 = `namespace B@1.0.0
 
-            let modelFile1 = ParserUtil.newModelFile(myModelManager, freddo1);
+            import A@1.0.0.{B}
+
+            concept B {
+            }`;
+
+
+            let modelFile1 = ParserUtil.newModelFile(myModelManager, model1);
             myModelManager.addModelFile(modelFile1);
 
-            let modelFile2 = ParserUtil.newModelFile(myModelManager, freddo2);
-            myModelManager.addModelFile(modelFile2);
-
-            let modelFile3 = ParserUtil.newModelFile(myModelManager, acme);
+            let modelFile2 = ParserUtil.newModelFile(myModelManager, model2);
 
             (() => {
-                modelFile3.validate();
-            }).should.throw('Importing types from different versions ("null", "2.0.0") of the same namespace "org.freddos@2.0.0" is not permitted.');
+                myModelManager.addModelFile(modelFile2);
+            }).should.throw('Type \'B\' clashes with an imported type with the same name.');
         });
+
+        it('should recognise a user-space type with the same name as a Prototype', () => {
+            const model1 = `
+            namespace A@1.0.0
+            concept Transaction {}
+            `;
+
+            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
+
+            (() => {
+                modelManager.addModelFile(modelFile1);
+            }).should.throw('Type \'Transaction\' clashes with an imported type with the same name.');
+        });
+
     });
 
     describe('#getDefinitions', () => {
@@ -427,7 +411,7 @@ describe('ModelFile', () => {
 
         it('should return false for a non-existent type', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
@@ -437,7 +421,7 @@ describe('ModelFile', () => {
 
         it('should return false for a local type', () => {
             const model = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
@@ -447,152 +431,57 @@ describe('ModelFile', () => {
 
         it('should return true for an explicitly imported type', () => {
             const model = `
-            namespace org.acme
-            import org.acme.ext.MyAsset2
+            namespace org.acme@1.0.0
+            import org.acme.ext@1.0.0.MyAsset2
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
             let modelFile = ParserUtil.newModelFile(modelManager, model);
             modelFile.isImportedType('MyAsset2').should.be.true;
         });
-
-        it('should return true for a type that exists in a namespace imported by wildcard', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.ext.*
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelFile2.isImportedType('MyAsset2').should.be.true;
-        });
-
-        it('should return false for a type that does not exist in a namespace imported by wildcard', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.ext.*
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelFile2.isImportedType('MyAsset3').should.be.false;
-        });
-
-        it('should return false for a type that does not exist in an invalid namespace imported by wildcard', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.another.*
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelFile2.isImportedType('MyAsset3').should.be.false;
-        });
-
     });
 
     describe('#resolveImport', () => {
 
         it('should find the fully qualified name of the import', () => {
             const model = `
-            namespace org.acme
-            import org.doge.Coin`;
+            namespace org.acme@1.0.0
+            import org.doge@1.0.0.Coin`;
             let modelFile = ParserUtil.newModelFile(modelManager, model);
-            modelFile.resolveImport('Coin').should.equal('org.doge.Coin');
+            modelFile.resolveImport('Coin').should.equal('org.doge@1.0.0.Coin');
         });
 
         it('should find the fully qualified name of a type using a wildcard import', () => {
             const model1 = `
-            namespace org.acme.ext
+            namespace org.acme.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.acme.ext.*
+            namespace org.acme@1.0.0
+            import org.acme.ext@1.0.0.MyAsset2
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            modelFile2.resolveImport('MyAsset2').should.equal('org.acme.ext.MyAsset2');
+            modelFile2.resolveImport('MyAsset2').should.equal('org.acme.ext@1.0.0.MyAsset2');
         });
 
         it('should throw if it cannot resolve a type that is not imported', () => {
             const model = `
-            namespace org.acme
-            import org.doge.Wow`;
+            namespace org.acme@1.0.0
+            import org.doge@1.0.0.Wow`;
             let modelFile = ParserUtil.newModelFile(modelManager, model);
             (() => {
                 modelFile.resolveImport('Coin');
             }).should.throw(/Coin/);
         });
 
-        it('should throw if it cannot resolve a type that does not exist in a wildcard import', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.ext.*
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            (() => {
-                modelFile2.resolveImport('Coin');
-            }).should.throw(/Coin/);
-        });
-
-        it('should throw if it cannot resolve a type that does not exist in a wildcard import of an invalid namespace', () => {
-            const model1 = `
-            namespace org.acme.ext
-            asset MyAsset2 identified by assetId {
-                o String assetId
-            }`;
-            const model2 = `
-            namespace org.acme
-            import org.acme.another.*
-            asset MyAsset identified by assetId {
-                o String assetId
-            }`;
-            let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
-            modelManager.addModelFile(modelFile1);
-            let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
-            (() => {
-                modelFile2.resolveImport('Coin');
-            }).should.throw(/Coin/);
-        });
-
         it('relatioship to an asset that does not exist', () => {
             const model2 = `
-            namespace org.acme
+            namespace org.acme@1.0.0
 
             asset MyAsset identified by assetId {
                 o String assetId
@@ -609,28 +498,24 @@ describe('ModelFile', () => {
     });
 
     describe('#aliasedImport', () => {
-
-        beforeEach(()=>{
-            modelManager.importAliasing=true;
-        });
         it('should resolve aliased name of import type', () => {
             const model = `
-            namespace org.acme
-            import org.saluja.{doc as d}`;
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{doc as d}`;
 
             let modelFile = ParserUtil.newModelFile(modelManager, model);
-            modelFile.resolveImport('d').should.equal('org.saluja.doc');
+            modelFile.resolveImport('d').should.equal('org.saluja@1.0.0.doc');
         });
 
         it('should not throw if an aliased import exists for a type that exists in a valid namespace', () => {
             const model1 = `
-            namespace org.saluja.ext
+            namespace org.saluja.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.ext.{MyAsset2 as m}
+            namespace org.acme@1.0.0
+            import org.saluja.ext@1.0.0.{MyAsset2 as m}
             asset MyAsset identified by assetId {
                 o String assetId
                 o m[] arr
@@ -643,20 +528,20 @@ describe('ModelFile', () => {
 
         it('should not throw if an duplicate types aliased to distinct aliased names', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
+            namespace org.acme@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`;
 
             const model3 = `
-            namespace org.acme2
-            import org.saluja.{MyAsset as m1}
-            import org.acme.{MyAsset as m2}
+            namespace org.acme2@1.0.0
+            import org.saluja@1.0.0.{MyAsset as m1}
+            import org.acme@1.0.0.{MyAsset as m2}
 
             asset MyAsset identified by assetId {
                 o String assetId
@@ -673,19 +558,18 @@ describe('ModelFile', () => {
 
         it('should not throw if map value is an aliased type', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
             asset Student identified by rollno {
                 o String rollno
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.{Student as stud}
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{Student as stud}
 
             map StudMap{
             o DateTime
             o stud
             }`;
-            modelManager.enableMapType=true;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
@@ -694,21 +578,20 @@ describe('ModelFile', () => {
 
         it('should not throw if declaration is extended on a aliased type declaration', () => {
             const model1 = `
-            namespace org.saluja
+            namespace org.saluja@1.0.0
 
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
             }`;
             const model2 = `
-            namespace org.acme
-            import org.saluja.{Vehicle as V,nickname as nk}
+            namespace org.acme@1.0.0
+            import org.saluja@1.0.0.{Vehicle as V,nickname as nk}
 
             asset Car extends V{
                 o String company
                 o nk shortname
             }`;
-            modelManager.enableMapType = true;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
@@ -717,21 +600,20 @@ describe('ModelFile', () => {
 
         it('should return the actual type name of the imported type', () => {
             const model1 = `
-            namespace org.example1
+            namespace org.example1@1.0.0
 
             scalar nickname extends String
             asset Vehicle identified by serialno {
                 o String serialno
             }`;
             const model2 = `
-            namespace org.example2
-            import org.example1.{Vehicle as V,nickname}
+            namespace org.example2@1.0.0
+            import org.example1@1.0.0.{Vehicle as V,nickname}
 
             asset Car extends V{
                 o String company
                 o nickname shortname
             }`;
-            modelManager.enableMapType = true;
             let modelFile1 = ParserUtil.newModelFile(modelManager, model1);
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
@@ -749,7 +631,7 @@ describe('ModelFile', () => {
         before(() => {
             modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
-            modelFile = modelManager.addCTOModel(`namespace org.acme
+            modelFile = modelManager.addCTOModel(`namespace org.acme@1.0.0
             asset MyAsset identified by assetId {
                 o String assetId
             }`);
@@ -773,7 +655,7 @@ describe('ModelFile', () => {
 
         it('should passthrough the type name for primitive types', () => {
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
@@ -783,13 +665,13 @@ describe('ModelFile', () => {
 
         it('should return false if imported, non primative\'s modelFile doesn\'t exist', () => {
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
             let mf = ParserUtil.newModelFile(modelManager, 'fake');
             mf.isImportedType = () => { return true; };
-            mf.resolveImport = () => { return 'org.acme'; };
+            mf.resolveImport = () => { return 'org.acme@1.0.0'; };
             should.not.exist(mf.getType('TNTAsset'));
         });
     });
@@ -911,7 +793,7 @@ describe('ModelFile', () => {
     describe('#getFullyQualifiedTypeName', () => {
         it('should return null if not prmative, imported or local type', () => {
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);
@@ -923,7 +805,7 @@ describe('ModelFile', () => {
 
         it('should return the type name if its a primative type', () => {
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 body: [ ]
             };
             sandbox.stub(Parser, 'parse').returns(ast);

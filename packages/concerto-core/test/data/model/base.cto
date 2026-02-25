@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace org.accordproject
+namespace org.accordproject@1.0.0
 
 /**
  * http://schema.org/Thing

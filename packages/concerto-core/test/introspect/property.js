@@ -16,13 +16,13 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const ClassDeclaration = require('../../lib/introspect/classdeclaration');
-const ModelFile = require('../../lib/introspect/modelfile');
-const Property = require('../../lib/introspect/property');
+const ClassDeclaration = require('../../src/introspect/classdeclaration');
+const ModelFile = require('../../src/introspect/modelfile');
+const Property = require('../../src/introspect/property');
+const ModelManager = require('../../src/modelmanager');
 
 const should = require('chai').should();
 const sinon = require('sinon');
-const ModelManager = require('../../lib/modelmanager');
 
 const fs = require('fs');
 const path = require('path');
@@ -123,7 +123,7 @@ describe('Property - Test for property types using Import Aliasing', () => {
     let resolvedModelManager;
 
     beforeEach(() => {
-        modelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        modelManager = new ModelManager();
 
         const childModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/child.cto'), 'utf8');
         const parentModelCTO = fs.readFileSync(path.resolve(__dirname, '../data/aliasing/parent.cto'), 'utf8');
@@ -132,7 +132,7 @@ describe('Property - Test for property types using Import Aliasing', () => {
         modelManager.addCTOModel(parentModelCTO, 'parent@1.0.0.cto');
         const resolvedMetamodelChild = modelManager.resolveMetaModel(modelManager.getAst().models[0]);
         const resolvedMetamodelParent = modelManager.resolveMetaModel(modelManager.getAst().models[1]);
-        resolvedModelManager = new ModelManager({ strict: true, importAliasing: true, enableMapType: true});
+        resolvedModelManager = new ModelManager();
         const resolvedModelFileChild = new ModelFile(resolvedModelManager, resolvedMetamodelChild, 'child@1.0.0.cto');
         const resolvedModelFileParent = new ModelFile(resolvedModelManager, resolvedMetamodelParent, 'parent@1.0.0.cto');
         resolvedModelManager.addModelFiles([resolvedModelFileChild, resolvedModelFileParent], ['child@1.0.0.cto', 'parent@1.0.0.cto']);

@@ -31,19 +31,7 @@ const COMPOSER_MODEL =
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace system
-
-event Event {
-}
-
-participant Participant {
-}
-
-asset Asset {
-}
-
-transaction Transaction {
-}
+namespace system@1.0.0
 
 /**
  * Abstract system participant that all participants extend.

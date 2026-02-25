@@ -15,8 +15,8 @@
 'use strict';
 
 require('chai').should();
-const ModelManager = require('../../lib/modelmanager');
-const RelationshipDeclaration = require('../../lib/introspect/relationshipdeclaration');
+const ModelManager = require('../../src/modelmanager');
+const RelationshipDeclaration = require('../../src/introspect/relationshipdeclaration');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');
@@ -39,8 +39,8 @@ describe('Farm2Fork Model', function() {
             file.should.not.be.null;
             modelManager.addCTOModel(file,fileName);
             modelManager.getModelFiles().length.should.equal(3);
-            let modelFile = modelManager.getModelFile('org.acme');
-            modelFile.getNamespace().should.equal('org.acme');
+            let modelFile = modelManager.getModelFile('org.acme@1.0.0');
+            modelFile.getNamespace().should.equal('org.acme@1.0.0');
 
             modelFile.getAssetDeclarations().length.should.equal(3);
             modelFile.getTransactionDeclarations().length.should.equal(11);

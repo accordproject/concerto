@@ -1,15 +1,88 @@
 {
   "name": "@accordproject/concerto-core",
+  "version": "4.0.0-beta.1",
   "description": "Core Implementation for the Concerto Modeling Language",
-  "version": "3.25.0",
-  "author": "accordproject.org",
+  "homepage": "https://github.com/accordproject/concerto",
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  },
+  "main": "dist/index.js",
   "browser": "dist/concerto-core.js",
-  "browserslist": "> 0.25%, not dead",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm-run-all clean",
+    "prepublishOnly": "npm run webpack",
+    "pretest": "npm run lint",
+    "lint": "eslint .",
+    "postlint": "npm run licchk",
+    "licchk": "license-check-and-add",
+    "postlicchk": "npm run doc",
+    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
+    "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000",
+    "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
+    "build": "tsc -p tsconfig.build.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/",
+    "postbuild": "npm run webpack",
+    "webpack": "webpack --config webpack.config.js --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-cto"
+  },
+  "keywords": [
+    "schema",
+    "data model",
+    "verification"
+  ],
+  "author": "accordproject.org",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@babel/preset-env": "7.16.11",
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "@types/jest": "28.1.1",
+    "@types/node": "18.11.18",
+    "@types/semver": "7.3.10",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "acorn": "8.5.0",
+    "acorn-walk": "8.2.0",
+    "babel-loader": "8.2.3",
+    "chai": "4.3.6",
+    "chai-as-promised": "7.1.1",
+    "chai-things": "0.2.0",
+    "commander": "2.20.0",
+    "cpx": "^1.5.0",
+    "cross-env": "7.0.3",
+    "doctrine": "3.0.0",
+    "eslint": "8.57.1",
+    "fs-extra": "9.1.0",
+    "jsdoc": "^4.0.2",
+    "klaw": "3.0.0",
+    "license-check-and-add": "2.3.6",
+    "mocha": "^10.8.2",
+    "node-polyfill-webpack-plugin": "2.0.1",
+    "npm-run-all": "4.1.5",
+    "nyc": "15.1.0",
+    "process": "0.11.10",
+    "rimraf": "3.0.2",
+    "sinon": "12.0.0",
+    "sinon-chai": "3.7.0",
+    "tmp-promise": "3.0.2",
+    "ts-jest": "28.0.4",
+    "ts-node": "10.9.1",
+    "typescript": "5.9.3",
+    "webpack": "^5.102.1",
+    "webpack-cli": "4.9.1",
+    "xregexp": "5.1.1",
+    "yargs": "17.3.1"
+  },
   "dependencies": {
-    "@accordproject/concerto-cto": "3.25.0",
-    "@accordproject/concerto-metamodel": "3.12.6",
-    "@accordproject/concerto-util": "3.25.0",
-    "dayjs": "1.11.13",
+    "@accordproject/concerto-codegen": "^3.16.2",
+    "@accordproject/concerto-cto": "4.0.0-beta.1",
+    "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
+    "@accordproject/concerto-util": "4.0.0-beta.1",
     "debug": "4.3.7",
     "lorem-ipsum": "2.0.8",
     "randexp": "0.5.3",
@@ -17,49 +90,55 @@
     "semver": "7.6.3",
     "urijs": "1.19.11",
     "uuid": "11.0.3",
-    "yaml": "2.8.0"
+    "yaml": "^2.8.1"
   },
-  "devDependencies": {
-    "@babel/preset-env": "7.26.0",
-    "acorn": "8.14.0",
-    "acorn-walk": "8.3.4",
-    "babel-loader": "9.2.1",
-    "chai": "4.3.6",
-    "chai-as-promised": "7.1.1",
-    "chai-things": "0.2.0",
-    "commander": "2.20.0",
-    "cross-env": "7.0.3",
-    "doctrine": "3.0.0",
-    "eslint": "8.57.1",
-    "fs-extra": "11.2.0",
-    "jsdoc": "4.0.4",
-    "klaw": "4.1.0",
-    "mocha": "10.8.2",
-    "node-polyfill-webpack-plugin": "4.0.0",
-    "nyc": "17.1.0",
-    "sinon": "19.0.2",
-    "tmp-promise": "3.0.3",
-    "typescript": "5.7.2",
-    "webpack": "5.96.1",
-    "webpack-cli": "5.1.4",
-    "xregexp": "5.1.1",
-    "yargs": "17.7.2"
+  "browserslist": "> 0.25%, not dead",
+  "license-check-and-add-config": {
+    "folder": "./src",
+    "license": "HEADER",
+    "exact_paths_method": "EXCLUDE",
+    "exact_paths": [
+      "api.txt",
+      "composer-logs",
+      "coverage",
+      "index.d.ts",
+      "./system",
+      "LICENSE",
+      "node_modules",
+      ".nyc-output",
+      "out",
+      "dist",
+      ".tern-project"
+    ],
+    "file_type_method": "EXCLUDE",
+    "file_types": [
+      ".yml",
+      ".yaml",
+      ".zip",
+      ".tgz"
+    ],
+    "insert_license": false,
+    "license_formats": {
+      "js|ts|njk|pegjs|cto|acl|qry": {
+        "prepend": "/*",
+        "append": " */",
+        "eachLine": {
+          "prepend": " * "
+        }
+      },
+      "npmrc|editorconfig|txt": {
+        "eachLine": {
+          "prepend": "# "
+        }
+      },
+      "md": {
+        "file": "HEADER.md"
+      }
+    }
   },
-  "engines": {
-    "node": ">=18",
-    "npm": ">=10"
-  },
-  "homepage": "https://github.com/accordproject/concerto",
-  "keywords": [
-    "data model",
-    "schema",
-    "verification"
-  ],
-  "license": "Apache-2.0",
-  "main": "index.js",
   "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
     "produce-source-map": "true",
-    "sourceMap": "inline",
     "reporter": [
       "lcov",
       "text-summary",
@@ -67,35 +146,15 @@
       "json"
     ],
     "include": [
-      "lib/**/*.js"
+      "src/**/*.js",
+      "src/**/*.ts"
     ],
     "exclude": [],
     "all": true,
     "check-coverage": true,
     "statements": 99,
-    "branches": 97,
-    "functions": 98,
+    "branches": 94.8,
+    "functions": 99,
     "lines": 99
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/accordproject/concerto.git",
-    "directory": "packages/concerto-cto"
-  },
-  "scripts": {
-    "build": "npm run build:types",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types",
-    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "lint": "eslint .",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "postbuild": "npm run webpack",
-    "postlicchk": "npm run doc",
-    "prepublishOnly": "npm run webpack",
-    "pretest": "npm run lint",
-    "test": "node ./scripts/api-changelog.js && cross-env TZ=UTC nyc mocha --recursive -t 10000",
-    "test:watch": "cross-env TZ=UTC nyc mocha --watch --recursive -t 10000",
-    "webpack": "webpack --config webpack.config.js --mode production"
-  },
-  "typings": "types/index.d.ts"
+  }
 }

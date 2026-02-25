@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Introspector = require('../../lib/introspect/introspector');
+const ModelManager = require('../../src/modelmanager');
+const Introspector = require('../../src/introspect/introspector');
 const Util = require('../composer/composermodelutility');
 
 const fs = require('fs');
@@ -45,7 +45,6 @@ describe('Introspector', () => {
     describe('#getClassDeclarations', () => {
 
         it('should return all class declarations', () => {
-            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
@@ -59,7 +58,7 @@ describe('Introspector', () => {
             let classDecl = introspector.getClassDeclarations();
             const scalarDecl = classDecl.filter(declaration =>  declaration.isScalarDeclaration?.());
             const mapDecl = classDecl.filter(declaration =>  declaration.isMapDeclaration?.());
-            classDecl.length.should.equal(44);
+            classDecl.length.should.equal(40);
             scalarDecl.length.should.equal(0);
             mapDecl.length.should.equal(0);
         });
@@ -68,7 +67,6 @@ describe('Introspector', () => {
     describe('#getClassDeclaration', () => {
 
         it('should be able to get a single class declaration', () => {
-            process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType.
             // create and populate the ModelManager with a model file
             const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
@@ -79,23 +77,23 @@ describe('Introspector', () => {
 
             modelManager.addCTOModel(modelBase, 'model-base.cto');
             const introspector = new Introspector(modelManager);
-            introspector.getClassDeclaration('org.acme.base.Person').should.not.be.null;
+            introspector.getClassDeclaration('org.acme.base@1.0.0.Person').should.not.be.null;
         });
 
         it('should be able to handle the aliased imported types', () => {
             // create and populate the ModelManager with a model file
-            const modelManager = new ModelManager({ importAliasing: true });
+            const modelManager = new ModelManager();
             Util.addComposerModel(modelManager);
             modelManager.should.not.be.null;
 
             const model1 = `
-            namespace org.example.ext
+            namespace org.example.ext@1.0.0
             asset MyAsset2 identified by assetId {
                 o String assetId
             }`;
             const model2 = `
-            namespace org.acme
-            import org.example.ext.{MyAsset2 as m}
+            namespace org.acme@1.0.0
+            import org.example.ext@1.0.0.{MyAsset2 as m}
             asset MyAsset identified by assetId {
                 o String assetId
                 o m[] arr
@@ -104,8 +102,8 @@ describe('Introspector', () => {
             modelManager.addModelFile(modelFile1);
             let modelFile2 = ParserUtil.newModelFile(modelManager, model2);
             const introspector = new Introspector(modelManager);
-            modelFile2.resolveImport('m').should.equal('org.example.ext.MyAsset2');
-            introspector.getClassDeclaration('org.example.ext.MyAsset2').should.not.be.null;
+            modelFile2.resolveImport('m').should.equal('org.example.ext@1.0.0.MyAsset2');
+            introspector.getClassDeclaration('org.example.ext@1.0.0.MyAsset2').should.not.be.null;
         });
     });
 

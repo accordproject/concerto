@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concertino",
-  "version": "1.0.0-alpha.7",
+  "version": "4.0.0-beta.1",
   "description": "Object-centric serialization of Concerto models",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -13,12 +13,12 @@
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean generate-types",
     "build": "tsc -p tsconfig.build.json",
-    "postbuild": "cp -R src/spec/*.json dist/spec/",
-    "pretest": "#npm-run-all lint",
+    "postbuild": "cpx \"src/spec/*.json\" dist/spec/",
+    "pretest": "npm-run-all lint",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate-types": "ENABLE_MAP_TYPE=true node scripts/generateTypes.js"
+    "generate-types": "cross-env ENABLE_MAP_TYPE=true node scripts/generateTypes.js"
   },
   "repository": {
     "type": "git",
@@ -33,19 +33,21 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "3.25.0",
+    "@accordproject/concerto-core": "4.0.0-beta.1",
+    "@accordproject/concerto-metamodel": "4.0.0-alpha.0",
     "ajv": "^8.17.1",
     "semver": "7.6.3"
   },
   "devDependencies": {
-    "@accordproject/concerto-types": "3.25.0",
     "@accordproject/concerto-codegen": "^3.22.0",
-    "@accordproject/concerto-cto": "3.25.0",
-    "@accordproject/concerto-util": "3.25.0",
+    "@accordproject/concerto-cto": "4.0.0-beta.1",
+    "@accordproject/concerto-util": "4.0.0-beta.1",
     "@types/semver": "7.5.8",
-    "@typescript-eslint/eslint-plugin": "8.16.0",
-    "@typescript-eslint/parser": "8.16.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
     "@vitest/coverage-v8": "^3.2.4",
+    "cross-env": "^7.0.3",
+    "cpx": "^1.5.0",
     "eslint": "8.57.1",
     "npm-run-all": "4.1.5",
     "typescript": "^5.7.2",

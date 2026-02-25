@@ -21,7 +21,7 @@ const yaml = require('yaml');
 const chai = require('chai');
 chai.should();
 
-const { jsonToYaml, yamlToJson } = require('../lib/dcsconverter');
+const { jsonToYaml, yamlToJson } = require('../src/dcsconverter');
 
 describe('DCS Converter', function(){
 
