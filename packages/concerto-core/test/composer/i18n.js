@@ -25,7 +25,7 @@ const ModelManager = require('../../src/modelmanager');
 const ModelUtil = require('../../src/modelutil');
 const Util = require('../composer/composermodelutility');
 const ParserUtil = require('../introspect/parserutility');
-const ModelFile = require('../../lib/introspect/modelfile');
+const ModelFile = require('../../src/introspect/modelfile');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
