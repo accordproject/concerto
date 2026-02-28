@@ -18,6 +18,12 @@ const yaml = require('yaml');
 const ModelUtil  = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
+const mapClassToType = {
+        [`${MetaModelNamespace}.DecoratorString`]: 'String',
+        [`${MetaModelNamespace}.DecoratorNumber`]: 'Number',
+        [`${MetaModelNamespace}.DecoratorBoolean`]: 'Boolean',
+    };
+
 /**
  * handles the target field of a command
  * @param {object} target the value of target
@@ -47,11 +53,6 @@ function handleTarget(target){
  * @private
  */
 function handleArguments(argument){
-    const mapClassToType = {
-        [`${MetaModelNamespace}.DecoratorString`]: 'String',
-        [`${MetaModelNamespace}.DecoratorNumber`]: 'Number',
-        [`${MetaModelNamespace}.DecoratorBoolean`]: 'Boolean',
-    };
     if (argument.$class.endsWith('TypeReference')) {
         return {
             typeReference: {
@@ -123,7 +124,7 @@ function jsonToYaml(dcsJson){
 /**
  * handles each argument of the decorator
  * converts simplified argument objects back to full JSON representation
- * @param {string} MetaModelNamespace - the metamodel namespace
+ * @param {string} MetaModelNamespace - the namespace for the metamodel
  * @param {object} argument - the simplified argument object
  * @param {string} [argument.type] - the argument type for primitive values
  * @param {*} [argument.value] - the argument value
