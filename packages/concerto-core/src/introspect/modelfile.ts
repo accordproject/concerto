@@ -30,6 +30,7 @@ const MapDeclaration = require('./mapdeclaration');
 const ModelUtil = require('../modelutil');
 const Globalize = require('../globalize');
 const Decorated = require('./decorated');
+const packageJson = require('../../package.json');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -670,16 +671,15 @@ class ModelFile extends Decorated {
     /**
      * Check whether this modelfile is compatible with the concerto version
      */
-    isCompatibleVersion() {
+isCompatibleVersion() {
         if (this.ast.concertoVersion) {
-            if (semver.satisfies(process.env.npm_package_version, this.ast.concertoVersion, { includePrerelease: true })) {
+            if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${process.env.npm_package_version}`);
+                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
             }
         }
     }
-
     /**
      * Verifies that an import is versioned if the strict
      * option has been set on the Model Manager
