@@ -206,6 +206,22 @@ class ClassDeclaration extends Declaration {
                 }), this.modelFile, this.ast.location);
             }
             this._resolveSuperType();
+
+            // Check for circular inheritance in the supertype chain
+            const visited = new Set();
+            visited.add(this.getFullyQualifiedName());
+            let currentSuper = this.superTypeDeclaration;
+            while (currentSuper) {
+                const superFqn = currentSuper.getFullyQualifiedName();
+                if (visited.has(superFqn)) {
+                    throw new IllegalModelException(
+                        `Cyclic inheritance detected for type "${this.getFullyQualifiedName()}"`,
+                        this.modelFile, this.ast.location
+                    );
+                }
+                visited.add(superFqn);
+                currentSuper = currentSuper.getSuperTypeDeclaration();
+            }
         }
 
         if (this.idField) {
@@ -330,13 +346,25 @@ class ClassDeclaration extends Declaration {
      * Returns the name of the identifying field for this class. Note
      * that the identifying field may come from a super type.
      *
+     * @param {Set} [visited] - tracks visited types to detect cycles (internal use)
      * @return {string} the name of the id field for this class or null if it does not exist
      */
-    getIdentifierFieldName() {
+    getIdentifierFieldName(visited) {
         if (this.idField) {
             return this.idField;
         } else {
             if (this.getSuperType()) {
+                // Guard against circular inheritance
+                const seen = visited || new Set();
+                const fqn = this.getFullyQualifiedName();
+                if (seen.has(fqn)) {
+                    throw new IllegalModelException(
+                        `Cyclic inheritance detected for type "${fqn}"`,
+                        this.modelFile, this.ast.location
+                    );
+                }
+                seen.add(fqn);
+
                 // we first check our own modelfile, as we may be called from validate
                 // in which case our model file has not yet been added to the model modelManager
                 let classDecl = this.getModelFile().getLocalType(this.getSuperType());
@@ -345,7 +373,7 @@ class ClassDeclaration extends Declaration {
                 if (!classDecl) {
                     classDecl = this.modelFile.getModelManager().getType(this.getSuperType());
                 }
-                return classDecl.getIdentifierFieldName();
+                return classDecl.getIdentifierFieldName(seen);
             } else {
                 return null;
             }
@@ -485,8 +513,18 @@ class ClassDeclaration extends Declaration {
      */
     getAllSuperTypeDeclarations() {
         const results = [];
+        const visited = new Set();
+        visited.add(this.getFullyQualifiedName());
         for (let type = this;
             (type = type.getSuperTypeDeclaration());) {
+            const fqn = type.getFullyQualifiedName();
+            if (visited.has(fqn)) {
+                throw new IllegalModelException(
+                    `Cyclic inheritance detected for type "${fqn}"`,
+                    this.modelFile, this.ast.location
+                );
+            }
+            visited.add(fqn);
             results.push(type);
         }
 
@@ -520,12 +558,24 @@ class ClassDeclaration extends Declaration {
     /**
      * Returns the properties defined in this class and all super classes.
      *
+     * @param {Set} [visited] - tracks visited types to detect cycles (internal use)
      * @return {Property[]} the array of fields
      */
-    getProperties() {
+    getProperties(visited) {
         let result = this.getOwnProperties();
         let classDecl = null;
         if (this.superType !== null) {
+            // Guard against circular inheritance
+            const seen = visited || new Set();
+            const fqn = this.getFullyQualifiedName();
+            if (seen.has(fqn)) {
+                throw new IllegalModelException(
+                    `Cyclic inheritance detected for type "${fqn}"`,
+                    this.modelFile, this.ast.location
+                );
+            }
+            seen.add(fqn);
+
             if (this.getModelFile().isImportedType(this.superType)) {
                 let fqnSuper = this.getModelFile().resolveImport(this.superType);
                 classDecl = this.modelFile.getModelManager().getType(fqnSuper);
@@ -541,7 +591,7 @@ class ClassDeclaration extends Declaration {
             // Note: this allows addition of an $identifier field from a supertype
             // even if this type is explicitly identified.
             // We allow this because it allows normalization of identifier lookup without the model present
-            result = result.concat(classDecl.getProperties());
+            result = result.concat(classDecl.getProperties(seen));
         }
 
         return result;

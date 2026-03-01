@@ -123,6 +123,33 @@ describe('ClassDeclaration', () => {
             const clazz = introspectUtils.loadLastDeclaration('test/data/parser/classdeclaration.scalararray.cto', ConceptDeclaration);
             clazz.validate();
         });
+
+        it('should throw for circular inheritance between two types across namespaces', () => {
+            const ctoA = `namespace org.circular.a@1.0.0
+            import org.circular.b@1.0.0.B
+            concept A extends B {}`;
+            const ctoB = `namespace org.circular.b@1.0.0
+            import org.circular.a@1.0.0.A
+            concept B extends A {}`;
+            (() => {
+                modelManager.addModelFiles([ctoA, ctoB]);
+            }).should.throw(/Cyclic inheritance detected/);
+        });
+
+        it('should throw for three-way circular inheritance', () => {
+            const ctoA = `namespace org.circular.a@1.0.0
+            import org.circular.c@1.0.0.C
+            concept A extends C {}`;
+            const ctoB = `namespace org.circular.b@1.0.0
+            import org.circular.a@1.0.0.A
+            concept B extends A {}`;
+            const ctoC = `namespace org.circular.c@1.0.0
+            import org.circular.b@1.0.0.B
+            concept C extends B {}`;
+            (() => {
+                modelManager.addModelFiles([ctoA, ctoB, ctoC]);
+            }).should.throw(/Cyclic inheritance detected/);
+        });
     });
 
     describe('#accept', () => {

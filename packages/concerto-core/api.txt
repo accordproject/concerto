@@ -98,7 +98,7 @@ class ClassDeclaration extends Declaration {
    + Boolean isIdentified() 
    + Boolean isSystemIdentified() 
    + Boolean isExplicitlyIdentified() 
-   + string getIdentifierFieldName() 
+   + string getIdentifierFieldName(Set?) 
    + Property getOwnProperty(string) 
    + Property[] getOwnProperties() 
    + string getSuperType() 
@@ -107,7 +107,7 @@ class ClassDeclaration extends Declaration {
    + ClassDeclaration[] getDirectSubclasses() 
    + ClassDeclaration[] getAllSuperTypeDeclarations() 
    + Property getProperty(string) 
-   + Property[] getProperties() 
+   + Property[] getProperties(Set?) 
    + Property getNestedProperty(string) throws IllegalModelException
    + String toString() 
    + boolean isAsset() 
