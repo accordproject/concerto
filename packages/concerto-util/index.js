@@ -58,6 +58,9 @@ const ErrorCodes = require('./lib/errorcodes');
 // NullUtil
 const NullUtil = require('./lib/null');
 
+// MonetaryUtil
+const MonetaryUtil = require('./lib/monetary');
+
 // Warning
 const Warning = require('./lib/warning');
 
@@ -79,5 +82,6 @@ module.exports = {
     Identifiers,
     ErrorCodes,
     NullUtil,
+    MonetaryUtil,
     Warning
 };
