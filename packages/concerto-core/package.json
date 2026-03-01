@@ -40,7 +40,7 @@
     "sinon": "19.0.2",
     "tmp-promise": "3.0.3",
     "typescript": "5.7.2",
-    "webpack": "5.96.1",
+    "webpack": "5.104.1",
     "webpack-cli": "5.1.4",
     "xregexp": "5.1.1",
     "yargs": "17.7.2"
