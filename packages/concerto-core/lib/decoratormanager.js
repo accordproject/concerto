@@ -385,7 +385,7 @@ class DecoratorManager {
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
-        if (!decoratorCommandSet) {
+        if (!decoratorCommandSet || decoratorCommandSet?.length === 0) {
             return modelManager;
         }
         const decoratorCommandSets = Array.isArray(decoratorCommandSet)
