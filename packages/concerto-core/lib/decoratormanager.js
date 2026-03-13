@@ -394,7 +394,7 @@ class DecoratorManager {
             : [decoratorCommandSet];
 
         if (options?.skipValidationAndResolution) {
-            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
+            if (options?.disableMetamodelResolution === false || options?.disableMetamodelValidation === false) {
                 throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
             }
             options.disableMetamodelResolution = true;
