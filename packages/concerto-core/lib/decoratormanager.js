@@ -385,10 +385,12 @@ class DecoratorManager {
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
-        const decoratorCommandSets = [decoratorCommandSet || []].flat();
-        if (decoratorCommandSets.length === 0) {
+        if (!decoratorCommandSet) {
             return modelManager;
         }
+        const decoratorCommandSets = Array.isArray(decoratorCommandSet)
+            ? decoratorCommandSet
+            : [decoratorCommandSet];
 
         if (options?.skipValidationAndResolution) {
             if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
