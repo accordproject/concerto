@@ -6,7 +6,7 @@ export = IllegalModelException;
  * @class
  * @memberof module:concerto-core
  */
-declare class IllegalModelException extends BaseFileException {
+declare class IllegalModelException {
     /**
      * Create an IllegalModelException.
      * @param {string} message - the message for the exception
@@ -20,5 +20,4 @@ declare class IllegalModelException extends BaseFileException {
      */
     constructor(message: string, modelFile?: ModelFile, fileLocation?: any, component?: string);
 }
-import { BaseFileException } from "@accordproject/concerto-util";
 import ModelFile = require("./modelfile");

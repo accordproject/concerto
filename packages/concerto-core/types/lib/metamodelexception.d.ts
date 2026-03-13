@@ -6,11 +6,10 @@ export = MetamodelException;
 * @class
 * @memberof module:concerto-core
 */
-declare class MetamodelException extends BaseException {
+declare class MetamodelException {
     /**
      * Create the MetamodelException.
      * @param {string} message - The exception message.
      */
     constructor(message: string);
 }
-import { BaseException } from "@accordproject/concerto-util";

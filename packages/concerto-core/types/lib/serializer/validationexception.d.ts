@@ -7,7 +7,7 @@ export = ValidationException;
  * @memberof module:concerto-core
  * @private
  */
-declare class ValidationException extends BaseException {
+declare class ValidationException {
     /**
      * Create a ValidationException
      * @param {string} message - the message for the exception
@@ -15,5 +15,3 @@ declare class ValidationException extends BaseException {
      */
     constructor(message: string, component: string);
 }
-import BaseException_1 = require("@accordproject/concerto-util/types/lib/baseexception");
-import BaseException = BaseException_1.BaseException;

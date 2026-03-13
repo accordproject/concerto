@@ -14,5 +14,6 @@ declare class BaseException extends Error {
      */
     constructor(message: string, component: string, errorType: string);
     component: any;
+    name: any;
     errorType: string;
 }

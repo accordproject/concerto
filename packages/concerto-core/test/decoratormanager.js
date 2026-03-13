@@ -607,6 +607,20 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
+        it('should not throw error if skipValidationAndResolution is true and disableMetamodelValidation is true', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, skipValidationAndResolution: true, disableMetamodelValidation: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
         it('should throw error if fast mode is enabled and disableModelResoltion and disableModelValidation are set as false', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({strict:true});

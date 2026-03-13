@@ -11,7 +11,7 @@ export = InMemoryWriter;
  */
 declare class InMemoryWriter extends Writer {
     fileName: string;
-    data: Map<any, any>;
+    data: any;
     /**
      * Creates the filename which will be used for association with its string content.
      *
@@ -27,6 +27,6 @@ declare class InMemoryWriter extends Writer {
      *
      * @return {Map} - a Map containing the string representation of files. (k,v) => (filename, file content).
      */
-    getFilesInMemory(): Map<any, any>;
+    getFilesInMemory(): Map;
 }
 import Writer = require("./writer");
