@@ -6,7 +6,7 @@ export = TypeNotFoundException;
  * @class
  * @memberof module:concerto-core
  */
-declare class TypeNotFoundException {
+declare class TypeNotFoundException extends BaseException {
     /**
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
@@ -23,3 +23,4 @@ declare class TypeNotFoundException {
      */
     getTypeName(): string;
 }
+import { BaseException } from "@accordproject/concerto-util";

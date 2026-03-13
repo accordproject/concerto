@@ -19,11 +19,11 @@ declare class ModelFile extends Decorated {
      */
     constructor(modelManager: ModelManager, ast: object, definitions?: string, fileName?: string);
     modelManager: ModelManager;
-    external: any;
+    external: boolean;
     declarations: any[];
-    localTypes: any;
+    localTypes: Map<any, any>;
     imports: any[];
-    importShortNames: any;
+    importShortNames: Map<any, any>;
     importWildcardNamespaces: any[];
     importUriMap: {};
     fileName: string;

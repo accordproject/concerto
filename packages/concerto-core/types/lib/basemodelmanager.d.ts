@@ -381,6 +381,7 @@ declare class BaseModelManager {
 import Factory = require("./factory");
 import Serializer = require("./serializer");
 import ModelFile = require("./introspect/modelfile");
+import { FileDownloader } from "@accordproject/concerto-util";
 import ClassDeclaration = require("./introspect/classdeclaration");
 import AssetDeclaration = require("./introspect/assetdeclaration");
 import TransactionDeclaration = require("./introspect/transactiondeclaration");
