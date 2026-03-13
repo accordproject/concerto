@@ -52,7 +52,7 @@ declare class DecoratorManager {
     /**
      * Migrate or validate the DecoratorCommandSet object if the options are set as true
      * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} decoratorCommandSets An array of DecoratorCommandSet objects
      * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} shouldValidate validate that decorator command set is valid
      * with respect to to decorator command set model
@@ -72,7 +72,7 @@ declare class DecoratorManager {
     /**
      * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
      * @param {object} [options] - decorator models options
      * @param {boolean} [options.validate] - validate that decorator command set is valid
      * with respect to to decorator command set model

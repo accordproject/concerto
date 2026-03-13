@@ -116,6 +116,45 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
+        it('should return the original model manager when no decorator command sets are provided', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, []);
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should support applying a batch of decorator command sets in one pass', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcsFiles = [
+                '/data/decoratorcommands/web.json',
+                '/data/decoratorcommands/possible-decorator-command-targets.json'
+            ];
+            const optionSets = [
+                {},
+                {validate: true},
+                {validate: true, validateCommands: true},
+                {migrate: true},
+                {validate: true, migrate: true}
+            ];
+
+            optionSets.forEach((decorateOptions) => {
+                const dcsList = dcsFiles.map(file => JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf-8')));
+
+                const sequentialModelManager = dcsList.reduce(
+                    (currentModelManager, dcs) => DecoratorManager.decorateModels(currentModelManager, dcs, decorateOptions),
+                    testModelManager
+                );
+                const batchedModelManager = DecoratorManager.decorateModels(testModelManager, dcsList, decorateOptions);
+
+                const sequentialCTO = Printer.toCTO(sequentialModelManager.getModelFile('test@1.0.0').getAst());
+                const batchedCTO = Printer.toCTO(batchedModelManager.getModelFile('test@1.0.0').getAst());
+                batchedCTO.should.equal(sequentialCTO);
+            });
+        });
+
         it('should support syntax validation', async function() {
             const testModelManager = new ModelManager({strict:true});
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
