@@ -30,6 +30,7 @@ jobs:
       - run: npm install -g npm@latest
 
       - run: npm ci
+      - run: npm run lint:package
       - run: npm run build --if-present
 
       - name: tag
