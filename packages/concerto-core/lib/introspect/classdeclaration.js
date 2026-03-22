@@ -206,6 +206,24 @@ class ClassDeclaration extends Declaration {
                 }), this.modelFile, this.ast.location);
             }
             this._resolveSuperType();
+
+            /* istanbul ignore if */
+            if (process.env.CONCERTO_CYCLE_CHECK === 'true') {
+                const visited = new Set();
+                visited.add(this.getFullyQualifiedName());
+                let currentSuper = this.superTypeDeclaration;
+                while (currentSuper) {
+                    const superFqn = currentSuper.getFullyQualifiedName();
+                    if (visited.has(superFqn)) {
+                        throw new IllegalModelException(
+                            `Cyclic inheritance detected for type "${this.getFullyQualifiedName()}"`,
+                            this.modelFile, this.ast.location
+                        );
+                    }
+                    visited.add(superFqn);
+                    currentSuper = currentSuper.getSuperTypeDeclaration();
+                }
+            }
         }
 
         if (this.idField) {
@@ -333,10 +351,32 @@ class ClassDeclaration extends Declaration {
      * @return {string} the name of the id field for this class or null if it does not exist
      */
     getIdentifierFieldName() {
+        /* istanbul ignore next */
+        return this._getIdentifierFieldName(process.env.CONCERTO_CYCLE_CHECK === 'true' ? new Set() : null);
+    }
+
+    /**
+     * @param {Set} [visited] - visited
+     * @return {string} - identifier
+     * @private
+     */
+    _getIdentifierFieldName(visited) {
         if (this.idField) {
             return this.idField;
         } else {
             if (this.getSuperType()) {
+                /* istanbul ignore if */
+                if (visited) {
+                    const fqn = this.getFullyQualifiedName();
+                    if (visited.has(fqn)) {
+                        throw new IllegalModelException(
+                            `Cyclic inheritance detected for type "${fqn}"`,
+                            this.modelFile, this.ast.location
+                        );
+                    }
+                    visited.add(fqn);
+                }
+
                 // we first check our own modelfile, as we may be called from validate
                 // in which case our model file has not yet been added to the model modelManager
                 let classDecl = this.getModelFile().getLocalType(this.getSuperType());
@@ -345,7 +385,7 @@ class ClassDeclaration extends Declaration {
                 if (!classDecl) {
                     classDecl = this.modelFile.getModelManager().getType(this.getSuperType());
                 }
-                return classDecl.getIdentifierFieldName();
+                return classDecl._getIdentifierFieldName(visited);
             } else {
                 return null;
             }
@@ -485,9 +525,27 @@ class ClassDeclaration extends Declaration {
      */
     getAllSuperTypeDeclarations() {
         const results = [];
-        for (let type = this;
-            (type = type.getSuperTypeDeclaration());) {
-            results.push(type);
+        /* istanbul ignore if */
+        if (process.env.CONCERTO_CYCLE_CHECK === 'true') {
+            const visited = new Set();
+            visited.add(this.getFullyQualifiedName());
+            for (let type = this;
+                (type = type.getSuperTypeDeclaration());) {
+                const fqn = type.getFullyQualifiedName();
+                if (visited.has(fqn)) {
+                    throw new IllegalModelException(
+                        `Cyclic inheritance detected for type "${fqn}"`,
+                        this.modelFile, this.ast.location
+                    );
+                }
+                visited.add(fqn);
+                results.push(type);
+            }
+        } else {
+            for (let type = this;
+                (type = type.getSuperTypeDeclaration());) {
+                results.push(type);
+            }
         }
 
         return results;
@@ -523,9 +581,31 @@ class ClassDeclaration extends Declaration {
      * @return {Property[]} the array of fields
      */
     getProperties() {
+        /* istanbul ignore next */
+        return this._getProperties(process.env.CONCERTO_CYCLE_CHECK === 'true' ? new Set() : null);
+    }
+
+    /**
+     * @param {Set} [visited] - visited
+     * @return {Property[]} - properties
+     * @private
+     */
+    _getProperties(visited) {
         let result = this.getOwnProperties();
         let classDecl = null;
         if (this.superType !== null) {
+            /* istanbul ignore if */
+            if (visited) {
+                const fqn = this.getFullyQualifiedName();
+                if (visited.has(fqn)) {
+                    throw new IllegalModelException(
+                        `Cyclic inheritance detected for type "${fqn}"`,
+                        this.modelFile, this.ast.location
+                    );
+                }
+                visited.add(fqn);
+            }
+
             if (this.getModelFile().isImportedType(this.superType)) {
                 let fqnSuper = this.getModelFile().resolveImport(this.superType);
                 classDecl = this.modelFile.getModelManager().getType(fqnSuper);
@@ -541,7 +621,7 @@ class ClassDeclaration extends Declaration {
             // Note: this allows addition of an $identifier field from a supertype
             // even if this type is explicitly identified.
             // We allow this because it allows normalization of identifier lookup without the model present
-            result = result.concat(classDecl.getProperties());
+            result = result.concat(classDecl._getProperties(visited));
         }
 
         return result;

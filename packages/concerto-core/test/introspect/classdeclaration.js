@@ -435,6 +435,101 @@ describe('ClassDeclaration', () => {
             const superclassNames = superclasses.map(classDef => classDef.getName());
             superclassNames.should.have.same.members(['Base', 'Super', 'Participant', 'Concept']);
         });
+
+        it('should throw for cyclic inheritance when CONCERTO_CYCLE_CHECK is set, even when called directly on a type', () => {
+            const mm = new ModelManager();
+            Util.addComposerModel(mm);
+            const ctoA = `namespace org.cyclic.direct.a@1.0.0
+            import org.cyclic.direct.b@1.0.0.B
+            concept A extends B {}`;
+            const ctoB = `namespace org.cyclic.direct.b@1.0.0
+            import org.cyclic.direct.a@1.0.0.A
+            concept B extends A {}`;
+            mm.addModelFiles([ctoA, ctoB], undefined, true);
+            const typeA = mm.getType('org.cyclic.direct.a@1.0.0.A');
+            process.env.CONCERTO_CYCLE_CHECK = 'true';
+            try {
+                (() => {
+                    typeA.getAllSuperTypeDeclarations();
+                }).should.throw(/Cyclic inheritance detected/);
+            } finally {
+                delete process.env.CONCERTO_CYCLE_CHECK;
+            }
+        });
+    });
+
+    describe('#getProperties cyclic inheritance', function() {
+        it('should throw for cyclic inheritance in getProperties when CONCERTO_CYCLE_CHECK is set', () => {
+            const mm = new ModelManager();
+            Util.addComposerModel(mm);
+            const ctoA = `namespace org.cyclic.props.a@1.0.0
+            import org.cyclic.props.b@1.0.0.B
+            concept A extends B { o String fieldA }`;
+            const ctoB = `namespace org.cyclic.props.b@1.0.0
+            import org.cyclic.props.a@1.0.0.A
+            concept B extends A { o String fieldB }`;
+            mm.addModelFiles([ctoA, ctoB], undefined, true);
+            const typeA = mm.getType('org.cyclic.props.a@1.0.0.A');
+            process.env.CONCERTO_CYCLE_CHECK = 'true';
+            try {
+                (() => {
+                    typeA.getProperties();
+                }).should.throw(/Cyclic inheritance detected/);
+            } finally {
+                delete process.env.CONCERTO_CYCLE_CHECK;
+            }
+        });
+    });
+
+    describe('#getIdentifierFieldName cyclic inheritance', function() {
+        it('should throw for cyclic inheritance in getIdentifierFieldName when CONCERTO_CYCLE_CHECK is set', () => {
+            const mm = new ModelManager();
+            Util.addComposerModel(mm);
+            const ctoA = `namespace org.cyclic.id.a@1.0.0
+            import org.cyclic.id.b@1.0.0.B
+            concept A extends B {}`;
+            const ctoB = `namespace org.cyclic.id.b@1.0.0
+            import org.cyclic.id.a@1.0.0.A
+            concept B extends A {}`;
+            mm.addModelFiles([ctoA, ctoB], undefined, true);
+            const typeA = mm.getType('org.cyclic.id.a@1.0.0.A');
+            process.env.CONCERTO_CYCLE_CHECK = 'true';
+            try {
+                (() => {
+                    typeA.getIdentifierFieldName();
+                }).should.throw(/Cyclic inheritance detected/);
+            } finally {
+                delete process.env.CONCERTO_CYCLE_CHECK;
+            }
+        });
+    });
+
+    describe('#getAllSuperTypeDeclarations', function() {
+        const modelFileNames = [
+            'test/data/parser/classdeclaration.participantwithparents.parent.cto',
+            'test/data/parser/classdeclaration.participantwithparents.child.cto'
+        ];
+
+        beforeEach(() => {
+            const modelFiles = introspectUtils.loadModelFiles(modelFileNames, modelManager);
+            modelManager.addModelFiles(modelFiles);
+        });
+
+        it('should return an array with Concept and Participant if there are no superclasses', function() {
+            const testClass = modelManager.getType('com.testing.parent.Base');
+            should.exist(testClass);
+            const superclasses = testClass.getAllSuperTypeDeclarations();
+            const superclassNames = superclasses.map(classDef => classDef.getName());
+            superclassNames.should.have.length(2);
+        });
+
+        it('should return all superclass definitions', function() {
+            const testClass = modelManager.getType('com.testing.child.Sub');
+            should.exist(testClass);
+            const superclasses = testClass.getAllSuperTypeDeclarations();
+            const superclassNames = superclasses.map(classDef => classDef.getName());
+            superclassNames.should.have.same.members(['Base', 'Super', 'Participant', 'Concept']);
+        });
     });
 
     describe('#getDirectSubclasses', function() {
