@@ -1,7 +1,7 @@
 {
   "name": "@accordproject/concerto-vocabulary",
   "description": "Associate human-readable text to model declarations",
-  "version": "3.25.0",
+  "version": "3.26.0",
   "author": "accordproject.org",
   "browserslist": "> 0.25%, not dead",
   "dependencies": {
@@ -9,7 +9,7 @@
     "yaml": "2.8.0"
   },
   "devDependencies": {
-    "@accordproject/concerto-core": "3.25.0",
+    "@accordproject/concerto-core": "3.26.0",
     "@types/webgl-ext": "0.0.37",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",

@@ -1,7 +1,7 @@
 {
   "name": "@accordproject/concerto-util",
   "description": "Utilities for Concerto Modeling Language",
-  "version": "3.25.0",
+  "version": "3.26.0",
   "author": "accordproject.org",
   "browser": "dist/concerto-util.js",
   "browserslist": "> 0.25%, not dead",
