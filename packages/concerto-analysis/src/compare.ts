@@ -122,14 +122,6 @@ export class Compare {
 
     private compareClassDeclaration(comparers: Comparer[], a: ClassDeclaration, b: ClassDeclaration) {
         comparers.forEach(comparer => comparer.compareClassDeclaration?.(a, b));
-        // MapDeclarations do not contain properties, nothing to compare.
-        if(a instanceof MapDeclaration || b instanceof MapDeclaration) {
-            return;
-        }
-        // ScalarDeclarations do not contain properties, nothing to compare.
-        if(a instanceof ScalarDeclaration || b instanceof ScalarDeclaration) {
-            return;
-        }
         this.compareProperties(comparers, a.getOwnProperties(), b.getOwnProperties());
     }
 
@@ -144,7 +136,7 @@ export class Compare {
 
     private compareModelFiles(comparers: Comparer[], a: ModelFile, b: ModelFile) {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
-        this.compareClassDeclarations(comparers, a.getAllDeclarations(), b.getAllDeclarations());
+        this.compareClassDeclarations(comparers, a.getClassDeclarations(), b.getClassDeclarations());
         this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
         this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());
     }

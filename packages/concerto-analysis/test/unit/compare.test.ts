@@ -70,9 +70,8 @@ test('should detect a change of namespace', async () => {
     expect(results.result).toBe(CompareResult.ERROR);
 });
 
-['asset', 'concept', 'enum', 'event', 'participant', 'transaction', 'map', 'scalar'].forEach(type => {
+['asset', 'concept', 'enum', 'event', 'participant', 'transaction'].forEach(type => {
     test(`should detect a ${type} being added`, async () => {
-        process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
         const [a, b] = await getModelFiles('empty.cto', `${type}-added.cto`);
         const results = new Compare().compare(a, b);
         expect(results.findings).toEqual(expect.arrayContaining([
@@ -95,6 +94,64 @@ test('should detect a change of namespace', async () => {
         ]));
         expect(results.result).toBe(CompareResult.MAJOR);
     });
+});
+
+test('should detect a map being added', async () => {
+    process.env.ENABLE_MAP_TYPE = 'true'; // TODO Remove on release of MapType
+    const [a, b] = await getModelFiles('empty.cto', 'map-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-declaration-added',
+            message: 'The map "Thing" was added'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a map being removed', async () => {
+    process.env.ENABLE_MAP_TYPE = 'true';
+    const [a, b] = await getModelFiles('map-added.cto', 'empty.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'map-declaration-removed',
+            message: 'The map "Thing" was removed'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a scalar being added', async () => {
+    const [a, b] = await getModelFiles('empty.cto', 'scalar-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-declaration-added',
+            message: 'The scalar "Thing" was added'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MINOR);
+});
+
+test('should detect a scalar being removed', async () => {
+    const [a, b] = await getModelFiles('scalar-added.cto', 'empty.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'scalar-declaration-removed',
+            message: 'The scalar "Thing" was removed'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should not emit class-declaration findings for map or scalar types', async () => {
+    process.env.ENABLE_MAP_TYPE = 'true';
+    const [a, b] = await getModelFiles('empty.cto', 'map-added.cto');
+    const results = new Compare().compare(a, b);
+    const classFindings = results.findings.filter(f => f.key.startsWith('class-declaration-'));
+    expect(classFindings).toHaveLength(0);
 });
 
 test('should detect a required field being added', async () => {
@@ -278,7 +335,6 @@ test('should detect a map key type changing from x to y', async () => {
             message: 'The map key type was changed to "DateTime"'
         })
     ]));
-    expect(results.findings[0].message).toBe('The map key type was changed to "DateTime"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -292,7 +348,6 @@ test('should detect a map value type changing from x to y', async () => {
             message: 'The map value type was changed to "DateTime"'
         })
     ]));
-    expect(results.findings[0].message).toBe('The map value type was changed to "DateTime"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -305,7 +360,6 @@ test('should detect a scalar extends changing from x to y', async () => {
             message: 'The scalar extends was changed from "String" to "Integer"'
         })
     ]));
-    expect(results.findings[0].message).toBe('The scalar extends was changed from "String" to "Integer"');
     expect(results.result).toBe(CompareResult.MAJOR);
 });
 
@@ -694,6 +748,16 @@ test('should detect a string validator being changed on a scalar (incompatible m
 test('should give a MAJOR CompareResult for Map Type compare config rules)', async () => {
     expect(defaultCompareConfig.rules['map-key-type-changed']).toBe(CompareResult.MAJOR);
     expect(defaultCompareConfig.rules['map-value-type-changed']).toBe(CompareResult.MAJOR);
+});
+
+test('should give correct CompareResult for map declaration add/remove rules', () => {
+    expect(defaultCompareConfig.rules['map-declaration-added']).toBe(CompareResult.MINOR);
+    expect(defaultCompareConfig.rules['map-declaration-removed']).toBe(CompareResult.MAJOR);
+});
+
+test('should give correct CompareResult for scalar declaration add/remove rules', () => {
+    expect(defaultCompareConfig.rules['scalar-declaration-added']).toBe(CompareResult.MINOR);
+    expect(defaultCompareConfig.rules['scalar-declaration-removed']).toBe(CompareResult.MAJOR);
 });
 
 test('should detect a required property changed to optional', async () => {
