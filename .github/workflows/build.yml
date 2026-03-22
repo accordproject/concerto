@@ -16,6 +16,8 @@ concurrency:
 jobs:
   build:
     name: Unit Tests
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30  # <--- Added timeout here
 
     strategy:
       matrix:
@@ -26,8 +28,6 @@ jobs:
           - windows-latest
           - macos-latest
           - ubuntu-latest
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: git checkout
@@ -67,10 +67,10 @@ jobs:
   notify:
     needs:
       - build
-
     name: Code Coverage
     if: ${{ success() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # <--- Added timeout here
 
     steps:
       - name: Coveralls Finished
@@ -79,4 +79,3 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
           fail-on-error: false
-

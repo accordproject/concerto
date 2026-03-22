@@ -15,6 +15,7 @@ concurrency:
 jobs:
   conformance:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # <--- Added timeout here
 
     steps:
       - name: Checkout Target Project
@@ -48,4 +49,3 @@ jobs:
           MODELFILE_PATH: ../../../../../../packages/concerto-core/index.js
           MODELMANAGER_PATH: ../../../../../../packages/concerto-core/index.js
         run: npm test
-        
