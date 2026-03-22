@@ -1,7 +1,7 @@
 {
   "name": "concerto",
   "description": "Define and introspect data models",
-  "version": "3.25.0",
+  "version": "3.26.0",
   "devDependencies": {
     "@types/jest": "29.5.14",
     "dayjs": "1.11.13",

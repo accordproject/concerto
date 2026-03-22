@@ -1,11 +1,11 @@
 {
   "name": "@accordproject/concerto-linter",
   "description": "Concerto Linter using Spectral rulesets",
-  "version": "3.25.0",
+  "version": "3.26.0",
   "author": "accordproject.org",
   "dependencies": {
-    "@accordproject/concerto-cto": "3.25.0",
-    "@accordproject/concerto-linter-default-ruleset": "3.25.0",
+    "@accordproject/concerto-cto": "3.26.0",
+    "@accordproject/concerto-linter-default-ruleset": "3.26.0",
     "@stoplight/spectral-cli": "6.15.0",
     "@stoplight/spectral-core": "1.20.0",
     "@stoplight/spectral-parsers": "1.0.5",

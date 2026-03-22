@@ -1,14 +1,14 @@
 {
   "name": "@accordproject/concerto-analysis",
   "description": "Analysis of Concerto model files",
-  "version": "3.25.0",
+  "version": "3.26.0",
   "author": "accordproject.org",
   "dependencies": {
-    "@accordproject/concerto-core": "3.25.0",
+    "@accordproject/concerto-core": "3.26.0",
     "semver": "7.6.3"
   },
   "devDependencies": {
-    "@accordproject/concerto-cto": "3.25.0",
+    "@accordproject/concerto-cto": "3.26.0",
     "@types/semver": "7.5.8",
     "@typescript-eslint/eslint-plugin": "8.16.0",
     "@typescript-eslint/parser": "8.16.0",
