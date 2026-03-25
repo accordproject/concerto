@@ -3,9 +3,12 @@
   "description": "Define and introspect data models",
   "version": "3.26.0",
   "devDependencies": {
+    "@types/eslint": "8.44.0",
+    "@types/estree": "1.0.3",
     "@types/jest": "29.5.14",
+    "ajv": "8.18.0",
     "dayjs": "1.11.13",
-    "glob": "11.1.0",
+    "glob": "10.3.10",
     "license-check-and-add": "4.0.5",
     "lockfile-lint": "4.14.1",
     "nyc": "17.1.0",
@@ -38,5 +41,12 @@
     "packages/concerto-vocabulary",
     "packages/concerto-linter",
     "packages/concerto-linter/default-ruleset"
-  ]
+  ],
+  "resolutions": {
+    "ajv": "8.18.0",
+    "@types/eslint": "8.44.0",
+    "@types/estree": "1.0.3",
+    "glob": "10.3.10",
+    "minimatch": "5.1.0"
+  }
 }

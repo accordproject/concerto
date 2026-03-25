@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concerto Core Test</title>
+</head>
+<body>
+    <h1>Concerto Core Browser Test</h1>
+    <div id="output"></div>
+
+    <script src="packages/concerto-core/dist/concerto-core.js"></script>
+    <script>
+        try {
+            // Test that Concerto is loaded
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Concerto loaded successfully!</p>';
+            output.innerHTML += '<p>Version: ' + (window.Concerto ? 'Available' : 'Not available') + '</p>';
+
+            // Test basic functionality
+            if (typeof Concerto !== 'undefined') {
+                output.innerHTML += '<p>Concerto object found in global scope</p>';
+            } else {
+                output.innerHTML += '<p>Concerto not found in global scope</p>';
+            }
+
+            console.log('Concerto:', window.Concerto);
+        } catch (error) {
+            document.getElementById('output').innerHTML = '<p>Error: ' + error.message + '</p>';
+        }
+    </script>
+</body>
+</html>

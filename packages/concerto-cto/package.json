@@ -64,7 +64,7 @@
   },
   "scripts": {
     "build": "npm run parser && npm run build:types",
-    "build:types": "tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types",
+    "build:types": "tsc index.js --target ES2015 --skipLibCheck --declaration --allowJs --emitDeclarationOnly --outDir types",
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "lint": "eslint .",
     "mocha": "mocha --recursive -t 10000",
