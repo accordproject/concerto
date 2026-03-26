@@ -6,7 +6,7 @@
   "browserslist": "> 0.25%, not dead",
   "dependencies": {
     "@accordproject/concerto-metamodel": "3.12.6",
-    "yaml": "2.8.0"
+    "yaml": "2.8.3"
   },
   "devDependencies": {
     "@accordproject/concerto-core": "3.26.0",
