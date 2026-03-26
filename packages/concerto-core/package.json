@@ -17,7 +17,7 @@
     "semver": "7.6.3",
     "urijs": "1.19.11",
     "uuid": "11.0.3",
-    "yaml": "2.8.0"
+    "yaml": "2.8.3"
   },
   "devDependencies": {
     "@babel/preset-env": "7.26.0",
