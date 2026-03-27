@@ -58,6 +58,8 @@ Infer models from other formats:
 - JSON Schema
 - OpenAPI v3 specification document
 
+
+
 ## Getting Started
 
 - Install the [Command Line Tool](https://concerto.accordproject.org/docs/tools/ref-concerto-cli)
@@ -65,16 +67,75 @@ Infer models from other formats:
 
 ```console
 $ npm i -g @accordproject/concerto-cli
-$ concerto compare --old model.cto --new model-with-changes.cto 
-[required-field-added]: The required field "weight" was added to the concept "Person" (major) 
+$ concerto compare --old model.cto --new model-with-changes.cto
+[required-field-added]: The required field "weight" was added to the concept "Person" (major)
 ```
 
-- Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
+## Developer Walkthrough (Hands-on Example)
+
+If you're just getting started with Concerto, this quick example might help you understand how things fit together.
+
+### Install dependency
+
+```bash
+npm install @accordproject/concerto-core
+```
+
+### Define a basic model
+
+```javascript
+const { ModelManager } = require('@accordproject/concerto-core');
+
+const manager = new ModelManager();
+
+const model = `
+namespace demo.basic
+
+concept User {
+  o String name
+  o Integer age
+}
+`;
+
+manager.addModelFile(model);
+```
+
+### Create sample data
+
+```javascript
+const factory = manager.getFactory();
+
+const user = factory.newResource('demo.basic', 'User', 'u1');
+user.name = "Amit";
+user.age = 23;
+```
+
+### Convert into JSON
+
+```javascript
+const serializer = manager.getSerializer();
+const json = serializer.toJSON(user);
+
+console.log(json);
+```
+
+### Output example
+
+```json
+{
+  "$class": "demo.basic.User",
+  "name": "Amit",
+  "age": 23
+}
+```
+
+* Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
 
 ![VSCode Editor](https://accordproject.org/wp-content/uploads/2022/10/af57b31d0eb66154bce4e0ffec780027.png)
 
-- Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
-- Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
+* Add to your [Node.js project](https://docs.accordproject.org/docs/model-api.html)
+* Add to your [.NET project](https://www.nuget.org/packages/AccordProject.Concerto)
+
 
 ## Structure of the Code
 
