@@ -69,6 +69,15 @@ $ concerto compare --old model.cto --new model-with-changes.cto
 [required-field-added]: The required field "weight" was added to the concept "Person" (major) 
 ```
 
+## Running Tests
+
+To run tests locally:
+
+```bash
+npm install
+npm test
+```
+
 - Open VSCode ([on the web](https://github.dev/accordproject/models/blob/master/src/address%400.2.0.cto), [on your machine](https://marketplace.visualstudio.com/items?itemName=accordproject.cicero-vscode-extension))
 
 ![VSCode Editor](https://accordproject.org/wp-content/uploads/2022/10/af57b31d0eb66154bce4e0ffec780027.png)
