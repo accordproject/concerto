@@ -28,7 +28,13 @@ import type {
 } from './concerto.metamodel@1.0.0';
 
 // interfaces
+/**
+ * Base interface representing a Concerto concept.
+ */
 export interface IConcept {
+   /**
+    * Fully qualified class name of the concept.
+    */
    $class: string;
 }
 
@@ -53,19 +59,43 @@ IImport |
 IModel | 
 IModels;
 
+/**
+ * Represents an asset entity in the Concerto model.
+ */
 export interface IAsset extends IConcept {
+   /**
+    * Unique identifier of the asset.
+    */
    $identifier: string;
 }
 
+/**
+ * Represents a participant in the Concerto model.
+ */
 export interface IParticipant extends IConcept {
+   /**
+    * Unique identifier of the participant.
+    */
    $identifier: string;
 }
 
+/**
+ * Represents a transaction in the Concerto model.
+ */
 export interface ITransaction extends IConcept {
+   /**
+    * Timestamp of the transaction.
+    */
    $timestamp: Date;
 }
 
+/**
+ * Represents an event emitted by the Concerto model.
+ */
 export interface IEvent extends IConcept {
+   /**
+    * Timestamp of the event.
+    */
    $timestamp: Date;
 }
 
