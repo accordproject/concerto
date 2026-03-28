@@ -67,7 +67,7 @@ declare class Vocabulary {
      * @param {ModelFile} modelFile the model file for this vocabulary
      * @returns {*} an object with missingTerms and additionalTerms properties
      */
-    validate(modelFile: ModelFile): any;
+    validate(modelFile: DecoratorManager): any;
     /**
      * Converts the object to JSON
      * @returns {*} the contens of this vocabulary
@@ -75,4 +75,3 @@ declare class Vocabulary {
     toJSON(): any;
 }
 import VocabularyManager = require("./vocabularymanager");
-import { ModelFile } from "@accordproject/concerto-core";
