@@ -89,7 +89,7 @@ declare class VocabularyManager {
      * @param {string} [identifier] the identifier of the term (optional)
      * @returns {string} the term or null if it does not exist
      */
-    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string;
+    resolveTerm(modelManager: YAML, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string;
     /**
      * Resolve the terms for a property, looking up terms from a more general vocabulary
      * if required, and resolving properties using an object manager, allowing terms defined
@@ -101,7 +101,7 @@ declare class VocabularyManager {
      * @param {string} [propertyName] the name of a property (optional)
      * @returns {*} the terms or null if it does not exist
      */
-    resolveTerms(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string): any;
+    resolveTerms(modelManager: YAML, namespace: string, locale: string, declarationName: string, propertyName?: string): any;
     /**
      * Gets the term for a concept, enum or property, looking up terms
      * from a more general vocabulary if required
@@ -132,7 +132,7 @@ declare class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the decorator command set used to decorate the model.
      */
-    generateDecoratorCommands(modelManager: ModelManager, locale: string): any;
+    generateDecoratorCommands(modelManager: YAML, locale: string): any;
     /**
      * Validates the terms in the vocabulary against the namespaces and declarations
      * within a ModelManager
@@ -140,7 +140,6 @@ declare class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @returns {*} the result of validation
      */
-    validate(modelManager: ModelManager): any;
+    validate(modelManager: YAML): any;
 }
 import Vocabulary = require("./vocabulary");
-import { ModelManager } from "@accordproject/concerto-core";

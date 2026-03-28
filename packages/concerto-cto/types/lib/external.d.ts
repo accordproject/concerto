@@ -8,4 +8,3 @@
  * @return {Promise} a promise when the download and update operation is completed.
  */
 export function resolveExternal(models: any, options?: any, fileDownloader?: FileDownloader): Promise<any>;
-import { FileDownloader } from "@accordproject/concerto-util";
