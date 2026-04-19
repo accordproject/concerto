@@ -56,11 +56,6 @@ import ModelUtil = require("./modelutil");
 import DateTimeUtil = require("./datetimeutil");
 import MetaModel = require("./introspect/metamodel");
 
-export type version = {
-    name: string;
-    version: string;
-};
-
 // Re-exporting ModelManager here makes it available as 'import { ModelManager }' to the outside world
 export { 
     SecurityException, 

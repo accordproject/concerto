@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field } = require('@accordproject/concerto-core');
-/* eslint-enable @typescript-eslint/no-require-imports */
+import ConcertoCore = require('@accordproject/concerto-core');
+const { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field } = ConcertoCore;
 
 import { getDeclarationType, getPropertyType, getValidatorType } from '../../src/compare-utils';
 
