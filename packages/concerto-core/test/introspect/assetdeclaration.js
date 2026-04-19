@@ -106,7 +106,7 @@ describe('AssetDeclaration', () => {
             }).should.throw(/more than one field named/);
         });
 
-        it('should throw when field has been duplicated in the same class hierachy', () => {
+        it('should throw when field has been duplicated in the same class hierarchy', () => {
             let asset = loadLastAssetDeclaration('test/data/parser/assetdeclaration.dupecomp.cto');
             (() => {
                 asset.validate();

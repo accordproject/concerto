@@ -107,6 +107,45 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
+        it('should return the original model manager when no decorator command sets are provided', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            let decoratedModelManager = DecoratorManager.decorateModels( testModelManager, []);
+            decoratedModelManager.should.not.be.null;
+        });
+
+        it('should support applying a batch of decorator command sets in one pass', async function() {
+            const testModelManager = new ModelManager({strict:true});
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const dcsFiles = [
+                '/data/decoratorcommands/web.json',
+                '/data/decoratorcommands/possible-decorator-command-targets.json'
+            ];
+            const optionSets = [
+                {},
+                {validate: true},
+                {validate: true, validateCommands: true},
+                {migrate: true},
+                {validate: true, migrate: true}
+            ];
+
+            optionSets.forEach((decorateOptions) => {
+                const dcsList = dcsFiles.map(file => JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf-8')));
+
+                const sequentialModelManager = dcsList.reduce(
+                    (currentModelManager, dcs) => DecoratorManager.decorateModels(currentModelManager, dcs, decorateOptions),
+                    testModelManager
+                );
+                const batchedModelManager = DecoratorManager.decorateModels(testModelManager, dcsList, decorateOptions);
+
+                const sequentialCTO = Printer.toCTO(sequentialModelManager.getModelFile('test@1.0.0').getAst());
+                const batchedCTO = Printer.toCTO(batchedModelManager.getModelFile('test@1.0.0').getAst());
+                batchedCTO.should.equal(sequentialCTO);
+            });
+        });
+
         it('should support syntax validation', async function() {
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
@@ -515,6 +554,20 @@ describe('DecoratorManager', () => {
             decoratedModelManager.should.not.be.null;
         });
 
+        it('should not throw error if skipValidationAndResolution is true and disableMetamodelValidation is true', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            const decoratedModelManager = DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                {validate: true, skipValidationAndResolution: true, disableMetamodelValidation: true});
+
+            decoratedModelManager.should.not.be.null;
+        });
+
         it('should throw error if fast mode is enabled and disableModelResoltion and disableModelValidation are set as false', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager();
@@ -526,6 +579,34 @@ describe('DecoratorManager', () => {
             (() => {
                 DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
                     {validate: true, skipValidationAndResolution: true, disableMetamodelResolution: false, disableMetamodelValidation: false});
+            }).should.throw(/skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false/);
+        });
+
+        it('should throw error if fast mode is enabled and disableMetamodelResolution is false', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, skipValidationAndResolution: true, disableMetamodelResolution: false});
+            }).should.throw(/skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false/);
+        });
+
+        it('should throw error if fast mode is enabled and disableMetamodelValidation is false', async function() {
+            // load a model to decorate
+            const testModelManager = new ModelManager({strict:true});
+            const modelAst = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/resolvedValidatedModel.json'), 'utf-8');
+            const modelFile =  new ModelFile(testModelManager, JSON.parse(modelAst));
+            testModelManager.addModelFile(modelFile);
+
+            const dcs = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/web.json'), 'utf-8');
+            (() => {
+                DecoratorManager.decorateModels( testModelManager, JSON.parse(dcs),
+                    {validate: true, skipValidationAndResolution: true, disableMetamodelValidation: false});
             }).should.throw(/skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false/);
         });
 

@@ -307,7 +307,7 @@ class DecoratorManager {
     /**
      * Migrate or validate the DecoratorCommandSet object if the options are set as true
      * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} decoratorCommandSet a DecoratorCommandSet object, or an array of DecoratorCommandSet objects
      * @param {boolean} shouldMigrate migrate the decoratorCommandSet $class to match the dcs model version
      * @param {boolean} shouldValidate validate that decorator command set is valid
      * with respect to to decorator command set model
@@ -316,8 +316,13 @@ class DecoratorManager {
      * @private
      */
     static migrateAndValidate(modelManager, decoratorCommandSet, shouldMigrate, shouldValidate, shouldValidateCommands) {
-        if (shouldMigrate && this.canMigrate(decoratorCommandSet, DCS_VERSION)) {
-            decoratorCommandSet = this.migrateTo(decoratorCommandSet, DCS_VERSION);
+        const decoratorCommandSets = Array.isArray(decoratorCommandSet) ? decoratorCommandSet : [decoratorCommandSet];
+        if (shouldMigrate) {
+            decoratorCommandSets.forEach((commandSet, index) => {
+                if (this.canMigrate(commandSet, DCS_VERSION)) {
+                    decoratorCommandSets[index] = this.migrateTo(commandSet, DCS_VERSION);
+                }
+            });
         }
 
         if (shouldValidate) {
@@ -332,15 +337,17 @@ class DecoratorManager {
             );
             const factory = new Factory(validationModelManager);
             const serializer = new Serializer(factory, validationModelManager);
-            serializer.fromJSON(decoratorCommandSet);
-            if (shouldValidateCommands) {
-                decoratorCommandSet.commands.forEach((command) => {
-                    DecoratorManager.validateCommand(
-                        validationModelManager,
-                        command
-                    );
-                });
-            }
+            decoratorCommandSets.forEach((commandSet) => {
+                serializer.fromJSON(commandSet);
+                if (shouldValidateCommands) {
+                    commandSet.commands.forEach((command) => {
+                        DecoratorManager.validateCommand(
+                            validationModelManager,
+                            command
+                        );
+                    });
+                }
+            });
         }
     }
 
@@ -360,7 +367,7 @@ class DecoratorManager {
     /**
      * Applies all the decorator commands from the DecoratorCommandSet to the ModelManager
      * @param {ModelManager} modelManager the input model manager
-     * @param {*} decoratorCommandSet the DecoratorCommandSet object
+     * @param {*} decoratorCommandSet the DecoratorCommandSet object, or an array of DecoratorCommandSet objects
      * @param {object} [options] - decorator models options
      * @param {boolean} [options.validate] - validate that decorator command set is valid
      * with respect to to decorator command set model
@@ -374,20 +381,31 @@ class DecoratorManager {
      * @returns {ModelManager} a new model manager with the decorations applied
      */
     static decorateModels(modelManager, decoratorCommandSet, options) {
+        if (!decoratorCommandSet || decoratorCommandSet?.length === 0) {
+            return modelManager;
+        }
+        const decoratorCommandSets = Array.isArray(decoratorCommandSet)
+            ? decoratorCommandSet
+            : [decoratorCommandSet];
 
         if (options?.skipValidationAndResolution) {
-            if (options?.disableMetamodelResolution === false || !options?.disableMetamodelValidation === false) {
+            if (options?.disableMetamodelResolution === false || options?.disableMetamodelValidation === false) {
                 throw new Error('skipValidationAndResolution cannot be used with disableMetamodelResolution or disableMetamodelValidation options as false');
             }
             options.disableMetamodelResolution = true;
             options.disableMetamodelValidation = true;
         }
 
-        this.migrateAndValidate(modelManager, decoratorCommandSet, options?.migrate, options?.validate, options?.validateCommands);
+        this.migrateAndValidate(modelManager, decoratorCommandSets, options?.migrate, options?.validate, options?.validateCommands);
+
+        // Flatten commands across all command sets so decorators can be applied in a single AST scan.
+        const combinedDecoratorCommandSet = {
+            commands: decoratorCommandSets.flatMap(commandSet => commandSet.commands)
+        };
 
         // we create synthetic imports for all decorator declarations
         // along with any of their type reference arguments
-        const decoratorImports = decoratorCommandSet.commands.flatMap(command => {
+        const decoratorImports = combinedDecoratorCommandSet.commands.flatMap(command => {
             return [{
                 $class: `${MetaModelNamespace}.ImportType`,
                 name: command.decorator.name,
@@ -402,7 +420,7 @@ class DecoratorManager {
                 })
                 : []);
         }).filter(i => i.namespace);
-        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(decoratorCommandSet);
+        const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(combinedDecoratorCommandSet);
         const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
         const decoratedAst = rfdc(ast);
         decoratedAst.models.forEach((model) => {
