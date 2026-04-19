@@ -1,6 +1,4 @@
-import ConcertoCore = require('@accordproject/concerto-core');
-const { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field } = ConcertoCore;
-
+import { ClassDeclaration, ModelFile, ModelManager, Property, Validator, Field }  from '@accordproject/concerto-core';
 import { getDeclarationType, getPropertyType, getValidatorType } from '../../src/compare-utils';
 
 // This test suite should disappear once we port concerto-core to TypeScript because the error branches will be enforced by the transpiler.
