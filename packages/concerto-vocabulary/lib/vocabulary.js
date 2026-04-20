@@ -140,7 +140,7 @@ class Vocabulary {
             return identifier ? decl[identifier] : decl[declarationName];
         }
         else {
-            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find(d => propertyName in d) : null;
             return property ? identifier ? property[identifier] : property[propertyName] : null;
         }
     }
@@ -163,7 +163,7 @@ class Vocabulary {
             return decl;
         }
         else {
-            const property = decl.properties ? decl.properties.find(d => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find(d => propertyName in d) : null;
             return property;
         }
     }

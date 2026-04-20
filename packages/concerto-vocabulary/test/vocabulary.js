@@ -134,4 +134,144 @@ describe('Vocabulary', () => {
         should.equal(term, obj.term);
         process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
     });
+
+    describe('getTerm - property existence checks', () => {
+        it('should find property with string value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithString: 'a valid string' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const term = voc.getTerm('TestDecl', 'propWithString');
+            term.should.equal('a valid string');
+        });
+
+        it('should find property with empty string value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithEmptyString: '' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const term = voc.getTerm('TestDecl', 'propWithEmptyString');
+            term.should.equal('');
+        });
+
+        it('should find property with null value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithNull: null }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const term = voc.getTerm('TestDecl', 'propWithNull');
+            (term === null).should.be.true;
+        });
+
+        it('should return null for non-existent property', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { existingProp: 'value' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const term = voc.getTerm('TestDecl', 'nonExistentProp');
+            (term === null).should.be.true;
+        });
+    });
+
+    describe('getElementTerms - property existence checks', () => {
+        it('should find property object with string value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithString: 'a valid string' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const terms = voc.getElementTerms('TestDecl', 'propWithString');
+            terms.propWithString.should.equal('a valid string');
+        });
+
+        it('should find property object with empty string value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithEmptyString: '' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const terms = voc.getElementTerms('TestDecl', 'propWithEmptyString');
+            terms.propWithEmptyString.should.equal('');
+        });
+
+        it('should find property object with null value', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { propWithNull: null }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const terms = voc.getElementTerms('TestDecl', 'propWithNull');
+            (terms.propWithNull === null).should.be.true;
+        });
+
+        it('should return undefined for non-existent property', () => {
+            const vocabularyManager = {};
+            const obj = {
+                declarations: [{
+                    TestDecl: 'Test Declaration',
+                    properties: [
+                        { existingProp: 'value' }
+                    ]
+                }],
+                locale: 'en',
+                namespace: 'org.test'
+            };
+            const voc = new Vocabulary(vocabularyManager, obj);
+            const terms = voc.getElementTerms('TestDecl', 'nonExistentProp');
+            should.not.exist(terms);
+        });
+    });
 });
