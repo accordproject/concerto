@@ -77,3 +77,4 @@ umd
 
 # TypeScript build folder
 dist
+debug-log.txt
