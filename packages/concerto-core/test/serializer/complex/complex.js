@@ -14,9 +14,9 @@
 
 'use strict';
 
-const Factory = require('../../../lib/factory');
-const ModelManager = require('../../../lib/modelmanager');
-const Serializer = require('../../../lib/serializer');
+const Factory = require('../../../src/factory');
+const ModelManager = require('../../../src/modelmanager');
+const Serializer = require('../../../src/serializer');
 const fs = require('fs');
 const Util = require('../../composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -62,25 +62,25 @@ describe('Test generating deduplicated JSON for complex models', () => {
 
         it('should generate deduplicated JSON for a complex model', () => {
 
-            const wrapper = factory.newResource( 'org.acme.vehicle.lifecycle', 'TransactionWrapper', 'dummy');
-            wrapper.transaction = factory.newTransaction('org.vda', 'PrivateVehicleTransfer', '111');
-            wrapper.transaction.seller = factory.newResource('composer.base', 'Person', 'dan');
+            const wrapper = factory.newResource( 'org.acme.vehicle.lifecycle@1.0.0', 'TransactionWrapper', 'dummy');
+            wrapper.transaction = factory.newTransaction('org.vda@1.0.0', 'PrivateVehicleTransfer', '111');
+            wrapper.transaction.seller = factory.newResource('composer.base@1.0.0', 'Person', 'dan');
             wrapper.transaction.seller.firstName = 'Dan';
             wrapper.transaction.seller.lastName = 'Selman';
             wrapper.transaction.seller.gender = 'MALE';
             wrapper.transaction.seller.nationalities = ['French', 'UK'];
-            wrapper.transaction.seller.contactDetails = factory.newConcept('composer.base', 'ContactDetails');
+            wrapper.transaction.seller.contactDetails = factory.newConcept('composer.base@1.0.0', 'ContactDetails');
             wrapper.transaction.seller.contactDetails.email = 'dan@acme.org';
-            wrapper.transaction.buyer = factory.newResource('composer.base', 'Person', 'anthony');
-            wrapper.transaction.vehicle = factory.newResource('org.vda', 'Vehicle', '156478954');
-            wrapper.transaction.vehicle.vehicleDetails = factory.newConcept( 'org.vda', 'VehicleDetails');
+            wrapper.transaction.buyer = factory.newResource('composer.base@1.0.0', 'Person', 'anthony');
+            wrapper.transaction.vehicle = factory.newResource('org.vda@1.0.0', 'Vehicle', '156478954');
+            wrapper.transaction.vehicle.vehicleDetails = factory.newConcept( 'org.vda@1.0.0', 'VehicleDetails');
             wrapper.transaction.vehicle.vehicleDetails.make = 'Ford';
             wrapper.transaction.vehicle.vehicleDetails.modelType = 'Mustang';
             wrapper.transaction.vehicle.vehicleDetails.colour = 'Red';
             wrapper.transaction.vehicle.vehicleStatus = 'ACTIVE';
-            wrapper.transaction.vehicle.owner = factory.newRelationship( 'composer.base', 'Person', 'dan');
+            wrapper.transaction.vehicle.owner = factory.newRelationship( 'composer.base@1.0.0', 'Person', 'dan');
 
-            const logEntry = factory.newConcept('org.vda', 'VehicleTransferLogEntry');
+            const logEntry = factory.newConcept('org.vda@1.0.0', 'VehicleTransferLogEntry');
             logEntry.vehicle = wrapper.transaction.vehicle;
             logEntry.buyer = wrapper.transaction.buyer;
             logEntry.seller = wrapper.transaction.seller;
@@ -91,9 +91,9 @@ describe('Test generating deduplicated JSON for complex models', () => {
 
             // check that the resources have been deduplicated
             // and the $id attribute has been added
-            obj.$id.should.equal('resource:org.acme.vehicle.lifecycle.TransactionWrapper#dummy');
-            obj.transaction.vehicle.logEntries[0].buyer.should.equal('resource:composer.base.Person#anthony');
-            obj.transaction.vehicle.logEntries[0].seller.should.equal('resource:composer.base.Person#dan');
+            obj.$id.should.equal('resource:org.acme.vehicle.lifecycle@1.0.0.TransactionWrapper#dummy');
+            obj.transaction.vehicle.logEntries[0].buyer.should.equal('resource:composer.base@1.0.0.Person#anthony');
+            obj.transaction.vehicle.logEntries[0].seller.should.equal('resource:composer.base@1.0.0.Person#dan');
         });
     });
 });

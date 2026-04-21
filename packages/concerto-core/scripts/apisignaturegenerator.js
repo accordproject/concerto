@@ -76,16 +76,17 @@ class APISignatureGenerator {
                 }
                 writer.writeLine(0, '}');
             }
-            for(let n=0; n < functions.length; n++) {
-                const func = functions[n];
-                let throws = '';
-                if(func.throws) {
-                    throws = 'throws ' + func.throws;
-                }
-                writer.writeLine(1, func.visibility +
-                ' ' + func.returnType + ' ' + func.name +
-                paramsToString(func.methodArgs | []) + ' ' + throws );
-            }
+            // We ignore independent functions for now. We need to figure out a better way to represent them in UML.
+            // for(let n=0; n < functions.length; n++) {
+            //     const func = functions[n];
+            //     let throws = '';
+            //     if(func.throws) {
+            //         throws = 'throws ' + func.throws;
+            //     }
+            //     writer.writeLine(1, func.visibility +
+            //     ' ' + func.returnType + ' ' + func.name +
+            //     paramsToString(func.methodArgs | []) + ' ' + throws );
+            // }
 
             fs.appendFileSync(program.outputDir + '/api.txt', writer.getBuffer());
         }

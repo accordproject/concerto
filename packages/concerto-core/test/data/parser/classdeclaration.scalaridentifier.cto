@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace com.testing
+namespace com.testing@1.0.0
 
 scalar SSN extends String default="000-00-0000" regex=/\d{3}-\d{2}-\d{4}/
 

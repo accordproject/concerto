@@ -15,9 +15,9 @@
 /**
  * Model based on the DVLA vehicle definition and registration process
  */
-namespace org.gov.uk.dvla
+namespace org.gov.uk.dvla@1.0.0
 
-import composer.base.Person
+import composer.base@1.0.0.Person
 
 /**
  * Based on DVLA document V355/1
@@ -96,7 +96,7 @@ concept ExhaustEmissions {
  * Based on the DVLA V62 document
  */
 transaction ApplicationForVehicleRegistrationCertificate  {
-  
+
   o VehicleDetails vehicleDetails
   o Person keeperDetails
   o String dvlaFleetNumber optional
@@ -106,7 +106,7 @@ transaction ApplicationForVehicleRegistrationCertificate  {
 }
 
 transaction VehicleTransaction  {
-  
+
   --> Vehicle vehicle
 }
 

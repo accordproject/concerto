@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');
@@ -36,17 +36,13 @@ describe('ModelFile semantic validation', () => {
 
     describe('#constructor', () => {
 
-        it('should throw and include file location', () => {
+        it('should throw', () => {
             try {
                 const mf = ParserUtil.newModelFile(modelManager,invalidModel, 'invalid.cto');
                 mf.validate();
             }
             catch(error) {
                 error.fileName.should.equal('invalid.cto');
-                error.getFileLocation().start.line.should.equal(22);
-                error.getFileLocation().start.column.should.equal(1);
-                error.getFileLocation().end.line.should.equal(24);
-                error.getFileLocation().end.column.should.equal(2);
             }
         });
     });

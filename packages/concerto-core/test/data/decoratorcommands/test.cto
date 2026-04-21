@@ -22,12 +22,12 @@ concept Person {
 }
 
 map Dictionary {
-    o String 
+    o String
     o String
 }
 
 map Rolodex {
-    o String 
+    o String
     o String
 }
 
