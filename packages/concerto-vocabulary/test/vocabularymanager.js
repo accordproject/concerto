@@ -425,4 +425,139 @@ describe('VocabularyManager', () => {
         const ssnDecorator = ssnDeclaration.getDecorator('Term');
         ssnDecorator.getArguments()[0].should.equal('SSN');
     });
+
+    describe('getTerm - falsy value handling', () => {
+        it('should return empty string when term is empty string', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - EmptyStringDecl: ""
+`;
+            testVocManager.addVocabulary(vocContent);
+            const term = testVocManager.getTerm('org.falsy@1.0.0', 'en', 'EmptyStringDecl');
+            term.should.equal('');
+        });
+
+        it('should return null when term has no value (YAML null)', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - NoValueDecl:
+`;
+            testVocManager.addVocabulary(vocContent);
+            const term = testVocManager.getTerm('org.falsy@1.0.0', 'en', 'NoValueDecl');
+            (term === null).should.be.true;
+        });
+
+        it('should return null when term is explicit null', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - ExplicitNullDecl: null
+`;
+            testVocManager.addVocabulary(vocContent);
+            const term = testVocManager.getTerm('org.falsy@1.0.0', 'en', 'ExplicitNullDecl');
+            (term === null).should.be.true;
+        });
+
+        it('should return string "undefined" when term is undefined (YAML parses as string)', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - UndefinedDecl: undefined
+`;
+            testVocManager.addVocabulary(vocContent);
+            const term = testVocManager.getTerm('org.falsy@1.0.0', 'en', 'UndefinedDecl');
+            term.should.equal('undefined');
+        });
+
+        it('should return string "null" when term is quoted null', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - QuotedNullDecl: "null"
+`;
+            testVocManager.addVocabulary(vocContent);
+            const term = testVocManager.getTerm('org.falsy@1.0.0', 'en', 'QuotedNullDecl');
+            term.should.equal('null');
+        });
+
+        it('should return null when term does not exist', () => {
+            const term = vocabularyManager.getTerm('org.acme@1.0.0', 'en', 'NonExistentDecl');
+            (term === null).should.be.true;
+        });
+    });
+
+    describe('getTerms - falsy value handling', () => {
+        it('should return object with empty string when term is empty string', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - EmptyStringDecl: ""
+`;
+            testVocManager.addVocabulary(vocContent);
+            const terms = testVocManager.getTerms('org.falsy@1.0.0', 'en', 'EmptyStringDecl');
+            terms.EmptyStringDecl.should.equal('');
+        });
+
+        it('should return object with null when term has no value (YAML null)', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - NoValueDecl:
+`;
+            testVocManager.addVocabulary(vocContent);
+            const terms = testVocManager.getTerms('org.falsy@1.0.0', 'en', 'NoValueDecl');
+            (terms.NoValueDecl === null).should.be.true;
+        });
+
+        it('should return object with null when term is explicit null', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - ExplicitNullDecl: null
+`;
+            testVocManager.addVocabulary(vocContent);
+            const terms = testVocManager.getTerms('org.falsy@1.0.0', 'en', 'ExplicitNullDecl');
+            (terms.ExplicitNullDecl === null).should.be.true;
+        });
+
+        it('should return object with string "undefined" when term is undefined (YAML parses as string)', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - UndefinedDecl: undefined
+`;
+            testVocManager.addVocabulary(vocContent);
+            const terms = testVocManager.getTerms('org.falsy@1.0.0', 'en', 'UndefinedDecl');
+            terms.UndefinedDecl.should.equal('undefined');
+        });
+
+        it('should return object with string "null" when term is quoted null', () => {
+            const testVocManager = new VocabularyManager();
+            const vocContent = `locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - QuotedNullDecl: "null"
+`;
+            testVocManager.addVocabulary(vocContent);
+            const terms = testVocManager.getTerms('org.falsy@1.0.0', 'en', 'QuotedNullDecl');
+            terms.QuotedNullDecl.should.equal('null');
+        });
+
+        it('should return null when terms do not exist', () => {
+            const terms = vocabularyManager.getTerms('org.acme@1.0.0', 'en', 'NonExistentDecl');
+            (terms === null).should.be.true;
+        });
+    });
+
 });
