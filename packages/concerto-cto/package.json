@@ -58,7 +58,6 @@
     "mocha": "^10.8.2",
     "npm-run-all": "4.1.5",
     "nyc": "15.1.0",
-    "path-browserify": "^1.0.1",
     "peggy": "2.0.1",
     "rimraf": "3.0.2",
     "sinon": "12.0.0",
@@ -73,6 +72,7 @@
     "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
     "@accordproject/concerto-util": "4.0.0",
     "acorn": "^8.15.0",
+    "path-browserify": "^1.0.1",
     "schema-utils": "^4.3.3"
   },
   "browserslist": "> 0.25%, not dead",
