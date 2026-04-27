@@ -1,0 +1,35 @@
+namespace org.example.contract@1.0.0
+
+/**
+ * Example Concerto schema — upload this file to test the browser explorer.
+ * Try modifying it and re-uploading to see the changes live.
+ */
+
+scalar Email extends String regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
+enum ContractStatus {
+  o DRAFT
+  o ACTIVE
+  o EXPIRED
+}
+
+concept Party {
+  o String name
+  o Email email
+  o Address address
+}
+
+concept Address {
+  o String street
+  o String city
+  o String country
+}
+
+concept Contract {
+  o String contractId
+  o Party buyer
+  o Party seller
+  o Double value range=[0,]
+  o ContractStatus status
+  o DateTime createdAt
+}

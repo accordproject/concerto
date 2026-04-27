@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concerto Schema Explorer — GSoC 2026</title>
+    <style>
+        body { font-family: monospace; max-width: 960px; margin: 30px auto; padding: 0 20px; background: #0d1117; color: #c9d1d9; }
+        h1  { color: #58a6ff; }
+        h2  { color: #3fb950; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+        .ok   { color: #3fb950; }
+        .fail { color: #f85149; }
+        .info { color: #d29922; }
+        pre  { background: #161b22; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.6; }
+        .cto { background: #161b22; padding: 12px; border-radius: 6px; font-size: 12px; white-space: pre; color: #79c0ff; overflow-x: auto; }
+        button { background: #238636; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; margin: 3px; font-size: 13px; }
+        button:hover { background: #2ea043; }
+        select { background: #161b22; color: #c9d1d9; border: 1px solid #30363d; padding: 6px; border-radius: 6px; font-size: 13px; }
+        .prop { color: #ffa657; }
+        .type { color: #79c0ff; }
+        .name { color: #3fb950; }
+        .lang-bar { text-align: right; margin-bottom: 12px; }
+        .lang-bar select { margin-left: 6px; }
+        .upload-zone { border: 2px dashed #30363d; border-radius: 6px; padding: 16px; text-align: center; margin-top: 8px; cursor: pointer; }
+        .upload-zone:hover { border-color: #58a6ff; }
+        [dir="rtl"] { direction: rtl; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="lang-bar">
+    <span id="lang_label_txt">Language</span> :
+    <select id="lang-select" onchange="setLang(this.value)">
+        <option value="en">🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="tn">🇹🇳 العربية</option>
+    </select>
+</div>
+
+<h1 id="t-title">Concerto Schema Explorer</h1>
+<p class="info" id="t-subtitle">Real schemas from accordproject/concerto — parsed live in the browser</p>
+
+<h2 id="t-s1">1. Choose a schema</h2>
+<select id="schemaSelect" onchange="loadSchema()">
+    <option value="readme">readme@1.0.0 — Person + Address</option>
+    <option value="sample">org.example.sample@1.0.0 — Person + Address + ContactInfo</option>
+</select>
+<button onclick="loadSchema()" id="t-btn-load">Load</button>
+
+<h2 id="t-s2">2. CTO Source</h2>
+<div id="cto-source" class="cto">Select a schema above or upload a .cto file</div>
+
+<h2 id="t-s3">3. Actions</h2>
+<button onclick="parseAndIntrospect()" id="t-btn-parse">Parse + Introspect</button>
+<button onclick="validateSample()" id="t-btn-validate">Validate JSON sample</button>
+
+<h2 id="t-s4">4. Upload your own .cto</h2>
+
+<div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:14px;margin-bottom:10px;font-size:12px;">
+    <div style="color:#3fb950;margin-bottom:8px;">&#9432; How to use</div>
+    <ol style="margin:0;padding-left:18px;line-height:2.1;">
+        <li>Download the starter template: <a href="browser/example.cto" download style="color:#58a6ff;font-weight:bold;">example.cto</a></li>
+        <li>Open it in any text editor — add concepts, change field types, add constraints</li>
+        <li>Click the upload zone below and select your <code style="color:#ffa657;">.cto</code> file</li>
+        <li>Click <strong>Parse + Introspect</strong> → see all declarations and properties</li>
+        <li>Click <strong>Validate JSON sample</strong> → test data against your schema</li>
+    </ol>
+    <div style="color:#d29922;margin-top:10px;margin-bottom:4px;">Template preview (example.cto):</div>
+    <pre style="margin:0;font-size:11px;color:#79c0ff;max-height:110px;overflow-y:auto;padding:8px;">namespace org.example.contract@1.0.0
+
+enum ContractStatus { o DRAFT  o ACTIVE  o EXPIRED }
+
+concept Party {
+  o String name
+  o String email
+  o Address address
+}
+
+concept Address {
+  o String street
+  o String city
+  o String country
+}
+
+concept Contract {
+  o String contractId
+  o Party buyer
+  o Party seller
+  o Double value range=[0,]
+  o ContractStatus status
+}</pre>
+</div>
+
+<div class="upload-zone" onclick="document.getElementById('cto-upload').click()">
+    <div style="font-size:22px;margin-bottom:4px;">&#8679;</div>
+    <span id="t-btn-upload">Upload .cto file</span>
+    <div style="font-size:11px;color:#8b949e;margin-top:4px;">click to browse — only .cto files accepted</div>
+    <input id="cto-upload" type="file" accept=".cto" style="display:none" onchange="handleUpload(event)">
+</div>
+
+<div id="output" style="margin-top:12px"></div>
+
+<script src="packages/concerto-core/dist/concerto-core.js"></script>
+<script>
+const SCHEMAS = {
+    readme: `namespace readme@1.0.0
+
+scalar Email extends String regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/
+
+@Term("Individual")
+concept Person {
+  o String firstName
+  o String lastName
+  o Integer age range=[0,] optional
+  o Email email optional
+  o Address address optional
+}
+
+concept Address {
+  o String street
+  o String city
+  o String zipCode
+  o String country
+}`,
+
+    sample: `namespace org.example.sample@1.0.0
+
+concept Person {
+  o String firstName
+  o String lastName
+  o Address address
+  o ContactInfo[] contacts optional
+}
+
+concept Address {
+  o String street
+  o String city
+  o String country
+  o String postalCode
+}
+
+concept ContactInfo {
+  o String type
+  o String value
+}`
+};
+
+const SAMPLES = {
+    readme: {
+        $class: 'readme@1.0.0.Person',
+        firstName: 'Mohamed',
+        lastName: 'Khattat',
+        age: 28
+    },
+    sample: {
+        $class: 'org.example.sample@1.0.0.Person',
+        firstName: 'Mohamed',
+        lastName: 'Khattat',
+        address: {
+            $class: 'org.example.sample@1.0.0.Address',
+            street: '12 Rue de Carthage',
+            city: 'Tunis',
+            country: 'Tunisia',
+            postalCode: '1000'
+        }
+    }
+};
+
+let currentKey = 'readme';
+let i18n = {};
+let currentLang = 'en';
+
+async function setLang(lang) {
+    currentLang = lang;
+    try {
+        const res = await fetch('browser/i18n/' + lang + '.json');
+        i18n = await res.json();
+    } catch(e) {
+        i18n = {};
+    }
+    const t = (k, fallback) => i18n[k] || fallback || k;
+    document.getElementById('t-title').textContent      = t('title', 'Concerto Schema Explorer');
+    document.getElementById('t-subtitle').textContent   = t('subtitle');
+    document.getElementById('t-s1').textContent         = t('section1');
+    document.getElementById('t-s2').textContent         = t('section2');
+    document.getElementById('t-s3').textContent         = t('section3');
+    document.getElementById('t-s4').textContent         = t('section4');
+    document.getElementById('t-btn-load').textContent   = t('btn_load');
+    document.getElementById('t-btn-parse').textContent  = t('btn_parse');
+    document.getElementById('t-btn-validate').textContent = t('btn_validate');
+    document.getElementById('t-btn-upload').textContent = t('btn_upload');
+    document.getElementById('lang_label_txt').textContent = t('lang_label');
+    document.getElementById('lang-select').value = lang;
+    document.documentElement.setAttribute('dir', lang === 'tn' ? 'rtl' : 'ltr');
+}
+
+function handleUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.cto')) {
+        out(i18n['err_filetype'] || 'Error: only .cto files are accepted', 'fail');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        SCHEMAS['_uploaded'] = content;
+        currentKey = '_uploaded';
+        document.getElementById('cto-source').textContent = content;
+        document.getElementById('output').innerHTML = '';
+        out((i18n['ok_uploaded'] || '✓ File loaded:') + ' ' + file.name, 'ok');
+    };
+    reader.readAsText(file);
+}
+
+function out(msg, type) {
+    const cls = type === 'ok' ? 'ok' : type === 'fail' ? 'fail' : 'info';
+    document.getElementById('output').innerHTML += `<div class="${cls}">${msg}</div>`;
+}
+
+function loadSchema() {
+    currentKey = document.getElementById('schemaSelect').value;
+    document.getElementById('cto-source').textContent = SCHEMAS[currentKey];
+    document.getElementById('output').innerHTML = '';
+}
+
+function parseAndIntrospect() {
+    document.getElementById('output').innerHTML = '';
+    const concerto = window['concerto-core'];
+    if (!concerto) { out('concerto-core bundle non trouvé — npm run build requis', 'fail'); return; }
+    try {
+        const { ModelManager, Introspector } = concerto;
+        const mm = new ModelManager({ strict: false });
+        mm.addCTOModel(SCHEMAS[currentKey]);
+        const modelFiles = mm.getModelFiles();
+        out('✓ CTO parsé — namespace : ' + modelFiles[modelFiles.length - 1].getNamespace(), 'ok');
+
+        const decls = new Introspector(mm).getClassDeclarations();
+        out('✓ ' + decls.length + ' déclaration(s)', 'ok');
+
+        let html = '<pre>';
+        decls.forEach(d => {
+            const type = d.constructor ? d.constructor.name : 'Declaration';
+            html += `\n<span class="type">${type}</span>  <span class="name">${d.getName()}</span>\n`;
+            const props = (d.getProperties && typeof d.getProperties === 'function') ? d.getProperties() : [];
+            props.forEach(p => {
+                const arr = (p.isArray && p.isArray()) ? '[]' : '';
+                const opt = (p.isOptional && p.isOptional()) ? ' optional' : '';
+                html += `  <span class="prop">o ${p.getType()}${arr}</span>  ${p.getName()}${opt}\n`;
+            });
+        });
+        document.getElementById('output').innerHTML += html + '</pre>';
+    } catch(e) { out('✗ ' + e.message, 'fail'); }
+}
+
+function validateSample() {
+    document.getElementById('output').innerHTML = '';
+    const concerto = window['concerto-core'];
+    try {
+        const { ModelManager, Factory, Serializer } = concerto;
+        const mm = new ModelManager({ strict: false });
+        mm.addCTOModel(SCHEMAS[currentKey]);
+        const s = new Serializer(new Factory(mm), mm);
+        const r = s.fromJSON(SAMPLES[currentKey]);
+        out('✓ JSON valide selon le schéma', 'ok');
+        document.getElementById('output').innerHTML += '<pre>' + JSON.stringify(s.toJSON(r), null, 2) + '</pre>';
+    } catch(e) { out('✗ ' + e.message, 'fail'); }
+}
+
+window.onload = () => { setLang('en'); loadSchema(); };
+</script>
+</body>
+</html>

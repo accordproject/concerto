@@ -7,7 +7,7 @@ export = ParseException;
  * @memberof module:concerto-core
  * @private
  */
-declare class ParseException extends BaseFileException {
+declare class ParseException {
     /**
      * Create an ParseException
      * @param {string} message - the message for the exception
@@ -18,4 +18,3 @@ declare class ParseException extends BaseFileException {
      */
     constructor(message: string, fileLocation?: string, fileName?: string, fullMessageOverride?: string, component?: string);
 }
-import { BaseFileException } from "@accordproject/concerto-util";

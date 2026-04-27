@@ -1,0 +1,20 @@
+{
+  "title": "Concerto Schema Explorer",
+  "subtitle": "Real schemas from accordproject/concerto — parsed live in the browser",
+  "section1": "1. Choose a schema",
+  "section2": "2. CTO Source",
+  "section3": "3. Actions",
+  "section4": "4. Upload your own .cto",
+  "btn_load": "Load",
+  "btn_parse": "Parse + Introspect",
+  "btn_validate": "Validate JSON sample",
+  "btn_upload": "Upload .cto file",
+  "placeholder_cto": "Select a schema above or upload a .cto file",
+  "ok_parsed": "✓ CTO parsed — namespace:",
+  "ok_declarations": "declaration(s)",
+  "ok_valid": "✓ JSON valid against schema",
+  "ok_uploaded": "✓ File loaded:",
+  "err_bundle": "concerto-core bundle not found — run npm run build",
+  "err_filetype": "Error: only .cto files are accepted",
+  "lang_label": "Language"
+}
