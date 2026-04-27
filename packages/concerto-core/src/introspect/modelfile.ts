@@ -64,7 +64,7 @@ class ModelFile extends Decorated {
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */
-    constructor(modelManager, ast, definitions, fileName) {
+    constructor(modelManager, ast, definitions?, fileName?) {
         super(ast);
         this.modelManager = modelManager;
         this.external = false;

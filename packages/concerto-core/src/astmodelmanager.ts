@@ -44,7 +44,7 @@ class AstModelManager extends BaseModelManager {
      * @constructor
      * @param {object} [options] - Serializer options
      */
-    constructor(options) {
+    constructor(options?) {
         super(options, astProcessFile);
     }
 }

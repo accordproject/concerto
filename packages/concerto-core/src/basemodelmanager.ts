@@ -179,7 +179,7 @@ class BaseModelManager {
      * @param {string} [fileName] - a file name to associate with the model file
      * @throws {IllegalModelException}
      */
-    validateModelFile(modelFile, fileName) {
+    validateModelFile(modelFile, fileName?) {
         if (typeof modelFile === 'string') {
             const { ast } = this.processFile(fileName, modelFile);
             let m = new ModelFile(this, ast, modelFile, fileName);
@@ -313,7 +313,7 @@ class BaseModelManager {
      * @throws {IllegalModelException}
      * @return {ModelFile} The newly added model file (internal).
      */
-    addModel(modelInput, cto, fileName, disableValidation) {
+    addModel(modelInput, cto?, fileName?, disableValidation?) {
         const NAME = 'addModel';
         debug(NAME, 'addModel', modelInput, fileName);
 
@@ -337,7 +337,7 @@ class BaseModelManager {
      * @throws {IllegalModelException}
      * @returns {Object} The newly added model file (internal).
      */
-    updateModelFile(modelFile, fileName, disableValidation) {
+    updateModelFile(modelFile, fileName?, disableValidation?) {
         const NAME = 'updateModelFile';
         debug(NAME, 'updateModelFile', modelFile, fileName);
         if (typeof modelFile === 'string') {
@@ -792,7 +792,7 @@ class BaseModelManager {
      * @param {object} [options] - options for the from ast method
      * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
-    fromAst(ast, options) {
+    fromAst(ast, options?) {
         this.clearModelFiles();
         ast.models.forEach( model => {
             if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
@@ -811,7 +811,7 @@ class BaseModelManager {
      * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve,includeConcertoNamespaces) {
+    getAst(resolve?,includeConcertoNamespaces?) {
         const result = {
             $class: `${MetaModelNamespace}.Models`,
             models: [] as any[],

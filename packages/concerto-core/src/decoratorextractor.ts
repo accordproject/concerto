@@ -51,7 +51,7 @@ class DecoratorExtractor {
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      * @param {object} [options] - decorator extractor options
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, options) {
+    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, options?) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
