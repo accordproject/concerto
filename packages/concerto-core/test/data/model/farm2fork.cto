@@ -17,9 +17,9 @@
  *
  * composer Language File
  */
-namespace org.acme
+namespace org.acme@1.0.0
 
-import composer.MyParticipant
+import composer@1.0.0.MyParticipant
 
 asset Animal identified by identifier {
     o String identifier
@@ -68,11 +68,11 @@ asset Meat identified by identifier {
 
 abstract transaction AnimalTransaction  {
     --> Animal animal //an AnimalTransaction is related to an Animal
-    
+
 }
 
 transaction Foo {
-  
+
 }
 
 transaction AnimalCreated extends AnimalTransaction {
@@ -102,7 +102,7 @@ transaction SlaughterAnimal extends AnimalTransaction {
 
 transaction MeatTransaction  {
     --> Meat meat
-    
+
 }
 
 transaction PackageMeat extends MeatTransaction {
@@ -110,5 +110,5 @@ transaction PackageMeat extends MeatTransaction {
 
 transaction PackagedMeatTransferedToPrivateConsumer  {
     --> MyParticipant privateConsumer
-    
+
 }

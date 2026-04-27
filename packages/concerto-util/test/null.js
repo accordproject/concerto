@@ -17,7 +17,7 @@
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
-const NullUtil = require('../lib/null');
+const NullUtil = require('../src/null');
 
 describe('NullUtil', function () {
 

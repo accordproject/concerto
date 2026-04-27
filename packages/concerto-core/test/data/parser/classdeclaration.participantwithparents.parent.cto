@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace com.testing.parent
+namespace com.testing.parent@1.0.0
 
 abstract participant Base identified by id {
   o String id

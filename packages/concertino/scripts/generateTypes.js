@@ -15,6 +15,7 @@
 
 'use strict';
 
+const util = require('util');
 const fs = require('fs');
 const path = require('path');
 const { ModelManager, ModelUtil } = require('@accordproject/concerto-core');
@@ -181,7 +182,6 @@ class ConcertinoTypescriptVisitor extends CodeGen.TypescriptVisitor {
 async function generateTypes() {
     try {
         const modelManager = new ModelManager({
-            strict: true,
             addMetamodel: true,
         });
 

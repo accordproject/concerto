@@ -16,9 +16,9 @@
 
 const fs = require('fs');
 
-const ModelManager = require('../lib/modelmanager');
-const Serializer = require('../lib/serializer');
-const Factory = require('../lib/factory');
+const ModelManager = require('../src/modelmanager');
+const Serializer = require('../src/serializer');
+const Factory = require('../src/factory');
 
 const chai = require('chai');
 chai.should();
@@ -42,61 +42,9 @@ describe('Semantic Versioning', () => {
         sandbox.restore();
     });
 
-    describe('#namespace versioning - strict:false', () => {
+    describe('#namespace versioning', () => {
         it('should support versioned namespaces', () => {
             modelManager = new ModelManager();
-            modelManager.addCTOModel(personCto, 'person.cto');
-            modelManager.addCTOModel(employeeCto, 'employee.cto');
-            modelManager.getModelFile('person@1.0.0').should.be.not.null;
-            modelManager.getModelFile('employee@2.0.0').should.be.not.null;
-        });
-        it('should serialize versioned declarations', () => {
-            modelManager = new ModelManager();
-            modelManager.addCTOModel(personCto, 'person.cto');
-            const factory = new Factory(modelManager);
-            const serializer = new Serializer(factory, modelManager);
-            const person = factory.newConcept('person@1.0.0', 'Person', 'john.doe@example.com');
-            const json = serializer.toJSON(person);
-            json.should.deep.equal({
-                $class: 'person@1.0.0.Person',
-                email: 'john.doe@example.com',
-            });
-            const person2 = serializer.fromJSON(json);
-            person2.email.should.equal(person.email);
-        });
-        it('should support unversioned namespaces', () => {
-            modelManager = new ModelManager();
-            modelManager.addCTOModel('namespace test', 'test.cto');
-        });
-        it('should serialize unversioned declarations', () => {
-            modelManager = new ModelManager();
-            modelManager.addCTOModel(`namespace test
-concept Person identified by email {
-    o String email
-}
-            `, 'test.cto');
-            const factory = new Factory(modelManager);
-            const serializer = new Serializer(factory, modelManager);
-            const person = factory.newConcept('test', 'Person', 'john.doe@example.com');
-            const json = serializer.toJSON(person);
-            json.should.deep.equal({
-                $class: 'test.Person',
-                email: 'john.doe@example.com',
-            });
-            const person2 = serializer.fromJSON(json);
-            person2.email.should.equal(person.email);
-        });
-
-        it('should support versioned system imports', () => {
-            modelManager = new ModelManager();
-            modelManager.addCTOModel(`namespace test@1.0.0
-import concerto@1.0.0.{Event}`, 'test.cto');
-        });
-    });
-
-    describe('#namespace versioning - strict:true', () => {
-        it('should support versioned namespaces', () => {
-            modelManager = new ModelManager({ strict: true });
             modelManager.addCTOModel(personCto, 'person.cto');
             modelManager.addCTOModel(employeeCto, 'employee.cto');
             modelManager.getModelFile('person@1.0.0').should.be.not.null;
@@ -106,28 +54,28 @@ import concerto@1.0.0.{Event}`, 'test.cto');
 
         it('should not support unversioned namespaces', () => {
             (() => {
-                modelManager = new ModelManager({ strict: true });
+                modelManager = new ModelManager();
                 modelManager.addCTOModel('namespace test', 'test.cto');
             }).should.throw(/Cannot add an unversioned namespace/);
         });
 
         it('should not support unversioned imports', () => {
             (() => {
-                modelManager = new ModelManager({ strict: true });
+                modelManager = new ModelManager();
                 modelManager.addCTOModel(`namespace test@1.0.0
 import concerto.Event`, 'test.cto');
             }).should.throw(/Cannot use an unversioned import/);
         });
 
         it('should not deserialize unversioned declarations', () => {
-            modelManager = new ModelManager({ strict: true });
+            modelManager = new ModelManager();
             modelManager.addCTOModel(personCto, 'person.cto');
             modelManager.addCTOModel(employeeCto, 'employee.cto');
             const factory = new Factory(modelManager);
             const serializer = new Serializer(factory, modelManager);
             (() => {
                 serializer.fromJSON({
-                    $class: 'test.Person',
+                    $class: 'test@1.0.0.Person',
                     email: 'john.doe@example.com',
                 });
             }).should.throw(/Namespace is not defined/);

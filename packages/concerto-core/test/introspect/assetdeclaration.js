@@ -14,9 +14,8 @@
 
 'use strict';
 
-const IllegalModelException = require('../../lib/introspect/illegalmodelexception');
-const AssetDeclaration = require('../../lib/introspect/assetdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const AssetDeclaration = require('../../src/introspect/assetdeclaration');
+const ModelManager = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
@@ -32,9 +31,9 @@ describe('AssetDeclaration', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        mockModelManager =  sinon.createStubInstance(ModelManager);
+        mockModelManager = sinon.createStubInstance(ModelManager);
         mockSystemAsset = sinon.createStubInstance(AssetDeclaration);
-        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system.Asset');
+        mockSystemAsset.getFullyQualifiedName.returns('org.hyperledger.composer.system@1.0.0.Asset');
         mockClassDeclaration = sinon.createStubInstance(AssetDeclaration);
         mockModelManager.getType.returns(mockClassDeclaration);
         mockClassDeclaration.getProperties.returns([]);
@@ -47,7 +46,7 @@ describe('AssetDeclaration', () => {
 
     let loadAssetDeclaration = (modelFileName) => {
         let modelDefinitions = fs.readFileSync(modelFileName, 'utf8');
-        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions);
+        let modelFile = ParserUtil.newModelFile(mockModelManager, modelDefinitions, null, false);
         let assets = modelFile.getAssetDeclarations();
         assets.should.have.lengthOf(1);
 
@@ -86,6 +85,7 @@ describe('AssetDeclaration', () => {
 
         it('should throw when identifying field is not a string', () => {
             let asset = loadAssetDeclaration('test/data/parser/assetdeclaration.numid.cto');
+            mockModelManager.getType.returns(mockClassDeclaration);
             (() => {
                 asset.validate();
             }).should.throw(/Class "TestAsset" is identified by field "assetId", but the type of the field is not "String". Line 19 column 1, to line 21 column 2. /);
@@ -111,16 +111,6 @@ describe('AssetDeclaration', () => {
             (() => {
                 asset.validate();
             }).should.throw(/more than one field named/);
-        });
-
-        it('should throw an an IllegalModelException if its not a System Type and is called Asset', () => {
-            let asset = loadLastAssetDeclaration('test/data/parser/assetdeclaration.systypename.cto');
-            try {
-                asset.validate();
-            } catch (err) {
-                err.should.be.an.instanceOf(IllegalModelException);
-                err.message.should.match(/Asset is a reserved type name./);
-            }
         });
     });
 

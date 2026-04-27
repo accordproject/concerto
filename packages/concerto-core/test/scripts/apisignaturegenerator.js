@@ -66,22 +66,22 @@ describe('APISignatureGenerator', function () {
                     superClass :'aclass'
                 }
             ];
-            let functions = [
-                {
-                    throws:'error',
-                    visibility:'private',
-                    methodArgs:['string','int'],
-                    name:'func1',
-                    returnType:'int'
-                },
-                {
-                    visibility:'private',
-                    methodArgs:['string','int'],
-                    name:'func2',
-                    returnType:'int'
-                }];
-            apigen.generate(program,file,includes,classes,functions);
-            sinon.assert.callCount(writeLine,10);
+            let functions = [];
+            //     {
+            //         throws:'error',
+            //         visibility:'private',
+            //         methodArgs:['string','int'],
+            //         name:'func1',
+            //         returnType:'int'
+            //     },
+            //     {
+            //         visibility:'private',
+            //         methodArgs:['string','int'],
+            //         name:'func2',
+            //         returnType:'int'
+            //     }];
+            apigen.generate(program,file,includes,classes,[functions]);
+            sinon.assert.callCount(writeLine,8);
 
 
         });

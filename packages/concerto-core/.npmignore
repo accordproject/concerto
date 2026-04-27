@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -16,6 +16,9 @@
 logs
 *.log
 npm-debug.log*
+
+# Source files
+src
 
 # Runtime data
 pids
@@ -37,6 +40,7 @@ test
 
 # scripts directory
 scripts
+output
 
 # Coverage directory used by tools like istanbul
 coverage
@@ -82,3 +86,8 @@ rollup.config.js
 
 # Locally built npm packages
 *.tgz
+
+# Build config files
+tsconfig.build.json
+tsconfig.json
+webpack.config.js

@@ -23,7 +23,7 @@ const packageJson = require('./package.json');
 const emitWarningPollyfill = 'function(message, options){ console.warn({message: `DEPRECATED: ${message}`,type: options?.type,code: options?.code,detail: options?.detail});}';
 
 module.exports = {
-    entry: './index.js',
+    entry: './dist/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'concerto-util.js',

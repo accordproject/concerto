@@ -1,0 +1,45 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+'use strict';
+
+import CompositeFileLoader = require('./compositefileloader');
+import HTTPFileLoader = require('./httpfileloader');
+import GitHubFileLoader = require('./githubfileloader');
+
+/**
+ * <p>
+ * A default CompositeFileLoader implementation which supports
+ * github://, http:// and https:// URLs.
+ * </p>
+ * @private
+ * @class
+ * @see See {@link CompositeFileLoader}
+ * @memberof module:concerto-util
+ */
+class DefaultFileLoader<T> extends CompositeFileLoader<T> {
+    /**
+     * Create the DefaultFileLoader.
+     * @param processFile - a function to apply to the content of the file
+     */
+    constructor(processFile: (name: string, text: string) => T) {
+        super();
+        const http = new HTTPFileLoader(processFile);
+        const github = new GitHubFileLoader(processFile);
+        this.addFileLoader(github);
+        this.addFileLoader(http);
+    }
+}
+
+export = DefaultFileLoader;

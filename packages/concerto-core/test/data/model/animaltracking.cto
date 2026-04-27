@@ -20,7 +20,7 @@
  *
  * composer Language File
  */
-namespace com.hyperledger.composer.animaltracking
+namespace com.hyperledger.composer.animaltracking@1.0.0
 
 /**
  * The types of animals that could be moved
@@ -118,7 +118,7 @@ asset Business identified by sbi {
  * An abstract transaction type for animal movements
  */
 abstract transaction AnimalMovement  {
-  
+
   o String[] logs optional
     --> Animal animal
     --> Business from

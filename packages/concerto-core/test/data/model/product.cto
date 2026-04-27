@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace org.accordproject.product
+namespace org.accordproject.product@1.0.0
 
 import org.accordproject.* from github://accordproject/models/master/base.cto
 import org.accordproject.address.PostalAddress from github://accordproject/models/master/address.cto

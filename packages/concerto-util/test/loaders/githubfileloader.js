@@ -14,7 +14,8 @@
 
 'use strict';
 
-const GitHubFileLoader = require('../../lib/loaders/githubfileloader');
+const GitHubFileLoader = require('../../src/loaders/githubfileloader');
+
 const chai = require('chai');
 chai.should();
 chai.use(require('chai-things'));

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v4.0.0 # Temporary, while we prepare for merge to main
   pull_request:
     branches:
       - main
@@ -18,10 +19,11 @@ jobs:
     name: Unit Tests
 
     strategy:
+      fail-fast: false
       matrix:
         node-version:
-          - 18.x
-          - 20.x
+          - 24.x
+          - 22.x
         os:
           - windows-latest
           - macos-latest
@@ -77,5 +79,3 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
-          fail-on-error: false
-
