@@ -65,7 +65,8 @@ jspm_packages
 
 # vscode folder
 .vscode
-package-lock.jsonyarn
+package-lock.json
+yarn
 out
 
 # windowsjunk
@@ -78,3 +79,5 @@ umd
 # TypeScript build folder
 dist
 debug-log.txt
+BACKLOG_GSoC.md
+GSoC_2026_AccordProject_SUBMIT.md

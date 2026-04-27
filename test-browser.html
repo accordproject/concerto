@@ -3,31 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concerto Core Test</title>
+    <title>Concerto Schema Explorer — GSoC 2026</title>
+    <style>
+        body { font-family: monospace; max-width: 960px; margin: 30px auto; padding: 0 20px; background: #0d1117; color: #c9d1d9; }
+        h1  { color: #58a6ff; }
+        h2  { color: #3fb950; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+        .ok   { color: #3fb950; }
+        .fail { color: #f85149; }
+        .info { color: #d29922; }
+        pre  { background: #161b22; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.6; }
+        .cto { background: #161b22; padding: 12px; border-radius: 6px; font-size: 12px; white-space: pre; color: #79c0ff; overflow-x: auto; }
+        button { background: #238636; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; margin: 3px; font-size: 13px; }
+        button:hover { background: #2ea043; }
+        select { background: #161b22; color: #c9d1d9; border: 1px solid #30363d; padding: 6px; border-radius: 6px; font-size: 13px; }
+        .prop { color: #ffa657; }
+        .type { color: #79c0ff; }
+        .name { color: #3fb950; }
+    </style>
 </head>
 <body>
-    <h1>Concerto Core Browser Test</h1>
-    <div id="output"></div>
 
-    <script src="packages/concerto-core/dist/concerto-core.js"></script>
-    <script>
-        try {
-            // Test that Concerto is loaded
-            const output = document.getElementById('output');
-            output.innerHTML = '<p>Concerto loaded successfully!</p>';
-            output.innerHTML += '<p>Version: ' + (window.Concerto ? 'Available' : 'Not available') + '</p>';
+<h1>Concerto Schema Explorer — GSoC 2026</h1>
+<p class="info">Schemas réels du projet accordproject/concerto — parsés en direct dans le navigateur</p>
 
-            // Test basic functionality
-            if (typeof Concerto !== 'undefined') {
-                output.innerHTML += '<p>Concerto object found in global scope</p>';
-            } else {
-                output.innerHTML += '<p>Concerto not found in global scope</p>';
-            }
+<h2>1. Choisir un schéma</h2>
+<select id="schemaSelect" onchange="loadSchema()">
+    <option value="readme">readme@1.0.0 — Person + Address</option>
+    <option value="sample">org.example.sample@1.0.0 — Person + Address + ContactInfo</option>
+</select>
+<button onclick="loadSchema()">Charger</button>
 
-            console.log('Concerto:', window.Concerto);
-        } catch (error) {
-            document.getElementById('output').innerHTML = '<p>Error: ' + error.message + '</p>';
+<h2>2. Source CTO</h2>
+<div id="cto-source" class="cto">Sélectionne un schéma ci-dessus</div>
+
+<h2>3. Actions</h2>
+<button onclick="parseAndIntrospect()">Parser + Introspect</button>
+<button onclick="validateSample()">Valider JSON exemple</button>
+
+<div id="output" style="margin-top:12px"></div>
+
+<script src="packages/concerto-core/dist/concerto-core.js"></script>
+<script>
+const SCHEMAS = {
+    readme: `namespace readme@1.0.0
+
+scalar Email extends String regex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/
+
+@Term("Individual")
+concept Person {
+  o String firstName
+  o String lastName
+  o Integer age range=[0,] optional
+  o Email email optional
+  o Address address optional
+}
+
+concept Address {
+  o String street
+  o String city
+  o String zipCode
+  o String country
+}`,
+
+    sample: `namespace org.example.sample@1.0.0
+
+concept Person {
+  o String firstName
+  o String lastName
+  o Address address
+  o ContactInfo[] contacts optional
+}
+
+concept Address {
+  o String street
+  o String city
+  o String country
+  o String postalCode
+}
+
+concept ContactInfo {
+  o String type
+  o String value
+}`
+};
+
+const SAMPLES = {
+    readme: {
+        $class: 'readme@1.0.0.Person',
+        firstName: 'Mohamed',
+        lastName: 'Khattat',
+        age: 28
+    },
+    sample: {
+        $class: 'org.example.sample@1.0.0.Person',
+        firstName: 'Mohamed',
+        lastName: 'Khattat',
+        address: {
+            $class: 'org.example.sample@1.0.0.Address',
+            street: '12 Rue de Carthage',
+            city: 'Tunis',
+            country: 'Tunisia',
+            postalCode: '1000'
         }
-    </script>
+    }
+};
+
+let currentKey = 'readme';
+
+function out(msg, type) {
+    const cls = type === 'ok' ? 'ok' : type === 'fail' ? 'fail' : 'info';
+    document.getElementById('output').innerHTML += `<div class="${cls}">${msg}</div>`;
+}
+
+function loadSchema() {
+    currentKey = document.getElementById('schemaSelect').value;
+    document.getElementById('cto-source').textContent = SCHEMAS[currentKey];
+    document.getElementById('output').innerHTML = '';
+}
+
+function parseAndIntrospect() {
+    document.getElementById('output').innerHTML = '';
+    const concerto = window['concerto-core'];
+    if (!concerto) { out('concerto-core bundle non trouvé — npm run build requis', 'fail'); return; }
+    try {
+        const { ModelManager, Introspector } = concerto;
+        const mm = new ModelManager({ strict: false });
+        mm.addCTOModel(SCHEMAS[currentKey]);
+        const modelFiles = mm.getModelFiles();
+        out('✓ CTO parsé — namespace : ' + modelFiles[modelFiles.length - 1].getNamespace(), 'ok');
+
+        const decls = new Introspector(mm).getClassDeclarations();
+        out('✓ ' + decls.length + ' déclaration(s)', 'ok');
+
+        let html = '<pre>';
+        decls.forEach(d => {
+            const type = d.constructor ? d.constructor.name : 'Declaration';
+            html += `\n<span class="type">${type}</span>  <span class="name">${d.getName()}</span>\n`;
+            const props = (d.getProperties && typeof d.getProperties === 'function') ? d.getProperties() : [];
+            props.forEach(p => {
+                const arr = (p.isArray && p.isArray()) ? '[]' : '';
+                const opt = (p.isOptional && p.isOptional()) ? ' optional' : '';
+                html += `  <span class="prop">o ${p.getType()}${arr}</span>  ${p.getName()}${opt}\n`;
+            });
+        });
+        document.getElementById('output').innerHTML += html + '</pre>';
+    } catch(e) { out('✗ ' + e.message, 'fail'); }
+}
+
+function validateSample() {
+    document.getElementById('output').innerHTML = '';
+    const concerto = window['concerto-core'];
+    try {
+        const { ModelManager, Factory, Serializer } = concerto;
+        const mm = new ModelManager({ strict: false });
+        mm.addCTOModel(SCHEMAS[currentKey]);
+        const s = new Serializer(new Factory(mm), mm);
+        const r = s.fromJSON(SAMPLES[currentKey]);
+        out('✓ JSON valide selon le schéma', 'ok');
+        document.getElementById('output').innerHTML += '<pre>' + JSON.stringify(s.toJSON(r), null, 2) + '</pre>';
+    } catch(e) { out('✗ ' + e.message, 'fail'); }
+}
+
+window.onload = () => loadSchema();
+</script>
 </body>
 </html>
