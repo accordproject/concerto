@@ -79,6 +79,7 @@ umd
 # TypeScript build folder
 dist
 debug-log.txt
+.claude/
 BACKLOG_GSoC.md
 GSoC_2026_AccordProject_SUBMIT.md
 browser/README_LOCAL.md
