@@ -304,7 +304,7 @@ class ModelFile extends Decorated {
      * @throws {IllegalModelException} - if the type is not defined
      * @private
      */
-    resolveType(context, type, fileLocation) {
+    resolveType(context, type, fileLocation?) {
         // is the type a primitive?
         if(!ModelUtil.isPrimitiveType(type)) {
             // is it an imported type?

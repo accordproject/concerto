@@ -71,7 +71,7 @@ class ResourceId {
      * @return {Identifier} - An identifier.
      * @throws {Error} - On an invalid resource URI.
      */
-    static fromURI(uri, legacyNamespace, legacyType) {
+    static fromURI(uri, legacyNamespace?, legacyType?) {
         let uriComponents;
         try {
             uriComponents = URIJS.parse(uri);
