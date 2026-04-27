@@ -1,0 +1,20 @@
+{
+  "title": "مستكشف مخططات Concerto",
+  "subtitle": "مخططات حقيقية من مشروع accordproject/concerto — تحليل مباشر في المتصفح",
+  "section1": "1. اختر مخططاً",
+  "section2": "2. المصدر CTO",
+  "section3": "3. الإجراءات",
+  "section4": "4. رفع ملف .cto خاص بك",
+  "btn_load": "تحميل",
+  "btn_parse": "تحليل + فحص",
+  "btn_validate": "التحقق من JSON",
+  "btn_upload": "رفع ملف .cto",
+  "placeholder_cto": "اختر مخططاً أو ارفع ملف .cto",
+  "ok_parsed": "✓ تم تحليل CTO — الفضاء:",
+  "ok_declarations": "تصريح/تصريحات",
+  "ok_valid": "✓ JSON صالح وفق المخطط",
+  "ok_uploaded": "✓ تم تحميل الملف:",
+  "err_bundle": "حزمة concerto-core غير موجودة — شغّل npm run build",
+  "err_filetype": "خطأ: يُقبل فقط ملفات .cto",
+  "lang_label": "اللغة"
+}

@@ -1,0 +1,20 @@
+{
+  "title": "Explorateur de schémas Concerto",
+  "subtitle": "Schémas réels du projet accordproject/concerto — parsés en direct dans le navigateur",
+  "section1": "1. Choisir un schéma",
+  "section2": "2. Source CTO",
+  "section3": "3. Actions",
+  "section4": "4. Importer votre propre .cto",
+  "btn_load": "Charger",
+  "btn_parse": "Parser + Introspecter",
+  "btn_validate": "Valider JSON exemple",
+  "btn_upload": "Importer un fichier .cto",
+  "placeholder_cto": "Sélectionnez un schéma ci-dessus ou importez un fichier .cto",
+  "ok_parsed": "✓ CTO parsé — namespace :",
+  "ok_declarations": "déclaration(s)",
+  "ok_valid": "✓ JSON valide selon le schéma",
+  "ok_uploaded": "✓ Fichier chargé :",
+  "err_bundle": "Bundle concerto-core introuvable — exécuter npm run build",
+  "err_filetype": "Erreur : seuls les fichiers .cto sont acceptés",
+  "lang_label": "Langue"
+}

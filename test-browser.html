@@ -19,26 +19,45 @@
         .prop { color: #ffa657; }
         .type { color: #79c0ff; }
         .name { color: #3fb950; }
+        .lang-bar { text-align: right; margin-bottom: 12px; }
+        .lang-bar button { background: #161b22; border: 1px solid #30363d; font-size: 12px; padding: 4px 10px; }
+        .lang-bar button.active { background: #1f6feb; border-color: #58a6ff; }
+        .upload-zone { border: 2px dashed #30363d; border-radius: 6px; padding: 16px; text-align: center; margin-top: 8px; cursor: pointer; }
+        .upload-zone:hover { border-color: #58a6ff; }
+        [dir="rtl"] { direction: rtl; text-align: right; }
     </style>
 </head>
 <body>
 
-<h1>Concerto Schema Explorer — GSoC 2026</h1>
-<p class="info">Schemas réels du projet accordproject/concerto — parsés en direct dans le navigateur</p>
+<div class="lang-bar">
+    <span id="lang_label_txt">Language</span> :
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button id="btn-tn" onclick="setLang('tn')">عربي</button>
+</div>
 
-<h2>1. Choisir un schéma</h2>
+<h1 id="t-title">Concerto Schema Explorer</h1>
+<p class="info" id="t-subtitle">Real schemas from accordproject/concerto — parsed live in the browser</p>
+
+<h2 id="t-s1">1. Choose a schema</h2>
 <select id="schemaSelect" onchange="loadSchema()">
     <option value="readme">readme@1.0.0 — Person + Address</option>
     <option value="sample">org.example.sample@1.0.0 — Person + Address + ContactInfo</option>
 </select>
-<button onclick="loadSchema()">Charger</button>
+<button onclick="loadSchema()" id="t-btn-load">Load</button>
 
-<h2>2. Source CTO</h2>
-<div id="cto-source" class="cto">Sélectionne un schéma ci-dessus</div>
+<h2 id="t-s2">2. CTO Source</h2>
+<div id="cto-source" class="cto">Select a schema above or upload a .cto file</div>
 
-<h2>3. Actions</h2>
-<button onclick="parseAndIntrospect()">Parser + Introspect</button>
-<button onclick="validateSample()">Valider JSON exemple</button>
+<h2 id="t-s3">3. Actions</h2>
+<button onclick="parseAndIntrospect()" id="t-btn-parse">Parse + Introspect</button>
+<button onclick="validateSample()" id="t-btn-validate">Validate JSON sample</button>
+
+<h2 id="t-s4">4. Upload your own .cto</h2>
+<div class="upload-zone" onclick="document.getElementById('cto-upload').click()">
+    <span id="t-btn-upload">Upload .cto file</span>
+    <input id="cto-upload" type="file" accept=".cto" style="display:none" onchange="handleUpload(event)">
+</div>
 
 <div id="output" style="margin-top:12px"></div>
 
@@ -109,6 +128,53 @@ const SAMPLES = {
 };
 
 let currentKey = 'readme';
+let i18n = {};
+let currentLang = 'en';
+
+async function setLang(lang) {
+    currentLang = lang;
+    try {
+        const res = await fetch('browser/i18n/' + lang + '.json');
+        i18n = await res.json();
+    } catch(e) {
+        i18n = {};
+    }
+    const t = (k, fallback) => i18n[k] || fallback || k;
+    document.getElementById('t-title').textContent      = t('title', 'Concerto Schema Explorer');
+    document.getElementById('t-subtitle').textContent   = t('subtitle');
+    document.getElementById('t-s1').textContent         = t('section1');
+    document.getElementById('t-s2').textContent         = t('section2');
+    document.getElementById('t-s3').textContent         = t('section3');
+    document.getElementById('t-s4').textContent         = t('section4');
+    document.getElementById('t-btn-load').textContent   = t('btn_load');
+    document.getElementById('t-btn-parse').textContent  = t('btn_parse');
+    document.getElementById('t-btn-validate').textContent = t('btn_validate');
+    document.getElementById('t-btn-upload').textContent = t('btn_upload');
+    document.getElementById('lang_label_txt').textContent = t('lang_label');
+    ['en','fr','tn'].forEach(l => {
+        document.getElementById('btn-' + l).classList.toggle('active', l === lang);
+    });
+    document.documentElement.setAttribute('dir', lang === 'tn' ? 'rtl' : 'ltr');
+}
+
+function handleUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.cto')) {
+        out(i18n['err_filetype'] || 'Error: only .cto files are accepted', 'fail');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        SCHEMAS['_uploaded'] = content;
+        currentKey = '_uploaded';
+        document.getElementById('cto-source').textContent = content;
+        document.getElementById('output').innerHTML = '';
+        out((i18n['ok_uploaded'] || '✓ File loaded:') + ' ' + file.name, 'ok');
+    };
+    reader.readAsText(file);
+}
 
 function out(msg, type) {
     const cls = type === 'ok' ? 'ok' : type === 'fail' ? 'fail' : 'info';
@@ -164,7 +230,7 @@ function validateSample() {
     } catch(e) { out('✗ ' + e.message, 'fail'); }
 }
 
-window.onload = () => loadSchema();
+window.onload = () => { setLang('en'); loadSchema(); };
 </script>
 </body>
 </html>
