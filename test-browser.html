@@ -20,8 +20,7 @@
         .type { color: #79c0ff; }
         .name { color: #3fb950; }
         .lang-bar { text-align: right; margin-bottom: 12px; }
-        .lang-bar button { background: #161b22; border: 1px solid #30363d; font-size: 12px; padding: 4px 10px; }
-        .lang-bar button.active { background: #1f6feb; border-color: #58a6ff; }
+        .lang-bar select { margin-left: 6px; }
         .upload-zone { border: 2px dashed #30363d; border-radius: 6px; padding: 16px; text-align: center; margin-top: 8px; cursor: pointer; }
         .upload-zone:hover { border-color: #58a6ff; }
         [dir="rtl"] { direction: rtl; text-align: right; }
@@ -31,9 +30,11 @@
 
 <div class="lang-bar">
     <span id="lang_label_txt">Language</span> :
-    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
-    <button id="btn-fr" onclick="setLang('fr')">FR</button>
-    <button id="btn-tn" onclick="setLang('tn')">عربي</button>
+    <select id="lang-select" onchange="setLang(this.value)">
+        <option value="en">🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="tn">🇹🇳 العربية</option>
+    </select>
 </div>
 
 <h1 id="t-title">Concerto Schema Explorer</h1>
@@ -151,9 +152,7 @@ async function setLang(lang) {
     document.getElementById('t-btn-validate').textContent = t('btn_validate');
     document.getElementById('t-btn-upload').textContent = t('btn_upload');
     document.getElementById('lang_label_txt').textContent = t('lang_label');
-    ['en','fr','tn'].forEach(l => {
-        document.getElementById('btn-' + l).classList.toggle('active', l === lang);
-    });
+    document.getElementById('lang-select').value = lang;
     document.documentElement.setAttribute('dir', lang === 'tn' ? 'rtl' : 'ltr');
 }
 
