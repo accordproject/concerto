@@ -380,7 +380,7 @@ class DecoratorManager {
      * @param {boolean} [options.disableMetamodelValidation] - flag to disable metamodel validation, only use if you are sure that the models and decorators are already validated
      * @returns {ModelManager} a new model manager with the decorations applied
      */
-    static decorateModels(modelManager, decoratorCommandSet, options) {
+    static decorateModels(modelManager, decoratorCommandSet, options?) {
         if (!decoratorCommandSet || decoratorCommandSet?.length === 0) {
             return modelManager;
         }

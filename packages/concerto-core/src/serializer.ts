@@ -46,8 +46,8 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Serializer {
-    factory: any;        
-    modelManager: any;   
+    factory: any;
+    modelManager: any;
     defaultOptions: any;
     /**
      * Create a Serializer.
@@ -55,7 +55,7 @@ class Serializer {
      * @param {ModelManager} modelManager - The ModelManager to use for validation etc.
      * @param {object} [options] - Serializer options
      */
-    constructor(factory, modelManager, options) {
+    constructor(factory, modelManager, options?) {
         if(!factory) {
             throw new Error(Globalize.formatMessage('serializer-constructor-factorynull'));
         } else if(!modelManager) {
@@ -99,7 +99,7 @@ class Serializer {
      * @throws {Error} - throws an exception if resource is not an instance of
      * Resource or fails validation.
      */
-    toJSON(resource, options) {
+    toJSON(resource, options?) {
         // correct instance type
         if(!(resource instanceof Typed)) {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
@@ -153,7 +153,7 @@ class Serializer {
      * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      * @return {Resource} The new populated resource
      */
-    fromJSON(jsonObject, options) {
+    fromJSON(jsonObject, options?) {
         // set default options
         options = options ? Object.assign({}, this.defaultOptions, options) : this.defaultOptions;
 
