@@ -64,7 +64,6 @@
     "undici": "6.25.0"
   },
   "dependencies": {
-    "@accordproject/concerto-codegen": "^3.16.2",
     "@supercharge/promise-pool": "1.7.0",
     "colors": "1.4.0",
     "debug": "4.3.4",
