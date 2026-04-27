@@ -31,7 +31,7 @@ dayjs.extend(duration);
  * @param {number} [utcOffset] - UTC Offset for this execution
  * @returns {object} if valid, the dayjs object for the current time
  */
-function setCurrentTime(currentTime, utcOffset) {
+function setCurrentTime(currentTime?, utcOffset?) {
     // Default UTC offset to local time
     const utcOffsetResolved = typeof utcOffset === 'number' ? utcOffset : dayjs().utcOffset();
     const currentTimeUTC = currentTime ? dayjs.utc(currentTime) : dayjs().utc();

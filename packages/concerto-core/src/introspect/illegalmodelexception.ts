@@ -43,7 +43,7 @@ class IllegalModelException extends BaseFileException {
      * @param {number} fileLocation.end.column - end column of the error location.
      * @param {string} [component] - the component which throws this error
      */
-    constructor(message, modelFile, fileLocation, component) {
+    constructor(message, modelFile?, fileLocation?, component?) {
 
         let messageSuffix = '';
         let fileName = null;

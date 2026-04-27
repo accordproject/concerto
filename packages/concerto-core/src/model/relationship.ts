@@ -88,7 +88,7 @@ class Relationship extends Identifiable {
      * @param {String} [defaultType] - default type to use for backwards compatibility
      * @return {Relationship} the relationship
      */
-    static fromURI(modelManager, uriAsString, defaultNamespace, defaultType) {
+    static fromURI(modelManager, uriAsString, defaultNamespace?, defaultType?) {
         const resourceId = ResourceId.fromURI(uriAsString, defaultNamespace, defaultType);
         let fqt = ModelUtil.getFullyQualifiedName(resourceId.namespace, resourceId.type);
         let classDeclaration = modelManager.getType(fqt);

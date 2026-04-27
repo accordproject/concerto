@@ -50,7 +50,7 @@ class JSONGenerator {
      * are specified for relationship fields into their id, false by default.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
-    constructor(convertResourcesToRelationships, permitResourcesForRelationships, deduplicateResources, convertResourcesToId, ergo, utcOffset) {
+    constructor(convertResourcesToRelationships?, permitResourcesForRelationships?, deduplicateResources?, convertResourcesToId?, ergo?, utcOffset?) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
