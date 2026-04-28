@@ -61,7 +61,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@accordproject/concerto-codegen": "^3.16.2",
     "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
     "yaml": "2.8.3"
   },

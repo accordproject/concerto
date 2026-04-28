@@ -68,7 +68,6 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@accordproject/concerto-codegen": "^3.16.2",
     "@accordproject/concerto-metamodel": "^4.0.0-alpha.0",
     "@accordproject/concerto-util": "4.0.1",
     "acorn": "^8.15.0",
