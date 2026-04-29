@@ -2,6 +2,29 @@
   "name": "@accordproject/concerto-linter",
   "version": "4.0.1",
   "description": "Concerto Linter using Spectral rulesets",
+  "version": "3.25.0",
+  "author": "accordproject.org",
+  "dependencies": {
+    "@accordproject/concerto-cto": "3.25.0",
+    "@accordproject/concerto-linter-default-ruleset": "3.25.0",
+    "@stoplight/spectral-cli": "6.15.0",
+    "@stoplight/spectral-core": "1.20.0",
+    "@stoplight/spectral-parsers": "1.0.5",
+    "find-up": "5.0.0"
+  },
+  "devDependencies": {
+https://github.com/accordproject/concerto/pull/1154/conflict?name=packages%252Fconcerto-linter%252Fpackage.json&ancestor_oid=d5a9c3119e2da4e6cc3ed9ca7e87391bbbfacb49&base_oid=d73ae1efe36c4e821761fab823dd9396860d5236&head_oid=1f585ce9a4fad8f0979de1080c896c5ebfa0cbde    "@types/chai": "^5.2.3",
+    "@types/jest": "^29.5.14",
+    "@types/mocha": "^10.0.10",
+    "@typescript-eslint/eslint-plugin": "8.16.0",
+    "@typescript-eslint/parser": "8.16.0",
+    "eslint": "8.57.1",
+    "jest": "29.7.0",
+    "npm-run-all": "4.1.5",
+    "rimraf": "6.0.1",
+    "ts-jest": "29.2.5",
+    "typescript": "5.7.2"
+  },
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
     "node": ">=18",
