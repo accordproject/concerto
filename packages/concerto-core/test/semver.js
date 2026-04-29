@@ -56,7 +56,7 @@ describe('Semantic Versioning', () => {
             (() => {
                 modelManager = new ModelManager();
                 modelManager.addCTOModel('namespace test', 'test.cto');
-            }).should.throw(/Cannot add an unversioned namespace/);
+            }).should.throw(/Cannot create a ModelFile with an unversioned namespace/);
         });
 
         it('should not support unversioned imports', () => {

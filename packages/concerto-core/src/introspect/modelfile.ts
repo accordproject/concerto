@@ -718,6 +718,11 @@ class ModelFile extends Decorated {
         this.namespace = ast.namespace;
         this.version = nsInfo.version;
 
+        // In v4, all non-system models must declare a namespace version (e.g., @1.0.0)
+        if (!this.version && !this.isSystemModelFile()) {
+            throw new Error(`Cannot create a ModelFile with an unversioned namespace: ${ast.namespace}. All models must specify a version (e.g., @1.0.0).`);
+        }
+
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];
 

@@ -349,6 +349,9 @@ class BaseModelManager {
             if (!existing) {
                 throw new Error(`Model file for namespace ${modelFile.getNamespace()} not found`);
             }
+            if (!modelFile.getVersion()) {
+                throw new Error(`Cannot update with an unversioned namespace: ${modelFile.getNamespace()}`);
+            }
             if (!disableValidation) {
                 modelFile.validate();
             }
@@ -399,6 +402,9 @@ class BaseModelManager {
                     m = new ModelFile(this, ast, modelFile, fileName);
                 } else {
                     m = modelFile;
+                }
+                if (!m.getVersion()) {
+                    throw new Error(`Cannot add an unversioned namespace: ${m.getNamespace()}`);
                 }
                 if (!this.modelFiles[m.getNamespace()]) {
                     this.modelFiles[m.getNamespace()] = m;

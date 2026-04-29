@@ -161,7 +161,7 @@ describe('Globalization', function () {
 
             const modelManager = new ModelManager();
             const ast = {
-                namespace: 'org.acme',
+                namespace: 'org.acme@1.0.0',
                 declarations: [{
                     $class: 'concerto.metamodel.UnknownThing',
                     name: 'Foo'

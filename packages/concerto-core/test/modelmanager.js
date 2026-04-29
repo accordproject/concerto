@@ -556,6 +556,7 @@ describe('ModelManager', () => {
 
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.doge@1.0.0');
+            mf2.getVersion.returns('1.0.0');
             mf2.isModelFile.returns(true);
             mf2.getAst.returns({$class: `${MetaModelNamespace}.Model`});
             mf2.$marker = 'mf2';
@@ -589,6 +590,7 @@ describe('ModelManager', () => {
 
             let mf2 = sinon.createStubInstance(ModelFile);
             mf2.getNamespace.returns('org.doge@1.0.0');
+            mf2.getVersion.returns('1.0.0');
             mf2.isModelFile.returns(true);
             mf2.$marker = 'mf2';
             mf2.validate.throws(new Error('fake error'));

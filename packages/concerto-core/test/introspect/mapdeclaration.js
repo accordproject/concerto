@@ -43,7 +43,7 @@ describe('MapDeclaration', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
-        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.test', 'mapdeclaration.cto');
+        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.test@1.0.0', 'mapdeclaration.cto');
     });
 
     describe('#constructor', () => {
