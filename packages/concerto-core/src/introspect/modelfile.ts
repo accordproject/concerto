@@ -682,7 +682,7 @@ class ModelFile extends Decorated {
                 if (semver.minSatisfying(['3.0.0'], this.ast.concertoVersion)) {
                     this.concertoVersion = this.ast.concertoVersion;
                 } else {
-                    throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
+                    throw new Error(`This version of Concerto supports a language version of v3.0.0 or greater, but this model is for ${this.ast.concertoVersion}`);
                 }
             }
         }
