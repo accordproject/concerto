@@ -30,11 +30,13 @@ describe('Semantic Versioning', () => {
     let sandbox;
     let modelManager;
     let personCto;
+    let personV3Cto;
     let employeeCto;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         personCto = fs.readFileSync('./test/data/semver/person.cto', 'utf-8');
+        personV3Cto = fs.readFileSync('./test/data/semver/personv3.cto', 'utf-8');
         employeeCto = fs.readFileSync('./test/data/semver/employee.cto', 'utf-8');
     });
 
@@ -56,7 +58,7 @@ describe('Semantic Versioning', () => {
             (() => {
                 modelManager = new ModelManager();
                 modelManager.addCTOModel('namespace test', 'test.cto');
-            }).should.throw(/Cannot add an unversioned namespace/);
+            }).should.throw(/Cannot create a ModelFile with an unversioned namespace/);
         });
 
         it('should not support unversioned imports', () => {
@@ -79,6 +81,19 @@ import concerto.Event`, 'test.cto');
                     email: 'john.doe@example.com',
                 });
             }).should.throw(/Namespace is not defined/);
+        });
+    });
+
+    describe('#v3 backward compatibility', () => {
+        it('should support v3 models on newer runtime', () => {
+            modelManager = new ModelManager();
+            modelManager.addCTOModel(personV3Cto, 'personv3.cto');
+            modelManager.addCTOModel(employeeCto, 'employee.cto');
+
+            modelManager.getModelFile('person@1.0.0').should.be.not.null;
+            modelManager.getModelFile('employee@2.0.0').should.be.not.null;
+            modelManager.getType('person@1.0.0.Person').should.be.not.null;
+            modelManager.getType('employee@2.0.0.Employee').should.be.not.null;
         });
     });
 

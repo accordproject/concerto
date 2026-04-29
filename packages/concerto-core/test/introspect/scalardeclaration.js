@@ -36,7 +36,7 @@ describe('ScalarDeclaration', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         introspectUtils = new IntrospectUtils(modelManager);
-        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing', 'org.acme.cto');
+        modelFile = ParserUtil.newModelFile(modelManager, 'namespace com.hyperledger.testing@1.0.0', 'org.acme.cto');
     });
     describe('Primitive type name conflict', () => {
         it('should throw an error when scalar name is a primitive type', () => {
@@ -81,7 +81,7 @@ describe('ScalarDeclaration', () => {
                 name: 'suchName'
             });
             clz.getName().should.equal('suchName');
-            clz.toString().should.equal('ScalarDeclaration {id=com.hyperledger.testing.suchName}');
+            clz.toString().should.equal('ScalarDeclaration {id=com.hyperledger.testing@1.0.0.suchName}');
         });
 
     });
@@ -104,7 +104,7 @@ describe('ScalarDeclaration', () => {
             let clz = new ScalarDeclaration(modelFile, {
                 name: 'suchName',
             });
-            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing.suchName');
+            clz.getFullyQualifiedName().should.equal('com.hyperledger.testing@1.0.0.suchName');
         });
 
     });

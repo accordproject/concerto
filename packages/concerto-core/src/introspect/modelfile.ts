@@ -669,14 +669,21 @@ class ModelFile extends Decorated {
     }
 
     /**
-     * Check whether this modelfile is compatible with the concerto version
+     * Check whether this modelfile is compatible with the concerto version.
+     * Models targeting an older major version are considered backward-compatible
+     * with newer runtimes (e.g. a model declaring "^3.0.0" loads under v4).
      */
-isCompatibleVersion() {
+    isCompatibleVersion() {
         if (this.ast.concertoVersion) {
             if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
+                // Allow v3 models to load under newer runtimes
+                if (semver.minSatisfying(['3.0.0'], this.ast.concertoVersion)) {
+                    this.concertoVersion = this.ast.concertoVersion;
+                } else {
+                    throw new Error(`This version of Concerto supports a language version of v3.0.0 or greater, but this model is for ${this.ast.concertoVersion}`);
+                }
             }
         }
     }
@@ -710,6 +717,11 @@ isCompatibleVersion() {
 
         this.namespace = ast.namespace;
         this.version = nsInfo.version;
+
+        // In v4, all non-system models must declare a namespace version (e.g., @1.0.0)
+        if (!this.version && !this.isSystemModelFile()) {
+            throw new Error(`Cannot create a ModelFile with an unversioned namespace: ${ast.namespace}. All models must specify a version (e.g., @1.0.0).`);
+        }
 
         // Make sure to clone imports since we will add built-in imports
         const imports = ast.imports ? ast.imports.concat([]) : [];

@@ -18,7 +18,7 @@
  * The composer namespace defines built-in types for building Blockchain
  * based business networks. This file should not be modified.
  */
-namespace composer
+namespace composer@1.0.0
 
 /**
  * MyParticipant defines an actor in a blockchain based business network
