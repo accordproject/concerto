@@ -673,14 +673,13 @@ class ModelFile extends Decorated {
      * Models targeting an older major version are considered backward-compatible
      * with newer runtimes (e.g. a model declaring "^3.0.0" loads under v4).
      */
-isCompatibleVersion() {
+    isCompatibleVersion() {
         if (this.ast.concertoVersion) {
             if (semver.satisfies(packageJson.version, this.ast.concertoVersion, { includePrerelease: true })) {
                 this.concertoVersion = this.ast.concertoVersion;
             } else {
-                // Allow models that target an older major version to load under a newer runtime.
-                const minVersion = semver.minVersion(this.ast.concertoVersion);
-                if (minVersion && semver.major(minVersion) < semver.major(packageJson.version)) {
+                // Allow v3 models to load under newer runtimes
+                if (semver.minSatisfying(['3.0.0'], this.ast.concertoVersion)) {
                     this.concertoVersion = this.ast.concertoVersion;
                 } else {
                     throw new Error(`ModelFile expects Concerto version ${this.ast.concertoVersion} but this is ${packageJson.version}`);
