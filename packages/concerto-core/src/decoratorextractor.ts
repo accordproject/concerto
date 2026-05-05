@@ -18,6 +18,16 @@ const ModelManager = require('./modelmanager');
 const ModelUtil = require('./modelutil');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
+// $class value for decorator arguments that carry a string value
+const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
+
+// Characters / patterns that make a YAML plain scalar unsafe — grouped by reason
+const YAML_INLINE_SPECIAL = /[:#{}'"\n\t\\]/;     // mapping, comment, quote, or escape chars
+const YAML_BLOCK_INDICATORS = /^[\[\]{}>|!&*%@`]/; // first-char triggers YAML block/flow syntax
+const YAML_EDGE_WHITESPACE = /^\s|\s$/;             // parsers strip unquoted leading/trailing space
+const YAML_RESERVED_WORDS = /^(true|false|yes|no|on|off|null|~)$/i; // parsed as non-string in YAML 1.1
+const YAML_NUMERIC = /^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;       // parsed as number without quotes
+
 /**
  * Utility functions to work with
  * [DecoratorCommandSet](https://models.accordproject.org/concerto/decorators.cto)
@@ -69,6 +79,40 @@ class DecoratorExtractor {
      */
     isVocabDecorator(decoractorName) {
         return decoractorName === 'Term' || decoractorName.startsWith('Term_');
+    }
+    /**
+     * Returns a value safe for embedding in a YAML scalar.
+     * String values containing YAML-special characters are wrapped in double quotes.
+     * Non-string decorator types (Number, Boolean) are returned as-is.
+     * @param {any} value - the value to emit
+     * @param {string} [type] - the $class of the decorator argument
+     * @returns {string} - the value, double-quoted if necessary
+     * @private
+     */
+    quoteStringValue(value: any, type?: string): any {
+        // Non-string decorator arguments (Number, Boolean) are already valid YAML scalars
+        if (!type || type !== DECORATOR_STRING_TYPE) {
+            return value;
+        }
+
+        const str = String(value);
+
+        const needsQuote =
+            str.length === 0            ||  // empty plain scalar is null in YAML, not ""
+            YAML_INLINE_SPECIAL.test(str)   ||
+            YAML_BLOCK_INDICATORS.test(str) ||
+            YAML_EDGE_WHITESPACE.test(str)  ||
+            YAML_RESERVED_WORDS.test(str)   ||
+            YAML_NUMERIC.test(str);
+
+        if (!needsQuote) return str;
+
+        const escaped = str
+            .replace(/\\/g, '\\\\')  // backslash first — avoids double-escaping later replacements
+            .replace(/"/g, '\\"')    // closing delimiter must be escaped inside double-quoted scalar
+            .replace(/\n/g, '\\n')   // literal newline → YAML newline escape sequence
+            .replace(/\t/g, '\\t');  // literal tab → YAML tab escape sequence
+        return `"${escaped}"`;
     }
     /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
@@ -133,27 +177,27 @@ class DecoratorExtractor {
             strVoc = strVoc + `namespace: ${namespace}\n`;
             if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
                 if (vocabObject.namespace.term){
-                    strVoc += `term: ${vocabObject.namespace.term}\n`;
+                    strVoc += `term: ${this.quoteStringValue(vocabObject.namespace.term, vocabObject.namespace.term_type)}\n`;
                 }
-                let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term');
+                let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term' && !str.endsWith('_type'));
                 otherProps.forEach(key =>{
-                    strVoc += `${key}: ${vocabObject.namespace[key]}\n`;
+                    strVoc += `${key}: ${this.quoteStringValue(vocabObject.namespace[key], vocabObject.namespace[`${key}_type`])}\n`;
                 });
             }
             if (vocabObject.declarations && Object.keys(vocabObject.declarations).length > 0 ){
                 strVoc = strVoc + 'declarations:\n';
                 Object.keys(vocabObject.declarations).forEach(decl =>{
                     if (vocabObject.declarations[decl].term){
-                        strVoc += `  - ${decl}: ${vocabObject.declarations[decl].term}\n`;
+                        strVoc += `  - ${decl}: ${this.quoteStringValue(vocabObject.declarations[decl].term, vocabObject.declarations[decl].term_type)}\n`;
                     }
-                    const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
+                    const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs' && !str.endsWith('_type'));
                     //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
                     if(otherProps.length > 0){
                         if (!vocabObject.declarations[decl].term){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         otherProps.forEach(key =>{
-                            strVoc += `    ${key}: ${vocabObject.declarations[decl][key]}\n`;
+                            strVoc += `    ${key}: ${this.quoteStringValue(vocabObject.declarations[decl][key], vocabObject.declarations[decl][`${key}_type`])}\n`;
                         });
                     }
                     if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
@@ -162,10 +206,10 @@ class DecoratorExtractor {
                         }
                         strVoc += '    properties:\n';
                         Object.keys(vocabObject.declarations[decl].propertyVocabs).forEach(prop =>{
-                            strVoc += `      - ${prop}: ${vocabObject.declarations[decl].propertyVocabs[prop].term || ''}\n`;
-                            const otherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
+                            strVoc += `      - ${prop}: ${this.quoteStringValue(vocabObject.declarations[decl].propertyVocabs[prop].term, vocabObject.declarations[decl].propertyVocabs[prop].term_type) || ''}\n`;
+                            const otherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term' && !str.endsWith('_type'));
                             otherProps.forEach(key =>{
-                                strVoc += `        ${key}: ${vocabObject.declarations[decl].propertyVocabs[prop][key]}\n`;
+                                strVoc += `        ${key}: ${this.quoteStringValue(vocabObject.declarations[decl].propertyVocabs[prop][key], vocabObject.declarations[decl].propertyVocabs[prop][`${key}_type`])}\n`;
                             });
                         });
                     }
@@ -247,6 +291,7 @@ class DecoratorExtractor {
             vocabObject.namespace = vocabObject.namespace || {};
             if (dcs.name === 'Term'){
                 vocabObject.namespace.term = dcs.arguments[0].value;
+                vocabObject.namespace.term_type = dcs.arguments[0].$class;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
@@ -254,6 +299,7 @@ class DecoratorExtractor {
                     throw new Error(`Invalid vocabulary key: ${extensionKey}. The key should not be one of the reserved keys: namespace, locale, declarations`);
                 }
                 vocabObject.namespace[extensionKey] = dcs.arguments[0].value;
+                vocabObject.namespace[`${extensionKey}_type`] = dcs.arguments[0].$class;
             }
             return vocabObject;
         }
@@ -265,6 +311,7 @@ class DecoratorExtractor {
             }
             if (dcs.name === 'Term'){
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property].term_type = dcs.arguments[0].$class;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
@@ -272,6 +319,7 @@ class DecoratorExtractor {
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][`${extensionKey}_type`] = dcs.arguments[0].$class;
             }
         }
         else if (vocabTarget.mapElement !== ''){
@@ -280,6 +328,7 @@ class DecoratorExtractor {
             }
             if (dcs.name === 'Term'){
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement].term_type = dcs.arguments[0].$class;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
@@ -287,11 +336,13 @@ class DecoratorExtractor {
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][`${extensionKey}_type`] = dcs.arguments[0].$class;
             }
         }
         else {
             if (dcs.name === 'Term'){
                 vocabObject.declarations[vocabTarget.declaration].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].term_type = dcs.arguments[0].$class;
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
@@ -299,6 +350,7 @@ class DecoratorExtractor {
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key cannot be a reserved word such as "properties" or the name of the current declaration.`);
                 }
                 vocabObject.declarations[vocabTarget.declaration][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration][`${extensionKey}_type`] = dcs.arguments[0].$class;
             }
         }
         return vocabObject;

@@ -1,0 +1,15 @@
+namespace com.test.complex.yaml@1.0.0
+
+concept SlaDocumentData {
+  @Term("name: Martin D'vloper\nage: 26\nhobbies:\n  - painting\n  - playing_music")
+  o String name optional
+
+  @Term("status: active # reviewed")
+  o String status optional
+
+  @Term(" leading and trailing ")
+  o String label optional
+
+  @Term("[primary, secondary]")
+  o String tags optional
+}

@@ -954,6 +954,141 @@ describe('DecoratorManager', () => {
             dcs.should.be.deep.equal(JSON.parse(expectedDcs));
             JSON.stringify(dcs).should.include('term_desc');
         });
+        it('should be able to extract vocabs from a model using YAML-safe quoting', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+            vocab[0].should.include('locale: en');
+            vocab[0].should.include('namespace: com.test.sla@1.0.0');
+            vocab[0].should.include('"Custom Field: Name"');
+        });
+        it('should correctly quote all YAML hazard categories and round-trip values intact', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-edge-cases.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'edge.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // must be valid YAML — no syntax errors from any quoted value
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // empty string must survive as "" not null
+            chai.expect(props[0].emptyTerm).to.equal('');
+
+            // YAML_INLINE_SPECIAL: tab, double-quote, backslash, literal \n (2-char, not newline)
+            props[1].tabInValue.should.equal('col1\tcol2');
+            props[2].doubleQuoteInValue.should.equal('say "hello"');
+            props[3].backslashInValue.should.equal('path\\to\\file');
+            props[4].literalBackslashN.should.equal('literal\\n value');
+
+            // YAML_BLOCK_INDICATORS: first-char triggers block/flow/tag/anchor/alias/directive
+            props[5].gtChar.should.equal('> folded block');
+            props[6].pipeChar.should.equal('| literal block');
+            props[7].exclamationChar.should.equal('!tag handle');
+            props[8].ampersandChar.should.equal('&anchor ref');
+            props[9].asteriskChar.should.equal('*alias ref');
+            props[10].percentChar.should.equal('%directive');
+
+            // YAML_RESERVED_WORDS: uppercase variants that /i flag must catch
+            props[11].uppercaseTrue.should.equal('TRUE');
+            props[12].uppercaseYes.should.equal('YES');
+            props[13].uppercaseNull.should.equal('NULL');
+            props[14].yamlNull.should.equal('~');
+
+            // YAML_NUMERIC: leading-dot decimal, negative, scientific notation
+            props[15].leadingDotDecimal.should.equal('.5');
+            props[16].negativeDecimal.should.equal('-1.5');
+            props[17].scientificNotation.should.equal('1e10');
+        });
+        it('should correctly quote complex YAML-like string values embedded in Term decorators', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-complex.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // output must be parseable YAML — embedded YAML-like content must not corrupt structure
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // newlines, colon, single-quote all round-trip intact
+            props[0].name.should.equal('name: Martin D\'vloper\nage: 26\nhobbies:\n  - painting\n  - playing_music');
+            // hash comment char round-trips intact
+            props[1].status.should.equal('status: active # reviewed');
+            // leading/trailing spaces round-trip intact
+            props[2].label.should.equal(' leading and trailing ');
+            // YAML flow-sequence syntax round-trips intact
+            props[3].tags.should.equal('[primary, secondary]');
+        });
+
+        it('should handle all parseVocabularies code paths — namespace, declaration, property, mapElement with YAML-special strings and non-string Term_ types', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-allpaths-nonstring.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'allpaths.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level Term with colon (must be quoted) and Term_* with Number and Boolean
+            parsed.term.should.equal('My Namespace: Title');
+            parsed.version.should.equal(3);
+            parsed.active.should.equal(true);
+
+            const decls = parsed.declarations;
+
+            // declaration-level Term with colon and Term_* with Number and Boolean
+            decls[0].Product.should.equal('Product: Details');
+            decls[0].sortOrder.should.equal(1);
+            decls[0].featured.should.equal(false);
+
+            // property-level Term with colon and Term_* with Number and Boolean
+            const props = decls[0].properties;
+            props[0].fieldName.should.equal('Field: Label');
+            props[0].rank.should.equal(2);
+            props[0].visible.should.equal(true);
+
+            // mapElement-level Term with colon (must be quoted) and Term_* with Number and Boolean
+            const mapDecl = decls[1];
+            const mapProps = mapDecl.properties;
+            mapProps[0].KEY.should.equal('Key: Identifier');
+            mapProps[0].weight.should.equal(5);
+            mapProps[1].VALUE.should.equal('Value: Data');
+            mapProps[1].required.should.equal(false);
+        });
+
+        it('should emit non-string Term_ values (Number, Boolean) as unquoted YAML scalars', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-nonstring.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+            const prop = parsed.declarations[0].properties[0];
+
+            // string term is quoted, numeric and boolean term_ values are native YAML types
+            prop.productName.should.equal('Product Name');
+            prop.priority.should.equal(1);
+            prop.active.should.equal(true);
+        });
     });
 
     describe('#executePropertyCommand', () => {
