@@ -39,7 +39,7 @@
     "semver": "7.6.3"
   },
   "devDependencies": {
-    "@accordproject/concerto-codegen": "^3.32.1",
+    "@accordproject/concerto-codegen": "^4.0.0",
     "@accordproject/concerto-cto": "4.0.2",
     "@accordproject/concerto-util": "4.0.2",
     "@types/semver": "7.5.8",
