@@ -447,7 +447,7 @@ class BaseModelManager {
 
         const downloader = fileDownloader ?? new FileDownloader(
             new DefaultFileLoader(this.processFile),
-            (file) => MetaModelUtil.getExternalImports(file.ast)
+            (file) => MetaModelUtil.getExternalImports(file.ast) as Record<string, string>
         );
 
         const originalModelFiles = {};
