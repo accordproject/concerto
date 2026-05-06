@@ -9,7 +9,7 @@
   },
   "main": "dist/index.js",
   "browser": "dist/concerto-util.js",
-  "typings": "types/index.d.ts",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean",

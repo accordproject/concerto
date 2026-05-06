@@ -22,42 +22,63 @@
  */
 
 // Exceptions
-export const BaseException = require('./baseexception');
-export const BaseFileException = require('./basefileexception');
+import BaseException = require('./baseexception');
+import BaseFileException = require('./basefileexception');
 
 // Transitive closure downloader
-export const FileDownloader = require('./filedownloader');
+import FileDownloader = require('./filedownloader');
 
 // File Loaders
-export const CompositeFileLoader = require('./loaders/compositefileloader');
-export const DefaultFileLoader = require('./loaders/defaultfileloader');
-export const GitHubFileLoader = require('./loaders/githubfileloader');
-export const HTTPFileLoader = require('./loaders/httpfileloader');
+import CompositeFileLoader = require('./loaders/compositefileloader');
+import DefaultFileLoader = require('./loaders/defaultfileloader');
+import GitHubFileLoader = require('./loaders/githubfileloader');
+import HTTPFileLoader = require('./loaders/httpfileloader');
 export type { FileLoader } from './loaders/fileloader';
 
 // Writers
-export const Writer = require('./writer');
-export const FileWriter = require('./filewriter');
-export const ModelWriter = require('./modelwriter');
-export const InMemoryWriter = require('./inmemorywriter');
+import Writer = require('./writer');
+import FileWriter = require('./filewriter');
+import ModelWriter = require('./modelwriter');
+import InMemoryWriter = require('./inmemorywriter');
 
 // Logger
-export const Logger = require('./logger');
+import Logger = require('./logger');
 
 // TypedStack
-export const TypedStack = require('./typedstack');
+import TypedStack = require('./typedstack');
 
 // Label
-export const Label = require('./label');
+import Label = require('./label');
 
 // Identifiers
-export const Identifiers = require('./identifiers');
+import Identifiers = require('./identifiers');
 
-//errorcodes
-export const ErrorCodes = require('./errorcodes');
+// Error codes
+import ErrorCodes = require('./errorcodes');
 
 // NullUtil
-export const NullUtil = require('./null');
+import NullUtil = require('./null');
 
 // Warning
-export const Warning = require('./warning');
+import * as Warning from './warning';
+
+export {
+    BaseException,
+    BaseFileException,
+    FileDownloader,
+    CompositeFileLoader,
+    DefaultFileLoader,
+    GitHubFileLoader,
+    HTTPFileLoader,
+    Writer,
+    FileWriter,
+    ModelWriter,
+    InMemoryWriter,
+    Logger,
+    TypedStack,
+    Label,
+    Identifiers,
+    ErrorCodes,
+    NullUtil,
+    Warning,
+};
