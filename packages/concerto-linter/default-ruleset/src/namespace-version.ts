@@ -22,7 +22,7 @@ import { pattern } from '@stoplight/spectral-functions';
  */
 export default {
     description: 'namespace should specify a version.',
-    given: '$.models[0].namespace',
+    given: '$.models[*].namespace',
     message: 'namespace \'{{value}}\' should specify a version.',
     severity: 0, // 0 = error, 1 = warning, 2 = info, 3 = hint
     then: {
