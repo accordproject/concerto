@@ -89,7 +89,7 @@ function createDefaultFileDownloader(): any {
         }
         throw new Error('External model file references are expected to have a .cto extension');
     };
-    return new FileDownloader(new DefaultFileLoader(processFile), MetaModelUtil.getExternalImports);
+    return new FileDownloader(new DefaultFileLoader(processFile), (file) => MetaModelUtil.getExternalImports(file) as Record<string, string>);
 }
 
 export = {
