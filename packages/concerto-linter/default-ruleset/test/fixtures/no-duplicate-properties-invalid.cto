@@ -1,0 +1,7 @@
+namespace org.example@1.0.0
+
+concept Order {
+  o String orderId
+  o Integer quantity
+  o String orderId
+}

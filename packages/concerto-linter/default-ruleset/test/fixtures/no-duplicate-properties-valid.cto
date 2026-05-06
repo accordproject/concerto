@@ -1,0 +1,17 @@
+namespace org.example@1.0.0
+
+concept Order {
+  o String orderId
+  o Integer quantity
+  o Double price
+}
+
+asset Product {
+  o String productId
+  o String name
+}
+
+enum Status {
+  o ACTIVE
+  o INACTIVE
+}
