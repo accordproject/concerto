@@ -29,8 +29,6 @@ const Relationship = require('./model/relationship');
 const Resource = require('./model/resource');
 const ValidatedResource = require('./model/validatedresource');
 
-const uuid = require('uuid');
-
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -56,7 +54,7 @@ class Factory {
      * @returns {string} a new ID
      */
     static newId() {
-        return uuid.v4();
+        return crypto.randomUUID();
     }
 
     /**

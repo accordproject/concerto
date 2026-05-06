@@ -17,7 +17,6 @@
 const Factory = require('../lib/factory');
 const ModelManager = require('../lib/modelmanager');
 const TypeNotFoundException = require('../lib/typenotfoundexception');
-const uuid = require('uuid');
 const Util = require('./composer/composermodelutility');
 const dayjs = require('dayjs');
 
@@ -64,7 +63,7 @@ describe('Factory', function() {
 
     beforeEach(function() {
         sandbox = sinon.createSandbox();
-        sandbox.stub(uuid, 'v4').returns('5604bdfe-7b96-45d0-9883-9c05c18fe638');
+        sandbox.stub(globalThis.crypto, 'randomUUID').returns('5604bdfe-7b96-45d0-9883-9c05c18fe638');
     });
 
     afterEach(() => {
