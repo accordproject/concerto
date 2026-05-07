@@ -17,6 +17,7 @@
 const Decorated = require('./decorated');
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
+const RESERVED_SYSTEM_TYPES = new Set(['Concept', 'Asset', 'Transaction', 'Participant', 'Event']);
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -80,11 +81,34 @@ class Declaration extends Decorated {
      */
     validate(...args) {
         super.validate(...args);
+        const modelFile = this.getModelFile();
 
         // #648 - check for clashes against imported types
-        if (this.getModelFile().isImportedType(this.getName())){
+        if (modelFile.isImportedType(this.getName())) {
+            const allowReservedSystemTypeNames = Boolean(modelFile.getModelManager()?.options?.allowReservedSystemTypeNames);
+            if (allowReservedSystemTypeNames && this.isReservedSystemTypeImport(modelFile, this.getName())) {
+                return;
+            }
+
             throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
         }
+    }
+
+    /**
+     * Determines whether a type name resolves to a reserved type in the Concerto
+     * system namespace.
+     * @param {ModelFile} modelFile - the current model file
+     * @param {string} typeName - local/imported type name
+     * @returns {boolean} true if the resolved import is a reserved system type
+     */
+    private isReservedSystemTypeImport(modelFile, typeName) {
+        if (!RESERVED_SYSTEM_TYPES.has(typeName)) {
+            return false;
+        }
+
+        const importedFqn = modelFile.resolveImport(typeName);
+        const importedNs = ModelUtil.getNamespace(importedFqn);
+        return importedNs === 'concerto' || importedNs.startsWith('concerto@');
     }
 
     /**

@@ -93,17 +93,18 @@ class BaseModelManager {
      options: any;
      decoratorValidation: any;
      metamodelModelFile: any;
-     /**
+    /**
      * Create the ModelManager.
      * @constructor
      * @param {object} [options] - ModelManager options, also passed to Serializer
      * @param {Object} [options.regExp] - An alternative regular expression engine.
      * @param {boolean} [options.metamodelValidation] - When true, modelfiles will be validated
      * @param {boolean} [options.addMetamodel] - When true, the Concerto metamodel is added to the model manager
+     * @param {boolean} [options.allowReservedSystemTypeNames] - When true, declarations may use reserved system type names
      * @param {object} [options.decoratorValidation] - the decorator validation configuration
      * @param {string} [options.decoratorValidation.missingDecorator] - the validation log level for missingDecorator decorators: off, warning, error
      * @param {string} [options.decoratorValidation.invalidDecorator] - the validation log level for invalidDecorator decorators: off, warning, error
-    * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
+     * @param {*} [processFile] - how to obtain a concerto AST from an input to the model manager
     */
     constructor(options?: ModelManagerOptions, processFile?: (fileName: string | null, modelInput: string | unknown) => ModelFileSource) {
         this.processFile = processFile ? processFile : defaultProcessFile;

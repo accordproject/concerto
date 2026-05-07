@@ -18,6 +18,7 @@ export interface ModelManagerOptions {
     regExp?: RegExp;
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
+    allowReservedSystemTypeNames?: boolean;
     decoratorValidation?: {
         missingDecorator?: string;
         invalidDecorator?: string;
