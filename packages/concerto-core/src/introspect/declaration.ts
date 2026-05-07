@@ -17,7 +17,6 @@
 const Decorated = require('./decorated');
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
-const RESERVED_SYSTEM_TYPES = new Set(['Concept', 'Asset', 'Transaction', 'Participant', 'Event']);
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -85,8 +84,8 @@ class Declaration extends Decorated {
 
         // #648 - check for clashes against imported types
         if (modelFile.isImportedType(this.getName())) {
-            const allowReservedSystemTypeNames = Boolean(modelFile.getModelManager()?.options?.allowReservedSystemTypeNames);
-            if (allowReservedSystemTypeNames && this.isReservedSystemTypeImport(modelFile, this.getName())) {
+            const dangerouslyAllowReservedSystemTypeNames = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNames);
+            if (dangerouslyAllowReservedSystemTypeNames && this.isReservedSystemTypeImport(modelFile, this.getName())) {
                 return;
             }
 
@@ -102,13 +101,21 @@ class Declaration extends Decorated {
      * @returns {boolean} true if the resolved import is a reserved system type
      */
     private isReservedSystemTypeImport(modelFile, typeName) {
-        if (!RESERVED_SYSTEM_TYPES.has(typeName)) {
+        const importedType = modelFile.getType(typeName);
+        if (!importedType || typeof importedType === 'string') {
             return false;
         }
 
-        const importedFqn = modelFile.resolveImport(typeName);
-        const importedNs = ModelUtil.getNamespace(importedFqn);
-        return importedNs === 'concerto' || importedNs.startsWith('concerto@');
+        const importedModelFile = importedType.getModelFile();
+        if (!importedModelFile || !importedModelFile.isSystemModelFile()) {
+            return false;
+        }
+
+        return importedType.isConcept()
+            || importedType.isAsset()
+            || importedType.isTransaction()
+            || importedType.isParticipant()
+            || importedType.isEvent();
     }
 
     /**

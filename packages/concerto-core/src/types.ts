@@ -18,7 +18,9 @@ export interface ModelManagerOptions {
     regExp?: RegExp;
     metamodelValidation?: boolean;
     addMetamodel?: boolean;
-    allowReservedSystemTypeNames?: boolean;
+    // Transitional migration escape hatch for legacy models.
+    // This option is temporary and will be removed in a future release.
+    dangerouslyAllowReservedSystemTypeNames?: boolean;
     decoratorValidation?: {
         missingDecorator?: string;
         invalidDecorator?: string;
