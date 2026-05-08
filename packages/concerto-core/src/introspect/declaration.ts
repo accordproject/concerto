@@ -80,11 +80,42 @@ class Declaration extends Decorated {
      */
     validate(...args) {
         super.validate(...args);
+        const modelFile = this.getModelFile();
 
         // #648 - check for clashes against imported types
-        if (this.getModelFile().isImportedType(this.getName())){
+        if (modelFile.isImportedType(this.getName())) {
+            const dangerouslyAllowReservedSystemTypeNamesInUserModels = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
+            if (dangerouslyAllowReservedSystemTypeNamesInUserModels && this.isReservedSystemTypeImport(modelFile, this.getName())) {
+                return;
+            }
+
             throw new IllegalModelException(`Type '${this.getName()}' clashes with an imported type with the same name.`, this.modelFile, this.ast.location);
         }
+    }
+
+    /**
+     * Determines whether a type name resolves to a reserved type in the Concerto
+     * system namespace.
+     * @param {ModelFile} modelFile - the current model file
+     * @param {string} typeName - local/imported type name
+     * @returns {boolean} true if the resolved import is a reserved system type
+     */
+    private isReservedSystemTypeImport(modelFile, typeName) {
+        const importedType = modelFile.getType(typeName);
+        if (!importedType || typeof importedType === 'string') {
+            return false;
+        }
+
+        const importedModelFile = importedType.getModelFile();
+        if (!importedModelFile || !importedModelFile.isSystemModelFile()) {
+            return false;
+        }
+
+        return importedType.isConcept()
+            || importedType.isAsset()
+            || importedType.isTransaction()
+            || importedType.isParticipant()
+            || importedType.isEvent();
     }
 
     /**

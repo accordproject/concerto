@@ -367,6 +367,47 @@ describe('ModelFile', () => {
             }).should.throw('Type \'Transaction\' clashes with an imported type with the same name.');
         });
 
+        it('should allow a system type name when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
+            const myModelManager = new ModelManager({
+                dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
+            });
+
+            const model = `
+            namespace A@1.0.0
+            asset Asset identified by assetId {
+                o String assetId
+            }
+            `;
+
+            const modelFile = ParserUtil.newModelFile(myModelManager, model);
+            myModelManager.addModelFile(modelFile);
+            myModelManager.getType('A@1.0.0.Asset').getName().should.equal('Asset');
+        });
+
+        it('should still fail non-system clashes when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
+            const myModelManager = new ModelManager({
+                dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
+            });
+
+            const imported = `namespace A@1.0.0
+            concept B {
+                o String name
+            }`;
+
+            const clashing = `namespace B@1.0.0
+            import A@1.0.0.{B}
+            concept B {
+            }`;
+
+            const importedModelFile = ParserUtil.newModelFile(myModelManager, imported);
+            myModelManager.addModelFile(importedModelFile);
+
+            const clashingModelFile = ParserUtil.newModelFile(myModelManager, clashing);
+            (() => {
+                myModelManager.addModelFile(clashingModelFile);
+            }).should.throw('Type \'B\' clashes with an imported type with the same name.');
+        });
+
     });
 
     describe('#getDefinitions', () => {
