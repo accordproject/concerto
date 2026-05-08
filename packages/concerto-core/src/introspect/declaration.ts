@@ -84,8 +84,8 @@ class Declaration extends Decorated {
 
         // #648 - check for clashes against imported types
         if (modelFile.isImportedType(this.getName())) {
-            const dangerouslyAllowReservedSystemTypeNames = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNames);
-            if (dangerouslyAllowReservedSystemTypeNames && this.isReservedSystemTypeImport(modelFile, this.getName())) {
+            const dangerouslyAllowReservedSystemTypeNamesInUserModels = Boolean(modelFile.getModelManager()?.options?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
+            if (dangerouslyAllowReservedSystemTypeNamesInUserModels && this.isReservedSystemTypeImport(modelFile, this.getName())) {
                 return;
             }
 

@@ -367,9 +367,9 @@ describe('ModelFile', () => {
             }).should.throw('Type \'Transaction\' clashes with an imported type with the same name.');
         });
 
-        it('should allow a system type name when dangerouslyAllowReservedSystemTypeNames is enabled', () => {
+        it('should allow a system type name when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
             const myModelManager = new ModelManager({
-                dangerouslyAllowReservedSystemTypeNames: true,
+                dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
             });
 
             const model = `
@@ -384,9 +384,9 @@ describe('ModelFile', () => {
             myModelManager.getType('A@1.0.0.Asset').getName().should.equal('Asset');
         });
 
-        it('should still fail non-system clashes when dangerouslyAllowReservedSystemTypeNames is enabled', () => {
+        it('should still fail non-system clashes when dangerouslyAllowReservedSystemTypeNamesInUserModels is enabled', () => {
             const myModelManager = new ModelManager({
-                dangerouslyAllowReservedSystemTypeNames: true,
+                dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
             });
 
             const imported = `namespace A@1.0.0

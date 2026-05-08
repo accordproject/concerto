@@ -20,7 +20,7 @@ export interface ModelManagerOptions {
     addMetamodel?: boolean;
     // Transitional migration escape hatch for legacy models.
     // This option is temporary and will be removed in a future release.
-    dangerouslyAllowReservedSystemTypeNames?: boolean;
+    dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean;
     decoratorValidation?: {
         missingDecorator?: string;
         invalidDecorator?: string;
