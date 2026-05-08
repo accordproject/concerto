@@ -198,9 +198,11 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {*} [options] options to configure term resolution
+     * @param {boolean} [options.generateMissing=true] whether to synthesize missing terms
      * @returns {*} the terms or null if it does not exist
      */
-    resolveTerms(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string) {
+    resolveTerms(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, options?: any) {
         const modelFile = modelManager.getModelFile(namespace);
         // @ts-ignore
         const classDecl = modelFile ? (modelFile as any).getType(declarationName) : null;
@@ -216,7 +218,7 @@ class VocabularyManager {
                 property = propertyName ? classDecl ? classDecl.getProperty(propertyName) : null : null;
             }
         }
-        return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? (property.getParent() as any).getName() : declarationName, propertyName);
+        return this.getTerms(property ? property.getNamespace() : namespace, locale, property ? (property.getParent() as any).getName() : declarationName, propertyName, options);
     }
 
     /**
@@ -256,9 +258,11 @@ class VocabularyManager {
      * @param {string} locale the BCP-47 locale identifier
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
+     * @param {*} [options] options to configure term resolution
+     * @param {boolean} [options.generateMissing=true] whether to synthesize missing terms
      * @returns {*} the terms or null if it does not exist
      */
-    getTerms(namespace: string, locale: string, declarationName: string, propertyName?: string): any {
+    getTerms(namespace: string, locale: string, declarationName: string, propertyName?: string, options?: any): any {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
@@ -270,9 +274,12 @@ class VocabularyManager {
         else {
             const dashIndex = locale.lastIndexOf('-');
             if (dashIndex >= 0) {
-                return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName);
+                return this.getTerms(namespace, locale.substring(0, dashIndex), declarationName, propertyName, options);
             }
             else {
+                if (options?.generateMissing === false) {
+                    return;
+                }
                 let missingKey = propertyName ? propertyName : declarationName;
                 missingKey = missingKey? missingKey : 'term';
                 return this.missingTermGenerator ? { [missingKey]: this.missingTermGenerator(namespace, locale, declarationName, propertyName) } : null;
@@ -309,7 +316,7 @@ class VocabularyManager {
 
         // @ts-ignore
         (modelManager as any).getModelFiles().forEach((model: any) => {
-            const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, ''); // Corrected args
+            const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, '', undefined, { generateMissing: false }); // Corrected args
             if (terms) {
                 Object.keys(terms).forEach( term => {
                     if(term === 'term') {

@@ -11,24 +11,6 @@ Object {
         "arguments": Array [
           Object {
             "$class": "concerto.metamodel@1.0.0.DecoratorString",
-            "value": "Org.acme",
-          },
-        ],
-        "name": "Term",
-      },
-      "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-        "namespace": "org.acme@1.0.0",
-      },
-      "type": "UPSERT",
-    },
-    Object {
-      "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
-      "decorator": Object {
-        "$class": "concerto.metamodel@1.0.0.Decorator",
-        "arguments": Array [
-          Object {
-            "$class": "concerto.metamodel@1.0.0.DecoratorString",
             "value": "A colour",
           },
         ],
@@ -510,24 +492,6 @@ Object {
         "declaration": "Truck",
         "namespace": "org.acme@1.0.0",
         "property": "$identifier",
-      },
-      "type": "UPSERT",
-    },
-    Object {
-      "$class": "org.accordproject.decoratorcommands@0.4.0.Command",
-      "decorator": Object {
-        "$class": "concerto.metamodel@1.0.0.Decorator",
-        "arguments": Array [
-          Object {
-            "$class": "concerto.metamodel@1.0.0.DecoratorString",
-            "value": "Org.accordproject",
-          },
-        ],
-        "name": "Term",
-      },
-      "target": Object {
-        "$class": "org.accordproject.decoratorcommands@0.4.0.CommandTarget",
-        "namespace": "org.accordproject@1.0.0",
       },
       "type": "UPSERT",
     },
