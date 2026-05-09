@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-linter",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "Concerto Linter using Spectral rulesets",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -32,9 +32,9 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "4.0.3",
-    "@accordproject/concerto-cto": "4.0.3",
-    "@accordproject/concerto-linter-default-ruleset": "4.0.3",
+    "@accordproject/concerto-core": "4.1.0",
+    "@accordproject/concerto-cto": "4.1.0",
+    "@accordproject/concerto-linter-default-ruleset": "4.1.0",
     "@accordproject/concerto-metamodel": "^3.13.0",
     "@stoplight/spectral-cli": "6.15.0",
     "@stoplight/spectral-core": "1.20.0",
