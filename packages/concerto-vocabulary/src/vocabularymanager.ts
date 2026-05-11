@@ -179,9 +179,9 @@ class VocabularyManager {
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
      * @param {string} [identifier] the identifier of the term (optional)
-     * @returns {string} the term or null if it does not exist
+     * @returns {string|number|boolean|null} the term or null if it does not exist
      */
-    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | null {
+    resolveTerm(modelManager: ModelManager, namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | number | boolean | null {
         const modelFile = modelManager.getModelFile(namespace);
         // @ts-ignore
         const classDecl = modelFile ? (modelFile as any).getType(declarationName) : null;
@@ -227,9 +227,9 @@ class VocabularyManager {
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
      * @param {string} [identifier] the identifier of the term (optional)
-     * @returns {string} the term or null if it does not exist
+     * @returns {string|number|boolean|null} the term or null if it does not exist
      */
-    getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | null {
+    getTerm(namespace: string, locale: string, declarationName: string, propertyName?: string, identifier?: string): string | number | boolean | null {
         const voc = this.getVocabulary(namespace, locale);
         let term = null;
         if (voc) {
