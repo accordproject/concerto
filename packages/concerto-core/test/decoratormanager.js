@@ -1146,6 +1146,34 @@ describe('DecoratorManager', () => {
                 DecoratorManager.extractVocabularies(testModelManager, options);
             }).should.throw(/Invalid vocabulary key/);
         });
+
+        it('should preserve falsy empty-string Term values at namespace, declaration, and property level', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-falsy-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level empty-string term must be preserved, not skipped
+            chai.expect(parsed.term).to.equal('');
+
+            const decls = parsed.declarations;
+
+            // declaration with only @Term("") must emit "" not be replaced by fallback label
+            chai.expect(decls[0].EmptyTermConcept).to.equal('');
+
+            // property with @Term("") must round-trip as ""
+            chai.expect(decls[0].properties[0].myField).to.equal('');
+
+            // declaration with @Term("") + extension: term must be "", extension must appear, no fallback label
+            chai.expect(decls[1].EmptyTermWithExtension).to.equal('');
+            chai.expect(decls[1].desc).to.equal('has extension too');
+        });
     });
 
     describe('#executePropertyCommand', () => {

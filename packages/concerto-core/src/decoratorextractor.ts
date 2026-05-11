@@ -176,7 +176,7 @@ class DecoratorExtractor {
             strVoc = strVoc + `locale: ${this.locale}\n`;
             strVoc = strVoc + `namespace: ${namespace}\n`;
             if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
-                if (vocabObject.namespace.term){
+                if ('term' in vocabObject.namespace){
                     strVoc += `term: ${this.quoteStringValue(vocabObject.namespace.term, vocabObject.namespace.__types?.term)}\n`;
                 }
                 let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term' && str !== '__types');
@@ -187,13 +187,13 @@ class DecoratorExtractor {
             if (vocabObject.declarations && Object.keys(vocabObject.declarations).length > 0 ){
                 strVoc = strVoc + 'declarations:\n';
                 Object.keys(vocabObject.declarations).forEach(decl =>{
-                    if (vocabObject.declarations[decl].term){
+                    if ('term' in vocabObject.declarations[decl]){
                         strVoc += `  - ${decl}: ${this.quoteStringValue(vocabObject.declarations[decl].term, vocabObject.declarations[decl].__types?.term)}\n`;
                     }
                     const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs' && str !== '__types');
                     //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
                     if(otherProps.length > 0){
-                        if (!vocabObject.declarations[decl].term){
+                        if (!('term' in vocabObject.declarations[decl])){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         otherProps.forEach(key =>{
@@ -201,7 +201,7 @@ class DecoratorExtractor {
                         });
                     }
                     if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
-                        if (!vocabObject.declarations[decl].term && otherProps.length === 0){
+                        if (!('term' in vocabObject.declarations[decl]) && otherProps.length === 0){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         strVoc += '    properties:\n';
