@@ -22,7 +22,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
 
 // Characters / patterns that make a YAML plain scalar unsafe — grouped by reason
-const YAML_INLINE_SPECIAL = /[:#{}'"\n\t\\]/;     // mapping, comment, quote, or escape chars
+const YAML_INLINE_SPECIAL = /[:#{}'"\n\r\t\\]/;    // mapping, comment, quote, or escape chars
 const YAML_BLOCK_INDICATORS = /^[\[\]{}>|!&*%@`]/; // first-char triggers YAML block/flow syntax
 const YAML_EDGE_WHITESPACE = /^\s|\s$/;             // parsers strip unquoted leading/trailing space
 const YAML_RESERVED_WORDS = /^(true|false|yes|no|on|off|null|~)$/i; // parsed as non-string in YAML 1.1
@@ -111,6 +111,7 @@ class DecoratorExtractor {
             .replace(/\\/g, '\\\\')  // backslash first — avoids double-escaping later replacements
             .replace(/"/g, '\\"')    // closing delimiter must be escaped inside double-quoted scalar
             .replace(/\n/g, '\\n')   // literal newline → YAML newline escape sequence
+            .replace(/\r/g, '\\r')   // carriage return → YAML carriage return escape sequence
             .replace(/\t/g, '\\t');  // literal tab → YAML tab escape sequence
         return `"${escaped}"`;
     }

@@ -1007,6 +1007,9 @@ describe('DecoratorManager', () => {
             props[15].leadingDotDecimal.should.equal('.5');
             props[16].negativeDecimal.should.equal('-1.5');
             props[17].scientificNotation.should.equal('1e10');
+
+            // YAML_INLINE_SPECIAL: carriage return
+            props[18].carriageReturn.should.equal('foo\rbar');
         });
         it('should correctly quote complex YAML-like string values embedded in Term decorators', async function() {
             const YAML = require('yaml');

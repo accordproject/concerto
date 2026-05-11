@@ -54,4 +54,7 @@ concept EdgeCases {
 
   @Term("1e10")
   o String scientificNotation optional
+
+  @Term("foo\rbar")
+  o String carriageReturn optional
 }
