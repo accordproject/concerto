@@ -86,10 +86,10 @@ class DecoratorExtractor {
      * Non-string decorator types (Number, Boolean) are returned as-is.
      * @param {any} value - the value to emit
      * @param {string} [type] - the $class of the decorator argument
-     * @returns {string} - the value, double-quoted if necessary
+     * @returns {string|number|boolean|null} - double-quoted string for string args, raw value for non-string args
      * @private
      */
-    quoteStringValue(value: any, type?: string): any {
+    quoteStringValue(value: any, type?: string): string | number | boolean | null {
         // Non-string decorator arguments (Number, Boolean) are already valid YAML scalars
         if (!type || type !== DECORATOR_STRING_TYPE) {
             return value;
