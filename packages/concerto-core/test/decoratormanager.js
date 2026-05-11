@@ -1010,6 +1010,15 @@ describe('DecoratorManager', () => {
 
             // YAML_INLINE_SPECIAL: carriage return
             props[18].carriageReturn.should.equal('foo\rbar');
+
+            // YAML_BLOCK_INDICATORS: dash-space and question-space trigger sequence/mapping
+            props[19].dashSpaceValue.should.equal('- foo');
+            props[20].questionSpaceValue.should.equal('? key');
+
+            // YAML_NUMERIC: YAML 1.1 hex/octal/binary forms coerced to numbers without quotes
+            props[21].hexValue.should.equal('0x1A');
+            props[22].octalValue.should.equal('0o10');
+            props[23].binaryValue.should.equal('0b11');
         });
         it('should correctly quote complex YAML-like string values embedded in Term decorators', async function() {
             const YAML = require('yaml');

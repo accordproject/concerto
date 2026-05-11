@@ -57,4 +57,19 @@ concept EdgeCases {
 
   @Term("foo\rbar")
   o String carriageReturn optional
+
+  @Term("- foo")
+  o String dashSpaceValue optional
+
+  @Term("? key")
+  o String questionSpaceValue optional
+
+  @Term("0x1A")
+  o String hexValue optional
+
+  @Term("0o10")
+  o String octalValue optional
+
+  @Term("0b11")
+  o String binaryValue optional
 }

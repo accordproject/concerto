@@ -23,10 +23,10 @@ const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
 
 // Characters / patterns that make a YAML plain scalar unsafe — grouped by reason
 const YAML_INLINE_SPECIAL = /[:#{}'"\n\r\t\\]/;    // mapping, comment, quote, or escape chars
-const YAML_BLOCK_INDICATORS = /^[\[\]{}>|!&*%@`]/; // first-char triggers YAML block/flow syntax
+const YAML_BLOCK_INDICATORS = /^[\[\]{}>|!&*%@`]|^[-?] /; // first-char triggers YAML block/flow syntax; dash/question + space triggers sequence/mapping
 const YAML_EDGE_WHITESPACE = /^\s|\s$/;             // parsers strip unquoted leading/trailing space
 const YAML_RESERVED_WORDS = /^(true|false|yes|no|on|off|null|~)$/i; // parsed as non-string in YAML 1.1
-const YAML_NUMERIC = /^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;       // parsed as number without quotes
+const YAML_NUMERIC = /^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$|^0o[0-7]+$|^0b[01]+$/; // parsed as number without quotes; includes YAML 1.1 hex/octal/binary forms
 
 /**
  * Utility functions to work with
