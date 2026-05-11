@@ -1,6 +1,0 @@
-@Term___types("collision attempt")
-namespace com.test.collision.ns@1.0.0
-
-concept Dummy {
-    o String id
-}
