@@ -235,7 +235,7 @@ class VocabularyManager {
         if (voc) {
             term = voc.getTerm(declarationName, propertyName, identifier);
         }
-        if (term !== null && term !== undefined) {
+        if (term != null) {
             return term;
         }
         else {
@@ -264,7 +264,7 @@ class VocabularyManager {
         if (voc) {
             term = voc.getElementTerms(declarationName, propertyName);
         }
-        if (term !== null && term !== undefined) {
+        if (term != null) {
             return term;
         }
         else {

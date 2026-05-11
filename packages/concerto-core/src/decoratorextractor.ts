@@ -90,8 +90,7 @@ class DecoratorExtractor {
      * @private
      */
     quoteStringValue(value: any, type?: string): string | number | boolean | null {
-        // Non-string decorator arguments (Number, Boolean) are already valid YAML scalars
-        if (!type || type !== DECORATOR_STRING_TYPE) {
+        if (type !== DECORATOR_STRING_TYPE) {
             return value;
         }
 
@@ -108,11 +107,11 @@ class DecoratorExtractor {
         if (!needsQuote) return str;
 
         const escaped = str
-            .replace(/\\/g, '\\\\')  // backslash first — avoids double-escaping later replacements
-            .replace(/"/g, '\\"')    // closing delimiter must be escaped inside double-quoted scalar
-            .replace(/\n/g, '\\n')   // literal newline → YAML newline escape sequence
-            .replace(/\r/g, '\\r')   // carriage return → YAML carriage return escape sequence
-            .replace(/\t/g, '\\t');  // literal tab → YAML tab escape sequence
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t');
         return `"${escaped}"`;
     }
     /**
