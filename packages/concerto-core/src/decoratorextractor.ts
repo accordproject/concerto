@@ -206,7 +206,7 @@ class DecoratorExtractor {
                         }
                         strVoc += '    properties:\n';
                         Object.keys(vocabObject.declarations[decl].propertyVocabs).forEach(prop =>{
-                            strVoc += `      - ${prop}: ${this.quoteStringValue(vocabObject.declarations[decl].propertyVocabs[prop].term, vocabObject.declarations[decl].propertyVocabs[prop].__types?.term) || ''}\n`;
+                            strVoc += `      - ${prop}: ${this.quoteStringValue(vocabObject.declarations[decl].propertyVocabs[prop].term, vocabObject.declarations[decl].propertyVocabs[prop].__types?.term) ?? ''}\n`;
                             const otherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term' && str !== '__types');
                             otherProps.forEach(key =>{
                                 strVoc += `        ${key}: ${this.quoteStringValue(vocabObject.declarations[decl].propertyVocabs[prop][key], vocabObject.declarations[decl].propertyVocabs[prop].__types?.[key])}\n`;

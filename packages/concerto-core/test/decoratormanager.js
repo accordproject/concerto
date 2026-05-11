@@ -1147,6 +1147,26 @@ describe('DecoratorManager', () => {
             }).should.throw(/Invalid vocabulary key/);
         });
 
+        it('should preserve falsy numeric and boolean Term values at property level', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-falsy-nonstring-prop-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // @Term(0) must emit 0, not be coerced to '' by || fallback
+            chai.expect(props[0].price).to.equal(0);
+
+            // @Term(false) must emit false, not be coerced to '' by || fallback
+            chai.expect(props[1].active).to.equal(false);
+        });
+
         it('should preserve falsy empty-string Term values at namespace, declaration, and property level', async function() {
             const YAML = require('yaml');
             const testModelManager = new ModelManager();
