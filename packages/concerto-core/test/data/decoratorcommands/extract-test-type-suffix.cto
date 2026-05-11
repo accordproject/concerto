@@ -1,0 +1,11 @@
+@Term("My Namespace")
+@Term_my_type("namespace type value")
+namespace com.test.typesuffix@1.0.0
+
+@Term("My Concept")
+@Term_my_type("concept type value")
+concept MyConcept {
+    @Term("My Field")
+    @Term_my_type("field type value")
+    o String myField
+}

@@ -1,0 +1,6 @@
+namespace com.test.collision.decl@1.0.0
+
+@Term___types("collision attempt")
+concept Dummy {
+    o String id
+}

@@ -1089,6 +1089,63 @@ describe('DecoratorManager', () => {
             prop.priority.should.equal(1);
             prop.active.should.equal(true);
         });
+
+        it('should round-trip Term_ extension keys whose name ends with _type', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-type-suffix.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level: my_type key must appear (not filtered), __types must not leak
+            parsed.my_type.should.equal('namespace type value');
+            chai.expect(parsed.__types).to.be.undefined;
+
+            // declaration-level: my_type survives
+            const decl = parsed.declarations[0];
+            decl.my_type.should.equal('concept type value');
+            chai.expect(decl.__types).to.be.undefined;
+
+            // property-level: my_type survives, no __types in output
+            const prop = decl.properties[0];
+            prop.my_type.should.equal('field type value');
+            chai.expect(prop.__types).to.be.undefined;
+        });
+
+        it('should throw error if __types is used as an extension key at namespace level', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-reserved-types-namespace.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            (() => {
+                DecoratorManager.extractVocabularies(testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+
+        it('should throw error if __types is used as an extension key at declaration level', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-reserved-types-declaration.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            (() => {
+                DecoratorManager.extractVocabularies(testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
+
+        it('should throw error if __types is used as an extension key at property level', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-reserved-types-property.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            (() => {
+                DecoratorManager.extractVocabularies(testModelManager, options);
+            }).should.throw(/Invalid vocabulary key/);
+        });
     });
 
     describe('#executePropertyCommand', () => {

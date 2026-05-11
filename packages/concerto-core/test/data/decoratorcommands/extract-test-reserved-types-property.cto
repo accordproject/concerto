@@ -1,0 +1,6 @@
+namespace com.test.collision.prop@1.0.0
+
+concept Dummy {
+    @Term___types("collision attempt")
+    o String id
+}
