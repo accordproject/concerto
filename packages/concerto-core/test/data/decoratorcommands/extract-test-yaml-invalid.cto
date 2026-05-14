@@ -1,0 +1,36 @@
+namespace com.test.invalid.yaml@1.0.0
+
+concept InvalidYamlStrings {
+  @Term("[unclosed bracket")
+  o String unclosedBracket optional
+
+  @Term("{key: val")
+  o String unclosedBrace optional
+
+  @Term("---")
+  o String docStartMarker optional
+
+  @Term("...")
+  o String docEndMarker optional
+
+  @Term("line1\nline2")
+  o String embeddedNewline optional
+
+  @Term("`template`")
+  o String backtick optional
+
+  @Term("@decorated")
+  o String atSign optional
+
+  @Term("foo:")
+  o String colonAtEnd optional
+
+  @Term("foo: bar")
+  o String colonSpace optional
+
+  @Term("hello # comment")
+  o String hashComment optional
+
+  @Term("it's here")
+  o String singleQuote optional
+}

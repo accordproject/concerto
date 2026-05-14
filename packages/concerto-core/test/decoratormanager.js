@@ -1173,6 +1173,46 @@ describe('DecoratorManager', () => {
             chai.expect(decls[1].EmptyTermWithExtension).to.equal('');
             chai.expect(decls[1].desc).to.equal('has extension too');
         });
+
+        it('should correctly quote strings that are syntactically invalid YAML when unquoted', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-invalid.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'invalid.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // output must be parseable YAML — no syntax errors from any value
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // unclosed flow collections — syntax errors without quoting
+            props[0].unclosedBracket.should.equal('[unclosed bracket');
+            props[1].unclosedBrace.should.equal('{key: val');
+
+            // YAML document markers — would terminate/start document without quoting
+            props[2].docStartMarker.should.equal('---');
+            props[3].docEndMarker.should.equal('...');
+
+            // actual embedded newline — block scalar without quoting breaks inline context
+            props[4].embeddedNewline.should.equal('line1\nline2');
+
+            // first-char reserved indicators
+            props[5].backtick.should.equal('`template`');
+            props[6].atSign.should.equal('@decorated');
+
+            // colon forms that create mapping keys without quoting
+            props[7].colonAtEnd.should.equal('foo:');
+            props[8].colonSpace.should.equal('foo: bar');
+
+            // hash — would truncate value as comment without quoting
+            props[9].hashComment.should.equal('hello # comment');
+
+            // single quote mid-string — valid plain scalar, must NOT be over-quoted
+            props[10].singleQuote.should.equal('it\'s here');
+        });
     });
 
     describe('#executePropertyCommand', () => {

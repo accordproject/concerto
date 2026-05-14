@@ -82,7 +82,8 @@
       "index.d.ts",
       "packages/concerto-core/introspect/parser.js",
       "node_modules",
-      ".nyc-output"
+      ".nyc-output",
+      "result.log"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [
