@@ -99,20 +99,6 @@ class DecoratorExtractor {
         if (type !== DECORATOR_STRING_TYPE) return value;
         const str = String(value);
         const serialized = yaml.stringify(str).trimEnd();
-        console.log("--------------------------------");
-        console.log(
-            ">",
-            "keep original:",
-            serialized === str,
-            "|",
-            "original:",
-            str,
-            "|",
-            "result:",
-            serialized === str ? str : JSON.stringify(str),
-            "|",
-        );
-        console.log("--------------------------------");
         return serialized === str ? str : JSON.stringify(str);
     }
     /**
