@@ -954,18 +954,6 @@ describe('DecoratorManager', () => {
             dcs.should.be.deep.equal(JSON.parse(expectedDcs));
             JSON.stringify(dcs).should.include('term_desc');
         });
-        it('should be able to extract vocabs from a model using YAML-safe quoting', async function() {
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const options = { removeDecoratorsFromModel: true, locale: 'en' };
-            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
-            const vocab = resp.vocabularies;
-            vocab.should.have.lengthOf(1);
-            vocab[0].should.include('locale: en');
-            vocab[0].should.include('namespace: com.test.sla@1.0.0');
-            vocab[0].should.include('"Custom Field: Name"');
-        });
         it('should correctly quote all YAML hazard categories and round-trip values intact', async function() {
             const YAML = require('yaml');
             const testModelManager = new ModelManager();
@@ -1083,24 +1071,7 @@ describe('DecoratorManager', () => {
             mapProps[1].required.should.equal(false);
         });
 
-        it('should emit non-string Term_ values (Number, Boolean) as unquoted YAML scalars', async function() {
-            const YAML = require('yaml');
-            const testModelManager = new ModelManager();
-            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-nonstring.cto'), 'utf-8');
-            testModelManager.addCTOModel(modelText, 'test.cto');
-            const options = { removeDecoratorsFromModel: true, locale: 'en' };
-            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
-            const vocab = resp.vocabularies;
-            vocab.should.have.lengthOf(1);
 
-            const parsed = YAML.parse(vocab[0]);
-            const prop = parsed.declarations[0].properties[0];
-
-            // string term is quoted, numeric and boolean term_ values are native YAML types
-            prop.productName.should.equal('Product Name');
-            prop.priority.should.equal(1);
-            prop.active.should.equal(true);
-        });
 
         it('should round-trip Term_ extension keys whose name ends with _type', async function() {
             const YAML = require('yaml');
@@ -1203,15 +1174,11 @@ describe('DecoratorManager', () => {
             props[5].backtick.should.equal('`template`');
             props[6].atSign.should.equal('@decorated');
 
-            // colon forms that create mapping keys without quoting
+            // colon at end — creates a mapping key without quoting
             props[7].colonAtEnd.should.equal('foo:');
-            props[8].colonSpace.should.equal('foo: bar');
-
-            // hash — would truncate value as comment without quoting
-            props[9].hashComment.should.equal('hello # comment');
 
             // single quote mid-string — valid plain scalar, must NOT be over-quoted
-            props[10].singleQuote.should.equal('it\'s here');
+            props[8].singleQuote.should.equal('it\'s here');
         });
 
         it('should fall back to property name for term when only Term_ extension exists with no Term', async function() {

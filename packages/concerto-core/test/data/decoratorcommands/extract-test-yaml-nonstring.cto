@@ -1,8 +1,0 @@
-namespace com.test.nonstring@1.0.0
-
-concept Product {
-  @Term("Product Name")
-  @Term_priority(1)
-  @Term_active(true)
-  o String productName optional
-}

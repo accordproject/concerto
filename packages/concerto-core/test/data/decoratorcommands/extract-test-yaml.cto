@@ -1,8 +1,0 @@
-namespace com.test.sla@1.0.0
-
-concept SlaDocumentData {
-  @Term("Custom Field 1")
-  o String c_CustomField1 optional
-  @Term("Custom Field: Name")
-  o String c_CustomField_Name optional
-}

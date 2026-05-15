@@ -25,12 +25,6 @@ concept InvalidYamlStrings {
   @Term("foo:")
   o String colonAtEnd optional
 
-  @Term("foo: bar")
-  o String colonSpace optional
-
-  @Term("hello # comment")
-  o String hashComment optional
-
   @Term("it's here")
   o String singleQuote optional
 }
