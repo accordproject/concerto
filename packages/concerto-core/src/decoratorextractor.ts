@@ -178,7 +178,7 @@ class DecoratorExtractor {
                             strVoc += `    ${key}: ${vocabObject.declarations[decl][key]}\n`;
                         });
                     }
-                    if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0) {
+                    if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
                         if (!('term' in vocabObject.declarations[decl]) && otherProps.length === 0){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
@@ -299,7 +299,7 @@ class DecoratorExtractor {
                 const propVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property];
                 propVocab[extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
-        } 
+        }
         else if (vocabTarget.mapElement !== ''){
             if (!vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement]){
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement] = {};
@@ -310,8 +310,8 @@ class DecoratorExtractor {
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
-                if (extensionKey === vocabTarget.mapElement){
-                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current map element.`);
+                if(extensionKey === vocabTarget.mapElement){
+                    throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
                 const mapVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement];
                 mapVocab[extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
