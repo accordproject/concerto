@@ -1213,6 +1213,24 @@ describe('DecoratorManager', () => {
             // single quote mid-string — valid plain scalar, must NOT be over-quoted
             props[10].singleQuote.should.equal('it\'s here');
         });
+
+        it('should fall back to property name for term when only Term_ extension exists with no Term', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(
+                path.join(__dirname, '/data/decoratorcommands/extract-test-prop-extension-no-term.cto'),
+                'utf-8'
+            );
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const parsed = YAML.parse(resp.vocabularies[0]);
+            const propEntry = parsed.declarations[0].properties[0];
+            // term must fall back to property name (consistent with declaration fallback), not null or ""
+            chai.expect(propEntry.myField).to.equal('myField');
+            // Term_ extension key must be present alongside it
+            chai.expect(propEntry.desc).to.equal('my desc');
+        });
     });
 
     describe('#executePropertyCommand', () => {

@@ -232,7 +232,9 @@ class DecoratorExtractor {
                         Object.keys(
                             vocabObject.declarations[decl].propertyVocabs,
                         ).forEach((prop) => {
-                            strVoc += `      - ${prop}: ${vocabObject.declarations[decl].propertyVocabs[prop].term ?? ""}\n`;
+                            const propVocab = vocabObject.declarations[decl].propertyVocabs[prop];
+                            const termVal = 'term' in propVocab ? propVocab.term : prop;
+                            strVoc += `      - ${prop}: ${termVal}\n`;
                             const otherProps = Object.keys(
                                 vocabObject.declarations[decl].propertyVocabs[
                                     prop

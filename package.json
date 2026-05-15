@@ -83,7 +83,8 @@
       "packages/concerto-core/introspect/parser.js",
       "node_modules",
       ".nyc-output",
-      "result.log"
+      "result.log",
+      "quoteStringValue-oracle-results.md"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [

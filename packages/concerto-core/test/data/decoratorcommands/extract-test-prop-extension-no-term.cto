@@ -1,0 +1,6 @@
+namespace com.test.propext@1.0.0
+
+concept HasExtensionNoTerm {
+  @Term_desc("my desc")
+  o String myField optional
+}
