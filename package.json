@@ -25,6 +25,9 @@
     "packages/concerto-linter",
     "packages/concerto-linter/default-ruleset"
   ],
+  "overrides": {
+    "ajv": "8.17.1"
+  },
   "name": "concerto",
   "description": "Monorepo for concerto packages",
   "version": "4.1.0",
