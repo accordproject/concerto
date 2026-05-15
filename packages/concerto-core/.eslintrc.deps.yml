@@ -1,0 +1,23 @@
+# Dedicated ESLint config used by `npm run lint:deps`.
+#
+# Asserts that every static `import`/`require` specifier in src/ resolves
+# to a declared `dependencies` / `peerDependencies` / `optionalDependencies`
+# entry in this package's package.json. Catches the case where a source
+# file pulls in a module that only happens to be reachable via hoisting
+# from another workspace package — e.g. dayjs prior to #1226.
+#
+# Kept separate from the main .eslintrc.yml so it does not enable
+# TypeScript parsing for the rest of the existing JS lint pass.
+root: true
+parser: '@typescript-eslint/parser'
+parserOptions:
+    ecmaVersion: 2022
+    sourceType: module
+plugins:
+    - import
+rules:
+    import/no-extraneous-dependencies:
+        - error
+        - devDependencies: false
+          optionalDependencies: false
+          peerDependencies: true
