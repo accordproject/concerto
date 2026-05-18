@@ -396,6 +396,84 @@ describe('VocabularyManager', () => {
         result.vocabularies['org.acme@1.0.0/zh-cn'].additionalTerms.should.have.members([]);
     });
 
+    describe('getTerm / getTerms - falsy term values (no locale fallback)', () => {
+        let falsyVocManager;
+        const FALSY_VOC_EN = `
+locale: en
+namespace: org.falsy@1.0.0
+declarations:
+  - Widget: en-fallback-should-not-appear
+    properties:
+      - enabled: en-fallback-should-not-appear
+`;
+        const FALSY_VOC_EN_GB = `
+locale: en-gb
+namespace: org.falsy@1.0.0
+declarations:
+  - Widget: false
+    properties:
+      - enabled: false
+      - count: 0
+      - label: ""
+      - countString: "0"
+`;
+
+        beforeEach(() => {
+            falsyVocManager = new VocabularyManager();
+            falsyVocManager.addVocabulary(FALSY_VOC_EN);
+            falsyVocManager.addVocabulary(FALSY_VOC_EN_GB);
+        });
+
+        it('getTerm - declaration with boolean false does not fall back to parent locale', () => {
+            const term = falsyVocManager.getTerm('org.falsy@1.0.0', 'en-gb', 'Widget');
+            term.should.equal(false);
+        });
+
+        it('getTerm - property with boolean false does not fall back to parent locale', () => {
+            const term = falsyVocManager.getTerm('org.falsy@1.0.0', 'en-gb', 'Widget', 'enabled');
+            term.should.equal(false);
+        });
+
+        it('getTerm - property with numeric 0 does not fall back to parent locale', () => {
+            const term = falsyVocManager.getTerm('org.falsy@1.0.0', 'en-gb', 'Widget', 'count');
+            term.should.equal(0);
+        });
+
+        it('getTerm - property with empty string does not fall back to parent locale', () => {
+            const term = falsyVocManager.getTerm('org.falsy@1.0.0', 'en-gb', 'Widget', 'label');
+            term.should.equal('');
+        });
+
+        it('getTerms - declaration with boolean false does not fall back to parent locale', () => {
+            const terms = falsyVocManager.getTerms('org.falsy@1.0.0', 'en-gb', 'Widget');
+            should.exist(terms);
+            terms.Widget.should.equal(false);
+        });
+
+        it('getTerms - property with boolean false does not fall back to parent locale', () => {
+            const terms = falsyVocManager.getTerms('org.falsy@1.0.0', 'en-gb', 'Widget', 'enabled');
+            should.exist(terms);
+            terms.enabled.should.equal(false);
+        });
+
+        it('getTerms - property with numeric 0 does not fall back to parent locale', () => {
+            const terms = falsyVocManager.getTerms('org.falsy@1.0.0', 'en-gb', 'Widget', 'count');
+            should.exist(terms);
+            terms.count.should.equal(0);
+        });
+
+        it('getTerms - property with empty string does not fall back to parent locale', () => {
+            const terms = falsyVocManager.getTerms('org.falsy@1.0.0', 'en-gb', 'Widget', 'label');
+            should.exist(terms);
+            terms.label.should.equal('');
+        });
+        it('getTerms - property with string "0" does not fall back to parent locale', () => {
+            const terms = falsyVocManager.getTerms('org.falsy@1.0.0', 'en-gb', 'Widget', 'countString');
+            should.exist(terms);
+            terms.countString.should.equal('0');
+        });
+    });
+
     it('decorateModels', () => {
         vocabularyManager = new VocabularyManager({
             missingTermGenerator: VocabularyManager.englishMissingTermGenerator

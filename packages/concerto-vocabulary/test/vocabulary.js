@@ -132,4 +132,63 @@ describe('Vocabulary', () => {
         const term = voc.getTerm();
         should.equal(term, obj.term);
     });
+
+    describe('getTerm / getElementTerms - falsy property values', () => {
+        let voc;
+        beforeEach(() => {
+            voc = new Vocabulary({}, {
+                locale: 'en',
+                namespace: 'org.falsy@1.0.0',
+                declarations: [
+                    {
+                        Widget: 'A widget',
+                        properties: [
+                            { enabled: false },
+                            { count: 0 },
+                            { label: '' }
+                        ]
+                    },
+                    { Flag: false }
+                ]
+            });
+        });
+
+        it('getTerm - property with boolean false value', () => {
+            const term = voc.getTerm('Widget', 'enabled');
+            term.should.equal(false);
+        });
+
+        it('getTerm - property with numeric 0 value', () => {
+            const term = voc.getTerm('Widget', 'count');
+            term.should.equal(0);
+        });
+
+        it('getTerm - property with empty string value', () => {
+            const term = voc.getTerm('Widget', 'label');
+            term.should.equal('');
+        });
+
+        it('getTerm - declaration with boolean false value', () => {
+            const term = voc.getTerm('Flag');
+            term.should.equal(false);
+        });
+
+        it('getElementTerms - property with boolean false value', () => {
+            const terms = voc.getElementTerms('Widget', 'enabled');
+            should.exist(terms);
+            terms.enabled.should.equal(false);
+        });
+
+        it('getElementTerms - property with numeric 0 value', () => {
+            const terms = voc.getElementTerms('Widget', 'count');
+            should.exist(terms);
+            terms.count.should.equal(0);
+        });
+
+        it('getElementTerms - property with empty string value', () => {
+            const terms = voc.getElementTerms('Widget', 'label');
+            should.exist(terms);
+            terms.label.should.equal('');
+        });
+    });
 });

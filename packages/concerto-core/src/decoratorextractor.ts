@@ -16,7 +16,11 @@
 
 const ModelManager = require('./modelmanager');
 const ModelUtil = require('./modelutil');
+const yaml = require('yaml');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+
+// $class value for decorator arguments that carry a string value
+const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
 
 /**
  * Utility functions to work with
@@ -69,6 +73,24 @@ class DecoratorExtractor {
      */
     isVocabDecorator(decoractorName) {
         return decoractorName === 'Term' || decoractorName.startsWith('Term_');
+    }
+    /**
+     * Returns a value safe for embedding in a YAML scalar.
+     * String values containing YAML-special characters are wrapped in double quotes.
+     * Non-string decorator types (Number, Boolean) are returned as-is.
+     * @param {any} value - the value to emit
+     * @param {string} [type] - the $class of the decorator argument
+     * @returns {string|number|boolean|null} - double-quoted string for string args, raw value for non-string args
+     * @private
+     */
+    quoteStringValue(
+        value: any,
+        type?: string,
+    ): string | number | boolean | null {
+        if (type !== DECORATOR_STRING_TYPE) return value;
+        const str = String(value);
+        const serialized = yaml.stringify(str).trimEnd();
+        return serialized === str ? str : JSON.stringify(str);
     }
     /**
     * Adds a key-value pair to a dictionary (object) if the key exists,
@@ -132,7 +154,7 @@ class DecoratorExtractor {
             strVoc = strVoc + `locale: ${this.locale}\n`;
             strVoc = strVoc + `namespace: ${namespace}\n`;
             if (vocabObject.namespace && Object.keys(vocabObject.namespace).length > 0 ){
-                if (vocabObject.namespace.term){
+                if ('term' in vocabObject.namespace){
                     strVoc += `term: ${vocabObject.namespace.term}\n`;
                 }
                 let otherProps = Object.keys(vocabObject.namespace).filter((str)=>str !== 'term');
@@ -143,13 +165,13 @@ class DecoratorExtractor {
             if (vocabObject.declarations && Object.keys(vocabObject.declarations).length > 0 ){
                 strVoc = strVoc + 'declarations:\n';
                 Object.keys(vocabObject.declarations).forEach(decl =>{
-                    if (vocabObject.declarations[decl].term){
+                    if ('term' in vocabObject.declarations[decl]){
                         strVoc += `  - ${decl}: ${vocabObject.declarations[decl].term}\n`;
                     }
                     const otherProps = Object.keys(vocabObject.declarations[decl]).filter((str)=>str !== 'term' && str !== 'propertyVocabs');
                     //If a declaration does not have any Term decorator, then add Term_ decorators to yaml
                     if(otherProps.length > 0){
-                        if (!vocabObject.declarations[decl].term){
+                        if (!('term' in vocabObject.declarations[decl])){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         otherProps.forEach(key =>{
@@ -157,12 +179,14 @@ class DecoratorExtractor {
                         });
                     }
                     if (vocabObject.declarations[decl].propertyVocabs && Object.keys(vocabObject.declarations[decl].propertyVocabs).length > 0){
-                        if (!vocabObject.declarations[decl].term && otherProps.length === 0){
+                        if (!('term' in vocabObject.declarations[decl]) && otherProps.length === 0){
                             strVoc += `  - ${decl}: ${decl}\n`;
                         }
                         strVoc += '    properties:\n';
                         Object.keys(vocabObject.declarations[decl].propertyVocabs).forEach(prop =>{
-                            strVoc += `      - ${prop}: ${vocabObject.declarations[decl].propertyVocabs[prop].term || ''}\n`;
+                            const propVocab = vocabObject.declarations[decl].propertyVocabs[prop];
+                            const termVal = 'term' in propVocab ? propVocab.term : prop;
+                            strVoc += `      - ${prop}: ${termVal}\n`;
                             const otherProps = Object.keys(vocabObject.declarations[decl].propertyVocabs[prop]).filter((str)=>str !== 'term');
                             otherProps.forEach(key =>{
                                 strVoc += `        ${key}: ${vocabObject.declarations[decl].propertyVocabs[prop][key]}\n`;
@@ -246,14 +270,14 @@ class DecoratorExtractor {
         if(vocabTarget.declaration === ''){
             vocabObject.namespace = vocabObject.namespace || {};
             if (dcs.name === 'Term'){
-                vocabObject.namespace.term = dcs.arguments[0].value;
+                vocabObject.namespace.term = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
                 if(extensionKey === 'namespace' || extensionKey === 'locale' || extensionKey === 'declarations'){
                     throw new Error(`Invalid vocabulary key: ${extensionKey}. The key should not be one of the reserved keys: namespace, locale, declarations`);
                 }
-                vocabObject.namespace[extensionKey] = dcs.arguments[0].value;
+                vocabObject.namespace[extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
             return vocabObject;
         }
@@ -264,14 +288,16 @@ class DecoratorExtractor {
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property] = {};
             }
             if (dcs.name === 'Term'){
-                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property].term = dcs.arguments[0].value;
+                const propVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property];
+                propVocab.term = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
                 if(extensionKey === vocabTarget.property){
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
-                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property][extensionKey] = dcs.arguments[0].value;
+                const propVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.property];
+                propVocab[extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
         }
         else if (vocabTarget.mapElement !== ''){
@@ -279,26 +305,28 @@ class DecoratorExtractor {
                 vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement] = {};
             }
             if (dcs.name === 'Term'){
-                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement].term = dcs.arguments[0].value;
+                const mapVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement];
+                mapVocab.term = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
                 if(extensionKey === vocabTarget.mapElement){
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key should not be the name of the current property.`);
                 }
-                vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement][extensionKey] = dcs.arguments[0].value;
+                const mapVocab = vocabObject.declarations[vocabTarget.declaration].propertyVocabs[vocabTarget.mapElement];
+                mapVocab[extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
         }
         else {
             if (dcs.name === 'Term'){
-                vocabObject.declarations[vocabTarget.declaration].term = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration].term = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
             else {
                 const extensionKey = dcs.name.split('Term_')[1];
                 if(extensionKey === 'properties' || extensionKey === vocabTarget.declaration){
                     throw new Error(`Invalid vocabulary key: "${extensionKey}". The key cannot be a reserved word such as "properties" or the name of the current declaration.`);
                 }
-                vocabObject.declarations[vocabTarget.declaration][extensionKey] = dcs.arguments[0].value;
+                vocabObject.declarations[vocabTarget.declaration][extensionKey] = this.quoteStringValue(dcs.arguments[0].value, dcs.arguments[0].$class);
             }
         }
         return vocabObject;

@@ -116,9 +116,9 @@ class Vocabulary {
      * @param {string} declarationName the name of a concept or enum
      * @param {string} [propertyName] the name of a property (optional)
      * @param {string} [identifier] the identifier of the term (optional)
-     * @returns {string} the term or null if it does not exist
+     * @returns {string|number|boolean|null} the term or null if it does not exist
      */
-    getTerm(declarationName?: string, propertyName?: string, identifier?: string): string | null {
+    getTerm(declarationName?: string, propertyName?: string, identifier?: string): string | number | boolean | null {
         if(!declarationName){
             const namespaceTerms = this.getNamespaceTerms();
             return identifier ? namespaceTerms?.[identifier]:namespaceTerms?.term;
@@ -131,7 +131,7 @@ class Vocabulary {
             return identifier ? decl[identifier] : decl[declarationName];
         }
         else {
-            const property = decl.properties ? decl.properties.find((d: any) => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => propertyName in d) : null;
             return property ? identifier ? property[identifier] : property[propertyName] : null;
         }
     }
@@ -154,7 +154,7 @@ class Vocabulary {
             return decl;
         }
         else {
-            const property = decl.properties ? decl.properties.find((d: any) => d[propertyName]) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => propertyName in d) : null;
             return property;
         }
     }

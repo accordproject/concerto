@@ -1,0 +1,75 @@
+namespace com.test.edge@1.0.0
+
+concept EdgeCases {
+  @Term("")
+  o String emptyTerm optional
+
+  @Term("col1\tcol2")
+  o String tabInValue optional
+
+  @Term("say \"hello\"")
+  o String doubleQuoteInValue optional
+
+  @Term("path\\to\\file")
+  o String backslashInValue optional
+
+  @Term("literal\\n value")
+  o String literalBackslashN optional
+
+  @Term("> folded block")
+  o String gtChar optional
+
+  @Term("| literal block")
+  o String pipeChar optional
+
+  @Term("!tag handle")
+  o String exclamationChar optional
+
+  @Term("&anchor ref")
+  o String ampersandChar optional
+
+  @Term("*alias ref")
+  o String asteriskChar optional
+
+  @Term("%directive")
+  o String percentChar optional
+
+  @Term("TRUE")
+  o String uppercaseTrue optional
+
+  @Term("YES")
+  o String uppercaseYes optional
+
+  @Term("NULL")
+  o String uppercaseNull optional
+
+  @Term("~")
+  o String yamlNull optional
+
+  @Term(".5")
+  o String leadingDotDecimal optional
+
+  @Term("-1.5")
+  o String negativeDecimal optional
+
+  @Term("1e10")
+  o String scientificNotation optional
+
+  @Term("foo\rbar")
+  o String carriageReturn optional
+
+  @Term("- foo")
+  o String dashSpaceValue optional
+
+  @Term("? key")
+  o String questionSpaceValue optional
+
+  @Term("0x1A")
+  o String hexValue optional
+
+  @Term("0o10")
+  o String octalValue optional
+
+  @Term("0b11")
+  o String binaryValue optional
+}

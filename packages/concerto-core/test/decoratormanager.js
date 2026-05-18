@@ -954,6 +954,250 @@ describe('DecoratorManager', () => {
             dcs.should.be.deep.equal(JSON.parse(expectedDcs));
             JSON.stringify(dcs).should.include('term_desc');
         });
+        it('should correctly quote all YAML hazard categories and round-trip values intact', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-edge-cases.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'edge.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // must be valid YAML — no syntax errors from any quoted value
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // empty string must survive as "" not null
+            chai.expect(props[0].emptyTerm).to.equal('');
+
+            // YAML_INLINE_SPECIAL: tab, double-quote, backslash, literal \n (2-char, not newline)
+            props[1].tabInValue.should.equal('col1\tcol2');
+            props[2].doubleQuoteInValue.should.equal('say "hello"');
+            props[3].backslashInValue.should.equal('path\\to\\file');
+            props[4].literalBackslashN.should.equal('literal\\n value');
+
+            // YAML_BLOCK_INDICATORS: first-char triggers block/flow/tag/anchor/alias/directive
+            props[5].gtChar.should.equal('> folded block');
+            props[6].pipeChar.should.equal('| literal block');
+            props[7].exclamationChar.should.equal('!tag handle');
+            props[8].ampersandChar.should.equal('&anchor ref');
+            props[9].asteriskChar.should.equal('*alias ref');
+            props[10].percentChar.should.equal('%directive');
+
+            // YAML_RESERVED_WORDS: uppercase variants that /i flag must catch
+            props[11].uppercaseTrue.should.equal('TRUE');
+            props[12].uppercaseYes.should.equal('YES');
+            props[13].uppercaseNull.should.equal('NULL');
+            props[14].yamlNull.should.equal('~');
+
+            // YAML_NUMERIC: leading-dot decimal, negative, scientific notation
+            props[15].leadingDotDecimal.should.equal('.5');
+            props[16].negativeDecimal.should.equal('-1.5');
+            props[17].scientificNotation.should.equal('1e10');
+
+            // YAML_INLINE_SPECIAL: carriage return
+            props[18].carriageReturn.should.equal('foo\rbar');
+
+            // YAML_BLOCK_INDICATORS: dash-space and question-space trigger sequence/mapping
+            props[19].dashSpaceValue.should.equal('- foo');
+            props[20].questionSpaceValue.should.equal('? key');
+
+            // YAML_NUMERIC: YAML 1.1 hex/octal/binary forms coerced to numbers without quotes
+            props[21].hexValue.should.equal('0x1A');
+            props[22].octalValue.should.equal('0o10');
+            props[23].binaryValue.should.equal('0b11');
+        });
+        it('should correctly quote complex YAML-like string values embedded in Term decorators', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-complex.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // output must be parseable YAML — embedded YAML-like content must not corrupt structure
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // newlines, colon, single-quote all round-trip intact
+            props[0].name.should.equal('name: Martin D\'vloper\nage: 26\nhobbies:\n  - painting\n  - playing_music');
+            // hash comment char round-trips intact
+            props[1].status.should.equal('status: active # reviewed');
+            // leading/trailing spaces round-trip intact
+            props[2].label.should.equal(' leading and trailing ');
+            // YAML flow-sequence syntax round-trips intact
+            props[3].tags.should.equal('[primary, secondary]');
+        });
+
+        it('should handle all parseVocabularies code paths — namespace, declaration, property, mapElement with YAML-special strings and non-string Term_ types', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-allpaths-nonstring.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'allpaths.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level Term with colon (must be quoted) and Term_* with Number and Boolean
+            parsed.term.should.equal('My Namespace: Title');
+            parsed.version.should.equal(3);
+            parsed.active.should.equal(true);
+
+            const decls = parsed.declarations;
+
+            // declaration-level Term with colon and Term_* with Number and Boolean
+            decls[0].Product.should.equal('Product: Details');
+            decls[0].sortOrder.should.equal(1);
+            decls[0].featured.should.equal(false);
+
+            // property-level Term with colon and Term_* with Number and Boolean
+            const props = decls[0].properties;
+            props[0].fieldName.should.equal('Field: Label');
+            props[0].rank.should.equal(2);
+            props[0].visible.should.equal(true);
+
+            // mapElement-level Term with colon (must be quoted) and Term_* with Number and Boolean
+            const mapDecl = decls[1];
+            const mapProps = mapDecl.properties;
+            mapProps[0].KEY.should.equal('Key: Identifier');
+            mapProps[0].weight.should.equal(5);
+            mapProps[1].VALUE.should.equal('Value: Data');
+            mapProps[1].required.should.equal(false);
+        });
+
+
+
+        it('should round-trip Term_ extension keys whose name ends with _type', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-type-suffix.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level: my_type key must appear (not filtered)
+            parsed.my_type.should.equal('namespace type value');
+
+            // declaration-level: my_type survives
+            const decl = parsed.declarations[0];
+            decl.my_type.should.equal('concept type value');
+
+            // property-level: my_type survives
+            const prop = decl.properties[0];
+            prop.my_type.should.equal('field type value');
+        });
+
+        it('should preserve falsy numeric and boolean Term values at property level', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-falsy-nonstring-prop-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // @Term(0) must emit 0, not be coerced to '' by || fallback
+            chai.expect(props[0].price).to.equal(0);
+
+            // @Term(false) must emit false, not be coerced to '' by || fallback
+            chai.expect(props[1].active).to.equal(false);
+        });
+
+        it('should preserve falsy empty-string Term values at namespace, declaration, and property level', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-falsy-term.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            const parsed = YAML.parse(vocab[0]);
+
+            // namespace-level empty-string term must be preserved, not skipped
+            chai.expect(parsed.term).to.equal('');
+
+            const decls = parsed.declarations;
+
+            // declaration with only @Term("") must emit "" not be replaced by fallback label
+            chai.expect(decls[0].EmptyTermConcept).to.equal('');
+
+            // property with @Term("") must round-trip as ""
+            chai.expect(decls[0].properties[0].myField).to.equal('');
+
+            // declaration with @Term("") + extension: term must be "", extension must appear, no fallback label
+            chai.expect(decls[1].EmptyTermWithExtension).to.equal('');
+            chai.expect(decls[1].desc).to.equal('has extension too');
+        });
+
+        it('should correctly quote strings that are syntactically invalid YAML when unquoted', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname, '/data/decoratorcommands/extract-test-yaml-invalid.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'invalid.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const vocab = resp.vocabularies;
+            vocab.should.have.lengthOf(1);
+
+            // output must be parseable YAML — no syntax errors from any value
+            const parsed = YAML.parse(vocab[0]);
+            const props = parsed.declarations[0].properties;
+
+            // unclosed flow collections — syntax errors without quoting
+            props[0].unclosedBracket.should.equal('[unclosed bracket');
+            props[1].unclosedBrace.should.equal('{key: val');
+
+            // YAML document markers — would terminate/start document without quoting
+            props[2].docStartMarker.should.equal('---');
+            props[3].docEndMarker.should.equal('...');
+
+            // actual embedded newline — block scalar without quoting breaks inline context
+            props[4].embeddedNewline.should.equal('line1\nline2');
+
+            // first-char reserved indicators
+            props[5].backtick.should.equal('`template`');
+            props[6].atSign.should.equal('@decorated');
+
+            // colon at end — creates a mapping key without quoting
+            props[7].colonAtEnd.should.equal('foo:');
+
+            // single quote mid-string — valid plain scalar, must NOT be over-quoted
+            props[8].singleQuote.should.equal('it\'s here');
+        });
+
+        it('should fall back to property name for term when only Term_ extension exists with no Term', async function() {
+            const YAML = require('yaml');
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(
+                path.join(__dirname, '/data/decoratorcommands/extract-test-prop-extension-no-term.cto'),
+                'utf-8'
+            );
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = { removeDecoratorsFromModel: true, locale: 'en' };
+            const resp = DecoratorManager.extractVocabularies(testModelManager, options);
+            const parsed = YAML.parse(resp.vocabularies[0]);
+            const propEntry = parsed.declarations[0].properties[0];
+            // term must fall back to property name (consistent with declaration fallback), not null or ""
+            chai.expect(propEntry.myField).to.equal('myField');
+            // Term_ extension key must be present alongside it
+            chai.expect(propEntry.desc).to.equal('my desc');
+        });
     });
 
     describe('#executePropertyCommand', () => {
