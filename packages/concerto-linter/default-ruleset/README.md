@@ -83,6 +83,8 @@ First, install the package as a development dependency:
 npm install --save-dev @accordproject/concerto-linter-default-ruleset
 ```
 
+```bash
+npm install --save-dev @accordproject/concerto-linter-default-ruleset
 ## Usage
 
 Once installed, the default ruleset is automatically used by the concerto Linter when no custom ruleset is specified:
