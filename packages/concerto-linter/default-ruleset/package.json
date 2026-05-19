@@ -34,9 +34,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@accordproject/concerto-core": "4.1.2",
-    "@stoplight/spectral-core": "1.20.0",
-    "@stoplight/spectral-functions": "1.10.1",
-    "@stoplight/spectral-parsers": "1.0.5"
+    "@stoplight/spectral-core": "^1.23.0",
+    "@stoplight/spectral-functions": "^1.10.2",
+    "@stoplight/spectral-parsers": "1.0.5",
+    "coveralls-next": "6.0.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.46.2",
