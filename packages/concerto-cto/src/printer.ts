@@ -197,12 +197,12 @@ function modifiersFromMetaModel(mm: any): string {
         case `${MetaModelNamespace}.DoubleProperty`:
         case `${MetaModelNamespace}.DoubleScalar`:
             if (mm.defaultValue !== undefined) {
-                const doubleString = mm.defaultValue.toFixed(Math.max(1, (mm.defaultValue.toString().split('.')[1] || []).length));
+                const doubleString = toDoubleString(mm.defaultValue);
                 defaultString += ` default=${doubleString}`;
             }
             if (mm.validator) {
-                const lowerString = mm.validator.lower !== undefined ? mm.validator.lower : '';
-                const upperString = mm.validator.upper !== undefined ? mm.validator.upper : '';
+                const lowerString = mm.validator.lower !== undefined ? toDoubleString(mm.validator.lower) : '';
+                const upperString = mm.validator.upper !== undefined ? toDoubleString(mm.validator.upper) : '';
                 validatorString += ` range=[${lowerString},${upperString}]`;
             }
             break;
@@ -250,6 +250,25 @@ function modifiersFromMetaModel(mm: any): string {
     }
 
     return result + defaultString + validatorString;
+}
+
+/**
+ * Format a numeric literal as a Double token for CTO output.
+ * @param {number} value - numeric value to format
+ * @returns {string} CTO-compatible Double literal
+ */
+function toDoubleString(value: number): string {
+    const normalizedValue = Number(value).toLocaleString('en-US', {
+        useGrouping: false,
+        // Intl.NumberFormat permits 1..21; use the maximum to avoid exponent output.
+        maximumSignificantDigits: 21,
+    });
+
+    if (!normalizedValue.includes('.')) {
+        return `${normalizedValue}.0`;
+    }
+
+    return normalizedValue;
 }
 
 /**
