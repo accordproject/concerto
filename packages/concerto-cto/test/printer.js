@@ -123,4 +123,33 @@ describe('parser', () => {
         result.should.include('import org.example@1.0.0.*');
         result.should.include('from https://example.org/models/example.cto');
     });
+
+    it('Should print Double range bounds using decimal notation', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 0,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0,1.0]');
+    });
 });
