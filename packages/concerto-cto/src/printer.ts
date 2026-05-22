@@ -258,8 +258,17 @@ function modifiersFromMetaModel(mm: any): string {
  * @returns {string} CTO-compatible Double literal
  */
 function toDoubleString(value: number): string {
-    const fractionalLength = (value.toString().split('.')[1] || '').length;
-    return value.toFixed(Math.max(1, fractionalLength));
+    const normalizedValue = Number(value).toLocaleString('en-US', {
+        useGrouping: false,
+        // Intl.NumberFormat permits 1..21; use the maximum to avoid exponent output.
+        maximumSignificantDigits: 21,
+    });
+
+    if (!normalizedValue.includes('.')) {
+        return `${normalizedValue}.0`;
+    }
+
+    return normalizedValue;
 }
 
 /**

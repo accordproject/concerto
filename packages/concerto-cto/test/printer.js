@@ -152,4 +152,33 @@ describe('parser', () => {
 
         result.should.include('o Double value range=[0.0,1.0]');
     });
+
+    it('Should print scientific notation Double range bounds without rounding to zero', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 1e-7,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0000001,1.0]');
+    });
 });
