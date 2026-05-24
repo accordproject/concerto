@@ -30,7 +30,8 @@ type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
 
 function getFileNameFromIdentifier(fileIdentifier) {
-    return fileIdentifier.split(/[\\/]/).pop() || fileIdentifier;
+    const normalizedIdentifier = fileIdentifier.replace(/[\\/]+$/, '');
+    return normalizedIdentifier.split(/[\\/]/).pop() || fileIdentifier;
 }
 
 // Types needed for TypeScript generation.

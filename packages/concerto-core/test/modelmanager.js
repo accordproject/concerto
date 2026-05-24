@@ -832,6 +832,21 @@ concept Bar {
             });
         });
 
+        it('should use the last non-empty segment for slash-delimited file identifiers with trailing separators', () => {
+            modelManager.addCTOModel(modelBase, 'https://example.org/models/');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'models', content: modelBase
+            });
+        });
+
+        it('should use the last non-empty segment for backslash-delimited file identifiers with trailing separators', () => {
+            modelManager.addCTOModel(modelBase, 'dir\\subdir\\');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'subdir', content: modelBase
+            });
+        });
         it('should fall back to the namespace when the file name is UNKNOWN', () => {
             const modelFile = sinon.createStubInstance(ModelFile);
             modelFile.getNamespace.returns('org.example@1.0.0');
