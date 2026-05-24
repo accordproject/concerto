@@ -14,8 +14,6 @@
 
 'use strict';
 
-const fsPath = require('path');
-
 const { DefaultFileLoader, FileDownloader, ModelWriter } = require('@accordproject/concerto-util');
 const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
@@ -30,6 +28,10 @@ const MetamodelException = require('./metamodelexception');
 import type { ModelFileSource, ModelManagerOptions } from './types';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
+
+function getFileNameFromIdentifier(fileIdentifier) {
+    return fileIdentifier.split(/[\\/]/).pop() || fileIdentifier;
+}
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -550,7 +552,7 @@ class BaseModelManager {
                 fileName = file.namespace + '.cto';
             } else {
                 let fileIdentifier = file.fileName;
-                fileName = fsPath.basename(fileIdentifier);
+                fileName = getFileNameFromIdentifier(fileIdentifier);
             }
             models.push({ 'name' : fileName, 'content' : file.definitions });
         });

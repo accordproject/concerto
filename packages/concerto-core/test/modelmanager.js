@@ -815,6 +815,43 @@ concept Bar {
                 name: 'org.acme.base.cto', content: modelBase
             });
         });
+
+        it('should use the last segment for slash-delimited file identifiers', () => {
+            modelManager.addCTOModel(modelBase, 'https://example.org/models/org.acme.base.cto');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'org.acme.base.cto', content: modelBase
+            });
+        });
+
+        it('should use the last segment for backslash-delimited file identifiers', () => {
+            modelManager.addCTOModel(modelBase, 'dir\\subdir\\org.acme.base.cto');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'org.acme.base.cto', content: modelBase
+            });
+        });
+
+        it('should fall back to the namespace when the file name is UNKNOWN', () => {
+            const modelFile = sinon.createStubInstance(ModelFile);
+            modelFile.getNamespace.returns('org.example@1.0.0');
+            modelFile.getVersion.returns('1.0.0');
+            modelFile.isModelFile.returns(true);
+            modelFile.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
+            modelFile.isExternal.returns(false);
+            modelFile.fileName = 'UNKNOWN';
+            modelFile.namespace = 'org.example@1.0.0';
+            modelFile.definitions = 'namespace org.example@1.0.0';
+
+            modelManager.addModelFile(modelFile);
+
+            const models = modelManager.getModels();
+            models.find((model) => model.content === 'namespace org.example@1.0.0').should.deep.equal({
+                name: 'org.example@1.0.0.cto',
+                content: 'namespace org.example@1.0.0'
+            });
+        });
+
         it('should return a list of name / content pairs, with External Models', async () => {
             const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external@1.0.0
             concept Foo{ o String baz }`, '@external.cto');
