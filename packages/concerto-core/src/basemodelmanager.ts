@@ -666,6 +666,107 @@ class BaseModelManager {
     }
 
     /**
+     * Validate a JSON instance, resolving its declared type from the
+     * `$class` discriminator. Convenience over
+     * {@link ClassDeclaration#validateInstance} for callers that do not
+     * already hold the declaration.
+     *
+     * @param {unknown} json the JSON object to validate
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {Object} the structured result {valid, resource|errors}
+     */
+    validateInstance(json: unknown, options?: any) {
+        const { validateInstance } = require('./serializer/instancevalidator');
+        const decl = this.resolveTypeFromJson(json, options);
+        if (decl.diagnostic) {
+            return { valid: false, resource: null, errors: [decl.diagnostic], warnings: [] };
+        }
+        return validateInstance(decl.classDeclaration, json, options);
+    }
+
+    /**
+     * Validate a JSON instance and return the populated Resource, or throw a
+     * {@link ValidationException} with aggregated diagnostics on failure.
+     *
+     * @param {unknown} json the JSON object to validate
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {Resource} the populated Resource on success
+     * @throws {ValidationException} on failure
+     */
+    validateInstanceOrThrow(json: unknown, options?: any) {
+        const { validateInstanceOrThrow } = require('./serializer/instancevalidator');
+        const decl = this.resolveTypeFromJson(json, options);
+        if (decl.diagnostic) {
+            const ValidationException = require('./serializer/validationexception');
+            const ex: any = new ValidationException(decl.diagnostic.message);
+            ex.diagnostics = [decl.diagnostic];
+            throw ex;
+        }
+        return validateInstanceOrThrow(decl.classDeclaration, json, options);
+    }
+
+    /**
+     * Predicate form of {@link BaseModelManager#validateInstance}.
+     *
+     * @param {unknown} json the JSON object to test
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {boolean} true iff the JSON validates against its declared type
+     */
+    isValidInstance(json: unknown, options?: any) {
+        return this.validateInstance(json, { ...(options || {}), collectAll: false }).valid;
+    }
+
+    /**
+     * Look up the ClassDeclaration that a JSON object declares via `$class`,
+     * returning a structured diagnostic instead of throwing when the input
+     * is unusable (missing or unknown `$class`).
+     * @param {unknown} json the JSON object
+     * @returns {{ classDeclaration: any, diagnostic: null } | { classDeclaration: null, diagnostic: any }} resolution outcome
+     * @private
+     */
+    resolveTypeFromJson(json: unknown, _options?: any) {
+        if (json === null || typeof json !== 'object') {
+            return {
+                classDeclaration: null,
+                diagnostic: {
+                    code: 'TYPE_MISMATCH',
+                    message: `Expected an object but got ${json === null ? 'null' : typeof json}.`,
+                    path: '/',
+                    severity: 'error',
+                    actual: json === null ? 'null' : typeof json,
+                },
+            };
+        }
+        const $class = (json as any).$class;
+        if (typeof $class !== 'string') {
+            return {
+                classDeclaration: null,
+                diagnostic: {
+                    code: 'MISSING_CLASS',
+                    message: 'Input object is missing a $class type identifier.',
+                    path: '/',
+                    severity: 'error',
+                },
+            };
+        }
+        try {
+            return { classDeclaration: this.getType($class), diagnostic: null };
+        } catch (err) {
+            return {
+                classDeclaration: null,
+                diagnostic: {
+                    code: 'UNKNOWN_TYPE',
+                    message: err instanceof Error ? err.message : String(err),
+                    path: '/',
+                    severity: 'error',
+                    actual: $class,
+                    cause: err instanceof Error ? err : undefined,
+                },
+            };
+        }
+    }
+
+    /**
      * Get the AssetDeclarations defined in this model manager
      * @return {AssetDeclaration[]} the AssetDeclarations defined in the model manager
      */
