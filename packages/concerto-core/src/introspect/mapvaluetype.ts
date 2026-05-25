@@ -91,6 +91,7 @@ class MapValueType extends Decorated {
         let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
+        case `${MetaModelNamespace}.RelationshipMapValueType`:
 
             // ObjectMapValueType must have TypeIdentifier.
             if (!('type' in ast)) {

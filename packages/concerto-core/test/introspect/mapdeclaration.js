@@ -143,6 +143,13 @@ describe('MapDeclaration', () => {
 
         it('should validate when map value is an identified concept declaration', () => {
             let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.goodvalue.declaration.identified.concept.cto', MapDeclaration);
+            expect(decl.getValue().getType()).to.equal('Person');
+            decl.validate();
+        });
+
+        it('should validate when map value is a relationship declaration', () => {
+            let decl = introspectUtils.loadLastDeclaration('test/data/parser/mapdeclaration/mapdeclaration.badvalue.declaration.relationship.cto', MapDeclaration);
+            expect(decl.getValue().getType()).to.equal('Person');
             decl.validate();
         });
 
