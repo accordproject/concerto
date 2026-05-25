@@ -27,6 +27,61 @@ const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
 /**
+ * Internal sentinel used in diagnostic-collection mode to unwind from a
+ * leaf reporter back to the nearest siblings loop after the diagnostic has
+ * been recorded. Never escapes the validator.
+ * @private
+ */
+class CollectedDiagnosticException extends Error {
+    constructor() {
+        super('diagnostic collected');
+    }
+}
+
+/**
+ * Escape a JSON-pointer reference token per RFC 6901.
+ * @param {string|number} token a path segment
+ * @returns {string} escaped segment
+ * @private
+ */
+function escapeJsonPointerToken(token) {
+    return String(token).replace(/~/g, '~0').replace(/\//g, '~1');
+}
+
+/**
+ * Render the current visitor path as a JSON Pointer.
+ * @param {Object} parameters visitor parameters
+ * @returns {string} JSON-pointer style path, e.g. "/parties/0/email"
+ * @private
+ */
+function currentPath(parameters) {
+    if (!parameters.pathStack || parameters.pathStack.length === 0) {
+        return '/';
+    }
+    return '/' + parameters.pathStack.map(escapeJsonPointerToken).join('/');
+}
+
+/**
+ * Push a path segment, run fn, then pop. Always pops even if fn throws.
+ * @param {Object} parameters visitor parameters
+ * @param {string|number} segment path segment to push
+ * @param {Function} fn function to invoke while the segment is on the stack
+ * @returns {*} the value returned by fn
+ * @private
+ */
+function withPath(parameters, segment, fn) {
+    if (!parameters.pathStack) {
+        parameters.pathStack = [];
+    }
+    parameters.pathStack.push(segment);
+    try {
+        return fn();
+    } finally {
+        parameters.pathStack.pop();
+    }
+}
+
+/**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
  * This class is used with the Visitor pattern and visits the class declarations
@@ -59,6 +114,42 @@ class ResourceValidator {
     constructor(options) {
         this.options = options || {};
     }
+
+    /**
+     * Run a reporter (one that normally throws a ValidationException) under
+     * diagnostic collection. In throw mode the reporter is invoked directly.
+     * In collect mode the thrown ValidationException is captured as a
+     * structured Diagnostic, the path is recorded, and a sentinel is rethrown
+     * so the nearest siblings loop can continue.
+     * @param {Object} parameters - visitor parameters
+     * @param {string} code - the diagnostic code to attach
+     * @param {Function} reportFn - the report function (throws on call)
+     * @param {Object} [extra] - optional fields to merge into the diagnostic
+     * @private
+     */
+    static reportOrCollect(parameters, code, reportFn, extra?) {
+        if (!parameters.errorCollector) {
+            reportFn();
+            return;
+        }
+        try {
+            reportFn();
+        } catch (err) {
+            if (err instanceof CollectedDiagnosticException) {
+                throw err;
+            }
+            const message = err instanceof Error ? err.message : String(err);
+            parameters.errorCollector.push(Object.assign({
+                code,
+                message,
+                path: currentPath(parameters),
+                severity: 'error',
+                cause: err,
+            }, extra || {}));
+            throw new CollectedDiagnosticException();
+        }
+    }
+
     /**
      * Visitor design pattern.
      *
@@ -105,7 +196,8 @@ class ResourceValidator {
         }
 
         if(!found) {
-            ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj);
+            ResourceValidator.reportOrCollect(parameters, 'INVALID_ENUM_VALUE',
+                () => ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj));
         }
 
         return null;
@@ -149,18 +241,21 @@ class ResourceValidator {
         switch(type) {
         case 'String':
             if (typeof value !== 'string') {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`);
+                ResourceValidator.reportOrCollect(parameters, 'MAP_TYPE_VIOLATION',
+                    () => { throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of String but found '${value}' instead.`); });
             }
             break;
         case 'DateTime':
             if (!dayjs.utc(value).isValid()) {
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`);
+                ResourceValidator.reportOrCollect(parameters, 'MAP_TYPE_VIOLATION',
+                    () => { throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of DateTime but found '${value}' instead.`); });
             }
             break;
         case 'Boolean':
             if (typeof value !== 'boolean') {
-                const type = typeof value;
-                throw new Error(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${type} instead, for value '${value}'.`);
+                const typeOfValue = typeof value;
+                ResourceValidator.reportOrCollect(parameters, 'MAP_TYPE_VIOLATION',
+                    () => { throw new ValidationException(`Model violation in ${mapDeclaration.getFullyQualifiedName()}. Expected Type of Boolean but found ${typeOfValue} instead, for value '${value}'.`); });
             }
             break;
         }
@@ -180,15 +275,25 @@ class ResourceValidator {
         const obj = parameters.stack.pop();
 
         if (!((obj instanceof Map))) {
-            throw new Error('Expected a Map, but found ' + JSON.stringify(obj));
+            ResourceValidator.reportOrCollect(parameters, 'MAP_TYPE_VIOLATION',
+                () => { throw new ValidationException('Expected a Map, but found ' + JSON.stringify(obj)); });
         }
 
         obj.forEach((value, key) => {
             if (!ModelUtil.isSystemProperty(key)) {
-                // Validate Key
-                this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
-                // Validate Value
-                this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                try {
+                    withPath(parameters, String(key), () => {
+                        // Validate Key
+                        this.checkMapType(mapDeclaration.getKey(), key, parameters, mapDeclaration);
+                        // Validate Value
+                        this.checkMapType(mapDeclaration.getValue(), value, parameters, mapDeclaration);
+                    });
+                } catch (err) {
+                    if (err instanceof CollectedDiagnosticException) {
+                        return; // continue forEach
+                    }
+                    throw err;
+                }
             }
         });
 
@@ -208,7 +313,8 @@ class ResourceValidator {
 
         // are we dealing with a Resource?
         if(!((obj instanceof Resource))) {
-            ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj );
+            ResourceValidator.reportOrCollect(parameters, 'NOT_RESOURCE',
+                () => ResourceValidator.reportNotResouceViolation(parameters.rootResourceIdentifier, classDeclaration, obj));
         }
 
         if(obj instanceof Identifiable) {
@@ -223,26 +329,38 @@ class ResourceValidator {
         // the only way this can happen is if the type is non-abstract
         // and then gets redeclared as abstract
         if(toBeAssignedClassDeclaration.isAbstract()) {
-            ResourceValidator.reportAbstractClass(toBeAssignedClassDeclaration);
+            ResourceValidator.reportOrCollect(parameters, 'ABSTRACT_CLASS',
+                () => ResourceValidator.reportAbstractClass(toBeAssignedClassDeclaration));
         }
 
         // are there extra fields in the object?
         let props = Object.getOwnPropertyNames(obj);
         for (let n = 0; n < props.length; n++) {
-            let propName = props[n];
-            if(!ModelUtil.isSystemProperty(propName)) {
-                const field = toBeAssignedClassDeclaration.getProperty(propName);
-                if (!field) {
-                    if(classDeclaration.isIdentified() &&
-                        // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
-                        propName !== '$identifier'
-                    ){
-                        ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
-                    }
-                    else {
-                        ResourceValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName);
+            try {
+                let propName = props[n];
+                if(!ModelUtil.isSystemProperty(propName)) {
+                    const field = toBeAssignedClassDeclaration.getProperty(propName);
+                    if (!field) {
+                        if(classDeclaration.isIdentified() &&
+                            // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
+                            propName !== '$identifier'
+                        ){
+                            withPath(parameters, propName, () =>
+                                ResourceValidator.reportOrCollect(parameters, 'UNDECLARED_FIELD',
+                                    () => ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName)));
+                        }
+                        else {
+                            withPath(parameters, propName, () =>
+                                ResourceValidator.reportOrCollect(parameters, 'UNDECLARED_FIELD',
+                                    () => ResourceValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName)));
+                        }
                     }
                 }
+            } catch (err) {
+                if (err instanceof CollectedDiagnosticException) {
+                    continue;
+                }
+                throw err;
             }
         }
 
@@ -251,7 +369,8 @@ class ResourceValidator {
 
             // prevent empty identifiers
             if(!id || id.trim().length === 0) {
-                ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier);
+                ResourceValidator.reportOrCollect(parameters, 'EMPTY_IDENTIFIER',
+                    () => ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier));
             }
 
             // Enforce that shadowed $identifier fields have the same value as the explicit identifying field.
@@ -267,24 +386,35 @@ class ResourceValidator {
         const properties = toBeAssignedClassDeclaration.getProperties();
         for(let n=0; n < properties.length; n++) {
             const property = properties[n];
-            const value = obj[property.getName()];
-            if(!Util.isNull(value)) {
-                parameters.stack.push(value);
-                property.accept(this,parameters);
-            }
-            else {
-                if(!property.isOptional()) {
-                    // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
-                    if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
-                    ) {
-                        continue;
-                    }
-                    // Allow implicit optionality by declaring a default value, without using the optional keyword.
-                    if (!Util.isNull(property?.defaultValue)){
-                        continue;
-                    }
-                    ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
+            try {
+                const value = obj[property.getName()];
+                if(!Util.isNull(value)) {
+                    withPath(parameters, property.getName(), () => {
+                        parameters.stack.push(value);
+                        property.accept(this, parameters);
+                    });
                 }
+                else {
+                    if(!property.isOptional()) {
+                        // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
+                        if (property.getName() === '$identifier' && identifierFieldName !== '$identifier'
+                        ) {
+                            continue;
+                        }
+                        // Allow implicit optionality by declaring a default value, without using the optional keyword.
+                        if (!Util.isNull(property?.defaultValue)){
+                            continue;
+                        }
+                        withPath(parameters, property.getName(), () =>
+                            ResourceValidator.reportOrCollect(parameters, 'MISSING_REQUIRED_FIELD',
+                                () => ResourceValidator.reportMissingRequiredProperty(parameters.rootResourceIdentifier, property)));
+                    }
+                }
+            } catch (err) {
+                if (err instanceof CollectedDiagnosticException) {
+                    continue;
+                }
+                throw err;
             }
         }
         return null;
@@ -304,7 +434,9 @@ class ResourceValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field));
+            return null;
         }
 
         if(field.isTypeEnum()) {
@@ -332,7 +464,8 @@ class ResourceValidator {
     checkEnum(obj,field,parameters) {
 
         if(field.isArray() && !(obj instanceof Array)) {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field));
         }
 
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
@@ -340,8 +473,17 @@ class ResourceValidator {
         if(field.isArray()) {
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
-                parameters.stack.push(item);
-                enumDeclaration.accept(this, parameters);
+                try {
+                    withPath(parameters, n, () => {
+                        parameters.stack.push(item);
+                        enumDeclaration.accept(this, parameters);
+                    });
+                } catch (err) {
+                    if (err instanceof CollectedDiagnosticException) {
+                        continue;
+                    }
+                    throw err;
+                }
             }
         }
         else {
@@ -361,12 +503,22 @@ class ResourceValidator {
     checkArray(obj,field,parameters) {
 
         if(!(obj instanceof Array)) {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field));
         }
 
         for(let n=0; n < obj.length; n++) {
             const item = obj[n];
-            this.checkItem(item, field, parameters);
+            try {
+                withPath(parameters, n, () => {
+                    this.checkItem(item, field, parameters);
+                });
+            } catch (err) {
+                if (err instanceof CollectedDiagnosticException) {
+                    continue;
+                }
+                throw err;
+            }
         }
     }
 
@@ -382,7 +534,8 @@ class ResourceValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field));
         }
 
         if(field.isPrimitive()) {
@@ -417,11 +570,13 @@ class ResourceValidator {
                 break;
             }
             if (invalid) {
-                ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                    () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field));
             }
             else {
                 if(field.getValidator() !== null) {
-                    field.getValidator().validate(parameters.currentIdentifier, obj);
+                    ResourceValidator.reportOrCollect(parameters, 'VALIDATOR_VIOLATION',
+                        () => field.getValidator().validate(parameters.currentIdentifier, obj));
                 }
             }
         }
@@ -432,12 +587,14 @@ class ResourceValidator {
                 try {
                     classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
                 } catch (err) {
-                    ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                    ResourceValidator.reportOrCollect(parameters, 'FIELD_TYPE_VIOLATION',
+                        () => ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field));
                 }
 
                 // is it compatible?
                 if(!ModelUtil.isAssignableTo(classDeclaration.getModelFile(), classDeclaration.getFullyQualifiedName(), field)) {
-                    ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field);
+                    ResourceValidator.reportOrCollect(parameters, 'INVALID_FIELD_ASSIGNMENT',
+                        () => ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field));
                 }
             }
 
@@ -459,12 +616,22 @@ class ResourceValidator {
 
         if(relationshipDeclaration.isArray()) {
             if(!(obj instanceof Array)) {
-                ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
+                ResourceValidator.reportOrCollect(parameters, 'INVALID_FIELD_ASSIGNMENT',
+                    () => ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration));
             }
 
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
-                this.checkRelationship(parameters, relationshipDeclaration, item);
+                try {
+                    withPath(parameters, n, () => {
+                        this.checkRelationship(parameters, relationshipDeclaration, item);
+                    });
+                } catch (err) {
+                    if (err instanceof CollectedDiagnosticException) {
+                        continue;
+                    }
+                    throw err;
+                }
             }
         }
         else {
@@ -486,17 +653,20 @@ class ResourceValidator {
         } else if (obj instanceof Resource && (this.options.convertResourcesToRelationships || this.options.permitResourcesForRelationships)) {
             // All good.. Again
         } else {
-            ResourceValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
+            ResourceValidator.reportOrCollect(parameters, 'NOT_RELATIONSHIP',
+                () => ResourceValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj));
         }
 
         const relationshipType = parameters.modelManager.getType(obj.getFullyQualifiedType());
 
         if(!relationshipType.getIdentifierFieldName()) {
-            throw new Error('Cannot have a relationship to a field that is not identifiable.');
+            ResourceValidator.reportOrCollect(parameters, 'INVALID_RELATIONSHIP',
+                () => { throw new ValidationException('Cannot have a relationship to a field that is not identifiable.'); });
         }
 
         if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj.getFullyQualifiedType(), relationshipDeclaration)) {
-            ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
+            ResourceValidator.reportOrCollect(parameters, 'INVALID_FIELD_ASSIGNMENT',
+                () => ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration));
         }
     }
 
