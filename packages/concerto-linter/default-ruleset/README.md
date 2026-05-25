@@ -46,6 +46,10 @@ The following table provides an overview of the available linting rules in the d
 <td>Enforces that names used for declarations, properties, and decorators in concerto models do not use reserved keywords. Reserved keywords are language-specific terms that may cause conflicts or unexpected behavior if used as identifiers.</td>
 </tr>
 <tr>
+<td><a href="#reserved-system-concept-declarations">reserved-system-concept-declarations</a></td>
+<td>Flags declaration names that collide with reserved Concerto system concepts in legacy/v3 models, or in v4 when dangerous reserved system type names are explicitly enabled for compatibility.</td>
+</tr>
+<tr>
 <td><a href="#pascal-case-declarations">pascal-case-declarations</a></td>
 <td>Ensures that declaration names (scalar, enum, concept, asset, participant, transaction, event) follow PascalCase naming convention (e.g., 'MyDeclaration'). This promotes consistency and readability across model declarations.</td>
 </tr>
@@ -101,6 +105,12 @@ To explicitly specify the default ruleset:
 const results = await lintModel(modelText, { ruleset: 'default' });
 ```
 
+The default ruleset includes `reserved-system-concept-declarations`, which behaves as follows:
+
+- v3 and legacy models: reports reserved declaration names such as `Concept`, `Asset`, `Transaction`, `Participant`, and `Event`
+- default v4 runs: stays silent
+- dangerous v4 compatibility mode: reports the same names when `dangerouslyAllowReservedSystemTypeNamesInUserModels` is enabled through `lintModel`
+
 ## Customization
 
 To create your own ruleset that fits your project needs, you can either extend the default ruleset, or create an entirely new ruleset from scratch.
@@ -147,6 +157,7 @@ Here are all the rule IDs that can be disabled:
 |---------|-------------|
 | `namespace-version` | Ensures namespaces include version numbers |
 | `no-reserved-keywords` | Prevents use of reserved keywords |
+| `reserved-system-concept-declarations` | Flags reserved system concept declaration names in risky compatibility contexts |
 | `pascal-case-declarations` | Enforces PascalCase for declarations |
 | `camel-case-properties` | Enforces camelCase for properties |
 | `upper-snake-case-enum-constants` | Enforces UPPER_SNAKE_CASE for enum constants |

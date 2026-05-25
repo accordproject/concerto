@@ -19,15 +19,32 @@ import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/g
 import  concertoRuleset  from '@accordproject/concerto-linter-default-ruleset';
 import { Parser } from '@accordproject/concerto-cto';
 
-interface options {
+const RESERVED_SYSTEM_CONCEPT_DECLARATIONS_RULE = 'reserved-system-concept-declarations';
+type PatchableFunctionClause = {
+    function?: unknown;
+    functionOptions?: Record<string, unknown>;
+};
+type PatchableFunction = (targetVal: unknown, functionOptions?: unknown, ...rest: unknown[]) => unknown;
+type PatchableRule = {
+    then?: PatchableFunctionClause | PatchableFunctionClause[];
+};
+type PatchableRuleset = (Ruleset | RulesetDefinition) & { rules?: Record<string, unknown> };
+
+export interface LintOptions {
     /** Path to a custom Spectral ruleset or 'default' to use the built-in ruleset */
     ruleset?: string;
 
     /** One or more namespaces to exclude from linting results */
     excludeNamespaces?: string | string[];
+
+    /**
+     * Transitional compatibility escape hatch from concerto-core.
+     * When true, the reserved system concept declaration rule also reports in v4.
+     */
+    dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean;
 }
 
-interface lintResult {
+export interface LintResult {
   /** Unique rule identifier (e.g. 'no-reserved-keywords') */
   code: string;
 
@@ -84,6 +101,50 @@ async function loadRuleset(ruleset?: string): Promise<Ruleset | RulesetDefinitio
     }
 }
 
+function patchReservedSystemConceptRule(
+    ruleset: Ruleset | RulesetDefinition,
+    dangerouslyAllowReservedSystemTypeNamesInUserModels = false
+): Ruleset | RulesetDefinition {
+    const patchableRuleset = ruleset as PatchableRuleset;
+    const reservedSystemConceptRule = patchableRuleset.rules?.[RESERVED_SYSTEM_CONCEPT_DECLARATIONS_RULE] as PatchableRule | undefined;
+    if (!reservedSystemConceptRule) {
+        return ruleset;
+    }
+
+    const patchedRule: PatchableRule = { ...reservedSystemConceptRule };
+    const thenClauses = Array.isArray(patchedRule.then) ? patchedRule.then : [patchedRule.then];
+    patchedRule.then = thenClauses.map((clause: PatchableFunctionClause | undefined) => ({
+        ...clause,
+        function: typeof clause?.function === 'function'
+            ? (targetVal: unknown, functionOptions?: unknown, ...rest: unknown[]) => {
+                const originalFunction = clause.function as PatchableFunction;
+                const mergedFunctionOptions = typeof functionOptions === 'object' && functionOptions !== null
+                    ? {
+                        ...(functionOptions as Record<string, unknown>),
+                        dangerouslyAllowReservedSystemTypeNamesInUserModels,
+                    }
+                    : { dangerouslyAllowReservedSystemTypeNamesInUserModels };
+
+                return originalFunction(targetVal, mergedFunctionOptions, ...rest);
+            }
+            : clause?.function,
+        functionOptions: {
+            ...clause?.functionOptions,
+            dangerouslyAllowReservedSystemTypeNamesInUserModels,
+        },
+    }));
+
+    return ({
+        ...patchableRuleset,
+        rules: {
+            ...patchableRuleset.rules,
+            [RESERVED_SYSTEM_CONCEPT_DECLARATIONS_RULE]: Array.isArray(reservedSystemConceptRule.then)
+                ? patchedRule
+                : { ...patchedRule, then: patchedRule.then[0] },
+        },
+    } as unknown) as Ruleset | RulesetDefinition;
+}
+
 /**
  * Formats Spectral linting results by mapping them to a standardized lint result structure,
  * extracting namespaces from the provided JSON AST, and filtering out results based on excluded namespaces.
@@ -100,7 +161,7 @@ function formatResults(
     spectralResults: IRuleResult[],
     jsonAST: string,
     excludeNamespaces: string | string[] = ['concerto.*', 'org.accordproject.*']
-): lintResult[] {
+): LintResult[] {
     try {
         const ast = JSON.parse(jsonAST);
 
@@ -111,7 +172,7 @@ function formatResults(
             3: 'hint',
         };
 
-        const results: lintResult[] = spectralResults.map(r => {
+        const results: LintResult[] = spectralResults.map(r => {
             let namespace = 'unknown';
 
             if (Array.isArray(r.path) && r.path.length >= 2 && r.path[0] === 'models') {
@@ -149,16 +210,20 @@ function formatResults(
 /**
  * Lints Concerto models using Spectral and Concerto rules.
  * @param {string | object} model - The Concerto model to lint, either as a CTO string or a parsed AST object. Note: No external dependency resolution is performed.
- * @param {options} [config] - Configuration options for customizing the linting process.
+ * @param {LintOptions} [config] - Configuration options for customizing the linting process.
  * @param {string} [config.ruleset] - Path to a custom Spectral ruleset file or 'default' to use the built-in ruleset.
  * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results (defaults to 'concerto.*' and 'org.accord.*').
- * @returns {Promise<lintResult[]>} Promise resolving to an array of formatted linting results as a JSON object.
+ * @param {boolean} [config.dangerouslyAllowReservedSystemTypeNamesInUserModels] - When true, report reserved system concept declaration names in v4 compatibility mode.
+ * @returns {Promise<LintResult[]>} Promise resolving to an array of formatted linting results as a JSON object.
  * @throws {Error} Throws an error if linting or model conversion fails.
  */
-export async function lintModel(model: string | object, config?: options): Promise<lintResult[]> {
+export async function lintModel(model: string | object, config?: LintOptions): Promise<LintResult[]> {
     try {
         const jsonAST = convertToJsonAST(model);
-        const ruleset = await loadRuleset(config?.ruleset);
+        const ruleset = patchReservedSystemConceptRule(
+            await loadRuleset(config?.ruleset),
+            config?.dangerouslyAllowReservedSystemTypeNamesInUserModels
+        );
 
         const spectral = new Spectral();
         spectral.setRuleset(ruleset);
