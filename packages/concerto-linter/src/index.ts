@@ -212,7 +212,7 @@ function formatResults(
  * @param {string | object} model - The Concerto model to lint, either as a CTO string or a parsed AST object. Note: No external dependency resolution is performed.
  * @param {LintOptions} [config] - Configuration options for customizing the linting process.
  * @param {string} [config.ruleset] - Path to a custom Spectral ruleset file or 'default' to use the built-in ruleset.
- * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results (defaults to 'concerto.*' and 'org.accord.*').
+ * @param {string | string[]} [config.excludeNamespaces] - One or more namespaces to exclude from linting results (defaults to 'concerto.*' and 'org.accordproject.*').
  * @param {boolean} [config.dangerouslyAllowReservedSystemTypeNamesInUserModels] - When true, report reserved system concept declaration names in v4 compatibility mode.
  * @returns {Promise<LintResult[]>} Promise resolving to an array of formatted linting results as a JSON object.
  * @throws {Error} Throws an error if linting or model conversion fails.

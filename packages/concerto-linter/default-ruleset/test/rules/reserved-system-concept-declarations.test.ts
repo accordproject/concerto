@@ -30,6 +30,7 @@ describe('Reserved System Concept Declarations Rule', () => {
         results.forEach(result => {
             expect(result.code).toBe('reserved-system-concept-declarations');
             expect(result.message).toContain('collides with a reserved Concerto system concept');
+            expect(result.message).not.toContain('disable dangerouslyAllowReservedSystemTypeNamesInUserModels');
         });
     });
 
@@ -41,6 +42,7 @@ describe('Reserved System Concept Declarations Rule', () => {
 
         expect(results).toHaveLength(1);
         expect(results[0].code).toBe('reserved-system-concept-declarations');
+        expect(results[0].message).not.toContain('disable dangerouslyAllowReservedSystemTypeNamesInUserModels');
     });
 
     test('should stay silent for normal v4 models when dangerous mode is disabled', async () => {
@@ -61,6 +63,7 @@ describe('Reserved System Concept Declarations Rule', () => {
         expect(results).toHaveLength(2);
         results.forEach(result => {
             expect(result.code).toBe('reserved-system-concept-declarations');
+            expect(result.message).toContain('disable dangerouslyAllowReservedSystemTypeNamesInUserModels');
         });
     });
 

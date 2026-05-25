@@ -48,6 +48,14 @@ function isLegacyOrV3Model(model: Model): boolean {
     return typeof model.namespace === 'string' && !model.namespace.includes('@');
 }
 
+function getReservedSystemConceptMessage(declarationName: string, isLegacyModel: boolean): string {
+    if (isLegacyModel) {
+        return `Declaration '${declarationName}' collides with a reserved Concerto system concept. Rename the declaration or migrate safely before relying on this model.`;
+    }
+
+    return `Declaration '${declarationName}' collides with a reserved Concerto system concept. Rename the declaration, disable dangerouslyAllowReservedSystemTypeNamesInUserModels, or migrate safely before relying on this model.`;
+}
+
 /**
  * Finds declaration names that collide with reserved Concerto system concepts
  * in risky compatibility contexts.
@@ -71,7 +79,8 @@ export const findReservedSystemConceptDeclarations: IFunction = (
 
     const functionOptions = options as ReservedSystemConceptOptions | undefined;
     const dangerousModeEnabled = Boolean(functionOptions?.dangerouslyAllowReservedSystemTypeNamesInUserModels);
-    const shouldReport = isLegacyOrV3Model(model) || dangerousModeEnabled;
+    const legacyOrV3Model = isLegacyOrV3Model(model);
+    const shouldReport = legacyOrV3Model || dangerousModeEnabled;
 
     if (!shouldReport) {
         return [];
@@ -83,7 +92,7 @@ export const findReservedSystemConceptDeclarations: IFunction = (
         }
 
         results.push({
-            message: `Declaration '${declaration.name}' collides with a reserved Concerto system concept. Rename the declaration, disable dangerouslyAllowReservedSystemTypeNamesInUserModels, or migrate safely before relying on this model.`,
+            message: getReservedSystemConceptMessage(declaration.name, legacyOrV3Model),
         });
 
         return results;
