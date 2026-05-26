@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace org.acme.base
+namespace org.acme.base@1.0.0
 
-import org.acme.core.BaseMember
+import org.acme.core@1.0.0.BaseMember
 
 participant ClientMember extends BaseMember {
     o String firstName optional

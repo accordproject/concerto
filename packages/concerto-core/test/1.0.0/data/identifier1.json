@@ -1,4 +1,4 @@
 {
-    "$class": "org.test.A",
+    "$class": "org.test@1.0.0.A",
     "name": "John"
 }

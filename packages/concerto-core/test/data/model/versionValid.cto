@@ -15,7 +15,7 @@
 concerto version ">= 1.0.0"
 
 // define the namespace for this model
-namespace org.acme
+namespace org.acme@1.0.0
 
 // define an enumeration
 enum State {

@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace com.hyperledger.testing
+namespace com.hyperledger.testing@1.0.0
 
-import com.hyperledger.elsewhere.BaseAsset
+import com.hyperledger.elsewhere@1.0.0.BaseAsset
 
 asset TestAsset identified by assetId {
     o String assetId optional

@@ -28,7 +28,7 @@ import {
     PropertyUnion,
     ScalarDeclarationUnion,
     DecoratorLiteralUnion
-} from '@accordproject/concerto-types';
+} from '@accordproject/concerto-metamodel';
 import {
     IConcertino,
     IConcertinoDeclaration,
@@ -50,7 +50,7 @@ import {
     EnumValueMap,
     PropertyMap,
     Prototype
-} from './spec/concertino.metamodel@1.0.0-alpha.7';
+} from './spec/concertino.metamodel@4.0.0-alpha.2';
 
 // Type definition for scalar types as strings for easier mapping
 type ScalarType = 'BooleanScalar' | 'IntegerScalar' | 'LongScalar' | 'DoubleScalar' | 'StringScalar' | 'DateTimeScalar';
@@ -311,7 +311,7 @@ function transformMapDeclaration(declaration: IMapDeclaration, context: { modelN
  * @param context The context object.
  * @returns The Concertino scalar declaration.
  */
-function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context: { modelNamespace: string }): IConcertinoScalarDeclaration {
+function transformScalarDeclaration(declaration: ScalarDeclarationUnion, _context: { modelNamespace: string }): IConcertinoScalarDeclaration { // eslint-disable-line @typescript-eslint/no-unused-vars
     const result: IConcertinoScalarDeclaration = {
         type: determineScalarType(declaration),
         ...extractDecoratorsInfo(declaration.decorators),
@@ -326,7 +326,7 @@ function transformScalarDeclaration(declaration: ScalarDeclarationUnion, context
  * @param context The context object.
  * @returns The Concertino enum declaration.
  */
-function transformEnumDeclaration(declaration: IEnumDeclaration, context: { modelNamespace: string }): IConcertinoEnumDeclaration {
+function transformEnumDeclaration(declaration: IEnumDeclaration, _context: { modelNamespace: string }): IConcertinoEnumDeclaration { // eslint-disable-line @typescript-eslint/no-unused-vars
     return {
         type: 'EnumDeclaration',
         values: transformEnumValues(declaration.properties),
@@ -430,7 +430,7 @@ function convertToConcertino(metamodel: IModels): IConcertino {
     const concertino: IConcertino = {
         declarations: {},
         metadata: {
-            concertinoVersion: '1.0.0-alpha.7',
+            concertinoVersion: '4.0.0-alpha.2',
             models: {},
         },
     };

@@ -15,7 +15,7 @@
 /**
  * Defines a data model for a contingent labor business network
  */
-namespace ibm.procurement.contingentLabor
+namespace ibm.procurement.contingentLabor@1.0.0
 
 /* Purchase Order Approval Status */
 enum POContractorApprovalStatus {

@@ -14,14 +14,14 @@
 
 'use strict';
 
-const Field = require('../../lib/introspect/field');
-const NumberValidator = require('../../lib/introspect/numbervalidator');
+const Field = require('../../src/introspect/field');
+const NumberValidator = require('../../src/introspect/numbervalidator');
 
 require('chai').should();
 const chai = require('chai'), should = chai.should();
 
 const sinon = require('sinon');
-const StringValidator = require('../../lib/introspect/stringvalidator');
+const StringValidator = require('../../src/introspect/stringvalidator');
 
 describe('NumberValidator', () => {
 

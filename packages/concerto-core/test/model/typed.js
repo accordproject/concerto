@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
-const Typed = require('../../lib/model/typed');
+const ModelManager = require('../../src/modelmanager');
+const Typed = require('../../src/model/typed');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 
@@ -32,44 +32,44 @@ describe('Typed', () => {
         modelManager = new ModelManager();
         Util.addComposerModel(modelManager);
         modelManager.addCTOModel(`
-        namespace org.acme.base
+        namespace org.acme.base@1.0.0
         abstract asset BaseAsset {
         }
         abstract asset BaseAsset2 extends BaseAsset {
         }`);
-        baseAssetClassDecl = modelManager.getType('org.acme.base.BaseAsset');
-        baseAsset2ClassDecl = modelManager.getType('org.acme.base.BaseAsset2');
+        baseAssetClassDecl = modelManager.getType('org.acme.base@1.0.0.BaseAsset');
+        baseAsset2ClassDecl = modelManager.getType('org.acme.base@1.0.0.BaseAsset2');
         modelManager.addCTOModel(`
-        namespace org.acme.ext
-        import org.acme.base.BaseAsset2
+        namespace org.acme.ext@1.0.0
+        import org.acme.base@1.0.0.BaseAsset2
         asset MyAsset identified by assetId extends BaseAsset2 {
             o String assetId
         }
         asset Asset2 extends MyAsset {
         }`);
-        asset2ClassDecl = modelManager.getType('org.acme.ext.Asset2');
+        asset2ClassDecl = modelManager.getType('org.acme.ext@1.0.0.Asset2');
     });
 
     describe('#instanceOf', () => {
 
         it('should return true for a matching type', () => {
-            let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base', 'BaseAsset');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base@1.0.0', 'BaseAsset');
+            typed.instanceOf('org.acme.base@1.0.0.BaseAsset').should.be.true;
         });
 
         it('should return true for a matching super type', () => {
-            let typed = new Typed(modelManager, baseAsset2ClassDecl, 'org.acme.base', 'BaseAsset2');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            let typed = new Typed(modelManager, baseAsset2ClassDecl, 'org.acme.base@1.0.0', 'BaseAsset2');
+            typed.instanceOf('org.acme.base@1.0.0.BaseAsset').should.be.true;
         });
 
         it('should return false for a non-matching sub type', () => {
-            let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base', 'BaseAsset');
-            typed.instanceOf('org.acme.base.BaseAsset2').should.be.false;
+            let typed = new Typed(modelManager, baseAssetClassDecl, 'org.acme.base@1.0.0', 'BaseAsset');
+            typed.instanceOf('org.acme.base@1.0.0.BaseAsset2').should.be.false;
         });
 
         it('should return true for a matching nested super type', () => {
-            let typed = new Typed(modelManager, asset2ClassDecl, 'org.acme.ext', 'Asset2');
-            typed.instanceOf('org.acme.base.BaseAsset').should.be.true;
+            let typed = new Typed(modelManager, asset2ClassDecl, 'org.acme.ext@1.0.0', 'Asset2');
+            typed.instanceOf('org.acme.base@1.0.0.BaseAsset').should.be.true;
         });
 
     });
@@ -91,7 +91,7 @@ describe('Typed', () => {
             it(`should assign the default value for primitive type ${defaultValueType}`, () => {
                 const defaultValue = defaultValues[defaultValueType];
                 modelManager.addCTOModel(`
-                namespace org.acme.defaults
+                namespace org.acme.defaults@1.0.0
                 enum Test {
                     o ONE
                     o TWO
@@ -101,8 +101,8 @@ describe('Typed', () => {
                     o String assetId
                     o ${defaultValueType} value default=${JSON.stringify(defaultValue)}
                 }`);
-                const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
-                const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
+                const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+                const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
                 typed.assignFieldDefaults();
                 if (dayjs.isDayjs(typed.value)) {
                     typed.value.format().should.equal(defaultValue);
@@ -114,15 +114,15 @@ describe('Typed', () => {
         });
 
         it('should assign the default value for falsy values', () => {
-            modelManager.addCTOModel(`namespace org.acme.defaults
+            modelManager.addCTOModel(`namespace org.acme.defaults@1.0.0
             concept DefaultAsset {
                 o Boolean bool default=false
                 o Integer int default=0
                 o Long long default=0
                 o Double double default=0.0
             }`);
-            const classDecl = modelManager.getType('org.acme.defaults.DefaultAsset');
-            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults', 'DefaultAsset');
+            const classDecl = modelManager.getType('org.acme.defaults@1.0.0.DefaultAsset');
+            const typed = new Typed(modelManager, classDecl, 'org.acme.defaults@1.0.0', 'DefaultAsset');
             typed.assignFieldDefaults();
             typed.bool.should.equal(false);
             typed.int.should.equal(0);

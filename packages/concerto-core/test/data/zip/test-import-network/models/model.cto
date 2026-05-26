@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace org.acme
+namespace org.acme@1.0.0
 
 // test a real import from the Internet
 import org.accordproject.product.* from github://accordproject/models/master/product.cto

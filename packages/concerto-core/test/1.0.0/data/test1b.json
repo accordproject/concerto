@@ -1,5 +1,5 @@
 {
-  "$class": "org.test.C",
+  "$class": "org.test@1.0.0.C",
   "i": null,
 	"ds": [1,2,3]
 }

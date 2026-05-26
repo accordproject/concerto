@@ -5,8 +5,8 @@
     },
     "source": {
         "include": [
-            "./lib",
-            "./index.js"
+            "./dist",
+            "./dist/index.js"
         ],
         "includePattern": ".+\\.js(doc|x)?$"
     },

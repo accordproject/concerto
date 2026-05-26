@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-namespace com.hyperledger.testing
+namespace com.hyperledger.testing@1.0.0
 
 transaction ContainsBadRelationship  {
-    
+
     --> String bad
 }

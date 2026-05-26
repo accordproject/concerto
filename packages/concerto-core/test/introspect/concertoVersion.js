@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../../lib/modelmanager');
+const ModelManager = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 const path = require('path');
@@ -46,7 +46,7 @@ describe('ModelFile', () => {
         it('should throw when concerto version is not compatible with model', () => {
             (() => {
                 ParserUtil.newModelFile(modelManager, versionInvalid);
-            }).should.throw(/ModelFile expects Concerto version/);
+            }).should.throw(/This version of Concerto supports a language version of v3.0.0 or greater/);
         });
 
         it('should return when concerto version is compatible with model', () => {

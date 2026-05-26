@@ -1,0 +1,14 @@
+@Term("")
+namespace com.test.falsy@1.0.0
+
+@Term("")
+concept EmptyTermConcept {
+    @Term("")
+    o String myField
+}
+
+@Term("")
+@Term_desc("has extension too")
+concept EmptyTermWithExtension {
+    o String id
+}

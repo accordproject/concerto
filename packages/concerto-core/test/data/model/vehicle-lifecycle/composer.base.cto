@@ -15,7 +15,7 @@
 /**
   * A library of standard reusable types
   */
-namespace composer.base
+namespace composer.base@1.0.0
 
 enum Gender {
  o MALE

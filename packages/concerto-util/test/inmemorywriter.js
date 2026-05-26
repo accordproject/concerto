@@ -20,8 +20,8 @@ chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
 
-const Writer = require('../lib/writer');
-const InMemoryWriter = require('../lib/inmemorywriter');
+const Writer = require('../src/writer');
+const InMemoryWriter = require('../src/inmemorywriter');
 
 describe('InMemoryWriter', function() {
 

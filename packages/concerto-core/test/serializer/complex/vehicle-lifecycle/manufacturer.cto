@@ -15,11 +15,11 @@
 /**
  * Order model for vehicle lifecycle
  */
-namespace org.acme.vehicle.lifecycle.manufacturer
+namespace org.acme.vehicle.lifecycle.manufacturer@1.0.0
 
-import org.vda.VehicleDetails
-import composer.business.Business
-import composer.base.Person
+import org.vda@1.0.0.VehicleDetails
+import composer.business@1.0.0.Business
+import composer.base@1.0.0.Person
 
 
 /**

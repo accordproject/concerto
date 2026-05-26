@@ -21,7 +21,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Vocabulary } = require('..');
+const { Vocabulary } = require('../src');
 
 describe('Vocabulary', () => {
 
@@ -62,7 +62,7 @@ describe('Vocabulary', () => {
         const voc = {
             declarations: [],
             locale: 'en_US',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
     });
@@ -72,7 +72,7 @@ describe('Vocabulary', () => {
         const voc = {
             declarations: [],
             locale: 'en-US',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         should.Throw(() => new Vocabulary(vocabularyManager, voc), Error);
     });
@@ -82,7 +82,7 @@ describe('Vocabulary', () => {
         const obj = {
             declarations: [],
             locale: 'en-us',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         const voc = new Vocabulary(vocabularyManager, obj);
         voc.should.not.be.null;
@@ -93,7 +93,7 @@ describe('Vocabulary', () => {
         const obj = {
             declarations: [],
             locale: 'en',
-            namespace: 'org.acme'
+            namespace: 'org.acme@1.0.0'
         };
         const voc = new Vocabulary(vocabularyManager, obj);
         const json = voc.toJSON();
@@ -121,7 +121,6 @@ describe('Vocabulary', () => {
     });
 
     it('getTerm - namespace term', () => {
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'true';
         const vocabularyManager = {};
         const obj = {
             declarations: [],
@@ -132,7 +131,65 @@ describe('Vocabulary', () => {
         const voc = new Vocabulary(vocabularyManager, obj);
         const term = voc.getTerm();
         should.equal(term, obj.term);
-        process.env.ENABLE_DCS_NAMESPACE_TARGET = 'false';
+    });
+
+    describe('getTerm / getElementTerms - falsy property values', () => {
+        let voc;
+        beforeEach(() => {
+            voc = new Vocabulary({}, {
+                locale: 'en',
+                namespace: 'org.falsy@1.0.0',
+                declarations: [
+                    {
+                        Widget: 'A widget',
+                        properties: [
+                            { enabled: false },
+                            { count: 0 },
+                            { label: '' }
+                        ]
+                    },
+                    { Flag: false }
+                ]
+            });
+        });
+
+        it('getTerm - property with boolean false value', () => {
+            const term = voc.getTerm('Widget', 'enabled');
+            term.should.equal(false);
+        });
+
+        it('getTerm - property with numeric 0 value', () => {
+            const term = voc.getTerm('Widget', 'count');
+            term.should.equal(0);
+        });
+
+        it('getTerm - property with empty string value', () => {
+            const term = voc.getTerm('Widget', 'label');
+            term.should.equal('');
+        });
+
+        it('getTerm - declaration with boolean false value', () => {
+            const term = voc.getTerm('Flag');
+            term.should.equal(false);
+        });
+
+        it('getElementTerms - property with boolean false value', () => {
+            const terms = voc.getElementTerms('Widget', 'enabled');
+            should.exist(terms);
+            terms.enabled.should.equal(false);
+        });
+
+        it('getElementTerms - property with numeric 0 value', () => {
+            const terms = voc.getElementTerms('Widget', 'count');
+            should.exist(terms);
+            terms.count.should.equal(0);
+        });
+
+        it('getElementTerms - property with empty string value', () => {
+            const terms = voc.getElementTerms('Widget', 'label');
+            should.exist(terms);
+            terms.label.should.equal('');
+        });
     });
 
     describe('getTerm - property existence checks', () => {

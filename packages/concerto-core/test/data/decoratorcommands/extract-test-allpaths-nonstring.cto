@@ -1,0 +1,24 @@
+@Term("My Namespace: Title")
+@Term_version(3)
+@Term_active(true)
+namespace com.test.allpaths@1.0.0
+
+@Term("Product: Details")
+@Term_sortOrder(1)
+@Term_featured(false)
+concept Product {
+  @Term("Field: Label")
+  @Term_rank(2)
+  @Term_visible(true)
+  o String fieldName optional
+}
+
+map Inventory {
+  @Term("Key: Identifier")
+  @Term_weight(5)
+  o String
+
+  @Term("Value: Data")
+  @Term_required(false)
+  o String
+}

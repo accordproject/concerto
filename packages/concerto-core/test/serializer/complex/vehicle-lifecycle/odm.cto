@@ -15,9 +15,9 @@
 /**
  * ODM specific classes
  */
-namespace com.hyperledger.rules
+namespace com.hyperledger.rules@1.0.0
 
-asset RuleAppCurrentVersion identified by ruleAppName 
+asset RuleAppCurrentVersion identified by ruleAppName
 {
   // ruleapp name should be of the form <ruleapp>/<ruleset>
   o String ruleAppName
@@ -25,7 +25,7 @@ asset RuleAppCurrentVersion identified by ruleAppName
   o String ruleset_version
 }
 
-asset RuleApp identified by ruleAppId 
+asset RuleApp identified by ruleAppId
 {
   o String ruleAppId
   // ruleapp name should be of the form <ruleapp>/<ruleset>
@@ -35,18 +35,18 @@ asset RuleApp identified by ruleAppId
   o String archive
 }
 
-asset Xom identified by xomId 
+asset Xom identified by xomId
 {
   o String xomId
   o String xomName
   o String xom_version
   o String libraryName
-  o String library_version  
+  o String library_version
   o String xom
 }
 
 
-transaction RuleAppUpdated 
+transaction RuleAppUpdated
 {
   o String resDeployerURL
   // ruleapp name should be of the form <ruleapp>/<ruleset>
@@ -57,7 +57,7 @@ transaction RuleAppUpdated
   o String managedXomURI
 }
 
-transaction XomUpdated  
+transaction XomUpdated
 {
   o String resDeployerURL
   o String xomName

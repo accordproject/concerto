@@ -1,0 +1,11 @@
+concerto version "^3.0.0"
+
+namespace person@1.0.0
+
+concept Phone {
+    o String number
+}
+
+concept Person identified by email {
+    o String email
+}

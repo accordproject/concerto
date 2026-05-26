@@ -1,0 +1,9 @@
+namespace com.test.falsy.nonstring@1.0.0
+
+concept Product {
+    @Term(0)
+    o Integer price
+
+    @Term(false)
+    o Boolean active
+}

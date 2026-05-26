@@ -22,7 +22,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Printer } = require('..');
+const { Printer } = require('../src');
 
 /**
  * Get the name and content of all cto files
@@ -87,5 +87,98 @@ describe('parser', () => {
                 }
             ]
         })).should.throw(Error, 'The declaration "Self_Extending" cannot extend itself.');
+    });
+
+    it('Should handle ImportTypes with aliased types', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: ['Person', 'Address'],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' },
+                    { name: 'Address', aliasedName: 'Location' }
+                ],
+                uri: 'https://example.org/models/example.cto'
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.{Person as Individual,Address as Location}');
+        result.should.include('from https://example.org/models/example.cto');
+    });
+
+    it('Should handle ImportAll type', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportAll',
+                namespace: 'org.example@1.0.0',
+                uri: 'https://example.org/models/example.cto'
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.*');
+        result.should.include('from https://example.org/models/example.cto');
+    });
+
+    it('Should print Double range bounds using decimal notation', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 0,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0,1.0]');
+    });
+
+    it('Should print scientific notation Double range bounds without rounding to zero', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 1e-7,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0000001,1.0]');
     });
 });

@@ -1,7 +1,7 @@
 {
     "$class": "concerto.metamodel@1.0.0.Model",
     "decorators": [],
-    "namespace": "org.acme",
+    "namespace": "org.acme@1.0.0",
     "imports": [],
     "declarations": [
         {

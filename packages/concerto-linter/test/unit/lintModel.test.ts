@@ -16,7 +16,7 @@ describe('lintModel', () => {
     test('should lint a valid model successfully', async () => {
         const validModel = `
       namespace com.example
-      
+
       concept Person {
         o String firstName
         o String lastName
@@ -35,7 +35,7 @@ describe('lintModel', () => {
     test('should detect violations in problematic model', async () => {
         const problematicModel = `
       namespace com.example
-      
+
       concept class {  // Reserved keyword as concept name
         o String private  // Reserved keyword as property name
       }
@@ -63,7 +63,7 @@ describe('lintModel', () => {
     test('should work with all configuration options', async () => {
         const model = `
       namespace com.example.test
-      
+
       concept ValidConcept {
         o String validProperty
       }

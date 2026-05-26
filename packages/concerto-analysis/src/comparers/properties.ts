@@ -172,7 +172,7 @@ const propertyTypeChanged: ComparerFactory = (context) => ({
         //     });
         //     return;
         // }
-        const versionDiff = semver.diff(aTypeVersion, bTypeVersion);
+        const versionDiff = semver.diff(aTypeVersion as string, bTypeVersion as string);
         if (versionDiff === 'major' || versionDiff === 'premajor') {
             context.report({
                 key: 'property-type-changed',

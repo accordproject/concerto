@@ -1,4 +1,4 @@
 locale: en
-namespace: com.test
+namespace: com.test@1.0.0
 declarations:
   - Human: A human being

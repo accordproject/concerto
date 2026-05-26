@@ -1,5 +1,5 @@
 {
-    "$class": "org.test.A",
+    "$class": "org.test@1.0.0.A",
     "$identifier": "00000000-0000-0000-0000-000000000000",
     "name": "John"
 }

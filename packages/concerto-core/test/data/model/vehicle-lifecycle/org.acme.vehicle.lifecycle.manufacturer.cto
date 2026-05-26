@@ -15,11 +15,11 @@
 /**
  * Order model for vehicle lifecycle
  */
-namespace org.acme.vehicle.lifecycle.manufacturer
+namespace org.acme.vehicle.lifecycle.manufacturer@1.0.0
 
-import org.gov.uk.dvla.VehicleDetails
-import composer.business.Business
-import composer.base.Person
+import org.gov.uk.dvla@1.0.0.VehicleDetails
+import composer.business@1.0.0.Business
+import composer.base@1.0.0.Person
 
 
 /**
@@ -56,7 +56,7 @@ asset Order identified by orderId {
  * Transaction to create an order
  */
 transaction PlaceOrder  {
-  
+
   o VehicleDetails vehicleDetails
   --> Manufacturer manufacturer
   --> Person orderer
@@ -66,7 +66,7 @@ transaction PlaceOrder  {
  * Transaction to update the status of an order
  */
 transaction UpdateOrderStatus  {
-  
+
   o OrderStatus orderStatus
   o String vin optional
   o String v5c optional

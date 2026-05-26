@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-namespace Bar
+namespace Bar@1.0.0
 
 asset foo identified by fooID {
     o String fooID

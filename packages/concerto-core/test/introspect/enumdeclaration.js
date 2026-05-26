@@ -14,8 +14,8 @@
 
 'use strict';
 
-const EnumDeclaration = require('../../lib/introspect/enumdeclaration');
-const ModelManager = require('../../lib/modelmanager');
+const EnumDeclaration = require('../../src/introspect/enumdeclaration');
+const ModelManager = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 
@@ -62,7 +62,7 @@ describe('EnumDeclaration', () => {
     describe('#toString', () => {
         it('should give the correct value', () => {
             let declaration = loadLastDeclaration('test/data/model/enum.cto', EnumDeclaration);
-            declaration.toString().should.equal('EnumDeclaration {id=org.acme.ConcreteEnum}');
+            declaration.toString().should.equal('EnumDeclaration {id=org.acme@1.0.0.ConcreteEnum}');
         });
     });
 

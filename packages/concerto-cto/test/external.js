@@ -22,7 +22,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { resolveExternal } = require('../lib/external');
+const { resolveExternal } = require('../src/external');
 
 /**
  * Get the name and content of all cto files
