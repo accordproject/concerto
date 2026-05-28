@@ -886,6 +886,7 @@ class ModelFile extends Decorated {
         const ast = {
             ...this.ast,
             declarations: declarations,
+            imports: this.ast.imports?.map(imp => ({...imp})),
         };
         if (ast.declarations?.length > 0){
             return new ModelFile(modelManager, ast, undefined, this.fileName);
