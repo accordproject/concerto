@@ -35,7 +35,13 @@
   "dependencies": {
     "@accordproject/concerto-core": "4.1.2",
     "@accordproject/concerto-metamodel": "^3.13.0",
-    "ajv": "^8.17.1",
+    "@stoplight/spectral-cli": "6.16.0",
+    "@stoplight/spectral-core": "1.23.0",
+    "@stoplight/spectral-functions": "1.10.2",
+    "ajv": "^8.18.0",
+    "coveralls-next": "6.0.1",
+    "mocha": "8.1.3",
+    "nyc": "14.1.1",
     "semver": "7.6.3"
   },
   "devDependencies": {
@@ -46,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vitest/coverage-v8": "^3.2.4",
-    "cpx": "^1.5.0",
+    "cpx": "^1.2.1",
     "cross-env": "^7.0.3",
     "eslint": "8.57.1",
     "npm-run-all": "4.1.5",
