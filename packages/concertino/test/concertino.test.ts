@@ -7,7 +7,8 @@ import { ConcertinoConverter } from '../src/';
 import { determineScalarType, dispatchDeclaration, getInheritanceChain, determinePropertyType } from '../src/concertinoSerializer';
 import { readdirSync, statSync } from 'fs';
 import { IModel, IModels } from '@accordproject/concerto-metamodel';
-import { it, expect, describe } from 'vitest';
+import Ajv from 'ajv';
+import { afterEach, it, expect, describe, vi } from 'vitest';
 
 const loadAllCtoFiles = (dir: string, models: object[]): void => {
     const files = readdirSync(dir);
@@ -31,6 +32,10 @@ const loadAllCtoFiles = (dir: string, models: object[]): void => {
         }
     });
 };
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 describe('concertino roundtripping (sample models)', () => {
     const models: IModel[] = [];
@@ -64,6 +69,34 @@ describe('concertino roundtripping (sample models)', () => {
 });
 
 describe('concertino edge cases and error handling', () => {
+    it('should lazily compile the validator', () => {
+        const compileSpy = vi.spyOn(Ajv.prototype, 'compile');
+        const converter = new ConcertinoConverter();
+        const ast = {
+            $class: 'concerto.metamodel@1.0.0.Models',
+            models: [{
+                $class: 'concerto.metamodel@1.0.0.Model',
+                namespace: 'sourceUriTest@1.0.0',
+                sourceUri: 'uri'
+            }],
+        };
+
+        expect(compileSpy).not.toHaveBeenCalled();
+        expect(converter.getValidationErrors()).toBeNull();
+
+        const concertino = converter.fromConcertoMetamodel(ast);
+        expect(compileSpy).not.toHaveBeenCalled();
+        expect(converter.toConcertoMetamodel(concertino)).toStrictEqual(ast);
+        expect(compileSpy).not.toHaveBeenCalled();
+
+        expect(converter.isValid(concertino)).toBe(true);
+        expect(compileSpy).toHaveBeenCalledTimes(1);
+        expect(converter.getValidationErrors()).toBeNull();
+
+        expect(converter.isValid(concertino)).toBe(true);
+        expect(compileSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('should roundtrip sourceUri', () => {
         const converter = new ConcertinoConverter();
         const ast = {
