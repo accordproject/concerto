@@ -902,18 +902,20 @@ class ModelFile extends Decorated {
                 return true;
             });
 
-            for (const imp of ast.imports) {
+            ast.imports = ast.imports.filter(imp => {
                 if (ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
                     const sourceFile = sourceManager.getModelFile(imp.namespace);
                     if (!sourceFile) {
-                        continue;
+                        return true;
                     }
                     imp.types = imp.types.filter(type => {
                         const decl = sourceFile.getLocalType(type);
                         return !decl || predicate(decl);
                     });
+                    return imp.types.length > 0;
                 }
-            }
+                return true;
+            });
         }
 
         return new ModelFile(modelManager, ast, undefined, this.fileName);
