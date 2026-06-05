@@ -865,33 +865,70 @@ class ModelFile extends Decorated {
      *
      * Will return null if the filtered ModelFile doesn't contain any declarations.
      *
+     * The predicate is also invoked on declarations from imported files to
+     * determine whether each import should be retained. It must be
+     * side-effect-free and total across all reachable namespaces.
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
-     * @param {string[]} removedDeclarations - an array that will be populated with the FQN of removed declarations
      * @returns {ModelFile?} - the filtered ModelFile
      * @private
      */
-    filter(predicate, modelManager, removedDeclarations){
-        let declarations: any[] = []; // ast for all included declarations
-        this.declarations?.forEach( declaration => {
-            const included = predicate(declaration);
-            if(!included) {
-                removedDeclarations.push(declaration.getFullyQualifiedName());
-            }
-            else {
+    filter(predicate, modelManager){
+        const declarations: any[] = [];
+        for (const declaration of this.declarations) {
+            if (predicate(declaration)) {
                 declarations.push(declaration.ast);
             }
-        } );
+        }
+
+        if (declarations.length === 0) {
+            return null;
+        }
 
         const ast = {
             ...this.ast,
-            declarations: declarations,
+            declarations,
             imports: this.ast.imports?.map(imp => ({...imp})),
         };
-        if (ast.declarations?.length > 0){
-            return new ModelFile(modelManager, ast, undefined, this.fileName);
+
+        if (ast.imports) {
+            const sourceManager = this.getModelManager();
+
+            ast.imports = ast.imports.filter(imp => {
+                const ns = imp.namespace;
+                if (ns.startsWith('concerto@') || ns === 'concerto') {
+                    return true;
+                }
+
+                const shortClass = ModelUtil.getShortName(imp.$class);
+
+                if (shortClass === 'ImportType') {
+                    const sourceFile = sourceManager.getModelFile(ns);
+                    if (!sourceFile) {
+                        return true;
+                    }
+                    const decl = sourceFile.getLocalType(imp.name);
+                    return !decl || predicate(decl);
+                }
+
+                if (shortClass === 'ImportTypes') {
+                    const sourceFile = sourceManager.getModelFile(ns);
+                    if (!sourceFile) {
+                        return true;
+                    }
+                    imp.types = imp.types.filter(type => {
+                        const decl = sourceFile.getLocalType(type);
+                        return !decl || predicate(decl);
+                    });
+                    return imp.types.length > 0;
+                }
+
+                return true;
+            });
         }
-        return null;
+
+        return new ModelFile(modelManager, ast, undefined, this.fileName);
     }
 }
 

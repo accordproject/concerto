@@ -856,4 +856,145 @@ describe('ModelFile', () => {
         });
     });
 
+    describe('#filter', () => {
+        it('should return a filtered ModelFile keeping only matching declarations', () => {
+            modelManager.addCTOModel(`namespace org.filter@1.0.0
+            concept Kept {}
+            concept Removed {}
+            `, 'filter.cto');
+
+            const modelFile = modelManager.getModelFile('org.filter@1.0.0');
+            const filtered = modelFile.filter(
+                decl => decl.getFullyQualifiedName() === 'org.filter@1.0.0.Kept',
+                modelManager
+            );
+
+            filtered.should.not.be.null;
+            filtered.getAllDeclarations().length.should.equal(1);
+            filtered.getAllDeclarations()[0].getName().should.equal('Kept');
+        });
+
+        it('should return null if no declarations match', () => {
+            modelManager.addCTOModel(`namespace org.filter2@1.0.0
+            concept OnlyOne {}
+            `, 'filter2.cto');
+
+            const modelFile = modelManager.getModelFile('org.filter2@1.0.0');
+            const filtered = modelFile.filter(
+                () => false,
+                modelManager
+            );
+
+            should.not.exist(filtered);
+        });
+
+        it('should clean imports referencing filtered-out types', () => {
+            modelManager.addCTOModel(`namespace org.dep@1.0.0
+            concept Used {}
+            concept Unused {}
+            `, 'dep.cto');
+
+            modelManager.addCTOModel(`namespace org.consumer@1.0.0
+            import org.dep@1.0.0.{Used, Unused}
+            concept Consumer {
+                o Used used
+            }
+            `, 'consumer.cto');
+
+            const modelFile = modelManager.getModelFile('org.consumer@1.0.0');
+            const predicate = decl => decl.getFullyQualifiedName() !== 'org.dep@1.0.0.Unused';
+            const filtered = modelFile.filter(predicate, modelManager);
+
+            filtered.should.not.be.null;
+            const imports = filtered.getImports();
+            imports.should.include('org.dep@1.0.0.Used');
+            imports.should.not.include('org.dep@1.0.0.Unused');
+        });
+
+        it('should filter out ImportTypeFrom when its type is excluded', () => {
+            modelManager.addCTOModel(`namespace org.dep@1.0.0
+            concept Foo {}
+            `, 'dep.cto');
+
+            modelManager.addCTOModel(`namespace org.consumer@1.0.0
+            import org.dep@1.0.0.Foo from https://example.com/dep.cto
+            concept Consumer {}
+            `, 'consumer.cto');
+
+            const modelFile = modelManager.getModelFile('org.consumer@1.0.0');
+            const predicate = decl => decl.getFullyQualifiedName() !== 'org.dep@1.0.0.Foo';
+            const filtered = modelFile.filter(predicate, modelManager);
+
+            const ast = filtered.getAst();
+            const depImport = ast.imports.find(imp => imp.namespace === 'org.dep@1.0.0');
+            should.not.exist(depImport);
+        });
+
+        it('should never remove system imports regardless of predicate', () => {
+            modelManager.addCTOModel(`namespace org.test@1.0.0
+            import concerto@1.0.0.Concept
+            concept Foo {}
+            `, 'test.cto');
+
+            const modelFile = modelManager.getModelFile('org.test@1.0.0');
+            const filtered = modelFile.filter(
+                decl => decl.getFullyQualifiedName() === 'org.test@1.0.0.Foo',
+                modelManager
+            );
+
+            const ast = filtered.getAst();
+            const systemImport = ast.imports.find(imp =>
+                imp.namespace.startsWith('concerto@') || imp.namespace === 'concerto'
+            );
+            should.exist(systemImport);
+        });
+
+        it('should retain ImportType when source file is not in model manager', () => {
+            modelManager.addCTOModel(`namespace org.test@1.0.0
+            import org.missing@1.0.0.Unknown
+            concept Keeper {}
+            `, 'test.cto', true);
+
+            const modelFile = modelManager.getModelFile('org.test@1.0.0');
+            const filtered = modelFile.filter(() => true, modelManager);
+
+            const filteredAst = filtered.getAst();
+            const missingImport = filteredAst.imports.find(imp => imp.namespace === 'org.missing@1.0.0');
+            should.exist(missingImport);
+        });
+
+        it('should retain ImportTypes when source file is not in model manager', () => {
+            modelManager.addCTOModel(`namespace org.test2@1.0.0
+            import org.missing@1.0.0.{Unknown}
+            concept Keeper {}
+            `, 'test2.cto', true);
+
+            const modelFile = modelManager.getModelFile('org.test2@1.0.0');
+            const filtered = modelFile.filter(() => true, modelManager);
+
+            const filteredAst = filtered.getAst();
+            const missingImport = filteredAst.imports.find(imp => imp.namespace === 'org.missing@1.0.0');
+            should.exist(missingImport);
+        });
+
+        it('should remove the entire import when all its types are filtered out', () => {
+            modelManager.addCTOModel(`namespace org.dep@1.0.0
+            concept OnlyType {}
+            `, 'dep.cto');
+
+            modelManager.addCTOModel(`namespace org.consumer@1.0.0
+            import org.dep@1.0.0.{OnlyType}
+            concept Consumer {}
+            `, 'consumer.cto');
+
+            const modelFile = modelManager.getModelFile('org.consumer@1.0.0');
+            const predicate = decl => decl.getFullyQualifiedName() !== 'org.dep@1.0.0.OnlyType';
+            const filtered = modelFile.filter(predicate, modelManager);
+
+            const ast = filtered.getAst();
+            const depImport = ast.imports.find(imp => imp.namespace === 'org.dep@1.0.0');
+            should.not.exist(depImport);
+        });
+    });
+
 });
