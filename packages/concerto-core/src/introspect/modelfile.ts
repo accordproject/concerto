@@ -921,7 +921,13 @@ class ModelFile extends Decorated {
                         const decl = sourceFile.getLocalType(type);
                         return !decl || predicate(decl);
                     });
-                    return imp.types.length > 0;
+                    if (imp.types.length === 0) {
+                        return false;
+                    }
+                    if (imp.aliasedTypes && imp.aliasedTypes.length > 0) {
+                        imp.aliasedTypes = imp.aliasedTypes.filter(a => imp.types.includes(a.name));
+                    }
+                    return true;
                 }
 
                 return true;

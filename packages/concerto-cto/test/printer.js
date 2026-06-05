@@ -139,6 +139,44 @@ describe('parser', () => {
         result.should.not.include('import org.example');
     });
 
+    it('Should skip ImportTypes with empty types array and orphaned aliasedTypes', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: [],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' }
+                ]
+            }],
+            declarations: [],
+        });
+        result.should.not.include('import org.example');
+        result.should.not.include('Person');
+        result.should.not.include('Individual');
+    });
+
+    it('Should not print aliases for types that were filtered out', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: ['Address'],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' }
+                ]
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.{Address}');
+        result.should.not.include('Person');
+        result.should.not.include('Individual');
+    });
+
     it('Should print Double range bounds using decimal notation', () => {
         const result = Printer.toCTO({
             $class: 'concerto.metamodel@1.0.0.Model',
