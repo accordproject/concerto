@@ -124,6 +124,21 @@ describe('parser', () => {
         result.should.include('from https://example.org/models/example.cto');
     });
 
+    it('Should skip ImportTypes with empty types array', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: [],
+                aliasedTypes: []
+            }],
+            declarations: [],
+        });
+        result.should.not.include('import org.example');
+    });
+
     it('Should print Double range bounds using decimal notation', () => {
         const result = Printer.toCTO({
             $class: 'concerto.metamodel@1.0.0.Model',
