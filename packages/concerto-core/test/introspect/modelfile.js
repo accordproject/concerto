@@ -977,6 +977,32 @@ describe('ModelFile', () => {
             should.exist(missingImport);
         });
 
+        it('should remove aliasedTypes entries for filtered-out types', () => {
+            modelManager.addCTOModel(`namespace org.dep@1.0.0
+            concept Kept {}
+            concept Removed {}
+            `, 'dep.cto');
+
+            modelManager.addCTOModel(`namespace org.consumer@1.0.0
+            import org.dep@1.0.0.{Kept as K, Removed as R}
+            concept Consumer {
+                o K k
+            }
+            `, 'consumer.cto');
+
+            const modelFile = modelManager.getModelFile('org.consumer@1.0.0');
+            const predicate = decl => decl.getFullyQualifiedName() !== 'org.dep@1.0.0.Removed';
+            const filtered = modelFile.filter(predicate, modelManager);
+
+            const ast = filtered.getAst();
+            const depImport = ast.imports.find(imp => imp.namespace === 'org.dep@1.0.0');
+            should.exist(depImport);
+            depImport.types.should.deep.equal(['Kept']);
+            depImport.aliasedTypes.length.should.equal(1);
+            depImport.aliasedTypes[0].name.should.equal('Kept');
+            depImport.aliasedTypes[0].aliasedName.should.equal('K');
+        });
+
         it('should remove the entire import when all its types are filtered out', () => {
             modelManager.addCTOModel(`namespace org.dep@1.0.0
             concept OnlyType {}
