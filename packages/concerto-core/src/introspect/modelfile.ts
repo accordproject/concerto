@@ -865,9 +865,14 @@ class ModelFile extends Decorated {
      *
      * Will return null if the filtered ModelFile doesn't contain any declarations.
      *
+     * The predicate is also invoked on declarations from imported files to
+     * determine whether each import should be retained. It must be
+     * side-effect-free and total across all reachable namespaces.
+     *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
      * @returns {ModelFile?} - the filtered ModelFile
+     * @private
      */
     filter(predicate, modelManager){
         const declarations: any[] = [];
@@ -891,20 +896,24 @@ class ModelFile extends Decorated {
             const sourceManager = this.getModelManager();
 
             ast.imports = ast.imports.filter(imp => {
-                if (ModelUtil.getShortName(imp.$class) === 'ImportType') {
-                    const sourceFile = sourceManager.getModelFile(imp.namespace);
+                const ns = imp.namespace;
+                if (ns.startsWith('concerto@') || ns === 'concerto') {
+                    return true;
+                }
+
+                const shortClass = ModelUtil.getShortName(imp.$class);
+
+                if (shortClass === 'ImportType') {
+                    const sourceFile = sourceManager.getModelFile(ns);
                     if (!sourceFile) {
                         return true;
                     }
                     const decl = sourceFile.getLocalType(imp.name);
                     return !decl || predicate(decl);
                 }
-                return true;
-            });
 
-            ast.imports = ast.imports.filter(imp => {
-                if (ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
-                    const sourceFile = sourceManager.getModelFile(imp.namespace);
+                if (shortClass === 'ImportTypes') {
+                    const sourceFile = sourceManager.getModelFile(ns);
                     if (!sourceFile) {
                         return true;
                     }
@@ -914,6 +923,7 @@ class ModelFile extends Decorated {
                     });
                     return imp.types.length > 0;
                 }
+
                 return true;
             });
         }
