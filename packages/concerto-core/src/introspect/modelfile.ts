@@ -867,31 +867,56 @@ class ModelFile extends Decorated {
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
      * @param {ModelManager} modelManager - the target ModelManager for the filtered ModelFile
-     * @param {string[]} removedDeclarations - an array that will be populated with the FQN of removed declarations
      * @returns {ModelFile?} - the filtered ModelFile
-     * @private
      */
-    filter(predicate, modelManager, removedDeclarations){
-        let declarations: any[] = []; // ast for all included declarations
-        this.declarations?.forEach( declaration => {
-            const included = predicate(declaration);
-            if(!included) {
-                removedDeclarations.push(declaration.getFullyQualifiedName());
-            }
-            else {
+    filter(predicate, modelManager){
+        const declarations: any[] = [];
+        for (const declaration of this.declarations) {
+            if (predicate(declaration)) {
                 declarations.push(declaration.ast);
             }
-        } );
+        }
+
+        if (declarations.length === 0) {
+            return null;
+        }
 
         const ast = {
             ...this.ast,
-            declarations: declarations,
+            declarations,
             imports: this.ast.imports?.map(imp => ({...imp})),
         };
-        if (ast.declarations?.length > 0){
-            return new ModelFile(modelManager, ast, undefined, this.fileName);
+
+        if (ast.imports) {
+            const sourceManager = this.getModelManager();
+
+            ast.imports = ast.imports.filter(imp => {
+                if (ModelUtil.getShortName(imp.$class) === 'ImportType') {
+                    const sourceFile = sourceManager.getModelFile(imp.namespace);
+                    if (!sourceFile) {
+                        return true;
+                    }
+                    const decl = sourceFile.getLocalType(imp.name);
+                    return !decl || predicate(decl);
+                }
+                return true;
+            });
+
+            for (const imp of ast.imports) {
+                if (ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
+                    const sourceFile = sourceManager.getModelFile(imp.namespace);
+                    if (!sourceFile) {
+                        continue;
+                    }
+                    imp.types = imp.types.filter(type => {
+                        const decl = sourceFile.getLocalType(type);
+                        return !decl || predicate(decl);
+                    });
+                }
+            }
         }
-        return null;
+
+        return new ModelFile(modelManager, ast, undefined, this.fileName);
     }
 }
 

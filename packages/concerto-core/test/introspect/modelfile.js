@@ -856,4 +856,60 @@ describe('ModelFile', () => {
         });
     });
 
+    describe('#filter', () => {
+        it('should return a filtered ModelFile keeping only matching declarations', () => {
+            modelManager.addCTOModel(`namespace org.filter@1.0.0
+            concept Kept {}
+            concept Removed {}
+            `, 'filter.cto');
+
+            const modelFile = modelManager.getModelFile('org.filter@1.0.0');
+            const filtered = modelFile.filter(
+                decl => decl.getFullyQualifiedName() === 'org.filter@1.0.0.Kept',
+                modelManager
+            );
+
+            filtered.should.not.be.null;
+            filtered.getAllDeclarations().length.should.equal(1);
+            filtered.getAllDeclarations()[0].getName().should.equal('Kept');
+        });
+
+        it('should return null if no declarations match', () => {
+            modelManager.addCTOModel(`namespace org.filter2@1.0.0
+            concept OnlyOne {}
+            `, 'filter2.cto');
+
+            const modelFile = modelManager.getModelFile('org.filter2@1.0.0');
+            const filtered = modelFile.filter(
+                () => false,
+                modelManager
+            );
+
+            should.not.exist(filtered);
+        });
+
+        it('should clean imports referencing filtered-out types', () => {
+            modelManager.addCTOModel(`namespace org.dep@1.0.0
+            concept Used {}
+            concept Unused {}
+            `, 'dep.cto');
+
+            modelManager.addCTOModel(`namespace org.consumer@1.0.0
+            import org.dep@1.0.0.{Used, Unused}
+            concept Consumer {
+                o Used used
+            }
+            `, 'consumer.cto');
+
+            const modelFile = modelManager.getModelFile('org.consumer@1.0.0');
+            const predicate = decl => decl.getFullyQualifiedName() !== 'org.dep@1.0.0.Unused';
+            const filtered = modelFile.filter(predicate, modelManager);
+
+            filtered.should.not.be.null;
+            const imports = filtered.getImports();
+            imports.should.include('org.dep@1.0.0.Used');
+            imports.should.not.include('org.dep@1.0.0.Unused');
+        });
+    });
+
 });
