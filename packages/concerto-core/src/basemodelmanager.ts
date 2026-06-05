@@ -852,9 +852,11 @@ class BaseModelManager {
      * ModelFiles with no declarations after filtering will be removed.
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
+     * @param {Object} [options] - options for the filter method
+     * @param {boolean} [options.disableValidation] — If true then the model files are not validated
      * @returns {BaseModelManager} - the filtered ModelManager
      */
-    filter(predicate){
+    filter(predicate, options?){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
         const filteredModels: ModelFileInstance[] = [];
 
@@ -868,7 +870,7 @@ class BaseModelManager {
             }
         }
 
-        modelManager.addModelFiles(filteredModels);
+        modelManager.addModelFiles(filteredModels, undefined, options?.disableValidation);
         return modelManager;
     }
 }
