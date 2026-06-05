@@ -930,6 +930,53 @@ describe('ModelFile', () => {
             should.not.exist(depImport);
         });
 
+        it('should never remove system imports regardless of predicate', () => {
+            modelManager.addCTOModel(`namespace org.test@1.0.0
+            import concerto@1.0.0.Concept
+            concept Foo {}
+            `, 'test.cto');
+
+            const modelFile = modelManager.getModelFile('org.test@1.0.0');
+            const filtered = modelFile.filter(
+                decl => decl.getFullyQualifiedName() === 'org.test@1.0.0.Foo',
+                modelManager
+            );
+
+            const ast = filtered.getAst();
+            const systemImport = ast.imports.find(imp =>
+                imp.namespace.startsWith('concerto@') || imp.namespace === 'concerto'
+            );
+            should.exist(systemImport);
+        });
+
+        it('should retain ImportType when source file is not in model manager', () => {
+            modelManager.addCTOModel(`namespace org.test@1.0.0
+            import org.missing@1.0.0.Unknown
+            concept Keeper {}
+            `, 'test.cto', true);
+
+            const modelFile = modelManager.getModelFile('org.test@1.0.0');
+            const filtered = modelFile.filter(() => true, modelManager);
+
+            const filteredAst = filtered.getAst();
+            const missingImport = filteredAst.imports.find(imp => imp.namespace === 'org.missing@1.0.0');
+            should.exist(missingImport);
+        });
+
+        it('should retain ImportTypes when source file is not in model manager', () => {
+            modelManager.addCTOModel(`namespace org.test2@1.0.0
+            import org.missing@1.0.0.{Unknown}
+            concept Keeper {}
+            `, 'test2.cto', true);
+
+            const modelFile = modelManager.getModelFile('org.test2@1.0.0');
+            const filtered = modelFile.filter(() => true, modelManager);
+
+            const filteredAst = filtered.getAst();
+            const missingImport = filteredAst.imports.find(imp => imp.namespace === 'org.missing@1.0.0');
+            should.exist(missingImport);
+        });
+
         it('should remove the entire import when all its types are filtered out', () => {
             modelManager.addCTOModel(`namespace org.dep@1.0.0
             concept OnlyType {}
