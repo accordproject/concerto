@@ -22,10 +22,29 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const IllegalModelException = require('./introspect/illegalmodelexception');
-const rfdc = require('rfdc')({
-    circles: false,
-    proto: false,
-});
+
+/**
+ * Shallow-clones a model AST, copying only the mutable paths (decorator arrays and imports).
+ * Shares all other nested structures (types, arguments, validators) by reference.
+ */
+function shallowCloneModelAst(ast) {
+    return {
+        ...ast,
+        imports: ast.imports ? ast.imports.slice() : [],
+        decorators: ast.decorators ? ast.decorators.slice() : undefined,
+        declarations: ast.declarations ? ast.declarations.map(decl => {
+            const d: any = { ...decl, decorators: decl.decorators ? decl.decorators.slice() : undefined };
+            if (decl.properties) {
+                d.properties = decl.properties.map(prop => ({
+                    ...prop, decorators: prop.decorators ? prop.decorators.slice() : undefined
+                }));
+            }
+            if (decl.key) { d.key = { ...decl.key, decorators: decl.key.decorators?.slice() }; }
+            if (decl.value) { d.value = { ...decl.value, decorators: decl.value.decorators?.slice() }; }
+            return d;
+        }) : []
+    };
+}
 
 const { jsonToYaml, yamlToJson } = require('./dcsconverter');
 
@@ -472,11 +491,16 @@ class DecoratorManager {
         const importsBySourceNs = this.buildImportMap(combinedCommands, options?.defaultNamespace);
 
         // Determine targeted namespaces — explicit from namespace commands
+        // Collect all explicitly targeted namespaces from every command
         const targetedNamespaces = new Set<string>(namespaceCommandsMap.keys());
-
-        // Resolve wildcards to specific namespaces (only if wildcards exist)
-        const hasWildcards = declarationCommandsMap.size > 0 || propertyCommandsMap.size > 0 ||
-            typeCommandsMap.size > 0 || mapElementCommandsMap.size > 0;
+        let hasWildcards = false;
+        for (const cmd of combinedCommands) {
+            if (cmd.target.namespace) {
+                targetedNamespaces.add(cmd.target.namespace);
+            } else {
+                hasWildcards = true;
+            }
+        }
         // Single pass: for each model file, either decorate it or pass it through
         const modelFiles = modelManager.getModelFiles(false);
         const resolveAst = !options?.disableMetamodelResolution;
@@ -499,7 +523,7 @@ class DecoratorManager {
 
             let modelAst = mf.getAst();
             if (resolveAst) { modelAst = modelManager.resolveMetaModel(modelAst); }
-            const model = rfdc(modelAst);
+            const model = shallowCloneModelAst(modelAst);
 
             if (importsBySourceNs.size > 0) {
                 this.addDecoratorImports(model, importsBySourceNs);
