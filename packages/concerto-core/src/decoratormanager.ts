@@ -23,7 +23,7 @@ const semver = require('semver');
 const DecoratorExtractor = require('./decoratorextractor');
 const IllegalModelException = require('./introspect/illegalmodelexception');
 const rfdc = require('rfdc')({
-    circles: true,
+    circles: false,
     proto: false,
 });
 
@@ -271,31 +271,26 @@ class DecoratorManager {
         const mapElementCommandsMap = new Map();
         const typeCommandsMap = new Map();
 
-        decoratorCommandSet.commands.map((decoratorCommand, index) => {
-            const dcsWithIndex = new DcsIndexWrapper(decoratorCommand, index);
-            switch (true) {
-            case !!decoratorCommand?.target?.type:
-                this.addDcsWithIndexToMap(typeCommandsMap, decoratorCommand.target.type, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.property:
-                this.addDcsWithIndexToMap(propertyCommandsMap, decoratorCommand.target.property, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.properties:
-                decoratorCommand.target.properties.forEach((property) => {
-                    this.addDcsWithIndexToMap(propertyCommandsMap, property, dcsWithIndex);
-                });
-                break;
-            case !!decoratorCommand?.target?.mapElement:
-                this.addDcsWithIndexToMap(mapElementCommandsMap, decoratorCommand.target.mapElement, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.declaration:
-                this.addDcsWithIndexToMap(declarationCommandsMap, decoratorCommand.target.declaration, dcsWithIndex);
-                break;
-            case !!decoratorCommand?.target?.namespace:
-                this.addDcsWithIndexToMap(namespaceCommandsMap, decoratorCommand.target.namespace, dcsWithIndex);
-                break;
+        const commands = decoratorCommandSet.commands;
+        for (let index = 0; index < commands.length; index++) {
+            const target = commands[index].target;
+            const dcsWithIndex = new DcsIndexWrapper(commands[index], index);
+            if (target.type) {
+                this.addDcsWithIndexToMap(typeCommandsMap, target.type, dcsWithIndex);
+            } else if (target.property) {
+                this.addDcsWithIndexToMap(propertyCommandsMap, target.property, dcsWithIndex);
+            } else if (target.properties) {
+                for (const prop of target.properties) {
+                    this.addDcsWithIndexToMap(propertyCommandsMap, prop, dcsWithIndex);
+                }
+            } else if (target.mapElement) {
+                this.addDcsWithIndexToMap(mapElementCommandsMap, target.mapElement, dcsWithIndex);
+            } else if (target.declaration) {
+                this.addDcsWithIndexToMap(declarationCommandsMap, target.declaration, dcsWithIndex);
+            } else if (target.namespace) {
+                this.addDcsWithIndexToMap(namespaceCommandsMap, target.namespace, dcsWithIndex);
             }
-        });
+        }
 
         return {
             namespaceCommandsMap,
@@ -354,34 +349,21 @@ class DecoratorManager {
     }
 
     /**
-     * Adds decorator commands with index to the array passed
-     * @param {DcsIndexWrapper[]} array the array to add the command to
-     * @param {*} map the target map to add the command to
-     * @param {key} key the target key to add the command to
-     * @private
-     */
-    /* istanbul ignore next */
-    static pushMapValues(array, map, key) {
-        for (const value of map.get(key) || []) {
-            array.push(value);
-        }
-    }
-
-    /**
      * Merges commands from multiple map buckets, sorts by index, and executes the callback for each.
      * @private
      */
-    static applyMergedCommands(a, b, fn, ...rest) {
-        const sources = [a, b, ...rest].filter(Boolean);
-        if (sources.length === 0) return;
-        if (sources.length === 1) {
-            for (const dcs of sources[0]) { fn(dcs); }
-        } else {
-            const merged: any[] = [];
-            for (const src of sources) { for (const v of src) merged.push(v); }
-            merged.sort((x, y) => x.getIndex() - y.getIndex());
-            for (const dcs of merged) { fn(dcs); }
-        }
+    static applyMergedCommands(a, b, fn, c?, d?, e?) {
+        if (!a && !b && !c && !d && !e) return;
+        if (!b && !c && !d && !e) { for (const dcs of a) { fn(dcs); } return; }
+        if (!a && !c && !d && !e) { for (const dcs of b) { fn(dcs); } return; }
+        const merged: any[] = [];
+        if (a) { for (const v of a) merged.push(v); }
+        if (b) { for (const v of b) merged.push(v); }
+        if (c) { for (const v of c) merged.push(v); }
+        if (d) { for (const v of d) merged.push(v); }
+        if (e) { for (const v of e) merged.push(v); }
+        merged.sort((x, y) => x.getIndex() - y.getIndex());
+        for (const dcs of merged) { fn(dcs); }
     }
 
     /**
@@ -813,24 +795,6 @@ class DecoratorManager {
     }
 
     /**
-     * Executes a Command against a Model Namespace, adding
-     * decorators to the Namespace.
-     * @private
-     * @param {*} model the model
-     * @param {*} command the Command object from the dcs
-     */
-    /* istanbul ignore next */
-    static executeNamespaceCommand(model, command) {
-        const { target, decorator, type } = command;
-        if (Object.keys(target).length === 2 && target.namespace) {
-            const { name } = ModelUtil.parseNamespace( model.namespace );
-            if(this.falsyOrEqual(target.namespace, [model.namespace, name])) {
-                this.applyDecorator(model, type, decorator);
-            }
-        }
-    }
-
-    /**
      * Executes a Command against a Declaration, adding
      * decorators to the Declaration, or its properties, as required.
      * @param {string} namespace the namespace for the declaration
@@ -913,15 +877,6 @@ class DecoratorManager {
         if (target.declaration) {
             this.applyDecorator(declaration, type, decorator);
         }
-    }
-
-    /**
-     * Legacy method. Kept for compatibility. Returns true.
-     *  @returns {Boolean} true
-     */
-    /* istanbul ignore next */
-    static isNamespaceTargetEnabled() {
-        return true;
     }
 
     /**
