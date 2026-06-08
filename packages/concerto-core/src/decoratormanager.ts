@@ -440,16 +440,19 @@ class DecoratorManager {
             }
         }
 
-        // Resolve which namespaces commands actually target using the model manager's index.
-        // This avoids cloning/traversing models that no command touches.
+        // Collect explicitly targeted namespaces from namespace commands
         const targetedNamespaces = new Set<string>();
         for (const ns of namespaceCommandsMap.keys()) {
             targetedNamespaces.add(ns);
         }
 
+        // Resolve wildcard commands (no explicit namespace) to specific namespaces.
+        // Only scan model files if wildcards exist — otherwise we already know the targets.
+        const hasWildcardCommands = declarationCommandsMap.size > 0 || propertyCommandsMap.size > 0 ||
+            typeCommandsMap.size > 0 || mapElementCommandsMap.size > 0;
+
         const modelFiles = modelManager.getModelFiles(false);
-        if (declarationCommandsMap.size > 0 || propertyCommandsMap.size > 0 ||
-            typeCommandsMap.size > 0 || mapElementCommandsMap.size > 0) {
+        if (hasWildcardCommands) {
             for (const mf of modelFiles) {
                 const ns = mf.getNamespace();
                 if (targetedNamespaces.has(ns)) continue;
@@ -482,28 +485,27 @@ class DecoratorManager {
             }
         }
 
-        // Only get AST for targeted models, clone them, and apply decorators
-        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, false) : modelManager.getAst(true, false);
-
-        const decoratedModels: any[] = [];
+        // Clone targeted models and apply all matching commands
         const processedNamespaces = new Set<string>();
+        const decoratedModelsByNamespace = new Map<string, any>();
+        const resolveAst = !options?.disableMetamodelResolution;
 
-        for (const model of ast.models) {
-            const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
-            const isTargeted = targetedNamespaces.has(model.namespace) || targetedNamespaces.has(namespaceName);
+        for (const mf of modelFiles) {
+            const ns = mf.getNamespace();
+            const namespaceName = ModelUtil.parseNamespace(ns).name;
+            if (!targetedNamespaces.has(ns) && !targetedNamespaces.has(namespaceName)) continue;
 
-            if (!isTargeted) {
-                decoratedModels.push(model);
-                continue;
+            let modelAst = mf.getAst();
+            if (resolveAst) {
+                modelAst = modelManager.resolveMetaModel(modelAst);
             }
-
-            const clonedModel = rfdc(model);
-            processedNamespaces.add(model.namespace);
+            const clonedModel = rfdc(modelAst);
+            processedNamespaces.add(ns);
 
             // Add imports for decorators (excluding self-namespace)
             let neededImports: any[] | null = null;
-            for (const [ns, imports] of importsBySourceNamespace) {
-                if (ns !== clonedModel.namespace) {
+            for (const [importNs, imports] of importsBySourceNamespace) {
+                if (importNs !== ns) {
                     if (!neededImports) { neededImports = []; }
                     for (const imp of imports) { neededImports.push(imp); }
                 }
@@ -513,7 +515,7 @@ class DecoratorManager {
             }
 
             // Apply namespace-level decorators once per model
-            const nsCommandsFull = namespaceCommandsMap.get(clonedModel.namespace);
+            const nsCommandsFull = namespaceCommandsMap.get(ns);
             const nsCommandsShort = namespaceCommandsMap.get(namespaceName);
             if (nsCommandsFull || nsCommandsShort) {
                 const nsCommands: any[] = [];
@@ -524,13 +526,13 @@ class DecoratorManager {
                 }
                 for (const dcsWithIndex of nsCommands) {
                     const { target, decorator, type } = dcsWithIndex.getCommand();
-                    if (this.falsyOrEqual(target.namespace, [clonedModel.namespace, namespaceName])) {
+                    if (this.falsyOrEqual(target.namespace, [ns, namespaceName])) {
                         this.applyDecorator(clonedModel, type, decorator);
                     }
                 }
             }
 
-            // Process declarations
+            // Apply declaration and property commands
             if (clonedModel.declarations) {
                 for (const decl of clonedModel.declarations) {
                     const { name: declarationName, $class: $classForDeclaration } = decl;
@@ -549,7 +551,7 @@ class DecoratorManager {
                             commands = declCmds || typeCmds;
                         }
                         for (const dcsWithIndex of commands) {
-                            this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand(), null, options);
+                            this.executeCommand(ns, decl, dcsWithIndex.getCommand(), null, options);
                         }
                     }
 
@@ -569,7 +571,7 @@ class DecoratorManager {
                             if (kvElCmds) { for (const v of kvElCmds) mapCommands.push(v); }
                             mapCommands.sort((a, b) => a.getIndex() - b.getIndex());
                             for (const dcsWithIndex of mapCommands) {
-                                this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand());
+                                this.executeCommand(ns, decl, dcsWithIndex.getCommand());
                             }
                         }
                     }
@@ -592,7 +594,7 @@ class DecoratorManager {
                                     commands = propCmds || propTypeCmds;
                                 }
                                 for (const dcsWithIndex of commands) {
-                                    this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand(), property);
+                                    this.executeCommand(ns, decl, dcsWithIndex.getCommand(), property);
                                 }
                             }
                         }
@@ -600,22 +602,22 @@ class DecoratorManager {
                 }
             }
 
-            decoratedModels.push(clonedModel);
+            decoratedModelsByNamespace.set(ns, clonedModel);
         }
 
-        // Build new ModelManager — reuse existing ModelFiles for unmodified models
+        // Build new ModelManager — only modified models get new ModelFiles
         const ModelFile = require('./introspect/modelfile');
         const newModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        for (const model of decoratedModels) {
-            if (processedNamespaces.has(model.namespace)) {
-                const mf = new ModelFile(newModelManager, model);
-                newModelManager.addModelFile(mf, null, null, true);
+        for (const mf of modelFiles) {
+            const ns = mf.getNamespace();
+            if (processedNamespaces.has(ns)) {
+                const newMf = new ModelFile(newModelManager, decoratedModelsByNamespace.get(ns));
+                newModelManager.addModelFile(newMf, null, null, true);
             } else {
-                const existingMf = modelManager.getModelFile(model.namespace);
-                existingMf.modelManager = newModelManager;
-                newModelManager.addModelFile(existingMf, null, null, true);
+                mf.modelManager = newModelManager;
+                newModelManager.addModelFile(mf, null, null, true);
             }
         }
         if (!options?.disableMetamodelValidation) {
