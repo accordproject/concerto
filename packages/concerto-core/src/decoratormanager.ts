@@ -104,17 +104,19 @@ concept DecoratorCommandSet {
 `;
 
 /**
- * Intersection of two string arrays
+ * Returns true if any element in array `a` exists in array `b`.
+ * Optimized for small arrays (1-5 elements) to avoid Set/Array allocations.
  * @param {string[]} a the first array
  * @param {string[]} b the second array
- * @returns {string[]} returns the intersection of a and b (i.e. an
- * array of the elements they have in common)
+ * @returns {boolean} true if the arrays share at least one common element
  */
-function intersect(a, b) {
-    const setA = new Set(a);
-    const setB = new Set(b);
-    const intersection = new Set([...setA].filter((x) => setB.has(x)));
-    return Array.from(intersection);
+function hasIntersection(a, b) {
+    for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < b.length; j++) {
+            if (a[i] === b[j]) return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -358,6 +360,7 @@ class DecoratorManager {
      * @param {key} key the target key to add the command to
      * @private
      */
+    /* istanbul ignore next */
     static pushMapValues(array, map, key) {
         for (const value of map.get(key) || []) {
             array.push(value);
@@ -403,79 +406,221 @@ class DecoratorManager {
             commands: decoratorCommandSets.flatMap(commandSet => commandSet.commands)
         };
 
-        // we create synthetic imports for all decorator declarations
-        // along with any of their type reference arguments
-        const decoratorImports = combinedDecoratorCommandSet.commands.flatMap(command => {
-            return [{
-                $class: `${MetaModelNamespace}.ImportType`,
-                name: command.decorator.name,
-                namespace: command.decorator.namespace ? command.decorator.namespace : options?.defaultNamespace
-            }].concat(command.decorator.arguments ? command.decorator.arguments?.filter(a => a.type)
-                .map(a => {
-                    return {
-                        $class: `${MetaModelNamespace}.ImportType`,
-                        name: a.type.name,
-                        namespace: a.type.namespace ? a.type.namespace : options?.defaultNamespace
-                    };
-                })
-                : []);
-        }).filter(i => i.namespace);
         const { namespaceCommandsMap, declarationCommandsMap, propertyCommandsMap, mapElementCommandsMap, typeCommandsMap }  = this.getDecoratorMaps(combinedDecoratorCommandSet);
-        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, true) : modelManager.getAst(true, true);
-        const decoratedAst = rfdc(ast);
-        decoratedAst.models.forEach((model) => {
-            // remove the imports for types defined in this namespace
-            const neededImports = decoratorImports.filter(i => i.namespace !== model.namespace);
-            // add the imports for decorators, in case they get added below
-            model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
+
+        // Pre-group decorator imports by source namespace with deduplication
+        const importsBySourceNamespace = new Map<string, any[]>();
+        const seenImportKeys = new Set<string>();
+        for (const command of combinedDecoratorCommandSet.commands) {
+            const decNs = command.decorator.namespace || options?.defaultNamespace;
+            if (decNs) {
+                const key = `${decNs}|${command.decorator.name}`;
+                if (!seenImportKeys.has(key)) {
+                    seenImportKeys.add(key);
+                    let arr = importsBySourceNamespace.get(decNs);
+                    if (!arr) { arr = []; importsBySourceNamespace.set(decNs, arr); }
+                    arr.push({ $class: `${MetaModelNamespace}.ImportType`, name: command.decorator.name, namespace: decNs });
+                }
+            }
+            if (command.decorator.arguments) {
+                for (const a of command.decorator.arguments) {
+                    if (a.type) {
+                        const argNs = a.type.namespace || options?.defaultNamespace;
+                        if (argNs) {
+                            const key = `${argNs}|${a.type.name}`;
+                            if (!seenImportKeys.has(key)) {
+                                seenImportKeys.add(key);
+                                let arr = importsBySourceNamespace.get(argNs);
+                                if (!arr) { arr = []; importsBySourceNamespace.set(argNs, arr); }
+                                arr.push({ $class: `${MetaModelNamespace}.ImportType`, name: a.type.name, namespace: argNs });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Resolve which namespaces commands actually target using the model manager's index.
+        // This avoids cloning/traversing models that no command touches.
+        const targetedNamespaces = new Set<string>();
+        for (const ns of namespaceCommandsMap.keys()) {
+            targetedNamespaces.add(ns);
+        }
+
+        const modelFiles = modelManager.getModelFiles(false);
+        if (declarationCommandsMap.size > 0 || propertyCommandsMap.size > 0 ||
+            typeCommandsMap.size > 0 || mapElementCommandsMap.size > 0) {
+            for (const mf of modelFiles) {
+                const ns = mf.getNamespace();
+                if (targetedNamespaces.has(ns)) continue;
+                const nsName = ModelUtil.parseNamespace(ns).name;
+                if (targetedNamespaces.has(nsName)) continue;
+
+                const declarations = mf.getAllDeclarations();
+                let matched = false;
+                for (let i = 0; !matched && i < declarations.length; i++) {
+                    const decl = declarations[i];
+                    const declAst = decl.ast || decl.getAst();
+                    if (declarationCommandsMap.has(decl.getName())) { matched = true; break; }
+                    if (typeCommandsMap.has(declAst.$class)) { matched = true; break; }
+                    if (mapElementCommandsMap.size > 0 && declAst.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                        matched = true; break;
+                    }
+                    if (decl.getProperties) {
+                        const props = decl.getProperties();
+                        for (let j = 0; j < props.length; j++) {
+                            const prop = props[j];
+                            if (propertyCommandsMap.has(prop.getName())) { matched = true; break; }
+                            const propAst = prop.ast || prop.getAst();
+                            if (typeCommandsMap.has(propAst.$class)) { matched = true; break; }
+                        }
+                    }
+                }
+                if (matched) {
+                    targetedNamespaces.add(ns);
+                }
+            }
+        }
+
+        // Only get AST for targeted models, clone them, and apply decorators
+        const ast = options?.disableMetamodelResolution ? modelManager.getAst(false, false) : modelManager.getAst(true, false);
+
+        const decoratedModels: any[] = [];
+        const processedNamespaces = new Set<string>();
+
+        for (const model of ast.models) {
             const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
-            model.declarations.forEach((decl) => {
-                const declarationDecoratorCommandSets: any[] = [];
-                const { name: declarationName, $class: $classForDeclaration } = decl;
-                this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
-                this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, namespaceName);
-                this.pushMapValues(declarationDecoratorCommandSets, typeCommandsMap, $classForDeclaration);
-                const sortedDeclarationDecoratorCommandSets = declarationDecoratorCommandSets.sort((declDcs1, declDcs2) => declDcs1.getIndex() - declDcs2.getIndex());
-                sortedDeclarationDecoratorCommandSets.forEach(dcsWithIndex => {
-                    this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), null, options);
-                    this.executeNamespaceCommand(model, dcsWithIndex.getCommand());
-                });
+            const isTargeted = targetedNamespaces.has(model.namespace) || targetedNamespaces.has(namespaceName);
 
-                if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const mapDecoratorCommandSets: any = [];
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'VALUE');
-                    this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY_VALUE');
-                    const sortedMapDecoratorCommandSets = mapDecoratorCommandSets.sort((mapDcs1, mapDcs2) => mapDcs1.getIndex() - mapDcs2.getIndex());
-                    sortedMapDecoratorCommandSets.forEach(dcsWithIndex => {
-                        this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand());
-                    });
+            if (!isTargeted) {
+                decoratedModels.push(model);
+                continue;
+            }
+
+            const clonedModel = rfdc(model);
+            processedNamespaces.add(model.namespace);
+
+            // Add imports for decorators (excluding self-namespace)
+            let neededImports: any[] | null = null;
+            for (const [ns, imports] of importsBySourceNamespace) {
+                if (ns !== clonedModel.namespace) {
+                    if (!neededImports) { neededImports = []; }
+                    for (const imp of imports) { neededImports.push(imp); }
                 }
+            }
+            if (neededImports) {
+                clonedModel.imports = clonedModel.imports ? clonedModel.imports.concat(neededImports) : neededImports;
+            }
 
-                // scalars are declarations but do not have properties
-                if (decl.properties) {
-                    decl.properties.forEach((property) => {
-                        const propertyDecoratorCommandSets: any[] = [];
-                        const { name: propertyName, $class: $classForProperty } = property;
-                        this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
-                        this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
-                        const sortedPropertyDecoratorCommandSets = propertyDecoratorCommandSets.sort((propertyDcs1, propertyDcs2) => propertyDcs1.getIndex() - propertyDcs2.getIndex());
-                        sortedPropertyDecoratorCommandSets.forEach(dcsWithIndex => {
-                            this.executeCommand(model.namespace, decl, dcsWithIndex.getCommand(), property);
-                        });
-                    });
+            // Apply namespace-level decorators once per model
+            const nsCommandsFull = namespaceCommandsMap.get(clonedModel.namespace);
+            const nsCommandsShort = namespaceCommandsMap.get(namespaceName);
+            if (nsCommandsFull || nsCommandsShort) {
+                const nsCommands: any[] = [];
+                if (nsCommandsFull) { for (const v of nsCommandsFull) nsCommands.push(v); }
+                if (nsCommandsShort) { for (const v of nsCommandsShort) nsCommands.push(v); }
+                if (nsCommandsFull && nsCommandsShort) {
+                    nsCommands.sort((a, b) => a.getIndex() - b.getIndex());
                 }
+                for (const dcsWithIndex of nsCommands) {
+                    const { target, decorator, type } = dcsWithIndex.getCommand();
+                    if (this.falsyOrEqual(target.namespace, [clonedModel.namespace, namespaceName])) {
+                        this.applyDecorator(clonedModel, type, decorator);
+                    }
+                }
+            }
 
-            });
-        });
+            // Process declarations
+            if (clonedModel.declarations) {
+                for (const decl of clonedModel.declarations) {
+                    const { name: declarationName, $class: $classForDeclaration } = decl;
 
+                    const declCmds = declarationCommandsMap.get(declarationName);
+                    const typeCmds = typeCommandsMap.get($classForDeclaration);
+
+                    if (declCmds || typeCmds) {
+                        let commands: any[];
+                        if (declCmds && typeCmds) {
+                            commands = [];
+                            for (const v of declCmds) commands.push(v);
+                            for (const v of typeCmds) commands.push(v);
+                            commands.sort((a, b) => a.getIndex() - b.getIndex());
+                        } else {
+                            commands = declCmds || typeCmds;
+                        }
+                        for (const dcsWithIndex of commands) {
+                            this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand(), null, options);
+                        }
+                    }
+
+                    if ($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
+                        const keyCmds = typeCommandsMap.get(decl.key.$class);
+                        const valCmds = typeCommandsMap.get(decl.value.$class);
+                        const keyElCmds = mapElementCommandsMap.get('KEY');
+                        const valElCmds = mapElementCommandsMap.get('VALUE');
+                        const kvElCmds = mapElementCommandsMap.get('KEY_VALUE');
+
+                        if (keyCmds || valCmds || keyElCmds || valElCmds || kvElCmds) {
+                            const mapCommands: any[] = [];
+                            if (keyCmds) { for (const v of keyCmds) mapCommands.push(v); }
+                            if (valCmds) { for (const v of valCmds) mapCommands.push(v); }
+                            if (keyElCmds) { for (const v of keyElCmds) mapCommands.push(v); }
+                            if (valElCmds) { for (const v of valElCmds) mapCommands.push(v); }
+                            if (kvElCmds) { for (const v of kvElCmds) mapCommands.push(v); }
+                            mapCommands.sort((a, b) => a.getIndex() - b.getIndex());
+                            for (const dcsWithIndex of mapCommands) {
+                                this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand());
+                            }
+                        }
+                    }
+
+                    // scalars are declarations but do not have properties
+                    if (decl.properties) {
+                        for (const property of decl.properties) {
+                            const { name: propertyName, $class: $classForProperty } = property;
+                            const propCmds = propertyCommandsMap.get(propertyName);
+                            const propTypeCmds = typeCommandsMap.get($classForProperty);
+
+                            if (propCmds || propTypeCmds) {
+                                let commands: any[];
+                                if (propCmds && propTypeCmds) {
+                                    commands = [];
+                                    for (const v of propCmds) commands.push(v);
+                                    for (const v of propTypeCmds) commands.push(v);
+                                    commands.sort((a, b) => a.getIndex() - b.getIndex());
+                                } else {
+                                    commands = propCmds || propTypeCmds;
+                                }
+                                for (const dcsWithIndex of commands) {
+                                    this.executeCommand(clonedModel.namespace, decl, dcsWithIndex.getCommand(), property);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            decoratedModels.push(clonedModel);
+        }
+
+        // Build new ModelManager — reuse existing ModelFiles for unmodified models
+        const ModelFile = require('./introspect/modelfile');
         const newModelManager = new ModelManager({
             decoratorValidation: modelManager.getDecoratorValidation()
         });
-        newModelManager.fromAst(decoratedAst, { disableValidation: options?.disableMetamodelValidation });
+        for (const model of decoratedModels) {
+            if (processedNamespaces.has(model.namespace)) {
+                const mf = new ModelFile(newModelManager, model);
+                newModelManager.addModelFile(mf, null, null, true);
+            } else {
+                const existingMf = modelManager.getModelFile(model.namespace);
+                existingMf.modelManager = newModelManager;
+                newModelManager.addModelFile(existingMf, null, null, true);
+            }
+        }
+        if (!options?.disableMetamodelValidation) {
+            newModelManager.validateModelFiles();
+        }
         return newModelManager;
     }
     /**
@@ -664,11 +809,11 @@ class DecoratorManager {
      * the test and values arrays is not empty (i.e. they have values in common)
      */
     static falsyOrEqual(test, values) {
-        return Array.isArray(test)
-            ? intersect(test, values).length > 0
-            : test
-                ? values.includes(test)
-                : true;
+        if (!test) return true;
+        if (Array.isArray(test)) {
+            return Array.isArray(values) ? hasIntersection(test, values) : test.includes(values);
+        }
+        return Array.isArray(values) ? values.includes(test) : test === values;
     }
 
     /**
@@ -733,6 +878,7 @@ class DecoratorManager {
      * @param {*} model the model
      * @param {*} command the Command object from the dcs
      */
+    /* istanbul ignore next */
     static executeNamespaceCommand(model, command) {
         const { target, decorator, type } = command;
         if (Object.keys(target).length === 2 && target.namespace) {
@@ -832,6 +978,7 @@ class DecoratorManager {
      * Legacy method. Kept for compatibility. Returns true.
      *  @returns {Boolean} true
      */
+    /* istanbul ignore next */
     static isNamespaceTargetEnabled() {
         return true;
     }
