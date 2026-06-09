@@ -107,9 +107,10 @@ class ModelFile extends Decorated {
 
         // Now build local types from Declarations
         this.localTypes = new Map();
+        const namespace = this.getNamespace();
         for(let index in this.declarations) {
             let classDeclaration = this.declarations[index];
-            let localType = this.getNamespace() + '.' + classDeclaration.getName();
+            let localType = namespace + '.' + classDeclaration.getName();
             this.localTypes.set(localType, this.declarations[index]);
         }
     }
@@ -743,27 +744,25 @@ class ModelFile extends Decorated {
             case `${MetaModelNamespace}.ImportAll`:
                 throw new Error('Wildcard Imports are not permitted.');
             case `${MetaModelNamespace}.ImportTypes`: {
-                const aliasedTypes = new Map();
-                if (imp.aliasedTypes) {
+                const ns = imp.namespace;
+                if (imp.aliasedTypes && imp.aliasedTypes.length > 0) {
+                    const aliasedTypes = new Map();
                     imp.aliasedTypes.forEach(({ name, aliasedName }) => {
                         if(ModelUtil.isPrimitiveType(aliasedName)){
                             throw new Error('Types cannot be aliased to primitive type');
                         }
                         aliasedTypes.set(name, aliasedName);
                     });
+                    // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
+                    imp.types.forEach((type) => {
+                        const alias = aliasedTypes.get(type);
+                        this.importShortNames.set(alias ?? type, `${ns}.${type}`);
+                    });
+                } else {
+                    imp.types.forEach((type) =>
+                        this.importShortNames.set(type, `${ns}.${type}`)
+                    );
                 }
-                // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
-                imp.types.forEach((type) =>
-                    aliasedTypes.has(type)
-                        ? this.importShortNames.set(
-                            aliasedTypes.get(type),
-                            `${imp.namespace}.${type}`
-                        )
-                        : this.importShortNames.set(
-                            type,
-                            `${imp.namespace}.${type}`
-                        )
-                );
                 break;
             }
             default:
@@ -780,74 +779,77 @@ class ModelFile extends Decorated {
         }
 
         for(let n=0; n < ast.declarations.length; n++) {
-            // Make sure to clone since we may add super type
-            let thing = Object.assign({}, ast.declarations[n]);
+            let thing = ast.declarations[n];
 
-            if(thing.$class === `${MetaModelNamespace}.AssetDeclaration`) {
+            switch(thing.$class) {
+            case `${MetaModelNamespace}.AssetDeclaration`:
                 // Default super type for asset
                 if (!thing.superType) {
+                    thing = Object.assign({}, thing);
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Asset',
                     };
                 }
                 this.declarations.push( new AssetDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.TransactionDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.TransactionDeclaration`:
                 // Default super type for transaction
                 if (!thing.superType) {
+                    thing = Object.assign({}, thing);
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Transaction',
                     };
                 }
                 this.declarations.push( new TransactionDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.EventDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.EventDeclaration`:
                 // Default super type for event
                 if (!thing.superType) {
+                    thing = Object.assign({}, thing);
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Event',
                     };
                 }
                 this.declarations.push( new EventDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.ParticipantDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.ParticipantDeclaration`:
                 // Default super type for participant
                 if (!thing.superType) {
+                    thing = Object.assign({}, thing);
                     thing.superType = {
                         $class: `${MetaModelNamespace}.TypeIdentified`,
                         name: 'Participant',
                     };
                 }
                 this.declarations.push( new ParticipantDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.EnumDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.EnumDeclaration`:
                 this.declarations.push( new EnumDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.MapDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.MapDeclaration`:
                 this.declarations.push( new MapDeclaration(this, thing) );
-            }
-            else if(thing.$class === `${MetaModelNamespace}.ConceptDeclaration`) {
+                break;
+            case `${MetaModelNamespace}.ConceptDeclaration`:
                 this.declarations.push( new ConceptDeclaration(this, thing) );
-            }
-            else if([
-                `${MetaModelNamespace}.BooleanScalar`,
-                `${MetaModelNamespace}.IntegerScalar`,
-                `${MetaModelNamespace}.LongScalar`,
-                `${MetaModelNamespace}.DoubleScalar`,
-                `${MetaModelNamespace}.StringScalar`,
-                `${MetaModelNamespace}.DateTimeScalar`,
-            ].includes(thing.$class)) {
+                break;
+            case `${MetaModelNamespace}.BooleanScalar`:
+            case `${MetaModelNamespace}.IntegerScalar`:
+            case `${MetaModelNamespace}.LongScalar`:
+            case `${MetaModelNamespace}.DoubleScalar`:
+            case `${MetaModelNamespace}.StringScalar`:
+            case `${MetaModelNamespace}.DateTimeScalar`:
                 this.declarations.push( new ScalarDeclaration(this, thing) );
-            }
-            else {
+                break;
+            default: {
                 let formatter = Globalize('en').messageFormatter('modelfile-constructor-unrecmodelelem');
 
                 throw new IllegalModelException(formatter({
                     'type': thing.$class,
                 }),this);
+            }
             }
         }
     }
