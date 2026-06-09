@@ -745,7 +745,7 @@ class ModelFile extends Decorated {
                 throw new Error('Wildcard Imports are not permitted.');
             case `${MetaModelNamespace}.ImportTypes`: {
                 const ns = imp.namespace;
-                if (imp.aliasedTypes) {
+                if (imp.aliasedTypes && imp.aliasedTypes.length > 0) {
                     const aliasedTypes = new Map();
                     imp.aliasedTypes.forEach(({ name, aliasedName }) => {
                         if(ModelUtil.isPrimitiveType(aliasedName)){
@@ -756,7 +756,7 @@ class ModelFile extends Decorated {
                     // Local-name(aliased or non-aliased) is mapped to the Fully qualified type name
                     imp.types.forEach((type) => {
                         const alias = aliasedTypes.get(type);
-                        this.importShortNames.set(alias || type, `${ns}.${type}`);
+                        this.importShortNames.set(alias ?? type, `${ns}.${type}`);
                     });
                 } else {
                     imp.types.forEach((type) =>
