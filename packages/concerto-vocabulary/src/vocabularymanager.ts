@@ -96,8 +96,7 @@ class VocabularyManager {
         }
         const voc = new Vocabulary(this, YAML.parse(contents));
 
-        const existing = Object.values(this.vocabularies).find(v => v.getIdentifier() === voc.getIdentifier());
-        if (existing) {
+        if (this.vocabularies[voc.getIdentifier()]) {
             throw new Error('Vocabulary has already been added.');
         }
         this.vocabularies[voc.getIdentifier()] = voc;
@@ -147,8 +146,16 @@ class VocabularyManager {
      * @returns {Vocabulary} the vocabulary or null if no vocabulary exists for the locale
      */
     getVocabulary(namespace: string, locale: string, options?: any): Vocabulary | null {
-        const vocs = this.getVocabulariesForNamespace(namespace);
-        return VocabularyManager.findVocabulary(locale.toLowerCase(), vocs, options);
+        const loc = locale.toLowerCase();
+        const voc = this.vocabularies[`${namespace}/${loc}`];
+        if (voc) {
+            return voc;
+        }
+        if (options?.localeMatcher === 'lookup') {
+            const vocs = this.getVocabulariesForNamespace(namespace);
+            return VocabularyManager.findVocabulary(loc, vocs, options);
+        }
+        return null;
     }
 
     /**
@@ -297,175 +304,102 @@ class VocabularyManager {
      * @returns {*} the decorator command set used to decorate the model.
      */
     generateDecoratorCommands(modelManager: ModelManager, locale: string): any {
-        const decoratorCommandSet: any = {
-            '$class': `${DC_NAMESPACE}.DecoratorCommandSet`,
-            'name': `terms-${locale}`,
-            'version': '1.0.0',
-            'commands': []
-        };
+        const commands: any[] = [];
 
-        const getPropertyNames = (declaration: any) => {
-            if (declaration.getProperties) {
-                return declaration.getProperties().map((property: any) => property.getName());
-            } else if(declaration.isMapDeclaration?.()) {
-                return ['KEY', 'VALUE'];
-            } else {
-                return [];
+        const CLASS_COMMAND = `${DC_NAMESPACE}.Command`;
+        const CLASS_TARGET = `${DC_NAMESPACE}.CommandTarget`;
+        const CLASS_DECORATOR = `${MetaModelNamespace}.Decorator`;
+        const CLASS_DECORATOR_STRING = `${MetaModelNamespace}.DecoratorString`;
+
+        const makeCommand = (target: any, decoratorName: string, value: string) => ({
+            '$class': CLASS_COMMAND,
+            'type': 'UPSERT',
+            'target': target,
+            'decorator': {
+                '$class': CLASS_DECORATOR,
+                'name': decoratorName,
+                'arguments': [{ '$class': CLASS_DECORATOR_STRING, 'value': value }]
             }
-        };
+        });
 
         // @ts-ignore
         (modelManager as any).getModelFiles().forEach((model: any) => {
-            const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, '', undefined, { generateMissing: false }); // Corrected args
-            if (terms) {
-                Object.keys(terms).forEach( term => {
-                    if(term === 'term') {
-                        decoratorCommandSet.commands.push({
-                            '$class': `${DC_NAMESPACE}.Command`,
-                            'type': 'UPSERT',
-                            'target': {
-                                '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                'namespace': model.getNamespace(),
-                            },
-                            'decorator': {
-                                '$class': `${MetaModelNamespace}.Decorator`,
-                                'name': 'Term',
-                                'arguments': [
-                                    {
-                                        '$class': `${MetaModelNamespace}.DecoratorString`,
-                                        'value': terms[term]
-                                    },
-                                ]
-                            }
-                        });
+            const namespace = model.getNamespace();
+
+            const nsTerms = this.getTerms(namespace, locale, '', undefined, { generateMissing: false });
+            if (nsTerms) {
+                const keys = Object.keys(nsTerms);
+                for (let i = 0; i < keys.length; i++) {
+                    const term = keys[i];
+                    if (term === 'term') {
+                        commands.push(makeCommand(
+                            { '$class': CLASS_TARGET, 'namespace': namespace },
+                            'Term', nsTerms[term]
+                        ));
+                    } else if (term !== 'declarations' && term !== 'namespace' && term !== 'locale') {
+                        commands.push(makeCommand(
+                            { '$class': CLASS_TARGET, 'namespace': namespace },
+                            `Term_${term}`, nsTerms[term]
+                        ));
                     }
-                    else if(term.localeCompare('declarations') && term.localeCompare('namespace') && term.localeCompare('locale')) {
-                        decoratorCommandSet.commands.push({
-                            '$class': `${DC_NAMESPACE}.Command`,
-                            'type': 'UPSERT',
-                            'target': {
-                                '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                'namespace': model.getNamespace(),
-                            },
-                            'decorator': {
-                                '$class': `${MetaModelNamespace}.Decorator`,
-                                'name': `Term_${term}`,
-                                'arguments': [
-                                    {
-                                        '$class': `${MetaModelNamespace}.DecoratorString`,
-                                        'value': terms[term]
-                                    },
-                                ]
-                            }
-                        });
-                    }
-                });
+                }
             }
+
             model.getAllDeclarations().forEach((decl: any) => {
-                const terms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName());
-                if (terms) {
-                    Object.keys(terms).forEach( term => {
-                        if(term === decl.getName()) {
-                            decoratorCommandSet.commands.push({
-                                '$class': `${DC_NAMESPACE}.Command`,
-                                'type': 'UPSERT',
-                                'target': {
-                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                    'namespace': model.getNamespace(),
-                                    'declaration': decl.getName(),
-                                },
-                                'decorator': {
-                                    '$class': `${MetaModelNamespace}.Decorator`,
-                                    'name': 'Term',
-                                    'arguments': [
-                                        {
-                                            '$class': `${MetaModelNamespace}.DecoratorString`,
-                                            'value': terms[term]
-                                        },
-                                    ]
-                                }
-                            });
+                const declName = decl.getName();
+
+                const declTerms = this.getTerms(namespace, locale, declName);
+                if (declTerms) {
+                    const keys = Object.keys(declTerms);
+                    for (let i = 0; i < keys.length; i++) {
+                        const term = keys[i];
+                        if (term === declName) {
+                            commands.push(makeCommand(
+                                { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName },
+                                'Term', declTerms[term]
+                            ));
+                        } else if (term !== 'properties') {
+                            commands.push(makeCommand(
+                                { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName },
+                                `Term_${term}`, declTerms[term]
+                            ));
                         }
-                        else if(term.localeCompare('properties')) {
-                            decoratorCommandSet.commands.push({
-                                '$class': `${DC_NAMESPACE}.Command`,
-                                'type': 'UPSERT',
-                                'target': {
-                                    '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                    'namespace': model.getNamespace(),
-                                    'declaration': decl.getName(),
-                                },
-                                'decorator': {
-                                    '$class': `${MetaModelNamespace}.Decorator`,
-                                    'name': `Term_${term}`,
-                                    'arguments': [
-                                        {
-                                            '$class': `${MetaModelNamespace}.DecoratorString`,
-                                            'value': terms[term]
-                                        },
-                                    ]
-                                }
-                            });
-                        }
-                    });
+                    }
                 }
 
-                const propertyNames = getPropertyNames(decl);
-                propertyNames.forEach((propertyName: string) => {
-                    const propertyTerms = this.resolveTerms(modelManager, model.getNamespace(), locale, decl.getName(), propertyName);
+                let propertyNames: string[] = [];
+                if (decl.getProperties) {
+                    propertyNames = decl.getProperties().map((p: any) => p.getName());
+                } else if (decl.isMapDeclaration?.()) {
+                    propertyNames = ['KEY', 'VALUE'];
+                } else {
+                    return;
+                }
+
+                for (let p = 0; p < propertyNames.length; p++) {
+                    const propertyName = propertyNames[p];
+                    const propertyTerms = this.resolveTerms(modelManager, namespace, locale, declName, propertyName);
                     if (propertyTerms) {
-                        Object.keys(propertyTerms).forEach( term => {
-                            const propertyType = propertyName === 'KEY' || propertyName === 'VALUE'  ? 'mapElement' : 'property';
-                            if(term === propertyName) {
-                                decoratorCommandSet.commands.push({
-                                    '$class': `${DC_NAMESPACE}.Command`,
-                                    'type': 'UPSERT',
-                                    'target': {
-                                        '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                        'namespace': model.getNamespace(),
-                                        'declaration': decl.getName(),
-                                        [propertyType]: propertyName
-                                    },
-                                    'decorator': {
-                                        '$class': `${MetaModelNamespace}.Decorator`,
-                                        'name': 'Term',
-                                        'arguments': [
-                                            {
-                                                '$class': `${MetaModelNamespace}.DecoratorString`,
-                                                'value': propertyTerms[term]
-                                            },
-                                        ]
-                                    }
-                                });
-                            }
-                            else {
-                                decoratorCommandSet.commands.push({
-                                    '$class': `${DC_NAMESPACE}.Command`,
-                                    'type': 'UPSERT',
-                                    'target': {
-                                        '$class': `${DC_NAMESPACE}.CommandTarget`,
-                                        'namespace': model.getNamespace(),
-                                        'declaration': decl.getName(),
-                                        [propertyType]: propertyName
-                                    },
-                                    'decorator': {
-                                        '$class': `${MetaModelNamespace}.Decorator`,
-                                        'name': `Term_${term}`,
-                                        'arguments': [
-                                            {
-                                                '$class': `${MetaModelNamespace}.DecoratorString`,
-                                                'value': propertyTerms[term]
-                                            },
-                                        ]
-                                    }
-                                });
-                            }
-                        });
+                        const propertyType = propertyName === 'KEY' || propertyName === 'VALUE' ? 'mapElement' : 'property';
+                        const keys = Object.keys(propertyTerms);
+                        for (let i = 0; i < keys.length; i++) {
+                            const term = keys[i];
+                            commands.push(makeCommand(
+                                { '$class': CLASS_TARGET, 'namespace': namespace, 'declaration': declName, [propertyType]: propertyName },
+                                term === propertyName ? 'Term' : `Term_${term}`, propertyTerms[term]
+                            ));
+                        }
                     }
-                });
+                }
             });
         });
-        return decoratorCommandSet;
+
+        return {
+            '$class': `${DC_NAMESPACE}.DecoratorCommandSet`,
+            'name': `terms-${locale}`,
+            'version': '1.0.0',
+            'commands': commands
+        };
     }
 
     /**
