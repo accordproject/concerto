@@ -330,6 +330,249 @@ describe('DecoratorManager', () => {
             decoratorCity2Property.should.not.be.null;
         });
 
+        it('should apply decorators when both declaration name and type target match the same declaration', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/test.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+
+            const dcs = {
+                '$class': 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                'name': 'test',
+                'version': '1.0.0',
+                'commands': [
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'declaration': 'Person'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'DeclTarget',
+                            'arguments': []
+                        }
+                    },
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'type': 'concerto.metamodel@1.0.0.ConceptDeclaration'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'TypeTarget',
+                            'arguments': []
+                        }
+                    }
+                ]
+            };
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, dcs);
+
+            const decl = decoratedModelManager.getType('test@1.0.0.Person');
+            decl.getDecorator('DeclTarget').should.not.be.null;
+            // SSN is also a ConceptDeclaration but 'DeclTarget' only targets declaration name 'Person'
+            const ssnDecl = decoratedModelManager.getType('test@1.0.0.SSN');
+            (ssnDecl.getDecorator('DeclTarget') === null).should.be.true;
+        });
+
+        it('should only process targeted namespaces when commands specify explicit namespace', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`namespace org.acme.hr@1.0.0
+                concept Employee {
+                    o String name
+                    o Integer age
+                }`, 'hr.cto');
+            testModelManager.addCTOModel(`namespace org.acme.finance@1.0.0
+                concept Invoice {
+                    o String ref
+                    o Double amount
+                }`, 'finance.cto');
+            testModelManager.addCTOModel(`namespace org.acme.inventory@1.0.0
+                concept Product {
+                    o String sku
+                    o Integer quantity
+                }`, 'inventory.cto');
+
+            const dcs = {
+                '$class': 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                'name': 'targeted',
+                'version': '1.0.0',
+                'commands': [{
+                    '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                    'type': 'UPSERT',
+                    'target': {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                        'namespace': 'org.acme.hr@1.0.0',
+                        'declaration': 'Employee'
+                    },
+                    'decorator': {
+                        '$class': 'concerto.metamodel@1.0.0.Decorator',
+                        'name': 'Sensitive',
+                        'arguments': []
+                    }
+                }]
+            };
+
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, dcs);
+
+            // Targeted model gets decorated
+            const employee = decoratedModelManager.getType('org.acme.hr@1.0.0.Employee');
+            employee.getDecorator('Sensitive').should.not.be.null;
+
+            // Non-targeted models are untouched but still present
+            const invoice = decoratedModelManager.getType('org.acme.finance@1.0.0.Invoice');
+            (invoice.getDecorator('Sensitive') === null).should.be.true;
+            const product = decoratedModelManager.getType('org.acme.inventory@1.0.0.Product');
+            (product.getDecorator('Sensitive') === null).should.be.true;
+        });
+
+        it('should resolve wildcard commands (no namespace) to only the models that contain matching targets', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`namespace org.acme.hr@1.0.0
+                concept Employee {
+                    o String name
+                    o Integer age
+                }`, 'hr.cto');
+            testModelManager.addCTOModel(`namespace org.acme.finance@1.0.0
+                concept Invoice {
+                    o String ref
+                    o Double amount
+                }`, 'finance.cto');
+            testModelManager.addCTOModel(`namespace org.acme.inventory@1.0.0
+                concept Product {
+                    o String sku
+                    o Integer quantity
+                }`, 'inventory.cto');
+
+            const dcs = {
+                '$class': 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                'name': 'wildcard',
+                'version': '1.0.0',
+                'commands': [
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'declaration': 'Employee'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'ByName',
+                            'arguments': []
+                        }
+                    },
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'property': 'sku'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'Tracked',
+                            'arguments': []
+                        }
+                    }
+                ]
+            };
+
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, dcs);
+
+            // Declaration wildcard resolved to hr namespace only
+            const employee = decoratedModelManager.getType('org.acme.hr@1.0.0.Employee');
+            employee.getDecorator('ByName').should.not.be.null;
+
+            // Property wildcard resolved to inventory namespace only
+            const product = decoratedModelManager.getType('org.acme.inventory@1.0.0.Product');
+            product.getProperty('sku').getDecorator('Tracked').should.not.be.null;
+
+            // Finance model untouched — no commands resolved to it
+            const invoice = decoratedModelManager.getType('org.acme.finance@1.0.0.Invoice');
+            (invoice.getDecorator('ByName') === null).should.be.true;
+            (invoice.getProperty('ref').getDecorator('Tracked') === null).should.be.true;
+        });
+
+        it('should handle mixed commands — explicit namespace and wildcards in the same command set', async function() {
+            const testModelManager = new ModelManager();
+            testModelManager.addCTOModel(`namespace org.acme.hr@1.0.0
+                concept Employee {
+                    o String name
+                    o Integer age
+                }`, 'hr.cto');
+            testModelManager.addCTOModel(`namespace org.acme.finance@1.0.0
+                concept Invoice {
+                    o String ref
+                    o Double amount
+                }
+                concept Employee {
+                    o String department
+                }`, 'finance.cto');
+            testModelManager.addCTOModel(`namespace org.acme.inventory@1.0.0
+                concept Product {
+                    o String sku
+                    o Integer quantity
+                }`, 'inventory.cto');
+
+            const dcs = {
+                '$class': 'org.accordproject.decoratorcommands@0.4.0.DecoratorCommandSet',
+                'name': 'mixed',
+                'version': '1.0.0',
+                'commands': [
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'namespace': 'org.acme.inventory@1.0.0',
+                            'declaration': 'Product'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'Catalogued',
+                            'arguments': []
+                        }
+                    },
+                    {
+                        '$class': 'org.accordproject.decoratorcommands@0.4.0.Command',
+                        'type': 'UPSERT',
+                        'target': {
+                            '$class': 'org.accordproject.decoratorcommands@0.4.0.CommandTarget',
+                            'declaration': 'Employee'
+                        },
+                        'decorator': {
+                            '$class': 'concerto.metamodel@1.0.0.Decorator',
+                            'name': 'PII',
+                            'arguments': []
+                        }
+                    }
+                ]
+            };
+
+            const decoratedModelManager = DecoratorManager.decorateModels(testModelManager, dcs);
+
+            // Explicit namespace target: inventory.Product gets Catalogued
+            const product = decoratedModelManager.getType('org.acme.inventory@1.0.0.Product');
+            product.getDecorator('Catalogued').should.not.be.null;
+
+            // Wildcard resolves Employee in BOTH hr and finance namespaces
+            const hrEmployee = decoratedModelManager.getType('org.acme.hr@1.0.0.Employee');
+            hrEmployee.getDecorator('PII').should.not.be.null;
+
+            const finEmployee = decoratedModelManager.getType('org.acme.finance@1.0.0.Employee');
+            finEmployee.getDecorator('PII').should.not.be.null;
+
+            // Invoice in finance is untouched by PII (wrong declaration name)
+            const invoice = decoratedModelManager.getType('org.acme.finance@1.0.0.Invoice');
+            (invoice.getDecorator('PII') === null).should.be.true;
+
+            // inventory.Product does NOT get PII (no Employee declaration there)
+            (product.getDecorator('PII') === null).should.be.true;
+        });
+
         it('should decorate the specified MapDeclaration', async function() {
             // load a model to decorate
             const testModelManager = new ModelManager({ skipLocationNodes: true });
