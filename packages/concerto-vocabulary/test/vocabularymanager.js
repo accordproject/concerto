@@ -520,8 +520,8 @@ declarations:
 `;
         const vm = new VocabularyManager();
         const voc = vm.addVocabulary(yaml, { enableSafeVocabParsing: true });
-        voc.getTerm('Person').should.be.a('string');
-        voc.getTerm('Vehicle').should.be.a('string');
+        voc.getTerm('Person').should.equal('{name: value}');
+        voc.getTerm('Vehicle').should.equal('[car, truck]');
     });
 
     it('addVocabulary - throws on malformed YAML', () => {
