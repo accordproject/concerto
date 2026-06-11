@@ -497,4 +497,48 @@ declarations:
         const ssnDecorator = ssnDeclaration.getDecorator('Term');
         ssnDecorator.getArguments()[0].should.equal('SSN');
     });
+
+    it('addVocabulary - preserves flow-style collections as strings', () => {
+        const yaml = `locale: en
+namespace: org.test@1.0.0
+declarations:
+  - Person: "{Човек}"
+  - Vehicle: A road vehicle
+`;
+        const vm = new VocabularyManager();
+        const voc = vm.addVocabulary(yaml);
+        voc.getTerm('Person').should.equal('{Човек}');
+        voc.getTerm('Vehicle').should.equal('A road vehicle');
+    });
+
+    it('addVocabulary - converts unquoted flow collections to strings with enableSafeVocabParsing', () => {
+        const yaml = `locale: en
+namespace: org.test@1.0.0
+declarations:
+  - Person: {name: value}
+  - Vehicle: [car, truck]
+`;
+        const vm = new VocabularyManager();
+        const voc = vm.addVocabulary(yaml, { enableSafeVocabParsing: true });
+        voc.getTerm('Person').should.be.a('string');
+        voc.getTerm('Vehicle').should.be.a('string');
+    });
+
+    it('addVocabulary - throws on malformed YAML', () => {
+        const { parseVocabularyYaml } = require('../src/yamlparser');
+        should.Throw(() => parseVocabularyYaml('{{{{invalid'), Error);
+    });
+
+    it('addVocabulary - enableSafeVocabParsing coerces non-string scalars to strings', () => {
+        const yaml = `locale: en
+namespace: org.test@1.0.0
+declarations:
+  - Active: true
+  - Count: 42
+`;
+        const vm = new VocabularyManager();
+        const voc = vm.addVocabulary(yaml, { enableSafeVocabParsing: true });
+        voc.getTerm('Active').should.equal('true');
+        voc.getTerm('Count').should.equal('42');
+    });
 });
