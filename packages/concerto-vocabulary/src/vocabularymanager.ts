@@ -16,6 +16,7 @@ import YAML from 'yaml';
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import Vocabulary = require('./vocabulary');
 import { ModelUtil, ModelManager } from '@accordproject/concerto-core';
+import { parseVocabularyYaml } from './yamlparser';
 
 const DC_NAMESPACE = 'org.accordproject.decoratorcommands@0.4.0';
 
@@ -88,13 +89,15 @@ class VocabularyManager {
     /**
      * Adds a vocabulary to the vocabulary manager
      * @param {string} contents the YAML string for the vocabulary
+     * @param {*} [options] options to configure vocabulary parsing
+     * @param {boolean} [options.enableSafeVocabParsing] When true, ensures vocabulary values are resolved correctly as strings
      * @returns {Vocabulary} the vocabulary the was added
      */
-    addVocabulary(contents: any): Vocabulary {
+    addVocabulary(contents: any, options?: any): Vocabulary {
         if (!contents) {
             throw new Error('Vocabulary contents must be specified');
         }
-        const voc = new Vocabulary(this, YAML.parse(contents));
+        const voc = new Vocabulary(this, options?.enableSafeVocabParsing ? parseVocabularyYaml(contents) : YAML.parse(contents));
 
         if (this.vocabularies[voc.getIdentifier()]) {
             throw new Error('Vocabulary has already been added.');
