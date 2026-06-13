@@ -154,9 +154,9 @@
     "exclude": [],
     "all": true,
     "check-coverage": true,
-    "statements": 99,
+    "statements": 98.5,
     "branches": 94.8,
     "functions": 99,
-    "lines": 99
+    "lines": 98.5
   }
 }

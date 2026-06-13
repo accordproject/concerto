@@ -665,6 +665,61 @@ class ClassDeclaration extends Declaration {
     isClassDeclaration() {
         return true;
     }
+
+    /**
+     * Validate a JSON instance against this class declaration.
+     *
+     * Wraps {@link Serializer#fromJSON} and {@link ResourceValidator} so the
+     * caller does not have to assemble the pipeline by hand or use try/catch
+     * for control flow. By default, all violations are collected; pass
+     * `{collectAll: false}` to stop at the first error.
+     *
+     * @param {unknown} json the JSON object to validate
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {Object} the structured result {valid, resource|errors}
+     */
+    validateInstance(json, options?) {
+        const { validateInstance } = require('../serializer/instancevalidator');
+        return validateInstance(this, json, options);
+    }
+
+    /**
+     * Validate a JSON instance and return the populated Resource, or throw a
+     * {@link ValidationException} with aggregated diagnostics on failure.
+     *
+     * @param {unknown} json the JSON object to validate
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {Resource} the populated Resource on success
+     * @throws {ValidationException} on failure
+     */
+    validateInstanceOrThrow(json, options?) {
+        const { validateInstanceOrThrow } = require('../serializer/instancevalidator');
+        return validateInstanceOrThrow(this, json, options);
+    }
+
+    /**
+     * Predicate form of {@link ClassDeclaration#validateInstance}. Returns
+     * true if the JSON is a valid instance of this type (or any subtype).
+     *
+     * @param {unknown} json the JSON object to test
+     * @param {Object} [options] - validation options (see serializer/instancevalidator)
+     * @returns {boolean} true if the JSON is a valid instance
+     */
+    isValidInstance(json, options?) {
+        const { isValidInstance } = require('../serializer/instancevalidator');
+        return isValidInstance(this, json, options);
+    }
+
+    /**
+     * Generate a JSON instance that conforms to this class declaration.
+     *
+     * @param {Object} [options] - generation options (see serializer/instancevalidator)
+     * @returns {object} a conforming JSON object
+     */
+    generateSample(options?) {
+        const { generateSample } = require('../serializer/instancevalidator');
+        return generateSample(this, options);
+    }
 }
 
 export = ClassDeclaration;
