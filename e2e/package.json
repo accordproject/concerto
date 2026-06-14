@@ -1,0 +1,13 @@
+{
+  "name": "concerto-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end browser tests for Concerto web bundles.",
+  "scripts": {
+    "pretest:e2e": "npm --prefix .. run build",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

@@ -12,12 +12,13 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean && cd ./default-ruleset && npm run build",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && npm run build:esm",
     "pretest": "npm-run-all lint",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -51,5 +52,16 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.2.5",
     "typescript": "5.7.2"
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false
 }

@@ -22,9 +22,7 @@ const ModelUtil = require('../modelutil');
 const ValidationException = require('./validationexception');
 const Globalize = require('../globalize');
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+const dayjs = require('../dayjs-setup');
 
 /**
  * <p>

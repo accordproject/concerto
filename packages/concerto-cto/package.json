@@ -23,9 +23,10 @@
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
-    "build": "npm run parser && tsc -p tsconfig.build.json",
+    "build": "npm run parser && tsc -p tsconfig.build.json && npm run build:esm",
     "postbuild": "npm run webpack",
-    "webpack": "webpack --config webpack.config.js --mode production"
+    "webpack": "webpack --config webpack.config.js --mode production",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -138,5 +139,16 @@
     "branches": 100,
     "functions": 100,
     "lines": 100
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false
 }
