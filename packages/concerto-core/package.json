@@ -172,6 +172,6 @@
   },
   "sideEffects": [
     "./dist/dayjs-setup.js",
-    "./dist/esm/index.mjs"
+    "./dist/esm/dayjs-setup.js"
   ]
 }

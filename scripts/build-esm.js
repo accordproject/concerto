@@ -25,6 +25,7 @@ const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const entryPoint = path.join(packageDir, 'src', 'index.ts');
 const outfile = path.join(packageDir, 'dist', 'esm', 'index.mjs');
 const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
+const hasDayjsSetup = fs.existsSync(path.join(packageDir, 'src', 'dayjs-setup.ts'));
 
 const workspacePackages = [
     '@accordproject/concerto-analysis',
@@ -45,9 +46,7 @@ const external = [
     ...builtinModules.map(name => `node:${name}`),
 ];
 
-esbuild.buildSync({
-    entryPoints: [entryPoint],
-    outfile,
+const commonBuildOptions = {
     bundle: true,
     format: 'esm',
     platform: isNodeOnlyPackage ? 'node' : 'browser',
@@ -59,4 +58,21 @@ esbuild.buildSync({
         js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);',
     },
     logLevel: 'info',
+};
+
+esbuild.buildSync({
+    ...commonBuildOptions,
+    entryPoints: [entryPoint],
+    outfile,
 });
+
+// For packages with dayjs-setup, also emit it as a separate ESM file so the
+// sideEffects field in package.json can reference it without marking the entire
+// index.mjs as side-effectful.
+if (hasDayjsSetup) {
+    esbuild.buildSync({
+        ...commonBuildOptions,
+        entryPoints: [path.join(packageDir, 'src', 'dayjs-setup.ts')],
+        outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.js'),
+    });
+}
