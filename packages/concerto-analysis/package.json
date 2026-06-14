@@ -12,12 +12,13 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && npm run build:esm",
     "pretest": "npm-run-all licchk lint",
     "lint": "eslint .",
     "licchk": "license-check-and-add",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -94,5 +95,16 @@
         "file": "./HEADER.md"
       }
     }
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false
 }
