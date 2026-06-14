@@ -1,9 +1,11 @@
 {
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/path-browserify": "^1.0.3",
     "colors": "1.4.0",
     "coveralls-next": "^5.0.0",
     "dayjs": "1.11.10",
+    "esbuild": "^0.27.7",
     "eslint": "8.57.1",
     "glob": "^7.2.0",
     "jsdoc": "^4.0.2",
@@ -23,7 +25,8 @@
     "packages/concerto-util",
     "packages/concerto-vocabulary",
     "packages/concerto-linter",
-    "packages/concerto-linter/default-ruleset"
+    "packages/concerto-linter/default-ruleset",
+    "e2e"
   ],
   "overrides": {
     "ajv@^8.0.0": "8.17.1"
@@ -42,7 +45,8 @@
     "build:level0": "npm run build -w packages/concerto-util",
     "build:level1": "npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core",
     "build:level2": "npm run build -w packages/concerto-analysis -w packages/concerto-vocabulary -w packages/concertino -w packages/concerto-linter",
-    "build:parallel": "npm run build --workspaces --if-present"
+    "build:parallel": "npm run build --workspaces --if-present",
+    "test:e2e": "npm run test:e2e -w concerto-e2e"
   },
   "repository": {
     "type": "git",
@@ -58,6 +62,7 @@
       ".gitattributes",
       ".tern-project",
       "node_modules",
+      "e2e",
       "packages",
       "softhsm",
       "build.cfg",

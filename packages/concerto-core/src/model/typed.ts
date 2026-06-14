@@ -14,11 +14,8 @@
 
 'use strict';
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
+const dayjs = require('../dayjs-setup');
 const Util = require('@accordproject/concerto-util').NullUtil;
-
-dayjs.extend(utc);
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
