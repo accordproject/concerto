@@ -87,7 +87,7 @@ const negative = [{
     name: 'root hierarchy',
     sample: './data/hierarchy2err.json',
     ctoFiles: ['./models/hierarchy2.cto'],
-    error: 'Unexpected properties for type org.test@1.0.0.C: c, t',
+    error: 'Unexpected properties for type org.test@1.0.0.C: c',
     errorFunctional: 'Instance "undefined" has a property named "c", which is not declared in "org.test@1.0.0.C".'
 }, {
     name: 'user defined identifier',
