@@ -66,7 +66,7 @@ type VisitorTarget = Declaration | Field | ClassDeclaration | MapDeclaration | R
  * @return {Array} property names.
  * @private
  */
-function getAssignableProperties(resourceData, classDeclaration) {
+function getAssignableProperties(resourceData, classDeclaration, strict = false) {
     const properties = Object.keys(resourceData);
     const privateProperties = properties.filter(ModelUtil.isPrivateSystemProperty);
     if (privateProperties.length > 0){
@@ -82,6 +82,12 @@ function getAssignableProperties(resourceData, classDeclaration) {
         throw new ValidationException(errorText);
     }
 
+    if (strict) {
+        return properties.filter((property) => {
+            return !ModelUtil.isSystemProperty(property);
+        });
+    }
+
     return properties.filter((property) => {
         return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
     });
@@ -94,7 +100,7 @@ function getAssignableProperties(resourceData, classDeclaration) {
  * @throws {ValidationException} if any properties are not defined by the class declaration.
  * @private
  */
-function validateProperties(properties, classDeclaration) {
+function validateProperties(properties, classDeclaration, path?) {
     const expectedProperties = classDeclaration
         .getProperties()
         .map((property) => property.getName());
@@ -103,7 +109,10 @@ function validateProperties(properties, classDeclaration) {
     if (invalidProperties.length > 0) {
         const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
             invalidProperties.join(', ');
-        throw new ValidationException(errorText);
+        throw new ValidationException(errorText, undefined, {
+            path,
+            code: 'UNKNOWN_PROPERTY',
+        });
     }
 }
 
@@ -123,6 +132,7 @@ class JSONPopulator {
     acceptResourcesForRelationships: boolean | undefined;
     utcOffset: number;
     strictQualifiedDateTimes: boolean;
+    strict: boolean;
     /**
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
@@ -130,12 +140,14 @@ class JSONPopulator {
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
+     * @param {boolean} [strict=false] - Throw on unknown or unmapped properties during deserialization.
 
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
+    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes, strict?) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes !== undefined ? strictQualifiedDateTimes : true;
+        this.strict = strict || false;
 
         if (process.env.TZ){
             debug(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
@@ -179,8 +191,9 @@ class JSONPopulator {
         const resourceObj = parameters.resourceStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        const properties = getAssignableProperties(jsonObj, classDeclaration);
-        validateProperties(properties, classDeclaration);
+        const properties = getAssignableProperties(jsonObj, classDeclaration, this.strict);
+        const currentPath = parameters.path?.stack.join('');
+        validateProperties(properties, classDeclaration, currentPath);
 
         properties.forEach((property) => {
             let value = jsonObj[property];
@@ -190,6 +203,22 @@ class JSONPopulator {
                 const classProperty = classDeclaration.getProperty(property);
                 resourceObj[property] = classProperty.accept(this,parameters);
                 parameters.path?.pop();
+            } else if (this.strict) {
+                const classProperty = classDeclaration.getProperty(property);
+                if (!classProperty.isOptional?.()) {
+                    const propertyPath = `${currentPath}.${property}`;
+                    const expectedType = classProperty.getFullyQualifiedTypeName();
+                    throw new ValidationException(
+                        `Expected value at path \`${propertyPath}\` to be of type \`${expectedType}\`, but got null`,
+                        undefined,
+                        {
+                            path: propertyPath,
+                            code: 'TYPE_VIOLATION',
+                            expected: expectedType,
+                            actual: 'null',
+                        }
+                    );
+                }
             }
         });
         return resourceObj;

@@ -507,6 +507,50 @@ describe('Serializer', () => {
             roundTrip.isPrivate.should.be.false;
         });
 
+        it('should throw on unknown null-valued properties when strict is true', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            (() =>
+                serializer.fromJSON(json, { strict: true, validate: false })
+            ).should.throw(/Unexpected properties.*unknownField/);
+        });
+
+        it('should attach structured details when strict hydrate fails with validate false', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            let error;
+            try {
+                serializer.fromJSON(json, { strict: true, validate: false });
+            } catch (e) {
+                error = e;
+            }
+            error.should.be.an.instanceOf(require('../src/serializer/validationexception'));
+            error.details.code.should.equal('UNKNOWN_PROPERTY');
+            error.details.path.should.equal('$');
+        });
+
+        it('should not throw on unknown null-valued properties when strict is false', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            const result = serializer.fromJSON(json, { strict: false, validate: false });
+            result.should.be.an.instanceOf(Resource);
+        });
+
         const json = {
             $class : 'org.acme.sample@1.0.0.DateTimeTest',
         };

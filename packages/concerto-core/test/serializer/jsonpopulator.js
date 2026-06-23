@@ -864,4 +864,141 @@ describe('JSONPopulator', () => {
 
     });
 
+    describe('#strict mode', () => {
+
+        let strictPopulator;
+
+        beforeEach(() => {
+            strictPopulator = new JSONPopulator(false, false, 0, true, true);
+        });
+
+        it('should throw on unknown properties with null values when strict is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.throw(ValidationException, /Unexpected properties.*unknownProp/);
+        });
+
+        it('should attach structured details for unknown properties when strict is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let error;
+            try {
+                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            } catch (e) {
+                error = e;
+            }
+            error.should.be.an.instanceOf(ValidationException);
+            error.details.code.should.equal('UNKNOWN_PROPERTY');
+            error.details.path.should.equal('$');
+        });
+
+        it('should attach structured details for required null fields when strict is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            let error;
+            try {
+                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            } catch (e) {
+                error = e;
+            }
+            error.should.be.an.instanceOf(ValidationException);
+            error.details.code.should.equal('TYPE_VIOLATION');
+            error.details.path.should.equal('$.assetId');
+            error.details.expected.should.equal('String');
+            error.details.actual.should.equal('null');
+        });
+
+        it('should not throw on known properties with null values when strict is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                assetValue: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should silently ignore unknown null-valued properties when strict is false', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should not throw on system properties ($class, $identifier) when strict is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                $identifier: 'asset1',
+                assetId: 'asset1'
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+    });
+
 });

@@ -17,6 +17,16 @@
 const BaseException = require('@accordproject/concerto-util').BaseException;
 
 /**
+ * Optional structured details for a validation failure.
+ * Intended for conversion to Diagnostic objects by higher-level validation APIs.
+ * @typedef {Object} ValidationExceptionDetails
+ * @property {string} [path] - JSON path to the invalid value (e.g. `$.declarations[0].name`)
+ * @property {string} [code] - Machine-readable code (e.g. `UNKNOWN_PROPERTY`, `TYPE_VIOLATION`)
+ * @property {string} [expected] - Expected type or value description
+ * @property {string} [actual] - Actual type or value description
+ */
+
+/**
  * Exception thrown when a resource fails to model against the model
  * @extends BaseException
  * @see See {@link  BaseException}
@@ -25,14 +35,24 @@ const BaseException = require('@accordproject/concerto-util').BaseException;
  * @private
  */
 class ValidationException extends BaseException {
+    details?: {
+        path?: string;
+        code?: string;
+        expected?: string;
+        actual?: string;
+    };
 
     /**
      * Create a ValidationException
      * @param {string} message - the message for the exception
-     * @param {string} component - the optional component which throws this error
+     * @param {string} [component] - the optional component which throws this error
+     * @param {ValidationExceptionDetails} [details] - optional structured details for diagnostic conversion
      */
-    constructor(message, component) {
+    constructor(message, component?, details?) {
         super(message, component);
+        if (details) {
+            this.details = details;
+        }
     }
 }
 
