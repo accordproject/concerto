@@ -26,6 +26,7 @@ const Serializer = require('./serializer');
 const TypeNotFoundException = require('./typenotfoundexception');
 const MetamodelException = require('./metamodelexception');
 import type { ModelFileSource, ModelManagerOptions } from './types';
+import { STRICT_VALIDATE_OPTIONS } from './types';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
 
@@ -291,7 +292,7 @@ class BaseModelManager {
 
         try {
             // Use deserialization to validate the AST
-            this.getSerializer().fromJSON(modelFile.getAst());
+            this.getSerializer().fromJSON(modelFile.getAst(), STRICT_VALIDATE_OPTIONS);
         } catch (err: unknown) {
             const error = err as Error;
             throw new MetamodelException(error.message);

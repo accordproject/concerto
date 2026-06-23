@@ -41,9 +41,9 @@ function newMetaModelManager() {
 /**
  * Validate metamodel instance against the metamodel
  * @param {object} input - the metamodel instance in JSON
- * @param {object} [options] - serializer options (see {@link Serializer#fromJSON})
- * @param {boolean} [options.strict] - reject unknown properties and fail fast on required
- * fields set to null during deserialization
+ * @param {object} [options] - deserialize options (see {@link Serializer#fromJSON})
+ * @param {boolean} [options.rejectUnknownKeys] - error on extra fields not in the model
+ * @param {boolean} [options.rejectRequiredNull] - fail fast when a required field is explicitly null
  * @return {object} the validated metamodel instance in JSON
  */
 function validateMetaModel(input, options?) {

@@ -22,6 +22,7 @@ const ModelManager = require('../../src/modelmanager');
 const Relationship = require('../../src/model/relationship');
 const Resource = require('../../src/model/resource');
 const ValidationException = require('../../src/serializer/validationexception');
+const { STRICT_VALIDATE_OPTIONS } = require('../../src');
 const TypeNotFoundException = require('../../src/typenotfoundexception');
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
@@ -864,15 +865,19 @@ describe('JSONPopulator', () => {
 
     });
 
-    describe('#strict mode', () => {
+    describe('#deserialize options', () => {
 
         let strictPopulator;
+        let rejectUnknownKeysPopulator;
+        let rejectRequiredNullPopulator;
 
         beforeEach(() => {
-            strictPopulator = new JSONPopulator(false, false, 0, true, true);
+            strictPopulator = new JSONPopulator(false, false, 0, true, STRICT_VALIDATE_OPTIONS);
+            rejectUnknownKeysPopulator = new JSONPopulator(false, false, 0, true, { rejectUnknownKeys: true });
+            rejectRequiredNullPopulator = new JSONPopulator(false, false, 0, true, { rejectRequiredNull: true });
         });
 
-        it('should throw on unknown properties with null values when strict is true', () => {
+        it('should throw on unknown properties with null values when rejectUnknownKeys is true', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -887,11 +892,11 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             (() => {
-                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+                rejectUnknownKeysPopulator.visitClassDeclaration(classDeclaration, parameters);
             }).should.throw(ValidationException, /Unexpected properties.*unknownProp/);
         });
 
-        it('should attach structured details for unknown properties when strict is true', () => {
+        it('should attach structured details for unknown properties when rejectUnknownKeys is true', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -907,7 +912,7 @@ describe('JSONPopulator', () => {
             };
             let error;
             try {
-                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+                rejectUnknownKeysPopulator.visitClassDeclaration(classDeclaration, parameters);
             } catch (e) {
                 error = e;
             }
@@ -916,7 +921,7 @@ describe('JSONPopulator', () => {
             error.details.path.should.equal('$');
         });
 
-        it('should attach structured details for required null fields when strict is true', () => {
+        it('should attach structured details for required null fields when rejectRequiredNull is true', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -931,7 +936,7 @@ describe('JSONPopulator', () => {
             };
             let error;
             try {
-                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+                rejectRequiredNullPopulator.visitClassDeclaration(classDeclaration, parameters);
             } catch (e) {
                 error = e;
             }
@@ -942,7 +947,7 @@ describe('JSONPopulator', () => {
             error.details.actual.should.equal('null');
         });
 
-        it('should not throw on known properties with null values when strict is true', () => {
+        it('should not throw on known optional null values when rejectRequiredNull is true', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -957,11 +962,11 @@ describe('JSONPopulator', () => {
                 modelManager: modelManager
             };
             (() => {
-                strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+                rejectRequiredNullPopulator.visitClassDeclaration(classDeclaration, parameters);
             }).should.not.throw();
         });
 
-        it('should silently ignore unknown null-valued properties when strict is false', () => {
+        it('should silently ignore unknown null-valued properties by default', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -980,7 +985,7 @@ describe('JSONPopulator', () => {
             }).should.not.throw();
         });
 
-        it('should not throw on system properties ($class, $identifier) when strict is true', () => {
+        it('should not throw on system properties ($class, $identifier) with STRICT_VALIDATE_OPTIONS', () => {
             const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
             const resource = {};
             const json = {
@@ -996,6 +1001,24 @@ describe('JSONPopulator', () => {
             };
             (() => {
                 strictPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should not reject required null when only rejectUnknownKeys is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                rejectUnknownKeysPopulator.visitClassDeclaration(classDeclaration, parameters);
             }).should.not.throw();
         });
 

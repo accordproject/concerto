@@ -297,6 +297,20 @@ describe('ModelManager', () => {
                 basemodelmanager.addModel(ast, undefined, 'origFile');
             }).should.throw('Model file version 99.0.0 does not match metamodel version 1.0.0');
         });
+
+        it('should reject null-valued unknown properties in metamodel AST validation', () => {
+            const basemodelmanager = new BaseModelManager({ metamodelValidation: true });
+            const ast = {
+                $class: `${MetaModelNamespace}.Model`,
+                namespace: 'org.acme@1.0.0',
+                declarations: [],
+                decorators: [],
+                'not-required-key': null
+            };
+            (() => {
+                basemodelmanager.addModel(ast, undefined, 'origFile');
+            }).should.throw(/Unexpected properties.*not-required-key/);
+        });
     });
 
     describe('#addModelFiles', () => {

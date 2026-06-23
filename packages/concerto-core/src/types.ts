@@ -35,3 +35,21 @@ export interface ModelFileSource {
     definitions: string | null;
     fileName: string;
 }
+
+/**
+ * Options controlling deserialization-time validation in Serializer.fromJSON.
+ */
+export interface DeserializeOptions {
+    /** Error on extra fields not in the model (Zod .strict()). Default false. */
+    rejectUnknownKeys?: boolean;
+    /** Fail fast when a required field is explicitly null. Default false. */
+    rejectRequiredNull?: boolean;
+    /** Type-only; strip as default deferred to #1239. */
+    unknownKeys?: 'strip';
+}
+
+/** Preset for strict metamodel validation and future validateInstance callers. */
+export const STRICT_VALIDATE_OPTIONS: DeserializeOptions = {
+    rejectUnknownKeys: true,
+    rejectRequiredNull: true,
+};

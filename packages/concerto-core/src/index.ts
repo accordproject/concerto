@@ -55,6 +55,9 @@ import Serializer = require("./serializer");
 import ModelUtil = require("./modelutil");
 import DateTimeUtil = require("./datetimeutil");
 import MetaModel = require("./introspect/metamodel");
+import { STRICT_VALIDATE_OPTIONS } from "./types";
+
+export type { DeserializeOptions } from "./types";
 
 // Re-exporting ModelManager here makes it available as 'import { ModelManager }' to the outside world
 export { 
@@ -98,5 +101,6 @@ export {
     ModelUtil, 
     ModelLoader, 
     DateTimeUtil, 
-    MetaModel 
+    MetaModel,
+    STRICT_VALIDATE_OPTIONS
 };

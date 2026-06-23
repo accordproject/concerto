@@ -20,6 +20,7 @@ const {
     validateMetaModel,
     modelManagerFromMetaModel
 } = require('../../src/introspect/metamodel');
+const { STRICT_VALIDATE_OPTIONS } = require('../../src');
 const ParserUtil = require('./parserutility');
 
 const { Parser, Printer } = require('@accordproject/concerto-cto');
@@ -231,7 +232,7 @@ describe('MetaModel (Parent - Child (Import Aliasing))', () => {
     });
 });
 
-describe('#validateMetaModel strict mode', () => {
+describe('#validateMetaModel deserialize options', () => {
     const emptyMetaModel = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/model/empty.json'), 'utf8'));
 
     const baseModelAst = {
@@ -262,12 +263,12 @@ describe('#validateMetaModel strict mode', () => {
         (() => validateMetaModel(ast)).should.not.throw();
     });
 
-    it('should reject null-valued unknown properties when strict is true', () => {
+    it('should reject null-valued unknown properties when rejectUnknownKeys is true', () => {
         const ast = JSON.parse(JSON.stringify(baseModelAst));
         ast.declarations[0].properties[0]['not-required-key'] = null;
         let error;
         try {
-            validateMetaModel(ast, { strict: true });
+            validateMetaModel(ast, { rejectUnknownKeys: true });
         } catch (e) {
             error = e;
         }
@@ -282,12 +283,12 @@ describe('#validateMetaModel strict mode', () => {
         (() => validateMetaModel(ast)).should.throw(ValidationException, /Unexpected properties/);
     });
 
-    it('should fail fast on required fields set to null when strict is true', () => {
+    it('should fail fast on required fields set to null when rejectRequiredNull is true', () => {
         const ast = JSON.parse(JSON.stringify(baseModelAst));
         ast.declarations[0].properties[0].name = null;
         let error;
         try {
-            validateMetaModel(ast, { strict: true });
+            validateMetaModel(ast, { rejectRequiredNull: true });
         } catch (e) {
             error = e;
         }
@@ -299,14 +300,43 @@ describe('#validateMetaModel strict mode', () => {
         error.details.actual.should.equal('null');
     });
 
-    it('should allow optional properties set to null when strict is true', () => {
+    it('should not reject null-valued unknown properties when only rejectRequiredNull is true', () => {
         const ast = JSON.parse(JSON.stringify(baseModelAst));
-        ast.declarations[0].properties[0].validator = null;
-        (() => validateMetaModel(ast, { strict: true })).should.not.throw();
+        ast.declarations[0].properties[0]['not-required-key'] = null;
+        (() => validateMetaModel(ast, { rejectRequiredNull: true })).should.not.throw();
     });
 
-    it('should validate a well-formed metamodel when strict is true', () => {
-        (() => validateMetaModel(emptyMetaModel, { strict: true })).should.not.throw();
-        (() => validateMetaModel(baseModelAst, { strict: true })).should.not.throw();
+    it('should defer required null when only rejectUnknownKeys is true', () => {
+        const ast = JSON.parse(JSON.stringify(baseModelAst));
+        ast.declarations[0].properties[0].name = null;
+        (() => validateMetaModel(ast, { rejectUnknownKeys: true })).should.throw(/missing the required field/);
+    });
+
+    it('should allow optional properties set to null when rejectRequiredNull is true', () => {
+        const ast = JSON.parse(JSON.stringify(baseModelAst));
+        ast.declarations[0].properties[0].validator = null;
+        (() => validateMetaModel(ast, { rejectRequiredNull: true })).should.not.throw();
+    });
+
+    it('should validate a well-formed metamodel with STRICT_VALIDATE_OPTIONS', () => {
+        (() => validateMetaModel(emptyMetaModel, STRICT_VALIDATE_OPTIONS)).should.not.throw();
+        (() => validateMetaModel(baseModelAst, STRICT_VALIDATE_OPTIONS)).should.not.throw();
+    });
+
+    it('should reject null unknown and required null with STRICT_VALIDATE_OPTIONS', () => {
+        const astUnknown = JSON.parse(JSON.stringify(baseModelAst));
+        astUnknown.declarations[0].properties[0]['not-required-key'] = null;
+        (() => validateMetaModel(astUnknown, STRICT_VALIDATE_OPTIONS)).should.throw(ValidationException);
+
+        const astRequiredNull = JSON.parse(JSON.stringify(baseModelAst));
+        astRequiredNull.declarations[0].properties[0].name = null;
+        let requiredNullError;
+        try {
+            validateMetaModel(astRequiredNull, STRICT_VALIDATE_OPTIONS);
+        } catch (e) {
+            requiredNullError = e;
+        }
+        requiredNullError.should.be.an.instanceOf(ValidationException);
+        requiredNullError.details.code.should.equal('TYPE_VIOLATION');
     });
 });

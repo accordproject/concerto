@@ -507,7 +507,7 @@ describe('Serializer', () => {
             roundTrip.isPrivate.should.be.false;
         });
 
-        it('should throw on unknown null-valued properties when strict is true', () => {
+        it('should throw on unknown null-valued properties when rejectUnknownKeys is true', () => {
             const json = {
                 $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
@@ -516,11 +516,11 @@ describe('Serializer', () => {
                 unknownField: null
             };
             (() =>
-                serializer.fromJSON(json, { strict: true, validate: false })
+                serializer.fromJSON(json, { rejectUnknownKeys: true, validate: false })
             ).should.throw(/Unexpected properties.*unknownField/);
         });
 
-        it('should attach structured details when strict hydrate fails with validate false', () => {
+        it('should attach structured details when hydrate fails with validate false', () => {
             const json = {
                 $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
@@ -530,7 +530,7 @@ describe('Serializer', () => {
             };
             let error;
             try {
-                serializer.fromJSON(json, { strict: true, validate: false });
+                serializer.fromJSON(json, { rejectUnknownKeys: true, validate: false });
             } catch (e) {
                 error = e;
             }
@@ -539,7 +539,7 @@ describe('Serializer', () => {
             error.details.path.should.equal('$');
         });
 
-        it('should not throw on unknown null-valued properties when strict is false', () => {
+        it('should not throw on unknown null-valued properties by default', () => {
             const json = {
                 $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
@@ -547,7 +547,7 @@ describe('Serializer', () => {
                 lastName: 'Norris',
                 unknownField: null
             };
-            const result = serializer.fromJSON(json, { strict: false, validate: false });
+            const result = serializer.fromJSON(json, { validate: false });
             result.should.be.an.instanceOf(Resource);
         });
 

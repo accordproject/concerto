@@ -37,6 +37,7 @@ import type RelationshipDeclaration = require('../introspect/relationshipdeclara
 import type MapDeclaration = require('../introspect/mapdeclaration');
 import type Resource = require('../model/resource');
 import Field = require('../introspect/field');
+import type { DeserializeOptions } from '../types';
 
 
 type Stack<T> = {
@@ -60,13 +61,12 @@ type JsonPopulatorParameters = {
 type VisitorTarget = Declaration | Field | ClassDeclaration | MapDeclaration | RelationshipDeclaration;
 
 /**
- * Get all properties on a resource object that both have a value and are not system properties.
+ * Validate reserved/system property constraints on JSON data.
  * @param {Object} resourceData JSON object representation of a resource.
  * @param {ClassDeclaration} classDeclaration class declaration.
- * @return {Array} property names.
  * @private
  */
-function getAssignableProperties(resourceData, classDeclaration, strict = false) {
+function validateReservedProperties(resourceData, classDeclaration) {
     const properties = Object.keys(resourceData);
     const privateProperties = properties.filter(ModelUtil.isPrivateSystemProperty);
     if (privateProperties.length > 0){
@@ -81,39 +81,22 @@ function getAssignableProperties(resourceData, classDeclaration, strict = false)
         const errorText = `Unexpected property for type ${classDeclaration.getFullyQualifiedName()}: $timestamp`;
         throw new ValidationException(errorText);
     }
-
-    if (strict) {
-        return properties.filter((property) => {
-            return !ModelUtil.isSystemProperty(property);
-        });
-    }
-
-    return properties.filter((property) => {
-        return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
-    });
 }
 
 /**
- * Assert that all resource properties exist in a given class declaration.
- * @param {Array} properties Property names.
+ * Get all properties on a resource object that both have a value and are not system properties.
+ * @param {Object} resourceData JSON object representation of a resource.
  * @param {ClassDeclaration} classDeclaration class declaration.
- * @throws {ValidationException} if any properties are not defined by the class declaration.
+ * @return {Array} property names.
  * @private
  */
-function validateProperties(properties, classDeclaration, path?) {
-    const expectedProperties = classDeclaration
-        .getProperties()
-        .map((property) => property.getName());
+function getAssignableProperties(resourceData, classDeclaration) {
+    validateReservedProperties(resourceData, classDeclaration);
 
-    const invalidProperties = properties.filter((property) => !expectedProperties.includes(property));
-    if (invalidProperties.length > 0) {
-        const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ` +
-            invalidProperties.join(', ');
-        throw new ValidationException(errorText, undefined, {
-            path,
-            code: 'UNKNOWN_PROPERTY',
-        });
-    }
+    const properties = Object.keys(resourceData);
+    return properties.filter((property) => {
+        return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
+    });
 }
 
 /**
@@ -132,7 +115,8 @@ class JSONPopulator {
     acceptResourcesForRelationships: boolean | undefined;
     utcOffset: number;
     strictQualifiedDateTimes: boolean;
-    strict: boolean;
+    rejectUnknownKeys: boolean;
+    rejectRequiredNull: boolean;
     /**
      * Constructor.
      * @param {boolean} [acceptResourcesForRelationships] Permit resources in the
@@ -140,14 +124,15 @@ class JSONPopulator {
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
-     * @param {boolean} [strict=false] - Throw on unknown or unmapped properties during deserialization.
+     * @param {DeserializeOptions} [deserializeOptions] - Deserialize-time validation flags.
 
      */
-    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes, strict?) {
+    constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes, deserializeOptions?: DeserializeOptions) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
         this.utcOffset = utcOffset || 0; // Defaults to UTC
         this.strictQualifiedDateTimes = strictQualifiedDateTimes !== undefined ? strictQualifiedDateTimes : true;
-        this.strict = strict || false;
+        this.rejectUnknownKeys = deserializeOptions?.rejectUnknownKeys === true;
+        this.rejectRequiredNull = deserializeOptions?.rejectRequiredNull === true;
 
         if (process.env.TZ){
             debug(`Environment variable 'TZ' is set to '${process.env.TZ}', this can cause unexpected behaviour when using unqualified date time formats.`);
@@ -191,21 +176,31 @@ class JSONPopulator {
         const resourceObj = parameters.resourceStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        const properties = getAssignableProperties(jsonObj, classDeclaration, this.strict);
-        const currentPath = parameters.path?.stack.join('');
-        validateProperties(properties, classDeclaration, currentPath);
+        validateReservedProperties(jsonObj, classDeclaration);
 
-        properties.forEach((property) => {
-            let value = jsonObj[property];
-            if (value !== null) {
-                parameters.path?.push(`.${property}`);
-                parameters.jsonStack.push(value);
-                const classProperty = classDeclaration.getProperty(property);
-                resourceObj[property] = classProperty.accept(this,parameters);
-                parameters.path?.pop();
-            } else if (this.strict) {
-                const classProperty = classDeclaration.getProperty(property);
-                if (!classProperty.isOptional?.()) {
+        const currentPath = parameters.path?.stack.join('');
+
+        for (const property of Object.keys(jsonObj)) {
+            if (ModelUtil.isSystemProperty(property)) {
+                continue;
+            }
+
+            const value = jsonObj[property];
+            const classProperty = classDeclaration.getProperty(property);
+
+            if (!classProperty) {
+                if (this.rejectUnknownKeys || !Util.isNull(value)) {
+                    const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ${property}`;
+                    throw new ValidationException(errorText, undefined, {
+                        path: currentPath,
+                        code: 'UNKNOWN_PROPERTY',
+                    });
+                }
+                continue;
+            }
+
+            if (Util.isNull(value)) {
+                if (!classProperty.isOptional?.() && this.rejectRequiredNull) {
                     const propertyPath = `${currentPath}.${property}`;
                     const expectedType = classProperty.getFullyQualifiedTypeName();
                     throw new ValidationException(
@@ -219,8 +214,14 @@ class JSONPopulator {
                         }
                     );
                 }
+                continue;
             }
-        });
+
+            parameters.path?.push(`.${property}`);
+            parameters.jsonStack.push(value);
+            resourceObj[property] = classProperty.accept(this, parameters);
+            parameters.path?.pop();
+        }
         return resourceObj;
     }
 

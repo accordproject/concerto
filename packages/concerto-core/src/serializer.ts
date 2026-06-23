@@ -151,9 +151,8 @@ class Serializer {
      * with its model prior to serialization (default to true)
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
-     * @param {boolean} [options.strict] - Reject unknown properties and fail fast on required
-     * fields set to null during deserialization. Shared option for instance and metamodel
-     * validation paths (see also {@link module:concerto-core.MetaModel.validateMetaModel}).
+     * @param {boolean} [options.rejectUnknownKeys] - Error on extra fields not in the model.
+     * @param {boolean} [options.rejectRequiredNull] - Fail fast when a required field is explicitly null.
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options?) {
@@ -197,7 +196,16 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
-        const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true, options.strict === true);
+        const populator = new JSONPopulator(
+            options.acceptResourcesForRelationships === true,
+            false,
+            options.utcOffset,
+            options.strictQualifiedDateTimes === true,
+            {
+                rejectUnknownKeys: options.rejectUnknownKeys === true,
+                rejectRequiredNull: options.rejectRequiredNull === true,
+            }
+        );
         classDeclaration.accept(populator, parameters);
 
         // validate the resource against the model
