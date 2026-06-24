@@ -99,6 +99,46 @@ function getAssignableProperties(resourceData, classDeclaration) {
     });
 }
 
+function rejectUnknownProperty(
+    property: string,
+    value: unknown,
+    classDeclaration: ClassDeclaration,
+    path: string,
+    rejectUnknownKeys: boolean
+) {
+    if (!rejectUnknownKeys && Util.isNull(value)) {
+        return;
+    }
+    throw new ValidationException(
+        `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ${property}`,
+        undefined,
+        { path, code: 'UNKNOWN_PROPERTY' }
+    );
+}
+
+function rejectRequiredNullProperty(
+    property: string,
+    classProperty: Declaration,
+    parentPath: string,
+    rejectRequiredNull: boolean
+) {
+    if (!rejectRequiredNull || classProperty.isOptional?.()) {
+        return;
+    }
+    const propertyPath = `${parentPath}.${property}`;
+    const expectedType = classProperty.getFullyQualifiedTypeName();
+    throw new ValidationException(
+        `Expected value at path \`${propertyPath}\` to be of type \`${expectedType}\`, but got null`,
+        undefined,
+        {
+            path: propertyPath,
+            code: 'TYPE_VIOLATION',
+            expected: expectedType,
+            actual: 'null',
+        }
+    );
+}
+
 /**
  * Populates a Resource with data from a JSON object graph. The JSON objects
  * should be the result of calling Serializer.toJSON and then JSON.parse.
@@ -174,13 +214,15 @@ class JSONPopulator {
     visitClassDeclaration(classDeclaration: ClassDeclaration, parameters: JsonPopulatorParameters) {
         const jsonObj = parameters.jsonStack.pop();
         const resourceObj = parameters.resourceStack.pop();
-        parameters.path ?? (parameters.path = new TypedStack('$'));
+        const path = parameters.path ?? new TypedStack('$');
+        parameters.path = path;
 
         validateReservedProperties(jsonObj, classDeclaration);
 
-        const currentPath = parameters.path?.stack.join('');
+        const currentPath = path.stack.join('');
 
         for (const property of Object.keys(jsonObj)) {
+            // $class, $identifier, etc. are handled outside this property loop.
             if (ModelUtil.isSystemProperty(property)) {
                 continue;
             }
@@ -189,39 +231,24 @@ class JSONPopulator {
             const classProperty = classDeclaration.getProperty(property);
 
             if (!classProperty) {
-                if (this.rejectUnknownKeys || !Util.isNull(value)) {
-                    const errorText = `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ${property}`;
-                    throw new ValidationException(errorText, undefined, {
-                        path: currentPath,
-                        code: 'UNKNOWN_PROPERTY',
-                    });
-                }
+                // Unknown null-valued keys are ignored unless rejectUnknownKeys is enabled.
+                rejectUnknownProperty(property, value, classDeclaration, currentPath, this.rejectUnknownKeys);
                 continue;
             }
 
             if (Util.isNull(value)) {
-                if (!classProperty.isOptional?.() && this.rejectRequiredNull) {
-                    const propertyPath = `${currentPath}.${property}`;
-                    const expectedType = classProperty.getFullyQualifiedTypeName();
-                    throw new ValidationException(
-                        `Expected value at path \`${propertyPath}\` to be of type \`${expectedType}\`, but got null`,
-                        undefined,
-                        {
-                            path: propertyPath,
-                            code: 'TYPE_VIOLATION',
-                            expected: expectedType,
-                            actual: 'null',
-                        }
-                    );
-                }
+                // Required nulls are deferred to ResourceValidator unless rejectRequiredNull is enabled.
+                rejectRequiredNullProperty(property, classProperty, currentPath, this.rejectRequiredNull);
                 continue;
             }
 
-            parameters.path?.push(`.${property}`);
+            // Track path for nested validation errors during recursive population.
+            path.push(`.${property}`);
             parameters.jsonStack.push(value);
             resourceObj[property] = classProperty.accept(this, parameters);
-            parameters.path?.pop();
+            path.pop();
         }
+
         return resourceObj;
     }
 
