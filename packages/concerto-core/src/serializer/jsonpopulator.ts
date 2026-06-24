@@ -99,18 +99,16 @@ function getAssignableProperties(resourceData, classDeclaration) {
     });
 }
 
-function rejectUnknownProperty(
-    property: string,
-    value: unknown,
+function throwUnknownProperties(
+    unknownProperties: string[],
     classDeclaration: ClassDeclaration,
     path: string,
-    rejectUnknownKeys: boolean
 ) {
-    if (!rejectUnknownKeys && Util.isNull(value)) {
+    if (unknownProperties.length === 0) {
         return;
     }
     throw new ValidationException(
-        `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ${property}`,
+        `Unexpected properties for type ${classDeclaration.getFullyQualifiedName()}: ${unknownProperties.join(', ')}`,
         undefined,
         { path, code: 'UNKNOWN_PROPERTY' }
     );
@@ -220,6 +218,7 @@ class JSONPopulator {
         validateReservedProperties(jsonObj, classDeclaration);
 
         const currentPath = path.stack.join('');
+        const unknownProperties: string[] = [];
 
         for (const property of Object.keys(jsonObj)) {
             // $class, $identifier, etc. are handled outside this property loop.
@@ -231,8 +230,10 @@ class JSONPopulator {
             const classProperty = classDeclaration.getProperty(property);
 
             if (!classProperty) {
-                // Unknown null-valued keys are ignored unless rejectUnknownKeys is enabled.
-                rejectUnknownProperty(property, value, classDeclaration, currentPath, this.rejectUnknownKeys);
+                // Null-valued unknown keys are ignored unless rejectUnknownKeys is enabled.
+                if (this.rejectUnknownKeys || !Util.isNull(value)) {
+                    unknownProperties.push(property);
+                }
                 continue;
             }
 
@@ -248,6 +249,8 @@ class JSONPopulator {
             resourceObj[property] = classProperty.accept(this, parameters);
             path.pop();
         }
+
+        throwUnknownProperties(unknownProperties, classDeclaration, currentPath);
 
         return resourceObj;
     }
