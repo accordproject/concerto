@@ -864,4 +864,150 @@ describe('JSONPopulator', () => {
 
     });
 
+    describe('#null property handling', () => {
+
+        it('should not throw on unknown null-valued properties when allowNullValues is not set', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should not throw on unknown null-valued properties when allowNullValues is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager,
+                allowNullValues: true,
+                validate: true
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should throw on unknown non-null properties when validate is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: 'not null'
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager,
+                allowNullValues: true,
+                validate: true
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.throw(/Unexpected properties.*unknownProp/);
+        });
+
+        it('should not throw on unknown null-valued properties when validate is false', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager,
+                allowNullValues: true,
+                validate: false
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should not throw on known null-valued properties when allowNullValues is true', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                assetId: 'asset1',
+                assetValue: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager,
+                allowNullValues: true
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should not throw on system properties ($class, $identifier)', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                $identifier: 'asset1',
+                assetId: 'asset1'
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.not.throw();
+        });
+
+        it('should throw on unknown properties', () => {
+            const classDeclaration = modelManager.getType('org.acme@1.0.0.MyAsset1');
+            const resource = {};
+            const json = {
+                $class: 'org.acme@1.0.0.MyAsset1',
+                $identifier: 'asset1',
+                assetId: 'asset1',
+                unknownProp: null
+            };
+            const parameters = {
+                jsonStack: new TypedStack(json),
+                resourceStack: new TypedStack(resource),
+                factory: mockFactory,
+                modelManager: modelManager,
+                allowNullValues: false,
+            };
+            (() => {
+                jsonPopulator.visitClassDeclaration(classDeclaration, parameters);
+            }).should.throw();
+        });
+
+    });
+
 });

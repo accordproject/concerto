@@ -26,6 +26,7 @@ const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
     validate: true,
     utcOffset: defaultUtcOffset,
+    allowNullValues: true, // TODO: remove in next major — always validate property names regardless of value
 };
 
 // Types needed for TypeScript generation.
@@ -147,10 +148,14 @@ class Serializer {
      * @param {Object} [options] - the optional serialization options
      * @param {boolean} options.acceptResourcesForRelationships - handle JSON objects
      * in the place of strings for relationships, defaults to false.
-     * @param {boolean} options.validate - validate the structure of the Resource
-     * with its model prior to serialization (default to true)
+     * @param {boolean} [options.validate=true] - Validate property names and run full
+     * model validation after population. Exists to allow trusted internal round-trips
+     * (e.g. storage → memory) to skip the overhead of re-checking already-valid data.
      * @param {number} [options.utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
+     * @param {boolean} [options.allowNullValues=true] - When true, null-valued properties are
+     * included in property iteration but bypass name validation and are never set on the resource.
+     * Set to false to treat null the same as undefined (filter out entirely).
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options?) {
@@ -194,6 +199,8 @@ class Serializer {
         parameters.resourceStack = new TypedStack(resource);
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
+        parameters.validate = options.validate;
+        parameters.allowNullValues = options.allowNullValues === true;
         const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
         classDeclaration.accept(populator, parameters);
 

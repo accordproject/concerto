@@ -55,18 +55,22 @@ type JsonPopulatorParameters = {
     acceptResourcesForRelationships?: boolean;
     utcOffset?: number;
     strictQualifiedDateTimes?: boolean;
+    validate?: boolean;
+    allowNullValues?: boolean;
 };
 
 type VisitorTarget = Declaration | Field | ClassDeclaration | MapDeclaration | RelationshipDeclaration;
 
 /**
- * Get all properties on a resource object that both have a value and are not system properties.
+ * Get all properties on a resource object that have a value and are not system properties.
  * @param {Object} resourceData JSON object representation of a resource.
  * @param {ClassDeclaration} classDeclaration class declaration.
+ * @param {boolean} [allowNullValues=true] - When true, null-valued properties are included
+ * in the returned list. When false, both null and undefined are treated as absent.
  * @return {Array} property names.
  * @private
  */
-function getAssignableProperties(resourceData, classDeclaration) {
+function getAssignableProperties(resourceData, classDeclaration, allowNullValues = true) {
     const properties = Object.keys(resourceData);
     const privateProperties = properties.filter(ModelUtil.isPrivateSystemProperty);
     if (privateProperties.length > 0){
@@ -82,9 +86,24 @@ function getAssignableProperties(resourceData, classDeclaration) {
         throw new ValidationException(errorText);
     }
 
-    return properties.filter((property) => {
-        return !ModelUtil.isSystemProperty(property) && !Util.isNull(resourceData[property]);
+    // All explicitly present (non-undefined) user properties
+    const allProperties = properties.filter((property) => {
+        return !ModelUtil.isSystemProperty(property) && resourceData[property] !== undefined;
     });
+
+    // Properties to write onto the resource: exclude nulls when allowNullValues=false
+    const assignable = allowNullValues
+        ? allProperties
+        : allProperties.filter(p => !Util.isNull(resourceData[p]));
+
+    // Properties to validate against the model:
+    // - allowNullValues=true: skip null props from type-checking (legacy permissive)
+    // - allowNullValues=false: validate ALL present props so unknown null fields are caught
+    const validatable = allowNullValues
+        ? allProperties.filter(p => !Util.isNull(resourceData[p]))
+        : allProperties;
+
+    return { assignable, validatable };
 }
 
 /**
@@ -130,7 +149,6 @@ class JSONPopulator {
      * @param {boolean} [ergo] - Deprecated - This is a dummy parameter to avoid breaking any consumers. It will be removed in a future release.
      * @param {number} [utcOffset] - UTC Offset for DateTime values.
      * @param {boolean} [strictQualifiedDateTimes=true] - Only allow fully-qualified date-times with offsets.
-
      */
     constructor(acceptResourcesForRelationships, ergo, utcOffset, strictQualifiedDateTimes) {
         this.acceptResourcesForRelationships = acceptResourcesForRelationships;
@@ -179,15 +197,21 @@ class JSONPopulator {
         const resourceObj = parameters.resourceStack.pop();
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
-        const properties = getAssignableProperties(jsonObj, classDeclaration);
-        validateProperties(properties, classDeclaration);
+        // Default to true when not explicitly set (preserves backward compatibility)
+        const { assignable, validatable } = getAssignableProperties(jsonObj, classDeclaration, parameters.allowNullValues !== false);
+        if (parameters.validate !== false) {
+            validateProperties(validatable, classDeclaration);
+        }
 
-        properties.forEach((property) => {
+        assignable.forEach((property) => {
             let value = jsonObj[property];
             if (value !== null) {
+                const classProperty = classDeclaration.getProperty(property);
+                if (!classProperty) {
+                    return;
+                }
                 parameters.path?.push(`.${property}`);
                 parameters.jsonStack.push(value);
-                const classProperty = classDeclaration.getProperty(property);
                 resourceObj[property] = classProperty.accept(this,parameters);
                 parameters.path?.pop();
             }
