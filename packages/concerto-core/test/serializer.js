@@ -520,7 +520,7 @@ describe('Serializer', () => {
             should.equal(resource.unknownField, undefined);
         });
 
-        it('should not throw on unknown null-valued properties when allowNullValues is false', () => {
+        it('should throw on unknown null-valued properties when allowNullValues is false', () => {
             const json = {
                 $class: 'org.acme.sample@1.0.0.SampleParticipant',
                 participantId: 'alphablock',
