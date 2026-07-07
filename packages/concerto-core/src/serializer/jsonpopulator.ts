@@ -62,12 +62,19 @@ type JsonPopulatorParameters = {
 type VisitorTarget = Declaration | Field | ClassDeclaration | MapDeclaration | RelationshipDeclaration;
 
 /**
- * Get all properties on a resource object that have a value and are not system properties.
+ * Get non-system, non-undefined properties from a resource object, split into two sets:
+ * - `assignable`: properties to write onto the resource instance.
+ * - `validatable`: properties to validate against the class declaration.
+ *
+ * When `allowNullValues` is true (default), null-valued properties are assignable but
+ * excluded from validation (legacy permissive behaviour). When false, null-valued
+ * properties are excluded from assignment but included in validation so that unknown
+ * null fields are caught.
+ *
  * @param {Object} resourceData JSON object representation of a resource.
  * @param {ClassDeclaration} classDeclaration class declaration.
- * @param {boolean} [allowNullValues=true] - When true, null-valued properties are included
- * in the returned list. When false, both null and undefined are treated as absent.
- * @return {Array} property names.
+ * @param {boolean} [allowNullValues=true] - Controls how null-valued properties are handled.
+ * @return {{assignable: string[], validatable: string[]}} property name sets.
  * @private
  */
 function getAssignableProperties(resourceData, classDeclaration, allowNullValues = true) {

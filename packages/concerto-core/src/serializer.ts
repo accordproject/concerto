@@ -155,7 +155,8 @@ class Serializer {
      * @param {boolean} [options.strictQualifiedDateTimes] - Only allow fully-qualified date-times with offsets.
      * @param {boolean} [options.allowNullValues=true] - When true, null-valued properties are
      * included in property iteration but bypass name validation and are never set on the resource.
-     * Set to false to treat null the same as undefined (filter out entirely).
+     * When false, null-valued properties are excluded from assignment but still validated against
+     * the model — unknown null-valued properties will throw a ValidationException if validate is true.
      * @return {Resource} The new populated resource
      */
     fromJSON(jsonObject, options?) {
@@ -200,7 +201,7 @@ class Serializer {
         parameters.modelManager = this.modelManager;
         parameters.factory = this.factory;
         parameters.validate = options.validate;
-        parameters.allowNullValues = options.allowNullValues === true;
+        parameters.allowNullValues = options.allowNullValues !== false;
         const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
         classDeclaration.accept(populator, parameters);
 
