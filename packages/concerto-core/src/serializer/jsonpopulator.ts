@@ -245,18 +245,23 @@ class JSONPopulator {
      */
     processMapType(mapDeclaration, parameters: JsonPopulatorParameters, value, type) {
         let decl;
-        // Search declarations across all loaded models: the map's value concept may
-        // be imported from another namespace and therefore is not present in the
-        // map's own model file.
-        const declarations = mapDeclaration.getModelFile().getModelManager()
-            .getModelFiles()
-            .flatMap(modelFile => modelFile.getAllDeclarations());
-        if (value && typeof value === 'object' && value.$class) {
-            // Use the $class property to find the class declaration
-            decl = declarations.find(decl => decl.getFullyQualifiedName() === value.$class);
-        } else {
-            // Fallback to the original type lookup if value is not an object or doesn't have $class
-            decl = declarations.find(decl => decl.name === type);
+        // The map's key/value concept may be imported from another namespace, so it
+        // is not necessarily present in the map's own model file. Resolve it via the
+        // model manager (which spans all loaded models). A failed lookup means the
+        // type is a scalar/primitive and the raw value is returned as-is, preserving
+        // the previous "not found => treat as scalar" behaviour.
+        const modelFile = mapDeclaration.getModelFile();
+        const modelManager = modelFile.getModelManager();
+        try {
+            if (value && typeof value === 'object' && value.$class) {
+                // The $class property is already fully-qualified.
+                decl = modelManager.getType(value.$class);
+            } else {
+                // Resolve the declared type honouring the map model file's imports.
+                decl = modelManager.getType(modelFile.getFullyQualifiedTypeName(type));
+            }
+        } catch (err) {
+            decl = undefined;
         }
 
         // if its a ClassDeclaration, populate the Concept.

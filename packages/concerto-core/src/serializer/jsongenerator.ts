@@ -103,14 +103,19 @@ class JSONGenerator {
 
             // Key is always a string, but value might be a ValidatedResource.
             if (typeof value === 'object') {
-                // Resolve the map's declared value type honouring imports. The value
-                // concept may be declared in another namespace, so it is not
-                // necessarily present in the map's own model file; resolve it by its
-                // fully-qualified name via the model manager instead.
+                // Resolve the declaration for the map value. Prefer the instance's
+                // own fully-qualified type so that polymorphic values (subclasses of
+                // the map's declared value type) are serialized using their actual
+                // declaration. Fall back to the map's declared value type - honouring
+                // imports - for instances that do not expose a fully-qualified type
+                // (e.g. those created by the populator). Either way the value concept
+                // may live in another namespace, so resolve it via the model manager
+                // rather than the map's own model file.
                 const modelFile = mapDeclaration.getModelFile();
-                const decl = modelFile.getModelManager().getType(
-                    modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType())
-                );
+                const valueType = typeof value.getFullyQualifiedType === 'function'
+                    ? value.getFullyQualifiedType()
+                    : modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType());
+                const decl = modelFile.getModelManager().getType(valueType);
 
                 // convert declaration to JSON representation
                 parameters.stack.push(value);

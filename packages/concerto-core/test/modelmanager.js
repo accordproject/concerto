@@ -723,8 +723,10 @@ concept Bar {
 }`, 'internal.cto', true);
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
-            // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 400');
+            // import all external models. The exact HTTP status returned by GitHub
+            // for the bad URL can vary (e.g. 400 vs 404), so assert on the stable
+            // failure message rather than pinning a specific status code.
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, /Failed to load model file\. Job: github:\/\/external\.cto Details: Error: HTTP request failed with status: \d+/);
         });
 
         it('should fail using bad protocol and default model file loader', () => {
