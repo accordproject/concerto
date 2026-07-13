@@ -103,9 +103,14 @@ class JSONGenerator {
 
             // Key is always a string, but value might be a ValidatedResource.
             if (typeof value === 'object') {
-                let decl = mapDeclaration.getModelFile()
-                    .getAllDeclarations()
-                    .find(decl => decl.name === value.getType());
+                // Resolve the map's declared value type honouring imports. The value
+                // concept may be declared in another namespace, so it is not
+                // necessarily present in the map's own model file; resolve it by its
+                // fully-qualified name via the model manager instead.
+                const modelFile = mapDeclaration.getModelFile();
+                const decl = modelFile.getModelManager().getType(
+                    modelFile.getFullyQualifiedTypeName(mapDeclaration.getValue().getType())
+                );
 
                 // convert declaration to JSON representation
                 parameters.stack.push(value);
