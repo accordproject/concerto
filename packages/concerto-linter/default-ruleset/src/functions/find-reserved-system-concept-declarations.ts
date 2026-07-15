@@ -13,6 +13,8 @@
  */
 
 import type { IFunction, IFunctionResult } from '@stoplight/spectral-core';
+import type { DeclarationUnion, IModel } from '@accordproject/concerto-metamodel';
+import concertoCorePackageJson from '@accordproject/concerto-core/package.json';
 import semver from 'semver';
 
 const RESERVED_SYSTEM_CONCEPT_NAMES = new Set([
@@ -23,29 +25,13 @@ const RESERVED_SYSTEM_CONCEPT_NAMES = new Set([
     'Event',
 ]);
 
-interface Declaration {
-    name?: string;
-}
-
-interface Model {
-    namespace?: string;
-    declarations?: Declaration[];
-    concertoVersion?: string;
-}
-
 interface ReservedSystemConceptOptions {
     dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean;
 }
 
-function isLegacyOrV3Model(model: Model): boolean {
-    if (typeof model.concertoVersion === 'string') {
-        const minimumVersion = semver.minVersion(model.concertoVersion);
-        if (minimumVersion) {
-            return minimumVersion.major === 3;
-        }
-    }
-
-    return typeof model.namespace === 'string' && !model.namespace.includes('@');
+function isLegacyOrV3Model(model: IModel): boolean {
+    const runtimeVersion = semver.parse(concertoCorePackageJson.version);
+    return runtimeVersion?.major === 3 || (typeof model.namespace === 'string' && !model.namespace.includes('@'));
 }
 
 function getReservedSystemConceptMessage(declarationName: string, isLegacyModel: boolean): string {
@@ -72,7 +58,7 @@ export const findReservedSystemConceptDeclarations: IFunction = (
         throw new Error('Value must be a valid AST object for a Concerto model.');
     }
 
-    const model = targetVal as Model;
+    const model = targetVal as IModel;
     if (!Array.isArray(model.declarations)) {
         return [];
     }
@@ -86,7 +72,7 @@ export const findReservedSystemConceptDeclarations: IFunction = (
         return [];
     }
 
-    return model.declarations.reduce<IFunctionResult[]>((results, declaration) => {
+    return model.declarations.reduce<IFunctionResult[]>((results, declaration: DeclarationUnion) => {
         if (!declaration?.name || !RESERVED_SYSTEM_CONCEPT_NAMES.has(declaration.name)) {
             return results;
         }

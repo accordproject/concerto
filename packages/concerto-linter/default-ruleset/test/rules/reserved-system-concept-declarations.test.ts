@@ -20,18 +20,13 @@ function createRule(dangerouslyAllowReservedSystemTypeNamesInUserModels = false)
 }
 
 describe('Reserved System Concept Declarations Rule', () => {
-    test('should report violations for v3 models with reserved system concept declarations', async () => {
+    test('should not treat concertoVersion compatibility metadata as the loaded runtime version', async () => {
         const results = await testRules(
             createRule(),
             'reserved-system-concept-declarations-v3-invalid.cto'
         );
 
-        expect(results).toHaveLength(2);
-        results.forEach(result => {
-            expect(result.code).toBe('reserved-system-concept-declarations');
-            expect(result.message).toContain('collides with a reserved Concerto system concept');
-            expect(result.message).not.toContain('disable dangerouslyAllowReservedSystemTypeNamesInUserModels');
-        });
+        expect(results).toHaveLength(0);
     });
 
     test('should report violations for legacy models when concertoVersion metadata is absent', async () => {

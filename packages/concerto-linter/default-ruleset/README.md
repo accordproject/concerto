@@ -107,7 +107,7 @@ const results = await lintModel(modelText, { ruleset: 'default' });
 
 The default ruleset includes `reserved-system-concept-declarations`, which behaves as follows:
 
-- v3 and legacy models: reports reserved declaration names such as `Concept`, `Asset`, `Transaction`, `Participant`, and `Event`
+- v3 runtime and legacy models: reports reserved declaration names such as `Concept`, `Asset`, `Transaction`, `Participant`, and `Event`
 - default v4 runs: stays silent
 - dangerous v4 compatibility mode: reports the same names when `dangerouslyAllowReservedSystemTypeNamesInUserModels` is enabled through `lintModel`
 

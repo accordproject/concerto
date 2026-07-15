@@ -153,7 +153,7 @@ function patchReservedSystemConceptRule(
  * @param jsonAST - A JSON string representing the AST, used to extract model namespaces.
  * @param excludeNamespaces - A string or array of strings specifying namespace patterns to exclude from the results.
  *                            Patterns ending with `.*` will match any namespace starting with the given prefix.
- *                            Defaults to `['concerto.*', 'org.accord.*']`.
+ *                            Defaults to `['concerto.*', 'org.accordproject.*']`.
  * @returns An array of formatted lint results, excluding those matching the specified namespaces.
  */
 
