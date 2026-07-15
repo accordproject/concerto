@@ -2,11 +2,16 @@
 import { jest } from '@jest/globals';
 import { lintModel } from '../../src/index';
 import * as configLoader from '../../src/config-loader';
+import { getRuleset } from '@stoplight/spectral-cli/dist/services/linter/utils/getRuleset';
 
 // Only mock our own functions when needed
 jest.mock('../../src/config-loader');
+jest.mock('@stoplight/spectral-cli/dist/services/linter/utils/getRuleset', () => ({
+    getRuleset: jest.fn(),
+}));
 
 const mockedConfigLoader = configLoader as jest.Mocked<typeof configLoader>;
+const mockedGetRuleset = getRuleset as jest.MockedFunction<typeof getRuleset>;
 
 describe('lintModel', () => {
     beforeEach(() => {
@@ -79,6 +84,83 @@ describe('lintModel', () => {
         const results = await lintModel(model, config);
 
         expect(Array.isArray(results)).toBe(true);
+    });
+
+    test('should stay silent for reserved system concept declarations in normal v4 mode', async () => {
+        const model = `
+      namespace com.example.test@1.0.0
+
+      asset Asset identified by assetId {
+        o String assetId length=[1,]
+      }
+    `;
+
+        mockedConfigLoader.resolveRulesetPath.mockResolvedValue(null);
+
+        const results = await lintModel(model, { ruleset: 'default', excludeNamespaces: [] });
+
+        expect(results).toEqual([]);
+    });
+
+    test('should report reserved system concept declarations when dangerous mode is enabled', async () => {
+        const model = `
+      namespace com.example.test@1.0.0
+
+      asset Asset identified by assetId {
+        o String assetId length=[1,]
+      }
+    `;
+
+        mockedConfigLoader.resolveRulesetPath.mockResolvedValue(null);
+
+        const results = await lintModel(model, {
+            ruleset: 'default',
+            excludeNamespaces: [],
+            dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
+        });
+
+        expect(results).toHaveLength(1);
+        expect(results[0].code).toBe('reserved-system-concept-declarations');
+    });
+
+    test('should inject dangerous mode into loaded custom rulesets', async () => {
+        const model = `
+      namespace com.example.test@1.0.0
+
+      asset Asset identified by assetId {
+        o String assetId length=[1,]
+      }
+    `;
+
+        mockedConfigLoader.resolveRulesetPath.mockResolvedValue('/tmp/custom-ruleset.yaml');
+        mockedGetRuleset.mockResolvedValue({
+            rules: {
+                'reserved-system-concept-declarations': {
+                    given: '$.models[*]',
+                    severity: 0,
+                    then: {
+                        function: (_targetVal: unknown, functionOptions?: { dangerouslyAllowReservedSystemTypeNamesInUserModels?: boolean }) => {
+                            return functionOptions?.dangerouslyAllowReservedSystemTypeNamesInUserModels
+                                ? [{
+                                    message: 'custom dangerous mode triggered',
+                                    path: ['declarations', 0, 'name'],
+                                }]
+                                : [];
+                        },
+                    },
+                },
+            },
+        } as never);
+
+        const results = await lintModel(model, {
+            ruleset: '/tmp/custom-ruleset.yaml',
+            excludeNamespaces: [],
+            dangerouslyAllowReservedSystemTypeNamesInUserModels: true,
+        });
+
+        expect(mockedGetRuleset).toHaveBeenCalledWith('/tmp/custom-ruleset.yaml');
+        expect(results).toHaveLength(1);
+        expect(results[0].message).toBe('custom dangerous mode triggered');
     });
 
 });
