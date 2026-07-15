@@ -439,6 +439,9 @@ function toCTO(metaModel: IModel): string {
                     break;
                 case `${MetaModelNamespace}.ImportTypes`: {
                     const typesImport = imp as IImportTypes;
+                    if (!typesImport.types || typesImport.types.length === 0) {
+                        break;
+                    }
                     const aliasedTypes = typesImport.aliasedTypes
                         ? new Map(
                             typesImport.aliasedTypes.map((aliasedType: any) => [

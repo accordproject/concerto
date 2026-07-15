@@ -1187,6 +1187,22 @@ concept Bar {
             filtered.validateModelFiles();
         });
 
+        it('should skip validation when disableValidation option is set', () => {
+            modelManager.addCTOModel(`namespace org.skip@1.0.0
+            concept Kept {}
+            concept Removed {}
+            `, 'skip.cto');
+
+            const filtered = modelManager.filter(
+                decl => decl.getFullyQualifiedName() === 'org.skip@1.0.0.Kept',
+                { disableValidation: true }
+            );
+
+            filtered.getModelFiles().length.should.equal(1);
+            filtered.getModelFiles()[0].getAllDeclarations().length.should.equal(1);
+            filtered.getModelFiles()[0].getAllDeclarations()[0].getName().should.equal('Kept');
+        });
+
         it('should remove imports for filtered types', () => {
             modelManager.addCTOModel(`namespace child@1.0.0
             concept Used {}

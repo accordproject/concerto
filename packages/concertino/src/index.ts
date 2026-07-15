@@ -20,11 +20,10 @@
 /* eslint-disable valid-jsdoc */
 import { IModels } from '@accordproject/concerto-metamodel';
 import { IConcertino } from './spec/concertino.metamodel@4.0.0-alpha.2';
+import schema from './spec/concertino.schema.json';
 import { convertToConcertino } from './concertinoSerializer';
 import { convertToMetamodel } from './metamodelSerializer';
 import Ajv, { ValidateFunction } from 'ajv';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 /**
  * Conversion options for Concertino format.
@@ -36,14 +35,12 @@ export interface ConcertinoOptions {
   version?: string;
 }
 
-const schema = JSON.parse(readFileSync(join(__dirname, 'spec/concertino.schema.json'), 'utf-8'));
-
 /**
  * Concertino utility class for converting between Concerto metamodel and Concertino format.
  */
 export class ConcertinoConverter {
     private options: ConcertinoOptions;
-    private validate: ValidateFunction;
+    private validate?: ValidateFunction;
     private ajv: Ajv;
 
     /**
@@ -56,7 +53,6 @@ export class ConcertinoConverter {
             ...options
         };
         this.ajv = new Ajv();
-        this.validate = this.ajv.compile(schema);
     }
 
     /**
@@ -82,11 +78,19 @@ export class ConcertinoConverter {
     }
 
     public isValid(concertino: IConcertino): boolean {
-        return this.validate(concertino);
+        return this.getValidator()(concertino);
     }
 
     public getValidationErrors() {
-        return this.validate.errors;
+        return this.validate?.errors ?? null;
+    }
+
+    private getValidator(): ValidateFunction {
+        if (!this.validate) {
+            this.validate = this.ajv.compile(schema);
+        }
+
+        return this.validate;
     }
 
 }

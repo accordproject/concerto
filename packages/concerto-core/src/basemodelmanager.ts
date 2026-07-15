@@ -209,9 +209,9 @@ class BaseModelManager {
              throw new Error(`Failed to load getDecoratorModel. Got: ${typeof getDecoratorModel}`);
         }
         const {decoratorModelAst, decoratorModelCto, decoratorModelFile} = getDecoratorModel();
-        
+
         const m = new ModelFile(this, decoratorModelAst, decoratorModelCto, decoratorModelFile);
- 
+
         this.addModelFile(m, decoratorModelCto, decoratorModelFile, true);
     }
 
@@ -852,63 +852,25 @@ class BaseModelManager {
      * ModelFiles with no declarations after filtering will be removed.
      *
      * @param {FilterFunction} predicate - the filter function over a Declaration object
+     * @param {Object} [options] - options for the filter method
+     * @param {boolean} [options.disableValidation] — If true then the model files are not validated
      * @returns {BaseModelManager} - the filtered ModelManager
      */
-    filter(predicate){
+    filter(predicate, options?){
         const modelManager = new BaseModelManager({...this.options}, this.processFile);
-        const removedFqns = []; // the list of FQN of types that have been removed
+        const filteredModels: ModelFileInstance[] = [];
 
-        // remove the types from model files, populating removedFqns
-        let filteredModels = Object.values(this.modelFiles)
-            .map((modelFile: ModelFileInstance) => modelFile.filter(predicate, modelManager, removedFqns))
-            .filter(Boolean);
-
-        // remove concerto model files - as these are automatically added
-        // when we recreate the model manager below
-        filteredModels = filteredModels.filter(mf => !mf.isSystemModelFile());
-
-        // now update filteredModels to remove any imports of removed types
-        const modelsWithValidImports = filteredModels.map( modelFile => {
-            const ast = modelFile.getAst();
-            let modified = false;
-            removedFqns.forEach( removedFqn => {
-                const ns = ModelUtil.getNamespace(removedFqn);
-                const isSystemImport = ns.startsWith('concerto@') || ns === 'concerto';
-                if(!isSystemImport && modelFile.getImports().includes(removedFqn)) {
-                    const removeName = ModelUtil.getShortName(removedFqn);
-                    const removeNamespace = ModelUtil.getNamespace(removedFqn);
-                    ast.imports = ast.imports.filter(imp => {
-                        const remove = ModelUtil.getShortName(imp.$class) === 'ImportType' &&
-                            imp.name === removeName &&
-                            imp.namespace === removeNamespace;
-                        if(remove) {
-                            modified = true;
-                        }
-                        return !remove;
-                    });
-                    ast.imports.forEach( imp => {
-                        if(imp.namespace === removeNamespace) {
-                            if(ModelUtil.getShortName(imp.$class) === 'ImportTypes') {
-                                imp.types = imp.types.filter((type) => {
-                                    const remove = (type === removeName);
-                                    if(remove) {
-                                        modified = true;
-                                    }
-                                    return !remove;
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-            if(modified) {
-                return new ModelFile(this, ast, undefined, modelFile.fileName);
+        for (const modelFile of Object.values(this.modelFiles) as ModelFileInstance[]) {
+            if (modelFile.isSystemModelFile()) {
+                continue;
             }
-            else {
-                return modelFile;
+            const filtered = modelFile.filter(predicate, modelManager);
+            if (filtered) {
+                filteredModels.push(filtered);
             }
-        });
-        modelManager.addModelFiles(modelsWithValidImports);
+        }
+
+        modelManager.addModelFiles(filteredModels, undefined, options?.disableValidation);
         return modelManager;
     }
 }

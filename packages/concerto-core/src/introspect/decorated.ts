@@ -81,16 +81,18 @@ class Decorated {
         this.decorators = [];
 
         if(this.ast.decorators) {
+            const modelFile: any = this.getModelFile();
+            const factories = modelFile.getModelManager()?.getDecoratorFactories();
+            const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
                 let thing = this.ast.decorators[n];
-                let modelFile: any = this.getModelFile();
-                let modelManager = modelFile.getModelManager();
-                let factories = modelManager.getDecoratorFactories();
                 let decorator;
-                for (let factory of factories) {
-                    decorator = factory.newDecorator(this, thing);
-                    if (decorator) {
-                        break;
+                if (hasFactories) {
+                    for (let factory of factories) {
+                        decorator = factory.newDecorator(this, thing);
+                        if (decorator) {
+                            break;
+                        }
                     }
                 }
                 if (!decorator) {
