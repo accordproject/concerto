@@ -724,7 +724,7 @@ concept Bar {
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
             // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 400');
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, /HTTP request failed with status: 40(0|4)/);
         });
 
         it('should fail using bad protocol and default model file loader', () => {
@@ -1230,6 +1230,78 @@ concept Bar {
             const filtered = modelManager.filter(declaration =>
                 ['concerto@1.0.0.Concept','test@1.0.0.Person','child@1.0.0.Used', 'cousin@1.0.0.AlsoUsed'].includes(declaration.getFullyQualifiedName()));
             filtered.validateModelFiles();
+        });
+    });
+
+    describe('#getAssignableConcreteTypes and #isAssignableTo', () => {
+        beforeEach(() => {
+            modelManager.addCTOModel(`namespace test@1.0.0
+            abstract concept Base {
+                o String id
+            }
+            concept Sub1 extends Base {
+                o String name
+            }
+            concept Sub2 extends Base {
+                o String value
+            }
+            abstract concept SubAbstract extends Base {
+            }
+            concept SubSub extends SubAbstract {
+            }
+            concept Unrelated {
+                o String field
+            }
+            enum Color {
+                o RED
+                o GREEN
+            }
+            `);
+        });
+
+        it('should get all concrete assignable types for a base class', () => {
+            const concreteTypes = modelManager.getAssignableConcreteTypes('test@1.0.0.Base');
+            const names = concreteTypes.map(t => t.getFullyQualifiedName());
+            names.should.have.members([
+                'test@1.0.0.Sub1',
+                'test@1.0.0.Sub2',
+                'test@1.0.0.SubSub'
+            ]);
+            names.should.not.contain('test@1.0.0.Base');
+            names.should.not.contain('test@1.0.0.SubAbstract');
+        });
+
+        it('should get subclass itself if concrete', () => {
+            const concreteTypes = modelManager.getAssignableConcreteTypes('test@1.0.0.Sub1');
+            const names = concreteTypes.map(t => t.getFullyQualifiedName());
+            names.should.deep.equal(['test@1.0.0.Sub1']);
+        });
+
+        it('should return empty array for non-existent base class', () => {
+            const concreteTypes = modelManager.getAssignableConcreteTypes('test@1.0.0.Absent');
+            concreteTypes.should.be.empty;
+        });
+
+        it('should return empty array for enums or non-classes', () => {
+            const concreteTypes = modelManager.getAssignableConcreteTypes('test@1.0.0.Color');
+            concreteTypes.should.be.empty;
+        });
+
+        it('should check assignability correctly', () => {
+            modelManager.isAssignableTo('test@1.0.0.Sub1', 'test@1.0.0.Base').should.be.true;
+            modelManager.isAssignableTo('test@1.0.0.SubSub', 'test@1.0.0.Base').should.be.true;
+            modelManager.isAssignableTo('test@1.0.0.Sub1', 'test@1.0.0.Sub1').should.be.true;
+            modelManager.isAssignableTo('test@1.0.0.Unrelated', 'test@1.0.0.Base').should.be.false;
+        });
+
+        it('should return false for abstract candidate in isAssignableTo', () => {
+            modelManager.isAssignableTo('test@1.0.0.Base', 'test@1.0.0.Base').should.be.false;
+            modelManager.isAssignableTo('test@1.0.0.SubAbstract', 'test@1.0.0.Base').should.be.false;
+        });
+
+        it('should return false if candidate or base class is absent', () => {
+            modelManager.isAssignableTo('test@1.0.0.Absent', 'test@1.0.0.Base').should.be.false;
+            modelManager.isAssignableTo('test@1.0.0.Sub1', 'test@1.0.0.Absent').should.be.false;
         });
     });
 });

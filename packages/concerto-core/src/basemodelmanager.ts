@@ -873,6 +873,48 @@ class BaseModelManager {
         modelManager.addModelFiles(filteredModels, undefined, options?.disableValidation);
         return modelManager;
     }
+
+    /**
+     * Get all concrete class declarations assignable to the given base fully qualified type name.
+     * @param {string} baseFqn - The fully qualified type name of the base class.
+     * @returns {ClassDeclaration[]} Concrete subclass declarations.
+     */
+    getAssignableConcreteTypes(baseFqn: string): any[] {
+        try {
+            const baseClass = this.getType(baseFqn);
+            if (baseClass.isClassDeclaration?.() && !baseClass.isEnum?.()) {
+                const assignable = baseClass.getAssignableClassDeclarations();
+                return assignable.filter((declaration: any) => !declaration.isAbstract());
+            }
+            return [];
+        } catch (err: any) {
+            if (err.name === 'TypeNotFoundException') {
+                return [];
+            }
+            throw err;
+        }
+    }
+
+    /**
+     * Check if a candidate fully qualified type name is assignable to (is or extends) a base type name, restricted to concrete types.
+     * @param {string} fqn - The fully qualified type name of the candidate subclass.
+     * @param {string} baseFqn - The fully qualified type name of the base class.
+     * @returns {boolean} True if fqn is assignable to baseFqn.
+     */
+    isAssignableTo(fqn: string, baseFqn: string): boolean {
+        try {
+            const candidateClass = this.getType(fqn);
+            if (candidateClass.isAbstract?.()) {
+                return false;
+            }
+            return this.derivesFrom(fqn, baseFqn);
+        } catch (err: any) {
+            if (err.name === 'TypeNotFoundException') {
+                return false;
+            }
+            throw err;
+        }
+    }
 }
 
 export = BaseModelManager;
