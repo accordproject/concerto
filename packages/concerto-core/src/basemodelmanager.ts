@@ -787,6 +787,45 @@ class BaseModelManager {
     }
 
     /**
+     * Concrete (non-abstract) declarations assignable to baseFqn: the base itself
+     * (when concrete) plus all subclasses. Empty array if baseFqn is not in the model.
+     * @param {string} baseFqn The fully qualified type name
+     * @returns {ClassDeclaration[]} An array of concrete ClassDeclaration that are assignable to baseFqn
+     */
+    getAssignableConcreteTypes(baseFqn: string): any[] {
+        let typeDeclaration;
+        try {
+            typeDeclaration = this.getType(baseFqn);
+        } catch (e) {
+            return []; // Empty array if baseFqn is not in the model
+        }
+
+        const assignable = typeDeclaration.getAssignableClassDeclarations();
+        return assignable.filter(decl => !decl.isAbstract());
+    }
+
+    /**
+     * True when fqn is, or extends, baseFqn (restricted to concrete types).
+     * @param {string} fqn The candidate fully qualified type name
+     * @param {string} baseFqn The fully qualified type name it may be derived from
+     * @returns {boolean} True if fqn is assignable to baseFqn
+     */
+    isAssignableTo(fqn: string, baseFqn: string): boolean {
+        let typeDeclaration;
+        try {
+            typeDeclaration = this.getType(fqn);
+        } catch (e) {
+            return false;
+        }
+
+        if (typeDeclaration.isAbstract()) {
+            return false;
+        }
+
+        return this.derivesFrom(fqn, baseFqn);
+    }
+
+    /**
      * Resolve the namespace for names in the metamodel
      * @param {object} metaModel - the MetaModel
      * @return {object} the resolved metamodel
