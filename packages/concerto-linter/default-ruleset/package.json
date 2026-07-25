@@ -39,13 +39,13 @@
     "@stoplight/spectral-parsers": "1.0.5"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
+    "@typescript-eslint/eslint-plugin": "8.46.2",
+    "@typescript-eslint/parser": "8.46.2",
     "eslint": "8.57.1",
-    "jest": "^29.7.0",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^6.0.1",
-    "ts-jest": "^29.2.5",
+    "jest": "29.7.0",
+    "npm-run-all": "4.1.5",
+    "rimraf": "6.0.1",
+    "ts-jest": "29.2.5",
     "typescript": "5.7.2"
   }
 }
