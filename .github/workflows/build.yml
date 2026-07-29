@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     name: Unit Tests
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -70,6 +71,7 @@ jobs:
       - build
 
     name: Code Coverage
+    timeout-minutes: 30
     if: ${{ success() }}
     runs-on: ubuntu-latest
 
