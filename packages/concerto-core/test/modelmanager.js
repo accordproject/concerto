@@ -1292,6 +1292,9 @@ concept Bar {
             modelManager.isAssignableTo('test@1.0.0.SubSub', 'test@1.0.0.Base').should.be.true;
             modelManager.isAssignableTo('test@1.0.0.Sub1', 'test@1.0.0.Sub1').should.be.true;
             modelManager.isAssignableTo('test@1.0.0.Unrelated', 'test@1.0.0.Base').should.be.false;
+            modelManager.isAssignableTo('test@1.0.0.Color', 'test@1.0.0.Base').should.be.false;
+            modelManager.isAssignableTo('test@1.0.0.Color', 'test@1.0.0.Color').should.be.false;
+            modelManager.isAssignableTo('test@1.0.0.Sub1', 'test@1.0.0.Color').should.be.false;
         });
 
         it('should return false for abstract candidate in isAssignableTo', () => {
