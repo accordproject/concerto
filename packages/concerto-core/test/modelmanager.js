@@ -714,6 +714,11 @@ concept Bar {
 
         it('should fail using bad URL and default model file loader', () => {
 
+            sandbox.stub(global, 'fetch').resolves({
+                ok: false,
+                status: 404
+            });
+
             // disable validation, we are using an external model
             modelManager.addCTOModel(`namespace org.acme@1.0.0
 import org.external@1.0.0.Foo from github://external.cto
@@ -724,7 +729,7 @@ concept Bar {
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
             // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 400');
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 404');
         });
 
         it('should fail using bad protocol and default model file loader', () => {
