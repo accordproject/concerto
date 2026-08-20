@@ -22,7 +22,7 @@ const should = chai.should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));
 
-const { Printer } = require('../src');
+const { Printer, Parser } = require('../src');
 
 /**
  * Get the name and content of all cto files
@@ -87,6 +87,56 @@ describe('parser', () => {
                 }
             ]
         })).should.throw(Error, 'The declaration "Self_Extending" cannot extend itself.');
+    });
+
+    it('Should escape quotes and backslashes in String default values', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'quoted',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'slashed',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'a\b'
+                }]
+            }],
+        });
+        cto.should.include('default="he said \\"hi\\""');
+        cto.should.include('default="a\\b"');
+    });
+
+    it('Should produce parseable CTO for String defaults containing quotes', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'quoted',
+                    isArray: false,
+                    isOptional: false,
+                    defaultValue: 'he said "hi"'
+                }]
+            }],
+        });
+        const reparsed = Parser.parse(cto);
+        reparsed.declarations[0].properties[0].defaultValue.should.equal('he said "hi"');
     });
 
     it('Should handle ImportTypes with aliased types', () => {

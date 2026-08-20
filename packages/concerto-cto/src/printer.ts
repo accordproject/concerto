@@ -191,7 +191,7 @@ function modifiersFromMetaModel(mm: any): string {
         case `${MetaModelNamespace}.DateTimeProperty`:
         case `${MetaModelNamespace}.DateTimeScalar`:
             if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
         case `${MetaModelNamespace}.DoubleProperty`:
@@ -231,7 +231,7 @@ function modifiersFromMetaModel(mm: any): string {
         case `${MetaModelNamespace}.StringProperty`:
         case `${MetaModelNamespace}.StringScalar`:
             if (mm.defaultValue) {
-                defaultString += ` default="${mm.defaultValue}"`;
+                defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             if (mm.validator) {
                 validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags || ''}`;
@@ -250,6 +250,16 @@ function modifiersFromMetaModel(mm: any): string {
     }
 
     return result + defaultString + validatorString;
+}
+
+/**
+ * Format a string as a quoted CTO string literal, escaping any characters that
+ * would otherwise terminate the literal or break parsing.
+ * @param {string} value - string value to quote
+ * @returns {string} CTO-compatible quoted string literal
+ */
+function toStringLiteral(value: string): string {
+    return JSON.stringify(String(value));
 }
 
 /**
