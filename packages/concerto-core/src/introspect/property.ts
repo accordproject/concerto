@@ -19,6 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
+const ArrayLengthValidator = require('./arraylengthvalidator');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -121,6 +122,10 @@ class Property extends Decorated {
             this.array = true;
         }
 
+        this.arrayLengthValidator = this.ast.arrayLengthValidator
+            ? new ArrayLengthValidator(this, this.ast.arrayLengthValidator)
+            : null;
+
         if(this.ast.isOptional) {
             this.optional = true;
         }
@@ -214,6 +219,14 @@ class Property extends Decorated {
      */
     isArray() {
         return this.array;
+    }
+
+    /**
+     * Returns the array length validator for this property.
+     * @return {ArrayLengthValidator | null} the validator or null
+     */
+    getArrayLengthValidator() {
+        return this.arrayLengthValidator;
     }
 
 

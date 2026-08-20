@@ -236,6 +236,38 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
     }
 });
 
+const propertyArrayLengthValidatorChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b || a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+            return;
+        }
+        const aValidator = a.getArrayLengthValidator();
+        const bValidator = b.getArrayLengthValidator();
+        const classDeclarationType = getDeclarationType(a.getParent());
+        if (!aValidator && !bValidator) {
+            return;
+        } else if (!aValidator && bValidator) {
+            context.report({
+                key: 'property-validator-added',
+                message: `An array length validator was added to the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+        } else if (aValidator && !bValidator) {
+            context.report({
+                key: 'property-validator-removed',
+                message: `An array length validator was removed from the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+        } else if (!aValidator.compatibleWith(bValidator)) {
+            context.report({
+                key: 'property-validator-changed',
+                message: `An array length validator for the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was changed and is no longer compatible`,
+                element: a
+            });
+        }
+    }
+});
+
 const propertyOptionalChanged: ComparerFactory = (context) => ({
     compareProperty: (a, b) => {
         if (!a || !b) {
@@ -292,4 +324,4 @@ const propertyDefaultChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertyOptionalChanged, propertyDefaultChanged];
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertyArrayLengthValidatorChanged, propertyOptionalChanged, propertyDefaultChanged];

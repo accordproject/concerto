@@ -338,6 +338,7 @@ class ResourceValidator {
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
 
         if(field.isArray()) {
+            field.getArrayLengthValidator()?.validate(parameters.rootResourceIdentifier, obj);
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
                 parameters.stack.push(item);
@@ -363,6 +364,8 @@ class ResourceValidator {
         if(!(obj instanceof Array)) {
             ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
         }
+
+        field.getArrayLengthValidator()?.validate(parameters.rootResourceIdentifier, obj);
 
         for(let n=0; n < obj.length; n++) {
             const item = obj[n];
@@ -461,6 +464,8 @@ class ResourceValidator {
             if(!(obj instanceof Array)) {
                 ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
             }
+
+            relationshipDeclaration.getArrayLengthValidator()?.validate(parameters.rootResourceIdentifier, obj);
 
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];

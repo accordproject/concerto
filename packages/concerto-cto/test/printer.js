@@ -63,6 +63,42 @@ describe('parser', () => {
         })).should.throw(Error, 'Unrecognized import');
     });
 
+    it('Should print array length validators in canonical order', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'Sample',
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'values',
+                    isArray: true,
+                    isOptional: true,
+                    arrayLengthValidator: {
+                        $class: 'concerto.metamodel@1.0.0.ArrayLengthValidator',
+                        minElements: 0,
+                        maxElements: 2,
+                    }
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'minimumOnly',
+                    isArray: true,
+                    arrayLengthValidator: { minElements: 1 }
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'maximumOnly',
+                    isArray: true,
+                    arrayLengthValidator: { maxElements: 3 }
+                }]
+            }]
+        });
+
+        result.should.include('o String[] values minElements=0 maxElements=2 optional');
+        result.should.include('o String[] minimumOnly minElements=1');
+        result.should.include('o String[] maximumOnly maxElements=3');
+    });
+
     it('Should throw error for a self-extending declaration', () => {
         (() => Printer.toCTO({
             '$class': 'concerto.metamodel@1.0.0.Model',

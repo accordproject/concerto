@@ -22,6 +22,14 @@ async function getModelFiles(
     return [a, b];
 }
 
+function compareArrayValidators(aValidator: string, bValidator: string) {
+    const modelManager = new ModelManager();
+    const model = (validator: string) => `namespace org.example@1.0.0 concept Thing { o String[] values ${validator} }`;
+    const a = new ModelFile(modelManager, Parser.parse(model(aValidator)));
+    const b = new ModelFile(modelManager, Parser.parse(model(bValidator)));
+    return new Compare().compare(a, b);
+}
+
 test('should convert results into readable strings', () => {
     [
         { result: CompareResult.ERROR, str: 'error' },
@@ -39,6 +47,13 @@ test('should detect no changes between two identical files', async () => {
     const results = new Compare().compare(a, b);
     expect(results.findings).toHaveLength(0);
     expect(results.result).toBe(CompareResult.NONE);
+});
+
+test('should classify array length validator compatibility', () => {
+    expect(compareArrayValidators('', 'minElements=1 maxElements=4').result).toBe(CompareResult.MAJOR);
+    expect(compareArrayValidators('minElements=1 maxElements=4', 'minElements=2 maxElements=3').result).toBe(CompareResult.MAJOR);
+    expect(compareArrayValidators('minElements=1 maxElements=4', 'minElements=0 maxElements=5').result).toBe(CompareResult.NONE);
+    expect(compareArrayValidators('minElements=1 maxElements=4', '').result).toBe(CompareResult.PATCH);
 });
 
 test('should detect a change of namespace', async () => {

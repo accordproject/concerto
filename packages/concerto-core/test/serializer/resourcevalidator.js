@@ -100,11 +100,11 @@ describe('ResourceValidator', function () {
     }
     asset Car extends Vehicle  {
       o String model
-      o String[] serviceHistory optional
-      o VehicleType[] vehicleTypes optional
+      o String[] serviceHistory minElements=1 maxElements=2 optional
+      o VehicleType[] vehicleTypes minElements=1 maxElements=2 optional
       --> Person owner optional
-      --> Person[] owners optional
-      o Person[] containment optional
+      --> Person[] owners minElements=1 maxElements=2 optional
+      o Person[] containment minElements=1 maxElements=2 optional
       o Person singlePerson optional
     }`;
 
@@ -199,6 +199,12 @@ describe('ResourceValidator', function () {
             (function () {
                 vehicleDeclaration.accept(resourceValidator,parameters );
             }).should.throw('Instance "org.acme.l3@1.0.0.Car#123" has a property "owners" with type "org.acme.l1@1.0.0.Person" that is not derived from "org.acme.l1@1.0.0.Person[]".');
+        });
+
+        it('should enforce relationship array length', function () {
+            const field = modelManager.getType('org.acme.l3@1.0.0.Car').getProperty('owners');
+            const parameters = { stack: new TypedStack([]), modelManager, rootResourceIdentifier: 'TEST' };
+            (() => field.accept(resourceValidator, parameters)).should.throw(/must contain at least 1 elements/);
         });
     });
 
@@ -316,6 +322,14 @@ describe('ResourceValidator', function () {
             const field = vehicleDeclaration.getProperty('vehicleTypes');
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters);
+        });
+
+        it('should enforce primitive and enum array lengths', function () {
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
+            ['serviceHistory', 'vehicleTypes'].forEach(name => {
+                const parameters = { stack: new TypedStack([]), modelManager, rootResourceIdentifier: 'TEST' };
+                (() => vehicleDeclaration.getProperty(name).accept(resourceValidator, parameters)).should.throw(/must contain at least 1 elements/);
+            });
         });
 
         it('should throw if dataType is undefined', () => {

@@ -70,6 +70,15 @@
     return value ? true : false;
   }
 
+  function applyArrayLengthValidator(result, array, validator) {
+    if (validator) {
+      if (!array) {
+        throw new Error('Array length validators can only be applied to array properties.');
+      }
+      result.arrayLengthValidator = validator;
+    }
+  }
+
   function buildRange(value) {
     if (options?.skipLocationNodes) {
         return undefined;
@@ -1268,7 +1277,7 @@ ClassDeclarationBody
     }
 
 ObjectFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:ObjectType __ array:"[]"? __ id:Identifier __ d:StringDefault? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:ObjectType __ array:"[]"? __ id:Identifier __ d:StringDefault? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.ObjectProperty",
     		name: id.name,
@@ -1283,11 +1292,12 @@ ObjectFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
 BooleanFieldDeclaration
-    = decorators:Decorators __ "o" __ BooleanType __ array:"[]"? __ id:Identifier __  d:BooleanDefault? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ BooleanType __ array:"[]"? __ id:Identifier __  d:BooleanDefault? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.BooleanProperty",
     		name: id.name,
@@ -1301,11 +1311,12 @@ BooleanFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
 DateTimeFieldDeclaration
-    = decorators:Decorators __ "o" __ DateTimeType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ DateTimeType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.DateTimeProperty",
     		name: id.name,
@@ -1319,11 +1330,12 @@ DateTimeFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
 StringFieldDeclaration
-    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.StringProperty",
     		name: id.name,
@@ -1343,6 +1355,7 @@ StringFieldDeclaration
       if (length) {
         result.lengthValidator = length;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
@@ -1364,6 +1377,34 @@ StringLengthValidator
     }
    	return result;
   }
+
+ArrayLengthValidator
+   = min:MinElementsValidator __ max:MaxElementsValidator? {
+      const result = {
+        $class: `${metamodelNamespace}.ArrayLengthValidator`,
+        minElements: min
+      };
+      if (max !== null) {
+        result.maxElements = max;
+      }
+      return result;
+    }
+   / max:MaxElementsValidator {
+      return {
+        $class: `${metamodelNamespace}.ArrayLengthValidator`,
+        maxElements: max
+      };
+    }
+
+MinElementsValidator
+   = "minElements" __ "=" __ value:$SignedInteger {
+      return parseInt(value);
+    }
+
+MaxElementsValidator
+   = "maxElements" __ "=" __ value:$SignedInteger {
+      return parseInt(value);
+    }
 
 RealDomainValidator
    = "range" __ "=" __ "[" __ lower:$SignedRealLiteral? __ "," __ upper:$SignedRealLiteral? __ "]" {
@@ -1408,7 +1449,7 @@ LongDomainValidator
   }
 
 RealFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? __ range:RealDomainValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? __ range:RealDomainValidator? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.DoubleProperty",
     		name: id.name,
@@ -1425,11 +1466,12 @@ RealFieldDeclaration
       if (range) {
     		result.validator = range;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
 IntegerFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:IntegerDomainValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:IntegerDomainValidator? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.IntegerProperty",
     		name: id.name,
@@ -1446,11 +1488,12 @@ IntegerFieldDeclaration
       if (range) {
     		result.validator = range;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
 LongFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:LongDomainValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:LongDomainValidator? __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.LongProperty",
     		name: id.name,
@@ -1467,6 +1510,7 @@ LongFieldDeclaration
       if (range) {
     		result.validator = range;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
@@ -1677,7 +1721,7 @@ EnumPropertyDeclaration
     }
 
 RelationshipDeclaration
-    = decorators:Decorators __ "-->" __ propertyType:Identifier __ array:"[]"? __ id:Identifier __ optional:Optional? __ {
+    = decorators:Decorators __ "-->" __ propertyType:Identifier __ array:"[]"? __ id:Identifier __ arrayLength:ArrayLengthValidator? __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.RelationshipProperty",
     		name: id.name,
@@ -1689,6 +1733,7 @@ RelationshipDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
+      applyArrayLengthValidator(result, array, arrayLength);
       return result;
     }
 
