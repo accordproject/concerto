@@ -70,7 +70,7 @@ function decoratorArgFromMetaModel(mm: IDecoratorLiteral): string {
             break;
         case `${MetaModelNamespace}.DecoratorString`:
             const strRef = mm as IDecoratorString;
-            result += `"${strRef.value}"`;
+            result += toStringLiteral(strRef.value);
             break;
         default:
             result += `${(mm as (IDecoratorNumber | IDecoratorBoolean)).value}`;
@@ -234,7 +234,7 @@ function modifiersFromMetaModel(mm: any): string {
                 defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             if (mm.validator) {
-                validatorString += ` regex=/${mm.validator.pattern}/${mm.validator.flags || ''}`;
+                validatorString += ` regex=${toRegexLiteral(mm.validator.pattern, mm.validator.flags)}`;
             }
             if (mm.lengthValidator) {
                 const minLength = mm.lengthValidator.minLength !== undefined ? mm.lengthValidator.minLength : '';
@@ -260,6 +260,26 @@ function modifiersFromMetaModel(mm: any): string {
  */
 function toStringLiteral(value: string): string {
     return JSON.stringify(String(value));
+}
+
+/**
+ * Format a regular expression validator as a CTO regex literal. Unescaped
+ * forward slashes and line terminators in the pattern would terminate the
+ * literal early, so the pattern is normalized the same way JavaScript
+ * normalizes RegExp.prototype.source. Patterns that are not valid regular
+ * expressions are emitted unchanged.
+ * @param {string} pattern - the regular expression pattern
+ * @param {string} [flags] - the regular expression flags
+ * @returns {string} CTO-compatible regex literal
+ */
+function toRegexLiteral(pattern: string, flags?: string): string {
+    let source = pattern;
+    try {
+        source = new RegExp(pattern, flags).source;
+    } catch {
+        // Leave invalid patterns untouched rather than throwing while printing
+    }
+    return `/${source}/${flags || ''}`;
 }
 
 /**

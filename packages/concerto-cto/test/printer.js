@@ -139,6 +139,58 @@ describe('parser', () => {
         reparsed.declarations[0].properties[0].defaultValue.should.equal('he said "hi"');
     });
 
+    it('Should escape quotes in decorator string arguments', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                decorators: [{
+                    $class: 'concerto.metamodel@1.0.0.Decorator',
+                    name: 'Term',
+                    arguments: [{
+                        $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                        value: 'he said "hi"'
+                    }]
+                }],
+                properties: []
+            }],
+        });
+        const reparsed = Parser.parse(cto);
+        reparsed.declarations[0].decorators[0].arguments[0].value.should.equal('he said "hi"');
+    });
+
+    it('Should escape forward slashes and line terminators in regex validators', () => {
+        const cto = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [],
+            declarations: [{
+                $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                name: 'C',
+                isAbstract: false,
+                properties: [{
+                    $class: 'concerto.metamodel@1.0.0.StringProperty',
+                    name: 'path',
+                    isArray: false,
+                    isOptional: false,
+                    validator: {
+                        $class: 'concerto.metamodel@1.0.0.StringRegexValidator',
+                        pattern: 'a/b',
+                        flags: ''
+                    }
+                }]
+            }],
+        });
+        cto.should.include('regex=/a\\/b/');
+        const reparsed = Parser.parse(cto);
+        const pattern = reparsed.declarations[0].properties[0].validator.pattern;
+        new RegExp(pattern).test('a/b').should.equal(true);
+    });
+
     it('Should handle ImportTypes with aliased types', () => {
         const result = Printer.toCTO({
             $class: 'concerto.metamodel@1.0.0.Model',
