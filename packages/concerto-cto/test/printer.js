@@ -123,4 +123,115 @@ describe('parser', () => {
         result.should.include('import org.example@1.0.0.*');
         result.should.include('from https://example.org/models/example.cto');
     });
+
+    it('Should skip ImportTypes with empty types array', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: [],
+                aliasedTypes: []
+            }],
+            declarations: [],
+        });
+        result.should.not.include('import org.example');
+    });
+
+    it('Should skip ImportTypes with empty types array and orphaned aliasedTypes', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: [],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' }
+                ]
+            }],
+            declarations: [],
+        });
+        result.should.not.include('import org.example');
+        result.should.not.include('Person');
+        result.should.not.include('Individual');
+    });
+
+    it('Should not print aliases for types that were filtered out', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            imports: [{
+                $class: 'concerto.metamodel@1.0.0.ImportTypes',
+                namespace: 'org.example@1.0.0',
+                types: ['Address'],
+                aliasedTypes: [
+                    { name: 'Person', aliasedName: 'Individual' }
+                ]
+            }],
+            declarations: [],
+        });
+        result.should.include('import org.example@1.0.0.{Address}');
+        result.should.not.include('Person');
+        result.should.not.include('Individual');
+    });
+
+    it('Should print Double range bounds using decimal notation', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 0,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0,1.0]');
+    });
+
+    it('Should print scientific notation Double range bounds without rounding to zero', () => {
+        const result = Printer.toCTO({
+            $class: 'concerto.metamodel@1.0.0.Model',
+            namespace: 'org.acme@1.0.0',
+            declarations: [
+                {
+                    $class: 'concerto.metamodel@1.0.0.ConceptDeclaration',
+                    name: 'Sample',
+                    isAbstract: false,
+                    properties: [
+                        {
+                            $class: 'concerto.metamodel@1.0.0.DoubleProperty',
+                            name: 'value',
+                            isArray: false,
+                            isOptional: false,
+                            validator: {
+                                $class: 'concerto.metamodel@1.0.0.DoubleDomainValidator',
+                                lower: 1e-7,
+                                upper: 1
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        result.should.include('o Double value range=[0.0000001,1.0]');
+    });
 });

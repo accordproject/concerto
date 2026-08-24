@@ -1027,5 +1027,82 @@ describe('Serializer', () => {
             }).should.throw('Unexpected properties for type org.acme.sample@1.0.0.Concepts: stateLog');
         });
     });
+
+    describe('# cross-namespace concept values in maps', () => {
+        let xnsModelManager;
+        let xnsFactory;
+        let xnsSerializer;
+
+        beforeEach(() => {
+            xnsModelManager = new ModelManager();
+            Util.addComposerModel(xnsModelManager);
+
+            // the value concept lives in its own namespace
+            xnsModelManager.addCTOModel(`
+            namespace org.acme.unit@1.0.0
+
+            concept MonetaryUnit {
+                o String code
+                o Integer scale
+            }
+            `, 'unit.cto');
+
+            // the map (and its container) live in a different namespace and
+            // import the value concept
+            xnsModelManager.addCTOModel(`
+            namespace org.acme.registry@1.0.0
+
+            import org.acme.unit@1.0.0.{MonetaryUnit}
+
+            map UnitMap {
+                o String
+                o MonetaryUnit
+            }
+
+            concept Registry {
+                o UnitMap units optional
+            }
+            `, 'registry.cto');
+
+            xnsFactory = new Factory(xnsModelManager);
+            xnsSerializer = new Serializer(xnsFactory, xnsModelManager);
+        });
+
+        it('should serialize -> deserialize a Map whose value concept is imported from another namespace', () => {
+            const registry = xnsFactory.newConcept('org.acme.registry@1.0.0', 'Registry');
+
+            const usd = xnsFactory.newConcept('org.acme.unit@1.0.0', 'MonetaryUnit');
+            usd.code = 'USD';
+            usd.scale = 2;
+            const jpy = xnsFactory.newConcept('org.acme.unit@1.0.0', 'MonetaryUnit');
+            jpy.code = 'JPY';
+            jpy.scale = 0;
+
+            registry.units = new Map();
+            registry.units.set('USD', usd);
+            registry.units.set('JPY', jpy);
+
+            // previously threw: TypeError: Cannot read properties of undefined (reading 'accept')
+            // because the value declaration was looked up only in the map's own model file.
+            const json = xnsSerializer.toJSON(registry);
+
+            json.should.deep.equal({
+                $class: 'org.acme.registry@1.0.0.Registry',
+                units: {
+                    USD: { $class: 'org.acme.unit@1.0.0.MonetaryUnit', code: 'USD', scale: 2 },
+                    JPY: { $class: 'org.acme.unit@1.0.0.MonetaryUnit', code: 'JPY', scale: 0 }
+                }
+            });
+
+            const resource = xnsSerializer.fromJSON(json);
+            resource.units.should.be.an.instanceOf(Map);
+            resource.units.get('USD').code.should.equal('USD');
+            resource.units.get('USD').scale.should.equal(2);
+            resource.units.get('JPY').scale.should.equal(0);
+
+            // round-trips back to the same JSON
+            xnsSerializer.toJSON(resource).should.deep.equal(json);
+        });
+    });
 });
 

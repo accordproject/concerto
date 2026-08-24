@@ -79,3 +79,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
+          # Don't block the PR when the Coveralls webhook is unavailable (e.g.
+          # 5xx/timeout). Coverage is still uploaded per-matrix above, which also
+          # uses fail-on-error: false.
+          fail-on-error: false

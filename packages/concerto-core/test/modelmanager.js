@@ -723,8 +723,10 @@ concept Bar {
 }`, 'internal.cto', true);
             modelManager.getModelFile('org.acme@1.0.0').should.not.be.null;
 
-            // import all external models
-            return modelManager.updateExternalModels().should.be.rejectedWith(Error, 'Failed to load model file. Job: github://external.cto Details: Error: HTTP request failed with status: 400');
+            // import all external models. The exact HTTP status returned by GitHub
+            // for the bad URL can vary (e.g. 400 vs 404), so assert on the stable
+            // failure message rather than pinning a specific status code.
+            return modelManager.updateExternalModels().should.be.rejectedWith(Error, /Failed to load model file\. Job: github:\/\/external\.cto Details: Error: HTTP request failed with status: \d+/);
         });
 
         it('should fail using bad protocol and default model file loader', () => {
@@ -815,6 +817,58 @@ concept Bar {
                 name: 'org.acme.base.cto', content: modelBase
             });
         });
+
+        it('should use the last segment for slash-delimited file identifiers', () => {
+            modelManager.addCTOModel(modelBase, 'https://example.org/models/org.acme.base.cto');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'org.acme.base.cto', content: modelBase
+            });
+        });
+
+        it('should use the last segment for backslash-delimited file identifiers', () => {
+            modelManager.addCTOModel(modelBase, 'dir\\subdir\\org.acme.base.cto');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'org.acme.base.cto', content: modelBase
+            });
+        });
+
+        it('should use the last non-empty segment for slash-delimited file identifiers with trailing separators', () => {
+            modelManager.addCTOModel(modelBase, 'https://example.org/models/');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'models', content: modelBase
+            });
+        });
+
+        it('should use the last non-empty segment for backslash-delimited file identifiers with trailing separators', () => {
+            modelManager.addCTOModel(modelBase, 'dir\\subdir\\');
+            const models = modelManager.getModels();
+            models[1].should.deep.equal({
+                name: 'subdir', content: modelBase
+            });
+        });
+        it('should fall back to the namespace when the file name is UNKNOWN', () => {
+            const modelFile = sinon.createStubInstance(ModelFile);
+            modelFile.getNamespace.returns('org.example@1.0.0');
+            modelFile.getVersion.returns('1.0.0');
+            modelFile.isModelFile.returns(true);
+            modelFile.getAst.returns({ $class: `${MetaModelNamespace}.Model` });
+            modelFile.isExternal.returns(false);
+            modelFile.fileName = 'UNKNOWN';
+            modelFile.namespace = 'org.example@1.0.0';
+            modelFile.definitions = 'namespace org.example@1.0.0';
+
+            modelManager.addModelFile(modelFile);
+
+            const models = modelManager.getModels();
+            models.find((model) => model.content === 'namespace org.example@1.0.0').should.deep.equal({
+                name: 'org.example@1.0.0.cto',
+                content: 'namespace org.example@1.0.0'
+            });
+        });
+
         it('should return a list of name / content pairs, with External Models', async () => {
             const externalModelFile = ParserUtil.newModelAst(modelManager, `namespace org.external@1.0.0
             concept Foo{ o String baz }`, '@external.cto');
@@ -1133,6 +1187,22 @@ concept Bar {
             filtered.getModelFiles().map(mf => mf.getAllDeclarations()).flat().length.should.equal(1);
 
             filtered.validateModelFiles();
+        });
+
+        it('should skip validation when disableValidation option is set', () => {
+            modelManager.addCTOModel(`namespace org.skip@1.0.0
+            concept Kept {}
+            concept Removed {}
+            `, 'skip.cto');
+
+            const filtered = modelManager.filter(
+                decl => decl.getFullyQualifiedName() === 'org.skip@1.0.0.Kept',
+                { disableValidation: true }
+            );
+
+            filtered.getModelFiles().length.should.equal(1);
+            filtered.getModelFiles()[0].getAllDeclarations().length.should.equal(1);
+            filtered.getModelFiles()[0].getAllDeclarations()[0].getName().should.equal('Kept');
         });
 
         it('should remove imports for filtered types', () => {
