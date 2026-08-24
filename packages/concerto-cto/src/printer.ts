@@ -249,13 +249,10 @@ function modifiersFromMetaModel(mm: any): string {
             break;
     }
 
-    if (mm.isArray && mm.arrayLengthValidator) {
-        if (mm.arrayLengthValidator.minElements !== undefined) {
-            validatorString += ` minElements=${mm.arrayLengthValidator.minElements}`;
-        }
-        if (mm.arrayLengthValidator.maxElements !== undefined) {
-            validatorString += ` maxElements=${mm.arrayLengthValidator.maxElements}`;
-        }
+    if (mm.sizeValidator) {
+        const minSize = mm.sizeValidator.minSize ?? '';
+        const maxSize = mm.sizeValidator.maxSize ?? '';
+        validatorString += ` size=[${minSize},${maxSize}]`;
     }
 
     return result + defaultString + validatorString;

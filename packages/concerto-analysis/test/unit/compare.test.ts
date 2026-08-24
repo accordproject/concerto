@@ -22,9 +22,9 @@ async function getModelFiles(
     return [a, b];
 }
 
-function compareArrayValidators(aValidator: string, bValidator: string) {
+function compareCollectionValidators(aValidator: string, bValidator: string, type = 'String[]') {
     const modelManager = new ModelManager();
-    const model = (validator: string) => `namespace org.example@1.0.0 concept Thing { o String[] values ${validator} }`;
+    const model = (validator: string) => `namespace org.example@1.0.0 map PhoneBook { o String o String } concept Thing { o ${type} values ${validator} }`;
     const a = new ModelFile(modelManager, Parser.parse(model(aValidator)));
     const b = new ModelFile(modelManager, Parser.parse(model(bValidator)));
     return new Compare().compare(a, b);
@@ -49,11 +49,12 @@ test('should detect no changes between two identical files', async () => {
     expect(results.result).toBe(CompareResult.NONE);
 });
 
-test('should classify array length validator compatibility', () => {
-    expect(compareArrayValidators('', 'minElements=1 maxElements=4').result).toBe(CompareResult.MAJOR);
-    expect(compareArrayValidators('minElements=1 maxElements=4', 'minElements=2 maxElements=3').result).toBe(CompareResult.MAJOR);
-    expect(compareArrayValidators('minElements=1 maxElements=4', 'minElements=0 maxElements=5').result).toBe(CompareResult.NONE);
-    expect(compareArrayValidators('minElements=1 maxElements=4', '').result).toBe(CompareResult.PATCH);
+test('should classify collection size validator compatibility', () => {
+    expect(compareCollectionValidators('', 'size=[1,4]').result).toBe(CompareResult.MAJOR);
+    expect(compareCollectionValidators('size=[1,4]', 'size=[2,3]').result).toBe(CompareResult.MAJOR);
+    expect(compareCollectionValidators('size=[1,4]', 'size=[0,5]').result).toBe(CompareResult.NONE);
+    expect(compareCollectionValidators('size=[1,4]', '').result).toBe(CompareResult.PATCH);
+    expect(compareCollectionValidators('', 'size=[1,4]', 'PhoneBook').result).toBe(CompareResult.MAJOR);
 });
 
 test('should detect a change of namespace', async () => {

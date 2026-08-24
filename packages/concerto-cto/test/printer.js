@@ -63,7 +63,7 @@ describe('parser', () => {
         })).should.throw(Error, 'Unrecognized import');
     });
 
-    it('Should print array length validators in canonical order', () => {
+    it('Should print collection size validators', () => {
         const result = Printer.toCTO({
             $class: 'concerto.metamodel@1.0.0.Model',
             namespace: 'org.acme@1.0.0',
@@ -75,28 +75,34 @@ describe('parser', () => {
                     name: 'values',
                     isArray: true,
                     isOptional: true,
-                    arrayLengthValidator: {
-                        $class: 'concerto.metamodel@1.0.0.ArrayLengthValidator',
-                        minElements: 0,
-                        maxElements: 2,
+                    sizeValidator: {
+                        $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator',
+                        minSize: 0,
+                        maxSize: 2,
                     }
                 }, {
                     $class: 'concerto.metamodel@1.0.0.StringProperty',
                     name: 'minimumOnly',
                     isArray: true,
-                    arrayLengthValidator: { minElements: 1 }
+                    sizeValidator: { minSize: 1 }
                 }, {
                     $class: 'concerto.metamodel@1.0.0.StringProperty',
                     name: 'maximumOnly',
                     isArray: true,
-                    arrayLengthValidator: { maxElements: 3 }
+                    sizeValidator: { maxSize: 3 }
+                }, {
+                    $class: 'concerto.metamodel@1.0.0.ObjectProperty',
+                    name: 'mapValues',
+                    type: { name: 'PhoneBook' },
+                    sizeValidator: { minSize: 1, maxSize: 3 }
                 }]
             }]
         });
 
-        result.should.include('o String[] values minElements=0 maxElements=2 optional');
-        result.should.include('o String[] minimumOnly minElements=1');
-        result.should.include('o String[] maximumOnly maxElements=3');
+        result.should.include('o String[] values size=[0,2] optional');
+        result.should.include('o String[] minimumOnly size=[1,]');
+        result.should.include('o String[] maximumOnly size=[,3]');
+        result.should.include('o PhoneBook mapValues size=[1,3]');
     });
 
     it('Should throw error for a self-extending declaration', () => {

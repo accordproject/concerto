@@ -81,36 +81,38 @@ describe('parser', () => {
         });
     });
 
-    describe('array length validators', () => {
+    describe('collection size validators', () => {
         const model = (property) => `namespace org.example@1.0.0
             concept Item {}
             participant Person identified by id { o String id }
+            map PhoneBook { o String o String }
             concept Test { ${property} }`;
 
-        it('Should parse validators for every array property type', () => {
+        it('Should parse validators for arrays and maps', () => {
             const properties = [
-                'o String[] value minElements=0 maxElements=2',
-                'o Integer[] value minElements=1',
-                'o Long[] value maxElements=2',
-                'o Double[] value minElements=1 maxElements=2',
-                'o Boolean[] value minElements=1',
-                'o DateTime [] value maxElements=2',
-                'o Item[] value minElements=1 maxElements=2 optional',
-                '--> Person[] value minElements=1 maxElements=2',
+                'o String[] value size=[0,2]',
+                'o Integer[] value size=[1,]',
+                'o Long[] value size=[,2]',
+                'o Double[] value size=[1,2]',
+                'o Boolean[] value size=[1,]',
+                'o DateTime [] value size=[,2]',
+                'o Item[] value size=[1,2] optional',
+                '--> Person[] value size=[1,2]',
+                'o PhoneBook value size=[1,3]',
             ];
             properties.forEach(property => {
                 const validator = Parser.parse(model(property), undefined, { skipLocationNodes: true })
-                    .declarations[2].properties[0].arrayLengthValidator;
-                validator.$class.should.equal('concerto.metamodel@1.0.0.ArrayLengthValidator');
+                    .declarations[3].properties[0].sizeValidator;
+                validator.$class.should.equal('concerto.metamodel@1.0.0.CollectionSizeValidator');
             });
         });
 
         [
-            'o String value minElements=1',
-            'o String[] value maxElements=2 minElements=1',
-            'o String[] value minElements=1 minElements=2',
+            'o String[] value size=[,]',
+            'o String[] value minElements=1',
+            'o String[] value size=[1,2] size=[1,2]',
         ].forEach(property => {
-            it(`Should reject invalid array validator syntax: ${property}`, () => {
+            it(`Should reject invalid collection validator syntax: ${property}`, () => {
                 (() => Parser.parse(model(property))).should.throw();
             });
         });

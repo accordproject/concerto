@@ -19,7 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
-const ArrayLengthValidator = require('./arraylengthvalidator');
+const CollectionSizeValidator = require('./collectionsizevalidator');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -122,8 +122,8 @@ class Property extends Decorated {
             this.array = true;
         }
 
-        this.arrayLengthValidator = this.ast.arrayLengthValidator
-            ? new ArrayLengthValidator(this, this.ast.arrayLengthValidator)
+        this.sizeValidator = this.ast.sizeValidator
+            ? new CollectionSizeValidator(this, this.ast.sizeValidator)
             : null;
 
         if(this.ast.isOptional) {
@@ -145,6 +145,13 @@ class Property extends Decorated {
 
         if(this.type) {
             classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
+        }
+
+        if (this.sizeValidator && !this.isArray()) {
+            const type = classDecl.getModelFile().getType(this.type);
+            if (!type?.isMapDeclaration?.()) {
+                throw new IllegalModelException('Collection size validators can only be applied to array or map properties.', classDecl.getModelFile(), this.ast.location);
+            }
         }
     }
 
@@ -222,11 +229,11 @@ class Property extends Decorated {
     }
 
     /**
-     * Returns the array length validator for this property.
-     * @return {ArrayLengthValidator | null} the validator or null
+     * Returns the collection size validator for this property.
+     * @return {CollectionSizeValidator | null} the validator or null
      */
-    getArrayLengthValidator() {
-        return this.arrayLengthValidator;
+    getCollectionSizeValidator() {
+        return this.sizeValidator;
     }
 
 

@@ -103,6 +103,12 @@ describe('Property', () => {
             }).should.throw(/Invalid property name '1st'/);
         });
 
+        it('should reject collection size validators on scalar properties', () => {
+            const modelManager = new ModelManager();
+            (() => modelManager.addCTOModel('namespace org.example@1.0.0 concept Test { o String value size=[1,2] }'))
+                .should.throw(/only be applied to array or map properties/);
+        });
+
     });
 
     describe('#hasInstance', () => {

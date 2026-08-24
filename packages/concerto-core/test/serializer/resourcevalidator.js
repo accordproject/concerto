@@ -56,7 +56,7 @@ describe('ResourceValidator', function () {
       o String
     }
     concept Data {
-        o PhoneBook numbers
+        o PhoneBook numbers size=[1,2]
     }`;
 
     const levelOneModel = `namespace org.acme.l1@1.0.0
@@ -100,11 +100,11 @@ describe('ResourceValidator', function () {
     }
     asset Car extends Vehicle  {
       o String model
-      o String[] serviceHistory minElements=1 maxElements=2 optional
-      o VehicleType[] vehicleTypes minElements=1 maxElements=2 optional
+      o String[] serviceHistory size=[1,2] optional
+      o VehicleType[] vehicleTypes size=[1,2] optional
       --> Person owner optional
-      --> Person[] owners minElements=1 maxElements=2 optional
-      o Person[] containment minElements=1 maxElements=2 optional
+      --> Person[] owners size=[1,2] optional
+      o Person[] containment size=[1,2] optional
       o Person singlePerson optional
     }`;
 
@@ -330,6 +330,16 @@ describe('ResourceValidator', function () {
                 const parameters = { stack: new TypedStack([]), modelManager, rootResourceIdentifier: 'TEST' };
                 (() => vehicleDeclaration.getProperty(name).accept(resourceValidator, parameters)).should.throw(/must contain at least 1 elements/);
             });
+        });
+
+        it('should enforce map property size without counting system entries', function () {
+            const field = modelManager.getType('org.acme.map@1.0.0.Data').getProperty('numbers');
+            const valid = new Map([['$class', 'org.acme.map@1.0.0.PhoneBook'], ['one', '1']]);
+            field.accept(resourceValidator, { stack: new TypedStack(valid), modelManager, rootResourceIdentifier: 'TEST' });
+
+            const tooLarge = new Map([['one', '1'], ['two', '2'], ['three', '3']]);
+            (() => field.accept(resourceValidator, { stack: new TypedStack(tooLarge), modelManager, rootResourceIdentifier: 'TEST' }))
+                .should.throw(/must contain no more than 2 elements/);
         });
 
         it('should throw if dataType is undefined', () => {
