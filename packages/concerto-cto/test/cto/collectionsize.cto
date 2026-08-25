@@ -1,0 +1,22 @@
+namespace test.collectionsize@1.0.0
+
+concept Person {
+}
+
+map PhoneBook {
+  o String
+  o String
+}
+
+concept Team {
+  o String[] tags size=[2,5]
+  o String[] middle size=[,3] optional
+  o Integer[] scores size=[1,]
+  o Boolean[] flags size=[1,10]
+  o Double[] weights size=[2,4] optional
+  o Long[] ids size=[1,100]
+  o DateTime[] timestamps size=[1,5]
+  o Person[] members size=[1,20]
+  o PhoneBook contacts size=[1,50]
+  --> Person[] advisors size=[1,3]
+}
