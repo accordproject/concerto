@@ -228,6 +228,14 @@ describe('Property - Test for property types using Import Aliasing', () => {
             prop.getSizeValidator().getMaxSize().should.equal(5);
         });
 
+        it('should allow size on a map-typed property imported from another namespace', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace maps@1.0.0\nmap PhoneBook { o String\n o String }');
+            mm.addCTOModel('namespace t@1.0.0\nimport maps@1.0.0.PhoneBook\nconcept A { o PhoneBook contacts size=[1,10] }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('contacts');
+            prop.getSizeValidator().getMinSize().should.equal(1);
+        });
+
         it('should allow size on a relationship array', () => {
             const mm = new ModelManager();
             mm.addCTOModel('namespace t@1.0.0\nconcept P identified by id { o String id }\nconcept A { --> P[] refs size=[1,3] }');

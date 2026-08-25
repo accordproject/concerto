@@ -154,13 +154,7 @@ class Property extends Decorated {
                     const resolvedType = classDecl.getModelFile().getType(this.type);
                     isMapType = resolvedType.isMapDeclaration?.() === true;
                 } catch(e) {
-                    // type not in this file, try model manager
-                    try {
-                        const resolvedType = classDecl.getModelFile().getModelManager().getType(this.getFullyQualifiedTypeName());
-                        isMapType = resolvedType.isMapDeclaration?.() === true;
-                    } catch(e2) {
-                        // type resolution failed — will be caught by other validation
-                    }
+                    // type resolution failed — will be caught by other validation
                 }
             }
             if(!isMapType) {
