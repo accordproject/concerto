@@ -168,4 +168,88 @@ describe('Property - Test for property types using Import Aliasing', () => {
 
     });
 
+    describe('#getSizeValidator', () => {
+
+        it('should reject size on a non-array String property', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept A { o String name size=[1,5] }');
+            }).should.throw(/size validator can only be applied to array or map/);
+        });
+
+        it('should reject size on a non-array Integer property', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept A { o Integer count size=[1,5] }');
+            }).should.throw(/size validator can only be applied to array or map/);
+        });
+
+        it('should reject size on a non-array, non-map object property', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept B { o String x }\nconcept A { o B thing size=[1,5] }');
+            }).should.throw(/size validator can only be applied to array or map/);
+        });
+
+        it('should reject negative minSize', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept A { o String[] tags size=[-1,5] }');
+            }).should.throw(/positive integers/);
+        });
+
+        it('should reject negative maxSize', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept A { o String[] tags size=[1,-5] }');
+            }).should.throw(/positive integers/);
+        });
+
+        it('should reject minSize greater than maxSize', () => {
+            (() => {
+                const mm = new ModelManager();
+                mm.addCTOModel('namespace t@1.0.0\nconcept A { o String[] tags size=[10,2] }');
+            }).should.throw(/minSize must be less than or equal to maxSize/);
+        });
+
+        it('should allow size on an array property', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace t@1.0.0\nconcept A { o String[] tags size=[1,10] }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('tags');
+            prop.getSizeValidator().getMinSize().should.equal(1);
+            prop.getSizeValidator().getMaxSize().should.equal(10);
+        });
+
+        it('should allow size on a map-typed property', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace t@1.0.0\nmap M { o String\n o String }\nconcept A { o M data size=[1,5] }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('data');
+            prop.getSizeValidator().getMinSize().should.equal(1);
+            prop.getSizeValidator().getMaxSize().should.equal(5);
+        });
+
+        it('should allow size on a map-typed property imported from another namespace', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace maps@1.0.0\nmap PhoneBook { o String\n o String }');
+            mm.addCTOModel('namespace t@1.0.0\nimport maps@1.0.0.PhoneBook\nconcept A { o PhoneBook contacts size=[1,10] }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('contacts');
+            prop.getSizeValidator().getMinSize().should.equal(1);
+        });
+
+        it('should allow size on a relationship array', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace t@1.0.0\nconcept P identified by id { o String id }\nconcept A { --> P[] refs size=[1,3] }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('refs');
+            prop.getSizeValidator().getMinSize().should.equal(1);
+        });
+
+        it('should return null when no size validator', () => {
+            const mm = new ModelManager();
+            mm.addCTOModel('namespace t@1.0.0\nconcept A { o String[] tags }');
+            const prop = mm.getType('t@1.0.0.A').getProperty('tags');
+            should.equal(prop.getSizeValidator(), null);
+        });
+
+    });
+
 });
