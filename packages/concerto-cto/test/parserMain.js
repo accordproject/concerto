@@ -124,6 +124,73 @@ describe('parser', () => {
         });
     });
 
+    describe('collection size validator', () => {
+        it('Should not parse size with missing brackets', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=1,5 }'))
+                .should.throw();
+        });
+
+        it('Should not parse size with missing comma', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1 5] }'))
+                .should.throw();
+        });
+
+        it('Should not parse size with non-integer values', () => {
+            (() => Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1.5,3] }'))
+                .should.throw();
+        });
+
+        it('Should parse size with various spacing', () => {
+            const variants = [
+                'o String[] x size=[1,5]',
+                'o String[] x size=[ 1, 5 ]',
+                'o String[] x size=[1 , 5]',
+                'o String[] x size=[ 1 ,5 ]',
+            ];
+            variants.forEach(v => {
+                const ast = Parser.parse(`namespace t@1.0.0\nconcept A { ${v} }`, undefined, { skipLocationNodes: true });
+                const prop = ast.declarations[0].properties[0];
+                prop.sizeValidator.minSize.should.equal(1);
+                prop.sizeValidator.maxSize.should.equal(5);
+            });
+        });
+
+        it('Should parse size before other modifiers', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] optional }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.sizeValidator.minSize.should.equal(1);
+            prop.isOptional.should.equal(true);
+        });
+
+        it('Should parse size after range validator', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Integer[] x range=[0,100] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size after length validator', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x length=[,50] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.lengthValidator.maxLength.should.equal(50);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size with min only', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[3,] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.sizeValidator.minSize.should.equal(3);
+            should.not.exist(prop.sizeValidator.maxSize);
+        });
+
+        it('Should parse size with max only', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[,10] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            should.not.exist(prop.sizeValidator.minSize);
+            prop.sizeValidator.maxSize.should.equal(10);
+        });
+    });
+
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [
