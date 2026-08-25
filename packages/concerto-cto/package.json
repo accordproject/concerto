@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-cto",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "description": "Parser for Concerto CTO files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "^3.13.0",
-    "@accordproject/concerto-util": "4.1.4",
+    "@accordproject/concerto-util": "4.1.5",
     "acorn": "^8.15.0",
     "path-browserify": "^1.0.1",
     "schema-utils": "^4.3.3"
