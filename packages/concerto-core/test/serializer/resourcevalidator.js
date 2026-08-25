@@ -19,6 +19,7 @@ const ModelManager = require('../../src/modelmanager');
 const Factory = require('../../src/factory');
 const TypeNotFoundException = require('../../src/typenotfoundexception');
 const ResourceValidator = require('../../src/serializer/resourcevalidator');
+const Serializer = require('../../src/serializer');
 const Identifiable = require('../../src/model/identifiable');
 const Field = require('../../src/introspect/field');
 const Resource = require('../../src/model/resource');
@@ -599,6 +600,127 @@ describe('ResourceValidator', function () {
             (() => {
                 resourceValidator.checkRelationship(parameters, {}, mockResource);
             }).should.not.throw();
+        });
+    });
+
+    describe('#collectionSizeValidator', () => {
+
+        const sizeModel = `namespace org.acme.size@1.0.0
+        import org.acme.l1@1.0.0.Person
+        import org.acme.l1@1.0.0.VehicleType
+        import org.acme.map@1.0.0.PhoneBook
+        concept Team identified by id {
+            o String id
+            o String[] tags size=[2,5]
+            o Integer[] scores size=[1,]
+            o VehicleType[] types size=[,3]
+            o Person[] members size=[1,4]
+            --> Person[] advisors size=[1,2]
+            o PhoneBook contacts size=[1,3]
+        }`;
+
+        it('should pass validation when all collections are within bounds', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b', 'c'];
+            team.scores = [100];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['alice', '555-0001']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.not.throw();
+        });
+
+        it('should reject array below minSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['only-one'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['a', '1']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/at least 2 elements/);
+        });
+
+        it('should reject array above maxSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b', 'c', 'd', 'e', 'f'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['a', '1']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/no more than 5 elements/);
+        });
+
+        it('should reject enum array above maxSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b'];
+            team.scores = [1];
+            team.types = ['CAR', 'TRUCK', 'SUV', 'MOTORBIKE'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['a', '1']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/no more than 3 elements/);
+        });
+
+        it('should reject object array below minSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['a', '1']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/at least 1 elements/);
+        });
+
+        it('should reject relationship array below minSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [];
+            team.contacts = new Map([['a', '1']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/at least 1 elements/);
+        });
+
+        it('should reject map property below minSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map();
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/at least 1 elements/);
+        });
+
+        it('should reject map property above maxSize', () => {
+            modelManager.addCTOModel(sizeModel);
+            const team = factory.newResource('org.acme.size@1.0.0', 'Team', 'team1');
+            team.tags = ['a', 'b'];
+            team.scores = [1];
+            team.types = ['CAR'];
+            team.members = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'p1')];
+            team.advisors = [factory.newRelationship('org.acme.l1@1.0.0', 'Person', 'p2')];
+            team.contacts = new Map([['a','1'],['b','2'],['c','3'],['d','4']]);
+            const serializer = new Serializer(factory, modelManager);
+            (() => serializer.toJSON(team)).should.throw(/no more than 3 elements/);
         });
     });
 });

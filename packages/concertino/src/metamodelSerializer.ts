@@ -382,6 +382,17 @@ function transformProperties(properties: Record<string, IConcertinoProperty>): {
                         (result as IStringProperty).lengthValidator = lengthValidator;
                     }
 
+                    if (property.size) {
+                        const sizeValidator: any = { $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator' };
+                        if (property.size[0] !== undefined && property.size[0] !== null) {
+                            sizeValidator.minSize = property.size[0];
+                        }
+                        if (property.size[1] !== undefined && property.size[1] !== null) {
+                            sizeValidator.maxSize = property.size[1];
+                        }
+                        (result as any).sizeValidator = sizeValidator;
+                    }
+
                     if (stringProperty.default !== undefined) {
                         (result as IStringProperty | IIntegerProperty | ILongProperty | IDoubleProperty | IBooleanProperty).defaultValue = stringProperty.default;
                     }
