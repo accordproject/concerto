@@ -39,6 +39,7 @@ import RelationshipDeclaration = require("./introspect/relationshipdeclaration")
 import Validator = require("./introspect/validator");
 import NumberValidator = require("./introspect/numbervalidator");
 import StringValidator = require("./introspect/stringvalidator");
+import CollectionSizeValidator = require("./introspect/collectionsizevalidator");
 import Typed = require("./model/typed");
 import Identifiable = require("./model/identifiable");
 import Relationship = require("./model/relationship");
@@ -82,9 +83,10 @@ export {
     Field, 
     EnumDeclaration, 
     RelationshipDeclaration, 
-    Validator, 
-    NumberValidator, 
-    StringValidator, 
+    Validator,
+    NumberValidator,
+    StringValidator,
+    CollectionSizeValidator,
     Typed, 
     Identifiable, 
     Relationship, 

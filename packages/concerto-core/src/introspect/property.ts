@@ -19,6 +19,7 @@ const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 const ModelUtil = require('../modelutil');
 const IllegalModelException = require('./illegalmodelexception');
 const Decorated = require('./decorated');
+const CollectionSizeValidator = require('./collectionsizevalidator');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
@@ -121,6 +122,10 @@ class Property extends Decorated {
             this.array = true;
         }
 
+        this.sizeValidator = this.ast.sizeValidator
+            ? new CollectionSizeValidator(this, this.ast.sizeValidator)
+            : null;
+
         if(this.ast.isOptional) {
             this.optional = true;
         }
@@ -140,6 +145,31 @@ class Property extends Decorated {
 
         if(this.type) {
             classDecl.getModelFile().resolveType( 'property ' + this.getFullyQualifiedName(), this.type);
+        }
+
+        if(this.sizeValidator && !this.array) {
+            let isMapType = false;
+            if(this.type && !this.isPrimitive()) {
+                try {
+                    const resolvedType = classDecl.getModelFile().getType(this.type);
+                    isMapType = resolvedType.isMapDeclaration?.() === true;
+                } catch(e) {
+                    // type not in this file, try model manager
+                    try {
+                        const resolvedType = classDecl.getModelFile().getModelManager().getType(this.getFullyQualifiedTypeName());
+                        isMapType = resolvedType.isMapDeclaration?.() === true;
+                    } catch(e2) {
+                        // type resolution failed — will be caught by other validation
+                    }
+                }
+            }
+            if(!isMapType) {
+                throw new IllegalModelException(
+                    `size validator can only be applied to array or map properties: ${this.getFullyQualifiedName()}`,
+                    classDecl.getModelFile(),
+                    this.ast.location
+                );
+            }
         }
     }
 
@@ -214,6 +244,14 @@ class Property extends Decorated {
      */
     isArray() {
         return this.array;
+    }
+
+    /**
+     * Returns the collection size validator for this property, if one exists.
+     * @return {CollectionSizeValidator|null} the validator or null
+     */
+    getSizeValidator() {
+        return this.sizeValidator;
     }
 
 
