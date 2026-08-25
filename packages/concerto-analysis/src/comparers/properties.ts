@@ -292,4 +292,42 @@ const propertyDefaultChanged: ComparerFactory = (context) => ({
     }
 });
 
-export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertyOptionalChanged, propertyDefaultChanged];
+const propertySizeValidatorChanged: ComparerFactory = (context) => ({
+    compareProperty: (a, b) => {
+        if (!a || !b || a instanceof EnumValueDeclaration || b instanceof EnumValueDeclaration) {
+            return;
+        }
+        const aValidator = a.getSizeValidator();
+        const bValidator = b.getSizeValidator();
+        const classDeclarationType = getDeclarationType(a.getParent());
+        if (!aValidator && !bValidator) {
+            return;
+        } else if (!aValidator && bValidator) {
+            context.report({
+                key: 'property-validator-added',
+                message: `A collection size validator was added to the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+        } else if (aValidator && !bValidator) {
+            context.report({
+                key: 'property-validator-removed',
+                message: `A collection size validator was removed from the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
+                element: a
+            });
+        } else if (!aValidator.compatibleWith(bValidator)) {
+            context.report({
+                key: 'property-validator-changed',
+                message: `A collection size validator for the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was changed and is no longer compatible`,
+                element: a
+            });
+        } else if (aValidator.getMinSize() !== bValidator.getMinSize() || aValidator.getMaxSize() !== bValidator.getMaxSize()) {
+            context.report({
+                key: 'property-validator-loosened',
+                message: `A collection size validator for the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was loosened`,
+                element: a
+            });
+        }
+    }
+});
+
+export const propertyComparerFactories = [propertyAdded, propertyRemoved, propertyTypeChanged, propertyValidatorChanged, propertySizeValidatorChanged, propertyOptionalChanged, propertyDefaultChanged];
