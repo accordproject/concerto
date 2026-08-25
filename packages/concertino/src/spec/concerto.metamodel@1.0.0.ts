@@ -37,8 +37,8 @@ export interface IRange extends IConcept {
 
 export interface ITypeIdentifier extends IConcept {
    name: string;
-   resolvedName?: string;
    namespace?: string;
+   resolvedName?: string;
 }
 
 export interface IDecoratorLiteral extends IConcept {
@@ -191,11 +191,6 @@ export interface ITransactionDeclaration extends IConceptDeclaration {
 export interface IEventDeclaration extends IConceptDeclaration {
 }
 
-export interface ICollectionSizeValidator extends IConcept {
-   minSize?: number;
-   maxSize?: number;
-}
-
 export interface IProperty extends IConcept {
    name: string;
    isArray: boolean;
@@ -213,6 +208,11 @@ IStringProperty |
 IDoubleProperty | 
 IIntegerProperty | 
 ILongProperty;
+
+export interface ICollectionSizeValidator extends IConcept {
+   minSize?: number;
+   maxSize?: number;
+}
 
 export interface IRelationshipProperty extends IProperty {
    type: ITypeIdentifier;

@@ -36,6 +36,7 @@ import {
 import {
     IBooleanProperty,
     IBooleanScalar,
+    ICollectionSizeValidator,
     IConceptDeclaration,
     IDecorator,
     IDoubleDomainValidator,
@@ -65,7 +66,6 @@ import {
     MapValueTypeUnion,
     PropertyUnion,
     ScalarDeclarationUnion,
-    ICollectionSizeValidator,
 } from '@accordproject/concerto-metamodel';
 
 /**
