@@ -65,6 +65,7 @@ import {
     MapValueTypeUnion,
     PropertyUnion,
     ScalarDeclarationUnion,
+    ICollectionSizeValidator,
 } from '@accordproject/concerto-metamodel';
 
 /**
@@ -383,7 +384,7 @@ function transformProperties(properties: Record<string, IConcertinoProperty>): {
                     }
 
                     if (property.size) {
-                        const sizeValidator: any = { $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator' };
+                        const sizeValidator: ICollectionSizeValidator = { $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator' };
                         if (property.size[0] !== undefined && property.size[0] !== null) {
                             sizeValidator.minSize = property.size[0];
                         }

@@ -180,6 +180,8 @@ abstract concept ConcertinoProperty {
   o Identifier inheritedFrom optional // For inherited properties
   o Boolean isCircular optional
   o Boolean isEnum optional
+  @CodeGen_TypeScript_Override("[number | null, number | null]")
+  o Integer[] size optional
   o Vocabulary vocabulary optional
   o MetadataMap metadata optional
 }

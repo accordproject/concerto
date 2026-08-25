@@ -191,10 +191,16 @@ export interface ITransactionDeclaration extends IConceptDeclaration {
 export interface IEventDeclaration extends IConceptDeclaration {
 }
 
+export interface ICollectionSizeValidator extends IConcept {
+   minSize?: number;
+   maxSize?: number;
+}
+
 export interface IProperty extends IConcept {
    name: string;
    isArray: boolean;
    isOptional: boolean;
+   sizeValidator?: ICollectionSizeValidator;
    decorators?: IDecorator[];
    location?: IRange;
 }
