@@ -1,0 +1,13 @@
+namespace org.example.collectionsize@1.0.0
+
+map PhoneBook {
+  o String
+  o String
+}
+
+concept Team {
+  o String[] tags size=[2,5]
+  o Integer[] scores size=[1,]
+  o String[] middle size=[,3] optional
+  o PhoneBook contacts size=[1,10]
+}

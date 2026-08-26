@@ -112,7 +112,8 @@ class ConcertinoTypescriptVisitor extends CodeGen.TypescriptVisitor {
     visitField(field, parameters) {
         const typeOverride = field.getDecorators().find(decorator => decorator.getName() === OVERRIDE_DECORATOR);
         if (typeOverride) {
-            parameters.fileWriter.writeLine(1, field.getName() + ': ' + typeOverride.getArguments()[0] + ';');
+            const optional = field.isOptional() ? '?' : '';
+            parameters.fileWriter.writeLine(1, field.getName() + optional + ': ' + typeOverride.getArguments()[0] + ';');
             return null;
         }
 

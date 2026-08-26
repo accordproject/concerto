@@ -259,6 +259,15 @@
                     "minItems": 2,
                     "maxItems": 2
                 },
+                "size": {
+                    "type": "array",
+                    "items": [
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        { "oneOf": [{ "type": "number" }, { "type": "null" }] }
+                    ],
+                    "minItems": 2,
+                    "maxItems": 2
+                },
                 "default": {
                     "oneOf": [
                         { "type": "string" },
