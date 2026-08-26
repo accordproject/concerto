@@ -803,3 +803,58 @@ test('should detect a default value being removed from a property', async () => 
     ]));
     expect(results.result).toBe(CompareResult.PATCH);
 });
+
+test('should detect a size validator being added to a property', async () => {
+    const [a, b] = await getModelFiles('size-validators.cto', 'size-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-added',
+            message: 'A collection size validator was added to the field "values" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a size validator being removed from a property', async () => {
+    const [a, b] = await getModelFiles('size-validator-added.cto', 'size-validators.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-removed',
+            message: 'A collection size validator was removed from the field "values" in the concept "Thing"'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should detect a size validator being tightened on a property (incompatible)', async () => {
+    const [a, b] = await getModelFiles('size-validator-added.cto', 'size-validator-changed-tightened.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-changed',
+            message: 'A collection size validator for the field "values" in the concept "Thing" was changed and is no longer compatible'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.MAJOR);
+});
+
+test('should detect a size validator being loosened on a property', async () => {
+    const [a, b] = await getModelFiles('size-validator-added.cto', 'size-validator-changed-loosened.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+            key: 'property-validator-loosened',
+            message: 'A collection size validator for the field "values" in the concept "Thing" was loosened'
+        })
+    ]));
+    expect(results.result).toBe(CompareResult.PATCH);
+});
+
+test('should not detect a size validator change when identical', async () => {
+    const [a, b] = await getModelFiles('size-validator-added.cto', 'size-validator-added.cto');
+    const results = new Compare().compare(a, b);
+    expect(results.findings).toEqual([]);
+    expect(results.result).toBe(CompareResult.NONE);
+});
