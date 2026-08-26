@@ -36,6 +36,7 @@ import {
 import {
     IBooleanProperty,
     IBooleanScalar,
+    ICollectionSizeValidator,
     IConceptDeclaration,
     IDecorator,
     IDoubleDomainValidator,
@@ -380,6 +381,17 @@ function transformProperties(properties: Record<string, IConcertinoProperty>): {
 
                     if (lengthValidator !== undefined) {
                         (result as IStringProperty).lengthValidator = lengthValidator;
+                    }
+
+                    if (property.size) {
+                        const sizeValidator: ICollectionSizeValidator = { $class: 'concerto.metamodel@1.0.0.CollectionSizeValidator' };
+                        if (property.size[0] !== undefined && property.size[0] !== null) {
+                            sizeValidator.minSize = property.size[0];
+                        }
+                        if (property.size[1] !== undefined && property.size[1] !== null) {
+                            sizeValidator.maxSize = property.size[1];
+                        }
+                        (result as any).sizeValidator = sizeValidator;
                     }
 
                     if (stringProperty.default !== undefined) {

@@ -315,6 +315,9 @@ class ResourceValidator {
                 this.checkArray(obj, field,parameters);
             }
             else {
+                if(field.getSizeValidator() && obj instanceof Map) {
+                    field.getSizeValidator().validate(parameters.rootResourceIdentifier, obj.size);
+                }
                 this.checkItem(obj, field,parameters);
             }
         }
@@ -338,6 +341,7 @@ class ResourceValidator {
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
 
         if(field.isArray()) {
+            field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
                 parameters.stack.push(item);
@@ -363,6 +367,8 @@ class ResourceValidator {
         if(!(obj instanceof Array)) {
             ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
         }
+
+        field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
 
         for(let n=0; n < obj.length; n++) {
             const item = obj[n];
@@ -461,6 +467,8 @@ class ResourceValidator {
             if(!(obj instanceof Array)) {
                 ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
             }
+
+            relationshipDeclaration.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
 
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
