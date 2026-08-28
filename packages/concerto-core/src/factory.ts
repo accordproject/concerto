@@ -28,7 +28,7 @@ import Relationship from './model/relationship';
 import Resource from './model/resource';
 import ValidatedResource from './model/validatedresource';
 
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 
 import dayjs from './dayjs-setup';
 
