@@ -12,12 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Resource = require('../model/resource');
-const Typed = require('../model/typed');
-const ModelUtil = require('../modelutil');
-const Util = require('@accordproject/concerto-util').NullUtil;
+import Resource from '../model/resource';
+import Typed from '../model/typed';
+import ModelUtil from '../modelutil';
+import { NullUtil as Util } from '@accordproject/concerto-util';
 
 /**
  * Converts the contents of a Resource to JSON. The parameters
@@ -321,4 +319,5 @@ class JSONGenerator {
     }
 }
 
-export = JSONGenerator;
+export { JSONGenerator };
+export default JSONGenerator;

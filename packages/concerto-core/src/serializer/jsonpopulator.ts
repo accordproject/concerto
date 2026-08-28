@@ -12,23 +12,22 @@
  * limitations under the License.
  */
 
-'use strict';
+import createDebug from 'debug';
+import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
+import Relationship from '../model/relationship';
+import ModelUtil from '../modelutil';
+import ValidationException from './validationexception';
+import dayjs from '../dayjs-setup';
+import type Factory from '../factory';
+import type ModelManager from '../modelmanager';
+import type Declaration from '../introspect/declaration';
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type RelationshipDeclaration from '../introspect/relationshipdeclaration';
+import type MapDeclaration from '../introspect/mapdeclaration';
+import type Resource from '../model/resource';
+import Field from '../introspect/field';
 
-const debug = require('debug')('concerto:JSONPopulator');
-const { TypedStack } = require('@accordproject/concerto-util');
-const Relationship = require('../model/relationship');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
-const ValidationException = require('./validationexception');
-const dayjs = require('../dayjs-setup');
-import type Factory = require('../factory');
-import type ModelManager = require('../modelmanager');
-import type Declaration = require('../introspect/declaration');
-import type ClassDeclaration = require('../introspect/classdeclaration');
-import type RelationshipDeclaration = require('../introspect/relationshipdeclaration');
-import type MapDeclaration = require('../introspect/mapdeclaration');
-import type Resource = require('../model/resource');
-import Field = require('../introspect/field');
+const debug = createDebug('concerto:JSONPopulator');
 
 
 type Stack<T> = {
@@ -501,4 +500,5 @@ class JSONPopulator {
     }
 }
 
-export = JSONPopulator;
+export { JSONPopulator };
+export default JSONPopulator;

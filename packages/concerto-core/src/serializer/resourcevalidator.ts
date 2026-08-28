@@ -12,17 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Relationship = require('../model/relationship');
-const Resource = require('../model/resource');
-const Identifiable = require('../model/identifiable');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
-const ValidationException = require('./validationexception');
-const Globalize = require('../globalize');
-
-const dayjs = require('../dayjs-setup');
+import Relationship from '../model/relationship';
+import Resource from '../model/resource';
+import Identifiable from '../model/identifiable';
+import { NullUtil as Util } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
+import ValidationException from './validationexception';
+import Globalize from '../globalize';
+import dayjs from '../dayjs-setup';
 
 /**
  * <p>
@@ -679,4 +676,5 @@ class ResourceValidator {
     }
 }
 
-export = ResourceValidator;
+export { ResourceValidator };
+export default ResourceValidator;

@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { loremIpsum } = require('lorem-ipsum');
-const RandExp = require('randexp');
-const dayjs = require('../dayjs-setup');
+import { loremIpsum } from 'lorem-ipsum';
+import RandExp from 'randexp';
+import dayjs from '../dayjs-setup';
 
 /**
  * Generate a random number within a given range with
@@ -398,4 +396,5 @@ class ValueGeneratorFactory {
     }
 }
 
-export = ValueGeneratorFactory;
+export { ValueGeneratorFactory };
+export default ValueGeneratorFactory;
