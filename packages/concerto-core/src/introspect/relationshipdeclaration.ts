@@ -12,18 +12,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import Property = require('./property');
-const IllegalModelException = require('./illegalmodelexception');
-const ModelUtil = require('../modelutil');
+import Property from './property';
+import IllegalModelException from './illegalmodelexception';
+import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-}
+import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -110,4 +105,5 @@ class RelationshipDeclaration extends Property {
     }
 }
 
-export = RelationshipDeclaration;
+export { RelationshipDeclaration };
+export default RelationshipDeclaration;

@@ -12,15 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
-
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const ModelManager = require('../modelmanager');
-}
+import type ClassDeclaration from './classdeclaration';
+import type ModelManager from '../modelmanager';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -89,4 +84,5 @@ class Introspector {
     }
 }
 
-export = Introspector;
+export { Introspector };
+export default Introspector;

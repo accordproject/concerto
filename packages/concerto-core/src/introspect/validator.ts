@@ -12,16 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
+import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
 
-const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Field = require('./field');
-    const ScalarDeclaration = require('./scalardeclaration');
-}
+import type Field from './field';
+import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -97,4 +93,5 @@ class Validator {
     }
 }
 
-export = Validator;
+export { Validator };
+export default Validator;

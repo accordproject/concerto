@@ -12,18 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { isNull } = require('@accordproject/concerto-util').NullUtil;
-const Validator = require('./validator');
+import { NullUtil } from '@accordproject/concerto-util';
+const { isNull } = NullUtil;
+import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Field = require('./field');
-    const ScalarDeclaration = require('./scalardeclaration');
-}
+import type Field from './field';
+import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -33,6 +29,8 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class NumberValidator extends Validator{
+    lowerBound: any;
+    upperBound: any;
 
     /**
      * Create a NumberValidator.
@@ -155,4 +153,5 @@ class NumberValidator extends Validator{
     }
 }
 
-export = NumberValidator;
+export { NumberValidator };
+export default NumberValidator;
