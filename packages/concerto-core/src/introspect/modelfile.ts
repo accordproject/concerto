@@ -12,34 +12,28 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-const semver = require('semver');
-const AssetDeclaration = require('./assetdeclaration');
-const EnumDeclaration = require('./enumdeclaration');
-const ClassDeclaration = require('./classdeclaration');
-const ConceptDeclaration = require('./conceptdeclaration');
-const ScalarDeclaration = require('./scalardeclaration');
-const ParticipantDeclaration = require('./participantdeclaration');
-const TransactionDeclaration = require('./transactiondeclaration');
-const EventDeclaration = require('./eventdeclaration');
-const IllegalModelException = require('./illegalmodelexception');
-const MapDeclaration = require('./mapdeclaration');
-const ModelUtil = require('../modelutil');
-const Globalize = require('../globalize');
-const Decorated = require('./decorated');
-const packageJson = require('../../package.json');
+import semver from 'semver';
+import AssetDeclaration from './assetdeclaration';
+import EnumDeclaration from './enumdeclaration';
+import ClassDeclaration from './classdeclaration';
+import ConceptDeclaration from './conceptdeclaration';
+import ScalarDeclaration from './scalardeclaration';
+import ParticipantDeclaration from './participantdeclaration';
+import TransactionDeclaration from './transactiondeclaration';
+import EventDeclaration from './eventdeclaration';
+import IllegalModelException from './illegalmodelexception';
+import MapDeclaration from './mapdeclaration';
+import ModelUtil from '../modelutil';
+import Globalize from '../globalize';
+import Decorated from './decorated';
+import packageJson from '../../package.json';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const ModelManager = require('../modelmanager');
-    const Declaration = require('./declaration');
-}
+import type ModelManager from '../modelmanager';
+import type Declaration from './declaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -54,6 +48,17 @@ class ModelFile extends Decorated {
     ast: any;
     definitions: any;
     fileName: any;
+    external: boolean;
+    declarations: any[];
+    localTypes: any;
+    imports: any[];
+    importShortNames: Map<string, any>;
+    importWildcardNamespaces: any[];
+    importUriMap: Record<string, any>;
+    concertoVersion: any;
+    version: any;
+    namespace: any;
+    modelFile: any;
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -940,4 +945,5 @@ class ModelFile extends Decorated {
     }
 }
 
-export = ModelFile;
+export { ModelFile };
+export default ModelFile;
