@@ -12,20 +12,16 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import Declaration = require('./declaration');
-const IllegalModelException = require('./illegalmodelexception');
-const MapValueType = require('./mapvaluetype');
-const MapKeyType = require('./mapkeytype');
-const ModelUtil = require('../modelutil');
+import Declaration from './declaration';
+import IllegalModelException from './illegalmodelexception';
+import MapValueType from './mapvaluetype';
+import MapKeyType from './mapkeytype';
+import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
+/* eslint-enable no-unused-vars */
 
 /**
  * MapDeclaration defines a Map data structure, which allows storage of a collection
@@ -37,6 +33,11 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class MapDeclaration extends Declaration {
+    modelFile: any;
+    name: any;
+    key: any;
+    value: any;
+    fqn: any;
     /**
      * Create an MapDeclaration.
      * @param {ModelFile} modelFile - the ModelFile for this class
@@ -163,4 +164,5 @@ class MapDeclaration extends Declaration {
     }
 }
 
-export = MapDeclaration;
+export { MapDeclaration };
+export default MapDeclaration;

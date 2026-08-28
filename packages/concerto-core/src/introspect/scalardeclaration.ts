@@ -12,23 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import Declaration from './declaration';
+import IllegalModelException from './illegalmodelexception';
+import NumberValidator from './numbervalidator';
+import StringValidator from './stringvalidator';
+import { NullUtil as Util } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
 
-const Declaration = require('./declaration');
-const IllegalModelException = require('./illegalmodelexception');
-const NumberValidator = require('./numbervalidator');
-const StringValidator = require('./stringvalidator');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Validator = require('./validator');
-    const ClassDeclaration = require('./classdeclaration');
-}
+import type Validator from './validator';
+import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -43,6 +39,14 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class ScalarDeclaration extends Declaration {
+    superType: any;
+    superTypeDeclaration: any;
+    idField: any;
+    timestamped: any;
+    abstract: any;
+    validator: any;
+    type: any;
+    defaultValue: any;
     /**
      * Process the AST and build the model
      *
@@ -283,4 +287,5 @@ class ScalarDeclaration extends Declaration {
 
 }
 
-export = ScalarDeclaration;
+export { ScalarDeclaration };
+export default ScalarDeclaration;

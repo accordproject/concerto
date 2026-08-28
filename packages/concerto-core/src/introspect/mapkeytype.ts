@@ -12,21 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
+import ModelUtil from '../modelutil';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const ModelUtil = require('../modelutil');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-const Decorated = require('./decorated');
-const IllegalModelException = require('./illegalmodelexception');
+import Decorated from './decorated';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-    const MapDeclaration = require('./mapdeclaration');
-}
+import type ModelFile from './modelfile';
+import type MapDeclaration from './mapdeclaration';
+/* eslint-enable no-unused-vars */
 
 /**
  * MapKeyType defines a Key type of an MapDeclaration.
@@ -37,6 +33,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class MapKeyType extends Decorated {
+    parent: any;
+    modelFile: any;
+    type: any;
     /**
      * Create an MapKeyType.
      * @param {MapDeclaration} parent - The owner of this property
@@ -164,4 +163,5 @@ class MapKeyType extends Decorated {
     }
 }
 
-export = MapKeyType;
+export { MapKeyType };
+export default MapKeyType;

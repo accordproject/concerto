@@ -12,22 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
-const Decorated = require('./decorated');
-const CollectionSizeValidator = require('./collectionsizevalidator');
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
+import Decorated from './decorated';
+import CollectionSizeValidator from './collectionsizevalidator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const ModelFile = require('./modelfile');
-}
+import type ClassDeclaration from './classdeclaration';
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 
@@ -39,6 +34,14 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Property extends Decorated {
+    parent: any;
+    modelFile: any;
+    name: any;
+    decorator: any;
+    type: any;
+    array: any;
+    sizeValidator: any;
+    optional: any;
     /**
      * Create a Property.
      * @param {ClassDeclaration} parent - the owner of this property
@@ -272,4 +275,5 @@ class Property extends Decorated {
     }
 }
 
-export = Property;
+export { Property };
+export default Property;

@@ -12,19 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { ErrorCodes } = require('@accordproject/concerto-util');
-const { isNull } = require('@accordproject/concerto-util').NullUtil;
-const Validator = require('./validator');
+import { ErrorCodes, NullUtil } from '@accordproject/concerto-util';
+const { isNull } = NullUtil;
+import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Field = require('./field');
-    const ScalarDeclaration = require('./scalardeclaration');
-}
+import type Field from './field';
+import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -34,6 +29,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class StringValidator extends Validator{
+    minLength: any;
+    maxLength: any;
+    regex: any;
 
     /**
      * Create a StringValidator.
@@ -167,4 +165,5 @@ class StringValidator extends Validator{
     }
 }
 
-export = StringValidator;
+export { StringValidator };
+export default StringValidator;

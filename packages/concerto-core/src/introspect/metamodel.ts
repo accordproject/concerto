@@ -12,14 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
-
-const ModelManager = require('../modelmanager');
-const Factory = require('../factory');
-const Serializer = require('../serializer');
-const ModelFile = require('../introspect/modelfile');
+import ModelManager from '../modelmanager';
+import Factory from '../factory';
+import Serializer from '../serializer';
+import ModelFile from '../introspect/modelfile';
 
 /**
  * Create a metamodel manager (for validation against the metamodel)
@@ -74,8 +72,5 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     return modelManager;
 }
 
-export = {
-    newMetaModelManager,
-    validateMetaModel,
-    modelManagerFromMetaModel
-};
+export { newMetaModelManager, validateMetaModel, modelManagerFromMetaModel };
+export default { newMetaModelManager, validateMetaModel, modelManagerFromMetaModel };
