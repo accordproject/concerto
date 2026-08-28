@@ -156,6 +156,47 @@ why the packages deliberately do **not** widen their `exports` map to re-expose 
 `types/` tree. If a type you need is not reachable from the root, please open an issue
 asking for it to be exported rather than deep-importing the declaration file.
 
+### Mixing `import` and `require` in one Node process
+
+In 4.x a package had no `exports` map and no `module` field, so `import` and `require`
+both resolved to the same CommonJS file: one copy of every class, in one process. From
+5.0.0 they resolve to different files, and Node loads each independently. A process
+that reaches a package both ways therefore holds **two copies** of it, with two sets of
+class identities:
+
+```js
+import { ModelManager, Factory } from '@accordproject/concerto-core';
+const concerto = createRequire(import.meta.url)('@accordproject/concerto-core');
+
+ModelManager === concerto.ModelManager;   // 4.x: true — 5.0.0: false
+```
+
+Most of the API is duck-typed and survives this, but the `instanceof` guards do not.
+The failure is not subtle when it happens:
+
+```js
+const resource = new Factory(modelManager).newResource('org.example@1.0.0', 'Order', 'o1');
+new concerto.Serializer(...).toJSON(resource);
+// Error: "Serializer.toJSON" only accepts "Concept", "Event", "Asset",
+// "Participant" or "Transaction".
+```
+
+This is the standard dual-package hazard, and it is inherent to shipping both module
+systems. It only bites a process that loads a package twice, so:
+
+- **Pick one module system per process for a given package.** In an ESM application,
+  `import` the package; don't also `createRequire` it.
+- **Watch for a CommonJS dependency in an ESM app.** A library that still uses
+  `require('@accordproject/concerto-core')` internally has its own copy. Objects can
+  cross that boundary safely, but `Resource`s and `ClassDeclaration`s created on one
+  side must be handed back to that same side to be serialized or validated. Where a
+  library re-exports concerto types for you (`@accordproject/template-engine` re-exports
+  `ModelManager` for exactly this reason), import them from the library rather than from
+  `@accordproject/concerto-core` directly.
+- **Check for a duplicate before debugging anything stranger.** If an `instanceof` or a
+  `Serializer` guard fails on an object that is obviously the right type, run
+  `npm ls @accordproject/concerto-core` and confirm you aren't loading it twice.
+
 ## Not breaking
 
 Root-package imports are unaffected — this is true for both CommonJS and ESM, and for
@@ -236,9 +277,9 @@ To benefit from the tree-shaking this release enables:
 - `@accordproject/concerto-util` declares `"sideEffects": false`, so a compliant
   bundler can drop any export you don't import.
 - `@accordproject/concerto-core` declares `"sideEffects": ["./dist/dayjs-setup.js",
-  "./dist/esm/dayjs-setup.mjs"]` — everything else is safe to drop, but those two
-  modules run global setup code (`dayjs` plugin registration) as a side effect and are
-  always kept.
+  "./dist/esm/dayjs-setup.mjs", "./dist/esm-browser/dayjs-setup.mjs"]` — everything
+  else is safe to drop, but those modules run global setup code (`dayjs` plugin
+  registration) as a side effect and are always kept.
 
 The ESM build ships one output module per source module (with shared code hoisted into
 chunks), mirroring the CJS build, so your bundler can drop whole modules you never
@@ -278,6 +319,7 @@ Every package's `exports` map has the same shape (shown here for `concerto-core`
 "exports": {
   ".": {
     "types": "./dist/index.d.ts",
+    "browser": "./dist/esm-browser/index.mjs",
     "import": "./dist/esm/index.mjs",
     "require": "./dist/index.js"
   },
@@ -285,6 +327,20 @@ Every package's `exports` map has the same shape (shown here for `concerto-core`
   "./dist/*": "./dist/*"
 }
 ```
+
+Two ESM graphs are published, built from the same entry points and exposing the same
+named exports. They differ only in how Node builtins are handled:
+
+| Graph | Selected by | Node builtins |
+|---|---|---|
+| `dist/esm` | the `import` condition — Node, and node-target bundlers | real `fs`/`path`, imported normally |
+| `dist/esm-browser` | the `browser` condition — webpack, Vite, Rollup and friends targeting the web | stubbed to empty modules, as the UMD build does via `resolve.fallback` |
+
+The split matters for the handful of APIs that touch the file system —
+`FileWriter`, `ModelWriter.writeModelsToFileSystem` and `ModelLoader`. In the browser
+graph those are inert by construction (they always were: the UMD bundle stubs `fs`
+too); under Node they behave exactly as they do in CommonJS. Nothing in your code
+selects between the graphs — your runtime or bundler does.
 
 The `"./dist/*"` subpath is what still permits deep imports at all (it is not removed
 in this release) — it is the compiled *shape* of those modules, described above, that
