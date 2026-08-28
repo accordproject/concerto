@@ -39,6 +39,7 @@
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
     "pretest": "npm run licchk",
     "test": "npm run test --workspaces --if-present",
+    "test:esm": "node ./scripts/smoke-esm.mjs",
     "licchk": "license-check-and-add",
     "build": "npm run build:ordered",
     "build:ordered": "npm run build:level0 && npm run build:level1 && npm run build:level2",
@@ -98,7 +99,7 @@
     ],
     "insert_license": false,
     "license_formats": {
-      "js|njk|pegjs|cto|acl|qry": {
+      "js|mjs|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
         "append": " */",
         "eachLine": {
