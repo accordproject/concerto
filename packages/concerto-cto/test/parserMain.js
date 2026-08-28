@@ -191,6 +191,65 @@ describe('parser', () => {
         });
     });
 
+    describe('validator ordering', () => {
+
+        it('Should parse length before regex on String field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String x length=[1,10] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.pattern.should.equal('abc');
+            prop.lengthValidator.minLength.should.equal(1);
+            prop.lengthValidator.maxLength.should.equal(10);
+        });
+
+        it('Should parse size before regex and length on String array field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] length=[2,50] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.pattern.should.equal('abc');
+            prop.lengthValidator.minLength.should.equal(2);
+            prop.lengthValidator.maxLength.should.equal(50);
+            prop.sizeValidator.minSize.should.equal(1);
+            prop.sizeValidator.maxSize.should.equal(5);
+        });
+
+        it('Should parse size before range on Integer field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Integer[] x size=[1,5] range=[0,100] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size before range on Double field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Double[] x size=[1,5] range=[0.0,100.0] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse size before range on Long field', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nconcept A { o Long[] x size=[1,5] range=[0,100] }', undefined, { skipLocationNodes: true });
+            const prop = ast.declarations[0].properties[0];
+            prop.validator.lower.should.equal(0);
+            prop.validator.upper.should.equal(100);
+            prop.sizeValidator.minSize.should.equal(1);
+        });
+
+        it('Should parse length before regex on String scalar', () => {
+            const ast = Parser.parse('namespace t@1.0.0\nscalar S extends String length=[1,100] regex=/.*/', undefined, { skipLocationNodes: true });
+            const decl = ast.declarations[0];
+            decl.validator.pattern.should.equal('.*');
+            decl.lengthValidator.minLength.should.equal(1);
+            decl.lengthValidator.maxLength.should.equal(100);
+        });
+
+        it('Should produce identical AST regardless of validator order', () => {
+            const ast1 = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x regex=/abc/ length=[1,10] size=[1,5] }', undefined, { skipLocationNodes: true });
+            const ast2 = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] length=[1,10] regex=/abc/ }', undefined, { skipLocationNodes: true });
+            ast1.should.deep.equal(ast2);
+        });
+    });
+
     describe('identifiers', () => {
 
         const acceptedIdentifiers = [

@@ -1172,18 +1172,18 @@ RealScalar
   }
 
 StringScalar
-   = StringType __ d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ {
+   = StringType __ d:StringDefault? validators:StringScalarValidators __ {
       const result = {
         $class: "concerto.metamodel@1.0.0.StringScalar",
       };
       if (d) {
         result.defaultValue = d;
       }
-      if (regex) {
-    		result.validator = regex;
+      if (validators.regex) {
+    		result.validator = validators.regex;
       }
-      if (length) {
-        result.lengthValidator = length;
+      if (validators.length) {
+        result.lengthValidator = validators.length;
       }
       return result;
   }
@@ -1332,7 +1332,7 @@ DateTimeFieldDeclaration
     }
 
 StringFieldDeclaration
-    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? __ regex:StringRegexValidator? __ length:StringLengthValidator? __ size:CollectionSizeValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ StringType __ array:"[]"? __ id:Identifier __  d:StringDefault? validators:StringFieldValidators __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.StringProperty",
     		name: id.name,
@@ -1346,14 +1346,14 @@ StringFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
-      if (regex) {
-    		result.validator = regex;
+      if (validators.regex) {
+    		result.validator = validators.regex;
       }
-      if (length) {
-        result.lengthValidator = length;
+      if (validators.length) {
+        result.lengthValidator = validators.length;
       }
-      if (size) {
-        result.sizeValidator = size;
+      if (validators.size) {
+        result.sizeValidator = validators.size;
       }
       return result;
     }
@@ -1433,8 +1433,59 @@ LongDomainValidator
    	return result;
   }
 
+StringScalarValidators
+   = items:(__ v:(StringRegexValidator / StringLengthValidator) { return v; })* {
+      const result = {};
+      for (const v of items) {
+        if (v.$class === `${metamodelNamespace}.StringRegexValidator`) { result.regex = v; }
+        else if (v.$class === `${metamodelNamespace}.StringLengthValidator`) { result.length = v; }
+      }
+      return result;
+   }
+
+StringFieldValidators
+   = items:(__ v:(StringRegexValidator / StringLengthValidator / CollectionSizeValidator) { return v; })* {
+      const result = {};
+      for (const v of items) {
+        if (v.$class === `${metamodelNamespace}.StringRegexValidator`) { result.regex = v; }
+        else if (v.$class === `${metamodelNamespace}.StringLengthValidator`) { result.length = v; }
+        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
+      }
+      return result;
+   }
+
+RealFieldValidators
+   = items:(__ v:(RealDomainValidator / CollectionSizeValidator) { return v; })* {
+      const result = {};
+      for (const v of items) {
+        if (v.$class === `${metamodelNamespace}.DoubleDomainValidator`) { result.range = v; }
+        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
+      }
+      return result;
+   }
+
+IntegerFieldValidators
+   = items:(__ v:(IntegerDomainValidator / CollectionSizeValidator) { return v; })* {
+      const result = {};
+      for (const v of items) {
+        if (v.$class === `${metamodelNamespace}.IntegerDomainValidator`) { result.range = v; }
+        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
+      }
+      return result;
+   }
+
+LongFieldValidators
+   = items:(__ v:(LongDomainValidator / CollectionSizeValidator) { return v; })* {
+      const result = {};
+      for (const v of items) {
+        if (v.$class === `${metamodelNamespace}.LongDomainValidator`) { result.range = v; }
+        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
+      }
+      return result;
+   }
+
 RealFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? __ range:RealDomainValidator? __ size:CollectionSizeValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:RealNumberType __ array:"[]"? __ id:Identifier __  d:RealDefault? validators:RealFieldValidators __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.DoubleProperty",
     		name: id.name,
@@ -1448,17 +1499,17 @@ RealFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
-      if (range) {
-    		result.validator = range;
+      if (validators.range) {
+    		result.validator = validators.range;
       }
-      if (size) {
-        result.sizeValidator = size;
+      if (validators.size) {
+        result.sizeValidator = validators.size;
       }
       return result;
     }
 
 IntegerFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:IntegerDomainValidator? __ size:CollectionSizeValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:IntegerType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? validators:IntegerFieldValidators __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.IntegerProperty",
     		name: id.name,
@@ -1472,17 +1523,17 @@ IntegerFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
-      if (range) {
-    		result.validator = range;
+      if (validators.range) {
+    		result.validator = validators.range;
       }
-      if (size) {
-        result.sizeValidator = size;
+      if (validators.size) {
+        result.sizeValidator = validators.size;
       }
       return result;
     }
 
 LongFieldDeclaration
-    = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? __ range:LongDomainValidator? __ size:CollectionSizeValidator? __ optional:Optional? __ {
+    = decorators:Decorators __ "o" __ propertyType:LongType __ array:"[]"? __ id:Identifier __  d:IntegerDefault? validators:LongFieldValidators __ optional:Optional? __ {
     	const result = {
     		$class: "concerto.metamodel@1.0.0.LongProperty",
     		name: id.name,
@@ -1496,11 +1547,11 @@ LongFieldDeclaration
       if (decorators.length > 0) {
         result.decorators = decorators;
       }
-      if (range) {
-    		result.validator = range;
+      if (validators.range) {
+    		result.validator = validators.range;
       }
-      if (size) {
-        result.sizeValidator = size;
+      if (validators.size) {
+        result.sizeValidator = validators.size;
       }
       return result;
     }
