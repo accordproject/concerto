@@ -13,7 +13,7 @@
  */
 
 import { ModelFile, ClassDeclaration, Property } from '@accordproject/concerto-core';
-import VocabularyManager = require('./vocabularymanager');
+import type VocabularyManager from './vocabularymanager';
 
 /**
 * A vocabulary for a concerto model
@@ -226,4 +226,5 @@ class Vocabulary {
     }
 }
 
-export = Vocabulary;
+export { Vocabulary };
+export default Vocabulary;

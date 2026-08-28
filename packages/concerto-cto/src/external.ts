@@ -17,7 +17,7 @@ import * as pathBrowserify from 'path-browserify';
 import { DefaultFileLoader, FileDownloader } from '@accordproject/concerto-util';
 import { MetaModelUtil, MetaModelNamespace, IModel, IModels  } from '@accordproject/concerto-metamodel';
 
-import Parser = require('./parser');
+import * as Parser from './parser';
 
 const debugLog = debug('concerto:ModelManager');
 
@@ -58,7 +58,7 @@ function updateModels(models: IModels, newModel: IModel): IModels {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-async function resolveExternal(models: IModels, options?: any, fileDownloader?: any): Promise<IModels> {
+export async function resolveExternal(models: IModels, options?: any, fileDownloader?: any): Promise<IModels> {
     const NAME = 'updateExternalModels';
     debugLog(NAME, 'updateExternalModels', options);
 
@@ -79,7 +79,7 @@ async function resolveExternal(models: IModels, options?: any, fileDownloader?: 
  * Creates a default file downloader
  * @return {FileDownloader} a default file downloader instance
  */
-function createDefaultFileDownloader(): any {
+export function createDefaultFileDownloader(): any {
     // How to create a modelfile from the external content
     const processFile = (name: string, data: any): any => {
         // Note: JSON URLs seem to be already parsed in 'data'
@@ -92,7 +92,8 @@ function createDefaultFileDownloader(): any {
     return new FileDownloader(new DefaultFileLoader(processFile), (file) => MetaModelUtil.getExternalImports(file) as Record<string, string>);
 }
 
-export = {
+const External = {
     resolveExternal,
     createDefaultFileDownloader,
 };
+export default External;

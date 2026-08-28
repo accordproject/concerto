@@ -14,8 +14,8 @@
 
 import { MetaModelNamespace, IModels } from '@accordproject/concerto-metamodel';
 
-import Parser = require('./parser');
-import ParseException = require('./parseexception');
+import * as Parser from './parser';
+import ParseException from './parseexception';
 
 interface ParseOptions {
     skipLocationNodes?: boolean;
@@ -29,7 +29,7 @@ interface ParseOptions {
  * @param {boolean} [options.skipLocationNodes] - default true, when true location nodes will be skipped in the metamodel AST
  * @return {object} the metamodel instance for the cto argument
  */
-function parse(cto: string, fileName?: string, options?: ParseOptions): any {
+export function parse(cto: string, fileName?: string, options?: ParseOptions): any {
     try {
         // Set default for skipLocationNodes to true if not specified
         if (!options || options?.skipLocationNodes === undefined) {
@@ -53,7 +53,7 @@ function parse(cto: string, fileName?: string, options?: ParseOptions): any {
  * @param {string} [options.skipLocationNodes] - when true location nodes will be skipped in the metamodel AST
  * @return {IModels} the AST / metamodel
  */
-function parseModels(files: string[], options?: ParseOptions): IModels {
+export function parseModels(files: string[], options?: ParseOptions): IModels {
     const result: IModels = {
         $class: `${MetaModelNamespace}.Models`,
         models: [],
@@ -65,7 +65,8 @@ function parseModels(files: string[], options?: ParseOptions): IModels {
     return result;
 }
 
-export = {
+const ParserMain = {
     parse,
     parseModels,
 };
+export default ParserMain;

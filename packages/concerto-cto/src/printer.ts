@@ -412,7 +412,7 @@ function declFromMetaModel(mm: IDeclaration): string {
  * @param {*} metaModel - the metamodel instance
  * @return {string} the CTO model as a string
  */
-function toCTO(metaModel: IModel): string {
+export function toCTO(metaModel: IModel): string {
     let result = '';
 
     // version
@@ -485,6 +485,7 @@ function toCTO(metaModel: IModel): string {
     return result;
 }
 
-export = {
+const Printer = {
     toCTO,
 };
+export default Printer;
