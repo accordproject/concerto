@@ -12,14 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const debug = require('debug')('concerto:FileDownloader');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const PromisePool = require('@supercharge/promise-pool');
+import createDebug from 'debug';
+import PromisePool from '@supercharge/promise-pool';
 
 import type { FileLoader } from './loaders/fileloader';
+
+const debug = createDebug('concerto:FileDownloader');
 
 type ExternalImportMap = Record<string, string>;
 type DownloadJob<TFile> = {
@@ -88,9 +86,9 @@ class FileDownloader<TFile = unknown> {
         return PromisePool
             .withConcurrency(this.concurrency)
             .for(jobs)
-            .handleError(handleJobError)
+            .handleError(handleJobError as any)
             .process((x: DownloadJob<TFile>) => this.runJob(x, this.fileLoader))
-            .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
+            .then(({ results }: any) => filterUndefined(flatten(results as Array<TFile[]>)));
     }
 
     /**
@@ -125,7 +123,7 @@ class FileDownloader<TFile = unknown> {
                 const externalImportsFiles = await PromisePool
                     .withConcurrency(this.concurrency)
                     .for(importedUris)
-                    .handleError(handleJobError)
+                    .handleError(handleJobError as any)
                     .process((uri: string) => {
                         if (!downloadedUris.has(uri)) {
                             // recurse and add a new job for the referenced URI
@@ -136,11 +134,12 @@ class FileDownloader<TFile = unknown> {
                             }, fileLoader);
                         }
                     })
-                    .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
+                    .then(({ results }: any) => filterUndefined(flatten(results as Array<TFile[]>)));
 
                 return externalImportsFiles.concat([file]);
             });
     }
 }
 
-export = FileDownloader;
+export { FileDownloader };
+export default FileDownloader;

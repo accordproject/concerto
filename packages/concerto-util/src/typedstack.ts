@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 type Constructor<T> = new (...args: unknown[]) => T;
 
 /**
@@ -86,4 +84,5 @@ class TypedStack<T> {
     }
 }
 
-export = TypedStack;
+export { TypedStack };
+export default TypedStack;

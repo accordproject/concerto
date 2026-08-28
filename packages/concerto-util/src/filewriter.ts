@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as fs from 'fs';
 import * as path from 'path';
-import Writer = require('./writer');
+import Writer from './writer';
 
 /**
  * FileWriter buffers text to be written to a file.
@@ -113,4 +111,5 @@ class FileWriter extends Writer {
     }
 }
 
-export = FileWriter;
+export { FileWriter };
+export default FileWriter;
