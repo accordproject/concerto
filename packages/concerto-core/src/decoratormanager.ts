@@ -12,29 +12,25 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const ModelManager = require('./modelmanager');
-const Serializer = require('./serializer');
-const Factory = require('./factory');
-const ModelUtil = require('./modelutil');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const semver = require('semver');
-const DecoratorExtractor = require('./decoratorextractor');
-const IllegalModelException = require('./introspect/illegalmodelexception');
-const rfdc = require('rfdc')({
+import ModelManager from './modelmanager';
+import Serializer from './serializer';
+import Factory from './factory';
+import ModelUtil from './modelutil';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import semver from 'semver';
+import DecoratorExtractor from './decoratorextractor';
+import IllegalModelException from './introspect/illegalmodelexception';
+import rfdcLib from 'rfdc';
+const rfdc = rfdcLib({
     circles: true,
     proto: false,
 });
 
-const { jsonToYaml, yamlToJson } = require('./dcsconverter');
+import { jsonToYaml, yamlToJson } from './dcsconverter';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./introspect/modelfile');
-}
+import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 
 const DCS_VERSION = '0.4.0';
@@ -236,7 +232,7 @@ class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-        return (semver.major(inputVersion) === semver.major(DCS_VERSION) && (semver.minor(inputVersion) < semver.minor(DCS_VERSION)));
+        return (semver.major(inputVersion!) === semver.major(DCS_VERSION) && (semver.minor(inputVersion!) < semver.minor(DCS_VERSION)));
     }
 
     /**
@@ -861,4 +857,5 @@ class DecoratorManager {
 
 }
 
-export = DecoratorManager;
+export { DecoratorManager };
+export default DecoratorManager;

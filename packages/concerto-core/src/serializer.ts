@@ -12,15 +12,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { TypedStack } = require('@accordproject/concerto-util');
-const DateTimeUtil = require('./datetimeutil');
-const Globalize = require('./globalize');
-const JSONGenerator = require('./serializer/jsongenerator');
-const JSONPopulator = require('./serializer/jsonpopulator');
-const Typed = require('./model/typed');
-const ResourceValidator = require('./serializer/resourcevalidator');
+import { TypedStack } from '@accordproject/concerto-util';
+import DateTimeUtil from './datetimeutil';
+import Globalize from './globalize';
+import JSONGenerator from './serializer/jsongenerator';
+import JSONPopulator from './serializer/jsonpopulator';
+import Typed from './model/typed';
+import ResourceValidator from './serializer/resourcevalidator';
 
 const { utcOffset: defaultUtcOffset } = DateTimeUtil.setCurrentTime();
 const baseDefaultOptions = {
@@ -30,12 +28,9 @@ const baseDefaultOptions = {
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Factory = require('./factory');
-    const ModelManager = require('./modelmanager');
-    const Resource = require('./model/resource');
-}
+import type Factory from './factory';
+import type ModelManager from './modelmanager';
+import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -206,4 +201,5 @@ class Serializer {
     }
 }
 
-export = Serializer;
+export { Serializer };
+export default Serializer;

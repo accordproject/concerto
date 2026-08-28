@@ -12,16 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as fs from 'fs';
 import { Parser } from '@accordproject/concerto-cto';
 import { DefaultFileLoader } from '@accordproject/concerto-util';
 import type { FileLoader } from '@accordproject/concerto-util';
 import type { ModelManagerOptions } from './types';
 
-import ModelFile = require('./introspect/modelfile');
-import ModelManager = require('./modelmanager');
+import ModelFile from './introspect/modelfile';
+import ModelManager from './modelmanager';
 
 type ModelLoaderOptions = ModelManagerOptions & { offline?: boolean };
 
@@ -124,4 +122,5 @@ class ModelLoader {
 
 }
 
-export = ModelLoader;
+export { ModelLoader };
+export default ModelLoader;

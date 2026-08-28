@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const BaseModelManager = require('./basemodelmanager');
+import BaseModelManager from './basemodelmanager';
 
 // How to create a modelfile from a cto file
 const astProcessFile = (name, data) => {
@@ -49,4 +47,5 @@ class AstModelManager extends BaseModelManager {
     }
 }
 
-export = AstModelManager;
+export { AstModelManager };
+export default AstModelManager;

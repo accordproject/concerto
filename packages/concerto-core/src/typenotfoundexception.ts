@@ -12,10 +12,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { BaseException, ErrorCodes } = require('@accordproject/concerto-util');
-const Globalize = require('./globalize');
+import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
+import Globalize from './globalize';
 
 /**
  * Error thrown when a Concerto type does not exist.
@@ -25,6 +23,7 @@ const Globalize = require('./globalize');
  * @memberof module:concerto-core
  */
 class TypeNotFoundException extends BaseException {
+    typeName: any;
     /**
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
@@ -33,7 +32,7 @@ class TypeNotFoundException extends BaseException {
      * @param {string} component - the optional component which throws this error
      * @param {string} errorType - the error code related to the error
      */
-    constructor(typeName, message, component, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
+    constructor(typeName, message?, component?, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
         if (!message) {
             const formatter = Globalize.messageFormatter('typenotfounderror-defaultmessage');
             message = formatter({
@@ -57,4 +56,5 @@ class TypeNotFoundException extends BaseException {
 
 }
 
-export = TypeNotFoundException;
+export { TypeNotFoundException };
+export default TypeNotFoundException;

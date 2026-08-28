@@ -12,19 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
+import { DefaultFileLoader, FileDownloader, ModelWriter } from '@accordproject/concerto-util';
+import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { DefaultFileLoader, FileDownloader, ModelWriter } = require('@accordproject/concerto-util');
-const { MetaModelUtil, MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-const Factory = require('./factory');
-const Globalize = require('./globalize');
-const IllegalModelException = require('./introspect/illegalmodelexception');
-const ModelFile = require('./introspect/modelfile');
-const ModelUtil = require('./modelutil');
-const Serializer = require('./serializer');
-const TypeNotFoundException = require('./typenotfoundexception');
-const MetamodelException = require('./metamodelexception');
+import Factory from './factory';
+import Globalize from './globalize';
+import IllegalModelException from './introspect/illegalmodelexception';
+import ModelFile from './introspect/modelfile';
+import ModelUtil from './modelutil';
+import Serializer from './serializer';
+import TypeNotFoundException from './typenotfoundexception';
+import MetamodelException from './metamodelexception';
+import rootModelModule from './rootmodelhelper';
+import decoratorModelModule from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions } from './types';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
@@ -36,22 +36,20 @@ function getFileNameFromIdentifier(fileIdentifier) {
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Declaration = require('./introspect/declaration');
-    const AssetDeclaration = require('./introspect/assetdeclaration');
-    const ClassDeclaration = require('./introspect/classdeclaration');
-    const MapDeclaration = require('./introspect/mapdeclaration');
-    const ConceptDeclaration = require('./introspect/conceptdeclaration');
-    const DecoratorFactory = require('./introspect/decoratorfactory');
-    const EnumDeclaration = require('./introspect/enumdeclaration');
-    const EventDeclaration = require('./introspect/eventdeclaration');
-    const ParticipantDeclaration = require('./introspect/participantdeclaration');
-    const TransactionDeclaration = require('./introspect/transactiondeclaration');
-}
+import type Declaration from './introspect/declaration';
+import type AssetDeclaration from './introspect/assetdeclaration';
+import type ClassDeclaration from './introspect/classdeclaration';
+import type MapDeclaration from './introspect/mapdeclaration';
+import type ConceptDeclaration from './introspect/conceptdeclaration';
+import type DecoratorFactory from './introspect/decoratorfactory';
+import type EnumDeclaration from './introspect/enumdeclaration';
+import type EventDeclaration from './introspect/eventdeclaration';
+import type ParticipantDeclaration from './introspect/participantdeclaration';
+import type TransactionDeclaration from './introspect/transactiondeclaration';
 /* eslint-enable no-unused-vars */
 
-const debug = require('debug')('concerto:BaseModelManager');
+import debugLib from 'debug';
+const debug = debugLib('concerto:BaseModelManager');
 
 // How to create a modelfile from the external content
 const defaultProcessFile = (name: string, data: unknown): ModelFileSource => {
@@ -141,7 +139,6 @@ class BaseModelManager {
      * @private
      */
     addRootModel() {
-        const rootModelModule = require('./rootmodelhelper');
         const getRootModel = rootModelModule.getRootModel || rootModelModule;
 
         if (typeof getRootModel !== 'function') {
@@ -202,7 +199,6 @@ class BaseModelManager {
      * @private
      */
     addDecoratorModel() {
-        const decoratorModelModule = require('./decoratormodelhelper');
         const getDecoratorModel = decoratorModelModule.getDecoratorModel || decoratorModelModule;
 
         if (typeof getDecoratorModel !== 'function') {
@@ -672,7 +668,7 @@ class BaseModelManager {
     getAssetDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getAssetDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -682,7 +678,7 @@ class BaseModelManager {
     getTransactionDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getTransactionDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -692,7 +688,7 @@ class BaseModelManager {
     getEventDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getEventDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -702,7 +698,7 @@ class BaseModelManager {
     getParticipantDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getParticipantDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -712,7 +708,7 @@ class BaseModelManager {
     getMapDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getMapDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -722,7 +718,7 @@ class BaseModelManager {
     getEnumDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getEnumDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -732,7 +728,7 @@ class BaseModelManager {
     getConceptDeclarations() {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getConceptDeclarations());
-        }, []);
+        }, [] as any[]);
     }
 
     /**
@@ -875,4 +871,5 @@ class BaseModelManager {
     }
 }
 
-export = BaseModelManager;
+export { BaseModelManager };
+export default BaseModelManager;
