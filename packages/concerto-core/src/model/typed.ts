@@ -12,18 +12,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const dayjs = require('../dayjs-setup');
-const Util = require('@accordproject/concerto-util').NullUtil;
+import dayjs from '../dayjs-setup';
+import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('../introspect/classdeclaration');
-    const ModelManager = require('../modelmanager');
-}
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type ModelManager from '../modelmanager';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -211,4 +206,5 @@ class Typed {
     }
 }
 
-export = Typed;
+export { Typed };
+export default Typed;

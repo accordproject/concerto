@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
+import URIJS from 'urijs';
 
-const URIJS = require('urijs');
-
-const ModelUtils = require('../modelutil');
+import ModelUtils from '../modelutil';
 
 const RESOURCE_SCHEME = 'resource';
 
@@ -115,4 +113,5 @@ class ResourceId {
 
 }
 
-export = ResourceId;
+export { ResourceId };
+export default ResourceId;

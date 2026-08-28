@@ -12,10 +12,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const ResourceId = require('./resourceid');
-const Typed = require('./typed');
+import ResourceId from './resourceid';
+import Typed from './typed';
 
 /**
  * Identifiable is an entity with a namespace, type and an identifier.
@@ -27,6 +25,9 @@ const Typed = require('./typed');
  * @memberof module:concerto-core
  */
 class Identifiable extends Typed {
+    $identifierFieldName: any;
+    $identifier: any;
+    $timestamp: any;
     /**
      * Create an instance.
      * <p>
@@ -128,4 +129,5 @@ class Identifiable extends Typed {
     }
 }
 
-export = Identifiable;
+export { Identifiable };
+export default Identifiable;

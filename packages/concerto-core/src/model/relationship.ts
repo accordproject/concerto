@@ -12,21 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Identifiable = require('./identifiable');
-const ModelUtil = require('../modelutil');
-const ResourceId = require('./resourceid');
-import type ModelManager = require('../modelmanager');
-import type ClassDeclaration = require('../introspect/classdeclaration');
-
-// Types needed for TypeScript generation.
-/* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelManager = require('../modelmanager');
-}
-/* eslint-enable no-unused-vars */
+import Identifiable from './identifiable';
+import ModelUtil from '../modelutil';
+import ResourceId from './resourceid';
+import type ModelManager from '../modelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
 
 /**
  * A Relationship is a typed pointer to an instance. I.e the relationship
@@ -42,6 +32,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Relationship extends Identifiable {
+    $class: any;
     /**
      * Create an asset. Use the Factory to create instances.
      * <p>
@@ -97,4 +88,5 @@ class Relationship extends Identifiable {
     }
 }
 
-export = Relationship;
+export { Relationship };
+export default Relationship;
