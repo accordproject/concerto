@@ -16,15 +16,15 @@
 
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 
-const IllegalModelException = require('../../src/introspect/illegalmodelexception');
-const ClassDeclaration = require('../../src/introspect/classdeclaration');
-const AssetDeclaration = require('../../src/introspect/assetdeclaration');
-const ConceptDeclaration = require('../../src/introspect/conceptdeclaration');
-const ModelFile = require('../../src/introspect/modelfile');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
+const { ClassDeclaration } = require('../../src/introspect/classdeclaration');
+const { AssetDeclaration } = require('../../src/introspect/assetdeclaration');
+const { ConceptDeclaration } = require('../../src/introspect/conceptdeclaration');
+const { ModelFile } = require('../../src/introspect/modelfile');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../src/modelmanager');
+const { ModelManager } = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 
 const should = require('chai').should();

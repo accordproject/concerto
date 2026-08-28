@@ -197,3 +197,6 @@ File these as work under `concerto-334`:
 | `concerto-a34` | D3: non-breaking compat from tarballs | open (gating measurement #2) |
 | `concerto-btw` | Phase E: close-out + push | open |
 | *(new)* | **Decision: choose ESM release strategy A/B/C for #1304** | to be filed |
+
+## License <a name="license"></a>
+Accord Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Accord Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
