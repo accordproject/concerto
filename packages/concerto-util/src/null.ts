@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Internal Utility Class
  * @class
@@ -32,4 +30,5 @@ class NullUtil {
     }
 }
 
-export = NullUtil;
+export { NullUtil };
+export default NullUtil;

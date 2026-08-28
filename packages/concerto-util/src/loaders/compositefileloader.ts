@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import type { FileLoader } from './fileloader';
 
 /**
@@ -96,4 +94,5 @@ class CompositeFileLoader<T = unknown> {
     }
 }
 
-export = CompositeFileLoader;
+export { CompositeFileLoader };
+export default CompositeFileLoader;
