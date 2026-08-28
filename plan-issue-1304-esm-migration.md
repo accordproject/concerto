@@ -1,10 +1,11 @@
 # Plan & Handoff — Issue #1304: Native-ESM migration of `concerto-core` / `concerto-util`
 
-> **Status:** ⏸️ PAUSED at a strategic decision point. This branch is a **resumable
-> checkpoint**, not merge-ready. A human decision (Option A/B/C below) is required
-> before the work can proceed to green.
+> **Status:** ▶️ RESUMED — **Option B (clean break, dual-package major) was chosen.**
+> The decision recorded in §4 is settled; §7 is the scope being executed. See §10 for
+> what has been done since the decision and what remains.
 >
-> **Branch:** `esm/integration` · **PR:** draft (WIP) · **Base:** `main` @ `455c77977`
+> **Branch:** `esm/integration` → continued on `claude/background-agents-cheaper-models-3wtlpz`
+> **PR:** draft (WIP) · **Base:** `main` @ `455c77977`
 > **Beads tracker:** `concerto-3oj` (Phase C, in_progress) · parent epic `concerto-334`
 
 ---
@@ -112,9 +113,12 @@ deep-required as objects are **unaffected** — only single-class-export leaves 
 | Release | Minor (e.g. 3.x) | Major (5.0.0), dual-package `exports` map | — |
 | Effort now | Low (revert ~8–12 files, re-run to green) | High (release eng, migration guide, dual build) | Low (2 measurements) |
 
-**Recommendation: A now, plan B as v5.** Ship the tree-shaking win that is achievable
-without breaking anyone, and schedule the full clean break for a deliberate major release
-once its value is measured (§6).
+**Recommendation was: A now, plan B as v5.**
+
+> **DECIDED: Option B.** The clean break is being taken now, as a single deliberate
+> major (5.0.0), rather than shipping a partial win and paying the migration cost twice.
+> §5 (Path A) is retained below for the record but is **not** the path being executed —
+> follow §7 and §10 instead.
 
 ## 5. Path A — Hybrid implementation steps (the recommended actionable work)
 
@@ -197,6 +201,154 @@ File these as work under `concerto-334`:
 | `concerto-a34` | D3: non-breaking compat from tarballs | open (gating measurement #2) |
 | `concerto-btw` | Phase E: close-out + push | open |
 | *(new)* | **Decision: choose ESM release strategy A/B/C for #1304** | to be filed |
+
+---
+
+## 10. Option B execution log
+
+### 10.1 Test migration (done)
+
+The 345 failures described in §3 were the decision, not a bug — under Option B they are
+resolved by updating the source-coupled tests, which a major release permits.
+
+A mechanical codemod rewrote every `const X = require('../src/x');` in the two packages'
+mocha suites to destructure the module's named export, `const { X } = require('../src/x')`,
+falling back to `require(...).default` where the local binding does not match a named
+export. Namespace/object modules were left alone.
+
+| Package | Before | After |
+|---|---|---|
+| `concerto-util` | 85 passing / 66 failing | **151 passing / 0 failing** |
+| `concerto-core` | 93 passing / 279 failing | **1276 passing / 0 failing** |
+
+219 requires across 100 test files; no `src/` or public API changes in that commit.
+
+### 10.2 Monorepo coverage extended (done)
+
+An audit of every other workspace package found **zero** breaking consumers of the
+`export default` change inside this monorepo: every cross-package import already used
+either the root package specifier with a named destructure, or the UMD bundle's named
+globals. The two packages still on the old TS-CJS-interop syntax — `concerto-cto`
+(`export =` in 5 files) and `concerto-vocabulary` (`export =` in 3 files) — were
+migrated to native ESM with the same recipe, so the whole published surface is
+consistent and tree-shakeable. `concerto-analysis`, `concertino`, `concerto-linter` and
+`concerto-linter-default-ruleset` were already clean.
+
+One item this monorepo cannot verify: `.github/workflows/conformance-test.yml` passes
+`MODELMANAGER_PATH`/`MODELFILE_PATH`/`PARSER_PATH` (pointing at `dist/index.js`) to the
+external `accordproject/concerto-conformance` suite. Those are **root barrel** paths, so
+named access is unaffected, but if that suite default-requires the module and constructs
+it, it needs the same one-line fix. Worth a spot-check when the release is cut.
+
+### 10.3 Release engineering (action required at release time)
+
+`MIGRATION.md` at the repo root is the consumer-facing guide required by §7: what breaks
+(deep `./dist/*` constructor imports, in both CJS and ESM form), what does not (every
+root-package import), and how to fix each. The `"./dist/*"` subpath export is retained,
+so deep imports still *resolve* — it is their compiled shape that changed.
+
+**Package versions are deliberately not hand-edited in this branch.** This repo bumps
+versions from the release tag: `.github/workflows/publish.yml` runs
+`scripts/bump_version.js <tag>` and `npm version --workspaces --include-workspace-root
+--exact <tag>`, then opens a follow-up PR with the incremented numbers. Editing
+`package.json` versions here would be overwritten and would churn `package-lock.json`.
+
+➡️ **The required release action is to cut the GitHub release as `v5.0.0`** (a major),
+not `v4.3.0`. Everything else follows automatically.
+
+### 10.4 Type-only deep imports: `import type`, not a wider `exports` map
+
+The `exports` map added for tree-shaking encapsulates each package to `.`,
+`./package.json` and `./dist/*`, which makes the supplemental `types/` declaration tree
+(shipped outside `dist/`) unreachable under `node16`/`nodenext`/`bundler` resolution.
+
+One candidate fix was to map `./types/*` alongside `./dist/*`
+(`f452b4c62d60fec09ec111a80e803bbcda6d4c94`, on `fix/tree-shaking-sideeffects`). **That
+change is deliberately not adopted on this branch.** Re-exposing the declaration tree
+widens the supported deep-import surface at exactly the moment we are trying to narrow
+it, and it entrenches a path that was only ever reachable by accident.
+
+The guidance instead is `import type` from the package root:
+
+```ts
+import type { ClassDeclaration, ModelFile } from '@accordproject/concerto-core';
+```
+
+`import type` is erased at compile time, so it costs nothing at runtime, cannot anchor a
+module into a consumer's bundle, and resolves identically under every module-resolution
+mode. This is documented in `MIGRATION.md` under "Type-only imports". Any type that is
+not reachable from a root barrel should be *added* to that barrel, not deep-imported.
+
+The same reasoning applied internally: `concerto-vocabulary`'s `vocabulary.ts` ↔
+`vocabularymanager.ts` cycle was removed outright by making the type-only direction an
+`import type`, rather than by shuffling the runtime module graph.
+
+### 10.5 D2 tree-shaking measurement — and the build fix it forced
+
+Measuring the migration (esbuild 0.27.7, `--bundle --minify --format=esm
+--platform=browser`, single-symbol import vs. whole-package `import * as all`) showed
+that **native-ESM source alone bought almost nothing**: importing `SecurityException`
+from `concerto-core` — a two-line exception subclass — cost 544,356 B against a
+559,367 B whole-package ceiling. 97% of the package survived DCE.
+
+**Root cause: `scripts/build-esm.js` was flattening each package into a single
+`dist/esm/index.mjs`.** Once every module is inlined into one file, `sideEffects` has
+nothing to act on — there are no separate modules left to drop — and a consumer's
+bundler is reduced to statement-level DCE across one large file, which the packages'
+dense cross-references defeat immediately. Native `import`/`export` syntax in the
+*source* is a prerequisite for tree-shaking, not a sufficient condition; the emitted
+*shape* has to preserve the module graph too.
+
+Two hypotheses were tested and rejected before finding this: `/* @__PURE__ */`
+annotations on the module-scope `debugLib(...)`/`rfdcLib(...)` calls (544,356 B →
+544,311 B, i.e. nothing), and splitting the emit without declaring `sideEffects` on the
+output (no improvement — a probe directory with no `package.json` gives esbuild no
+grounds to treat the modules as pure, which invalidated an earlier measurement).
+
+**The fix** (in `scripts/build-esm.js`): make every `src/**/*.ts` module an entry point
+and emit with `outdir` + `splitting: true` + `outExtension: { '.js': '.mjs' }`, so the
+ESM build mirrors what `tsc` already produces for CJS — one output module per source
+module, with shared code hoisted into chunks. `dist/esm/index.mjs` keeps its path, so
+`main`/`module`/`exports` are unchanged.
+
+Result, same measurement before and after the build change:
+
+| Scenario | Before (flattened) | After (module graph) | Change |
+|---|---:|---:|---:|
+| `concerto-core`, `SecurityException` only | 544,356 B | **3,627 B** | **−99.3%** |
+| `concerto-core`, `ModelManager` only | 552,634 B | **418,282 B** | −24.3% |
+| `concerto-core`, whole package | 559,367 B | 547,863 B | −2.1% |
+| `concerto-util`, `Writer` only | 17,215 B | **739 B** | **−95.7%** |
+| `concerto-util`, whole package | 22,253 B | 22,322 B | +0.3% |
+
+Whole-package imports are unchanged, as expected — the win is entirely in what a
+consumer *doesn't* import. `ModelManager` legitimately reaches most of the package
+(introspect, serializer, the CTO parser), so its 24% is the honest floor for that
+symbol.
+
+Correctness of the new output was verified, not assumed:
+
+- All seven packages emit `dist/esm/index.mjs` plus a per-module graph; `npm run build`
+  is clean.
+- A Node ESM smoke test against the emitted `.mjs` covers `ModelManager` /`Factory`
+  /`Serializer` round-tripping, CTO parse + print, `Writer`, `TypedStack`,
+  `VocabularyManager` and the exception types.
+- The `dayjs` plugin registration (`utc`, `quarterOfYear`, `minMax`, `duration`) is the
+  one genuine module-level side effect in the tree, and it is the thing most at risk from
+  aggressive shaking. A **minified, tree-shaken** consumer bundle that never imports
+  `dayjs-setup` explicitly still deserializes and re-serializes a `DateTime` correctly,
+  with `utc` live — the `sideEffects` entry does its job.
+- Full monorepo suite green (1276 + 163 + 151 + 89 + 99 + 18 + 19), and the Playwright
+  UMD browser-bundle e2e tests pass (the UMD path is built by webpack from the CJS
+  `dist/`, so it is unaffected by this change).
+
+### 10.6 Still open
+
+- `concerto-a34` (D3, non-breaking compat from tarballs).
+- `concerto-mwi` (D1, full suite vs baseline) — satisfied by §10.1, can be closed.
+- `concerto-fe5` (D2) — satisfied by §10.5; the follow-ups it surfaced should be filed
+  as their own issues.
+- Spot-check the external conformance suite (§10.2).
 
 ## License <a name="license"></a>
 Accord Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Accord Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
