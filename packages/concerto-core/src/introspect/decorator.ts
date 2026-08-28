@@ -12,20 +12,15 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const { Logger } = require('@accordproject/concerto-util');
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { Logger } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Property = require('./property');
-}
+import type ClassDeclaration from './classdeclaration';
+import type Property from './property';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -218,4 +213,5 @@ class Decorator {
     }
 }
 
-export = Decorator;
+export { Decorator };
+export default Decorator;

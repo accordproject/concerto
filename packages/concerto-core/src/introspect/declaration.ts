@@ -12,18 +12,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Decorated = require('./decorated');
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
+import Decorated from './decorated';
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -38,6 +33,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Declaration extends Decorated {
+    modelFile: any;
+    name: any;
+    fqn: any;
     /**
      * Create a Declaration from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -237,4 +235,5 @@ class Declaration extends Decorated {
     }
 }
 
-export = Declaration;
+export { Declaration };
+export default Declaration;
