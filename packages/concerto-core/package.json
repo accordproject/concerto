@@ -23,9 +23,10 @@
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "cross-env TS_NODE_PROJECT=tsconfig.build.json TZ=UTC nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "cross-env TZ=UTC nyc mocha -r ts-node/register --watch --recursive -t 10000",
-    "build": "tsc -p tsconfig.build.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/",
+    "build": "tsc -p tsconfig.build.json && cpx \"src/*.json\" dist/ && cpx \"src/messages/*.json\" dist/messages/ && npm run build:esm",
     "postbuild": "npm run webpack",
-    "webpack": "webpack --config webpack.config.js --mode production"
+    "webpack": "webpack --config webpack.config.js --mode production",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -158,5 +159,20 @@
     "branches": 94.8,
     "functions": 99,
     "lines": 99
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*",
+    "./types/*": "./types/*"
+  },
+  "sideEffects": [
+    "./dist/dayjs-setup.js",
+    "./dist/esm/dayjs-setup.mjs"
+  ]
 }

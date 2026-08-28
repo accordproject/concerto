@@ -16,6 +16,7 @@ import SecurityException = require("./securityexception");
 import IllegalModelException = require("./introspect/illegalmodelexception");
 import TypeNotFoundException = require("./typenotfoundexception");
 import MetamodelException = require("./metamodelexception");
+import Decorated = require("./introspect/decorated");
 import Decorator = require("./introspect/decorator");
 import DecoratorFactory = require("./introspect/decoratorfactory");
 import DecoratorManager = require("./decoratormanager");
@@ -63,8 +64,9 @@ export {
     IllegalModelException, 
     TypeNotFoundException, 
     MetamodelException, 
-    Decorator, 
-    DecoratorFactory, 
+    Decorated,
+    Decorator,
+    DecoratorFactory,
     DecoratorManager, 
     Declaration, 
     ClassDeclaration, 

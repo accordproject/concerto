@@ -16,9 +16,7 @@
 
 const { loremIpsum } = require('lorem-ipsum');
 const RandExp = require('randexp');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+const dayjs = require('../dayjs-setup');
 
 /**
  * Generate a random number within a given range with

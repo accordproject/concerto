@@ -14,15 +14,7 @@
 
 'use strict';
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
-const quarterOfYear = require('dayjs/plugin/quarterOfYear');
-dayjs.extend(quarterOfYear);
-const minMax = require('dayjs/plugin/minMax');
-dayjs.extend(minMax);
-const duration = require('dayjs/plugin/duration');
-dayjs.extend(duration);
+const dayjs = require('./dayjs-setup');
 
 /**
  * Ensures there is a proper current time

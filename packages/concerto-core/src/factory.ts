@@ -31,9 +31,7 @@ const ValidatedResource = require('./model/validatedresource');
 
 const uuid = require('uuid');
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+const dayjs = require('./dayjs-setup');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
