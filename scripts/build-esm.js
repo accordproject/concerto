@@ -22,10 +22,38 @@ const esbuild = require('esbuild');
 const packageDir = process.cwd();
 const packageJsonPath = path.join(packageDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-const entryPoint = path.join(packageDir, 'src', 'index.ts');
-const outfile = path.join(packageDir, 'dist', 'esm', 'index.mjs');
+const srcDir = path.join(packageDir, 'src');
+const outdir = path.join(packageDir, 'dist', 'esm');
 const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
-const hasDayjsSetup = fs.existsSync(path.join(packageDir, 'src', 'dayjs-setup.ts'));
+
+/**
+ * Every TypeScript module under src/ is an entry point.
+ *
+ * This is what makes the packages tree-shakeable. esbuild will happily bundle
+ * src/index.ts into a single dist/esm/index.mjs, but a consumer's bundler then
+ * has one enormous module to reason about: `sideEffects` no longer applies
+ * (there is nothing left to drop at module granularity) and the only tool left
+ * is statement-level dead-code elimination across the whole flattened file,
+ * which cross-references defeat almost immediately. Emitting one output module
+ * per source module — mirroring what tsc already does for the CJS build —
+ * preserves the import graph, so a downstream bundler can drop whole modules
+ * the consumer never reached.
+ *
+ * @param {string} dir - directory to scan
+ * @param {string[]} found - accumulator
+ * @return {string[]} absolute paths of the .ts modules under dir
+ */
+function collectEntryPoints(dir, found = []) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const entryPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            collectEntryPoints(entryPath, found);
+        } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
+            found.push(entryPath);
+        }
+    }
+    return found;
+}
 
 const workspacePackages = [
     '@accordproject/concerto-analysis',
@@ -108,20 +136,19 @@ const commonBuildOptions = {
 async function main() {
     await esbuild.build({
         ...commonBuildOptions,
-        entryPoints: [entryPoint],
-        outfile,
+        entryPoints: collectEntryPoints(srcDir),
+        outdir,
+        outbase: srcDir,
+        // Code shared between entry points is hoisted into chunk files rather
+        // than duplicated into each one. Splitting is only supported for the
+        // esm format, which is what we emit.
+        splitting: true,
+        // dist/esm sits inside a package without "type": "module", so the
+        // output has to carry the .mjs extension to be treated as ESM. esbuild
+        // rewrites the emitted relative specifiers to match, which also keeps
+        // them resolvable by Node, where extensionless imports do not work.
+        outExtension: { '.js': '.mjs' },
     });
-
-    // For packages with dayjs-setup, also emit it as a separate ESM file so the
-    // sideEffects field in package.json can reference it without marking the
-    // entire index.mjs as side-effectful.
-    if (hasDayjsSetup) {
-        await esbuild.build({
-            ...commonBuildOptions,
-            entryPoints: [path.join(packageDir, 'src', 'dayjs-setup.ts')],
-            outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.mjs'),
-        });
-    }
 }
 
 main().catch(err => {
