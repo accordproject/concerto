@@ -59,6 +59,16 @@ module.exports = {
     module: {
         rules: [
             {
+                // The workspace packages now resolve through their `browser`
+                // export condition to an ESM build. Webpack treats .mjs as
+                // fully specified, which breaks the extensionless request that
+                // the `process` ProvidePlugin injects; the sibling packages'
+                // own relative imports already carry extensions.
+                test: /\.mjs$/,
+                type: 'javascript/auto',
+                resolve: { fullySpecified: false },
+            },
+            {
                 test: /\.js$/,
                 include: [path.join(__dirname, 'lib')],
                 use: ['babel-loader']

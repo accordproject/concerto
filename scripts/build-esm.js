@@ -23,7 +23,8 @@ const packageDir = process.cwd();
 const packageJsonPath = path.join(packageDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const srcDir = path.join(packageDir, 'src');
-const outdir = path.join(packageDir, 'dist', 'esm');
+const nodeOutdir = path.join(packageDir, 'dist', 'esm');
+const browserOutdir = path.join(packageDir, 'dist', 'esm-browser');
 const isNodeOnlyPackage = packageJson.name === '@accordproject/concerto-linter';
 
 /**
@@ -65,7 +66,6 @@ const workspacePackages = [
     '@accordproject/concertino',
 ].filter(name => name !== packageJson.name);
 
-const packageExternal = isNodeOnlyPackage ? [...workspacePackages, 'fsevents', 'fsevents/*', '*.node'] : workspacePackages;
 const expandExternal = name => name.includes('*') ? [name] : [name, `${name}/*`];
 
 const builtinSpecifiers = new Set([
@@ -73,21 +73,13 @@ const builtinSpecifiers = new Set([
     ...builtinModules.map(name => `node:${name}`),
 ]);
 
-// The Node-only build keeps builtins external (emitted as runtime require()
-// calls). Browser builds must not resolve — or carry bare imports of — Node
-// builtins, since a downstream browser bundler without Node polyfills would
-// fail to resolve `import "fs"`. Instead we stub them to empty modules, matching
-// the parity the existing webpack UMD build achieves via resolve.fallback
-// (fs/tls/net/child_process/os/path -> false). A dependency that remaps a
-// builtin through its own `browser` field is resolved by esbuild before this
-// plugin runs, so genuine browser shims (e.g. crypto-browserify) still win.
-const external = [
-    ...packageExternal.flatMap(expandExternal),
-    ...(isNodeOnlyPackage
-        ? [...builtinModules, ...builtinModules.map(name => `node:${name}`)]
-        : []),
-];
-
+// Browser builds must not resolve — or carry bare imports of — Node builtins,
+// since a downstream browser bundler without Node polyfills would fail to
+// resolve `import "fs"`. Instead we stub them to empty modules, matching the
+// parity the webpack UMD build achieves via resolve.fallback (fs/tls/net/
+// child_process/os/path -> false). A dependency that remaps a builtin through
+// its own `browser` field is resolved by esbuild before this plugin runs, so
+// genuine browser shims (e.g. crypto-browserify) still win.
 const stubNodeBuiltinsPlugin = {
     name: 'stub-node-builtins',
     setup(build) {
@@ -107,48 +99,77 @@ const stubNodeBuiltinsPlugin = {
     },
 };
 
-const commonBuildOptions = {
-    bundle: true,
-    format: 'esm',
-    platform: isNodeOnlyPackage ? 'node' : 'browser',
-    mainFields: isNodeOnlyPackage ? ['module', 'main'] : ['browser', 'module', 'main'],
-    target: 'es2020',
-    sourcemap: true,
-    external,
-    logLevel: 'info',
-    // Only the Node-only build needs the createRequire shim: its externalised
-    // Node builtins are emitted as runtime require() calls. Browser-targeted
-    // builds must not carry a Node-only `import ... from "module"`, which would
-    // break downstream browser bundlers, so the banner is gated accordingly.
-    ...(isNodeOnlyPackage ? {
-        banner: {
-            js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);',
-        },
-    } : {
-        // Browser builds stub Node builtins to empty modules instead of leaving
-        // bare `import "fs"` in the output.
-        plugins: [stubNodeBuiltinsPlugin],
-    }),
-};
+/**
+ * Build options for one ESM target.
+ *
+ * Two ESM builds are emitted, because stubbing Node builtins is right for a
+ * browser bundle and wrong for Node. The `exports` map routes the `browser`
+ * condition at dist/esm-browser and the `import` condition at dist/esm, so a
+ * Node consumer gets real `fs`/`path` — stubbing them there silently breaks
+ * anything that touches the filesystem (FileWriter, ModelWriter, ModelLoader)
+ * at runtime rather than at build time.
+ *
+ * @param {'node'|'browser'} target - which runtime this build is for
+ * @return {object} esbuild options shared by every entry point of that target
+ */
+function buildOptionsFor(target) {
+    const isNode = target === 'node';
+    const packageExternal = isNodeOnlyPackage
+        ? [...workspacePackages, 'fsevents', 'fsevents/*', '*.node']
+        : workspacePackages;
+
+    return {
+        bundle: true,
+        format: 'esm',
+        platform: target,
+        mainFields: isNode ? ['module', 'main'] : ['browser', 'module', 'main'],
+        target: 'es2020',
+        sourcemap: true,
+        logLevel: 'info',
+        external: [
+            ...packageExternal.flatMap(expandExternal),
+            // Node keeps its builtins external, so they resolve to the real
+            // modules at runtime.
+            ...(isNode ? [...builtinModules, ...builtinModules.map(name => `node:${name}`)] : []),
+        ],
+        // Only the Node build needs the createRequire shim: bundling a CJS
+        // dependency can emit a runtime require() call, which has no meaning in
+        // an ES module. A browser-targeted build must not carry a Node-only
+        // `import ... from "module"`, which would break downstream bundlers.
+        ...(isNode
+            ? { banner: { js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);' } }
+            : { plugins: [stubNodeBuiltinsPlugin] }),
+    };
+}
 
 // The async build API is required because browser builds register an esbuild
 // plugin (buildSync cannot use plugins).
 async function main() {
-    await esbuild.build({
-        ...commonBuildOptions,
-        entryPoints: collectEntryPoints(srcDir),
-        outdir,
-        outbase: srcDir,
-        // Code shared between entry points is hoisted into chunk files rather
-        // than duplicated into each one. Splitting is only supported for the
-        // esm format, which is what we emit.
-        splitting: true,
-        // dist/esm sits inside a package without "type": "module", so the
-        // output has to carry the .mjs extension to be treated as ESM. esbuild
-        // rewrites the emitted relative specifiers to match, which also keeps
-        // them resolvable by Node, where extensionless imports do not work.
-        outExtension: { '.js': '.mjs' },
-    });
+    const entryPoints = collectEntryPoints(srcDir);
+
+    // A node-only package has no browser consumers, so it gets one build.
+    const targets = isNodeOnlyPackage
+        ? [{ target: 'node', outdir: nodeOutdir }]
+        : [{ target: 'node', outdir: nodeOutdir }, { target: 'browser', outdir: browserOutdir }];
+
+    for (const { target, outdir } of targets) {
+        await esbuild.build({
+            ...buildOptionsFor(target),
+            entryPoints,
+            outdir,
+            outbase: srcDir,
+            // Code shared between entry points is hoisted into chunk files
+            // rather than duplicated into each one. Splitting is only supported
+            // for the esm format, which is what we emit.
+            splitting: true,
+            // dist/esm sits inside a package without "type": "module", so the
+            // output has to carry the .mjs extension to be treated as ESM.
+            // esbuild rewrites the emitted relative specifiers to match, which
+            // also keeps them resolvable by Node, where extensionless imports
+            // do not work.
+            outExtension: { '.js': '.mjs' },
+        });
+    }
 }
 
 main().catch(err => {

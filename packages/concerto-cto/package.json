@@ -144,6 +144,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/esm-browser/index.mjs",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/index.js"
     },
