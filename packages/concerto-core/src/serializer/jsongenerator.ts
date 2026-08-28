@@ -143,7 +143,7 @@ class JSONGenerator {
         }
 
         let result: any = {};
-        let id = null;
+        let id: any = null;
 
         if (obj.isIdentifiable() && this.deduplicateResources) {
             id = obj.toURI();

@@ -40,7 +40,7 @@ type Stack<T> = {
 type JsonPopulatorParameters = {
     jsonStack: Stack<String | { [key: string]: unknown; $class: string } | { [key: string]: unknown; $class: string }[]>;
     resourceStack: Stack<Resource>;
-    path?: Stack<string>;
+    path?: TypedStack<string>;
     factory: Factory;
     modelManager: ModelManager;
     acceptResourcesForRelationships?: boolean;
@@ -140,7 +140,7 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing: VisitorTarget, parameters: JsonPopulatorParameters) {
+    visit(thing: any, parameters: JsonPopulatorParameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
         if (thing.isClassDeclaration?.()) {

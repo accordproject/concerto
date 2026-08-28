@@ -46,13 +46,13 @@ import Logger from './logger';
 import TypedStack from './typedstack';
 
 // Label
-import Label from './label';
+import * as Label from './label';
 
 // Identifiers
-import Identifiers from './identifiers';
+import * as Identifiers from './identifiers';
 
 // Error codes
-import ErrorCodes from './errorcodes';
+import * as ErrorCodes from './errorcodes';
 
 // NullUtil
 import NullUtil from './null';

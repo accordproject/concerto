@@ -214,7 +214,7 @@ class ModelFile extends Decorated {
      * this ModelFile
      */
     getImports() {
-        let result = [];
+        let result: string[] = [];
         this.imports.forEach( imp => {
             result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
         });

@@ -29,7 +29,7 @@ class ValidationException extends BaseException {
      * @param {string} message - the message for the exception
      * @param {string} component - the optional component which throws this error
      */
-    constructor(message, component) {
+    constructor(message, component?) {
         super(message, component);
     }
 }

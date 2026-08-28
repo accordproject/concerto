@@ -29,8 +29,7 @@ function newMetaModelManager() {
         metaModelManager,
         MetaModelUtil.metaModelAst,
         MetaModelUtil.metaModelCto,
-        'concerto.metamodel',
-        true
+        'concerto.metamodel'
     );
     metaModelManager.addModelFile(mf, MetaModelUtil.metaModelCto, 'concerto.metamodel');
     return metaModelManager;
@@ -64,7 +63,7 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     const modelManager = new ModelManager();
 
     mm.models.forEach((mm) => {
-        const mf = new ModelFile(modelManager, mm, null, null, true);
+        const mf = new ModelFile(modelManager, mm, null, null);
         modelManager.addModelFile(mf, null, null);
     });
 

@@ -51,7 +51,7 @@ class ResourceValidator {
      * are specified for relationship fields into relationships, false by default.
      * @param {boolean} options.permitResourcesForRelationships - Permit resources in the
      */
-    constructor(options) {
+    constructor(options?) {
         this.options = options || {};
     }
     /**

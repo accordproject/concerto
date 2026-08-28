@@ -14,7 +14,7 @@
 
 import * as ErrorCodes from './errorcodes';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const packageJson: { name: string } = (require('../package.json'));
+const packageJson = require('../package.json');
 
 /**
 * A base class for all Concerto exceptions
