@@ -12,17 +12,16 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-const quarterOfYear = require('dayjs/plugin/quarterOfYear');
-const minMax = require('dayjs/plugin/minMax');
-const duration = require('dayjs/plugin/duration');
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+import minMax from 'dayjs/plugin/minMax';
+import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
 dayjs.extend(minMax);
 dayjs.extend(duration);
 
-export = dayjs;
+export { dayjs };
+export default dayjs;

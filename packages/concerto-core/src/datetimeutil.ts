@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const dayjs = require('./dayjs-setup');
+import dayjs from './dayjs-setup';
 
 /**
  * Ensures there is a proper current time
@@ -40,4 +38,5 @@ function setCurrentTime(currentTime?, utcOffset?) {
     };
 }
 
-export = { setCurrentTime };
+export { setCurrentTime };
+export default { setCurrentTime };

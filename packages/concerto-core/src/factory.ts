@@ -12,33 +12,29 @@
  * limitations under the License.
  */
 
-'use strict';
+import { TypedStack } from '@accordproject/concerto-util';
 
-const { TypedStack } = require('@accordproject/concerto-util');
+import debugLib from 'debug';
+const debug = debugLib('concerto:Factory');
+import Globalize from './globalize';
 
-const debug = require('debug')('concerto:Factory');
-const Globalize = require('./globalize');
+import ModelUtil from './modelutil';
 
-const ModelUtil = require('./modelutil');
+import InstanceGenerator from './serializer/instancegenerator';
+import ValueGeneratorFactory from './serializer/valuegenerator';
+import ResourceValidator from './serializer/resourcevalidator';
 
-const InstanceGenerator = require('./serializer/instancegenerator');
-const ValueGeneratorFactory = require('./serializer/valuegenerator');
-const ResourceValidator = require('./serializer/resourcevalidator');
+import Relationship from './model/relationship';
+import Resource from './model/resource';
+import ValidatedResource from './model/validatedresource';
 
-const Relationship = require('./model/relationship');
-const Resource = require('./model/resource');
-const ValidatedResource = require('./model/validatedresource');
+import uuid from 'uuid';
 
-const uuid = require('uuid');
-
-const dayjs = require('./dayjs-setup');
+import dayjs from './dayjs-setup';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelManager = require('./modelmanager');
-}
+import type ModelManager from './modelmanager';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -134,7 +130,7 @@ class Factory {
         }
 
         let newObj: any = null;
-        let timestamp = null;
+        let timestamp: any = null;
         if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
         }
@@ -308,4 +304,5 @@ class Factory {
     }
 }
 
-export = Factory;
+export { Factory };
+export default Factory;

@@ -12,12 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const ModelManager = require('./modelmanager');
-const ModelUtil = require('./modelutil');
-const yaml = require('yaml');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import ModelManager from './modelmanager';
+import ModelUtil from './modelutil';
+import yaml from 'yaml';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
 // $class value for decorator arguments that carry a string value
 const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
@@ -516,4 +514,6 @@ class DecoratorExtractor {
         };
     }
 }
-export = DecoratorExtractor;
+
+export { DecoratorExtractor };
+export default DecoratorExtractor;
