@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Identifiable = require('./identifiable');
+import Identifiable from './identifiable';
 
 /**
  *
@@ -102,4 +100,5 @@ class Resource extends Identifiable {
 
 }
 
-export = Resource;
+export { Resource };
+export default Resource;

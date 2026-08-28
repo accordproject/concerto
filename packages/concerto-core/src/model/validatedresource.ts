@@ -12,10 +12,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const Resource = require('./resource');
+import { TypedStack } from '@accordproject/concerto-util';
+import Resource from './resource';
 
 /**
  * ValidatedResource is a Resource that can validate that property
@@ -127,4 +125,5 @@ class ValidatedResource extends Resource {
     }
 }
 
-export = ValidatedResource;
+export { ValidatedResource };
+export default ValidatedResource;
