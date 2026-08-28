@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-'use strict';
+import { NullUtil } from '@accordproject/concerto-util';
+import Validator from './validator';
 
-const { isNull } = require('@accordproject/concerto-util').NullUtil;
-const Validator = require('./validator');
+const { isNull } = NullUtil;
 
 /**
  * A Validator to enforce that a collection (array or map) has a size within a specified range.
@@ -24,6 +24,8 @@ const Validator = require('./validator');
  * @memberof module:concerto-core
  */
 class CollectionSizeValidator extends Validator {
+    minSize: any;
+    maxSize: any;
 
     /**
      * Create a CollectionSizeValidator.
@@ -117,4 +119,5 @@ class CollectionSizeValidator extends Validator {
     }
 }
 
-export = CollectionSizeValidator;
+export { CollectionSizeValidator };
+export default CollectionSizeValidator;

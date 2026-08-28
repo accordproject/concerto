@@ -12,22 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-import Property = require('./property');
-const NumberValidator = require('./numbervalidator');
-const StringValidator = require('./stringvalidator');
-const Util = require('@accordproject/concerto-util').NullUtil;
+import Property from './property';
+import NumberValidator from './numbervalidator';
+import StringValidator from './stringvalidator';
+import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Validator = require('./validator');
-}
+import type ClassDeclaration from './classdeclaration';
+import type Validator from './validator';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -41,6 +36,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Field extends Property {
+    validator: any;
+    defaultValue: any;
+    scalarField: any;
     /**
      * Create a Field.
      * @param {ClassDeclaration} parent - The owner of this property
@@ -201,4 +199,5 @@ class Field extends Property {
     }
 }
 
-export = Field;
+export { Field };
+export default Field;

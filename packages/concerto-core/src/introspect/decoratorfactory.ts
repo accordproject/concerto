@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Decorator = require('./decorator');
-    const Property = require('./property');
-}
+import type ClassDeclaration from './classdeclaration';
+import type Decorator from './decorator';
+import type Property from './property';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -45,4 +40,5 @@ class DecoratorFactory {
 
 }
 
-export = DecoratorFactory;
+export { DecoratorFactory };
+export default DecoratorFactory;

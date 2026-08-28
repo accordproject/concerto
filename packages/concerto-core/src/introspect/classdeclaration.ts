@@ -12,25 +12,20 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-import Declaration = require('./declaration');
-const EnumValueDeclaration = require('./enumvaluedeclaration');
-const Field = require('./field');
-const Globalize = require('../globalize');
-const IllegalModelException = require('./illegalmodelexception');
-const Introspector = require('./introspector');
-const RelationshipDeclaration = require('./relationshipdeclaration');
-const ModelUtil = require('../modelutil');
+import Declaration from './declaration';
+import EnumValueDeclaration from './enumvaluedeclaration';
+import Field from './field';
+import Globalize from '../globalize';
+import IllegalModelException from './illegalmodelexception';
+import Introspector from './introspector';
+import RelationshipDeclaration from './relationshipdeclaration';
+import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Property = require('./property');
-}
+import type Property from './property';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -46,6 +41,21 @@ if (global === undefined) {
  */
 class ClassDeclaration extends Declaration {
     modelFile: any;
+    properties: any;
+    superType: any;
+    superTypeDeclaration: any;
+    idField: any;
+    timestamped: any;
+    abstract: any;
+    type: any;
+    /**
+     * Returns the kind of declaration
+     * @return {string} the kind of declaration
+     */
+    declarationKind(): string {
+        return '';
+    }
+
     /**
      * Process the AST and build the model
      *
@@ -425,7 +435,7 @@ class ClassDeclaration extends Declaration {
         const subclassMap = new Map();
 
         // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
+        allClassDeclarations.forEach((declaration: any) => {
             const superType = declaration.getSuperType();
             if (superType) {
                 const subclasses = subclassMap.get(superType) || new Set();
@@ -462,7 +472,7 @@ class ClassDeclaration extends Declaration {
         const subclassMap = new Map();
 
         // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration) => {
+        allClassDeclarations.forEach((declaration: any) => {
             const superType = declaration.getSuperType();
             if (superType) {
                 const subclasses = subclassMap.get(superType) || new Set();
@@ -667,4 +677,5 @@ class ClassDeclaration extends Declaration {
     }
 }
 
-export = ClassDeclaration;
+export { ClassDeclaration };
+export default ClassDeclaration;

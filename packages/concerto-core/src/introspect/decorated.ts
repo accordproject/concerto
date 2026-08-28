@@ -12,17 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Decorator = require('./decorator');
-const IllegalModelException = require('./illegalmodelexception');
+import Decorator from './decorator';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -162,4 +157,5 @@ class Decorated {
     }
 }
 
-export = Decorated;
+export { Decorated };
+export default Decorated;
