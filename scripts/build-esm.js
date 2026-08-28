@@ -138,7 +138,17 @@ function buildOptionsFor(target) {
         // `import ... from "module"`, which would break downstream bundlers.
         ...(isNode
             ? { banner: { js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);' } }
-            : { plugins: [stubNodeBuiltinsPlugin] }),
+            : {
+                plugins: [stubNodeBuiltinsPlugin],
+                // The sources and their dependencies read `process.env` and
+                // `process.emitWarning`. Left free, that identifier is every
+                // downstream browser bundler's problem — and a webpack
+                // consumer's ProvidePlugin answers it with an extensionless
+                // `process/browser` request, which webpack rejects as not
+                // fully specified once the importing module is a .mjs file.
+                // Binding it here keeps the browser build self-contained.
+                inject: [path.join(__dirname, 'browser-process-shim.js')],
+            }),
     };
 }
 
