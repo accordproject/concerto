@@ -148,7 +148,8 @@
       "require": "./dist/index.js"
     },
     "./package.json": "./package.json",
-    "./dist/*": "./dist/*"
+    "./dist/*": "./dist/*",
+    "./types/*": "./types/*"
   },
   "sideEffects": false
 }
