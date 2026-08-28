@@ -507,6 +507,82 @@ describe('Serializer', () => {
             roundTrip.isPrivate.should.be.false;
         });
 
+        it('should not throw on unknown null-valued properties with default options', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            let resource = serializer.fromJSON(json);
+            resource.should.be.an.instanceOf(Resource);
+            should.equal(resource.unknownField, undefined);
+        });
+
+        it('should throw on unknown null-valued properties when allowNullValues is false', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            (() => serializer.fromJSON(json, { allowNullValues: false, validate: true }))
+                .should.throw(/Unexpected properties.*unknownField/);
+        });
+
+        it('should not throw on unknown null-valued properties when allowNullValues is undefined', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphabblock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            let resource = serializer.fromJSON(json, { allowNullValues: undefined, validate: true });
+            resource.should.be.an.instanceOf(Resource);
+            should.equal(resource.unknownField, undefined);
+        });
+
+        it('should throw on unknown non-null properties when validate is true', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: 'not null'
+            };
+            (() => serializer.fromJSON(json, { validate: true }))
+                .should.throw(/Unexpected properties.*unknownField/);
+        });
+
+        it('should not throw on unknown null-valued properties when validate is false', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: null
+            };
+            let resource = serializer.fromJSON(json, { allowNullValues: true, validate: false });
+            resource.should.be.an.instanceOf(Resource);
+            should.equal(resource.unknownField, undefined);
+        });
+
+        it('should not throw on unknown non-null properties when validate is false', () => {
+            const json = {
+                $class: 'org.acme.sample@1.0.0.SampleParticipant',
+                participantId: 'alphablock',
+                firstName: 'Block',
+                lastName: 'Norris',
+                unknownField: 'not null'
+            };
+            let resource = serializer.fromJSON(json, { allowNullValues: true, validate: false });
+            resource.should.be.an.instanceOf(Resource);
+            should.equal(resource.unknownField, undefined);
+        });
+
         const json = {
             $class : 'org.acme.sample@1.0.0.DateTimeTest',
         };
