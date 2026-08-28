@@ -40,11 +40,44 @@ const workspacePackages = [
 const packageExternal = isNodeOnlyPackage ? [...workspacePackages, 'fsevents', 'fsevents/*', '*.node'] : workspacePackages;
 const expandExternal = name => name.includes('*') ? [name] : [name, `${name}/*`];
 
-const external = [
-    ...packageExternal.flatMap(expandExternal),
+const builtinSpecifiers = new Set([
     ...builtinModules,
     ...builtinModules.map(name => `node:${name}`),
+]);
+
+// The Node-only build keeps builtins external (emitted as runtime require()
+// calls). Browser builds must not resolve — or carry bare imports of — Node
+// builtins, since a downstream browser bundler without Node polyfills would
+// fail to resolve `import "fs"`. Instead we stub them to empty modules, matching
+// the parity the existing webpack UMD build achieves via resolve.fallback
+// (fs/tls/net/child_process/os/path -> false). A dependency that remaps a
+// builtin through its own `browser` field is resolved by esbuild before this
+// plugin runs, so genuine browser shims (e.g. crypto-browserify) still win.
+const external = [
+    ...packageExternal.flatMap(expandExternal),
+    ...(isNodeOnlyPackage
+        ? [...builtinModules, ...builtinModules.map(name => `node:${name}`)]
+        : []),
 ];
+
+const stubNodeBuiltinsPlugin = {
+    name: 'stub-node-builtins',
+    setup(build) {
+        build.onResolve({ filter: /^(node:|[a-z])/ }, args => {
+            if (args.path.startsWith('node:') || builtinSpecifiers.has(args.path)) {
+                return { path: args.path, namespace: 'node-builtin-stub' };
+            }
+            return undefined;
+        });
+        build.onLoad({ filter: /.*/, namespace: 'node-builtin-stub' }, () => ({
+            // Empty CommonJS module: `import x from 'fs'` -> {}, named imports
+            // resolve to undefined without a build-time error (parity with
+            // webpack's `fs: false` fallback).
+            contents: 'module.exports = {};',
+            loader: 'js',
+        }));
+    },
+};
 
 const commonBuildOptions = {
     bundle: true,
@@ -63,22 +96,35 @@ const commonBuildOptions = {
         banner: {
             js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);',
         },
-    } : {}),
+    } : {
+        // Browser builds stub Node builtins to empty modules instead of leaving
+        // bare `import "fs"` in the output.
+        plugins: [stubNodeBuiltinsPlugin],
+    }),
 };
 
-esbuild.buildSync({
-    ...commonBuildOptions,
-    entryPoints: [entryPoint],
-    outfile,
-});
-
-// For packages with dayjs-setup, also emit it as a separate ESM file so the
-// sideEffects field in package.json can reference it without marking the entire
-// index.mjs as side-effectful.
-if (hasDayjsSetup) {
-    esbuild.buildSync({
+// The async build API is required because browser builds register an esbuild
+// plugin (buildSync cannot use plugins).
+async function main() {
+    await esbuild.build({
         ...commonBuildOptions,
-        entryPoints: [path.join(packageDir, 'src', 'dayjs-setup.ts')],
-        outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.mjs'),
+        entryPoints: [entryPoint],
+        outfile,
     });
+
+    // For packages with dayjs-setup, also emit it as a separate ESM file so the
+    // sideEffects field in package.json can reference it without marking the
+    // entire index.mjs as side-effectful.
+    if (hasDayjsSetup) {
+        await esbuild.build({
+            ...commonBuildOptions,
+            entryPoints: [path.join(packageDir, 'src', 'dayjs-setup.ts')],
+            outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.mjs'),
+        });
+    }
 }
+
+main().catch(err => {
+    console.error(err);
+    process.exit(1);
+});
