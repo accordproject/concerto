@@ -73,6 +73,6 @@ if (hasDayjsSetup) {
     esbuild.buildSync({
         ...commonBuildOptions,
         entryPoints: [path.join(packageDir, 'src', 'dayjs-setup.ts')],
-        outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.js'),
+        outfile: path.join(packageDir, 'dist', 'esm', 'dayjs-setup.mjs'),
     });
 }
