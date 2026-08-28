@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import * as path from 'path';
 
 const CTO_BUNDLE = path.resolve(__dirname, '../../packages/concerto-cto/dist/concerto-cto.js');

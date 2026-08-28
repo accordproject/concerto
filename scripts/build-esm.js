@@ -54,10 +54,16 @@ const commonBuildOptions = {
     target: 'es2020',
     sourcemap: true,
     external,
-    banner: {
-        js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);',
-    },
     logLevel: 'info',
+    // Only the Node-only build needs the createRequire shim: its externalised
+    // Node builtins are emitted as runtime require() calls. Browser-targeted
+    // builds must not carry a Node-only `import ... from "module"`, which would
+    // break downstream browser bundlers, so the banner is gated accordingly.
+    ...(isNodeOnlyPackage ? {
+        banner: {
+            js: 'import { createRequire as __createRequire } from "module";\nconst require = __createRequire(import.meta.url);',
+        },
+    } : {}),
 };
 
 esbuild.buildSync({
