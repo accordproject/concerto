@@ -339,13 +339,27 @@ To benefit from the tree-shaking this release enables:
 
 The ESM build ships one output module per source module (with shared code hoisted into
 chunks), mirroring the CJS build, so your bundler can drop whole modules you never
-reach. Measured with esbuild on a minified browser bundle:
+reach.
 
-| What you import | 4.x | 5.0.0 |
-|---|---:|---:|
-| `{ Writer }` from `concerto-util` | 26,550 B | **739 B** |
-| `{ SecurityException }` from `concerto-core` | 754,277 B | **3,627 B** |
-| `{ ModelManager }` from `concerto-core` | 754,272 B | **418,282 B** |
+Measured with `esbuild --bundle --minify --format=esm`, importing each package **by
+name** so that resolution happens the way it would in your project (4.2.0 has no
+`exports` map, so a browser bundler takes its `browser` field — the UMD bundle — while
+5.0.0 resolves the `browser` condition to `dist/esm-browser`):
+
+| What you import | 4.2.0 | 5.0.0 | |
+|---|---:|---:|---:|
+| `{ Writer }` from `concerto-util` | 95,570 B | **1,050 B** | −98.9% |
+| `{ SecurityException }` from `concerto-core` | 903,570 B | **4,064 B** | −99.6% |
+| `{ ModelManager }` from `concerto-core` | 903,565 B | **419,416 B** | −53.6% |
+
+Bundling for Node instead (`--platform=node`, which takes 4.2.0's `main` and 5.0.0's
+`import` condition):
+
+| What you import | 4.2.0 | 5.0.0 | |
+|---|---:|---:|---:|
+| `{ Writer }` from `concerto-util` | 28,647 B | **863 B** | −97.0% |
+| `{ SecurityException }` from `concerto-core` | 559,234 B | **3,831 B** | −99.3% |
+| `{ ModelManager }` from `concerto-core` | 559,229 B | **426,781 B** | −23.7% |
 
 `ModelManager` genuinely reaches most of the package (introspection, serialization and
 the CTO parser), so it shrinks least — that is the honest floor, not a bug. Importing
