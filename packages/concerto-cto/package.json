@@ -9,11 +9,9 @@
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "browser": "dist/concerto-cto.js",
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean",
-    "prepublishOnly": "npm run webpack",
     "parser": "peggy -o src/parser.js src/parser.pegjs",
     "pretest": "npm run lint && npm run parser",
     "lint": "eslint .",
@@ -24,8 +22,6 @@
     "test": "nyc mocha -r ts-node/register --recursive -t 10000",
     "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
     "build": "npm run parser && tsc -p tsconfig.build.json && npm run build:esm",
-    "postbuild": "npm run webpack",
-    "webpack": "webpack --config webpack.config.js --mode production",
     "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
@@ -65,8 +61,7 @@
     "sinon-chai": "3.7.0",
     "ts-jest": "28.0.4",
     "ts-node": "10.9.1",
-    "typescript": "5.9.3",
-    "webpack-cli": "^6.0.1"
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "@accordproject/concerto-metamodel": "^3.16.0",

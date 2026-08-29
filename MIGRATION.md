@@ -120,6 +120,54 @@ import { Writer } from '@accordproject/concerto-util/dist/writer';
 const writer = new Writer();
 ```
 
+### The UMD browser bundles are removed
+
+**Before (4.x):** three packages published a webpack-built UMD bundle for direct browser
+consumption via a `<script>` tag. The bundle exposed a global named after the package —
+which is not a valid JavaScript identifier, so it was read off `window`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@accordproject/concerto-core/dist/concerto-core.js"></script>
+<script>
+  const { Factory, ModelManager } = window['concerto-core'];
+</script>
+```
+
+The same packages also set the legacy top-level `browser` field in `package.json` to
+point at these bundles, for bundlers that predate the `exports` field.
+
+The bundles were at:
+- `@accordproject/concerto-core`: `dist/concerto-core.js`
+- `@accordproject/concerto-util`: `dist/concerto-util.js`
+- `@accordproject/concerto-cto`: `dist/concerto-cto.js`
+
+**After (5.0.0)** — the UMD bundles and the `browser` field are removed. They are gone
+in all three packages with no drop-in replacement.
+
+What actually changed:
+
+- **For bundler users** (webpack 5+, Vite, Rollup, esbuild): nothing. Your bundler
+  already selected the browser ESM graph at `dist/esm-browser/index.mjs` via the
+  `browser` *condition* in the `exports` map, because `exports` takes precedence over
+  the legacy `browser` field. Your code needs no edits.
+- **For `<script>` tag users** with no build step: you were relying on the UMD bundle's
+  global namespace. That is gone. Your options are:
+  1. **Add a bundler** to your build (webpack, esbuild, Rollup, Vite). Bundle the
+     package with your own code and import normally.
+  2. **Load the ESM graph as a module**, with `<script type="module">` and an
+     `import` statement. Note that `dist/esm-browser/index.mjs` is a module *graph*, not
+     a single file — it imports sibling chunks by relative path, and `concerto-core`'s
+     graph additionally imports `@accordproject/concerto-cto` and
+     `@accordproject/concerto-util` as bare specifiers. Serving it therefore needs
+     either a CDN that rewrites those specifiers into resolvable URLs, or an import map
+     that maps them yourself. Check the behaviour of whichever CDN you use before
+     relying on it.
+
+The `browser` condition in `exports` (which points to `dist/esm-browser/index.mjs`) is
+still there and still in use — bundlers automatically pick it when targeting the web. But
+the old UMD distribution is gone, and there is no `window['concerto-core']` global
+anymore.
+
 ### Affected modules
 
 Every single-class module in the four migrated packages moved from `export =` to
@@ -299,18 +347,17 @@ the whole package costs about what it always did.
 
 Every package in this release ships a dual-package `exports` map (CJS + ESM + types),
 plus the legacy `main`/`module`/`typings` fields for tooling that doesn't read
-`exports`. `concerto-util`, `concerto-core`, and `concerto-cto` additionally ship a UMD
-browser bundle.
+`exports`.
 
-| Package | `main` (CJS) | `module` (ESM) | `browser` (UMD) | `types` |
-|---|---|---|---|---|
-| `concerto-core` | `dist/index.js` | `dist/esm/index.mjs` | `dist/concerto-core.js` | `dist/index.d.ts` |
-| `concerto-util` | `dist/index.js` | `dist/esm/index.mjs` | `dist/concerto-util.js` | `dist/index.d.ts` |
-| `concerto-cto` | `dist/index.js` | `dist/esm/index.mjs` | `dist/concerto-cto.js` | `dist/index.d.ts` |
-| `concertino` | `dist/index.js` | `dist/esm/index.mjs` | — | `dist/index.d.ts` |
-| `concerto-vocabulary` | `dist/index.js` | `dist/esm/index.mjs` | — | `dist/index.d.ts` |
-| `concerto-analysis` | `dist/index.js` | `dist/esm/index.mjs` | — | `dist/index.d.ts` |
-| `concerto-linter` | `dist/index.js` | `dist/esm/index.mjs` | — | `dist/index.d.ts` |
+| Package | `main` (CJS) | `module` (ESM) | `types` |
+|---|---|---|---|
+| `concerto-core` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concerto-util` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concerto-cto` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concertino` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concerto-vocabulary` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concerto-analysis` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
+| `concerto-linter` | `dist/index.js` | `dist/esm/index.mjs` | `dist/index.d.ts` |
 
 Every package's `exports` map has the same shape (shown here for `concerto-core`;
 `concerto-util` is identical apart from the package name):
@@ -334,13 +381,13 @@ named exports. They differ only in how Node builtins are handled:
 | Graph | Selected by | Node builtins |
 |---|---|---|
 | `dist/esm` | the `import` condition — Node, and node-target bundlers | real `fs`/`path`, imported normally |
-| `dist/esm-browser` | the `browser` condition — webpack, Vite, Rollup and friends targeting the web | stubbed to empty modules, as the UMD build does via `resolve.fallback` |
+| `dist/esm-browser` | the `browser` condition — webpack, Vite, Rollup and friends targeting the web | stubbed to empty modules |
 
 The split matters for the handful of APIs that touch the file system —
 `FileWriter`, `ModelWriter.writeModelsToFileSystem` and `ModelLoader`. In the browser
-graph those are inert by construction (they always were: the UMD bundle stubs `fs`
-too); under Node they behave exactly as they do in CommonJS. Nothing in your code
-selects between the graphs — your runtime or bundler does.
+graph those are inert by construction (the `fs` and `path` modules are stubbed); under
+Node they behave exactly as they do in CommonJS. Nothing in your code selects between
+the graphs — your runtime or bundler does.
 
 The `"./dist/*"` subpath is what still permits deep imports at all (it is not removed
 in this release) — it is the compiled *shape* of those modules, described above, that
