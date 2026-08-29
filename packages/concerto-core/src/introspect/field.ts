@@ -23,6 +23,7 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
 /* eslint-disable no-unused-vars */
 import type ClassDeclaration from './classdeclaration';
 import type Validator from './validator';
+import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -36,16 +37,18 @@ import type Validator from './validator';
  * @memberof module:concerto-core
  */
 class Field extends Property {
-    validator: any;
-    defaultValue: any;
-    scalarField: any;
+    // Populated by process(), which the Property constructor calls, so these
+    // carry definite assignment assertions rather than initialisers.
+    validator!: Validator | null;
+    defaultValue!: string | number | boolean | null;
+    scalarField: Field | null;
     /**
      * Create a Field.
      * @param {ClassDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: ClassDeclaration, ast: AstNode) {
         super(parent, ast);
         this.scalarField = null; // cache scalar field
     }
@@ -93,7 +96,7 @@ class Field extends Property {
      * Returns the validator string for this field
      * @return {Validator} the validator for the field or null
      */
-    getValidator() {
+    getValidator(): Validator | null {
         return this.validator;
     }
 
@@ -101,7 +104,7 @@ class Field extends Property {
      * Returns the default value for the field or null if there is no default value
      * @return {string | number} the default value for the field or null
      */
-    getDefaultValue() {
+    getDefaultValue(): string | number | boolean | null {
         return this.defaultValue;
     }
 
@@ -109,7 +112,7 @@ class Field extends Property {
      * Returns a string representation of this property§
      * @return {String} the string version of the property.
      */
-    toString() {
+    toString(): string {
         return (
             'Field {name=' +
             this.name +
@@ -128,7 +131,7 @@ class Field extends Property {
      *
      * @return {boolean} true if the class is a field
      */
-    isField() {
+    isField(): boolean {
         return true;
     }
 
@@ -136,7 +139,7 @@ class Field extends Property {
      * Returns true if the field's type is a scalar
      * @returns {boolean} true if the field is a scalar type
      */
-    isTypeScalar() {
+    isTypeScalar(): boolean {
         if (this.isPrimitive()) {
             return false;
         } else {
@@ -155,7 +158,7 @@ class Field extends Property {
      * @throws {Error} throws an error if this field is not a scalar type.
      * @returns {Field} the primitive field for this scalar
      */
-    getScalarField() {
+    getScalarField(): Field {
         if(this.scalarField) {
             return this.scalarField;
         }

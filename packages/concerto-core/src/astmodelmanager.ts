@@ -13,13 +13,14 @@
  */
 
 import BaseModelManager from './basemodelmanager';
+import type { ModelFileSource, ModelManagerOptions } from './types';
 
 // How to create a modelfile from a cto file
-const astProcessFile = (name, data) => {
+const astProcessFile = (name: string | null, data: unknown): ModelFileSource => {
     return {
         ast: data,
         definitions: null,
-        fileName: name,
+        fileName: name ?? 'UNKNOWN',
     };
 };
 
@@ -42,7 +43,7 @@ class AstModelManager extends BaseModelManager {
      * @constructor
      * @param {object} [options] - Serializer options
      */
-    constructor(options?) {
+    constructor(options?: ModelManagerOptions) {
         super(options, astProcessFile);
     }
 }

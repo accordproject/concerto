@@ -15,6 +15,13 @@
 import ResourceId from './resourceid';
 import Typed from './typed';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type BaseModelManager from '../basemodelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
+/* eslint-enable no-unused-vars */
+
+
 /**
  * Identifiable is an entity with a namespace, type and an identifier.
  * Applications should retrieve instances from {@link Factory}
@@ -25,8 +32,14 @@ import Typed from './typed';
  * @memberof module:concerto-core
  */
 class Identifiable extends Typed {
-    $identifierFieldName: any;
-    $identifier: any;
+    $identifierFieldName: string;
+    // Set via setIdentifier(), called from this constructor rather than
+    // assigned directly, so TS can't see the assignment for definite-assignment
+    // analysis; the field is genuinely absent for non-identified instances.
+    $identifier!: string | undefined;
+    // Genuinely polymorphic at runtime: JSDoc'd as a string, but
+    // Factory#newResource stores a Dayjs instance (or null) here for
+    // Transaction/Event timestamps.
     $timestamp: any;
     /**
      * Create an instance.
@@ -43,7 +56,7 @@ class Identifiable extends Typed {
      * @param {string} timestamp - The timestamp of this instance
      * @protected
      */
-    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id?: string, timestamp?: unknown) {
         super(modelManager, classDeclaration, ns, type);
 
         // Cache the identifier field name

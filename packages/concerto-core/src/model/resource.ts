@@ -14,6 +14,13 @@
 
 import Identifiable from './identifiable';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type BaseModelManager from '../basemodelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
+/* eslint-enable no-unused-vars */
+
+
 /**
  *
  * Resource is an instance that has a type. The type of the resource
@@ -49,7 +56,7 @@ class Resource extends Identifiable {
      * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id?: string, timestamp?: unknown) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
     }
 

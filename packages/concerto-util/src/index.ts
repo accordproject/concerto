@@ -37,6 +37,7 @@ export type { FileLoader } from './loaders/fileloader';
 import Writer from './writer';
 import FileWriter from './filewriter';
 import * as ModelWriter from './modelwriter';
+export type { WritableModelFile, WriteModelsOptions } from './modelwriter';
 import InMemoryWriter from './inmemorywriter';
 
 // Logger

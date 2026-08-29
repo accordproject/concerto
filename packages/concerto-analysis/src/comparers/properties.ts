@@ -224,8 +224,8 @@ const propertyValidatorChanged: ComparerFactory = (context) => ({
                 element: a
             });
             return;
-        } else if (!aValidator.compatibleWith(bValidator)) {
-            const aValidatorType = getValidatorType(aValidator);
+        } else if (!aValidator!.compatibleWith(bValidator)) {
+            const aValidatorType = getValidatorType(aValidator!);
             context.report({
                 key: 'property-validator-changed',
                 message: `A ${aValidatorType} validator for the field "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was changed and is no longer compatible`,
@@ -314,13 +314,13 @@ const propertySizeValidatorChanged: ComparerFactory = (context) => ({
                 message: `A collection size validator was removed from the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}"`,
                 element: a
             });
-        } else if (!aValidator.compatibleWith(bValidator)) {
+        } else if (!aValidator!.compatibleWith(bValidator)) {
             context.report({
                 key: 'property-validator-changed',
                 message: `A collection size validator for the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was changed and is no longer compatible`,
                 element: a
             });
-        } else if (aValidator.getMinSize() !== bValidator.getMinSize() || aValidator.getMaxSize() !== bValidator.getMaxSize()) {
+        } else if (aValidator!.getMinSize() !== bValidator!.getMinSize() || aValidator!.getMaxSize() !== bValidator!.getMaxSize()) {
             context.report({
                 key: 'property-validator-loosened',
                 message: `A collection size validator for the ${getPropertyType(a)} "${a.getName()}" in the ${classDeclarationType} "${a.getParent().getName()}" was loosened`,

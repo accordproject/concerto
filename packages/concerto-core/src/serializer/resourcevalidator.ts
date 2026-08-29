@@ -21,6 +21,11 @@ import ValidationException from './validationexception';
 import Globalize from '../globalize';
 import dayjs from '../dayjs-setup';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { SerializerOptions } from '../types';
+/* eslint-enable no-unused-vars */
+
 /**
  * <p>
  * Validates a Resource or Field against the models defined in the ModelManager.
@@ -40,7 +45,7 @@ import dayjs from '../dayjs-setup';
  * @memberof module:concerto-core
  */
 class ResourceValidator {
-    options: any;
+    options: SerializerOptions;
 
     /**
      * ResourceValidator constructor
@@ -51,7 +56,7 @@ class ResourceValidator {
      * are specified for relationship fields into relationships, false by default.
      * @param {boolean} options.permitResourcesForRelationships - Permit resources in the
      */
-    constructor(options?) {
+    constructor(options?: SerializerOptions) {
         this.options = options || {};
     }
     /**
@@ -514,7 +519,7 @@ class ResourceValidator {
      */
     static reportFieldTypeViolation(id, propName, value, field) {
         let isArray = field.isArray() ? '[]' : '';
-        let typeOfValue = typeof value;
+        let typeOfValue: string = typeof value;
 
         if(value instanceof Identifiable) {
             typeOfValue = value.getFullyQualifiedType();

@@ -18,6 +18,12 @@ import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
+import type { ValidatedElement } from './validator';
+import type { AstNode } from './decorated';
+/* eslint-enable no-unused-vars */
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
 import type Field from './field';
 import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
@@ -29,8 +35,8 @@ import type ScalarDeclaration from './scalardeclaration';
  * @memberof module:concerto-core
  */
 class NumberValidator extends Validator{
-    lowerBound: any;
-    upperBound: any;
+    lowerBound: number | null;
+    upperBound: number | null;
 
     /**
      * Create a NumberValidator.
@@ -39,7 +45,7 @@ class NumberValidator extends Validator{
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, ast) {
+    constructor(field: ValidatedElement, ast: AstNode) {
         super(field, ast);
 
         this.lowerBound = null;
@@ -80,14 +86,14 @@ class NumberValidator extends Validator{
      * Returns the lower bound for this validator, or null if not specified
      * @returns {number} the lower bound or null
      */
-    getLowerBound() {
+    getLowerBound(): number | null {
         return this.lowerBound;
     }
     /**
      * Returns the upper bound for this validator, or null if not specified
      * @returns {number} the upper bound or null
      */
-    getUpperBound() {
+    getUpperBound(): number | null {
         return this.upperBound;
     }
 
@@ -98,7 +104,7 @@ class NumberValidator extends Validator{
      * @throws {IllegalModelException}
      * @private
      */
-    validate(identifier, value) {
+    validate(identifier: string | null, value: number): void {
         if(value !== null) {
             if(this.lowerBound !== null && value < this.lowerBound) {
                 this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
@@ -115,7 +121,7 @@ class NumberValidator extends Validator{
      * @return {string} the string representation
      * @private
      */
-    toString() {
+    toString(): string {
         return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
     }
 
@@ -127,7 +133,7 @@ class NumberValidator extends Validator{
      * @returns {boolean} True if this validator is compatible with the other
      * validator, false otherwise.
      */
-    compatibleWith(other) {
+    compatibleWith(other: Validator | null): boolean {
         if (!(other instanceof NumberValidator)) {
             return false;
         }

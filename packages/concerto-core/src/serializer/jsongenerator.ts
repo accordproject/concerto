@@ -28,11 +28,11 @@ import { NullUtil as Util } from '@accordproject/concerto-util';
  * @memberof module:concerto-core
  */
 class JSONGenerator {
-    convertResourcesToRelationships: any;
-    permitResourcesForRelationships: any;
-    deduplicateResources: any;
-    convertResourcesToId: any;
-    utcOffset: any;
+    convertResourcesToRelationships: boolean | undefined;
+    permitResourcesForRelationships: boolean | undefined;
+    deduplicateResources: boolean | undefined;
+    convertResourcesToId: boolean | undefined;
+    utcOffset: number;
 
     /**
      * Constructor.
@@ -48,7 +48,7 @@ class JSONGenerator {
      * are specified for relationship fields into their id, false by default.
      * @param {number} [utcOffset] UTC Offset for DateTime values.
      */
-    constructor(convertResourcesToRelationships?, permitResourcesForRelationships?, deduplicateResources?, convertResourcesToId?, ergo?, utcOffset?) {
+    constructor(convertResourcesToRelationships?: boolean, permitResourcesForRelationships?: boolean, deduplicateResources?: boolean, convertResourcesToId?: boolean, ergo?: boolean, utcOffset?: number) {
         this.convertResourcesToRelationships = convertResourcesToRelationships;
         this.permitResourcesForRelationships = permitResourcesForRelationships;
         this.deduplicateResources = deduplicateResources;
@@ -142,8 +142,8 @@ class JSONGenerator {
             throw new Error('Expected a Resource, but found ' + obj);
         }
 
-        let result: any = {};
-        let id: any = null;
+        let result: Record<string, unknown> = {};
+        let id: string | null = null;
 
         if (obj.isIdentifiable() && this.deduplicateResources) {
             id = obj.toURI();
@@ -185,7 +185,7 @@ class JSONGenerator {
         const obj = parameters.stack.pop();
         let result;
         if (field.isArray()) {
-            let array: any[] = [];
+            let array: unknown[] = [];
             // Walk the object
             for (let index in obj) {
                 const item = obj[index];
@@ -256,7 +256,7 @@ class JSONGenerator {
         let result;
 
         if (relationshipDeclaration.isArray()) {
-            let array: any[] = [];
+            let array: unknown[] = [];
             // walk the object
             for (let index in obj) {
                 const item = obj[index];

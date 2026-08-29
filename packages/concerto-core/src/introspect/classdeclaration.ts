@@ -26,6 +26,7 @@ import ModelUtil from '../modelutil';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Property from './property';
+import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -40,20 +41,24 @@ import type Property from './property';
  * @memberof module:concerto-core
  */
 class ClassDeclaration extends Declaration {
-    modelFile: any;
-    properties: any;
-    superType: any;
-    superTypeDeclaration: any;
-    idField: any;
-    timestamped: any;
-    abstract: any;
-    type: any;
+    // These are populated by process(), which the Declaration constructor calls,
+    // so they carry definite assignment assertions rather than initialisers --
+    // an initialiser here would run after the base constructor and clobber it.
+    properties!: Property[];
+    superType!: string | null;
+    superTypeDeclaration!: ClassDeclaration | null;
+    idField!: string | null;
+    timestamped!: boolean;
+    abstract!: boolean;
+    type!: string;
+
     /**
      * Returns the kind of declaration
+     * @abstract
      * @return {string} the kind of declaration
      */
     declarationKind(): string {
-        return '';
+        throw new Error('not implemented');
     }
 
     /**
@@ -141,8 +146,7 @@ class ClassDeclaration extends Declaration {
      * @private
      */
     addTimestampField() {
-        const definition: any = {};
-        definition.$class = `${MetaModelNamespace}.DateTimeProperty`;
+        const definition: AstNode = { $class: `${MetaModelNamespace}.DateTimeProperty` };
         definition.name = '$timestamp';
         this.properties.push(new Field(this, definition));
     }
@@ -153,8 +157,7 @@ class ClassDeclaration extends Declaration {
      * @private
      */
     addIdentifierField() {
-        const definition: any = {};
-        definition.$class = `${MetaModelNamespace}.StringProperty`;
+        const definition: AstNode = { $class: `${MetaModelNamespace}.StringProperty` };
         definition.name = '$identifier';
         this.properties.push(new Field(this, definition));
     }
@@ -163,13 +166,13 @@ class ClassDeclaration extends Declaration {
      * Resolve the super type on this class and store it as an internal property.
      * @return {ClassDeclaration} The super type, or null if non specified.
      */
-    _resolveSuperType() {
+    _resolveSuperType(): ClassDeclaration | null {
         if (!this.superType) {
             return null;
         }
         // Clear out any old resolved super types.
         this.superTypeDeclaration = null;
-        let classDecl: any = null;
+        let classDecl: ClassDeclaration;
         if (this.getModelFile().isImportedType(this.superType)) {
             let fqnSuper = this.getModelFile().resolveImport(this.superType);
             classDecl = this.modelFile.getModelManager().getType(fqnSuper);
@@ -307,7 +310,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is abstract
      */
-    isAbstract() {
+    isAbstract(): boolean {
         return this.abstract;
     }
 
@@ -316,7 +319,7 @@ class ClassDeclaration extends Declaration {
      * (system or explicit)
      * @returns {Boolean} true if the class declaration includes an identifier
      */
-    isIdentified() {
+    isIdentified(): boolean {
         return !!(this.getIdentifierFieldName());
     }
 
@@ -325,7 +328,7 @@ class ClassDeclaration extends Declaration {
      * $identifier
      * @returns {Boolean} true if the class declaration includes a system identifier
      */
-    isSystemIdentified() {
+    isSystemIdentified(): boolean {
         return this.getIdentifierFieldName() === '$identifier';
     }
 
@@ -333,7 +336,7 @@ class ClassDeclaration extends Declaration {
      * Returns true if this class declaration declares an explicit identifier
      * @returns {Boolean} true if the class declaration includes an explicit identifier
      */
-    isExplicitlyIdentified() {
+    isExplicitlyIdentified(): boolean {
         return (!!this.idField && this.idField !== '$identifier');
     }
 
@@ -343,20 +346,22 @@ class ClassDeclaration extends Declaration {
      *
      * @return {string} the name of the id field for this class or null if it does not exist
      */
-    getIdentifierFieldName() {
+    getIdentifierFieldName(): string | null {
         if (this.idField) {
             return this.idField;
         } else {
-            if (this.getSuperType()) {
+            const superType = this.getSuperType();
+            if (superType) {
                 // we first check our own modelfile, as we may be called from validate
                 // in which case our model file has not yet been added to the model modelManager
-                let classDecl = this.getModelFile().getLocalType(this.getSuperType());
+                let classDecl = this.getModelFile().getLocalType(superType);
 
-                // not a local type, so we try the model manager
+                // not a local type, so we try the model manager, which throws
+                // if the super type cannot be resolved
                 if (!classDecl) {
-                    classDecl = this.modelFile.getModelManager().getType(this.getSuperType());
+                    classDecl = this.modelFile.getModelManager().getType(superType);
                 }
-                return classDecl.getIdentifierFieldName();
+                return classDecl!.getIdentifierFieldName();
             } else {
                 return null;
             }
@@ -371,7 +376,7 @@ class ClassDeclaration extends Declaration {
      * @param {string} name the name of the field
      * @return {Property} the field definition or null if it does not exist
      */
-    getOwnProperty(name) {
+    getOwnProperty(name: string): Property | null {
         for (let n = 0; n < this.properties.length; n++) {
             const field = this.properties[n];
             if (field.getName() === name) {
@@ -387,7 +392,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {Property[]} the array of fields
      */
-    getOwnProperties() {
+    getOwnProperties(): Property[] {
         return this.properties;
     }
 
@@ -397,7 +402,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {string} the FQN name of the super type or null
      */
-    getSuperType() {
+    getSuperType(): string | null {
         const superTypeDeclaration = this.getSuperTypeDeclaration();
         if (superTypeDeclaration) {
             return superTypeDeclaration.getFullyQualifiedName();
@@ -410,7 +415,7 @@ class ClassDeclaration extends Declaration {
      * Get the super type class declaration for this class.
      * @return {ClassDeclaration} the super type declaration, or null if there is no super type.
      */
-    getSuperTypeDeclaration() {
+    getSuperTypeDeclaration(): ClassDeclaration | null {
         if (!this.superType) {
             // No super type.
             return null;
@@ -427,15 +432,15 @@ class ClassDeclaration extends Declaration {
      * Get the class declarations for all subclasses of this class, including this class.
      * @return {ClassDeclaration[]} subclass declarations.
      */
-    getAssignableClassDeclarations() {
-        const results = new Set<any>();
+    getAssignableClassDeclarations(): ClassDeclaration[] {
+        const results = new Set<ClassDeclaration>();
         const modelManager = this.getModelFile().getModelManager();
         const introspector = new Introspector(modelManager);
         const allClassDeclarations = introspector.getClassDeclarations();
         const subclassMap = new Map();
 
         // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration: any) => {
+        allClassDeclarations.forEach((declaration) => {
             const superType = declaration.getSuperType();
             if (superType) {
                 const subclasses = subclassMap.get(superType) || new Set();
@@ -465,14 +470,14 @@ class ClassDeclaration extends Declaration {
      * Get the class declarations for just the direct subclasses of this class, excluding this class.
      * @return {ClassDeclaration[]} direct subclass declarations.
      */
-    getDirectSubclasses() {
+    getDirectSubclasses(): ClassDeclaration[] {
         const modelManager = this.getModelFile().getModelManager();
         const introspector = new Introspector(modelManager);
         const allClassDeclarations = introspector.getClassDeclarations();
         const subclassMap = new Map();
 
         // Build map of all direct subclasses relationships
-        allClassDeclarations.forEach((declaration: any) => {
+        allClassDeclarations.forEach((declaration) => {
             const superType = declaration.getSuperType();
             if (superType) {
                 const subclasses = subclassMap.get(superType) || new Set();
@@ -494,9 +499,9 @@ class ClassDeclaration extends Declaration {
      * Get all the super-type declarations for this type.
      * @return {ClassDeclaration[]} super-type declarations.
      */
-    getAllSuperTypeDeclarations() {
-        const results: any[] = [];
-        for (let type = this;
+    getAllSuperTypeDeclarations(): ClassDeclaration[] {
+        const results: ClassDeclaration[] = [];
+        for (let type: ClassDeclaration | null = this;
             (type = type.getSuperTypeDeclaration());) {
             results.push(type);
         }
@@ -511,9 +516,9 @@ class ClassDeclaration extends Declaration {
      * @param {string} name the name of the field
      * @return {Property} the field, or null if it does not exist
      */
-    getProperty(name) {
+    getProperty(name: string): Property | null {
         let result = this.getOwnProperty(name);
-        let classDecl: any = null;
+        let classDecl: ClassDeclaration;
 
         if (result === null && this.superType !== null) {
             if (this.getModelFile().isImportedType(this.superType)) {
@@ -533,9 +538,9 @@ class ClassDeclaration extends Declaration {
      *
      * @return {Property[]} the array of fields
      */
-    getProperties() {
+    getProperties(): Property[] {
         let result = this.getOwnProperties();
-        let classDecl: any = null;
+        let classDecl: ClassDeclaration;
         if (this.superType !== null) {
             if (this.getModelFile().isImportedType(this.superType)) {
                 let fqnSuper = this.getModelFile().resolveImport(this.superType);
@@ -564,22 +569,26 @@ class ClassDeclaration extends Declaration {
      * @returns {Property} the property
      * @throws {IllegalModelException} if the property path is invalid or the property does not exist
      */
-    getNestedProperty(propertyPath) {
+    getNestedProperty(propertyPath: string): Property {
 
         const propertyNames = propertyPath.split('.');
-        let classDeclaration = this;
-        let result: any = null;
+        let classDeclaration: ClassDeclaration = this;
+        // propertyPath.split() always yields at least one name, so the loop below
+        // either assigns result or throws
+        let result!: Property;
 
         for (let n = 0; n < propertyNames.length; n++) {
 
             // get the nth property
-            result = classDeclaration.getProperty(propertyNames[n]);
+            const property = classDeclaration.getProperty(propertyNames[n]);
 
-            if (result === null) {
+            if (property === null) {
                 throw new IllegalModelException('Property ' + propertyNames[n] + ' does not exist on ' + classDeclaration.getFullyQualifiedName(), this.modelFile, this.ast.location);
             }
+            result = property;
+
             // not the last element, get the class of the element
-            else if (n < propertyNames.length - 1) {
+            if (n < propertyNames.length - 1) {
                 if (result.isPrimitive() || result.isTypeEnum()) {
                     throw new Error('Property ' + propertyNames[n] + ' is a primitive or enum. Invalid property path: ' + propertyPath);
                 } else {
@@ -596,7 +605,7 @@ class ClassDeclaration extends Declaration {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string {
         let superType = '';
         if (this.superType) {
             superType = ' super=' + this.superType;
@@ -609,7 +618,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isAsset() {
+    isAsset(): boolean {
         return this.type === `${MetaModelNamespace}.AssetDeclaration`;
     }
 
@@ -618,7 +627,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isParticipant() {
+    isParticipant(): boolean {
         return this.type === `${MetaModelNamespace}.ParticipantDeclaration`;
     }
 
@@ -627,7 +636,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isTransaction() {
+    isTransaction(): boolean {
         return this.type === `${MetaModelNamespace}.TransactionDeclaration`;
     }
 
@@ -636,7 +645,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isEvent() {
+    isEvent(): boolean {
         return this.type === `${MetaModelNamespace}.EventDeclaration`;
     }
 
@@ -645,7 +654,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isConcept() {
+    isConcept(): boolean {
         return this.type === `${MetaModelNamespace}.ConceptDeclaration`;
     }
 
@@ -654,7 +663,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isEnum() {
+    isEnum(): boolean {
         return this.type === `${MetaModelNamespace}.EnumDeclaration`;
     }
 
@@ -663,7 +672,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isMapDeclaration() {
+    isMapDeclaration(): boolean {
         return this.type === `${MetaModelNamespace}.MapDeclaration`;
     }
 
@@ -672,7 +681,7 @@ class ClassDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is an asset
      */
-    isClassDeclaration() {
+    isClassDeclaration(): boolean {
         return true;
     }
 }

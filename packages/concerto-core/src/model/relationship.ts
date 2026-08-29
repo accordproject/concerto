@@ -15,7 +15,7 @@
 import Identifiable from './identifiable';
 import ModelUtil from '../modelutil';
 import ResourceId from './resourceid';
-import type ModelManager from '../modelmanager';
+import type BaseModelManager from '../basemodelmanager';
 import type ClassDeclaration from '../introspect/classdeclaration';
 
 /**
@@ -32,7 +32,7 @@ import type ClassDeclaration from '../introspect/classdeclaration';
  * @memberof module:concerto-core
  */
 class Relationship extends Identifiable {
-    $class: any;
+    $class: 'Relationship';
     /**
      * Create an asset. Use the Factory to create instances.
      * <p>
@@ -48,7 +48,7 @@ class Relationship extends Identifiable {
      * @param {string} timestamp - The timestamp of this instance
      * @private
      */
-    constructor(modelManager: ModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp?: string) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id: string, timestamp?: string) {
         super(modelManager, classDeclaration, ns, type, id, timestamp);
         // we use this metatag to identify the instance as a relationship
         this.$class = 'Relationship';

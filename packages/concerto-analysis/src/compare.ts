@@ -139,7 +139,9 @@ export class Compare {
 
     private compareModelFiles(comparers: Comparer[], a: ModelFile, b: ModelFile) {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
-        this.compareClassDeclarations(comparers, a.getAllDeclarations(), b.getAllDeclarations());
+        // every declaration is put through the class declaration comparers; map and
+        // scalar declarations are additionally compared by the calls below
+        this.compareClassDeclarations(comparers, a.getAllDeclarations() as ClassDeclaration[], b.getAllDeclarations() as ClassDeclaration[]);
         this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
         this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());
     }

@@ -34,7 +34,11 @@ import dayjs from './dayjs-setup';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-import type ModelManager from './modelmanager';
+import type BaseModelManager from './basemodelmanager';
+import type ClassDeclaration from './introspect/classdeclaration';
+import type Typed from './model/typed';
+import type { Dayjs } from 'dayjs';
+import type { GenerateOptions, InstanceGeneratorParameters } from './types';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -45,7 +49,7 @@ import type ModelManager from './modelmanager';
  * @memberof module:concerto-core
  */
 class Factory {
-    modelManager: any;
+    modelManager: BaseModelManager;
     /**
      * Create a new ID for an object.
      * @returns {string} a new ID
@@ -59,7 +63,7 @@ class Factory {
      *
      * @param {ModelManager} modelManager - The ModelManager to use for this registry
      */
-    constructor(modelManager) {
+    constructor(modelManager: BaseModelManager) {
         this.modelManager = modelManager;
     }
 
@@ -129,8 +133,8 @@ class Factory {
             throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
         }
 
-        let newObj: any = null;
-        let timestamp: any = null;
+        let newObj: Resource;
+        let timestamp: Dayjs | null = null;
         if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
         }
@@ -214,7 +218,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let transaction: any = this.newResource(ns, type, id, options);
+        const transaction = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
 
         if (!classDeclaration.isTransaction()) {
@@ -244,7 +248,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let event: any = this.newResource(ns, type, id, options);
+        const event = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
 
         if (!classDeclaration.isEvent()) {
@@ -263,8 +267,8 @@ class Factory {
      * @param {ClassDeclaration} classDeclaration - class declaration for the resource.
      * @param {Object} clientOptions - field generation options supplied by the caller.
      */
-    initializeNewObject(newObject, classDeclaration, clientOptions) {
-        const generateParams: any = this.parseGenerateOptions(clientOptions);
+    initializeNewObject(newObject: Typed, classDeclaration: ClassDeclaration, clientOptions: GenerateOptions) {
+        const generateParams = this.parseGenerateOptions(clientOptions);
         if (generateParams) {
             generateParams.stack = new TypedStack(newObject);
             generateParams.seen = [newObject.getFullyQualifiedType()];
@@ -282,23 +286,22 @@ class Factory {
      * @param {Object} clientOptions - field generation options supplied by the caller.
      * @return {Object} InstanceGenerator options.
      */
-    parseGenerateOptions(clientOptions) {
+    parseGenerateOptions(clientOptions: GenerateOptions): InstanceGeneratorParameters | null {
         if (!clientOptions.generate) {
             return null;
         }
 
-        const generateParams: any = { };
-        generateParams.modelManager = this.modelManager;
-        generateParams.factory = this;
-
-        if ((/^empty$/i).test(clientOptions.generate)) {
-            generateParams.valueGenerator = ValueGeneratorFactory.empty();
-        } else {
+        const valueGenerator = (/^empty$/i).test(clientOptions.generate)
+            ? ValueGeneratorFactory.empty()
             // Allow any other value for backwards compatibility with previous (truthy) behavior
-            generateParams.valueGenerator = ValueGeneratorFactory.sample();
-        }
+            : ValueGeneratorFactory.sample();
 
-        generateParams.includeOptionalFields = clientOptions.includeOptionalFields ? true : false;
+        const generateParams: InstanceGeneratorParameters = {
+            modelManager: this.modelManager,
+            factory: this,
+            valueGenerator,
+            includeOptionalFields: clientOptions.includeOptionalFields ? true : false,
+        };
 
         return generateParams;
     }

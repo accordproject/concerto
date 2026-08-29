@@ -15,7 +15,8 @@
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ClassDeclaration from './classdeclaration';
-import type ModelManager from '../modelmanager';
+import type Declaration from './declaration';
+import type BaseModelManager from '../basemodelmanager';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -26,12 +27,12 @@ import type ModelManager from '../modelmanager';
  * @memberof module:concerto-core
  */
 class Introspector {
-    modelManager: any;
+    modelManager: BaseModelManager;
     /**
      * Create the Introspector.
      * @param {ModelManager} modelManager - the ModelManager that backs this Introspector
      */
-    constructor(modelManager) {
+    constructor(modelManager: BaseModelManager) {
         this.modelManager = modelManager;
     }
 
@@ -49,14 +50,14 @@ class Introspector {
      * Returns all the class declarations for the business network.
      * @return {ClassDeclaration[]} the array of class declarations
      */
-    getClassDeclarations() {
-        let result = [];
+    getClassDeclarations(): ClassDeclaration[] {
+        let result: ClassDeclaration[] = [];
         const modelFiles = this.modelManager.getModelFiles();
         for(let n=0; n < modelFiles.length; n++) {
             const modelFile = modelFiles[n];
 
             const filteredDeclarations = modelFile.getAllDeclarations()
-                .filter(declaration =>  !declaration.isMapDeclaration?.() && !declaration.isScalarDeclaration?.());
+                .filter((declaration: Declaration) => !declaration.isMapDeclaration?.() && !declaration.isScalarDeclaration?.()) as ClassDeclaration[];
 
             result = result.concat(filteredDeclarations);
         }
@@ -70,7 +71,7 @@ class Introspector {
      * @return {ClassDeclaration} the class declaration
      * @throws {Error} if the class declaration does not exist
      */
-    getClassDeclaration(fullyQualifiedTypeName) {
+    getClassDeclaration(fullyQualifiedTypeName: string): ClassDeclaration {
         return this.modelManager.getType(fullyQualifiedTypeName);
     }
 
@@ -79,7 +80,7 @@ class Introspector {
      * @return {ModelManager} the backing ModelManager
      * @private
      */
-    getModelManager() {
+    getModelManager(): BaseModelManager {
         return this.modelManager;
     }
 }

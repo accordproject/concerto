@@ -22,6 +22,7 @@ import IllegalModelException from './illegalmodelexception';
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 import type MapDeclaration from './mapdeclaration';
+import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -33,9 +34,10 @@ import type MapDeclaration from './mapdeclaration';
  * @memberof module:concerto-core
  */
 class MapKeyType extends Decorated {
-    parent: any;
-    modelFile: any;
-    type: any;
+    parent: MapDeclaration;
+    modelFile: ModelFile;
+    // Populated by process(), which this class's constructor calls.
+    type!: string;
     /**
      * Create an MapKeyType.
      * @param {MapDeclaration} parent - The owner of this property
@@ -43,7 +45,7 @@ class MapKeyType extends Decorated {
      * @param {ModelFile} modelFile - the ModelFile for the Map class
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: MapDeclaration, ast: AstNode) {
         super(ast);
         this.parent = parent;
         this.modelFile = parent.getModelFile();
@@ -85,7 +87,7 @@ class MapKeyType extends Decorated {
      * @param {Object} ast - The AST created by the parser
      * @private
      */
-    processType(ast) {
+    processType(ast: AstNode) {
         switch(ast.$class) {
         case `${MetaModelNamespace}.DateTimeMapKeyType`:
             this.type = 'DateTime';
@@ -105,7 +107,7 @@ class MapKeyType extends Decorated {
      * @public
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         return this.parent.getModelFile();
     }
 
@@ -114,7 +116,7 @@ class MapKeyType extends Decorated {
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
-    getParent() {
+    getParent(): MapDeclaration {
         return this.parent;
     }
 
@@ -124,7 +126,7 @@ class MapKeyType extends Decorated {
      *
      * @return {string} the short name of this class
      */
-    getType() {
+    getType(): string {
         return this.type;
     }
 
@@ -132,7 +134,7 @@ class MapKeyType extends Decorated {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string {
         return 'MapKeyType {id=' + this.getType() + '}';
     }
 
@@ -141,7 +143,7 @@ class MapKeyType extends Decorated {
      *
      * @return {boolean} true if the class is a Map Key
      */
-    isKey() {
+    isKey(): boolean {
         return true;
     }
 
@@ -150,7 +152,7 @@ class MapKeyType extends Decorated {
      *
      * @return {boolean} true if the class is a Map Value
      */
-    isValue() {
+    isValue(): boolean {
         return false;
     }
 
@@ -158,7 +160,7 @@ class MapKeyType extends Decorated {
      * Return the namespace of this map key.
      * @return {string} namespace - a namespace.
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.modelFile.getNamespace();
     }
 }

@@ -15,6 +15,12 @@
 import { NullUtil } from '@accordproject/concerto-util';
 import Validator from './validator';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { ValidatedElement } from './validator';
+import type { AstNode } from './decorated';
+/* eslint-enable no-unused-vars */
+
 const { isNull } = NullUtil;
 
 /**
@@ -24,8 +30,8 @@ const { isNull } = NullUtil;
  * @memberof module:concerto-core
  */
 class CollectionSizeValidator extends Validator {
-    minSize: any;
-    maxSize: any;
+    minSize: number | null;
+    maxSize: number | null;
 
     /**
      * Create a CollectionSizeValidator.
@@ -34,14 +40,14 @@ class CollectionSizeValidator extends Validator {
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, validator) {
+    constructor(field: ValidatedElement, validator: AstNode) {
         super(field, validator);
         this.minSize = validator.minSize ?? null;
         this.maxSize = validator.maxSize ?? null;
 
         if (isNull(this.minSize) && isNull(this.maxSize)) {
             this.reportError(field.getName(), 'Invalid collection size, minSize and/or maxSize must be specified.');
-        } else if (this.minSize < 0 || this.maxSize < 0) {
+        } else if ((this.minSize ?? 0) < 0 || (this.maxSize ?? 0) < 0) {
             this.reportError(field.getName(), 'minSize and/or maxSize must be positive integers.');
         } else if (isNull(this.minSize) || isNull(this.maxSize)) {
             // this is fine and means that we don't need to check whether minSize > maxSize
@@ -57,7 +63,7 @@ class CollectionSizeValidator extends Validator {
      * @throws {IllegalModelException}
      * @private
      */
-    validate(identifier, value) {
+    validate(identifier: string | null, value: number): void {
         if(!isNull(this.minSize) && value < this.minSize) {
             this.reportError(identifier, `Collection must contain at least ${this.minSize} elements.`);
         }
@@ -70,7 +76,7 @@ class CollectionSizeValidator extends Validator {
      * Returns the minSize for this validator, or null if not specified
      * @returns {number} the min size or null
      */
-    getMinSize() {
+    getMinSize(): number | null {
         return this.minSize;
     }
 
@@ -78,7 +84,7 @@ class CollectionSizeValidator extends Validator {
      * Returns the maxSize for this validator, or null if not specified
      * @returns {number} the max size or null
      */
-    getMaxSize() {
+    getMaxSize(): number | null {
         return this.maxSize;
     }
 
@@ -90,7 +96,7 @@ class CollectionSizeValidator extends Validator {
      * @returns {boolean} True if this validator is compatible with the other
      * validator, false otherwise.
      */
-    compatibleWith(other) {
+    compatibleWith(other: Validator | null): boolean {
         if (!(other instanceof CollectionSizeValidator)) {
             return false;
         }

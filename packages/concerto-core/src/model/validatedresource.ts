@@ -15,6 +15,11 @@
 import { TypedStack } from '@accordproject/concerto-util';
 import Resource from './resource';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type ResourceValidator from '../serializer/resourcevalidator';
+/* eslint-enable no-unused-vars */
+
 /**
  * ValidatedResource is a Resource that can validate that property
  * changes (or the whole instance) do not violate the structure of
@@ -25,7 +30,7 @@ import Resource from './resource';
  * @memberof module:concerto-core
  */
 class ValidatedResource extends Resource {
-    $validator: any;
+    $validator: ResourceValidator;
     /**
      * This constructor should not be called directly.
      * Use the Factory class to create instances.
@@ -97,15 +102,16 @@ class ValidatedResource extends Resource {
                 propName + ' which is not declared as an array in the model.');
         }
 
-        const parameters:any = {};
-        let newArray: any[] = [];
+        let newArray: unknown[] = [];
         if(this[propName]) {
             newArray = this[propName].slice(0);
         }
         newArray.push(value);
-        parameters.stack = new TypedStack(newArray);
-        parameters.modelManager = this.getModelManager();
-        parameters.rootResourceIdentifier = this.getFullyQualifiedIdentifier();
+        const parameters = {
+            stack: new TypedStack(newArray),
+            modelManager: this.getModelManager(),
+            rootResourceIdentifier: this.getFullyQualifiedIdentifier(),
+        };
         field.accept(this.$validator, parameters);
         super.addArrayValue(propName, value);
     }

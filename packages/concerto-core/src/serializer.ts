@@ -29,7 +29,9 @@ const baseDefaultOptions = {
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type Factory from './factory';
-import type ModelManager from './modelmanager';
+import type BaseModelManager from './basemodelmanager';
+import type { SerializerOptions } from './types';
+import type { JsonPopulatorParameters } from './serializer/jsonpopulator';
 import type Resource from './model/resource';
 /* eslint-enable no-unused-vars */
 
@@ -41,16 +43,16 @@ import type Resource from './model/resource';
  * @memberof module:concerto-core
  */
 class Serializer {
-    factory: any;
-    modelManager: any;
-    defaultOptions: any;
+    factory: Factory;
+    modelManager: BaseModelManager;
+    defaultOptions: SerializerOptions;
     /**
      * Create a Serializer.
      * @param {Factory} factory - The Factory to use to create instances
      * @param {ModelManager} modelManager - The ModelManager to use for validation etc.
      * @param {object} [options] - Serializer options
      */
-    constructor(factory, modelManager, options?) {
+    constructor(factory: Factory, modelManager: BaseModelManager, options?: SerializerOptions) {
         if(!factory) {
             throw new Error(Globalize.formatMessage('serializer-constructor-factorynull'));
         } else if(!modelManager) {
@@ -66,7 +68,7 @@ class Serializer {
      * Set the default options for the serializer.
      * @param {Object} newDefaultOptions The new default options for the serializer.
      */
-    setDefaultOptions(newDefaultOptions) {
+    setDefaultOptions(newDefaultOptions: SerializerOptions) {
         // Combine the specified default options with the base default
         this.defaultOptions = Object.assign({}, baseDefaultOptions, newDefaultOptions);
     }
@@ -100,11 +102,12 @@ class Serializer {
             throw new Error(Globalize.formatMessage('serializer-tojson-notcobject'));
         }
 
-        const parameters: any = {};
-        parameters.stack = new TypedStack(resource);
-        parameters.modelManager = this.modelManager;
-        parameters.seenResources = new Set();
-        parameters.dedupeResources = new Set();
+        const parameters = {
+            stack: new TypedStack(resource),
+            modelManager: this.modelManager,
+            seenResources: new Set(),
+            dedupeResources: new Set(),
+        };
         const classDeclaration = this.modelManager.getType( resource.getFullyQualifiedType() );
 
         // validate the resource against the model
@@ -184,11 +187,12 @@ class Serializer {
 
         // populate the resource based on the jsonObject
         // by walking the classDeclaration
-        const parameters: any = {};
-        parameters.jsonStack = new TypedStack(jsonObject);
-        parameters.resourceStack = new TypedStack(resource);
-        parameters.modelManager = this.modelManager;
-        parameters.factory = this.factory;
+        const parameters: JsonPopulatorParameters = {
+            jsonStack: new TypedStack(jsonObject),
+            resourceStack: new TypedStack(resource),
+            modelManager: this.modelManager,
+            factory: this.factory,
+        };
         const populator = new JSONPopulator(options.acceptResourcesForRelationships === true, false, options.utcOffset, options.strictQualifiedDateTimes === true);
         classDeclaration.accept(populator, parameters);
 

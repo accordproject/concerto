@@ -186,7 +186,8 @@ class Vocabulary {
         };
 
         const checkPropertyExists = (k: any, p: any) => {
-            const declaration = modelFile.getLocalType(Object.keys(k)[0]);
+            // only reached for keys that getLocalType has already resolved
+            const declaration = modelFile.getLocalType(Object.keys(k)[0]) as ClassDeclaration;
             const property = Object.keys(p)[0];
             if(declaration.isMapDeclaration()) {
                 if (property === 'KEY') {
@@ -202,7 +203,7 @@ class Vocabulary {
         };
 
         const result = {
-            missingTerms: modelFile.getAllDeclarations().flatMap( (d: ClassDeclaration) => this.getTerm(d.getName())
+            missingTerms: (modelFile.getAllDeclarations() as ClassDeclaration[]).flatMap( (d: ClassDeclaration) => this.getTerm(d.getName())
                 ? getOwnProperties(d).flatMap( (p: Property) => this.getTerm(d.getName(), getPropertyName(p)) ? null : `${d.getName()}.${getPropertyName(p)}`)
                 : d.getName() ).filter( (i: any) => i !== null),
             additionalTerms: this.content.declarations.flatMap( (k: any) => modelFile.getLocalType(Object.keys(k)[0])

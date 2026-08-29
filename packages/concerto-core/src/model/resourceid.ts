@@ -28,9 +28,9 @@ const RESOURCE_SCHEME = 'resource';
  * @property {String} id
  */
 class ResourceId {
-    namespace: any;
-    type: any;
-    id: any;
+    namespace: string;
+    type: string;
+    id: string;
     /**
      * <strong>Note: only for use by internal framework code.</strong>
      * @param {String} namespace - Namespace containing the type.

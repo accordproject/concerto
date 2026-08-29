@@ -76,4 +76,17 @@ describe('Declaration', () => {
             should.equal(declaration.toString(), null);
         });
     });
+
+    describe('declaration kind predicates', () => {
+        it('should all be false on the base class', () => {
+            declaration.isAsset().should.equal(false);
+            declaration.isParticipant().should.equal(false);
+            declaration.isTransaction().should.equal(false);
+            declaration.isEvent().should.equal(false);
+            declaration.isConcept().should.equal(false);
+            declaration.isEnum().should.equal(false);
+            declaration.isClassDeclaration().should.equal(false);
+            declaration.isScalarDeclaration().should.equal(false);
+        });
+    });
 });
