@@ -65,11 +65,10 @@ class Decorator {
     /**
     * Handles a validation error, logging and throwing as required
     * @param {string} level the log level
-    * @param {*} err the error to log
-    * @param {*} [fileLocation] the file location
+    * @param {string | Error} err the message to log, or the error that was caught
     * @private
     */
-    handleError(level: string | undefined, err: unknown): void {
+    handleError(level: string | undefined, err: string | Error): void {
         Logger.dispatch(level as string, err);
         if (level === 'error') {
             throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
@@ -206,7 +205,7 @@ class Decorator {
                 }
             }
             catch (err) {
-                this.handleError(validationOptions.missingDecorator, err);
+                this.handleError(validationOptions.missingDecorator, err as Error);
             }
         }
     }

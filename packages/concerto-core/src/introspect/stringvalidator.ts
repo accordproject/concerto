@@ -19,7 +19,7 @@ import Validator from './validator';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type { ValidatedElement } from './validator';
-import type { AstNode } from './decorated';
+import type { IStringLengthValidator, IStringRegexValidator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
 // Types needed for TypeScript generation.
@@ -35,6 +35,7 @@ import type ScalarDeclaration from './scalardeclaration';
  * @memberof module:concerto-core
  */
 class StringValidator extends Validator{
+    declare validator: IStringRegexValidator | undefined;
     // The metamodel makes both bounds optional, so an AST can leave either
     // absent as well as explicitly null.
     minLength: number | null | undefined;
@@ -49,7 +50,7 @@ class StringValidator extends Validator{
      *
      * @throws {IllegalModelException}
      */
-    constructor(field: ValidatedElement, validator: AstNode, lengthValidator?: AstNode) {
+    constructor(field: ValidatedElement, validator?: IStringRegexValidator, lengthValidator?: IStringLengthValidator) {
         super(field, validator);
         this.minLength = null;
         this.maxLength = null;

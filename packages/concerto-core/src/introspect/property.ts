@@ -23,7 +23,6 @@ import CollectionSizeValidator from './collectionsizevalidator';
 /* eslint-disable no-unused-vars */
 import type ClassDeclaration from './classdeclaration';
 import type ModelFile from './modelfile';
-import type Decorator from './decorator';
 import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
@@ -41,10 +40,6 @@ class Property extends Decorated {
     // carry definite assignment assertions rather than initialisers -- an
     // initialiser here would run before process() and be overwritten anyway.
     name!: string;
-    /**
-     * Vestigial: only ever set to null, never read. Retained for compatibility.
-     */
-    decorator!: Decorator | null;
     type!: string | null;
     array!: boolean;
     sizeValidator!: CollectionSizeValidator | null;
@@ -92,7 +87,6 @@ class Property extends Decorated {
         }
 
         this.name = this.ast.name;
-        this.decorator = null;
 
         if(!this.name) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));

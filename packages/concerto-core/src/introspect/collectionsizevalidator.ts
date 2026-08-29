@@ -18,7 +18,7 @@ import Validator from './validator';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type { ValidatedElement } from './validator';
-import type { AstNode } from './decorated';
+import type { ICollectionSizeValidator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
 
 const { isNull } = NullUtil;
@@ -30,6 +30,7 @@ const { isNull } = NullUtil;
  * @memberof module:concerto-core
  */
 class CollectionSizeValidator extends Validator {
+    declare validator: ICollectionSizeValidator;
     minSize: number | null;
     maxSize: number | null;
 
@@ -40,7 +41,7 @@ class CollectionSizeValidator extends Validator {
      *
      * @throws {IllegalModelException}
      */
-    constructor(field: ValidatedElement, validator: AstNode) {
+    constructor(field: ValidatedElement, validator: ICollectionSizeValidator) {
         super(field, validator);
         this.minSize = validator.minSize ?? null;
         this.maxSize = validator.maxSize ?? null;

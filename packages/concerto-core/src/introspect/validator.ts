@@ -18,8 +18,31 @@ import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
 /* eslint-disable no-unused-vars */
 import type Property from './property';
 import type ScalarDeclaration from './scalardeclaration';
-import type { AstNode } from './decorated';
+import type {
+    ICollectionSizeValidator,
+    IDoubleDomainValidator,
+    IIntegerDomainValidator,
+    ILongDomainValidator,
+    IStringLengthValidator,
+    IStringRegexValidator,
+} from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
+
+/**
+ * The numeric range validators, which share a shape across the three numeric
+ * primitive types.
+ */
+export type NumberDomainValidatorAst = IIntegerDomainValidator | ILongDomainValidator | IDoubleDomainValidator;
+
+/**
+ * The metamodel nodes a Validator is built from. Subclasses narrow this to the
+ * single node kind they handle.
+ */
+export type ValidatorAst =
+    | ICollectionSizeValidator
+    | IStringRegexValidator
+    | IStringLengthValidator
+    | NumberDomainValidatorAst;
 
 /**
  * The model elements a Validator can be attached to: a Property (in practice a
@@ -36,7 +59,7 @@ export type ValidatedElement = Property | ScalarDeclaration;
  * @memberof module:concerto-core
  */
 class Validator {
-    validator: AstNode;
+    validator: ValidatorAst | undefined;
     field: ValidatedElement;
     /**
      * Create a Property.
@@ -44,7 +67,7 @@ class Validator {
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
-    constructor(field: ValidatedElement, validator: AstNode) {
+    constructor(field: ValidatedElement, validator: ValidatorAst | undefined) {
         this.validator = validator;
         this.field = field;
     }

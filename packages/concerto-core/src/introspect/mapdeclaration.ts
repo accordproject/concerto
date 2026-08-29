@@ -71,7 +71,7 @@ class MapDeclaration extends Declaration {
             throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
         }
 
-        // name and fqn are already set by Declaration.process() above
+        // super.process() has already set name and fqn from this.ast.name
         this.key = new MapKeyType(this, this.ast.key);
         this.value = new MapValueType(this, this.ast.value);
     }

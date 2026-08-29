@@ -18,8 +18,7 @@ import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-import type { ValidatedElement } from './validator';
-import type { AstNode } from './decorated';
+import type { ValidatedElement, NumberDomainValidatorAst } from './validator';
 /* eslint-enable no-unused-vars */
 
 // Types needed for TypeScript generation.
@@ -35,6 +34,7 @@ import type ScalarDeclaration from './scalardeclaration';
  * @memberof module:concerto-core
  */
 class NumberValidator extends Validator{
+    declare validator: NumberDomainValidatorAst;
     lowerBound: number | null;
     upperBound: number | null;
 
@@ -45,18 +45,19 @@ class NumberValidator extends Validator{
      *
      * @throws {IllegalModelException}
      */
-    constructor(field: ValidatedElement, ast: AstNode) {
+    constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
 
         this.lowerBound = null;
         this.upperBound = null;
 
+        // the hasOwnProperty guards establish that the bound is present
         if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
-            this.lowerBound = ast.lower;
+            this.lowerBound = ast.lower as number;
         }
 
         if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
-            this.upperBound = ast.upper;
+            this.upperBound = ast.upper as number;
         }
 
         if(this.lowerBound === null && this.upperBound === null) {

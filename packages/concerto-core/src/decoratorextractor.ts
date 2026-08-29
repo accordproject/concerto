@@ -498,7 +498,7 @@ class DecoratorExtractor {
     */
     processModels(){
         const processedModels = this.sourceModelAst.models.map(model =>{
-            if (model?.decorators?.length) {
+            if ((model?.decorators?.length ?? 0) > 0) {
                 this.constructDCSDictionary(model.namespace, model.decorators, {});
                 model.decorators = this.filterOutDecorators(model.decorators);
             }
