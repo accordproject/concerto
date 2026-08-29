@@ -1174,6 +1174,63 @@ concept Bar {
         });
     });
 
+    describe('#getAssignableConcreteTypes', () => {
+
+        it('should get assignable concrete types for an abstract base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.Person');
+            result.length.should.equal(3);
+            result.map(d => d.getName()).should.include.members(['Employee', 'Manager', 'Customer']);
+        });
+
+        it('should get assignable concrete types for a concrete base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.Employee');
+            result.length.should.equal(1);
+            result[0].getName().should.equal('Employee');
+        });
+
+        it('should return empty array for an absent base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.getAssignableConcreteTypes('org.accordproject.test@1.0.0.DoesNotExist');
+            result.length.should.equal(0);
+        });
+
+    });
+
+    describe('#isAssignableTo', () => {
+
+        it('should return true when fqn is a subclass of the base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Employee', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.true;
+        });
+
+        it('should return true when fqn is the same concrete base type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Employee', 'org.accordproject.test@1.0.0.Employee');
+            result.should.be.true;
+        });
+
+        it('should return false when fqn is abstract', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Person', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
+        });
+
+        it('should return false for unrelated types', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.Product', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
+        });
+
+        it('should return false for an absent candidate type', () => {
+            modelManager.addCTOModel(concertoModel);
+            const result = modelManager.isAssignableTo('org.accordproject.test@1.0.0.DoesNotExist', 'org.accordproject.test@1.0.0.Person');
+            result.should.be.false;
+        });
+    });
+
     describe('#filter', () => {
         it('should return true for a valid ModelManager', () => {
             modelManager.addModelFiles([composerModel, modelBase, farm2fork, concertoModel]);
