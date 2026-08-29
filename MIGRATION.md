@@ -146,10 +146,11 @@ in all three packages with no drop-in replacement.
 
 What actually changed:
 
-- **For bundler users** (webpack 5+, Vite, Rollup, esbuild): nothing. Your bundler
-  already selected the browser ESM graph at `dist/esm-browser/index.mjs` via the
-  `browser` *condition* in the `exports` map, because `exports` takes precedence over
-  the legacy `browser` field. Your code needs no edits.
+- **For bundler users** (webpack 5+, Vite, Rollup, esbuild): nothing. These read the
+  `exports` map, which takes precedence over the legacy `browser` field, so they were
+  already resolving to the browser ESM graph at `dist/esm-browser/index.mjs` rather than
+  the UMD bundle. Removing the bundle takes away something they had stopped using. Your
+  code needs no edits.
 - **For `<script>` tag users** with no build step: you were relying on the UMD bundle's
   global namespace. That is gone. Your options are:
   1. **Add a bundler** to your build (webpack, esbuild, Rollup, Vite). Bundle the
@@ -162,6 +163,13 @@ What actually changed:
      either a CDN that rewrites those specifiers into resolvable URLs, or an import map
      that maps them yourself. Check the behaviour of whichever CDN you use before
      relying on it.
+- **For tooling that does not read `exports` at all** (webpack 4, browserify, Parcel 1):
+  this is the sharp edge. Those tools previously found the UMD bundle through the
+  top-level `browser` field. With both removed they fall back to `main`, which is the
+  **CommonJS** build — it imports `fs` and other Node builtins, so it will not run in a
+  browser, and the failure surfaces as a confusing missing-module error rather than a
+  clear one. There is no supported path for these tools in 5.0.0; upgrade to a bundler
+  that understands `exports`.
 
 The `browser` condition in `exports` (which points to `dist/esm-browser/index.mjs`) is
 still there and still in use — bundlers automatically pick it when targeting the web. But
