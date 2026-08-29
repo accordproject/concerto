@@ -68,6 +68,39 @@ const workspacePackages = [
 
 const expandExternal = name => name.includes('*') ? [name] : [name, `${name}/*`];
 
+// Runtime dependencies, kept external in the Node build so they resolve through
+// the consumer's node_modules — the same thing tsc already does for the CJS
+// output, which emits `require("dayjs")` rather than inlining it.
+//
+// Bundling them instead gives every package its own private copy: `debug` was
+// compiled into concerto-util, concerto-core and concerto-cto independently, so
+// an application depending on all three shipped three copies and deduplicated
+// none of them. It also hides those dependencies from `npm audit` and SBOM
+// tooling, and makes a patch to any of them require republishing concerto
+// rather than a lockfile bump.
+//
+// The browser build still bundles them: it is consumed as a self-contained
+// graph, and its Node-builtin stubbing only holds if the dependencies that
+// reach for builtins are resolved here rather than by the consumer.
+//
+// Three exceptions stay bundled. They are CommonJS with no ESM build, and
+// Node's cjs-module-lexer cannot statically see their named exports, so
+// externalising them emits `import { MetaModelUtil } from '...'` and Node
+// throws "Named export 'MetaModelUtil' not found" at load time. Bundling is
+// what esbuild's interop was already doing for them. Re-check whether an
+// entry can be removed with:
+//
+//   node --input-type=module -e "import { MetaModelUtil } from '<pkg>'"
+const nonLexableDependencies = [
+    '@accordproject/concerto-metamodel',
+    '@stoplight/spectral-cli',
+    '@stoplight/spectral-core',
+    '@stoplight/spectral-parsers',
+];
+
+const runtimeDependencies = Object.keys(packageJson.dependencies || {})
+    .filter(name => !nonLexableDependencies.includes(name));
+
 const builtinSpecifiers = new Set([
     ...builtinModules,
     ...builtinModules.map(name => `node:${name}`),
@@ -117,6 +150,7 @@ function buildOptionsFor(target) {
     const packageExternal = isNodeOnlyPackage
         ? [...workspacePackages, 'fsevents', 'fsevents/*', '*.node']
         : workspacePackages;
+    const externalDependencies = isNode ? runtimeDependencies : [];
 
     return {
         bundle: true,
@@ -128,6 +162,7 @@ function buildOptionsFor(target) {
         logLevel: 'info',
         external: [
             ...packageExternal.flatMap(expandExternal),
+            ...externalDependencies.flatMap(expandExternal),
             // Node keeps its builtins external, so they resolve to the real
             // modules at runtime.
             ...(isNode ? [...builtinModules, ...builtinModules.map(name => `node:${name}`)] : []),

@@ -13,10 +13,10 @@
  */
 
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import minMax from 'dayjs/plugin/minMax';
-import duration from 'dayjs/plugin/duration';
+import utc from 'dayjs/plugin/utc.js';
+import quarterOfYear from 'dayjs/plugin/quarterOfYear.js';
+import minMax from 'dayjs/plugin/minMax.js';
+import duration from 'dayjs/plugin/duration.js';
 
 dayjs.extend(utc);
 dayjs.extend(quarterOfYear);
