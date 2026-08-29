@@ -47,12 +47,6 @@ jobs:
           NODE_OPTIONS: "--max_old_space_size=4096"
         run: npm test
 
-      # The unit suites run against src/ through ts-node, so this is the only
-      # job that exercises what a consumer actually resolves: the emitted ESM,
-      # and specifically the dist/esm graph Node takes.
-      - name: ESM smoke test
-        run: npm run test:esm
-
       - name: Archive npm failure logs
         uses: actions/upload-artifact@v4
         if: failure()

@@ -42,6 +42,7 @@
     "test:esm": "node ./scripts/smoke-esm.mjs",
     "licchk": "license-check-and-add",
     "build": "npm run build:ordered",
+    "postbuild": "npm run test:esm",
     "build:ordered": "npm run build:level0 && npm run build:level1 && npm run build:level2",
     "build:level0": "npm run build -w packages/concerto-util",
     "build:level1": "npm run build -w packages/concerto-cto && npm run build -w packages/concerto-core",
