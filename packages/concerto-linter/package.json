@@ -36,7 +36,7 @@
     "@accordproject/concerto-core": "4.2.0",
     "@accordproject/concerto-cto": "4.2.0",
     "@accordproject/concerto-linter-default-ruleset": "4.2.0",
-    "@accordproject/concerto-metamodel": "^3.16.0",
+    "@accordproject/concerto-metamodel": "^3.17.0",
     "@stoplight/spectral-cli": "6.15.0",
     "@stoplight/spectral-core": "1.20.0",
     "@stoplight/spectral-parsers": "1.0.5",

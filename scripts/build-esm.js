@@ -85,14 +85,14 @@ const expandExternal = name => name.includes('*') ? [name] : [name, `${name}/*`]
 //
 // Three exceptions stay bundled. They are CommonJS with no ESM build, and
 // Node's cjs-module-lexer cannot statically see their named exports, so
-// externalising them emits `import { MetaModelUtil } from '...'` and Node
-// throws "Named export 'MetaModelUtil' not found" at load time. Bundling is
-// what esbuild's interop was already doing for them. Re-check whether an
-// entry can be removed with:
+// externalising them emits `import { Spectral } from '...'` and Node throws
+// "Named export 'Spectral' not found" at load time. Bundling is what
+// esbuild's interop was already doing for them. Re-check whether an entry
+// can be removed once upstream publishes a lexable build:
 //
-//   node --input-type=module -e "import { MetaModelUtil } from '<pkg>'"
+//   node -e "const {parse}=require('cjs-module-lexer');
+//     console.log(parse(require('fs').readFileSync(require.resolve('<pkg>'),'utf8')).exports)"
 const nonLexableDependencies = [
-    '@accordproject/concerto-metamodel',
     '@stoplight/spectral-cli',
     '@stoplight/spectral-core',
     '@stoplight/spectral-parsers',

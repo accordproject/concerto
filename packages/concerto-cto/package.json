@@ -64,7 +64,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "^3.16.0",
+    "@accordproject/concerto-metamodel": "^3.17.0",
     "@accordproject/concerto-util": "4.2.0",
     "acorn": "^8.15.0",
     "path-browserify": "^1.0.1",
