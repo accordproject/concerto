@@ -26,19 +26,28 @@ type DownloadJob<TFile> = {
     options: RequestInit;
 };
 
-const flatten = <T>(arr: T[][]): T[] => ([] as T[]).concat(...arr);
+function flatten<T>(arr: T[][]): T[];
+function flatten<T>(arr: Array<T[] | undefined>): Array<T | undefined>;
+function flatten<T>(arr: Array<T[] | undefined>): Array<T | undefined> {
+    return ([] as Array<T | undefined>).concat(...arr);
+}
 const filterUndefined = <T>(arr: Array<T | undefined | null>): T[] => arr.filter((value): value is T => Boolean(value));
 
-const handleJobError = async (error: unknown, job: DownloadJob<unknown>) => {
+// Used as the PromisePool error handler for both the outer pool (whose items are
+// DownloadJob objects) and the inner recursive pool (whose items are plain URI
+// strings), hence the union.
+const handleJobError = async (error: unknown, job: DownloadJob<unknown> | string): Promise<never> => {
     const errLike = error as { response?: { status?: number }; code?: string };
     const badHttpResponse = errLike.response && errLike.response.status && errLike.response.status !== 200;
     const dnsFailure = errLike.code && errLike.code === 'ENOTFOUND';
+    // undefined for the inner pool's string jobs, as it has always been
+    const jobUrl = (job as DownloadJob<unknown>).url;
     if(badHttpResponse || dnsFailure){
-        const err = new Error(`Unable to download external model dependency '${job.url}'`);
+        const err = new Error(`Unable to download external model dependency '${jobUrl}'`);
         (err as { code?: string }).code = 'MISSING_DEPENDENCY';
         throw err;
     }
-    throw new Error('Failed to load model file. Job: ' + job.url + ' Details: ' + error);
+    throw new Error('Failed to load model file. Job: ' + jobUrl + ' Details: ' + error);
 };
 
 /**
@@ -86,9 +95,9 @@ class FileDownloader<TFile = unknown> {
         return PromisePool
             .withConcurrency(this.concurrency)
             .for(jobs)
-            .handleError(handleJobError as any)
+            .handleError(handleJobError)
             .process((x: DownloadJob<TFile>) => this.runJob(x, this.fileLoader))
-            .then(({ results }: any) => filterUndefined(flatten(results as Array<TFile[]>)));
+            .then(({ results }) => filterUndefined(flatten(results)));
     }
 
     /**
@@ -123,7 +132,7 @@ class FileDownloader<TFile = unknown> {
                 const externalImportsFiles = await PromisePool
                     .withConcurrency(this.concurrency)
                     .for(importedUris)
-                    .handleError(handleJobError as any)
+                    .handleError(handleJobError)
                     .process((uri: string) => {
                         if (!downloadedUris.has(uri)) {
                             // recurse and add a new job for the referenced URI
@@ -133,8 +142,9 @@ class FileDownloader<TFile = unknown> {
                                 downloadedUris: downloadedUris
                             }, fileLoader);
                         }
+                        return undefined;
                     })
-                    .then(({ results }: any) => filterUndefined(flatten(results as Array<TFile[]>)));
+                    .then(({ results }) => filterUndefined(flatten(results)));
 
                 return externalImportsFiles.concat([file]);
             });

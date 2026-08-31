@@ -411,6 +411,19 @@ describe('ClassDeclaration', () => {
         });
     });
 
+    describe('#declarationKind', () => {
+        it('should throw on the abstract base class', () => {
+            const classDecl = new ClassDeclaration(modelFile, {
+                $class: `${MetaModelNamespace}.ConceptDeclaration`,
+                name: 'suchName',
+                properties: []
+            });
+            (() => {
+                classDecl.declarationKind();
+            }).should.throw(/not implemented/);
+        });
+    });
+
     describe('#getDirectSubclasses', function() {
         it('should return an array with Sub and Sub2 given they extend Super', function() {
             const modelFileNames = [

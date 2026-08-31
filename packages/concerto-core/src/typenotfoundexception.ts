@@ -23,7 +23,7 @@ import Globalize from './globalize';
  * @memberof module:concerto-core
  */
 class TypeNotFoundException extends BaseException {
-    typeName: any;
+    typeName: string;
     /**
      * Constructor. If the optional 'message' argument is not supplied, it will be set to a default value that
      * includes the type name.
@@ -32,12 +32,12 @@ class TypeNotFoundException extends BaseException {
      * @param {string} component - the optional component which throws this error
      * @param {string} errorType - the error code related to the error
      */
-    constructor(typeName, message?, component?, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
+    constructor(typeName: string, message?: string, component?: string, errorType = ErrorCodes.TYPE_NOT_FOUND_EXCEPTION) {
         if (!message) {
             const formatter = Globalize.messageFormatter('typenotfounderror-defaultmessage');
             message = formatter({
                 typeName: typeName
-            });
+            }) as string;
         }
 
         // FIX: Explicitly default to '@accordproject/concerto-core' if component is not provided.
@@ -50,7 +50,7 @@ class TypeNotFoundException extends BaseException {
      * Get the name of the type that was not found.
      * @returns {string} fully qualified type name.
      */
-    getTypeName() {
+    getTypeName(): string {
         return this.typeName;
     }
 

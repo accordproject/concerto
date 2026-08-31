@@ -16,9 +16,39 @@ import { BaseException, ErrorCodes } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-import type Field from './field';
+import type Property from './property';
 import type ScalarDeclaration from './scalardeclaration';
+import type {
+    ICollectionSizeValidator,
+    IDoubleDomainValidator,
+    IIntegerDomainValidator,
+    ILongDomainValidator,
+    IStringLengthValidator,
+    IStringRegexValidator,
+} from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
+
+/**
+ * The numeric range validators, which share a shape across the three numeric
+ * primitive types.
+ */
+export type NumberDomainValidatorAst = IIntegerDomainValidator | ILongDomainValidator | IDoubleDomainValidator;
+
+/**
+ * The metamodel nodes a Validator is built from. Subclasses narrow this to the
+ * single node kind they handle.
+ */
+export type ValidatorAst =
+    | ICollectionSizeValidator
+    | IStringRegexValidator
+    | IStringLengthValidator
+    | NumberDomainValidatorAst;
+
+/**
+ * The model elements a Validator can be attached to: a Property (in practice a
+ * Field) or a ScalarDeclaration.
+ */
+export type ValidatedElement = Property | ScalarDeclaration;
 
 /**
  * An Abstract field validator. Extend this class and override the
@@ -29,15 +59,15 @@ import type ScalarDeclaration from './scalardeclaration';
  * @memberof module:concerto-core
  */
 class Validator {
-    validator: any;
-    field: any;
+    validator: ValidatorAst | undefined;
+    field: ValidatedElement;
     /**
      * Create a Property.
      * @param {Object} field - the field or scalar declaration this validator is attached to
      * @param {Object} validator - The validation string
      * @throws {IllegalModelException}
      */
-    constructor(field, validator) {
+    constructor(field: ValidatedElement, validator: ValidatorAst | undefined) {
         this.validator = validator;
         this.field = field;
     }
@@ -48,7 +78,7 @@ class Validator {
      * @param {string} errorType the type of error
      * @throws {Error} throws an error to report the message
      */
-    reportError(id, msg, errorType=ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION) {
+    reportError(id: string | null, msg: string, errorType: string = ErrorCodes.DEFAULT_VALIDATOR_EXCEPTION): never {
         throw new BaseException('Validator error for field `' + id + '`. ' + this.getFieldOrScalarDeclaration().getFullyQualifiedName() + ': ' + msg, undefined, errorType);
     }
 
@@ -66,7 +96,7 @@ class Validator {
      * Returns the field or scalar declaration that this validator applies to
      * @return {Object} the field
      */
-    getFieldOrScalarDeclaration() {
+    getFieldOrScalarDeclaration(): ValidatedElement {
         return this.field;
     }
 
@@ -77,7 +107,7 @@ class Validator {
      * @throws {IllegalModelException}
      * @private
      */
-    validate(identifier, value) {
+    validate(identifier: string | null, value: any): void {
     }
 
     /**
@@ -88,7 +118,7 @@ class Validator {
      * @returns {boolean} True if this validator is compatible with the other
      * validator, false otherwise.
      */
-    compatibleWith(other) {
+    compatibleWith(other: Validator | null): boolean {
         return false;
     }
 }

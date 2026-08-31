@@ -25,7 +25,7 @@ class NullUtil {
      * @param obj - the object to be tested
      * @returns true if the object is null or undefined
      */
-    static isNull(obj: unknown): boolean {
+    static isNull(obj: unknown): obj is null | undefined {
         return(typeof(obj) === 'undefined' || obj === null);
     }
 }

@@ -12,13 +12,23 @@
  * limitations under the License.
  */
 
-import { MetaModelNamespace, IModels } from '@accordproject/concerto-metamodel';
+import { MetaModelNamespace, IModel, IModels } from '@accordproject/concerto-metamodel';
 
 import * as Parser from './parser';
 import ParseException from './parseexception';
 
 interface ParseOptions {
     skipLocationNodes?: boolean;
+}
+
+// The shape of the error thrown by the generated peg.js parser (parser.js's
+// `peg$SyntaxError`), which is not itself a typed module.
+interface CtoSyntaxError {
+    message: string;
+    location?: {
+        start: { line: number; column: number; offset: number };
+        end?: { line: number; column: number; offset: number };
+    };
 }
 
 /**
@@ -29,16 +39,17 @@ interface ParseOptions {
  * @param {boolean} [options.skipLocationNodes] - default true, when true location nodes will be skipped in the metamodel AST
  * @return {object} the metamodel instance for the cto argument
  */
-export function parse(cto: string, fileName?: string, options?: ParseOptions): any {
+export function parse(cto: string, fileName?: string, options?: ParseOptions): IModel {
     try {
         // Set default for skipLocationNodes to true if not specified
         if (!options || options?.skipLocationNodes === undefined) {
             options = { ...options, skipLocationNodes: true };
         }
         return Parser.parse(cto, options);
-    } catch(err: any) {
-        if(err.location && err.location.start) {
-            throw new ParseException(err.message, err.location, fileName);
+    } catch(err: unknown) {
+        const parseErr = err as CtoSyntaxError;
+        if(parseErr.location && parseErr.location.start) {
+            throw new ParseException(parseErr.message, parseErr.location, fileName);
         }
         else {
             throw err;
@@ -59,7 +70,7 @@ export function parseModels(files: string[], options?: ParseOptions): IModels {
         models: [],
     };
     files.forEach((modelFile) => {
-        let metaModel = Parser.parse(modelFile, options);
+        const metaModel: IModel = Parser.parse(modelFile, options);
         result.models.push(metaModel);
     });
     return result;

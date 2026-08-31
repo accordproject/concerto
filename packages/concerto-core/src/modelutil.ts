@@ -15,6 +15,11 @@
 import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 import semver from 'semver';
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { SemVer } from 'semver';
+/* eslint-enable no-unused-vars */
 import Globalize from './globalize';
 
 // Types needed for TypeScript generation.
@@ -120,7 +125,7 @@ class ModelUtil {
         }
 
         const parts = ns.split('@');
-        let version: any = parts[1];
+        let version: string | SemVer | null = parts[1];
         if(parts.length > 2) {
             throw new Error(`Invalid namespace ${ns}`);
         }
@@ -246,8 +251,8 @@ class ModelUtil {
      * @param {string} name - the name of the identifier to test.
      * @returns {boolean} true if the identifier is valid.
      */
-    static isValidIdentifier(name) {
-        return ID_REGEX.test(name);
+    static isValidIdentifier(name: string | undefined): name is string {
+        return ID_REGEX.test(name as string);
     }
 
     /**

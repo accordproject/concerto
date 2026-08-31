@@ -16,6 +16,11 @@ import { loremIpsum } from 'lorem-ipsum';
 import RandExp from 'randexp';
 import dayjs from '../dayjs-setup';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { Dayjs } from 'dayjs';
+/* eslint-enable no-unused-vars */
+
 /**
  * Generate a random number within a given range with
  * a prescribed precision and inside a global range
@@ -156,7 +161,7 @@ const getRegexString = (regex, minLength, maxLength) => {
  * @private
  */
 class EmptyValueGenerator {
-    currentDate: any;
+    currentDate: Dayjs;
     /**
      * This constructor should not be called directly.
      * @private
@@ -396,5 +401,5 @@ class ValueGeneratorFactory {
     }
 }
 
-export { ValueGeneratorFactory };
+export { ValueGeneratorFactory, EmptyValueGenerator, SampleValueGenerator };
 export default ValueGeneratorFactory;

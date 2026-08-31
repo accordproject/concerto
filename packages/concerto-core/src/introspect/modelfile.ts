@@ -32,9 +32,16 @@ import packageJson from '../../package.json';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-import type ModelManager from '../modelmanager';
+import type BaseModelManager from '../basemodelmanager';
 import type Declaration from './declaration';
+import type { AstNode } from './decorated';
+import type { IImportType, IModel } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
+
+/**
+ * A predicate over a Declaration, used by ModelFile#filter.
+ */
+export type FilterFunction = (declaration: Declaration) => boolean;
 
 /**
  * Class representing a Model File. A Model File contains a single namespace
@@ -44,21 +51,20 @@ import type Declaration from './declaration';
  * @memberof module:concerto-core
  */
 class ModelFile extends Decorated {
-    modelManager: any;
-    ast: any;
-    definitions: any;
-    fileName: any;
+    modelManager: BaseModelManager;
+    definitions: string | null | undefined;
+    fileName: string | null | undefined;
     external: boolean;
-    declarations: any[];
-    localTypes: any;
-    imports: any[];
-    importShortNames: Map<string, any>;
-    importWildcardNamespaces: any[];
-    importUriMap: Record<string, any>;
-    concertoVersion: any;
-    version: any;
-    namespace: any;
-    modelFile: any;
+    declarations: Declaration[];
+    localTypes: Map<string, Declaration> | null;
+    imports: AstNode[];
+    importShortNames: Map<string, string>;
+    importWildcardNamespaces: string[];
+    importUriMap: Record<string, string>;
+    concertoVersion: string | null;
+    version: string | null | undefined;
+    // Set by fromAst(), which the constructor calls
+    namespace!: string;
     /**
      * Create a ModelFile. This should only be called by framework code.
      * Use the ModelManager to manage ModelFiles.
@@ -69,7 +75,7 @@ class ModelFile extends Decorated {
      * @param {string} [fileName] - The optional filename for this modelfile
      * @throws {IllegalModelException}
      */
-    constructor(modelManager, ast, definitions?, fileName?) {
+    constructor(modelManager: BaseModelManager, ast: AstNode, definitions?: string | null, fileName?: string | null) {
         super(ast);
         this.modelManager = modelManager;
         this.external = false;
@@ -126,7 +132,7 @@ class ModelFile extends Decorated {
      * @protected
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         return this;
     }
 
@@ -134,7 +140,7 @@ class ModelFile extends Decorated {
      * Returns true
      * @returns {boolean} true
      */
-    isModelFile() {
+    isModelFile(): boolean {
         return true;
     }
 
@@ -143,7 +149,7 @@ class ModelFile extends Decorated {
      * @returns {string} the semantic version or null if the namespace for the model file is
      * unversioned
      */
-    getVersion() {
+    getVersion(): string | null | undefined {
         return this.version;
     }
 
@@ -159,7 +165,7 @@ class ModelFile extends Decorated {
      * Returns true if this ModelFile was downloaded from an external URI.
      * @return {boolean} true iff this ModelFile was downloaded from an external URI
      */
-    isExternal() {
+    isExternal(): boolean {
         return this.external;
     }
 
@@ -169,7 +175,7 @@ class ModelFile extends Decorated {
      * @return {string} the URI or null if the namespace was not associated with a URI.
      * @private
      */
-    getImportURI(namespace) {
+    getImportURI(namespace: string): string | null {
         const result = this.importUriMap[namespace];
         if(result) {
             return result;
@@ -184,7 +190,7 @@ class ModelFile extends Decorated {
      * @return {Object} keys are import declarations, values are URIs
      * @private
      */
-    getExternalImports() {
+    getExternalImports(): Record<string, string> {
         return this.importUriMap;
     }
 
@@ -203,7 +209,7 @@ class ModelFile extends Decorated {
      *
      * @return {ModelManager} The ModelManager for this ModelFile
      */
-    getModelManager() {
+    getModelManager(): BaseModelManager {
         return this.modelManager;
     }
 
@@ -213,7 +219,7 @@ class ModelFile extends Decorated {
      * @return {string[]} The array of fully-qualified names for types imported by
      * this ModelFile
      */
-    getImports() {
+    getImports(): string[] {
         let result: string[] = [];
         this.imports.forEach( imp => {
             result = result.concat(ModelUtil.importFullyQualifiedNames(imp));
@@ -359,9 +365,9 @@ class ModelFile extends Decorated {
      * @throws {Error} - if the type is not imported
      * @private
      */
-    resolveImport(type) {
+    resolveImport(type: string): string {
         if (this.importShortNames.has(type)) {
-            return this.importShortNames.get(type);
+            return this.importShortNames.get(type)!;
         }
 
         let formatter = Globalize('en').messageFormatter('modelfile-resolveimport-failfindimp');
@@ -378,9 +384,9 @@ class ModelFile extends Decorated {
      * @param {string} type - the short name of the type
      * @returns {string} - the actual imported name. If not aliased then returns the same string
      */
-    getImportedType(type) {
-        let fqn = this.resolveImport(type);
-        return fqn.split('.').pop();
+    getImportedType(type: string): string {
+        const fqn = this.resolveImport(type);
+        return fqn.split('.').pop()!;
     }
 
     /**
@@ -446,7 +452,7 @@ class ModelFile extends Decorated {
                     return null;
                 }
                 else {
-                    return this.getLocalType(type).getFullyQualifiedName();
+                    return this.getLocalType(type)!.getFullyQualifiedName();
                 }
             }
             else {
@@ -464,7 +470,7 @@ class ModelFile extends Decorated {
      * @param {string} type the short OR FQN name of the type
      * @return {ClassDeclaration} the ClassDeclaration, or null if the type does not exist
      */
-    getLocalType(type) {
+    getLocalType(type: string): Declaration | null {
         if(!this.localTypes) {
             throw new Error('Internal error: local types are not yet initialized. Do not try to resolve types inside `process`.');
         }
@@ -474,7 +480,7 @@ class ModelFile extends Decorated {
         }
 
         if (this.localTypes.has(type)) {
-            return this.localTypes.get(type);
+            return this.localTypes.get(type)!;
         } else {
             return null;
         }
@@ -541,7 +547,7 @@ class ModelFile extends Decorated {
      * Get the Namespace for this model file.
      * @return {string} The Namespace for this model file
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.namespace;
     }
 
@@ -549,7 +555,7 @@ class ModelFile extends Decorated {
      * Get the filename for this model file. Note that this may be null.
      * @return {string} The filename for this model file
      */
-    getName() {
+    getName(): string | null | undefined {
         return this.fileName;
     }
 
@@ -630,8 +636,8 @@ class ModelFile extends Decorated {
      * @param {Function} type - the type of the declaration
      * @return {Object[]} the ClassDeclaration defined in the model file
      */
-    getDeclarations(type) {
-        let result: any[] = [];
+    getDeclarations<T extends Declaration>(type: new (...args: any[]) => T): T[] {
+        const result: T[] = [];
         for(let n=0; n < this.declarations.length; n++) {
             let declaration = this.declarations[n];
             if(declaration instanceof type) {
@@ -646,7 +652,7 @@ class ModelFile extends Decorated {
      * Get all declarations in this ModelFile
      * @return {ClassDeclaration[]} the ClassDeclarations defined in the model file
      */
-    getAllDeclarations() {
+    getAllDeclarations(): Declaration[] {
         return this.declarations;
     }
 
@@ -654,7 +660,7 @@ class ModelFile extends Decorated {
      * Get the definitions for this model.
      * @return {string} The definitions for this model.
      */
-    getDefinitions() {
+    getDefinitions(): string | null | undefined {
         return this.definitions;
     }
 
@@ -662,15 +668,16 @@ class ModelFile extends Decorated {
      * Get the ast for this model.
      * @return {object} The definitions for this model.
      */
-    getAst() {
-        return this.ast;
+    getAst(): IModel {
+        // a ModelFile is always constructed from a metamodel Model node
+        return this.ast as IModel;
     }
 
     /**
      * Get the expected concerto version
      * @return {string} The semver range for compatible concerto versions
      */
-    getConcertoVersion() {
+    getConcertoVersion(): string | null {
         return this.concertoVersion;
     }
 
@@ -711,13 +718,13 @@ class ModelFile extends Decorated {
      * @param {object} ast - the AST obtained from the parser
      * @private
      */
-    fromAst(ast) {
+    fromAst(ast: AstNode) {
         const nsInfo = ModelUtil.parseNamespace(ast.namespace);
 
         const namespaceParts = nsInfo.name.split('.');
         namespaceParts.forEach(part => {
             if (!ModelUtil.isValidIdentifier(part)){
-                throw new IllegalModelException(`Invalid namespace part '${part}'`, this.modelFile, this.ast.location);
+                throw new IllegalModelException(`Invalid namespace part '${part}'`, this, this.ast.location);
             }
         });
 
@@ -771,7 +778,7 @@ class ModelFile extends Decorated {
                 break;
             }
             default:
-                this.importShortNames.set(imp.name, ModelUtil.importFullyQualifiedNames(imp)[0]);
+                this.importShortNames.set((imp as IImportType).name, ModelUtil.importFullyQualifiedNames(imp)[0]);
             }
             if(imp.uri) {
                 this.importUriMap[ModelUtil.importFullyQualifiedNames(imp)[0]] = imp.uri;
@@ -881,8 +888,8 @@ class ModelFile extends Decorated {
      * @returns {ModelFile?} - the filtered ModelFile
      * @private
      */
-    filter(predicate, modelManager){
-        const declarations: any[] = [];
+    filter(predicate: FilterFunction, modelManager: BaseModelManager): ModelFile | null {
+        const declarations: AstNode[] = [];
         for (const declaration of this.declarations) {
             if (predicate(declaration)) {
                 declarations.push(declaration.ast);

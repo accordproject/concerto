@@ -15,10 +15,29 @@
 import Decorator from './decorator';
 import IllegalModelException from './illegalmodelexception';
 
+import type { IDecorator, IRange } from '@accordproject/concerto-metamodel';
+
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
+
+/**
+ * The shape shared by every metamodel AST node that the introspect classes
+ * consume. The named members are the ones present on every node; the index
+ * signature is deliberate: these classes are duck-typed across node kinds
+ * (a ClassDeclaration is built from either a concept or an enum declaration,
+ * for example), so narrowing `ast` per subclass would mean a type guard at
+ * every access site. Callers wanting the precise node types should use the
+ * interfaces exported by `@accordproject/concerto-metamodel`.
+ */
+export interface AstNode {
+    $class: string;
+    name?: string;
+    location?: IRange;
+    decorators?: IDecorator[];
+    [key: string]: any;
+}
 
 /**
  * Decorated defines a model element that may have decorators attached.
@@ -29,8 +48,8 @@ import type ModelFile from './modelfile';
  * @memberof module:concerto-core
  */
 class Decorated {
-    ast: any;
-    decorators: any[] = [];
+    ast: AstNode;
+    decorators: Decorator[] = [];
     /**
      * Create a Decorated from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -38,7 +57,7 @@ class Decorated {
      * @param {string} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(ast) {
+    constructor(ast: AstNode) {
         if(!ast) {
             throw new Error('ast not specified');
         }
@@ -52,7 +71,7 @@ class Decorated {
      * @protected
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         throw new Error('not implemented');
     }
 
@@ -76,7 +95,7 @@ class Decorated {
         this.decorators = [];
 
         if(this.ast.decorators) {
-            const modelFile: any = this.getModelFile();
+            const modelFile = this.getModelFile();
             const factories = modelFile.getModelManager()?.getDecoratorFactories();
             const hasFactories = factories && factories.length > 0;
             for(let n=0; n < this.ast.decorators.length; n++ ) {
@@ -136,7 +155,7 @@ class Decorated {
      *
      * @return {Decorator[]} the decorators for the class
      */
-    getDecorators() {
+    getDecorators(): Decorator[] {
         return this.decorators;
     }
 
@@ -145,7 +164,7 @@ class Decorated {
      * @param {string} name  - the name of the decorator
      * @return {Decorator} the decorator attached to this class with the given name, or null if it does not exist.
      */
-    getDecorator(name) {
+    getDecorator(name: string): Decorator | null {
         for(let n=0; n < this.decorators.length; n++) {
             let decorator = this.decorators[n];
             if(decorator.getName() === name) {

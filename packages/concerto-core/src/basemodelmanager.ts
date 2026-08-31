@@ -13,7 +13,9 @@
  */
 
 import { DefaultFileLoader, FileDownloader, ModelWriter } from '@accordproject/concerto-util';
+import type { WritableModelFile } from '@accordproject/concerto-util';
 import { MetaModelUtil, MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import type { IModel, IModels } from '@accordproject/concerto-metamodel';
 
 import Factory from './factory';
 import Globalize from './globalize';
@@ -26,6 +28,7 @@ import MetamodelException from './metamodelexception';
 import rootModelModule from './rootmodelhelper';
 import decoratorModelModule from './decoratormodelhelper';
 import type { ModelFileSource, ModelManagerOptions } from './types';
+import type { AstNode } from './introspect/decorated';
 type ModelFileInstance = InstanceType<typeof ModelFile>;
 type ModelFileInput = string | ModelFileInstance;
 
@@ -52,11 +55,11 @@ import debugLib from 'debug';
 const debug = debugLib('concerto:BaseModelManager');
 
 // How to create a modelfile from the external content
-const defaultProcessFile = (name: string, data: unknown): ModelFileSource => {
+const defaultProcessFile = (name: string | null, data: unknown): ModelFileSource => {
     return {
         ast: data, // AST is input
         definitions: null, // No CTO file
-        fileName: name,
+        fileName: name ?? 'UNKNOWN',
     };
 };
 
@@ -86,14 +89,14 @@ const EXCLUDE_NS = ['concerto@1.0.0', 'concerto', 'concerto.decorator@1.0.0'];
  * @memberof module:concerto-core
  */
 class BaseModelManager {
-     modelFiles: any;
-     processFile: any;
-     factory: any;
-     serializer: any;
-     decoratorFactories: any[];
-     options: any;
-     decoratorValidation: any;
-     metamodelModelFile: any;
+     modelFiles: Record<string, ModelFileInstance>;
+     processFile: (fileName: string | null, modelInput: string | unknown) => ModelFileSource;
+     factory: Factory;
+     serializer: Serializer;
+     decoratorFactories: DecoratorFactory[];
+     options: ModelManagerOptions | undefined;
+     decoratorValidation: NonNullable<ModelManagerOptions['decoratorValidation']>;
+     metamodelModelFile: ModelFileInstance;
     /**
      * Create the ModelManager.
      * @constructor
@@ -119,7 +122,7 @@ class BaseModelManager {
         this.decoratorValidation = options?.decoratorValidation ? options?.decoratorValidation : DEFAULT_DECORATOR_VALIDATION;
 
         // Cache a copy of the Metamodel ModelFile for use when validating the structure of ModelFiles later.
-        this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst, undefined, MetaModelNamespace);
+        this.metamodelModelFile = new ModelFile(this, MetaModelUtil.metaModelAst as AstNode, undefined, MetaModelNamespace);
 
         if(options?.addMetamodel) {
             this.addModelFile(this.metamodelModelFile);
@@ -183,7 +186,7 @@ class BaseModelManager {
     validateModelFile(modelFile, fileName?) {
         if (typeof modelFile === 'string') {
             const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast, modelFile, fileName);
+            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
             m.validate();
         } else {
             modelFile.validate();
@@ -319,7 +322,7 @@ class BaseModelManager {
 
         const { ast, definitions } = this.processFile(fileName, modelInput);
         const finalCto = cto || definitions;
-        const m = new ModelFile(this, ast, finalCto, fileName);
+        const m = new ModelFile(this, ast as AstNode, finalCto, fileName);
 
         this.addModelFile(m, finalCto, fileName, disableValidation);
 
@@ -342,7 +345,7 @@ class BaseModelManager {
         debug(NAME, 'updateModelFile', modelFile, fileName);
         if (typeof modelFile === 'string') {
             const { ast } = this.processFile(fileName, modelFile);
-            let m = new ModelFile(this, ast, modelFile, fileName);
+            let m = new ModelFile(this, ast as AstNode, modelFile, fileName);
             return this.updateModelFile(m,fileName,disableValidation);
         } else {
             let existing = this.modelFiles[modelFile.getNamespace()];
@@ -399,7 +402,7 @@ class BaseModelManager {
                 let m: ModelFileInstance;
                 if (typeof modelFile === 'string') {
                     const { ast } = this.processFile(fileName, modelFile);
-                    m = new ModelFile(this, ast, modelFile, fileName);
+                    m = new ModelFile(this, ast as AstNode, modelFile, fileName);
                 } else {
                     m = modelFile;
                 }
@@ -460,11 +463,11 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
 
         try {
-            const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
+            const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles() as unknown as (ModelFileInstance[] & ModelFileSource[]), options);
 
             const externalModelFiles: ModelFileInstance[] = [];
             externalModels.forEach((file) => {
-                const mf = new ModelFile(this, file.ast, file.definitions, file.fileName);
+                const mf = new ModelFile(this, file.ast as AstNode, file.definitions, file.fileName);
                 const existing = this.modelFiles[mf.getNamespace()];
 
                 if (existing) {
@@ -494,7 +497,7 @@ class BaseModelManager {
      *  If true, external models are written to the file system. Defaults to true
      */
     writeModelsToFileSystem(path, options = {}) {
-        ModelWriter.writeModelsToFileSystem(this.getModelFiles(), path, options);
+        ModelWriter.writeModelsToFileSystem(this.getModelFiles() as unknown as WritableModelFile[], path, options);
     }
 
     /**
@@ -535,7 +538,7 @@ class BaseModelManager {
      */
     getModels(options?: { includeExternalModels?: boolean }) {
         const modelFiles = this.getModelFiles();
-        let models: Array<{ name: string; content: string | null }> = [];
+        let models: Array<{ name: string; content: string | null | undefined }> = [];
         const opts = Object.assign({
             includeExternalModels: true,
         }, options);
@@ -665,70 +668,70 @@ class BaseModelManager {
      * Get the AssetDeclarations defined in this model manager
      * @return {AssetDeclaration[]} the AssetDeclarations defined in the model manager
      */
-    getAssetDeclarations() {
+    getAssetDeclarations(): AssetDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getAssetDeclarations());
-        }, [] as any[]);
+        }, [] as AssetDeclaration[]);
     }
 
     /**
      * Get the TransactionDeclarations defined in this model manager
      * @return {TransactionDeclaration[]} the TransactionDeclarations defined in the model manager
      */
-    getTransactionDeclarations() {
+    getTransactionDeclarations(): TransactionDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getTransactionDeclarations());
-        }, [] as any[]);
+        }, [] as TransactionDeclaration[]);
     }
 
     /**
      * Get the EventDeclarations defined in this model manager
      * @return {EventDeclaration[]} the EventDeclaration defined in the model manager
      */
-    getEventDeclarations() {
+    getEventDeclarations(): EventDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getEventDeclarations());
-        }, [] as any[]);
+        }, [] as EventDeclaration[]);
     }
 
     /**
      * Get the ParticipantDeclarations defined in this model manager
      * @return {ParticipantDeclaration[]} the ParticipantDeclaration defined in the model manager
      */
-    getParticipantDeclarations() {
+    getParticipantDeclarations(): ParticipantDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getParticipantDeclarations());
-        }, [] as any[]);
+        }, [] as ParticipantDeclaration[]);
     }
 
     /**
      * Get the MapDeclarations defined in this model manager
      * @return {MapDeclaration[]} the MapDeclaration defined in the model manager
      */
-    getMapDeclarations() {
+    getMapDeclarations(): MapDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getMapDeclarations());
-        }, [] as any[]);
+        }, [] as MapDeclaration[]);
     }
 
     /**
      * Get the EnumDeclarations defined in this model manager
      * @return {EnumDeclaration[]} the EnumDeclaration defined in the model manager
      */
-    getEnumDeclarations() {
+    getEnumDeclarations(): EnumDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getEnumDeclarations());
-        }, [] as any[]);
+        }, [] as EnumDeclaration[]);
     }
 
     /**
      * Get the Concepts defined in this model manager
      * @return {ConceptDeclaration[]} the ConceptDeclaration defined in the model manager
      */
-    getConceptDeclarations() {
+    getConceptDeclarations(): ConceptDeclaration[] {
         return this.getModelFiles().reduce((prev, cur) => {
             return prev.concat(cur.getConceptDeclarations());
-        }, [] as any[]);
+        }, [] as ConceptDeclaration[]);
     }
 
     /**
@@ -787,9 +790,9 @@ class BaseModelManager {
      * @param {object} metaModel - the MetaModel
      * @return {object} the resolved metamodel
      */
-    resolveMetaModel(metaModel) {
+    resolveMetaModel(metaModel: IModel): IModel {
         const priorModels = this.getAst(false, true);
-        return MetaModelUtil.resolveLocalNames(priorModels, metaModel);
+        return MetaModelUtil.resolveLocalNames(priorModels, metaModel) as IModel;
     }
 
     /**
@@ -798,9 +801,9 @@ class BaseModelManager {
      * @param {object} [options] - options for the from ast method
      * @param {object} [options.disableValidation] - option to disable metamodel validation and just fetch the models, to be used only if the metamodel is already validated
      */
-    fromAst(ast, options?) {
+    fromAst(ast: IModels, options?: { disableValidation?: boolean }) {
         this.clearModelFiles();
-        ast.models.forEach( model => {
+        ast.models.forEach( (model: IModel) => {
             if(!EXCLUDE_NS.includes(model.namespace)) { // excludes the internal namespaces, already added
                 const modelFile = new ModelFile( this, model );
                 this.addModelFile( modelFile, null, null, true );
@@ -817,10 +820,10 @@ class BaseModelManager {
      * @param {boolean} [includeConcertoNamespaces] - whether to include the concerto namespaces
      * @returns {*} the metamodel
      */
-    getAst(resolve?,includeConcertoNamespaces?) {
-        const result = {
+    getAst(resolve?, includeConcertoNamespaces?): IModels {
+        const result: IModels = {
             $class: `${MetaModelNamespace}.Models`,
-            models: [] as any[],
+            models: [] as IModel[],
         };
         const modelFiles = this.getModelFiles(includeConcertoNamespaces);
         modelFiles.forEach((thisModelFile) => {

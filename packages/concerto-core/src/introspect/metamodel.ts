@@ -19,6 +19,11 @@ import Factory from '../factory';
 import Serializer from '../serializer';
 import ModelFile from '../introspect/modelfile';
 
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { AstNode } from './decorated';
+/* eslint-enable no-unused-vars */
+
 /**
  * Create a metamodel manager (for validation against the metamodel)
  * @return {ModelManager} the metamodel manager
@@ -27,7 +32,7 @@ function newMetaModelManager() {
     const metaModelManager = new ModelManager();
     const mf = new ModelFile(
         metaModelManager,
-        MetaModelUtil.metaModelAst,
+        MetaModelUtil.metaModelAst as AstNode,
         MetaModelUtil.metaModelCto,
         'concerto.metamodel'
     );

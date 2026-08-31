@@ -103,8 +103,7 @@ class ModelLoader {
      */
     static async loadModelManagerFromModelFiles(modelFiles: Array<string | ModelFile>, fileNames?: string[], options: ModelLoaderOptions = { offline: false }) {
         const opts = options || { offline: false };
-        
-        // FIX: Cast to 'any' to bypass strict constructor signature check
+
         let modelManager = new ModelManager(opts);
 
         // Load system model

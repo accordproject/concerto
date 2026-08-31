@@ -14,9 +14,9 @@
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-import type ClassDeclaration from './classdeclaration';
+import type Decorated from './decorated';
+import type { AstNode } from './decorated';
 import type Decorator from './decorator';
-import type Property from './property';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -34,7 +34,7 @@ class DecoratorFactory {
      * @param {Object} ast - The AST created by the parser
      * @return {Decorator} The decorator.
      */
-    newDecorator(parent, ast) {
+    newDecorator(parent: Decorated, ast: AstNode): Decorator | null {
         throw new Error('abstract function called');
     }
 

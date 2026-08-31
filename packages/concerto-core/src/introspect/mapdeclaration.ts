@@ -21,6 +21,7 @@ import ModelUtil from '../modelutil';
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
 import type ModelFile from './modelfile';
+import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -33,18 +34,17 @@ import type ModelFile from './modelfile';
  * @memberof module:concerto-core
  */
 class MapDeclaration extends Declaration {
-    modelFile: any;
-    name: any;
-    key: any;
-    value: any;
-    fqn: any;
+    // Populated by process(), which the Declaration constructor calls, so these
+    // carry definite assignment assertions rather than initialisers.
+    key!: MapKeyType;
+    value!: MapValueType;
     /**
      * Create an MapDeclaration.
      * @param {ModelFile} modelFile - the ModelFile for this class
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile, ast) {
+    constructor(modelFile: ModelFile, ast: AstNode) {
         super(modelFile, ast);
         this.modelFile = modelFile;
         this.process();
@@ -71,10 +71,9 @@ class MapDeclaration extends Declaration {
             throw new IllegalModelException(`MapDeclaration must contain valid MapValueType, for MapDeclaration ${this.ast.name}` , this.modelFile, this.ast.location);
         }
 
-        this.name = this.ast.name;
+        // super.process() has already set name and fqn from this.ast.name
         this.key = new MapKeyType(this, this.ast.key);
         this.value = new MapValueType(this, this.ast.value);
-        this.fqn = ModelUtil.getFullyQualifiedName(this.modelFile.getNamespace(), this.ast.name);
     }
 
     /**
@@ -90,41 +89,11 @@ class MapDeclaration extends Declaration {
     }
 
     /**
-     * Returns the fully qualified name of this class.
-     * The name will include the namespace if present.
-     *
-     * @return {string} the fully-qualified name of this class
-     */
-    getFullyQualifiedName() {
-        return this.fqn;
-    }
-
-    /**
-     * Returns the ModelFile that defines this class.
-     *
-     * @public
-     * @return {ModelFile} the owning ModelFile
-     */
-    getModelFile() {
-        return this.modelFile;
-    }
-
-    /**
-     * Returns the short name of a class. This name does not include the
-     * namespace from the owning ModelFile.
-     *
-     * @return {string} the short name of this class
-     */
-    getName() {
-        return this.name;
-    }
-
-    /**
      * Returns the type of the Map key property.
      *
      * @return {MapKeyType} the Map key property
      */
-    getKey() {
+    getKey(): MapKeyType {
         return this.key;
     }
 
@@ -133,7 +102,7 @@ class MapDeclaration extends Declaration {
      *
      * @return {MapValueType} the Map Value property
      */
-    getValue() {
+    getValue(): MapValueType {
         return this.value;
     }
 
@@ -141,7 +110,7 @@ class MapDeclaration extends Declaration {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string {
         return 'MapDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
@@ -150,7 +119,7 @@ class MapDeclaration extends Declaration {
      *
      * @return {string} what kind of declaration this is
      */
-    declarationKind() {
+    declarationKind(): string {
         return 'MapDeclaration';
     }
 
@@ -159,7 +128,7 @@ class MapDeclaration extends Declaration {
      *
      * @return {boolean} true if the class is a class
      */
-    isMapDeclaration() {
+    isMapDeclaration(): boolean {
         return true;
     }
 }

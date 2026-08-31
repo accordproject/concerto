@@ -50,6 +50,12 @@ function updateModels(models: IModels, newModel: IModel): IModels {
 }
 
 /**
+ * Options passed through to the underlying FileDownloader (and, in turn, to the
+ * FileLoader's `fetch` call) when resolving external model dependencies.
+ */
+export type ResolveExternalOptions = RequestInit;
+
+/**
  * Downloads all ModelFiles that are external dependencies and adds or
  * updates them in this ModelManager.
  * @param {*} models - the AST for all the known models
@@ -58,7 +64,7 @@ function updateModels(models: IModels, newModel: IModel): IModels {
  * @throws {IllegalModelException} if the models fail validation
  * @return {Promise} a promise when the download and update operation is completed.
  */
-export async function resolveExternal(models: IModels, options?: any, fileDownloader?: any): Promise<IModels> {
+export async function resolveExternal(models: IModels, options?: ResolveExternalOptions, fileDownloader?: FileDownloader<IModel>): Promise<IModels> {
     const NAME = 'updateExternalModels';
     debugLog(NAME, 'updateExternalModels', options);
 
@@ -79,9 +85,9 @@ export async function resolveExternal(models: IModels, options?: any, fileDownlo
  * Creates a default file downloader
  * @return {FileDownloader} a default file downloader instance
  */
-export function createDefaultFileDownloader(): any {
+export function createDefaultFileDownloader(): FileDownloader<IModel> {
     // How to create a modelfile from the external content
-    const processFile = (name: string, data: any): any => {
+    const processFile = (name: string, data: string): IModel => {
         // Note: JSON URLs seem to be already parsed in 'data'
         // return { ast: data, data, name };
         if (pathBrowserify.extname(name) === '.cto') {
