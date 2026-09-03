@@ -546,6 +546,31 @@ describe('InstanceGenerator', () => {
             }`);
             resource.owner.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
         });
+
+        it('should respect length bounds alongside the regex on a nested id field', function () {
+            modelManager.addCTOModel(`namespace org.acme.test@1.0.0
+
+            scalar Tag extends String regex=/^[a-z]+$/ length=[2,4]
+
+            participant MyParticipant identified by tag {
+                o Tag tag
+            }
+
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyParticipant owner
+            }`);
+            // The generated value is random, so sample repeatedly to keep the
+            // bounds check meaningful.
+            for (let i = 0; i < 15; i++) {
+                let resource = factory.newResource('org.acme.test@1.0.0', 'MyAsset', 'asset1');
+                parameters.stack = new TypedStack(resource);
+                parameters.seen = [resource.getFullyQualifiedType()];
+                let generated = resource.getClassDeclaration().accept(visitor, parameters);
+                generated.owner.tag.should.match(/^[a-z]+$/);
+                generated.owner.tag.length.should.be.within(2, 4);
+            }
+        });
     });
 
     describe('#findConcreteSubclass', () => {
