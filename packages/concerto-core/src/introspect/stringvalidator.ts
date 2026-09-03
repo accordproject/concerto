@@ -97,10 +97,27 @@ class StringValidator extends Validator{
                 this.reportError(identifier, `The string length of '${value}' should not exceed ${this.maxLength} characters.`);
             }
 
-            if (this.regex && !this.regex.test(value)) {
+            if (this.regex && !this.matchesRegex(value)) {
                 this.reportError(identifier, `Value '${value}' failed to match validation regex: ${this.regex}`);
             }
         }
+    }
+
+    /**
+     * Tests a value against the validation regex. Returns true when no regex is
+     * specified.
+     * @param {string} value the value to test
+     * @returns {boolean} true if the value matches the validation regex
+     */
+    matchesRegex(value) {
+        if (!this.regex) {
+            return true;
+        }
+        // `test` advances `lastIndex` when the regex has the global or sticky flag, so
+        // testing the same value twice would otherwise alternate between matching and
+        // not matching. Reset it to make every test independent of previous ones.
+        this.regex.lastIndex = 0;
+        return this.regex.test(value);
     }
 
     /**

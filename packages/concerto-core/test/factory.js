@@ -108,6 +108,19 @@ describe('Factory', function() {
             resource.assetId.should.equal('MY_ID_1');
         });
 
+        it('should repeatedly create a new instance with an ID matching a global regex', function() {
+            const regexModelManager = new ModelManager();
+            regexModelManager.addCTOModel(`
+            namespace org.acme.regex@1.0.0
+            asset RegexAsset identified by assetId {
+                o String assetId regex=/^[A-Z]{3}$/g
+            }`);
+            const regexFactory = new Factory(regexModelManager);
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
+            regexFactory.newResource('org.acme.regex@1.0.0', 'RegexAsset', 'ABC').assetId.should.equal('ABC');
+        });
+
         it('should create a new validating instance by default', function() {
             const resource = factory.newResource(namespace, assetName, 'MY_ID_1');
             should.not.equal(resource.validate, undefined);

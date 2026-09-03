@@ -127,7 +127,7 @@ class Factory {
                     idFullField = idFullField.getScalarField();
                 }
                 // if regex on identifier field & provided id does not match regex, throw error
-                if(idFullField?.validator?.regex && (idFullField.validator?.regex.test(id) === false)) {
+                if(idFullField?.validator?.regex && (idFullField.validator?.matchesRegex(id) === false)) {
                     throw new Error('Provided id does not match regex: ' + idFullField?.validator?.regex);
                 }
             }
