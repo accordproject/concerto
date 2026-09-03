@@ -168,7 +168,9 @@ const getRegexString = (regex, minLength, maxLength) => {
     let stringValue = randexp.gen();
     // Padding or truncating the generated value to a random length in the range would
     // stop it matching the regex, so only reshape it when it is outside the range.
-    if ((minLength || maxLength) && !isLengthInRange(stringValue, minLength, maxLength)) {
+    // isLengthInRange treats a null or undefined bound as unenforced, so no
+    // separate truthiness gate: that would also skip a legitimate bound of 0.
+    if (!isLengthInRange(stringValue, minLength, maxLength)) {
         stringValue = generateString(stringValue, minLength, maxLength, () => randexp.gen());
     }
     return stringValue;

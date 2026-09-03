@@ -532,6 +532,18 @@ describe('InstanceGenerator', () => {
             resource.code.should.match(/^[a-z]{3}$/);
         });
 
+        it('should enforce a length bound of zero on a regex Scalar field', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar Empty extends String regex=/^[a-z]*$/ length=[0,0]
+
+            asset MyAsset identified by id {
+                o String id
+                o Empty empty
+            }`);
+            resource.empty.should.equal('');
+        });
+
         it('should throw an error when id provided does not match regex on id field', function () {
             (() => test(`namespace org.acme.test@1.0.0
 
