@@ -209,6 +209,21 @@ describe('ValueGenerator', function() {
             });
         });
 
+        it('getRegex with string length should return a string that matches a fixed length regex', function() {
+            [
+                [1, 10],
+                [null, 10],
+                [1, null],
+                [3, 3],
+            ].forEach(([min, max]) => {
+                const regex = /^[a-z]{3}$/;
+                for (let i = 0; i < 10; i++) {
+                    const output = ValueGeneratorFactory.sample().getRegex(regex, min, max);
+                    expect(regex.test(output)).to.be.true;
+                }
+            });
+        });
+
         it('getString with length should return a string that matches the length constraint', function() {
             [
                 [1, 100],

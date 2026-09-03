@@ -134,6 +134,25 @@ const getString = (minLength, maxLength) => {
 
 
 /**
+ * Determine whether the length of a value is within the given bounds. A null or
+ * undefined bound is not enforced.
+ * @param {string} value the value to test.
+ * @param {number} minLength the lower bound on the range, inclusive.
+ * @param {number} maxLength the upper bound on the range, inclusive.
+ * @return {boolean} true if the length of the value is within the bounds.
+ * @private
+ */
+const isLengthInRange = (value, minLength, maxLength) => {
+    if (minLength !== null && minLength !== undefined && value.length < minLength) {
+        return false;
+    }
+    if (maxLength !== null && maxLength !== undefined && value.length > maxLength) {
+        return false;
+    }
+    return true;
+};
+
+/**
  * Get a randomly generated sample regex String value with lower and upper bound.
  * @param {RegExp} regex A regular expression.
  * @param {number} minLength the lower bound on the range, inclusive.
@@ -147,7 +166,11 @@ const getRegexString = (regex, minLength, maxLength) => {
     }
     const randexp = new RandExp(regex.source, regex.flags);
     let stringValue = randexp.gen();
-    if (minLength || maxLength) {
+    // Padding or truncating the generated value to a random length in the range would
+    // stop it matching the regex, so only reshape it when it is outside the range.
+    // isLengthInRange treats a null or undefined bound as unenforced, so no
+    // separate truthiness gate: that would also skip a legitimate bound of 0.
+    if (!isLengthInRange(stringValue, minLength, maxLength)) {
         stringValue = generateString(stringValue, minLength, maxLength, () => randexp.gen());
     }
     return stringValue;
