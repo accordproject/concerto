@@ -520,6 +520,18 @@ describe('InstanceGenerator', () => {
             resource.scalarValueWithExactLength.should.have.lengthOf(100);
         });
 
+        it('should generate a value matching a fixed length regex for a Scalar field with a length', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar Code extends String regex=/^[a-z]{3}$/ length=[1,10]
+
+            asset MyAsset identified by id {
+                o String id
+                o Code code
+            }`);
+            resource.code.should.match(/^[a-z]{3}$/);
+        });
+
         it('should throw an error when id provided does not match regex on id field', function () {
             (() => test(`namespace org.acme.test@1.0.0
 
