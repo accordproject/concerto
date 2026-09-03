@@ -996,49 +996,39 @@ function peg$parse(input, options) {
   };
   var peg$f88 = function(v) { return v; };
   var peg$f89 = function(items) {
-      const result = {};
-      for (const v of items) {
-        if (v.$class === `${metamodelNamespace}.StringRegexValidator`) { result.regex = v; }
-        else if (v.$class === `${metamodelNamespace}.StringLengthValidator`) { result.length = v; }
-      }
-      return result;
+      return bucketValidators(items, {
+        [`${metamodelNamespace}.StringRegexValidator`]: 'regex',
+        [`${metamodelNamespace}.StringLengthValidator`]: 'length',
+      });
    };
   var peg$f90 = function(v) { return v; };
   var peg$f91 = function(items) {
-      const result = {};
-      for (const v of items) {
-        if (v.$class === `${metamodelNamespace}.StringRegexValidator`) { result.regex = v; }
-        else if (v.$class === `${metamodelNamespace}.StringLengthValidator`) { result.length = v; }
-        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
-      }
-      return result;
+      return bucketValidators(items, {
+        [`${metamodelNamespace}.StringRegexValidator`]: 'regex',
+        [`${metamodelNamespace}.StringLengthValidator`]: 'length',
+        [`${metamodelNamespace}.CollectionSizeValidator`]: 'size',
+      });
    };
   var peg$f92 = function(v) { return v; };
   var peg$f93 = function(items) {
-      const result = {};
-      for (const v of items) {
-        if (v.$class === `${metamodelNamespace}.DoubleDomainValidator`) { result.range = v; }
-        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
-      }
-      return result;
+      return bucketValidators(items, {
+        [`${metamodelNamespace}.DoubleDomainValidator`]: 'range',
+        [`${metamodelNamespace}.CollectionSizeValidator`]: 'size',
+      });
    };
   var peg$f94 = function(v) { return v; };
   var peg$f95 = function(items) {
-      const result = {};
-      for (const v of items) {
-        if (v.$class === `${metamodelNamespace}.IntegerDomainValidator`) { result.range = v; }
-        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
-      }
-      return result;
+      return bucketValidators(items, {
+        [`${metamodelNamespace}.IntegerDomainValidator`]: 'range',
+        [`${metamodelNamespace}.CollectionSizeValidator`]: 'size',
+      });
    };
   var peg$f96 = function(v) { return v; };
   var peg$f97 = function(items) {
-      const result = {};
-      for (const v of items) {
-        if (v.$class === `${metamodelNamespace}.LongDomainValidator`) { result.range = v; }
-        else if (v.$class === `${metamodelNamespace}.CollectionSizeValidator`) { result.size = v; }
-      }
-      return result;
+      return bucketValidators(items, {
+        [`${metamodelNamespace}.LongDomainValidator`]: 'range',
+        [`${metamodelNamespace}.CollectionSizeValidator`]: 'size',
+      });
    };
   var peg$f98 = function(decorators, propertyType, array, id, d, validators, optional) {
     	const result = {
@@ -11917,6 +11907,17 @@ function peg$parse(input, options) {
   function isPrimitiveType(typeName) {
     const primitiveTypes = ['Boolean', 'String', 'DateTime', 'Double', 'Integer', 'Long'];
     return (primitiveTypes.indexOf(typeName) >= 0);
+  }
+  function bucketValidators(items, kindByClass) {
+    const result = {};
+    for (const v of items) {
+      const kind = kindByClass[v.$class];
+      if (result[kind]) {
+        error(`Duplicate ${kind} validator`);
+      }
+      result[kind] = v;
+    }
+    return result;
   }
 
   peg$result = peg$startRuleFunction();

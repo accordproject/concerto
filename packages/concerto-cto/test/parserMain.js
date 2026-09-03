@@ -248,6 +248,48 @@ describe('parser', () => {
             const ast2 = Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,5] length=[1,10] regex=/abc/ }', undefined, { skipLocationNodes: true });
             ast1.should.deep.equal(ast2);
         });
+
+        it('Should not parse a duplicate regex validator on a String field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String x regex=/a/ regex=/b/ }');
+            }).should.throw(/Duplicate regex validator/);
+        });
+
+        it('Should not parse a duplicate length validator on a String field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String x length=[1,2] length=[30,40] }');
+            }).should.throw(/Duplicate length validator/);
+        });
+
+        it('Should not parse a duplicate range validator on an Integer field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Integer x range=[0,10] range=[500,600] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate range validator on a Double field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Double x range=[0.5,1.5] range=[2.5,3.5] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate range validator on a Long field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o Long x range=[0,10] range=[500,600] }');
+            }).should.throw(/Duplicate range validator/);
+        });
+
+        it('Should not parse a duplicate size validator on a String array field', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nconcept A { o String[] x size=[1,2] size=[9,10] }');
+            }).should.throw(/Duplicate size validator/);
+        });
+
+        it('Should not parse a duplicate regex validator on a String scalar', () => {
+            (() => {
+                Parser.parse('namespace t@1.0.0\nscalar S extends String regex=/a/ regex=/b/');
+            }).should.throw(/Duplicate regex validator/);
+        });
     });
 
     describe('identifiers', () => {
