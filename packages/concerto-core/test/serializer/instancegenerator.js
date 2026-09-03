@@ -530,6 +530,22 @@ describe('InstanceGenerator', () => {
                 o SSN ssn
             }`)).should.throw(/Provided id does not match regex/);
         });
+
+        it('should generate an id matching the regex on the id field of a nested type', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
+
+            participant MyParticipant identified by ssn {
+                o SSN ssn
+            }
+
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyParticipant owner
+            }`);
+            resource.owner.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
+        });
     });
 
     describe('#findConcreteSubclass', () => {

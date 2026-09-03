@@ -172,7 +172,7 @@ class InstanceGenerator {
                     idField = idField.getScalarField();
                 }
                 if(idField?.validator?.regex){
-                    id = parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
+                    id = parameters.valueGenerator.getRegex(idField.validator.regex);
                 } else {
                     id = this.generateRandomId(declaration);
                 }
