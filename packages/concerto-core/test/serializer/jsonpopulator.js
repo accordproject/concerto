@@ -62,6 +62,10 @@ describe('JSONPopulator', () => {
                 o String assetId
                 o MyAsset1[] myAssets
             }
+            asset MyAsset3 identified by assetId {
+                o String assetId
+                o String[] values
+            }
             transaction MyTx1 {
                 --> MyAsset1 myAsset
             }
@@ -532,6 +536,53 @@ describe('JSONPopulator', () => {
             (() => {
                 jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyContainerAsset2'), options);
             }).should.throw(/Expected value at path `\$.rootObj.myAssets\[0\].assetValue` to be of type `Integer`/);
+        });
+
+        it('should throw if the value for an array field is a string rather than an array', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme@1.0.0.MyAsset3',
+                    assetId: 'asset3',
+                    values: 'hello' // this is invalid, should be an array
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyAsset3'), options);
+            }).should.throw(ValidationException, /Expected value at path `\$.values` to be an array of type `String`/);
+        });
+
+        it('should throw if the value for an array relationship is a string rather than an array', () => {
+            let options = {
+                jsonStack: new TypedStack('resource:org.acme@1.0.0.MyAsset1#asset1'),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            (() => {
+                jsonPopulator.visit(relationshipDeclaration2, options);
+            }).should.throw(ValidationException, /Expected value at path `\$` to be an array of type `MyAsset1`/);
+        });
+
+        it('should throw if the value for an array field is not an array', () => {
+            let options = {
+                jsonStack: new TypedStack({
+                    $class: 'org.acme@1.0.0.MyAsset3',
+                    assetId: 'asset3',
+                    values: 42 // this is invalid, should be an array
+                }),
+                resourceStack: new TypedStack({}),
+                factory: mockFactory,
+                modelManager: modelManager
+            };
+
+            (() => {
+                jsonPopulator.visit(modelManager.getType('org.acme@1.0.0.MyAsset3'), options);
+            }).should.throw(ValidationException, /Expected value at path `\$.values` to be an array of type `String`/);
         });
 
         it('should be able to deserialise a map that uses abstract types as values', () => {

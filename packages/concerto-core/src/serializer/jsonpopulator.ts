@@ -290,6 +290,10 @@ class JSONPopulator {
         let result: any = null;
 
         if(field.isArray()) {
+            if(!Array.isArray(jsonObj)) {
+                const path = parameters.path?.stack.join('');
+                throw new ValidationException(`Expected value at path \`${path}\` to be an array of type \`${field.getType()}\``);
+            }
             result = [];
             const jsonArray = jsonObj as unknown[];
             for(let n=0; n < jsonArray.length; n++) {
@@ -451,6 +455,10 @@ class JSONPopulator {
         let defaultType = ModelUtil.getShortName(typeFQN);
 
         if(relationshipDeclaration.isArray()) {
+            if(!Array.isArray(jsonObj)) {
+                const path = parameters.path?.stack.join('');
+                throw new ValidationException(`Expected value at path \`${path}\` to be an array of type \`${relationshipDeclaration.getType()}\``);
+            }
             result = [];
             const jsonArray = jsonObj as { [key: string]: unknown, $class: string }[];
             for(let n=0; n < jsonArray.length; n++) {
