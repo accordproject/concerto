@@ -115,9 +115,14 @@ class StringValidator extends Validator{
         }
         // `test` advances `lastIndex` when the regex has the global or sticky flag, so
         // testing the same value twice would otherwise alternate between matching and
-        // not matching. Reset it to make every test independent of previous ones.
+        // not matching. Reset it before and after so that every test is independent of
+        // previous ones, and so that getRegex() never hands out a poisoned object.
         this.regex.lastIndex = 0;
-        return this.regex.test(value);
+        try {
+            return this.regex.test(value);
+        } finally {
+            this.regex.lastIndex = 0;
+        }
     }
 
     /**

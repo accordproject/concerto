@@ -151,6 +151,13 @@ describe('StringValidator', () => {
             }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
+        it('should not leave lastIndex set on the regex it exposes', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'g' });
+            v.getRegex().lastIndex.should.equal(0);
+            v.validate('id', 'AB1234567');
+            v.getRegex().lastIndex.should.equal(0);
+        });
+
         it('should repeatedly validate a matching string with a sticky regex', () => {
             let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'y' });
             v.validate('id', 'AB1234567');
