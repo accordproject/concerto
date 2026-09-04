@@ -29,7 +29,12 @@
     "e2e"
   ],
   "overrides": {
-    "ajv@^8.0.0": "8.17.1"
+    "ajv@^8.0.0": "8.17.1",
+    "@accordproject/concerto-codegen": {
+      "@accordproject/concerto-core": "*",
+      "@accordproject/concerto-util": "*",
+      "@accordproject/concerto-vocabulary": "*"
+    }
   },
   "name": "concerto",
   "description": "Monorepo for concerto packages",
