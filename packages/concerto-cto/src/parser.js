@@ -793,7 +793,7 @@ function peg$parse(input, options) {
       const result = {
         $class: "concerto.metamodel@1.0.0.StringScalar",
       };
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (validators.regex) {
@@ -808,7 +808,7 @@ function peg$parse(input, options) {
      const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
       };
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       return result;
@@ -857,7 +857,7 @@ function peg$parse(input, options) {
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {
@@ -895,7 +895,7 @@ function peg$parse(input, options) {
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {
@@ -914,7 +914,7 @@ function peg$parse(input, options) {
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {

@@ -190,7 +190,7 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
         case `${MetaModelNamespace}.DateTimeScalar`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default="${mm.defaultValue}"`;
             }
             break;
@@ -230,7 +230,7 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.StringProperty`:
         case `${MetaModelNamespace}.StringScalar`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default="${mm.defaultValue}"`;
             }
             if (mm.validator) {
@@ -243,7 +243,7 @@ function modifiersFromMetaModel(mm: any): string {
             }
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default="${mm.defaultValue}"`;
             }
             break;
