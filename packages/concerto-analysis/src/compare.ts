@@ -141,6 +141,11 @@ export class Compare {
         comparers.forEach(comparer => comparer.compareModelFiles?.(a, b));
         // every declaration is put through the class declaration comparers; map and
         // scalar declarations are additionally compared by the calls below
+        // SAFETY: getAllDeclarations() also returns MapDeclaration/ScalarDeclaration, neither of
+        // which is a ClassDeclaration. compareClassDeclaration() guards against both with an
+        // instanceof check before touching anything ClassDeclaration-specific, and the public
+        // Comparer.compareClassDeclaration callback already has to tolerate this today, so
+        // narrowing the cast away would mean widening that public callback type instead.
         this.compareClassDeclarations(comparers, a.getAllDeclarations() as ClassDeclaration[], b.getAllDeclarations() as ClassDeclaration[]);
         this.compareMapDeclarations(comparers, a.getMapDeclarations(), b.getMapDeclarations());
         this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());

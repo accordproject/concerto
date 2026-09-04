@@ -463,6 +463,12 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
 
         try {
+            // SAFETY: FileDownloader<TFile> uses one TFile for both input and output, but the
+            // default downloader's declared shape here takes ModelFileInstance[] in and returns
+            // ModelFileSource[] out. Both getModelFiles() results and freshly downloaded files
+            // only need to structurally satisfy `{ ast }` for getExternalImports(), so the two
+            // are interchangeable at runtime; a caller-supplied fileDownloader must honour the
+            // same contract.
             const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles() as unknown as (ModelFileInstance[] & ModelFileSource[]), options);
 
             const externalModelFiles: ModelFileInstance[] = [];
@@ -497,6 +503,10 @@ class BaseModelManager {
      *  If true, external models are written to the file system. Defaults to true
      */
     writeModelsToFileSystem(path, options = {}) {
+        // SAFETY: ModelFile.fileName/definitions are typed nullable because the constructor
+        // accepts them as optional, but every ModelFile actually reachable here was built by a
+        // ModelFileLoader, which always supplies both; WritableModelFile requires them
+        // non-nullable only to keep concerto-util free of a dependency on ModelFile itself.
         ModelWriter.writeModelsToFileSystem(this.getModelFiles() as unknown as WritableModelFile[], path, options);
     }
 
