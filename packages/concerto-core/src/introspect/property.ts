@@ -12,22 +12,18 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
-const Decorated = require('./decorated');
-const CollectionSizeValidator = require('./collectionsizevalidator');
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
+import Decorated from './decorated';
+import CollectionSizeValidator from './collectionsizevalidator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const ModelFile = require('./modelfile');
-}
+import type ClassDeclaration from './classdeclaration';
+import type ModelFile from './modelfile';
+import type { AstNode } from './decorated';
 /* eslint-enable no-unused-vars */
 
 
@@ -39,13 +35,22 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Property extends Decorated {
+    parent: ClassDeclaration;
+    // Populated by process(), which this class's constructor calls, so these
+    // carry definite assignment assertions rather than initialisers -- an
+    // initialiser here would run before process() and be overwritten anyway.
+    name!: string;
+    type!: string | null;
+    array!: boolean;
+    sizeValidator!: CollectionSizeValidator | null;
+    optional!: boolean;
     /**
      * Create a Property.
      * @param {ClassDeclaration} parent - the owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: ClassDeclaration, ast: AstNode) {
         super(ast);
         this.parent = parent;
         this.process();
@@ -57,7 +62,7 @@ class Property extends Decorated {
      * @public
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         return this.parent.getModelFile();
     }
 
@@ -65,7 +70,7 @@ class Property extends Decorated {
      * Returns the owner of this property
      * @return {ClassDeclaration} the parent class declaration
      */
-    getParent() {
+    getParent(): ClassDeclaration {
         return this.parent;
     }
 
@@ -78,11 +83,10 @@ class Property extends Decorated {
         super.process();
 
         if (!ModelUtil.isValidIdentifier(this.ast.name)){
-            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.modelFile, this.ast.location);
+            throw new IllegalModelException(`Invalid property name '${this.ast.name}'`, this.getModelFile(), this.ast.location);
         }
 
         this.name = this.ast.name;
-        this.decorator = null;
 
         if(!this.name) {
             throw new Error('No name for type ' + JSON.stringify(this.ast));
@@ -140,7 +144,7 @@ class Property extends Decorated {
      * @throws {IllegalModelException}
      * @protected
      */
-    validate(classDecl) {
+    validate(classDecl: ClassDeclaration) {
         super.validate();
 
         if(this.type) {
@@ -171,7 +175,7 @@ class Property extends Decorated {
      * Returns the name of a property
      * @return {string} the name of this field
      */
-    getName() {
+    getName(): string {
         return this.name;
     }
 
@@ -179,7 +183,7 @@ class Property extends Decorated {
      * Returns the type of a property
      * @return {string} the type of this field
      */
-    getType() {
+    getType(): string | null {
         return this.type;
     }
 
@@ -187,7 +191,7 @@ class Property extends Decorated {
      * Returns true if the field is optional
      * @return {boolean} true if the field is optional
      */
-    isOptional() {
+    isOptional(): boolean {
         return this.optional;
     }
 
@@ -195,9 +199,10 @@ class Property extends Decorated {
      * Returns the fully qualified type name of a property
      * @return {string} the fully qualified type of this property
      */
-    getFullyQualifiedTypeName() {
+    getFullyQualifiedTypeName(): string {
         if(this.isPrimitive()) {
-            return this.type;
+            // isPrimitive() is only true when this.type is a primitive type name
+            return this.type as string;
         }
 
         const parent = this.getParent();
@@ -220,7 +225,7 @@ class Property extends Decorated {
      * Returns the fully name of a property (ns + class name + property name)
      * @return {string} the fully qualified name of this property
      */
-    getFullyQualifiedName() {
+    getFullyQualifiedName(): string {
         return this.getParent().getFullyQualifiedName() + '.' + this.getName();
     }
 
@@ -228,7 +233,7 @@ class Property extends Decorated {
      * Returns the namespace of the parent of this property
      * @return {string} the namespace of the parent of this property
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.getParent().getNamespace();
     }
 
@@ -236,7 +241,7 @@ class Property extends Decorated {
      * Returns true if the field is declared as an array type
      * @return {boolean} true if the property is an array type
      */
-    isArray() {
+    isArray(): boolean {
         return this.array;
     }
 
@@ -244,7 +249,7 @@ class Property extends Decorated {
      * Returns the collection size validator for this property, if one exists.
      * @return {CollectionSizeValidator|null} the validator or null
      */
-    getSizeValidator() {
+    getSizeValidator(): CollectionSizeValidator | null {
         return this.sizeValidator;
     }
 
@@ -253,7 +258,7 @@ class Property extends Decorated {
      * Returns true if the field is declared as an enumerated value
      * @return {boolean} true if the property is an enumerated value
      */
-    isTypeEnum() {
+    isTypeEnum(): boolean {
         if(this.isPrimitive()) {
             return false;
         }
@@ -267,9 +272,10 @@ class Property extends Decorated {
      * Returns true if this property is a primitive type.
      * @return {boolean} true if the property is a primitive type.
      */
-    isPrimitive() {
+    isPrimitive(): boolean {
         return ModelUtil.isPrimitiveType(this.getType());
     }
 }
 
-export = Property;
+export { Property };
+export default Property;

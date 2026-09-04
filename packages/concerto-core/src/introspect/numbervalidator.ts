@@ -12,18 +12,19 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { isNull } = require('@accordproject/concerto-util').NullUtil;
-const Validator = require('./validator');
+import { NullUtil } from '@accordproject/concerto-util';
+const { isNull } = NullUtil;
+import Validator from './validator';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const Field = require('./field');
-    const ScalarDeclaration = require('./scalardeclaration');
-}
+import type { ValidatedElement, NumberDomainValidatorAst } from './validator';
+/* eslint-enable no-unused-vars */
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type Field from './field';
+import type ScalarDeclaration from './scalardeclaration';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -33,6 +34,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class NumberValidator extends Validator{
+    declare validator: NumberDomainValidatorAst;
+    lowerBound: number | null;
+    upperBound: number | null;
 
     /**
      * Create a NumberValidator.
@@ -41,18 +45,19 @@ class NumberValidator extends Validator{
      *
      * @throws {IllegalModelException}
      */
-    constructor(field, ast) {
+    constructor(field: ValidatedElement, ast: NumberDomainValidatorAst) {
         super(field, ast);
 
         this.lowerBound = null;
         this.upperBound = null;
 
+        // the hasOwnProperty guards establish that the bound is present
         if(Object.prototype.hasOwnProperty.call(ast, 'lower')) {
-            this.lowerBound = ast.lower;
+            this.lowerBound = ast.lower as number;
         }
 
         if(Object.prototype.hasOwnProperty.call(ast, 'upper')) {
-            this.upperBound = ast.upper;
+            this.upperBound = ast.upper as number;
         }
 
         if(this.lowerBound === null && this.upperBound === null) {
@@ -82,14 +87,14 @@ class NumberValidator extends Validator{
      * Returns the lower bound for this validator, or null if not specified
      * @returns {number} the lower bound or null
      */
-    getLowerBound() {
+    getLowerBound(): number | null {
         return this.lowerBound;
     }
     /**
      * Returns the upper bound for this validator, or null if not specified
      * @returns {number} the upper bound or null
      */
-    getUpperBound() {
+    getUpperBound(): number | null {
         return this.upperBound;
     }
 
@@ -100,7 +105,7 @@ class NumberValidator extends Validator{
      * @throws {IllegalModelException}
      * @private
      */
-    validate(identifier, value) {
+    validate(identifier: string | null, value: number): void {
         if(value !== null) {
             if(this.lowerBound !== null && value < this.lowerBound) {
                 this.reportError(identifier, `Value ${value} is outside lower bound ${this.lowerBound}`);
@@ -117,7 +122,7 @@ class NumberValidator extends Validator{
      * @return {string} the string representation
      * @private
      */
-    toString() {
+    toString(): string {
         return 'NumberValidator lower: ' + this.lowerBound + ' upper: ' + this.upperBound;
     }
 
@@ -129,7 +134,7 @@ class NumberValidator extends Validator{
      * @returns {boolean} True if this validator is compatible with the other
      * validator, false otherwise.
      */
-    compatibleWith(other) {
+    compatibleWith(other: Validator | null): boolean {
         if (!(other instanceof NumberValidator)) {
             return false;
         }
@@ -155,4 +160,5 @@ class NumberValidator extends Validator{
     }
 }
 
-export = NumberValidator;
+export { NumberValidator };
+export default NumberValidator;

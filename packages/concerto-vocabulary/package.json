@@ -21,7 +21,8 @@
     "test": "nyc mocha -r ts-node/register --recursive -t 10000",
     "test:updateSnapshots": "UPDATE_SNAPSHOT=1 nyc mocha -r ts-node/register  --recursive -t 10000",
     "test:watch": "nyc mocha -r ts-node/register --watch --recursive -t 10000",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json && npm run build:esm",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -61,7 +62,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@accordproject/concerto-metamodel": "^3.16.0",
+    "@accordproject/concerto-metamodel": "^3.17.0",
     "yaml": "2.8.3"
   },
   "browserslist": "> 0.25%, not dead",
@@ -126,5 +127,17 @@
     "branches": 88,
     "functions": 98,
     "lines": 95
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/esm-browser/index.mjs",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false
 }

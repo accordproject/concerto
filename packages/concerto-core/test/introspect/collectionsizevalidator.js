@@ -17,7 +17,7 @@
 const chai = require('chai');
 chai.should();
 
-const CollectionSizeValidator = require('../../src/introspect/collectionsizevalidator');
+const { CollectionSizeValidator } = require('../../src/introspect/collectionsizevalidator');
 
 describe('CollectionSizeValidator', () => {
 

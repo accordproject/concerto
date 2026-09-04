@@ -12,12 +12,16 @@
  * limitations under the License.
  */
 
-'use strict';
+import ModelManager from './modelmanager';
+import ModelUtil from './modelutil';
+import yaml from 'yaml';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
-const ModelManager = require('./modelmanager');
-const ModelUtil = require('./modelutil');
-const yaml = require('yaml');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { IModels } from '@accordproject/concerto-metamodel';
+import type { DecoratorCommandTarget } from './types';
+/* eslint-enable no-unused-vars */
 
 // $class value for decorator arguments that carry a string value
 const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
@@ -28,14 +32,25 @@ const DECORATOR_STRING_TYPE = `${MetaModelNamespace}.DecoratorString`;
  * @memberof module:concerto-core
  * @private
  */
+/**
+ * A decorator collected from a model, keyed in the extraction dictionary by
+ * the namespace it was found in.
+ */
+interface ExtractedDecorator {
+    declaration: string;
+    property: string;
+    mapElement: string;
+    dcs: string;
+}
+
 class DecoratorExtractor {
-    extractionDictionary: any;
-    removeDecoratorsFromModel: any;
-    locale: any;
-    dcs_version: any;
-    sourceModelAst: any;
-    updatedModelAst: any;
-    action: any;
+    extractionDictionary: Record<string, ExtractedDecorator[]>;
+    removeDecoratorsFromModel: boolean;
+    locale: string;
+    dcs_version: string;
+    sourceModelAst: IModels;
+    updatedModelAst: IModels;
+    action: number;
     /**
      * The action to be performed to extract all, only vocab or only non-vocab decorators
      */
@@ -55,7 +70,7 @@ class DecoratorExtractor {
      * @param {int} [action=DecoratorExtractor.Action.EXTRACT_ALL]  - the action to be performed
      * @param {object} [options] - decorator extractor options
      */
-    constructor(removeDecoratorsFromModel, locale, dcs_version, sourceModelAst, action = DecoratorExtractor.Action.EXTRACT_ALL, options?) {
+    constructor(removeDecoratorsFromModel: boolean, locale: string, dcs_version: string, sourceModelAst: IModels, action: number = DecoratorExtractor.Action.EXTRACT_ALL, options?: Record<string, unknown>) {
         this.extractionDictionary = {};
         this.removeDecoratorsFromModel = removeDecoratorsFromModel;
         this.locale = locale;
@@ -210,7 +225,7 @@ class DecoratorExtractor {
      * @private
      */
     constructTarget(namespace, obj){
-        const target: any = {
+        const target: DecoratorCommandTarget & { $class: string } = {
             '$class': `org.accordproject.decoratorcommands@${this.dcs_version}.CommandTarget`,
             'namespace':namespace
         };
@@ -483,7 +498,7 @@ class DecoratorExtractor {
     */
     processModels(){
         const processedModels = this.sourceModelAst.models.map(model =>{
-            if ((model?.decorators?.length > 0)){
+            if ((model?.decorators?.length ?? 0) > 0) {
                 this.constructDCSDictionary(model.namespace, model.decorators, {});
                 model.decorators = this.filterOutDecorators(model.decorators);
             }
@@ -516,4 +531,6 @@ class DecoratorExtractor {
         };
     }
 }
-export = DecoratorExtractor;
+
+export { DecoratorExtractor };
+export default DecoratorExtractor;

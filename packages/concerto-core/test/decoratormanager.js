@@ -16,13 +16,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const DecoratorManager = require('../src/decoratormanager');
-const ModelManager = require('../src/modelmanager');
+const { DecoratorManager } = require('../src/decoratormanager');
+const { ModelManager } = require('../src/modelmanager');
 const VocabularyManager = require('@accordproject/concerto-vocabulary').VocabularyManager;
 const Printer = require('@accordproject/concerto-cto').Printer;
 
 const chai = require('chai');
-const ModelFile = require('../src/introspect/modelfile');
+const { ModelFile } = require('../src/introspect/modelfile');
 require('chai').should();
 chai.use(require('chai-things'));
 chai.use(require('chai-as-promised'));

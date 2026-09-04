@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import IdentifiedDeclaration = require('./identifieddeclaration');
+import IdentifiedDeclaration from './identifieddeclaration';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /** Class representing the definition of an Transaction.
@@ -52,4 +47,5 @@ class TransactionDeclaration extends IdentifiedDeclaration {
     }
 }
 
-export = TransactionDeclaration;
+export { TransactionDeclaration };
+export default TransactionDeclaration;

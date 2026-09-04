@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Internal Utility Class
  * @class
@@ -27,9 +25,10 @@ class NullUtil {
      * @param obj - the object to be tested
      * @returns true if the object is null or undefined
      */
-    static isNull(obj: unknown): boolean {
+    static isNull(obj: unknown): obj is null | undefined {
         return(typeof(obj) === 'undefined' || obj === null);
     }
 }
 
-export = NullUtil;
+export { NullUtil };
+export default NullUtil;

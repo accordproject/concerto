@@ -12,31 +12,22 @@
  * limitations under the License.
  */
 
-'use strict';
+import createDebug from 'debug';
+import { TypedStack, NullUtil as Util } from '@accordproject/concerto-util';
+import Relationship from '../model/relationship';
+import ModelUtil from '../modelutil';
+import ValidationException from './validationexception';
+import dayjs from '../dayjs-setup';
+import type Factory from '../factory';
+import type BaseModelManager from '../basemodelmanager';
+import type Declaration from '../introspect/declaration';
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type RelationshipDeclaration from '../introspect/relationshipdeclaration';
+import type MapDeclaration from '../introspect/mapdeclaration';
+import type Resource from '../model/resource';
+import Field from '../introspect/field';
 
-const debug = require('debug')('concerto:JSONPopulator');
-const { TypedStack } = require('@accordproject/concerto-util');
-const Relationship = require('../model/relationship');
-const Util = require('@accordproject/concerto-util').NullUtil;
-const ModelUtil = require('../modelutil');
-const ValidationException = require('./validationexception');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
-const quarterOfYear = require('dayjs/plugin/quarterOfYear');
-dayjs.extend(quarterOfYear);
-const minMax = require('dayjs/plugin/minMax');
-dayjs.extend(minMax);
-const duration = require('dayjs/plugin/duration');
-dayjs.extend(duration);
-import type Factory = require('../factory');
-import type ModelManager = require('../modelmanager');
-import type Declaration = require('../introspect/declaration');
-import type ClassDeclaration = require('../introspect/classdeclaration');
-import type RelationshipDeclaration = require('../introspect/relationshipdeclaration');
-import type MapDeclaration = require('../introspect/mapdeclaration');
-import type Resource = require('../model/resource');
-import Field = require('../introspect/field');
+const debug = createDebug('concerto:JSONPopulator');
 
 
 type Stack<T> = {
@@ -46,12 +37,12 @@ type Stack<T> = {
     stack: T[];
 };
 
-type JsonPopulatorParameters = {
+export type JsonPopulatorParameters = {
     jsonStack: Stack<String | { [key: string]: unknown; $class: string } | { [key: string]: unknown; $class: string }[]>;
     resourceStack: Stack<Resource>;
-    path?: Stack<string>;
+    path?: TypedStack<string>;
     factory: Factory;
-    modelManager: ModelManager;
+    modelManager: BaseModelManager;
     acceptResourcesForRelationships?: boolean;
     utcOffset?: number;
     strictQualifiedDateTimes?: boolean;
@@ -149,7 +140,7 @@ class JSONPopulator {
      * @return {Object} the result of visiting or null
      * @private
      */
-    visit(thing: VisitorTarget, parameters: JsonPopulatorParameters) {
+    visit(thing: any, parameters: JsonPopulatorParameters) {
         parameters.path ?? (parameters.path = new TypedStack('$'));
 
         if (thing.isClassDeclaration?.()) {
@@ -187,7 +178,9 @@ class JSONPopulator {
             if (value !== null) {
                 parameters.path?.push(`.${property}`);
                 parameters.jsonStack.push(value);
-                const classProperty = classDeclaration.getProperty(property);
+                // validateProperties() above has already established that every
+                // name in `properties` resolves to a property on the declaration
+                const classProperty = classDeclaration.getProperty(property)!;
                 resourceObj[property] = classProperty.accept(this,parameters);
                 parameters.path?.pop();
             }
@@ -509,4 +502,5 @@ class JSONPopulator {
     }
 }
 
-export = JSONPopulator;
+export { JSONPopulator };
+export default JSONPopulator;

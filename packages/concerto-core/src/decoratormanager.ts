@@ -12,29 +12,26 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const ModelManager = require('./modelmanager');
-const Serializer = require('./serializer');
-const Factory = require('./factory');
-const ModelUtil = require('./modelutil');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const semver = require('semver');
-const DecoratorExtractor = require('./decoratorextractor');
-const IllegalModelException = require('./introspect/illegalmodelexception');
-const rfdc = require('rfdc')({
+import ModelManager from './modelmanager';
+import Serializer from './serializer';
+import Factory from './factory';
+import ModelUtil from './modelutil';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import semver from 'semver';
+import DecoratorExtractor from './decoratorextractor';
+import IllegalModelException from './introspect/illegalmodelexception';
+import rfdcLib from 'rfdc';
+const rfdc = rfdcLib({
     circles: true,
     proto: false,
 });
 
-const { jsonToYaml, yamlToJson } = require('./dcsconverter');
+import { jsonToYaml, yamlToJson } from './dcsconverter';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./introspect/modelfile');
-}
+import type ModelFile from './introspect/modelfile';
+import type { DecoratorCommand } from './types';
 /* eslint-enable no-unused-vars */
 
 const DCS_VERSION = '0.4.0';
@@ -135,8 +132,8 @@ function isUnversionedNamespaceEqual(modelFile, unversionedNamespace) {
  * @private
  */
 class DcsIndexWrapper {
-    command: any;
-    index: any;
+    command: DecoratorCommand;
+    index: number;
 
     /**
      * Create the DcsIndexWrapper.
@@ -144,7 +141,7 @@ class DcsIndexWrapper {
      * @param {*} command - the decorator command
      * @param {number} index - the index of the command
      */
-    constructor(command, index) {
+    constructor(command: DecoratorCommand, index: number) {
         this.command = command;
         this.index = index;
     }
@@ -153,7 +150,7 @@ class DcsIndexWrapper {
      * Get the decorator command.
      * @returns {*} The decorator command.
      */
-    getCommand() {
+    getCommand(): DecoratorCommand {
         return this.command;
     }
 
@@ -161,7 +158,7 @@ class DcsIndexWrapper {
      * Get the index of the command.
      * @returns {number} The index of the command.
      */
-    getIndex() {
+    getIndex(): number {
         return this.index;
     }
 }
@@ -236,7 +233,7 @@ class DecoratorManager {
      */
     static canMigrate(decoratorCommandSet, DCS_VERSION) {
         const inputVersion = ModelUtil.parseNamespace(ModelUtil.getNamespace(decoratorCommandSet.$class)).version;
-        return (semver.major(inputVersion) === semver.major(DCS_VERSION) && (semver.minor(inputVersion) < semver.minor(DCS_VERSION)));
+        return (semver.major(inputVersion!) === semver.major(DCS_VERSION) && (semver.minor(inputVersion!) < semver.minor(DCS_VERSION)));
     }
 
     /**
@@ -430,7 +427,7 @@ class DecoratorManager {
             model.imports = model.imports ? model.imports.concat(neededImports) : neededImports;
             const namespaceName = ModelUtil.parseNamespace(model.namespace).name;
             model.declarations.forEach((decl) => {
-                const declarationDecoratorCommandSets: any[] = [];
+                const declarationDecoratorCommandSets: DcsIndexWrapper[] = [];
                 const { name: declarationName, $class: $classForDeclaration } = decl;
                 this.pushMapValues(declarationDecoratorCommandSets, declarationCommandsMap, declarationName);
                 this.pushMapValues(declarationDecoratorCommandSets, namespaceCommandsMap, model.namespace);
@@ -443,7 +440,7 @@ class DecoratorManager {
                 });
 
                 if($classForDeclaration === `${MetaModelNamespace}.MapDeclaration`) {
-                    const mapDecoratorCommandSets: any = [];
+                    const mapDecoratorCommandSets: DcsIndexWrapper[] = [];
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.key.$class);
                     this.pushMapValues(mapDecoratorCommandSets, typeCommandsMap, decl.value.$class);
                     this.pushMapValues(mapDecoratorCommandSets, mapElementCommandsMap, 'KEY');
@@ -458,7 +455,7 @@ class DecoratorManager {
                 // scalars are declarations but do not have properties
                 if (decl.properties) {
                     decl.properties.forEach((property) => {
-                        const propertyDecoratorCommandSets: any[] = [];
+                        const propertyDecoratorCommandSets: DcsIndexWrapper[] = [];
                         const { name: propertyName, $class: $classForProperty } = property;
                         this.pushMapValues(propertyDecoratorCommandSets, propertyCommandsMap, propertyName);
                         this.pushMapValues(propertyDecoratorCommandSets, typeCommandsMap, $classForProperty);
@@ -564,7 +561,7 @@ class DecoratorManager {
                 command.target.type
             );
         }
-        let modelFile: any = null;
+        let modelFile: ModelFile | null = null;
         if (command.target.namespace) {
             modelFile = validationModelManager.getModelFile(
                 command.target.namespace
@@ -589,10 +586,11 @@ class DecoratorManager {
             );
         }
 
+        // the guard above throws unless modelFile was resolved for the namespace
         if (command.target.namespace && command.target.declaration) {
             validationModelManager.resolveType(
                 'DecoratorCommand.target.declaration',
-                `${modelFile.getNamespace()}.${command.target.declaration}`
+                `${modelFile!.getNamespace()}.${command.target.declaration}`
             );
         }
         if (command.target.properties && command.target.property) {
@@ -606,7 +604,7 @@ class DecoratorManager {
             command.target.property
         ) {
             const decl = validationModelManager.getType(
-                `${modelFile.getNamespace()}.${command.target.declaration}`
+                `${modelFile!.getNamespace()}.${command.target.declaration}`
             );
             const property = decl.getProperty(command.target.property);
             if (!property) {
@@ -621,7 +619,7 @@ class DecoratorManager {
             command.target.properties
         ) {
             const decl = validationModelManager.getType(
-                `${modelFile.getNamespace()}.${command.target.declaration}`
+                `${modelFile!.getNamespace()}.${command.target.declaration}`
             );
             command.target.properties.forEach((commandProperty) => {
                 const property = decl.getProperty(commandProperty);
@@ -861,4 +859,5 @@ class DecoratorManager {
 
 }
 
-export = DecoratorManager;
+export { DecoratorManager };
+export default DecoratorManager;

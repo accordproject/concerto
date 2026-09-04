@@ -57,8 +57,8 @@ const scalarValidatorChanged: ComparerFactory = (context) => ({
                 element: a.getName()
             });
             return;
-        } else if (!aValidator.compatibleWith(bValidator)) {
-            const aValidatorType = getValidatorType(aValidator);
+        } else if (!aValidator!.compatibleWith(bValidator)) {
+            const aValidatorType = getValidatorType(aValidator!);
             context.report({
                 key: 'scalar-validator-changed',
                 message: `A ${aValidatorType} validator for the scalar "${a.getName()}" was changed and is no longer compatible`,

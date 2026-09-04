@@ -12,14 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
+import { MetaModelUtil } from '@accordproject/concerto-metamodel';
 
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
+import ModelManager from '../modelmanager';
+import Factory from '../factory';
+import Serializer from '../serializer';
+import ModelFile from '../introspect/modelfile';
 
-const ModelManager = require('../modelmanager');
-const Factory = require('../factory');
-const Serializer = require('../serializer');
-const ModelFile = require('../introspect/modelfile');
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { AstNode } from './decorated';
+/* eslint-enable no-unused-vars */
 
 /**
  * Create a metamodel manager (for validation against the metamodel)
@@ -29,10 +32,9 @@ function newMetaModelManager() {
     const metaModelManager = new ModelManager();
     const mf = new ModelFile(
         metaModelManager,
-        MetaModelUtil.metaModelAst,
+        MetaModelUtil.metaModelAst as AstNode,
         MetaModelUtil.metaModelCto,
-        'concerto.metamodel',
-        true
+        'concerto.metamodel'
     );
     metaModelManager.addModelFile(mf, MetaModelUtil.metaModelCto, 'concerto.metamodel');
     return metaModelManager;
@@ -66,7 +68,7 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     const modelManager = new ModelManager();
 
     mm.models.forEach((mm) => {
-        const mf = new ModelFile(modelManager, mm, null, null, true);
+        const mf = new ModelFile(modelManager, mm, null, null);
         modelManager.addModelFile(mf, null, null);
     });
 
@@ -74,8 +76,5 @@ function modelManagerFromMetaModel(metaModel, validate = true) {
     return modelManager;
 }
 
-export = {
-    newMetaModelManager,
-    validateMetaModel,
-    modelManagerFromMetaModel
-};
+export { newMetaModelManager, validateMetaModel, modelManagerFromMetaModel };
+export default { newMetaModelManager, validateMetaModel, modelManagerFromMetaModel };

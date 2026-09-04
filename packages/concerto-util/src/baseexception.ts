@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as ErrorCodes from './errorcodes';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const packageJson = require('../package.json');
@@ -46,4 +44,5 @@ class BaseException extends Error {
     }
 }
 
-export = BaseException;
+export { BaseException };
+export default BaseException;

@@ -12,21 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-const Util = require('@accordproject/concerto-util').NullUtil;
-
-dayjs.extend(utc);
+import dayjs from '../dayjs-setup';
+import { NullUtil as Util } from '@accordproject/concerto-util';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('../introspect/classdeclaration');
-    const ModelManager = require('../modelmanager');
-}
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type BaseModelManager from '../basemodelmanager';
+import type Field from '../introspect/field';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -38,10 +31,10 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Typed {
-    $modelManager: any;
-    $classDeclaration: any;
-    $namespace: any;
-    $type: any;
+    $modelManager: BaseModelManager;
+    $classDeclaration: ClassDeclaration;
+    $namespace: string;
+    $type: string;
     /**
      * Create an instance.
      * <p>
@@ -55,7 +48,7 @@ class Typed {
      * @param {string} type - The type this instance.
      * @protected
      */
-    constructor(modelManager, classDeclaration, ns, type) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string) {
         this.$modelManager = modelManager;
         this.$classDeclaration = classDeclaration;
         this.$namespace = ns;
@@ -78,7 +71,7 @@ class Typed {
      * @return {ModelManager} The ModelManager for this object
      * @private
      */
-    getModelManager() {
+    getModelManager(): BaseModelManager {
         return this.$modelManager;
     }
 
@@ -86,7 +79,7 @@ class Typed {
      * Get the type of the instance (a short name, not including namespace).
      * @return {string} The type of this object
      */
-    getType() {
+    getType(): string {
         return this.$type;
     }
 
@@ -94,7 +87,7 @@ class Typed {
      * Get the fully-qualified type name of the instance (including namespace).
      * @return {string} The fully-qualified type name of this object
      */
-    getFullyQualifiedType() {
+    getFullyQualifiedType(): string {
         return this.$classDeclaration.getFullyQualifiedName();
     }
 
@@ -102,7 +95,7 @@ class Typed {
      * Get the namespace of the instance.
      * @return {string} The namespace of this object
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.$namespace;
     }
 
@@ -112,7 +105,7 @@ class Typed {
      * @return {ClassDeclaration} - the class declaration for this instance
      * @private
      */
-    getClassDeclaration() {
+    getClassDeclaration(): ClassDeclaration {
         return this.$classDeclaration;
     }
 
@@ -143,12 +136,15 @@ class Typed {
      * Sets the fields to their default values, based on the model
      * @private
      */
-    assignFieldDefaults() {
+    assignFieldDefaults(): void {
         let classDeclaration = this.getClassDeclaration();
         let fields = classDeclaration.getProperties();
 
         for (let n = 0; n < fields.length; n++) {
-            let field = fields[n];
+            // isTypeScalar/isField/getDefaultValue/getScalarField are Field-only
+            // members, absent on other Property subtypes (e.g. relationships) -
+            // the optional chaining below guards those cases at runtime.
+            let field = fields[n] as Field;
             if(field.isTypeScalar?.()) {
                 field = field.getScalarField();
             }
@@ -187,7 +183,7 @@ class Typed {
      * @returns {boolean} True if this instance is an instance of the specified fully
      * qualified type name, false otherwise.
      */
-    instanceOf(fqt) {
+    instanceOf(fqt: string): boolean {
         // Check to see if this is an exact instance of the specified type.
         const classDeclaration = this.getClassDeclaration();
         if (classDeclaration.getFullyQualifiedName() === fqt) {
@@ -214,4 +210,5 @@ class Typed {
     }
 }
 
-export = Typed;
+export { Typed };
+export default Typed;

@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const BaseException = require('@accordproject/concerto-util').BaseException;
+import { BaseException } from '@accordproject/concerto-util';
 
 /**
  * Exception thrown when a resource fails to model against the model
@@ -31,9 +29,10 @@ class ValidationException extends BaseException {
      * @param {string} message - the message for the exception
      * @param {string} component - the optional component which throws this error
      */
-    constructor(message, component) {
+    constructor(message, component?) {
         super(message, component);
     }
 }
 
-export = ValidationException;
+export { ValidationException };
+export default ValidationException;

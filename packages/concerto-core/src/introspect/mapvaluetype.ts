@@ -12,21 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Decorated = require('./decorated');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const IllegalModelException = require('./illegalmodelexception');
-const ModelUtil = require('../modelutil');
-
+import Decorated from './decorated';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import IllegalModelException from './illegalmodelexception';
+import ModelUtil from '../modelutil';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-    const MapDeclaration = require('./mapdeclaration');
-}
+import type ModelFile from './modelfile';
+import type MapDeclaration from './mapdeclaration';
+import type { AstNode } from './decorated';
+/* eslint-enable no-unused-vars */
 
 /**
  * MapValueType defines a Value type of MapDeclaration.
@@ -37,13 +33,17 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class MapValueType extends Decorated {
+    parent: MapDeclaration;
+    modelFile: ModelFile;
+    // Populated by process(), which this class's constructor calls.
+    type!: string;
     /**
      * Create an MapValueType.
      * @param {MapDeclaration} parent - The owner of this property
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: MapDeclaration, ast: AstNode) {
         super(ast);
         this.parent = parent;
         this.modelFile = parent.getModelFile();
@@ -87,7 +87,7 @@ class MapValueType extends Decorated {
      * @param {Object} ast - The AST created by the parser
      * @private
      */
-    processType(ast) {
+    processType(ast: AstNode) {
         let decl;
         switch(this.ast.$class) {
         case `${MetaModelNamespace}.ObjectMapValueType`:
@@ -138,7 +138,7 @@ class MapValueType extends Decorated {
      * @public
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         return this.parent.getModelFile();
     }
 
@@ -147,7 +147,7 @@ class MapValueType extends Decorated {
      * @public
      * @return {MapDeclaration} the parent map declaration
      */
-    getParent() {
+    getParent(): MapDeclaration {
         return this.parent;
     }
 
@@ -157,7 +157,7 @@ class MapValueType extends Decorated {
      *
      * @return {string} the short name of this class
      */
-    getType() {
+    getType(): string {
         return this.type;
     }
 
@@ -165,7 +165,7 @@ class MapValueType extends Decorated {
      * Returns the string representation of this class
      * @return {String} the string representation of the class
      */
-    toString() {
+    toString(): string {
         return 'MapValueType {id=' + this.getType() + '}';
     }
 
@@ -174,7 +174,7 @@ class MapValueType extends Decorated {
      *
      * @return {boolean} true if the class is a Map Key
      */
-    isKey() {
+    isKey(): boolean {
         return false;
     }
 
@@ -183,7 +183,7 @@ class MapValueType extends Decorated {
      *
      * @return {boolean} true if the class is a Map Value
      */
-    isValue() {
+    isValue(): boolean {
         return true;
     }
 
@@ -191,9 +191,10 @@ class MapValueType extends Decorated {
      * Return the namespace of this map value.
      * @return {string} namespace - a namespace.
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.modelFile.getNamespace();
     }
 }
 
-export = MapValueType;
+export { MapValueType };
+export default MapValueType;

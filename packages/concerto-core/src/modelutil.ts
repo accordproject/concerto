@@ -12,19 +12,20 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const { MetaModelUtil } = require('@accordproject/concerto-metamodel');
-const semver = require('semver');
-const Globalize = require('./globalize');
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { MetaModelUtil } from '@accordproject/concerto-metamodel';
+import semver from 'semver';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./introspect/modelfile');
-}
+import type { SemVer } from 'semver';
+/* eslint-enable no-unused-vars */
+import Globalize from './globalize';
+
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type ModelFile from './introspect/modelfile';
+/* eslint-enable no-unused-vars */
 
 const ID_REGEX = /^(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4})(?:\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|\$|_|\\u[0-9A-Fa-f]{4}|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200C|\u200D)*$/u;
 
@@ -124,7 +125,7 @@ class ModelUtil {
         }
 
         const parts = ns.split('@');
-        let version = parts[1];
+        let version: string | SemVer | null = parts[1];
         if(parts.length > 2) {
             throw new Error(`Invalid namespace ${ns}`);
         }
@@ -250,8 +251,8 @@ class ModelUtil {
      * @param {string} name - the name of the identifier to test.
      * @returns {boolean} true if the identifier is valid.
      */
-    static isValidIdentifier(name) {
-        return ID_REGEX.test(name);
+    static isValidIdentifier(name: string | undefined): name is string {
+        return ID_REGEX.test(name as string);
     }
 
     /**
@@ -351,4 +352,5 @@ class ModelUtil {
     }
 }
 
-export = ModelUtil;
+export { ModelUtil };
+export default ModelUtil;

@@ -12,21 +12,32 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
-const { Logger } = require('@accordproject/concerto-util');
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
+import { Logger } from '@accordproject/concerto-util';
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ClassDeclaration = require('./classdeclaration');
-    const Property = require('./property');
-}
+import type Decorated from './decorated';
+import type { AstNode } from './decorated';
+import type { IDecorator } from '@accordproject/concerto-metamodel';
 /* eslint-enable no-unused-vars */
+
+/**
+ * A decorator argument that references a type, produced from a
+ * `DecoratorTypeReference` node in the metamodel AST.
+ */
+export interface DecoratorTypeReferenceArgument {
+    type: 'Identifier';
+    name: string;
+    array: boolean;
+}
+
+/**
+ * The values a decorator can be given: a literal, or a reference to a type.
+ */
+export type DecoratorArgument = string | number | boolean | DecoratorTypeReferenceArgument;
 
 /**
  * Decorator encapsulates a decorator (annotation) on a class or property.
@@ -34,9 +45,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Decorator {
-    ast: any;
-    parent: any;
-    arguments: any[];
+    ast: AstNode;
+    parent: Decorated;
+    arguments: DecoratorArgument[];
     name!: string;
     /**
      * Create a Decorator.
@@ -44,7 +55,7 @@ class Decorator {
      * @param {Object} ast - The AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(parent, ast) {
+    constructor(parent: Decorated, ast: AstNode) {
         this.ast = ast;
         this.parent = parent;
         this.arguments = [];
@@ -54,12 +65,11 @@ class Decorator {
     /**
     * Handles a validation error, logging and throwing as required
     * @param {string} level the log level
-    * @param {*} err the error to log
-    * @param {*} [fileLocation] the file location
+    * @param {string | Error} err the message to log, or the error that was caught
     * @private
     */
-    handleError(level, err) {
-        Logger.dispatch(level, err);
+    handleError(level: string | undefined, err: string | Error): void {
+        Logger.dispatch(level as string, err);
         if (level === 'error') {
             throw new IllegalModelException(err, this.getParent().getModelFile(), this.ast.location);
         }
@@ -79,7 +89,7 @@ class Decorator {
      * Returns the owner of this property
      * @return {ClassDeclaration|Property} the parent class or property declaration
      */
-    getParent() {
+    getParent(): Decorated {
         return this.parent;
     }
 
@@ -89,7 +99,9 @@ class Decorator {
      * @private
      */
     process() {
-        this.name = this.ast.name;
+        // a Decorator is always built from a metamodel Decorator node, which
+        // always carries a name
+        this.name = (this.ast as IDecorator).name;
         this.arguments = [];
 
         if (this.ast.arguments) {
@@ -117,7 +129,9 @@ class Decorator {
      */
     validate() {
         const mf = this.getParent().getModelFile();
-        const decoratedName = this.getParent().getFullyQualifiedName?.();
+        // ModelFile decorators have no fully qualified name, hence the optional call
+        const parent = this.getParent() as Decorated & { getFullyQualifiedName?(): string };
+        const decoratedName = parent.getFullyQualifiedName?.();
         const mm = mf.getModelManager();
         const validationOptions = mm.getDecoratorValidation();
 
@@ -165,18 +179,22 @@ class Decorator {
                             }
                             break;
                         default: {
-                            if (argType !== 'object' || arg?.type !== 'Identifier') {
+                            if (typeof arg !== 'object' || arg?.type !== 'Identifier') {
                                 const err = `Decorator ${this.getName()} has invalid decorator argument. Expected object. Found ${argType}, with value ${JSON.stringify(arg)}`;
                                 this.handleError(validationOptions.invalidDecorator, err);
                             }
-                            const typeDecl = mf.getType(arg.name);
+                            // handleError above only throws when the decorator
+                            // validation option is set to 'error', so arg may still
+                            // be something other than a type reference here
+                            const typeReference = arg as DecoratorTypeReferenceArgument;
+                            const typeDecl = mf.getType(typeReference.name);
                             if (!typeDecl) {
-                                const err = `Decorator ${this.getName()} references a type ${arg.name} which has not been defined/imported.`;
+                                const err = `Decorator ${this.getName()} references a type ${typeReference.name} which has not been defined/imported.`;
                                 this.handleError(validationOptions.invalidDecorator, err);
                             }
                             else {
                                 if (!ModelUtil.isAssignableTo(typeDecl.getModelFile(), typeDecl.getFullyQualifiedName(), property)) {
-                                    const err = `Decorator ${this.getName()} references a type ${arg.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
+                                    const err = `Decorator ${this.getName()} references a type ${typeReference.name} which cannot be assigned to the declared type ${property.getFullyQualifiedTypeName()}`;
                                     this.handleError(validationOptions.invalidDecorator, err);
                                 }
                             }
@@ -187,7 +205,7 @@ class Decorator {
                 }
             }
             catch (err) {
-                this.handleError(validationOptions.missingDecorator, err);
+                this.handleError(validationOptions.missingDecorator, err as Error);
             }
         }
     }
@@ -196,7 +214,7 @@ class Decorator {
      * Returns the name of a decorator
      * @return {string} the name of this decorator
      */
-    getName() {
+    getName(): string {
         return this.name;
     }
 
@@ -204,7 +222,7 @@ class Decorator {
      * Returns the arguments for this decorator
      * @return {object[]} the arguments for this decorator
      */
-    getArguments() {
+    getArguments(): DecoratorArgument[] {
         return this.arguments;
     }
 
@@ -213,9 +231,10 @@ class Decorator {
      *
      * @return {boolean} true if the class is a decorator
      */
-    isDecorator() {
+    isDecorator(): boolean {
         return true;
     }
 }
 
-export = Decorator;
+export { Decorator };
+export default Decorator;

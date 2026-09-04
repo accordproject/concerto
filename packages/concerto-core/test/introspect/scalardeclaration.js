@@ -14,12 +14,12 @@
 
 'use strict';
 
-const ScalarDeclaration = require('../../src/introspect/scalardeclaration');
-const IllegalModelException = require('../../src/introspect/illegalmodelexception');
+const { ScalarDeclaration } = require('../../src/introspect/scalardeclaration');
+const { IllegalModelException } = require('../../src/introspect/illegalmodelexception');
 const IntrospectUtils = require('./introspectutils');
 const ParserUtil = require('./parserutility');
 
-const ModelManager = require('../../src/modelmanager');
+const { ModelManager } = require('../../src/modelmanager');
 const Util = require('../composer/composermodelutility');
 const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
 

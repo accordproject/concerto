@@ -12,14 +12,12 @@
  * limitations under the License.
  */
 
-'use strict';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const debug = require('debug')('concerto:FileDownloader');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const PromisePool = require('@supercharge/promise-pool');
+import createDebug from 'debug';
+import PromisePool from '@supercharge/promise-pool';
 
 import type { FileLoader } from './loaders/fileloader';
+
+const debug = createDebug('concerto:FileDownloader');
 
 type ExternalImportMap = Record<string, string>;
 type DownloadJob<TFile> = {
@@ -28,28 +26,44 @@ type DownloadJob<TFile> = {
     options: RequestInit;
 };
 
-const flatten = <T>(arr: T[][]): T[] => ([] as T[]).concat(...arr);
+function flatten<T>(arr: T[][]): T[];
+function flatten<T>(arr: Array<T[] | undefined>): Array<T | undefined>;
+function flatten<T>(arr: Array<T[] | undefined>): Array<T | undefined> {
+    return ([] as Array<T | undefined>).concat(...arr);
+}
 const filterUndefined = <T>(arr: Array<T | undefined | null>): T[] => arr.filter((value): value is T => Boolean(value));
 
-const handleJobError = async (error: unknown, job: DownloadJob<unknown>) => {
+// Used as the PromisePool error handler for both the outer pool (whose items are
+// DownloadJob objects) and the inner recursive pool (whose items are plain URI
+// strings), hence the union.
+const handleJobError = async (error: unknown, job: DownloadJob<unknown> | string): Promise<never> => {
     const errLike = error as { response?: { status?: number }; code?: string };
     const badHttpResponse = errLike.response && errLike.response.status && errLike.response.status !== 200;
     const dnsFailure = errLike.code && errLike.code === 'ENOTFOUND';
+    // undefined for the inner pool's string jobs, as it has always been
+    const jobUrl = (job as DownloadJob<unknown>).url;
     if(badHttpResponse || dnsFailure){
-        const err = new Error(`Unable to download external model dependency '${job.url}'`);
+        const err = new Error(`Unable to download external model dependency '${jobUrl}'`);
         (err as { code?: string }).code = 'MISSING_DEPENDENCY';
         throw err;
     }
-    throw new Error('Failed to load model file. Job: ' + job.url + ' Details: ' + error);
+    throw new Error('Failed to load model file. Job: ' + jobUrl + ' Details: ' + error);
 };
 
 /**
  * Downloads the transitive closure of a set of model files.
+ *
+ * The files handed in to start the walk are not necessarily the same type as the files
+ * the loader produces: a caller may seed the walk with model files it has already parsed
+ * into its own representation, while everything downloaded from a URI is whatever the
+ * bound FileLoader returns. TSeed is the former, TFile the latter, and both are only ever
+ * inspected through getExternalImports. TSeed defaults to TFile for the common case where
+ * a caller seeds the walk with files of the same type the loader produces.
  * @memberof module:concerto-core
  */
-class FileDownloader<TFile = unknown> {
+class FileDownloader<TFile = unknown, TSeed = TFile> {
     public fileLoader: FileLoader<TFile>;
-    public getExternalImports: (file: TFile) => ExternalImportMap;
+    public getExternalImports: (file: TFile | TSeed) => ExternalImportMap;
     public concurrency: number;
 
     /**
@@ -58,7 +72,7 @@ class FileDownloader<TFile = unknown> {
      * @param getExternalImports - a function taking a file and returning new files
      * @param concurrency - the number of model files to download concurrently
      */
-    constructor(fileLoader: FileLoader<TFile>, getExternalImports: (file: TFile) => ExternalImportMap, concurrency = 10) {
+    constructor(fileLoader: FileLoader<TFile>, getExternalImports: (file: TFile | TSeed) => ExternalImportMap, concurrency = 10) {
         this.fileLoader = fileLoader;
         this.concurrency = concurrency;
         this.getExternalImports = getExternalImports;
@@ -66,11 +80,11 @@ class FileDownloader<TFile = unknown> {
 
     /**
      * Download all external dependencies for an array of model files
-     * @param files - the model files
+     * @param files - the model files to start the walk from
      * @param options - Options object passed to FileLoaders
      * @return a promise that resolves to Files[] for the external model files
      */
-    downloadExternalDependencies(files: TFile[], options: RequestInit = {} as RequestInit): Promise<TFile[]> {
+    downloadExternalDependencies(files: TSeed[], options: RequestInit = {} as RequestInit): Promise<TFile[]> {
         const method = 'downloadExternalDependencies';
         debug(method);
 
@@ -90,7 +104,7 @@ class FileDownloader<TFile = unknown> {
             .for(jobs)
             .handleError(handleJobError)
             .process((x: DownloadJob<TFile>) => this.runJob(x, this.fileLoader))
-            .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
+            .then(({ results }) => filterUndefined(flatten(results)));
     }
 
     /**
@@ -135,12 +149,14 @@ class FileDownloader<TFile = unknown> {
                                 downloadedUris: downloadedUris
                             }, fileLoader);
                         }
+                        return undefined;
                     })
-                    .then(({ results }: { results: Array<TFile[]> }) => filterUndefined(flatten(results)));
+                    .then(({ results }) => filterUndefined(flatten(results)));
 
                 return externalImportsFiles.concat([file]);
             });
     }
 }
 
-export = FileDownloader;
+export { FileDownloader };
+export default FileDownloader;

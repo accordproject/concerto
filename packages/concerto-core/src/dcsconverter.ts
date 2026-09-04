@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const yaml = require('yaml');
-const ModelUtil  = require('./modelutil');
-const { MetaModelNamespace } = require('@accordproject/concerto-metamodel');
+import yaml from 'yaml';
+import ModelUtil from './modelutil';
+import { MetaModelNamespace } from '@accordproject/concerto-metamodel';
 
 /**
  * handles the target field of a command
@@ -220,4 +218,5 @@ function yamlToJson(yamlString){
 }
 
 
-export = { jsonToYaml, yamlToJson };
+export { jsonToYaml, yamlToJson };
+export default { jsonToYaml, yamlToJson };
