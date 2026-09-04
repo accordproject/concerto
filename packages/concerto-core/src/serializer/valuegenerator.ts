@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-import { loremIpsum } from 'lorem-ipsum';
 import RandExp from 'randexp';
 import dayjs from '../dayjs-setup';
 
@@ -20,6 +19,25 @@ import dayjs from '../dayjs-setup';
 /* eslint-disable no-unused-vars */
 import type { Dayjs } from 'dayjs';
 /* eslint-enable no-unused-vars */
+
+const LOREM_WORDS = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo'];
+
+/**
+ * Generate a random lorem-ipsum-like sentence of one to five words. The
+ * trailing period preserves visible word boundaries when getString
+ * concatenates multiple sentences to satisfy a length constraint.
+ * @return {string} a non-empty sentence.
+ * @private
+ */
+const generateSentence = () => {
+    const wordCount = Math.floor(Math.random() * 5) + 1;
+    const words: string[] = [];
+    for (let i = 0; i < wordCount; i++) {
+        words.push(LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)]);
+    }
+    const sentence = words.join(' ');
+    return sentence.charAt(0).toUpperCase() + sentence.substring(1) + '.';
+};
 
 /**
  * Generate a random number within a given range with
@@ -113,22 +131,10 @@ const generateString = (seedString, minLength, maxLength, stringGenFunc) => {
  * @private
  */
 const getString = (minLength, maxLength) => {
-    const lower = 1;
-    const upper = 5;
-    let stringValue = loremIpsum({
-        count: 1                        // Number of words, sentences, or paragraphs to generate.
-        , units: 'sentences'            // Generate words, sentences, or paragraphs.
-        , sentenceLowerBound: lower         // Minimum words per sentence.
-        , sentenceUpperBound: upper         // Maximum words per sentence.
-    });
+    let stringValue = generateSentence();
 
     if (minLength || maxLength) {
-        stringValue = generateString(stringValue, minLength, maxLength, () => loremIpsum({
-            count: 1                        // Number of words, sentences, or paragraphs to generate.
-            , units: 'sentences'            // Generate words, sentences, or paragraphs.
-            , sentenceLowerBound: lower         // Minimum words per sentence.
-            , sentenceUpperBound: upper         // Maximum words per sentence.
-        }));
+        stringValue = generateString(stringValue, minLength, maxLength, () => generateSentence());
     }
     return stringValue;
 };
