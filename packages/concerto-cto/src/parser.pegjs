@@ -1187,7 +1187,7 @@ StringScalar
       const result = {
         $class: "concerto.metamodel@1.0.0.StringScalar",
       };
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (validators.regex) {
@@ -1204,7 +1204,7 @@ DateTimeScalar
      const result = {
         $class: "concerto.metamodel@1.0.0.DateTimeScalar",
       };
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       return result;
@@ -1288,7 +1288,7 @@ ObjectFieldDeclaration
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {
@@ -1330,7 +1330,7 @@ DateTimeFieldDeclaration
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {
@@ -1351,7 +1351,7 @@ StringFieldDeclaration
     		isOptional: buildBoolean(optional),
             ...buildRange(location())
     	};
-      if (d) {
+      if (d !== null) {
         result.defaultValue = d;
       }
       if (decorators.length > 0) {

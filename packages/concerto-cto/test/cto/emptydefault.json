@@ -1,0 +1,61 @@
+{
+    "$class": "concerto.metamodel@1.0.0.Model",
+    "decorators": [],
+    "namespace": "org.acme@1.0.0",
+    "imports": [],
+    "declarations": [
+        {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "defaultValue": "",
+            "name": "EmptyStringScalar"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.StringScalar",
+            "defaultValue": "something",
+            "name": "NonEmptyStringScalar"
+        },
+        {
+            "$class": "concerto.metamodel@1.0.0.ConceptDeclaration",
+            "name": "EmptyDefaults",
+            "isAbstract": false,
+            "properties": [
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "emptyString",
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": ""
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "nonEmptyString",
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": "something"
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.StringProperty",
+                    "name": "emptyStringWithLength",
+                    "isArray": false,
+                    "isOptional": false,
+                    "defaultValue": "",
+                    "lengthValidator": {
+                        "$class": "concerto.metamodel@1.0.0.StringLengthValidator",
+                        "minLength": 0,
+                        "maxLength": 10
+                    }
+                },
+                {
+                    "$class": "concerto.metamodel@1.0.0.ObjectProperty",
+                    "name": "emptyStringScalar",
+                    "type": {
+                        "$class": "concerto.metamodel@1.0.0.TypeIdentifier",
+                        "name": "EmptyStringScalar"
+                    },
+                    "isArray": false,
+                    "isOptional": false
+                }
+            ]
+        }
+    ]
+}
