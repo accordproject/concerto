@@ -52,11 +52,18 @@ const handleJobError = async (error: unknown, job: DownloadJob<unknown> | string
 
 /**
  * Downloads the transitive closure of a set of model files.
+ *
+ * The files handed in to start the walk are not necessarily the same type as the files
+ * the loader produces: a caller may seed the walk with model files it has already parsed
+ * into its own representation, while everything downloaded from a URI is whatever the
+ * bound FileLoader returns. TSeed is the former, TFile the latter, and both are only ever
+ * inspected through getExternalImports. TSeed defaults to TFile for the common case where
+ * a caller seeds the walk with files of the same type the loader produces.
  * @memberof module:concerto-core
  */
-class FileDownloader<TFile = unknown> {
+class FileDownloader<TFile = unknown, TSeed = TFile> {
     public fileLoader: FileLoader<TFile>;
-    public getExternalImports: (file: TFile) => ExternalImportMap;
+    public getExternalImports: (file: TFile | TSeed) => ExternalImportMap;
     public concurrency: number;
 
     /**
@@ -65,7 +72,7 @@ class FileDownloader<TFile = unknown> {
      * @param getExternalImports - a function taking a file and returning new files
      * @param concurrency - the number of model files to download concurrently
      */
-    constructor(fileLoader: FileLoader<TFile>, getExternalImports: (file: TFile) => ExternalImportMap, concurrency = 10) {
+    constructor(fileLoader: FileLoader<TFile>, getExternalImports: (file: TFile | TSeed) => ExternalImportMap, concurrency = 10) {
         this.fileLoader = fileLoader;
         this.concurrency = concurrency;
         this.getExternalImports = getExternalImports;
@@ -73,11 +80,11 @@ class FileDownloader<TFile = unknown> {
 
     /**
      * Download all external dependencies for an array of model files
-     * @param files - the model files
+     * @param files - the model files to start the walk from
      * @param options - Options object passed to FileLoaders
      * @return a promise that resolves to Files[] for the external model files
      */
-    downloadExternalDependencies(files: TFile[], options: RequestInit = {} as RequestInit): Promise<TFile[]> {
+    downloadExternalDependencies(files: TSeed[], options: RequestInit = {} as RequestInit): Promise<TFile[]> {
         const method = 'downloadExternalDependencies';
         debug(method);
 

@@ -454,7 +454,7 @@ class BaseModelManager {
         const NAME = 'updateExternalModels';
         debug(NAME, 'updateExternalModels', options);
 
-        const downloader = fileDownloader ?? new FileDownloader(
+        const downloader = fileDownloader ?? new FileDownloader<ModelFileSource, ModelFileInstance>(
             new DefaultFileLoader(this.processFile),
             (file) => MetaModelUtil.getExternalImports(file.ast) as Record<string, string>
         );
@@ -463,13 +463,7 @@ class BaseModelManager {
         Object.assign(originalModelFiles, this.modelFiles);
 
         try {
-            // SAFETY: FileDownloader<TFile> uses one TFile for both input and output, but the
-            // default downloader's declared shape here takes ModelFileInstance[] in and returns
-            // ModelFileSource[] out. Both getModelFiles() results and freshly downloaded files
-            // only need to structurally satisfy `{ ast }` for getExternalImports(), so the two
-            // are interchangeable at runtime; a caller-supplied fileDownloader must honour the
-            // same contract.
-            const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles() as unknown as (ModelFileInstance[] & ModelFileSource[]), options);
+            const externalModels = await downloader.downloadExternalDependencies(this.getModelFiles(), options);
 
             const externalModelFiles: ModelFileInstance[] = [];
             externalModels.forEach((file) => {
@@ -503,11 +497,19 @@ class BaseModelManager {
      *  If true, external models are written to the file system. Defaults to true
      */
     writeModelsToFileSystem(path, options = {}) {
-        // SAFETY: ModelFile.fileName/definitions are typed nullable because the constructor
-        // accepts them as optional, but every ModelFile actually reachable here was built by a
-        // ModelFileLoader, which always supplies both; WritableModelFile requires them
-        // non-nullable only to keep concerto-util free of a dependency on ModelFile itself.
-        ModelWriter.writeModelsToFileSystem(this.getModelFiles() as unknown as WritableModelFile[], path, options);
+        // A ModelFile is only writable if it knows its own file name and carries its CTO
+        // source: one built from an AST alone has neither. Narrowing here rather than casting
+        // keeps WritableModelFile an honest statement of what the writer needs, and turns what
+        // was a TypeError from deep inside fs into an error that names the offending model.
+        const writableModelFiles = this.getModelFiles().map((modelFile): WritableModelFile => {
+            const fileName = modelFile.getName();
+            const definitions = modelFile.getDefinitions();
+            if (!fileName || definitions === null || definitions === undefined) {
+                throw new Error(`Cannot write model file for namespace '${modelFile.getNamespace()}' to the file system: it has no ${!fileName ? 'file name' : 'definitions'}.`);
+            }
+            return { fileName, definitions, external: modelFile.isExternal() };
+        });
+        ModelWriter.writeModelsToFileSystem(writableModelFiles, path, options);
     }
 
     /**

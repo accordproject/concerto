@@ -253,6 +253,47 @@ systems. It only bites a process that loads a package twice, so:
   `Serializer` guard fails on an object that is obviously the right type, run
   `npm ls @accordproject/concerto-core` and confirm you aren't loading it twice.
 
+### Type signatures that were lying
+
+The ESM migration replaced `require()` with `import`, which restored real types across
+package boundaries where `require()` had been producing `any`. Three signatures turned
+out not to describe what the code actually does, and were being held together by casts.
+They are corrected here rather than papered over, because a major release is the only
+place that can happen. All three are type-level changes: **runtime behaviour is
+unchanged**, apart from one error message noted below.
+
+**`Comparer.compareClassDeclaration` receives a `Declaration`, not a `ClassDeclaration`**
+(`@accordproject/concerto-analysis`). Every declaration in a model file is put through
+this callback, including `MapDeclaration` and `ScalarDeclaration` — neither of which is a
+`ClassDeclaration`. That has always been true at runtime; only the type said otherwise.
+If you write custom comparers in TypeScript and reach for something only a
+`ClassDeclaration` has, you now get a compile error where you previously got a runtime
+crash on a model containing a map or scalar:
+
+```ts
+const myComparer: ComparerFactory = () => ({
+    compareClassDeclaration: (a, b) => {
+        a?.getOwnProperties();          // 5.0.0: compile error — narrow first
+        if (a instanceof ClassDeclaration) {
+            a.getOwnProperties();       // fine
+        }
+        a?.getName();                   // fine — Declaration-level, unchanged
+    }
+});
+```
+
+**`FileDownloader` takes a second type parameter** (`@accordproject/concerto-util`):
+`FileDownloader<TFile, TSeed = TFile>`. The files you seed the walk with are not
+necessarily the type the bound `FileLoader` produces — `ModelManager` seeds it with
+parsed `ModelFile`s and gets back raw sources — and one type parameter could not say
+that. `TSeed` defaults to `TFile`, so existing single-parameter uses are unaffected.
+
+**`ModelManager.writeModelsToFileSystem` reports unwritable models properly.** A
+`ModelFile` built from an AST alone has no file name and no CTO source, so it cannot be
+written to disk. This previously surfaced as a `TypeError` from inside `fs`; it now
+throws an error naming the namespace that could not be written. Model managers loaded
+from CTO — the overwhelmingly common case — are unaffected.
+
 ## Not breaking
 
 Root-package imports are unaffected — this is true for both CommonJS and ESM, and for

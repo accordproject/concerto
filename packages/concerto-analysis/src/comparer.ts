@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { ClassDeclaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
+import { Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareContext } from './compare-context';
 
 /**
@@ -25,13 +25,18 @@ export type Comparer = {
     compareModelFiles?: (a: ModelFile, b: ModelFile) => void;
 
     /**
-     * Called to compare two class declarations. If a is undefined, but b is defined, then this class declaration was
-     * created in the second model. If a is defined, but b is undefined, then this class declaration was removed in the
+     * Called to compare two declarations. If a is undefined, but b is defined, then this declaration was
+     * created in the second model. If a is defined, but b is undefined, then this declaration was removed in the
      * second model.
-     * @param a The first class declaration for comparision, or undefined if it is undefined in the first model.
-     * @param b The second class declaration for comparision, or undefined if it is undefined in the second model.
+     *
+     * Every declaration in a model file is put through this callback, including map and scalar
+     * declarations, which are additionally compared by compareMapDeclaration and
+     * compareScalarDeclaration. Narrow with `instanceof ClassDeclaration` before reaching for
+     * anything a MapDeclaration or ScalarDeclaration does not have.
+     * @param a The first declaration for comparision, or undefined if it is undefined in the first model.
+     * @param b The second declaration for comparision, or undefined if it is undefined in the second model.
      */
-    compareClassDeclaration?: (a: ClassDeclaration | undefined, b: ClassDeclaration | undefined) => void;
+    compareClassDeclaration?: (a: Declaration | undefined, b: Declaration | undefined) => void;
 
     /**
      * Called to compare two map declarations. If a is undefined, but b is defined, then this map declaration was
