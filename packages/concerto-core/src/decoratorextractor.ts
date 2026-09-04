@@ -257,6 +257,14 @@ class DecoratorExtractor {
         };
         if (dcs.arguments){
             const args = dcs.arguments.map((arg)=>{
+                // type reference arguments carry a type identifier rather than a value
+                if (arg.$class === `${MetaModelNamespace}.DecoratorTypeReference`){
+                    return {
+                        '$class':arg.$class,
+                        'type':arg.type,
+                        'isArray':arg.isArray
+                    };
+                }
                 return {
                     '$class':arg.$class,
                     'value':arg.value
