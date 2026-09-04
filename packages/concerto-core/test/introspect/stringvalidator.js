@@ -134,6 +134,36 @@ describe('StringValidator', () => {
             }).should.throw(/Validator error for field `id`. org.acme.myField/);
         });
 
+        it('should repeatedly validate a matching string with a global regex', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'g' });
+            v.validate('id', 'AB1234567');
+            v.validate('id', 'AB1234567');
+            v.validate('id', 'AB1234567');
+        });
+
+        it('should repeatedly reject a mismatched string with a global regex', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'g' });
+            (() => {
+                v.validate('id', 'xyz');
+            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+            (() => {
+                v.validate('id', 'xyz');
+            }).should.throw(/Validator error for field `id`. org.acme.myField/);
+        });
+
+        it('should not leave lastIndex set on the regex it exposes', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'g' });
+            v.getRegex().lastIndex.should.equal(0);
+            v.validate('id', 'AB1234567');
+            v.getRegex().lastIndex.should.equal(0);
+        });
+
+        it('should repeatedly validate a matching string with a sticky regex', () => {
+            let v = new StringValidator(mockField, { pattern: '^[A-z][A-z][0-9]{7}', flags: 'y' });
+            v.validate('id', 'AB1234567');
+            v.validate('id', 'AB1234567');
+        });
+
         it('should validate a string with escaped chacters', () => {
             let v = new StringValidator(mockField, { pattern: '^[\\\\]*\\n$' });
             v.validate('id', '\\\\\n');
