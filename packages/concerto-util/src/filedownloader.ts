@@ -90,13 +90,21 @@ class FileDownloader<TFile = unknown, TSeed = TFile> {
 
         const downloadedUris = new Set<string>();
 
-        const jobs: Array<DownloadJob<TFile>> = flatten(files.map(file => {
-            const externalImports = this.getExternalImports(file);
-            return Object.keys(externalImports).map(importDeclaration => ({
-                downloadedUris: downloadedUris,
-                url: externalImports[importDeclaration],
-                options: options
-            }));
+        // several import declarations, in one file or across files, can share a
+        // URI, so the URIs are deduplicated before jobs are created for them
+        const importedUris = Array.from(
+            new Set(
+                flatten(files.map(file => {
+                    const externalImports = this.getExternalImports(file);
+                    return Object.keys(externalImports).map(importDeclaration => externalImports[importDeclaration]);
+                }))
+            )
+        );
+
+        const jobs: Array<DownloadJob<TFile>> = importedUris.map(url => ({
+            downloadedUris: downloadedUris,
+            url: url,
+            options: options
         }));
 
         return PromisePool

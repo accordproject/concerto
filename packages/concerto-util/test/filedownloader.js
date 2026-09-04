@@ -106,6 +106,50 @@ describe('FileDownloader', () => {
                 });
         });
 
+        it('should download a shared external dependency only once', function() {
+
+            const rootFile = `namespace org.root
+import org.external.Foo from github://external.cto
+import org.external.Bar from github://external.cto
+concept Foo {}`;
+            const otherRootFile = `namespace org.other
+import org.external.Foo from github://external.cto
+concept Foo {}`;
+            const leafFile = `namespace org.external
+concept Foo {}
+concept Bar {}`;
+
+            // create a fake model file loader
+            const ml = sinon.createStubInstance(GitHubFileLoader);
+
+            // it accepts all URLs
+            ml.accepts.returns(true);
+
+            ml.load.withArgs('github://external.cto').returns(Promise.resolve(leafFile));
+
+            // two import declarations in one file, plus a second file, all sharing a URI
+            const getExternalImports = (file) => {
+                if (file === rootFile) {
+                    return {
+                        'org.external.Foo': 'github://external.cto',
+                        'org.external.Bar': 'github://external.cto'
+                    };
+                } else if (file === otherRootFile) {
+                    return {
+                        'org.external.Foo': 'github://external.cto'
+                    };
+                } else {
+                    return {};
+                }
+            };
+            const mfd = new FileDownloader(ml, getExternalImports);
+            return mfd.downloadExternalDependencies([rootFile, otherRootFile])
+                .then((result) => {
+                    result.should.deep.equal([leafFile]);
+                    ml.load.withArgs('github://external.cto').callCount.should.equal(1);
+                });
+        });
+
         it('should handle loader errors', function() {
 
             // create a fake model file loader
