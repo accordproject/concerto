@@ -841,6 +841,50 @@ describe('DecoratorManager', () => {
             });
             sourceCTO.should.be.deep.equal(updatedCTO);
         });
+        it('should preserve type reference arguments when extracting decorators', async function() {
+            const testModelManager = new ModelManager();
+            const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/extract-test-type-reference.cto'), 'utf-8');
+            testModelManager.addCTOModel(modelText, 'test.cto');
+            const options = {
+                removeDecoratorsFromModel:true,
+                locale:'en'
+            };
+            const resp = DecoratorManager.extractDecorators( testModelManager, options);
+            const commandSet = resp.decoratorCommandSet.find(dcs => dcs.name === 'test');
+            const args = commandSet.commands.map(command => command.decorator.arguments);
+            args.should.be.deep.equal([
+                [
+                    {
+                        $class: 'concerto.metamodel@1.0.0.DecoratorTypeReference',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                            name: 'Address',
+                            namespace: 'test@1.0.0'
+                        },
+                        isArray: false
+                    }
+                ],
+                [
+                    {
+                        $class: 'concerto.metamodel@1.0.0.DecoratorTypeReference',
+                        type: {
+                            $class: 'concerto.metamodel@1.0.0.TypeIdentifier',
+                            name: 'Address',
+                            namespace: 'test@1.0.0'
+                        },
+                        isArray: true
+                    },
+                    {
+                        $class: 'concerto.metamodel@1.0.0.DecoratorString',
+                        value: 'text'
+                    }
+                ]
+            ]);
+            (() => DecoratorManager.validate(commandSet)).should.not.throw();
+            const decorated = DecoratorManager.decorateModels(resp.modelManager, commandSet);
+            const decorator = decorated.getType('test@1.0.0.Person').getDecorator('Form');
+            decorator.getArguments()[0].name.should.equal('Address');
+        });
         it('should give proper response in there is no vocabulary on any model', async function() {
             const testModelManager = new ModelManager();
             const modelText = fs.readFileSync(path.join(__dirname,'/data/decoratorcommands/model-without-vocab.cto'), 'utf-8');

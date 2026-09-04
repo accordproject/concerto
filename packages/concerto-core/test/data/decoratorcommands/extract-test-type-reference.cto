@@ -1,0 +1,11 @@
+namespace test@1.0.0
+
+concept Address {
+  o String street
+}
+
+@Form(Address)
+concept Person {
+  @Form(Address[], "text")
+  o String firstName
+}
