@@ -23,7 +23,9 @@ import type { Dayjs } from 'dayjs';
 const LOREM_WORDS = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo'];
 
 /**
- * Generate a random lorem-ipsum-like sentence of one to five words.
+ * Generate a random lorem-ipsum-like sentence of one to five words. The
+ * trailing period preserves visible word boundaries when getString
+ * concatenates multiple sentences to satisfy a length constraint.
  * @return {string} a non-empty sentence.
  * @private
  */
@@ -34,7 +36,7 @@ const generateSentence = () => {
         words.push(LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)]);
     }
     const sentence = words.join(' ');
-    return sentence.charAt(0).toUpperCase() + sentence.substring(1);
+    return sentence.charAt(0).toUpperCase() + sentence.substring(1) + '.';
 };
 
 /**
