@@ -77,11 +77,9 @@
     "@accordproject/concerto-util": "4.2.0",
     "dayjs": "1.11.13",
     "debug": "4.3.7",
-    "lorem-ipsum": "2.0.8",
     "randexp": "0.5.3",
     "rfdc": "1.4.1",
     "semver": "7.6.3",
-    "urijs": "1.19.11",
     "uuid": "11.0.3",
     "yaml": "^2.8.3"
   },

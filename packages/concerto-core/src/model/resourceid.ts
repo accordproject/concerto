@@ -12,11 +12,90 @@
  * limitations under the License.
  */
 
-import URIJS from 'urijs';
-
 import ModelUtils from '../modelutil';
 
 const RESOURCE_SCHEME = 'resource';
+
+/**
+ * Parse a URI into its component parts. Implements the subset of the
+ * generic URI parsing algorithm (RFC 3986) that ResourceId relies on:
+ * fragment, query, scheme, and authority (userinfo/host/port), leaving
+ * the remainder as the path.
+ * @param {String} uri - The URI to parse.
+ * @returns {Object} An object with protocol, username, password, port,
+ * query, fragment and path properties.
+ * @throws {Error} If the authority contains a non-numeric port.
+ * @private
+ */
+function parseUri(uri: string) {
+    let s = uri;
+    let fragment: string | null = null;
+    let query: string | null = null;
+    let protocol: string | null = null;
+    let username: string | null = null;
+    let password: string | null = null;
+    let port: string | null = null;
+
+    // fragment: split on the first '#'
+    const hashPos = s.indexOf('#');
+    if (hashPos > -1) {
+        fragment = s.substring(hashPos + 1) || null;
+        s = s.substring(0, hashPos);
+    }
+
+    // query: split on the first '?'
+    const qPos = s.indexOf('?');
+    if (qPos > -1) {
+        query = s.substring(qPos + 1);
+        s = s.substring(0, qPos);
+    }
+
+    // scheme: only recognised if the remainder does not start with '//'
+    if (s.substring(0, 2) !== '//') {
+        const colonPos = s.indexOf(':');
+        if (colonPos > -1) {
+            const candidate = s.substring(0, colonPos);
+            if (/^[a-z][a-z0-9.+-]*$/i.test(candidate)) {
+                protocol = candidate.toLowerCase();
+                s = s.substring(colonPos + 1);
+            }
+        }
+    }
+
+    // authority: only present if the remainder starts with '//'
+    if (s.substring(0, 2) === '//') {
+        s = s.substring(2);
+        const slashPos = s.indexOf('/');
+        const authority = slashPos > -1 ? s.substring(0, slashPos) : s;
+        s = slashPos > -1 ? s.substring(slashPos) : '';
+        let hostport = authority;
+        const atPos = authority.indexOf('@');
+        if (atPos > -1) {
+            const userinfo = authority.substring(0, atPos);
+            hostport = authority.substring(atPos + 1);
+            const uColon = userinfo.indexOf(':');
+            if (uColon > -1) {
+                username = userinfo.substring(0, uColon);
+                password = userinfo.substring(uColon + 1);
+            } else {
+                username = userinfo;
+            }
+        }
+        const pColon = hostport.lastIndexOf(':');
+        if (pColon > -1) {
+            const maybePort = hostport.substring(pColon + 1);
+            if (maybePort !== '') {
+                if (!/^[0-9]+$/.test(maybePort)) {
+                    throw new Error('Invalid port');
+                }
+                port = maybePort;
+            }
+        }
+    }
+
+    const path = s;
+    return { protocol, username, password, port, query, fragment, path };
+}
 
 /**
  * All the identifying properties of a resource.
@@ -72,7 +151,7 @@ class ResourceId {
     static fromURI(uri, legacyNamespace?, legacyType?) {
         let uriComponents;
         try {
-            uriComponents = URIJS.parse(uri);
+            uriComponents = parseUri(uri);
         } catch (err){
             throw new Error('Invalid URI: ' + uri);
         }
