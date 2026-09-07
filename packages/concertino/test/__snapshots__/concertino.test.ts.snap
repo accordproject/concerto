@@ -3272,7 +3272,7 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "sourceUri": undefined,
       },
       "com.test.models@1.2.3": {
-        "concertoVersion": "4.x",
+        "concertoVersion": "5.x",
         "decorators": [
           {
             "$class": "concerto.metamodel@1.0.0.Decorator",

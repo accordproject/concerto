@@ -11,6 +11,7 @@
         "packages/*/scripts/**",
         "**/generated/**",
         "node_modules",
+        ".beads/**",
         "**/out/**",
         "**/HEADER",
         "**/[.]*",
