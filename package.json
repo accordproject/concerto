@@ -31,14 +31,14 @@
   "overrides": {
     "ajv@^8.0.0": "8.17.1",
     "@accordproject/concerto-codegen": {
-      "@accordproject/concerto-core": "*",
-      "@accordproject/concerto-util": "*",
-      "@accordproject/concerto-vocabulary": "*"
+      "@accordproject/concerto-core": "^5.0.0-beta.2",
+      "@accordproject/concerto-util": "^5.0.0-beta.2",
+      "@accordproject/concerto-vocabulary": "^5.0.0-beta.2"
     }
   },
   "name": "concerto",
   "description": "Monorepo for concerto packages",
-  "version": "4.2.0",
+  "version": "5.0.0-beta.2",
   "private": true,
   "scripts": {
     "coverage": "node ./scripts/coverage.js \"packages/concerto-*\" && nyc report -t coverage --cwd . --report-dir coverage --reporter=lcov && cat ./coverage/lcov.info",
@@ -94,7 +94,9 @@
       "index.d.ts",
       "packages/concerto-core/introspect/parser.js",
       "node_modules",
-      ".nyc-output"
+      ".nyc-output",
+      ".beads/",
+      "issues.jsonl"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [

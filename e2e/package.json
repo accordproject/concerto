@@ -1,6 +1,6 @@
 {
   "name": "concerto-e2e",
-  "version": "1.0.0",
+  "version": "5.0.0-beta.2",
   "private": true,
   "description": "End-to-end browser tests for Concerto web bundles.",
   "scripts": {

@@ -80,3 +80,4 @@ dist
 
 # beads issue tracker data (local only)
 issues.jsonl
+.beads/
