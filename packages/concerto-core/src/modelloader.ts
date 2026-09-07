@@ -12,16 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as fs from 'fs';
 import { Parser } from '@accordproject/concerto-cto';
 import { DefaultFileLoader } from '@accordproject/concerto-util';
 import type { FileLoader } from '@accordproject/concerto-util';
 import type { ModelManagerOptions } from './types';
 
-import ModelFile = require('./introspect/modelfile');
-import ModelManager = require('./modelmanager');
+import ModelFile from './introspect/modelfile';
+import ModelManager from './modelmanager';
 
 type ModelLoaderOptions = ModelManagerOptions & { offline?: boolean };
 
@@ -105,8 +103,7 @@ class ModelLoader {
      */
     static async loadModelManagerFromModelFiles(modelFiles: Array<string | ModelFile>, fileNames?: string[], options: ModelLoaderOptions = { offline: false }) {
         const opts = options || { offline: false };
-        
-        // FIX: Cast to 'any' to bypass strict constructor signature check
+
         let modelManager = new ModelManager(opts);
 
         // Load system model
@@ -124,4 +121,5 @@ class ModelLoader {
 
 }
 
-export = ModelLoader;
+export { ModelLoader };
+export default ModelLoader;

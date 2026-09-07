@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-analysis",
-  "version": "4.1.4",
+  "version": "4.2.0",
   "description": "Analysis of Concerto model files",
   "homepage": "https://github.com/accordproject/concerto",
   "engines": {
@@ -12,12 +12,13 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm-run-all clean",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && npm run build:esm",
     "pretest": "npm-run-all licchk lint",
     "lint": "eslint .",
     "licchk": "license-check-and-add",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "build:esm": "node ../../scripts/build-esm.js"
   },
   "repository": {
     "type": "git",
@@ -32,11 +33,11 @@
   "author": "accordproject.org",
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/concerto-core": "4.1.4",
+    "@accordproject/concerto-core": "4.2.0",
     "semver": "7.5.4"
   },
   "devDependencies": {
-    "@accordproject/concerto-cto": "4.1.4",
+    "@accordproject/concerto-cto": "4.2.0",
     "@types/jest": "28.1.1",
     "@types/node": "18.11.18",
     "@types/semver": "7.3.10",
@@ -94,5 +95,17 @@
         "file": "./HEADER.md"
       }
     }
-  }
+  },
+  "module": "dist/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/esm-browser/index.mjs",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false
 }

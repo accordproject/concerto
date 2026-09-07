@@ -1757,6 +1757,56 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
       },
       "type": "ConceptDeclaration",
     },
+    "org.example.collectionsize@1.0.0.PhoneBook": {
+      "key": {
+        "type": "String",
+      },
+      "type": "MapDeclaration",
+      "value": {
+        "type": "String",
+      },
+    },
+    "org.example.collectionsize@1.0.0.Team": {
+      "properties": {
+        "contacts": {
+          "name": "contacts",
+          "size": [
+            1,
+            10,
+          ],
+          "type": "org.example.collectionsize@1.0.0.PhoneBook",
+        },
+        "middle": {
+          "isArray": true,
+          "isOptional": true,
+          "name": "middle",
+          "size": [
+            null,
+            3,
+          ],
+          "type": "String",
+        },
+        "scores": {
+          "isArray": true,
+          "name": "scores",
+          "size": [
+            1,
+            null,
+          ],
+          "type": "Integer",
+        },
+        "tags": {
+          "isArray": true,
+          "name": "tags",
+          "size": [
+            2,
+            5,
+          ],
+          "type": "String",
+        },
+      },
+      "type": "ConceptDeclaration",
+    },
     "org.example.complex@1.0.0.Department": {
       "properties": {
         "code": {
@@ -3323,6 +3373,12 @@ exports[`concertino roundtripping (sample models) > should produce valid concert
         "sourceUri": undefined,
       },
       "org.agreement@1.2.3": {
+        "concertoVersion": undefined,
+        "decorators": [],
+        "imports": [],
+        "sourceUri": undefined,
+      },
+      "org.example.collectionsize@1.0.0": {
         "concertoVersion": undefined,
         "decorators": [],
         "imports": [],

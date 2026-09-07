@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { BaseException } = require('@accordproject/concerto-util');
+import { BaseException } from '@accordproject/concerto-util';
 
 /**
 * Class representing a security exception
@@ -34,4 +32,5 @@ class SecurityException extends BaseException {
 
 }
 
-export = SecurityException;
+export { SecurityException };
+export default SecurityException;

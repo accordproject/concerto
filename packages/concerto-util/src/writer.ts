@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Writer buffers text to be written in memory. It handles simple
  * indentation and tracks the number of lines written.
@@ -117,4 +115,5 @@ class Writer {
     }
 }
 
-export = Writer;
+export { Writer };
+export default Writer;

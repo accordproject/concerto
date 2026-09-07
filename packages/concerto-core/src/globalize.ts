@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const messages = require('./messages/en.json');
+import messages from './messages/en.json';
 
 /**
  * Dummy globalize replacement.
@@ -58,4 +56,5 @@ function Globalize(locale) {
 Globalize.messageFormatter = messageFormatter;
 Globalize.formatMessage = formatMessage;
 
-export = Globalize;
+export { Globalize };
+export default Globalize;

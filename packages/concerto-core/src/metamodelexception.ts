@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const { BaseException } = require('@accordproject/concerto-util');
+import { BaseException } from '@accordproject/concerto-util';
 
 /**
 * Class representing an invalid Metamodel instance (JSON AST)
@@ -34,4 +32,5 @@ class MetamodelException extends BaseException {
 
 }
 
-export = MetamodelException;
+export { MetamodelException };
+export default MetamodelException;

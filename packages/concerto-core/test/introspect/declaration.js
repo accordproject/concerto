@@ -14,8 +14,8 @@
 
 'use strict';
 
-const Declaration = require('../../src/introspect/declaration');
-const ModelFile = require('../../src/introspect/modelfile');
+const { Declaration } = require('../../src/introspect/declaration');
+const { ModelFile } = require('../../src/introspect/modelfile');
 
 require('chai').should();
 const should = require('chai').should();
@@ -74,6 +74,19 @@ describe('Declaration', () => {
     describe('#toString', () => {
         it('should be null', () => {
             should.equal(declaration.toString(), null);
+        });
+    });
+
+    describe('declaration kind predicates', () => {
+        it('should all be false on the base class', () => {
+            declaration.isAsset().should.equal(false);
+            declaration.isParticipant().should.equal(false);
+            declaration.isTransaction().should.equal(false);
+            declaration.isEvent().should.equal(false);
+            declaration.isConcept().should.equal(false);
+            declaration.isEnum().should.equal(false);
+            declaration.isClassDeclaration().should.equal(false);
+            declaration.isScalarDeclaration().should.equal(false);
         });
     });
 });

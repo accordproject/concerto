@@ -214,6 +214,12 @@ function extractMetaProperties(property: PropertyUnion | ScalarDeclarationUnion,
         const max = property.lengthValidator.maxLength === undefined ? null : property.lengthValidator.maxLength;
         (propertyEntry as IConcertinoStringProperty).length = [min, max];
     }
+    if ('sizeValidator' in property && (property as any).sizeValidator) {
+        const sv = (property as any).sizeValidator;
+        const min = sv.minSize === undefined ? null : sv.minSize;
+        const max = sv.maxSize === undefined ? null : sv.maxSize;
+        (propertyEntry as IConcertinoProperty).size = [min, max];
+    }
     if ('defaultValue' in property && property.defaultValue !== undefined && property.defaultValue !== null) {
         (propertyEntry as IConcertinoStringProperty | IConcertinoIntegerProperty | IConcertinoDoubleProperty | IConcertinoLongProperty | IConcertinoBooleanProperty | IConcertinoDateTimeProperty)
             .default = property.defaultValue;

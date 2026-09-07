@@ -12,18 +12,14 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Decorated = require('./decorated');
-const ModelUtil = require('../modelutil');
-const IllegalModelException = require('./illegalmodelexception');
+import Decorated from './decorated';
+import type { AstNode } from './decorated';
+import ModelUtil from '../modelutil';
+import IllegalModelException from './illegalmodelexception';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -38,6 +34,9 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Declaration extends Decorated {
+    modelFile: ModelFile;
+    name!: string;
+    fqn!: string;
     /**
      * Create a Declaration from an Abstract Syntax Tree. The AST is the
      * result of parsing.
@@ -46,7 +45,7 @@ class Declaration extends Decorated {
      * @param {Object} ast - the AST created by the parser
      * @throws {IllegalModelException}
      */
-    constructor(modelFile, ast) {
+    constructor(modelFile: ModelFile, ast: AstNode) {
         super(ast);
         this.modelFile = modelFile;
         this.process();
@@ -78,7 +77,7 @@ class Declaration extends Decorated {
      * @throws {IllegalModelException}
      * @protected
      */
-    validate(...args) {
+    validate(...args: any[]) {
         super.validate(...args);
         const modelFile = this.getModelFile();
 
@@ -100,7 +99,7 @@ class Declaration extends Decorated {
      * @param {string} typeName - local/imported type name
      * @returns {boolean} true if the resolved import is a reserved system type
      */
-    private isReservedSystemTypeImport(modelFile, typeName) {
+    private isReservedSystemTypeImport(modelFile: ModelFile, typeName: string): boolean {
         const importedType = modelFile.getType(typeName);
         if (!importedType || typeof importedType === 'string') {
             return false;
@@ -124,7 +123,7 @@ class Declaration extends Decorated {
      * @public
      * @return {ModelFile} the owning ModelFile
      */
-    getModelFile() {
+    getModelFile(): ModelFile {
         return this.modelFile;
     }
 
@@ -134,7 +133,7 @@ class Declaration extends Decorated {
      *
      * @return {string} the short name of this class
      */
-    getName() {
+    getName(): string {
         return this.name;
     }
 
@@ -142,7 +141,7 @@ class Declaration extends Decorated {
      * Return the namespace of this class.
      * @return {string} namespace - a namespace.
      */
-    getNamespace() {
+    getNamespace(): string {
         return this.modelFile.getNamespace();
     }
 
@@ -152,7 +151,7 @@ class Declaration extends Decorated {
      *
      * @return {string} the fully-qualified name of this class
      */
-    getFullyQualifiedName() {
+    getFullyQualifiedName(): string {
         return this.fqn;
     }
 
@@ -160,7 +159,7 @@ class Declaration extends Decorated {
      * Returns false as scalars are never identified.
      * @returns {Boolean} false as scalars are never identified
      */
-    isIdentified() {
+    isIdentified(): boolean {
         return false;
     }
 
@@ -168,7 +167,7 @@ class Declaration extends Decorated {
      * Returns false as scalars are never identified.
      * @returns {Boolean} false as scalars are never identified
      */
-    isSystemIdentified() {
+    isSystemIdentified(): boolean {
         return false;
     }
 
@@ -178,7 +177,7 @@ class Declaration extends Decorated {
      *
      * @return {string} the name of the id field for this class or null if it does not exist
      */
-    getIdentifierFieldName() {
+    getIdentifierFieldName(): string | null {
         return null;
     }
 
@@ -188,7 +187,7 @@ class Declaration extends Decorated {
      *
      * @return {string} the FQN name of the super type or null
      */
-    getType() {
+    getType(): string | null {
         return null;
     }
 
@@ -205,7 +204,7 @@ class Declaration extends Decorated {
      *
      * @return {boolean} true if the class is an enum
      */
-    isEnum() {
+    isEnum(): boolean {
         return false;
     }
 
@@ -214,7 +213,7 @@ class Declaration extends Decorated {
      *
      * @return {boolean} true if the class is a class
      */
-    isClassDeclaration() {
+    isClassDeclaration(): boolean {
         return false;
     }
 
@@ -223,7 +222,7 @@ class Declaration extends Decorated {
      *
      * @return {boolean} true if the class is a scalar
      */
-    isScalarDeclaration() {
+    isScalarDeclaration(): boolean {
         return false;
     }
 
@@ -232,9 +231,55 @@ class Declaration extends Decorated {
      *
      * @return {boolean} true if the class is a map-declaration
      */
-    isMapDeclaration() {
+    isMapDeclaration(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns true if this class is the definition of an asset.
+     *
+     * @return {boolean} true if the class is an asset
+     */
+    isAsset(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns true if this class is the definition of a participant.
+     *
+     * @return {boolean} true if the class is a participant
+     */
+    isParticipant(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns true if this class is the definition of a transaction.
+     *
+     * @return {boolean} true if the class is a transaction
+     */
+    isTransaction(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns true if this class is the definition of an event.
+     *
+     * @return {boolean} true if the class is an event
+     */
+    isEvent(): boolean {
+        return false;
+    }
+
+    /**
+     * Returns true if this class is the definition of a concept.
+     *
+     * @return {boolean} true if the class is a concept
+     */
+    isConcept(): boolean {
         return false;
     }
 }
 
-export = Declaration;
+export { Declaration };
+export default Declaration;

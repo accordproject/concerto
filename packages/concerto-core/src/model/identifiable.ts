@@ -12,10 +12,16 @@
  * limitations under the License.
  */
 
-'use strict';
+import ResourceId from './resourceid';
+import Typed from './typed';
 
-const ResourceId = require('./resourceid');
-const Typed = require('./typed');
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type BaseModelManager from '../basemodelmanager';
+import type ClassDeclaration from '../introspect/classdeclaration';
+import type { Dayjs } from 'dayjs';
+/* eslint-enable no-unused-vars */
+
 
 /**
  * Identifiable is an entity with a namespace, type and an identifier.
@@ -27,6 +33,15 @@ const Typed = require('./typed');
  * @memberof module:concerto-core
  */
 class Identifiable extends Typed {
+    $identifierFieldName: string;
+    // Set via setIdentifier(), called from this constructor rather than
+    // assigned directly, so TS can't see the assignment for definite-assignment
+    // analysis; the field is genuinely absent for non-identified instances.
+    $identifier!: string | undefined;
+    // Every DateTime value in the object model is held as a Dayjs, not a
+    // string; JSONGenerator formats it on the way out and JSONPopulator
+    // rebuilds one on the way in.
+    $timestamp?: Dayjs | null;
     /**
      * Create an instance.
      * <p>
@@ -39,10 +54,10 @@ class Identifiable extends Typed {
      * @param {string} ns - The namespace this instance.
      * @param {string} type - The type this instance.
      * @param {string} id - The identifier of this instance.
-     * @param {string} timestamp - The timestamp of this instance
+     * @param {Dayjs} [timestamp] - The timestamp of this instance
      * @protected
      */
-    constructor(modelManager, classDeclaration, ns, type, id, timestamp) {
+    constructor(modelManager: BaseModelManager, classDeclaration: ClassDeclaration, ns: string, type: string, id?: string, timestamp?: Dayjs | null) {
         super(modelManager, classDeclaration, ns, type);
 
         // Cache the identifier field name
@@ -56,9 +71,9 @@ class Identifiable extends Typed {
 
     /**
      * Get the timestamp of this instance
-     * @return {string} The timestamp for this object
+     * @return {Dayjs} The timestamp for this object
      */
-    getTimestamp() {
+    getTimestamp(): Dayjs | null | undefined {
         return this.$timestamp;
     }
 
@@ -128,4 +143,5 @@ class Identifiable extends Typed {
     }
 }
 
-export = Identifiable;
+export { Identifiable };
+export default Identifiable;

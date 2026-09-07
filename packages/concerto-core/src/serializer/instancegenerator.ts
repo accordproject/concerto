@@ -12,10 +12,8 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const Util = require('@accordproject/concerto-util').NullUtil;
-const Globalize = require('../globalize');
+import { NullUtil as Util } from '@accordproject/concerto-util';
+import Globalize from '../globalize';
 
 /**
  * Generate sample instance data for the specified class declaration
@@ -172,7 +170,8 @@ class InstanceGenerator {
                     idField = idField.getScalarField();
                 }
                 if(idField?.validator?.regex){
-                    id = parameters.valueGenerator.getRegex(fieldOrScalarDeclaration.validator.regex);
+                    id = parameters.valueGenerator.getRegex(idField.validator.regex,
+                        idField.validator.minLength, idField.validator.maxLength);
                 } else {
                     id = this.generateRandomId(declaration);
                 }
@@ -258,4 +257,5 @@ class InstanceGenerator {
 
 }
 
-export = InstanceGenerator;
+export { InstanceGenerator };
+export default InstanceGenerator;

@@ -15,7 +15,7 @@
 'use strict';
 
 const Parser = require('@accordproject/concerto-cto').Parser;
-const ModelFile = require('../../src/introspect/modelfile');
+const { ModelFile } = require('../../src/introspect/modelfile');
 
 module.exports = {
     newModelFile: (modelManager, definitions, fileName, skipLocationNodes = true) => {

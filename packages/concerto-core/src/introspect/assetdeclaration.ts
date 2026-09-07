@@ -12,16 +12,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import IdentifiedDeclaration = require('./identifieddeclaration');
+import IdentifiedDeclaration from './identifieddeclaration';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./modelfile');
-}
+import type ModelFile from './modelfile';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -56,4 +51,5 @@ class AssetDeclaration extends IdentifiedDeclaration {
     }
 }
 
-export = AssetDeclaration;
+export { AssetDeclaration };
+export default AssetDeclaration;

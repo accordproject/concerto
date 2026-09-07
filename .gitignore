@@ -77,3 +77,6 @@ umd
 
 # TypeScript build folder
 dist
+
+# beads issue tracker data (local only)
+issues.jsonl

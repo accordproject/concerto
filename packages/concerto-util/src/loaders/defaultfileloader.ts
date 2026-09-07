@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import CompositeFileLoader = require('./compositefileloader');
-import HTTPFileLoader = require('./httpfileloader');
-import GitHubFileLoader = require('./githubfileloader');
+import CompositeFileLoader from './compositefileloader';
+import HTTPFileLoader from './httpfileloader';
+import GitHubFileLoader from './githubfileloader';
 
 /**
  * <p>
@@ -42,4 +40,5 @@ class DefaultFileLoader<T> extends CompositeFileLoader<T> {
     }
 }
 
-export = DefaultFileLoader;
+export { DefaultFileLoader };
+export default DefaultFileLoader;

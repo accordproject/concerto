@@ -15,10 +15,10 @@
 'use strict';
 
 const TypedStack = require('@accordproject/concerto-util').TypedStack;
-const Factory = require('../../src/factory');
-const InstanceGenerator = require('../../src/serializer/instancegenerator');
-const ModelManager = require('../../src/modelmanager');
-const ValueGenerator = require('../../src/serializer/valuegenerator');
+const { Factory } = require('../../src/factory');
+const { InstanceGenerator } = require('../../src/serializer/instancegenerator');
+const { ModelManager } = require('../../src/modelmanager');
+const ValueGenerator = require('../../src/serializer/valuegenerator').default;
 const Util = require('../composer/composermodelutility');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -520,6 +520,30 @@ describe('InstanceGenerator', () => {
             resource.scalarValueWithExactLength.should.have.lengthOf(100);
         });
 
+        it('should generate a value matching a fixed length regex for a Scalar field with a length', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar Code extends String regex=/^[a-z]{3}$/ length=[1,10]
+
+            asset MyAsset identified by id {
+                o String id
+                o Code code
+            }`);
+            resource.code.should.match(/^[a-z]{3}$/);
+        });
+
+        it('should enforce a length bound of zero on a regex Scalar field', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar Empty extends String regex=/^[a-z]*$/ length=[0,0]
+
+            asset MyAsset identified by id {
+                o String id
+                o Empty empty
+            }`);
+            resource.empty.should.equal('');
+        });
+
         it('should throw an error when id provided does not match regex on id field', function () {
             (() => test(`namespace org.acme.test@1.0.0
 
@@ -529,6 +553,47 @@ describe('InstanceGenerator', () => {
                 o String id
                 o SSN ssn
             }`)).should.throw(/Provided id does not match regex/);
+        });
+
+        it('should generate an id matching the regex on the id field of a nested type', function () {
+            let resource = test(`namespace org.acme.test@1.0.0
+
+            scalar SSN extends String regex=/^\\d{3}-\\d{2}-\\d{4}$/
+
+            participant MyParticipant identified by ssn {
+                o SSN ssn
+            }
+
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyParticipant owner
+            }`);
+            resource.owner.ssn.should.match(/^\d{3}-\d{2}-\d{4}$/);
+        });
+
+        it('should respect length bounds alongside the regex on a nested id field', function () {
+            modelManager.addCTOModel(`namespace org.acme.test@1.0.0
+
+            scalar Tag extends String regex=/^[a-z]+$/ length=[2,4]
+
+            participant MyParticipant identified by tag {
+                o Tag tag
+            }
+
+            asset MyAsset identified by assetId {
+                o String assetId
+                o MyParticipant owner
+            }`);
+            // The generated value is random, so sample repeatedly to keep the
+            // bounds check meaningful.
+            for (let i = 0; i < 15; i++) {
+                let resource = factory.newResource('org.acme.test@1.0.0', 'MyAsset', 'asset1');
+                parameters.stack = new TypedStack(resource);
+                parameters.seen = [resource.getFullyQualifiedType()];
+                let generated = resource.getClassDeclaration().accept(visitor, parameters);
+                generated.owner.tag.should.match(/^[a-z]+$/);
+                generated.owner.tag.length.should.be.within(2, 4);
+            }
         });
     });
 

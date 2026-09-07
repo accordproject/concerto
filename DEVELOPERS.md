@@ -42,6 +42,8 @@ npm run test
 
 > **Note:** The build step is required because some packages (like `concerto-linter`) depend on other workspace packages that need to be compiled first. The CI workflows follow this same pattern: build first, then test.
 
+> **Note:** Always build the whole monorepo with `npm run build` (which builds in dependency order), not a single package in isolation. Because each package's `exports.import` condition resolves to its `dist/esm/index.mjs`, building one package alone can fail if a workspace dependency's ESM output does not yet exist. `npm run build:ordered` (the default `build` script) handles this ordering; CI relies on it too.
+
 If you're working on a specific package, you can run tests for just that package:
 
 ```shell

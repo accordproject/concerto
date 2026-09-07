@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-const { BaseFileException } = require('@accordproject/concerto-util');
+import { BaseFileException } from '@accordproject/concerto-util';
 
 /**
  * Exception throws when a Concerto file is syntactically invalid
@@ -76,4 +75,5 @@ class ParseException extends (BaseFileException as any) {
     }
 }
 
-export = ParseException; 
+export { ParseException };
+export default ParseException; 

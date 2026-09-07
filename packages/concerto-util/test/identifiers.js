@@ -75,6 +75,10 @@ describe('Identifiers', function () {
             ['😄', '_1f604'],       // Surrogate pair, Emoji
             ['\u{1F604}', '_1f604'],  // Escaped surrogate pair, Emoji
             ['𐴓𐴠𐴑𐴤𐴝', '_d803_dd13_d803_dd20_d803_dd11'], // Surrogate pairs, Hanifi Rohingya RTL
+            ['‿foo', '_‿foo'], // leading connector punctuation, undertie
+            ['́foo', '_́foo'], // leading combining mark
+            ['ःfoo', '_ःfoo'], // leading spacing combining mark
+            ['́', '_́'], // combining mark alone
             [null, 'null'],
             [undefined, 'undefined'],
         ];

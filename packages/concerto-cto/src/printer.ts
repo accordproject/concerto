@@ -190,7 +190,7 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.DateTimeProperty`:
         case `${MetaModelNamespace}.DateTimeScalar`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             break;
@@ -230,7 +230,7 @@ function modifiersFromMetaModel(mm: any): string {
             break;
         case `${MetaModelNamespace}.StringProperty`:
         case `${MetaModelNamespace}.StringScalar`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default=${toStringLiteral(mm.defaultValue)}`;
             }
             if (mm.validator) {
@@ -243,10 +243,16 @@ function modifiersFromMetaModel(mm: any): string {
             }
             break;
         case `${MetaModelNamespace}.ObjectProperty`:
-            if (mm.defaultValue) {
+            if (mm.defaultValue !== undefined) {
                 defaultString += ` default="${mm.defaultValue}"`;
             }
             break;
+    }
+
+    if (mm.sizeValidator) {
+        const minSize = mm.sizeValidator.minSize !== undefined ? mm.sizeValidator.minSize : '';
+        const maxSize = mm.sizeValidator.maxSize !== undefined ? mm.sizeValidator.maxSize : '';
+        validatorString += ` size=[${minSize},${maxSize}]`;
     }
 
     return result + defaultString + validatorString;
@@ -436,7 +442,7 @@ function declFromMetaModel(mm: IDeclaration): string {
  * @param {*} metaModel - the metamodel instance
  * @return {string} the CTO model as a string
  */
-function toCTO(metaModel: IModel): string {
+export function toCTO(metaModel: IModel): string {
     let result = '';
 
     // version
@@ -509,6 +515,7 @@ function toCTO(metaModel: IModel): string {
     return result;
 }
 
-export = {
+const Printer = {
     toCTO,
 };
+export default Printer;

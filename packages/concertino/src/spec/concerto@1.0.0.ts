@@ -16,6 +16,7 @@ import type {
 	IMapValueType,
 	IEnumProperty,
 	IProperty,
+	ICollectionSizeValidator,
 	IStringRegexValidator,
 	IStringLengthValidator,
 	IDoubleDomainValidator,
@@ -57,6 +58,7 @@ IMapKeyType |
 IMapValueType | 
 IEnumProperty | 
 IProperty | 
+ICollectionSizeValidator | 
 IStringRegexValidator | 
 IStringLengthValidator | 
 IDoubleDomainValidator | 

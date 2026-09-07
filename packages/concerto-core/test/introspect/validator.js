@@ -14,8 +14,8 @@
 
 'use strict';
 
-const Field = require('../../src/introspect/field');
-const Validator = require('../../src/introspect/validator');
+const { Field } = require('../../src/introspect/field');
+const { Validator } = require('../../src/introspect/validator');
 
 require('chai').should();
 const sinon = require('sinon');

@@ -14,8 +14,8 @@
 
 'use strict';
 
-const AssetDeclaration = require('../../src/introspect/assetdeclaration');
-const ModelManager = require('../../src/modelmanager');
+const { AssetDeclaration } = require('../../src/introspect/assetdeclaration');
+const { ModelManager } = require('../../src/modelmanager');
 const ParserUtil = require('./parserutility');
 const fs = require('fs');
 

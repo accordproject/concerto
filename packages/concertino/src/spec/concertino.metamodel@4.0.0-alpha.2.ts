@@ -85,12 +85,12 @@ IConcertinoDateTimeScalarDeclaration;
 
 export interface IConcertinoStringScalarDeclaration extends IConcertinoScalarDeclaration {
    regex?: string;
-   length: [number | null, number | null];
+   length?: [number | null, number | null];
    default?: string;
 }
 
 export interface IConcertinoIntegerScalarDeclaration extends IConcertinoScalarDeclaration {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 
@@ -99,12 +99,12 @@ export interface IConcertinoBooleanScalarDeclaration extends IConcertinoScalarDe
 }
 
 export interface IConcertinoDoubleScalarDeclaration extends IConcertinoScalarDeclaration {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 
 export interface IConcertinoLongScalarDeclaration extends IConcertinoScalarDeclaration {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 
@@ -141,6 +141,7 @@ export interface IConcertinoProperty extends IConcept {
    inheritedFrom?: string;
    isCircular?: boolean;
    isEnum?: boolean;
+   size?: [number | null, number | null];
    vocabulary?: IVocabulary;
    metadata?: MetadataMap;
 }
@@ -154,12 +155,12 @@ IConcertinoDateTimeProperty;
 
 export interface IConcertinoStringProperty extends IConcertinoProperty {
    regex?: string;
-   length: [number | null, number | null];
+   length?: [number | null, number | null];
    default?: string;
 }
 
 export interface IConcertinoIntegerProperty extends IConcertinoProperty {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 
@@ -168,12 +169,12 @@ export interface IConcertinoBooleanProperty extends IConcertinoProperty {
 }
 
 export interface IConcertinoDoubleProperty extends IConcertinoProperty {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 
 export interface IConcertinoLongProperty extends IConcertinoProperty {
-   range: [number | null, number | null];
+   range?: [number | null, number | null];
    default?: number;
 }
 

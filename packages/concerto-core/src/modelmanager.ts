@@ -12,21 +12,17 @@
  * limitations under the License.
  */
 
-'use strict';
+import { Parser } from '@accordproject/concerto-cto';
 
-const Parser = require('@accordproject/concerto-cto').Parser;
-
-import BaseModelManager = require('./basemodelmanager');
+import BaseModelManager from './basemodelmanager';
 import type { ModelFileSource, ModelManagerOptions } from './types';
 
-const debug = require('debug')('concerto:BaseModelManager');
+import debugLib from 'debug';
+const debug = debugLib('concerto:BaseModelManager');
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelFile = require('./introspect/modelfile');
-}
+import type ModelFile from './introspect/modelfile';
 /* eslint-enable no-unused-vars */
 
 // How to create a modelfile from a cto file
@@ -84,4 +80,6 @@ class ModelManager extends BaseModelManager {
     }
 
 }
-export = ModelManager;
+
+export { ModelManager };
+export default ModelManager;

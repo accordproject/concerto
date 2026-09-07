@@ -12,35 +12,33 @@
  * limitations under the License.
  */
 
-'use strict';
+import { TypedStack } from '@accordproject/concerto-util';
 
-const { TypedStack } = require('@accordproject/concerto-util');
+import debugLib from 'debug';
+const debug = debugLib('concerto:Factory');
+import Globalize from './globalize';
 
-const debug = require('debug')('concerto:Factory');
-const Globalize = require('./globalize');
+import ModelUtil from './modelutil';
 
-const ModelUtil = require('./modelutil');
+import InstanceGenerator from './serializer/instancegenerator';
+import ValueGeneratorFactory from './serializer/valuegenerator';
+import ResourceValidator from './serializer/resourcevalidator';
 
-const InstanceGenerator = require('./serializer/instancegenerator');
-const ValueGeneratorFactory = require('./serializer/valuegenerator');
-const ResourceValidator = require('./serializer/resourcevalidator');
+import Relationship from './model/relationship';
+import Resource from './model/resource';
+import ValidatedResource from './model/validatedresource';
 
-const Relationship = require('./model/relationship');
-const Resource = require('./model/resource');
-const ValidatedResource = require('./model/validatedresource');
+import * as uuid from 'uuid';
 
-const uuid = require('uuid');
-
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+import dayjs from './dayjs-setup';
 
 // Types needed for TypeScript generation.
 /* eslint-disable no-unused-vars */
-/* istanbul ignore next */
-if (global === undefined) {
-    const ModelManager = require('./modelmanager');
-}
+import type BaseModelManager from './basemodelmanager';
+import type ClassDeclaration from './introspect/classdeclaration';
+import type Typed from './model/typed';
+import type { Dayjs } from 'dayjs';
+import type { GenerateOptions, InstanceGeneratorParameters } from './types';
 /* eslint-enable no-unused-vars */
 
 /**
@@ -51,7 +49,7 @@ if (global === undefined) {
  * @memberof module:concerto-core
  */
 class Factory {
-    modelManager: any;
+    modelManager: BaseModelManager;
     /**
      * Create a new ID for an object.
      * @returns {string} a new ID
@@ -65,7 +63,7 @@ class Factory {
      *
      * @param {ModelManager} modelManager - The ModelManager to use for this registry
      */
-    constructor(modelManager) {
+    constructor(modelManager: BaseModelManager) {
         this.modelManager = modelManager;
     }
 
@@ -135,8 +133,8 @@ class Factory {
             throw new Error('Type is not identifiable ' + classDecl.getFullyQualifiedName());
         }
 
-        let newObj: any = null;
-        let timestamp = null;
+        let newObj: Resource;
+        let timestamp: Dayjs | null = null;
         if (classDecl.isTransaction() || classDecl.isEvent()) {
             timestamp = dayjs.utc();
         }
@@ -220,7 +218,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let transaction: any = this.newResource(ns, type, id, options);
+        const transaction = this.newResource(ns, type, id, options);
         const classDeclaration = transaction.getClassDeclaration();
 
         if (!classDeclaration.isTransaction()) {
@@ -250,7 +248,7 @@ class Factory {
         } else if (!type) {
             throw new Error('type not specified');
         }
-        let event: any = this.newResource(ns, type, id, options);
+        const event = this.newResource(ns, type, id, options);
         const classDeclaration = event.getClassDeclaration();
 
         if (!classDeclaration.isEvent()) {
@@ -269,8 +267,8 @@ class Factory {
      * @param {ClassDeclaration} classDeclaration - class declaration for the resource.
      * @param {Object} clientOptions - field generation options supplied by the caller.
      */
-    initializeNewObject(newObject, classDeclaration, clientOptions) {
-        const generateParams: any = this.parseGenerateOptions(clientOptions);
+    initializeNewObject(newObject: Typed, classDeclaration: ClassDeclaration, clientOptions: GenerateOptions) {
+        const generateParams = this.parseGenerateOptions(clientOptions);
         if (generateParams) {
             generateParams.stack = new TypedStack(newObject);
             generateParams.seen = [newObject.getFullyQualifiedType()];
@@ -288,26 +286,26 @@ class Factory {
      * @param {Object} clientOptions - field generation options supplied by the caller.
      * @return {Object} InstanceGenerator options.
      */
-    parseGenerateOptions(clientOptions) {
+    parseGenerateOptions(clientOptions: GenerateOptions): InstanceGeneratorParameters | null {
         if (!clientOptions.generate) {
             return null;
         }
 
-        const generateParams: any = { };
-        generateParams.modelManager = this.modelManager;
-        generateParams.factory = this;
-
-        if ((/^empty$/i).test(clientOptions.generate)) {
-            generateParams.valueGenerator = ValueGeneratorFactory.empty();
-        } else {
+        const valueGenerator = (/^empty$/i).test(clientOptions.generate)
+            ? ValueGeneratorFactory.empty()
             // Allow any other value for backwards compatibility with previous (truthy) behavior
-            generateParams.valueGenerator = ValueGeneratorFactory.sample();
-        }
+            : ValueGeneratorFactory.sample();
 
-        generateParams.includeOptionalFields = clientOptions.includeOptionalFields ? true : false;
+        const generateParams: InstanceGeneratorParameters = {
+            modelManager: this.modelManager,
+            factory: this,
+            valueGenerator,
+            includeOptionalFields: clientOptions.includeOptionalFields ? true : false,
+        };
 
         return generateParams;
     }
 }
 
-export = Factory;
+export { Factory };
+export default Factory;

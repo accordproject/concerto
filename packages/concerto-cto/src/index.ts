@@ -20,16 +20,16 @@
  */
 
 // Exceptions
-import ParseException = require('./parseexception');
+import ParseException from './parseexception';
 
 // Parser
-import Parser = require('./parserMain');
+import Parser from './parserMain';
 
 // Printer
-import Printer = require('./printer');
+import Printer from './printer';
 
 // External models resolution
-import External = require('./external');
+import External from './external';
 
 export {
     ParseException,

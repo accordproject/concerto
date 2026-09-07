@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ModelManager = require('../../src/modelmanager');
-const ModelLoader = require('../../src/modelloader');
+const { ModelManager } = require('../../src/modelmanager');
+const { ModelLoader } = require('../../src/modelloader');
 const {
     validateMetaModel,
     modelManagerFromMetaModel

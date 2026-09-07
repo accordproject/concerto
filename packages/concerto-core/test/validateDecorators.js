@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ModelManager = require('../src/modelmanager');
+const { ModelManager } = require('../src/modelmanager');
 
 describe('ModelManager', () => {
 

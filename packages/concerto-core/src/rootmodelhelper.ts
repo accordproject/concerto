@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
-
-const rootModelAst = require('./rootmodel.json');
+import rootModelAst from './rootmodel.json';
 
 /**
  * Gets the root 'concerto' model
@@ -37,4 +35,5 @@ function getRootModel() {
     return { rootModelFile, rootModelCto, rootModelAst: ast };
 }
 
-export = { getRootModel };
+export { getRootModel };
+export default { getRootModel };

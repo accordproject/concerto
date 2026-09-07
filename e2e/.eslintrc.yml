@@ -1,0 +1,38 @@
+root: true
+env:
+    es6: true
+    node: true
+parser: '@typescript-eslint/parser'
+plugins:
+    - '@typescript-eslint'
+extends:
+    - 'eslint:recommended'
+    - 'plugin:@typescript-eslint/recommended'
+parserOptions:
+    ecmaVersion: 2020
+    sourceType: module
+rules:
+    indent:
+        - error
+        - 4
+    linebreak-style:
+        - error
+        - unix
+    quotes:
+        - error
+        - single
+    semi:
+        - error
+        - always
+    no-unused-vars: 'off'
+    '@typescript-eslint/no-unused-vars':
+        - error
+        - args: none
+    no-console: warn
+    curly: error
+    eqeqeq: error
+    no-throw-literal: error
+    no-var: error
+    dot-notation: error
+    no-tabs: error
+    no-trailing-spaces: error

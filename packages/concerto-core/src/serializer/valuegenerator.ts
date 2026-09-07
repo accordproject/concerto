@@ -12,13 +12,32 @@
  * limitations under the License.
  */
 
-'use strict';
+import RandExp from 'randexp';
+import dayjs from '../dayjs-setup';
 
-const { loremIpsum } = require('lorem-ipsum');
-const RandExp = require('randexp');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+// Types needed for TypeScript generation.
+/* eslint-disable no-unused-vars */
+import type { Dayjs } from 'dayjs';
+/* eslint-enable no-unused-vars */
+
+const LOREM_WORDS = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo'];
+
+/**
+ * Generate a random lorem-ipsum-like sentence of one to five words. The
+ * trailing period preserves visible word boundaries when getString
+ * concatenates multiple sentences to satisfy a length constraint.
+ * @return {string} a non-empty sentence.
+ * @private
+ */
+const generateSentence = () => {
+    const wordCount = Math.floor(Math.random() * 5) + 1;
+    const words: string[] = [];
+    for (let i = 0; i < wordCount; i++) {
+        words.push(LOREM_WORDS[Math.floor(Math.random() * LOREM_WORDS.length)]);
+    }
+    const sentence = words.join(' ');
+    return sentence.charAt(0).toUpperCase() + sentence.substring(1) + '.';
+};
 
 /**
  * Generate a random number within a given range with
@@ -112,26 +131,33 @@ const generateString = (seedString, minLength, maxLength, stringGenFunc) => {
  * @private
  */
 const getString = (minLength, maxLength) => {
-    const lower = 1;
-    const upper = 5;
-    let stringValue = loremIpsum({
-        count: 1                        // Number of words, sentences, or paragraphs to generate.
-        , units: 'sentences'            // Generate words, sentences, or paragraphs.
-        , sentenceLowerBound: lower         // Minimum words per sentence.
-        , sentenceUpperBound: upper         // Maximum words per sentence.
-    });
+    let stringValue = generateSentence();
 
     if (minLength || maxLength) {
-        stringValue = generateString(stringValue, minLength, maxLength, () => loremIpsum({
-            count: 1                        // Number of words, sentences, or paragraphs to generate.
-            , units: 'sentences'            // Generate words, sentences, or paragraphs.
-            , sentenceLowerBound: lower         // Minimum words per sentence.
-            , sentenceUpperBound: upper         // Maximum words per sentence.
-        }));
+        stringValue = generateString(stringValue, minLength, maxLength, () => generateSentence());
     }
     return stringValue;
 };
 
+
+/**
+ * Determine whether the length of a value is within the given bounds. A null or
+ * undefined bound is not enforced.
+ * @param {string} value the value to test.
+ * @param {number} minLength the lower bound on the range, inclusive.
+ * @param {number} maxLength the upper bound on the range, inclusive.
+ * @return {boolean} true if the length of the value is within the bounds.
+ * @private
+ */
+const isLengthInRange = (value, minLength, maxLength) => {
+    if (minLength !== null && minLength !== undefined && value.length < minLength) {
+        return false;
+    }
+    if (maxLength !== null && maxLength !== undefined && value.length > maxLength) {
+        return false;
+    }
+    return true;
+};
 
 /**
  * Get a randomly generated sample regex String value with lower and upper bound.
@@ -147,7 +173,11 @@ const getRegexString = (regex, minLength, maxLength) => {
     }
     const randexp = new RandExp(regex.source, regex.flags);
     let stringValue = randexp.gen();
-    if (minLength || maxLength) {
+    // Padding or truncating the generated value to a random length in the range would
+    // stop it matching the regex, so only reshape it when it is outside the range.
+    // isLengthInRange treats a null or undefined bound as unenforced, so no
+    // separate truthiness gate: that would also skip a legitimate bound of 0.
+    if (!isLengthInRange(stringValue, minLength, maxLength)) {
         stringValue = generateString(stringValue, minLength, maxLength, () => randexp.gen());
     }
     return stringValue;
@@ -160,7 +190,7 @@ const getRegexString = (regex, minLength, maxLength) => {
  * @private
  */
 class EmptyValueGenerator {
-    currentDate: any;
+    currentDate: Dayjs;
     /**
      * This constructor should not be called directly.
      * @private
@@ -400,4 +430,5 @@ class ValueGeneratorFactory {
     }
 }
 
-export = ValueGeneratorFactory;
+export { ValueGeneratorFactory, EmptyValueGenerator, SampleValueGenerator };
+export default ValueGeneratorFactory;
