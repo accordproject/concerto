@@ -14,8 +14,7 @@
 
 import { ClassDeclaration, Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
-import { CompareFinding } from './compare-message';
-import { CompareResults } from './compare-results';
+import { CompareFinding, CompareResults } from './compare-results';
 import { Comparer } from './comparer';
 
 export class Compare {
