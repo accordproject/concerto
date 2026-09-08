@@ -18,6 +18,7 @@ export type CompareFinding = {
     key: string;
     message: string;
     result: CompareResult;
+    element?: unknown;
 }
 
 export type CompareResults = {

@@ -14,7 +14,7 @@
 
 import { ClassDeclaration, Declaration, MapDeclaration, ModelFile, Property, ScalarDeclaration } from '@accordproject/concerto-core';
 import { CompareConfig, CompareResult, defaultCompareConfig } from './compare-config';
-import { CompareFinding } from './compare-message';
+import { CompareMessage } from './compare-message';
 import { CompareResults } from './compare-results';
 import { Comparer } from './comparer';
 
@@ -27,7 +27,7 @@ export class Compare {
 
     public compare(a: ModelFile, b: ModelFile): CompareResults {
         const comparerFactories = this.config.comparerFactories;
-        const findings: CompareFinding[] = [];
+        const findings: CompareMessage[] = [];
         const comparers = comparerFactories.map(comparerFactory => comparerFactory({
             report: finding => findings.push(finding),
         }));
@@ -143,7 +143,7 @@ export class Compare {
         this.compareScalarDeclarations(comparers, a.getScalarDeclarations(), b.getScalarDeclarations());
     }
 
-    private buildResults(findings: CompareFinding[]) {
+    private buildResults(findings: CompareMessage[]) {
         const results: CompareResults = {
             findings: [],
             result: CompareResult.NONE,

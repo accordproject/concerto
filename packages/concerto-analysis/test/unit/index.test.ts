@@ -14,15 +14,16 @@
 
 import {
     Compare,
-    CompareConfig,
     CompareResult,
     CompareConfigBuilder,
     compareResultToString,
-    type Comparer,
-    type ComparerFactory,
+    type CompareConfig,
     type CompareContext,
     type CompareFinding,
+    type CompareMessage,
     type CompareResults,
+    type Comparer,
+    type ComparerFactory,
 } from '../../src/index';
 
 describe('index exports', () => {
@@ -36,11 +37,12 @@ describe('index exports', () => {
     it('should support typing custom comparers using exported types', () => {
         const customComparerFactory: ComparerFactory = (context: CompareContext): Comparer => ({
             compareModelFiles: () => {
-                context.report({
+                const message: CompareMessage = {
                     key: 'custom-rule',
                     message: 'Custom comparison message',
                     element: null,
-                });
+                };
+                context.report(message);
             },
         });
 
@@ -52,6 +54,7 @@ describe('index exports', () => {
             key: 'custom-rule',
             message: 'Custom comparison message',
             result: CompareResult.PATCH,
+            element: null,
         };
         const results: CompareResults = {
             findings: [finding],
