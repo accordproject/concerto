@@ -17,8 +17,8 @@ import { CompareResult } from './compare-config';
 export type CompareFinding = {
     key: string;
     message: string;
-    result: CompareResult;
     element?: unknown;
+    result?: CompareResult;
 }
 
 export type CompareResults = {

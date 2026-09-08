@@ -12,13 +12,4 @@
  * limitations under the License.
  */
 
-import { CompareResult } from './compare-config';
-
-export type CompareMessage = {
-    key: string;
-    message: string;
-    element: unknown;
-    result?: CompareResult;
-}
-
-export type CompareFinding = CompareMessage;
+export type { CompareFinding } from './compare-results';

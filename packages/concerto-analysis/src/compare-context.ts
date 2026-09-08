@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-import { CompareMessage } from './compare-message';
+import { CompareFinding } from './compare-results';
 
 export type CompareContext = {
-    report: (finding: CompareMessage) => void;
+    report: (finding: CompareFinding) => void;
 }

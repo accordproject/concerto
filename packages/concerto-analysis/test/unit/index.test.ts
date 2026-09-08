@@ -20,7 +20,6 @@ import {
     type CompareConfig,
     type CompareContext,
     type CompareFinding,
-    type CompareMessage,
     type CompareResults,
     type Comparer,
     type ComparerFactory,
@@ -37,12 +36,12 @@ describe('index exports', () => {
     it('should support typing custom comparers using exported types', () => {
         const customComparerFactory: ComparerFactory = (context: CompareContext): Comparer => ({
             compareModelFiles: () => {
-                const message: CompareMessage = {
+                const finding: CompareFinding = {
                     key: 'custom-rule',
                     message: 'Custom comparison message',
                     element: null,
                 };
-                context.report(message);
+                context.report(finding);
             },
         });
 

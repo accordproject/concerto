@@ -16,7 +16,5 @@ export { Compare } from './compare';
 export { CompareResult, CompareConfigBuilder, compareResultToString } from './compare-config';
 export type { CompareConfig } from './compare-config';
 export type { CompareFinding, CompareResults } from './compare-results';
-export type { CompareMessage } from './compare-message';
 export type { Comparer, ComparerFactory } from './comparer';
 export type { CompareContext } from './compare-context';
-
