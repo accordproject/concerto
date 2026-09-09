@@ -191,4 +191,56 @@ describe('Vocabulary', () => {
             terms.label.should.equal('');
         });
     });
+
+    describe('getTerm / getElementTerms - property names that shadow Object.prototype', () => {
+        let voc;
+        beforeEach(() => {
+            voc = new Vocabulary({}, {
+                locale: 'en',
+                namespace: 'org.proto@1.0.0',
+                declarations: [
+                    {
+                        Book: 'A book',
+                        properties: [
+                            { title: 'The title' },
+                            { constructor: 'Constructor term' },
+                            { toString: 'ToString term' },
+                            { hasOwnProperty: 'HasOwnProperty term' }
+                        ]
+                    }
+                ]
+            });
+        });
+
+        it('getTerm - returns the term for a property named constructor', () => {
+            const term = voc.getTerm('Book', 'constructor');
+            term.should.equal('Constructor term');
+        });
+
+        it('getTerm - returns the term for a property named toString', () => {
+            const term = voc.getTerm('Book', 'toString');
+            term.should.equal('ToString term');
+        });
+
+        it('getTerm - returns the term for a property named hasOwnProperty', () => {
+            const term = voc.getTerm('Book', 'hasOwnProperty');
+            term.should.equal('HasOwnProperty term');
+        });
+
+        it('getTerm - returns null for an undeclared Object.prototype property name', () => {
+            const term = voc.getTerm('Book', 'valueOf');
+            should.equal(term, null);
+        });
+
+        it('getElementTerms - returns the property for a name that shadows Object.prototype', () => {
+            const terms = voc.getElementTerms('Book', 'toString');
+            should.exist(terms);
+            terms.toString.should.equal('ToString term');
+        });
+
+        it('getElementTerms - returns null for an undeclared Object.prototype property name', () => {
+            const terms = voc.getElementTerms('Book', 'valueOf');
+            should.not.exist(terms);
+        });
+    });
 });
