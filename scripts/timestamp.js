@@ -29,4 +29,10 @@ const configFile = path.resolve(rootDir, 'package.json');
 const config = require(configFile);
 config.version.replace(/-.*/, '');
 const targetVersion = semver.inc(config.version, 'patch') + '-' + timestamp;
-fs.appendFileSync(process.env.GITHUB_OUTPUT, `stamp=${targetVersion}\n`);
+const output = `stamp=${targetVersion}`;
+
+if (process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
+} else {
+    console.log(output);
+}

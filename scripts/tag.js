@@ -26,5 +26,10 @@ if (!semver.valid(targetVersion)) {
 
 const prerelease = semver.prerelease(targetVersion);
 const tag = prerelease ? 'unstable' : 'latest';
+const output = `tag=--tag=${tag}`;
 
-fs.appendFileSync(process.env.GITHUB_OUTPUT, `tag=--tag=${tag}\n`);
+if (process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
+} else {
+    console.log(output);
+}
