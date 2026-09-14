@@ -15,6 +15,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const semver = require('semver');
 const targetVersion = process.argv[2];
 
@@ -25,5 +26,10 @@ if (!semver.valid(targetVersion)) {
 
 const prerelease = semver.prerelease(targetVersion);
 const tag = prerelease ? 'unstable' : 'latest';
+const output = `tag=--tag=${tag}`;
 
-console.log(`::set-output name=tag::--tag=${tag}`);
+if (process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
+} else {
+    console.log(output);
+}

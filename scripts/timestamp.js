@@ -15,6 +15,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 const dayjs = require('dayjs');
@@ -28,4 +29,10 @@ const configFile = path.resolve(rootDir, 'package.json');
 const config = require(configFile);
 config.version.replace(/-.*/, '');
 const targetVersion = semver.inc(config.version, 'patch') + '-' + timestamp;
-console.log(`::set-output name=stamp::${targetVersion}`);
+const output = `stamp=${targetVersion}`;
+
+if (process.env.GITHUB_OUTPUT) {
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
+} else {
+    console.log(output);
+}
