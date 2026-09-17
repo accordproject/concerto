@@ -541,13 +541,21 @@ class ResourceValidator {
         }
 
         let formatter = Globalize.messageFormatter('resourcevalidator-fieldtypeviolation');
-        throw new ValidationException(formatter({
-            resourceId: id,
-            propertyName: propName,
-            fieldType: field.getType() + isArray,
-            value: value,
-            typeOfValue: typeOfValue
-        }));
+        throw new ValidationException(
+            formatter({
+                resourceId: id,
+                propertyName: propName,
+                fieldType: field.getType() + isArray,
+                value: value,
+                typeOfValue: typeOfValue
+            }),
+            undefined,
+            {
+                code: 'TYPE_VIOLATION',
+                path: `$.${propName}`,
+                expected: field.getType()
+            }
+        );
     }
 
     /**
@@ -563,7 +571,10 @@ class ResourceValidator {
             resourceId: id,
             classFQN: classDeclaration.getFullyQualifiedName(),
             invalidValue: value.toString()
-        }));
+        }), undefined, {
+            code: 'TYPE_VIOLATION',
+            expected: classDeclaration.getFullyQualifiedName()
+        });
     }
 
     /**
@@ -579,7 +590,10 @@ class ResourceValidator {
             resourceId: id,
             classFQN: relationshipDeclaration.getFullyQualifiedTypeName(),
             invalidValue: value.toString()
-        }));
+        }), undefined, {
+            code: 'INVALID_RELATIONSHIP',
+            expected: relationshipDeclaration.getFullyQualifiedTypeName()
+        });
     }
 
     /**
@@ -593,8 +607,11 @@ class ResourceValidator {
         throw new ValidationException(formatter({
             resourceId: id,
             fieldName: field.getName()
-        }));
-    }
+        }), undefined, {
+            code: 'MISSING_REQUIRED_FIELD',
+            path: `$.${field.getName()}`
+        });
+}
 
     /**
      * Throw a new error for a missing, but required field.
@@ -606,7 +623,10 @@ class ResourceValidator {
         let formatter = Globalize.messageFormatter('resourcevalidator-emptyidentifier');
         throw new ValidationException(formatter({
             resourceId: id
-        }));
+        }), undefined, {
+            code: 'MISSING_REQUIRED_FIELD',
+            path: '$'
+        });
     }
 
     /**
@@ -622,7 +642,11 @@ class ResourceValidator {
             resourceId: id,
             value: obj,
             fieldName: field.getName()
-        }));
+        }), undefined, {
+            code: 'TYPE_VIOLATION',
+            path: `$.${field.getName()}`,
+            expected: field.getType()
+        });
     }
 
     /**
@@ -635,7 +659,10 @@ class ResourceValidator {
         let formatter = Globalize.messageFormatter('resourcevalidator-abstractclass');
         throw new ValidationException(formatter({
             className: classDeclaration.getFullyQualifiedName(),
-        }));
+        }), undefined, {
+            code: 'ABSTRACT_CLASS',
+            expected: classDeclaration.getFullyQualifiedName()
+        });
     }
 
     /**
@@ -652,7 +679,10 @@ class ResourceValidator {
             resourceId: resourceId,
             propertyName: propertyName,
             fullyQualifiedTypeName: fullyQualifiedTypeName
-        }));
+        }), undefined, {
+            code: 'UNKNOWN_PROPERTY',
+            path: `$.${propertyName}`
+        });
     }
 
     /**
@@ -677,7 +707,11 @@ class ResourceValidator {
             propertyName: propName,
             objectType: obj.getFullyQualifiedType(),
             fieldType: typeName
-        }));
+        }), undefined, {
+            code: 'TYPE_VIOLATION',
+            path: `$.${propName}`,
+            expected: typeName,
+        });
     }
 }
 

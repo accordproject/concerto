@@ -23,14 +23,24 @@ import { BaseException } from '@accordproject/concerto-util';
  * @private
  */
 class ValidationException extends BaseException {
+    public details?: {
+        path?: string;
+        code?: string;
+        expected?: string;
+        actual?: string;
+    };
 
     /**
      * Create a ValidationException
      * @param {string} message - the message for the exception
      * @param {string} component - the optional component which throws this error
+     * @param {Object} details - optional structured validation details
      */
-    constructor(message, component?) {
+    constructor(message, component?, details?) {
         super(message, component);
+        if (details) {
+            this.details = details;
+        }
     }
 }
 

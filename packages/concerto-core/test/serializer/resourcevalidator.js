@@ -19,6 +19,7 @@ const { ModelManager } = require('../../src/modelmanager');
 const { Factory } = require('../../src/factory');
 const { TypeNotFoundException } = require('../../src/typenotfoundexception');
 const { ResourceValidator } = require('../../src/serializer/resourcevalidator');
+const { ValidationException } = require('../../src/serializer/validationexception');
 const { Serializer } = require('../../src/serializer');
 const { Identifiable } = require('../../src/model/identifiable');
 const { Field } = require('../../src/introspect/field');
@@ -543,6 +544,19 @@ describe('ResourceValidator', function () {
             (() => {
                 ResourceValidator.reportFieldTypeViolation('id', 'property', obj, mockField);
             }).should.throw('Model violation in the "id" instance. The field "property" has a value of "[object Object]" (type of value: "object"). Expected type of value: "undefined".');
+        });
+        it('should include structured details', () => {
+            mockField.getType.returns('String');
+            try {
+                ResourceValidator.reportFieldTypeViolation('id', 'property', 123, mockField);
+            } catch (error) {
+                error.should.be.instanceOf(ValidationException);
+                error.details.should.deep.equal({
+                    code: 'TYPE_VIOLATION',
+                    path: '$.property',
+                    expected: 'String'
+                });
+            }
         });
     });
 
