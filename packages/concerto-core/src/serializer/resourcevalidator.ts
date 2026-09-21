@@ -105,7 +105,7 @@ class ResourceValidator {
         }
 
         if(!found) {
-            ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj);
+            ResourceValidator.reportInvalidEnumValue(parameters.rootResourceIdentifier, enumDeclaration, obj, parameters.path);
         }
 
         return null;
@@ -269,8 +269,11 @@ class ResourceValidator {
             const property = properties[n];
             const value = obj[property.getName()];
             if(!Util.isNull(value)) {
+                const previousPath = parameters.path;
+                parameters.path = `${previousPath}.${property.getName()}`;
                 parameters.stack.push(value);
                 property.accept(this,parameters);
+                parameters.path = previousPath;
             }
             else {
                 if(!property.isOptional()) {
@@ -283,7 +286,7 @@ class ResourceValidator {
                     if (!Util.isNull(property?.defaultValue)){
                         continue;
                     }
-                    ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property);
+                    ResourceValidator.reportMissingRequiredProperty( parameters.rootResourceIdentifier, property, parameters.path);
                 }
             }
         }
@@ -304,7 +307,7 @@ class ResourceValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, parameters.path);
         }
 
         if(field.isTypeEnum()) {
@@ -335,7 +338,7 @@ class ResourceValidator {
     checkEnum(obj,field,parameters) {
 
         if(field.isArray() && !(obj instanceof Array)) {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field, parameters.path);
         }
 
         const enumDeclaration = field.getParent().getModelFile().getType(field.getType());
@@ -344,8 +347,11 @@ class ResourceValidator {
             field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
+                const previousPath = parameters.path;
+                parameters.path = `${previousPath}[${n}]`;
                 parameters.stack.push(item);
                 enumDeclaration.accept(this, parameters);
+                parameters.path = previousPath;
             }
         }
         else {
@@ -365,14 +371,17 @@ class ResourceValidator {
     checkArray(obj,field,parameters) {
 
         if(!(obj instanceof Array)) {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field);
+            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, field.getName(), obj, field, parameters.path);
         }
 
         field.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
 
         for(let n=0; n < obj.length; n++) {
             const item = obj[n];
+            const previousPath = parameters.path;
+            parameters.path = `${previousPath}[${n}]`;
             this.checkItem(item, field, parameters);
+            parameters.path = previousPath;
         }
     }
 
@@ -388,7 +397,7 @@ class ResourceValidator {
         let propName = field.getName();
 
         if (dataType === 'undefined' || dataType === 'symbol') {
-            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+            ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, parameters.path);
         }
 
         if(field.isPrimitive()) {
@@ -423,7 +432,7 @@ class ResourceValidator {
                 break;
             }
             if (invalid) {
-                ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, parameters.path);
             }
             else {
                 if(field.getValidator() !== null) {
@@ -438,12 +447,12 @@ class ResourceValidator {
                 try {
                     classDeclaration = parameters.modelManager.getType(obj.getFullyQualifiedType());
                 } catch (err) {
-                    ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field);
+                    ResourceValidator.reportFieldTypeViolation(parameters.rootResourceIdentifier, propName, obj, field, parameters.path);
                 }
 
                 // is it compatible?
                 if(!ModelUtil.isAssignableTo(classDeclaration.getModelFile(), classDeclaration.getFullyQualifiedName(), field)) {
-                    ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field);
+                    ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, propName, obj, field, parameters.path);
                 }
             }
 
@@ -465,7 +474,7 @@ class ResourceValidator {
 
         if(relationshipDeclaration.isArray()) {
             if(!(obj instanceof Array)) {
-                ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
+                ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration, parameters.path );
             }
 
             relationshipDeclaration.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
@@ -494,7 +503,7 @@ class ResourceValidator {
         } else if (obj instanceof Resource && (this.options.convertResourcesToRelationships || this.options.permitResourcesForRelationships)) {
             // All good.. Again
         } else {
-            ResourceValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj);
+            ResourceValidator.reportNotRelationshipViolation(parameters.rootResourceIdentifier, relationshipDeclaration, obj, parameters.path);
         }
 
         const relationshipType = parameters.modelManager.getType(obj.getFullyQualifiedType());
@@ -504,7 +513,7 @@ class ResourceValidator {
         }
 
         if(!ModelUtil.isAssignableTo(relationshipType.getModelFile(), obj.getFullyQualifiedType(), relationshipDeclaration)) {
-            ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration);
+            ResourceValidator.reportInvalidFieldAssignment(parameters.rootResourceIdentifier, relationshipDeclaration.getName(), obj, relationshipDeclaration, parameters.path);
         }
     }
 
@@ -517,7 +526,7 @@ class ResourceValidator {
      * @throws {ValidationException} the exception
      * @private
      */
-    static reportFieldTypeViolation(id, propName, value, field) {
+    static reportFieldTypeViolation(id, propName, value, field, path) {
         let isArray = field.isArray() ? '[]' : '';
         let typeOfValue: string = typeof value;
 
@@ -552,7 +561,7 @@ class ResourceValidator {
             undefined,
             {
                 code: 'TYPE_VIOLATION',
-                path: `$.${propName}`,
+                path,
                 expected: field.getType()
             }
         );
@@ -584,7 +593,7 @@ class ResourceValidator {
      * @param {Object} value - the value of the field.
      * @private
      */
-    static reportNotRelationshipViolation(id, relationshipDeclaration, value) {
+    static reportNotRelationshipViolation(id, relationshipDeclaration, value, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-notrelationship');
         throw new ValidationException(formatter({
             resourceId: id,
@@ -592,6 +601,7 @@ class ResourceValidator {
             invalidValue: value.toString()
         }), undefined, {
             code: 'INVALID_RELATIONSHIP',
+            path,
             expected: relationshipDeclaration.getFullyQualifiedTypeName()
         });
     }
@@ -602,14 +612,14 @@ class ResourceValidator {
      * @param {Field} field - the field/
      * @private
      */
-    static reportMissingRequiredProperty(id, field) {
+    static reportMissingRequiredProperty(id, field, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-missingrequiredproperty');
         throw new ValidationException(formatter({
             resourceId: id,
             fieldName: field.getName()
         }), undefined, {
             code: 'MISSING_REQUIRED_FIELD',
-            path: `$.${field.getName()}`
+            path: `${path}.${field.getName()}`
         });
 }
 
@@ -636,7 +646,7 @@ class ResourceValidator {
      * @param {string} obj - the object value
      * @private
      */
-    static reportInvalidEnumValue(id, field, obj) {
+    static reportInvalidEnumValue(id, field, obj, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-invalidenumvalue');
         throw new ValidationException(formatter({
             resourceId: id,
@@ -644,7 +654,7 @@ class ResourceValidator {
             fieldName: field.getName()
         }), undefined, {
             code: 'TYPE_VIOLATION',
-            path: `$.${field.getName()}`,
+            path,
             expected: field.getType()
         });
     }
@@ -694,7 +704,7 @@ class ResourceValidator {
      * @throws {ValidationException} the validation exception
      * @private
      */
-    static reportInvalidFieldAssignment(resourceId, propName, obj, field) {
+    static reportInvalidFieldAssignment(resourceId, propName, obj, field, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-invalidfieldassignment');
         let typeName = field.getFullyQualifiedTypeName();
 
@@ -709,7 +719,7 @@ class ResourceValidator {
             fieldType: typeName
         }), undefined, {
             code: 'TYPE_VIOLATION',
-            path: `$.${propName}`,
+            path,
             expected: typeName,
         });
     }

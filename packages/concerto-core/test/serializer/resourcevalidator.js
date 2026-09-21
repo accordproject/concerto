@@ -214,7 +214,29 @@ describe('ResourceValidator', function () {
             const parameters = { stack : typedStack, 'modelManager' : modelManager, rootResourceIdentifier : 'TEST' };
             field.accept(resourceValidator,parameters );
         });
+        it('should preserve nested indexed path in structured validation details', function () {
+            const base = factory.newResource('org.acme.l1@1.0.0', 'Base', 'DAN');
 
+            const car = factory.newResource('org.acme.l3@1.0.0', 'Car', '123');
+            car.model = 'FOO';
+            car.numberOfWheels = 4;
+            car.milage = 3.14;
+            car.containment = [base];
+
+            const serializer = new Serializer(factory, modelManager);
+
+            let validationError;
+            try {
+                serializer.toJSON(car);
+            } catch (error) {
+                validationError = error;
+            }
+
+            validationError.should.be.instanceOf(ValidationException);
+            validationError.details.path.should.equal('$.containment[0]');
+            validationError.details.code.should.equal('TYPE_VIOLATION');
+            validationError.details.expected.should.equal('org.acme.l1@1.0.0.Person[]');
+        });
         it('should detect assigning an incompatible resource type', function () {
             const base = factory.newResource('org.acme.l1@1.0.0', 'Base', 'DAN');
             const typedStack = new TypedStack( [base] );
@@ -548,7 +570,7 @@ describe('ResourceValidator', function () {
         it('should include structured details', () => {
             mockField.getType.returns('String');
             try {
-                ResourceValidator.reportFieldTypeViolation('id', 'property', 123, mockField);
+                ResourceValidator.reportFieldTypeViolation('id', 'property', 123, mockField, '$.property');
             } catch (error) {
                 error.should.be.instanceOf(ValidationException);
                 error.details.should.deep.equal({
