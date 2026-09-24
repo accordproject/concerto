@@ -1,0 +1,4 @@
+# Recorded oracle fixtures are generated output (74 MB, ~15.6k files):
+# regenerate them with the recorder against the frozen reference package
+# (see README.md). They are kept out of the concerto PR on purpose.
+fixtures/
