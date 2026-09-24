@@ -1,0 +1,22 @@
+{
+  "name": "@accordproject/concerto-engine",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local workspace link to the concerto-core Rust engine (WASM) built in a sibling concerto-rust checkout. Not published.",
+  "homepage": "https://github.com/accordproject/concerto-rust",
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  },
+  "main": "index.js",
+  "exports": {
+    "import": "./index.mjs",
+    "require": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto.git",
+    "directory": "packages/concerto-engine"
+  },
+  "license": "Apache-2.0"
+}
