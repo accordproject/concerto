@@ -1,0 +1,67 @@
+# migration/telemetry/thresholds.yaml
+#
+# Starting thresholds for the nine stuck rules (plan §5.1). Tune these
+# after day one; migration/telemetry/stuck.mjs reads this file (or
+# whatever --thresholds path it is given) at every run, so a change here
+# takes effect on the next evaluation without touching stuck.mjs itself.
+#
+# Each rule has:
+#   description   - restates the plan's signal/rule for humans reading this file
+#   response      - the plan's intended automatic response (informational;
+#                   stuck.mjs only detects and logs, it does not itself
+#                   restart agents, switch models, etc. -- that is the
+#                   dispatcher's job, reading these same 'stuck' events)
+#   plus whatever numeric/string parameters that rule's detector needs.
+
+silent:
+  description: "No heartbeat (or other activity) for N minutes on an active task/attempt."
+  response: "Restart from the last commit."
+  no_activity_minutes: 20
+
+looping:
+  description: "The same failure signature on N consecutive attempts of the same task."
+  response: "Switch to a stronger model, or split the task."
+  consecutive_attempts: 3
+
+plateau:
+  description: "The task's tracked metric hasn't improved in N consecutive attempts."
+  response: "A reviewer diagnoses."
+  attempts_without_improvement: 3
+
+burning:
+  description: "Over N tokens used on a task since its last commit."
+  response: "Stop the agent and ask the human."
+  tokens_without_commit: 1000000
+
+regression:
+  description: "A test that passed at the previous merge now fails."
+  response: "File a fix task against the merge that caused it."
+
+deadlock:
+  description: "Nothing ready, nothing running, and the queue is not finished."
+  response: "Report the dependency chain; ask the human."
+
+global_stall:
+  description: "No plan §0 metric has moved across N hours of merges."
+  response: "Flag it in the hourly report."
+  window_hours: 2
+
+review_churn:
+  description: "The same task is rejected by review N times."
+  response: "Treat PORTING.md as the likely gap and update it."
+  rejections: 2
+
+external:
+  description: "A network, permission or tool failure blocks a task."
+  response: "Mark the task blocked and notify immediately."
+  reason_keywords:
+    - network
+    - timeout
+    - dns
+    - econnrefused
+    - permission denied
+    - eacces
+    - 403
+    - 407
+    - rate limit
+    - proxy
