@@ -22,9 +22,11 @@ lib/              core.js      loads the modules of one build (workspace src/ vi
 drivers/          data.spec.js (test/data, test/1.0.0), conformance.spec.js (concerto-conformance),
                   unit-setup.js (global chai set-up for per-file unit runs)
 bin/              record-all.sh, build-corpus.js, replay.js, coverage.sh, coverage-gaps.js, self-check.js,
-                  cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; P0-04b trial)
+                  cto-cache.js (P0-04b trial version, kept as-is, not used by anything else any more),
+                  build-cto-cache.js (CTO -> AST cache for the native Rust harness, OD-9; task P1-07a)
 fixtures/         the corpus: <source>/<op>/<id>.json, blobs/, manifest.json
-results/          replay-reference.json, coverage.json, self-check.json
+cto-cache/        the CTO -> AST cache: <aa>/<sha256>.json (generated; see "CTO -> AST cache" below)
+results/          replay-reference.json, coverage.json, self-check.json, cto-cache.json
 coverage-gaps.json  every src branch the corpus does not reach
 ```
 
@@ -40,6 +42,8 @@ Run from anywhere; `<work>` is a scratch directory for raw records and logs.
 | Replay against another engine | `node migration/oracle/bin/replay.js --engine path/to/adapter.js` |
 | Corpus-only coverage and gaps | `migration/oracle/bin/coverage.sh <work> --with-suite` |
 | Judge self-check (mutants) | `node migration/oracle/bin/self-check.js --report migration/oracle/results/self-check.json` |
+| Build/refresh the CTO -> AST cache | `node migration/oracle/bin/build-cto-cache.js` |
+| Check the CTO -> AST cache is complete | `node migration/oracle/bin/build-cto-cache.js --check` |
 
 `replay.js` exits non-zero unless every fixture passes. Options: `--source unit|data|conformance`,
 `--op <op>`, `--fixtures <dir>`, `--max-failures N`. Set `ORACLE_VERBOSE=1` to see engine log output.
@@ -170,6 +174,80 @@ uses `reference/node_modules/@accordproject/concerto-core` and `srcAdapter()` th
 Verdicts: `pass` (canonical outcomes identical), `fail` (different outcome, state divergence, input
 construction failed, unsupported op), `harness-error` (fixture or blob missing, unreadable or malformed).
 A harness error is never a pass.
+
+## CTO -> AST cache for the native harness
+
+CTO parsing lives in `concerto-cto`, which stays out of the Rust port, so a native (`cargo test`) harness
+cannot itself turn a fixture's CTO text into a model. 13,006 of the corpus' 15,037 fixtures have CTO text as
+input (a `ModelManager` recipe with an `addCTOModel` step, or a fixture whose own recorded op is
+`ModelManager.addCTOModel`): `bin/build-cto-cache.js` (task P1-07a, PORTING.md OD-9) pre-parses all of them
+with the frozen reference `concerto-cto` 5.0.0 -- the same parser the corpus was recorded with -- and writes
+the result to a cache the harness can look entries up in without ever running a JS process itself.
+
+```
+node migration/oracle/bin/build-cto-cache.js               # build/refresh the cache from the corpus
+node migration/oracle/bin/build-cto-cache.js --check        # exit non-zero if any corpus CTO text has no entry
+node migration/oracle/bin/build-cto-cache.js --verify        # re-parse every entry fresh and compare it to the cache
+node migration/oracle/bin/build-cto-cache.js --force         # re-parse every entry even if a cache file exists
+```
+
+`ORACLE_REFERENCE_DIR` overrides the reference directory, same as `bin/cto-cache.js` (the P0-04b trial
+version of this generator, at `bin/cto-cache.js`, kept as-is and not touched by this task; nothing else
+reads it any more). `--fixtures`, `--cache` and `--manifest` override the corpus, cache and manifest
+locations (defaults: `fixtures/`, `cto-cache/`, `results/cto-cache.json`, all under `migration/oracle/`).
+
+**Where the CTO text is collected from.** Every fixture's resolved `inputs` are walked for two shapes: a
+`ModelManager` recipe (`"@@oracle":"mm"`), whose `addCTOModel` steps are read directly, including one
+reached only through a `derived` spec; and a fixture (or nested `derived` spec) whose own `op` *is*
+`ModelManager.addCTOModel`, whose `inputs.args` are the call's own arguments rather than a step in some
+other op's target. The P0-04b trial generator (`bin/cto-cache.js`) only covered the first shape; the second
+one accounts for several hundred fixtures across the `unit`, `data` and `conformance` sources (`op` itself
+is `ModelManager.addCTOModel`) that would otherwise silently be missing from the cache.
+
+**Cache key.** Each entry is keyed by the SHA-256 of `JSON.stringify([cto, fileName, skipLocationNodes])`,
+written to `cto-cache/<first two hex chars>/<sha256>.json`. `skipLocationNodes` (the model manager's
+constructor option) is the only parser argument that changes the *shape* of a successful AST -- verified by
+parsing the same text with the same `skipLocationNodes` but two different file names and diffing the
+result: identical, because `fileName` is never written into a location node. `fileName` is still part of the
+key even so, because it changes the *message* of a `ParseException` (`" File " + fileName` is appended);
+dropping it from the key would let two fixtures with the same invalid CTO text but different file names
+collide on one entry and silently give one of them the wrong recorded message.
+
+**Entry shape.** `{"ast": <AST>}` for a successful parse, or `{"error": {"class", "message", "location"}}`
+for a `ParseException` -- `class` is the constructor name, `message` the exception's own `.message`
+(location and file name already folded in, matching how fixtures record other errors), `location` its
+`getFileLocation()` (`null` when the exception carries none). The native harness replays an `addCTOModel`
+step as `add_model` with the cached AST on a hit, and a recorded `ParseException` on an error entry; a CTO
+text with no entry is a harness error there, never a skip or a pass (plan §2.6).
+
+**Regeneration.** The cache is generated output, exactly like the corpus it is built from (`fixtures/` is
+git-ignored -- see `.gitignore`), so `cto-cache/` is git-ignored too and never appears in a PR diff. Rebuild
+it locally with `node migration/oracle/bin/build-cto-cache.js` whenever the corpus is re-recorded; it reuses
+any cache file already on disk unless `--force` is given, so a routine re-run after `record-all.sh` only
+(re)parses CTO text that changed. What *is* committed is the generator above, this documentation, and a
+small evidence manifest, `results/cto-cache.json`:
+
+```json
+{
+  "generatedAt": "...", "fixturesDir": "fixtures", "cacheDir": "cto-cache", "ctoParserVersion": "5.0.0",
+  "fixturesScanned": 15794, "fixturesWithCto": 13699, "uniqueCtoTexts": 534,
+  "entries": { "ast": 516, "error": 18, "total": 534 },
+  "written": 534, "reused": 0,
+  "contentHash": "<sha-256 over every entry's own sha-256, sorted by key>"
+}
+```
+
+`fixturesWithCto` is what the exit condition calls "the CTO-dependent fixtures": every fixture whose
+resolved inputs reached at least one `addCTOModel` call, of either shape above. It tracks the corpus present
+at generation time, so it moves as the corpus grows (P2-10 and P2-11 add fixtures under `fixtures/lifted`
+and `fixtures/gaps`); a manifest whose `fixturesWithCto` differs from the 13,006 noted above (this file's
+corpus snapshot, and the issue's own figure) carries a `note` saying so, rather than silently disagreeing
+with it. `contentHash`
+lets a stale or corrupted cache be detected -- for example after a partial rebuild was interrupted -- without
+diffing the (git-ignored) cache directory itself: `--check` (existence and readability of every needed
+entry) and `--verify` (every needed entry re-parsed fresh and compared byte for byte to what is cached) are
+the two ways to detect that, and both fail loudly (non-zero exit, the offending keys named) rather than
+silently passing on a missing or corrupt entry.
 
 ## Results
 

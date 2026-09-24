@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-09-24T16:38:36.138Z",
+  "fixturesDir": "fixtures",
+  "cacheDir": "cto-cache",
+  "ctoParserVersion": "5.0.0",
+  "fixturesScanned": 15794,
+  "fixturesWithCto": 13699,
+  "uniqueCtoTexts": 534,
+  "entries": {
+    "ast": 516,
+    "error": 18,
+    "total": 534
+  },
+  "written": 0,
+  "reused": 534,
+  "contentHash": "f0e29375ad62f6e414cc195db5a26532849bffcf103e157af65f734478ed9cac",
+  "note": "fixturesWithCto (13699) differs from the 13006 recorded in migration/oracle/README.md's corpus snapshot; this generator counts a fixture as CTO-dependent whenever its resolved inputs reach at least one addCTOModel call (step-level or as the fixture's own recorded op), so the figure tracks the corpus present at generation time -- it moves when the corpus is re-recorded or topped up (P2-10/P2-11 add fixtures under fixtures/lifted and fixtures/gaps)."
+}
