@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T13:15:26.937Z",
+  "generated_at": "2026-09-24T14:19:02.582Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 42207,
+  "runtime_ms": 53552,
   "repos": {
     "concerto": {
       "path": "/home/user/concerto",
-      "commit": "14c042802fb8888ec3236db167b56e12f8ffa58b",
-      "commit_used": "14c042802fb8888ec3236db167b56e12f8ffa58b"
+      "commit": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8",
+      "commit_used": "a2aa8c83b48ba6a590204b8270d3561df0bb6bb8"
     },
     "concerto-rust": {
       "path": "/home/user/concerto-rust",
-      "commit": "ab79200f9cb4cf2e0a971c4e66dce334b937db2c"
+      "commit": "53280924cec925163849c8b5ef4f46b1a550e9d2"
     },
     "concerto-validate-rs": {
       "path": "/home/user/concerto-validate-rs",
@@ -60,7 +60,7 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 7212
+        "duration_ms": 14549
       },
       "by_tag": {
         "available": true,
@@ -94,7 +94,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 7212
+          "duration_ms": 14549
         },
         "rust": {
           "available": false,
@@ -223,12 +223,12 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 102,
+            "passed": 133,
             "failed": 0
           },
           "per_crate": {
             "concerto_core": {
-              "passed": 97,
+              "passed": 128,
               "failed": 0
             },
             "concerto_metamodel": {
