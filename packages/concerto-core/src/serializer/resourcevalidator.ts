@@ -237,10 +237,10 @@ class ResourceValidator {
                         // Allow shadowing of the $identifier field to normalize lookup of the identifying field.
                         propName !== '$identifier'
                     ){
-                        ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName);
+                        ResourceValidator.reportUndeclaredField(obj.getIdentifier(), propName, toBeAssignedClassDecName, parameters.path);
                     }
                     else {
-                        ResourceValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName);
+                        ResourceValidator.reportUndeclaredField(parameters.currentIdentifier, propName, toBeAssignedClassDecName, parameters.path);
                     }
                 }
             }
@@ -251,7 +251,7 @@ class ResourceValidator {
 
             // prevent empty identifiers
             if(!id || id.trim().length === 0) {
-                ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier);
+                ResourceValidator.reportEmptyIdentifier(parameters.rootResourceIdentifier, parameters.path);
             }
 
             // Enforce that shadowed $identifier fields have the same value as the explicit identifying field.
@@ -478,10 +478,12 @@ class ResourceValidator {
             }
 
             relationshipDeclaration.getSizeValidator()?.validate(parameters.rootResourceIdentifier, obj.length);
-
             for(let n=0; n < obj.length; n++) {
                 const item = obj[n];
+                const previousPath = parameters.path;
+                parameters.path = `${previousPath}[${n}]`;
                 this.checkRelationship(parameters, relationshipDeclaration, item);
+                parameters.path = previousPath;
             }
         }
         else {
@@ -621,21 +623,21 @@ class ResourceValidator {
             code: 'MISSING_REQUIRED_FIELD',
             path: `${path}.${field.getName()}`
         });
-}
+    }
 
     /**
-     * Throw a new error for a missing, but required field.
+     * Throw a new error for an empty identifier.
      * @param {string} id - the identifier of this instance.
-     * @param {Field} field - the field/
+     * @param {string} path - the path to the empty identifier.
      * @private
-     */
-    static reportEmptyIdentifier(id) {
+    */
+    static reportEmptyIdentifier(id, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-emptyidentifier');
         throw new ValidationException(formatter({
             resourceId: id
         }), undefined, {
             code: 'MISSING_REQUIRED_FIELD',
-            path: '$'
+            path
         });
     }
 
@@ -680,10 +682,11 @@ class ResourceValidator {
      * @param {string} resourceId - the id of the resource being validated
      * @param {string} propertyName - the name of the property that is not declared
      * @param {string} fullyQualifiedTypeName - the fully qualified type being validated
+     * @param {string} path - the path to the property
      * @throws {ValidationException} the validation exception
      * @private
-     */
-    static reportUndeclaredField(resourceId, propertyName, fullyQualifiedTypeName ) {
+      */
+    static reportUndeclaredField(resourceId, propertyName, fullyQualifiedTypeName, path) {
         let formatter = Globalize.messageFormatter('resourcevalidator-undeclaredfield');
         throw new ValidationException(formatter({
             resourceId: resourceId,
@@ -691,7 +694,7 @@ class ResourceValidator {
             fullyQualifiedTypeName: fullyQualifiedTypeName
         }), undefined, {
             code: 'UNKNOWN_PROPERTY',
-            path: `$.${propertyName}`
+            path: path ? `${path}.${propertyName}` : `$.${propertyName}`
         });
     }
 

@@ -237,6 +237,46 @@ describe('ResourceValidator', function () {
             validationError.details.code.should.equal('TYPE_VIOLATION');
             validationError.details.expected.should.equal('org.acme.l1@1.0.0.Person[]');
         });
+        it('should include indexed path for relationship array violations', function () {
+            const car = factory.newResource('org.acme.l3@1.0.0', 'Car', '123');
+            car.model = 'FOO';
+            car.numberOfWheels = 4;
+            car.milage = 3.14;
+            // put a Resource (not a Relationship) into the owners[] relationship array
+            car.owners = [factory.newResource('org.acme.l1@1.0.0', 'Person', 'P1')];
+
+            const typedStack = new TypedStack(car);
+            const vehicleDeclaration = modelManager.getType('org.acme.l3@1.0.0.Car');
+            const parameters = {
+                stack: typedStack,
+                modelManager: modelManager,
+                rootResourceIdentifier: '123',
+                path: '$'
+            };
+
+            let error;
+            try {
+                vehicleDeclaration.accept(resourceValidator, parameters);
+            } catch (caught) {
+                error = caught;
+            }
+
+            error.should.be.instanceOf(ValidationException);
+            error.details.code.should.equal('INVALID_RELATIONSHIP');
+            error.details.path.should.equal('$.owners[0]');
+        });
+        it('should include nested path for empty identifier', () => {
+            let error;
+            try {
+                ResourceValidator.reportEmptyIdentifier('resourceId', '$.owners[0]');
+            } catch (caught) {
+                error = caught;
+            }
+
+            error.should.be.instanceOf(ValidationException);
+            error.details.code.should.equal('MISSING_REQUIRED_FIELD');
+            error.details.path.should.equal('$.owners[0]');
+        });
         it('should detect assigning an incompatible resource type', function () {
             const base = factory.newResource('org.acme.l1@1.0.0', 'Base', 'DAN');
             const typedStack = new TypedStack( [base] );
