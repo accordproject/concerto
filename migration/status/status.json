@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T10:15:11.092Z",
+  "generated_at": "2026-09-24T11:17:34.343Z",
   "requested_at_sha": null,
   "fast": true,
-  "runtime_ms": 47382,
+  "runtime_ms": 33610,
   "repos": {
     "concerto": {
       "path": "/home/user/concerto",
-      "commit": "2402747a0a19c80247d2ddbe0e0dafa802679f0f",
-      "commit_used": "43614cbd8a8c9a3d395919b0b59d44f203b1df40"
+      "commit": "4e7de7dc7b8c3545e6c9d18795515f35d21d209e",
+      "commit_used": "4e7de7dc7b8c3545e6c9d18795515f35d21d209e"
     },
     "concerto-rust": {
       "path": "/home/user/concerto-rust",
-      "commit": "d8d3c9801d8c5d9542f4df83c3f4f94de6d0f27e"
+      "commit": "c20c40befef5bc4716c4a549819bd61e26e0fc3b"
     },
     "concerto-validate-rs": {
       "path": "/home/user/concerto-validate-rs",
@@ -20,7 +20,7 @@
     },
     "concerto-conformance": {
       "path": "/home/user/concerto-conformance",
-      "commit": "66a5e8bc290eb4f33ee0f065104f76b30e7cce66"
+      "commit": "83c004b38f8bf469e3ebc033de4d26b8cbd9a3d4"
     }
   },
   "metrics": {
@@ -59,7 +59,7 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 8527
+        "duration_ms": 6797
       },
       "by_tag": {
         "available": true,
@@ -93,7 +93,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 8527
+          "duration_ms": 6797
         },
         "rust": {
           "available": false,
@@ -135,7 +135,7 @@
           "available": true,
           "command_exit_ok": true,
           "totals": {
-            "passed": 97,
+            "passed": 102,
             "failed": 0
           },
           "per_crate": {
@@ -145,6 +145,14 @@
             },
             "concerto_metamodel": {
               "passed": 0,
+              "failed": 0
+            },
+            "debug": {
+              "passed": 1,
+              "failed": 0
+            },
+            "round_trip": {
+              "passed": 4,
               "failed": 0
             },
             "concerto_vocabulary": {
