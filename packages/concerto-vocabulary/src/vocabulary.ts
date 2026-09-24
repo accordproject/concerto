@@ -131,7 +131,7 @@ class Vocabulary {
             return identifier ? decl[identifier] : decl[declarationName];
         }
         else {
-            const property = decl.properties ? decl.properties.find((d: any) => propertyName in d) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => Object.prototype.hasOwnProperty.call(d, propertyName)) : null;
             return property ? identifier ? property[identifier] : property[propertyName] : null;
         }
     }
@@ -154,7 +154,7 @@ class Vocabulary {
             return decl;
         }
         else {
-            const property = decl.properties ? decl.properties.find((d: any) => propertyName in d) : null;
+            const property = decl.properties ? decl.properties.find((d: any) => Object.prototype.hasOwnProperty.call(d, propertyName)) : null;
             return property;
         }
     }
