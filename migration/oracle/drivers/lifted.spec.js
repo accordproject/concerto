@@ -49,6 +49,13 @@ const scenarioFiles = fs
     .filter((f) => f.endsWith('.scenarios.js'))
     .sort();
 
+// The context passed to a scenario's own `run(ctx)`, for scenario files that
+// need more than "one model, one Serializer.fromJSON call" (for example
+// task P2-10's stringvalidator.js lift, which reads a real validator back
+// off a real Field and calls its own public methods directly). Each class
+// is the same one every jsonpopulator-style scenario already uses.
+const RUN_CTX = { ModelManager, Factory, Serializer };
+
 describe('oracle lifted driver', function () {
     this.timeout(30000);
 
@@ -59,6 +66,18 @@ describe('oracle lifted driver', function () {
 
             for (const scenario of scenarios) {
                 it(scenario.id, () => {
+                    // A scenario file may export either the original plain
+                    // {model, json, options} shape (driven generically below
+                    // through Serializer.fromJSON) or, for a lift that needs
+                    // to call something other than fromJSON, a
+                    // `run(ctx)` function it drives itself. Never assert
+                    // either way: the recorder captures whatever the
+                    // reference actually does (an outcome or a thrown
+                    // error) as the fixture.
+                    if (typeof scenario.run === 'function') {
+                        attempt(() => scenario.run(RUN_CTX));
+                        return;
+                    }
                     let entry = mmCache.get(scenario.model);
                     if (!entry) {
                         const mm = new ModelManager();
@@ -68,9 +87,6 @@ describe('oracle lifted driver', function () {
                         entry = { mm, factory, serializer };
                         mmCache.set(scenario.model, entry);
                     }
-                    // Never assert: the recorder captures whatever the
-                    // reference actually does (an outcome or a thrown
-                    // error) as the fixture.
                     attempt(() => entry.serializer.fromJSON(scenario.json, scenario.options));
                 });
             }
