@@ -1,6 +1,6 @@
 # Plan: Run concerto-core on a Rust engine
 
-**Status:** v2.2: all decisions (D1–D10) accepted; ready to launch Phase 0. Nothing has been implemented yet. (v2.1 added §5.1 on instrumentation and task P0-08.)
+**Status:** v2.3: all decisions (D1–D11) accepted; Phase 0 done except the P0-04 split; the tracker is live in accordproject/concerto-rust (#29–#85). (v2.3 adds D11 and Phase 6, splits P0-04 into P0-04a/b, adds P2-12, and records the merge policy.)
 **Repos:** `accordproject/concerto`, `accordproject/concerto-rust`, `accordproject/concerto-validate-rs`. Each has a branch named `claude/tender-pascal-ocwf9q`.
 
 **v2 changes:**
@@ -193,7 +193,8 @@ concerto-rust: concerto-metamodel (build-time download + native codegen)
 | P0-01 | Baseline: build; TS suite and nyc; `cargo test` and llvm-cov in both Rust repos → `migration/baseline.json` | – | P0 | runner / H | committed; TS suite green |
 | P0-02 | Test tagging B/W/M (§2.1), plus guardrails: a CI step and hook that fail on changes to `test/**`, the nyc thresholds or the `.d.ts`/API snapshot | P0-01 | P0 | harness / S | tags cover all `it()`; a deliberately bad edit is caught |
 | P0-03 | Seam ledger (RUST/HYBRID/TS, weights, reasons) | P0-01 | P0 | architect / O | every method classified; human review |
-| P0-04 | PORTING.md rulebook, plus a trial port of `ModelUtil`, `NumberValidator` and `ScalarDeclaration` end to end (Rust, WASM, view, oracle) | P0-03 | P0 | architect / O | the trial units pass their oracle fixtures and unit test files |
+| P0-04a | PORTING.md rulebook: TS-to-Rust mapping, error and message contract, semantics, ledger defaults (#32), module layout (WASM-facing types stay out of core's public API), testing, porting discipline, review checklist, and a worked example (`ModelUtil.getShortName`) | P0-03 | P0 | architect / O | merged; reviewed as actionable |
+| P0-04b | Trial port of `ModelUtil`, `NumberValidator` and `ScalarDeclaration` end to end (Rust, WASM, view, oracle); fold the lessons back into PORTING.md | P0-04a, P1-02 | P0 | architect / O | trial units pass their oracle fixtures (native and WASM) and unit test files |
 | P0-05 | **Oracle recorder and judge** (§2.2, §2.4, §2.6): instrument the reference; record from the unit suite, the fixtures and conformance; canonicalise; measure the corpus's nyc coverage of the reference; judge self-check against mutants | P0-01 | P0 | harness / O (design) → S | corpus plus a coverage report; the judge rejects every seeded mutant |
 | P0-06 | Status reporter and snapshot writer `migration/status.mjs [--at <sha>]`: queue state, B/W pass rates in rust mode, oracle pass % (native and WASM), oracle coverage of the reference, nyc, Rust tests, llvm-cov, mutants, ledger %, conformance. Appends a row to `metrics.jsonl` (§5.1). | P0-01 | P0 | harness / H | `status.json` in under 10 minutes; `--at` reproduces a past row |
 | P0-08 | **Telemetry, stuck detection and dashboard** (§5.1): the event log and the `emit` script, test-run records with failure signatures, stuck rules plus a thresholds config, the `migration-telemetry` branch, the dashboard generator | P0-06 | P0 | harness / S, review O | a replayed synthetic run fires every stuck rule once; the dashboard renders from the logs |
@@ -226,6 +227,7 @@ For each task: first port the TS introspect tests (Concerto v4), then fill the v
 | P2-09 | Gap audit: every TS `validate()` and validation-style method maps to Rust plus a test, or has a written reason | O |
 | P2-10 | **Lift W tests** (§2.3). Batched by test file, starting with `jsonpopulator`, `modelmanager`, `resourcevalidator`, `modelfile`. The reference confirms each fixture. | S (lift) / O (review) |
 | P2-11 | Oracle coverage top-up: turn uncovered reference branches into fixtures until coverage ≥ the suite's own | S |
+| P2-12 | DCS (decorator command sets) in Rust: apply, validate, migrate, converter, extractor (with a Rust port of YAML plain-scalar quoting) | S / O |
 
 ### Phase 3: Instance validation and the modern API (the blog's next phase)
 | ID | Task | Deps | Pri | Agent / Model | Exit condition |
@@ -253,6 +255,13 @@ For each task: first port the TS introspect tests (Concerto v4), then fill the v
 | P5-04 | Criterion benchmark of Rust vs TS on the same models (blog): model load and validate, instance validate | P5-01 | P2 | runner / S | report in the PR |
 | P5-05 | Differential fuzzing with fast-check (models and instances); every divergence becomes a fixture plus a fix | P4-10 | P1 | harness / S | 1M cases with no divergence |
 | P5-06 | `cargo-mutants` on validation; surviving mutants become tests | P2-09 | P1 | rust-core / S | catch rate ≥ 85% |
+
+### Phase 6: Standalone Rust interface (after the TS migration; D11)
+| ID | Task | Deps | Pri | Agent / Model | Exit condition |
+|---|---|---|---|---|---|
+| P6-01 | Rust public API design: audit core's public items, keep WASM and JS-facing types in `concerto-wasm`, idiomatic naming and errors, design note | P5-03 | P2 | architect / O | design note merged; no missing docs on public items |
+| P6-02 | Native acceptance example and usage guide; feature-parity table (native vs TS-only) in the final report | P6-01 | P2 | rust-core / S | example runs in CI; guide covers the D11 scope |
+| P6-03 | `cargo public-api` snapshot and `cargo semver-checks` in CI | P6-01 | P2 | harness / S | CI green; a deliberate API change fails it |
 
 **Critical path:** P0-01 → P0-03/P0-05/P0-08 → P0-04 → P1-01 → P1-02 → P1-03 → P1-04 → (P2-x ∥ P4-01 → P4-02) → P4-03…10 → P5-01 → P5-02 → P5-03.
 **Size:** about 51 tasks. About 14 are Opus (design and review), most are Sonnet, and running and reporting is Haiku.
@@ -346,6 +355,9 @@ Everything is recorded in two append-only logs committed to git. Stuck detection
 
 **Durability.** Telemetry lives on a separate `migration-telemetry` branch of the concerto repo, so it stays out of the PRs. It is pushed after every snapshot, because containers are ephemeral.
 
+### 5.2 Merge policy
+Worker PRs whose base is `claude/tender-pascal-ocwf9q`, in any repo, are merged without human review once they pass adversarial review and CI is green. The coordinator re-runs the repo's fast checks on the merged tree first. Stacked PRs are merged with a signed-off `git merge --no-ff` and push. The integration PRs into `main` still need human review.
+
 ## 6. Decisions
 | # | Decision | Status |
 |---|---|---|
@@ -359,6 +371,7 @@ Everything is recorded in two append-only logs committed to git. Stuck detection
 | D8 | Workflow-script orchestration | **Accepted** |
 | D9 | Publishing (#27, npm) out of scope; local linking during development | **Accepted** |
 | D10 | The oracle is the published `@accordproject/concerto-core@5.0.0` (frozen), and white-box tests may be satisfied by signed-off lifted fixtures if they cannot pass on views | **Accepted** |
+| D11 | Standalone Rust interface, after the TS migration. In scope: JSON AST loading, introspection, semantic validation, instance validation with diagnostics. Out (named follow-ups): CTO parsing, typed instances and JSON generation, sample generation | **Accepted** |
 
 ## 7. Risks
 - **Views vs W tests.** Some W tests may not pass on handle-backed views. Mitigation: a context fallback where cheap; otherwise a lifted fixture signed off under D10.
