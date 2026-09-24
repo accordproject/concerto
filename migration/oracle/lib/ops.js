@@ -40,7 +40,15 @@ const MM_QUERIES = [
     'getAssetDeclarations', 'getTransactionDeclarations', 'getEventDeclarations',
     'getParticipantDeclarations', 'getMapDeclarations', 'getEnumDeclarations',
     'getConceptDeclarations', 'getDecoratorValidation', 'filter',
+    // writeModelsToFileSystem (task P2-11): recorded only when its path is
+    // falsy, where it throws (no file name, or no path) before touching the
+    // disk; see WRITES_TO_DISK below.
+    'writeModelsToFileSystem',
 ];
+// Ops that would write files for a truthy first argument (the directory).
+// The recorder skips such calls ('writes-to-disk') and an adapter refuses to
+// run one, so no recorded or replayed call ever writes to disk.
+const WRITES_TO_DISK = new Set(['ModelManager.writeModelsToFileSystem']);
 // Calls that make a model manager's state unreproducible from plain data.
 const MM_TAINT = ['addDecoratorFactory', 'updateExternalModels'];
 
@@ -140,7 +148,25 @@ function opTable(core) {
         method('ModelManager.' + m, [core.ModelManager.prototype], m, { step: true });
     }
     for (const m of MM_QUERIES) {
-        method('ModelManager.' + m, [BMM], m);
+        const op = 'ModelManager.' + m;
+        if (!WRITES_TO_DISK.has(op)) {
+            method(op, [BMM], m);
+            continue;
+        }
+        method(op, [BMM], m, {
+            skipIf: (args) => (args[0] ? 'writes-to-disk' : null),
+            exec: (c, target, args) => {
+                if (args[0]) {
+                    const err = new Error(op + ' with a directory would write to disk');
+                    err.name = 'HarnessError';
+                    throw err;
+                }
+                if (!target || typeof target[m] !== 'function') {
+                    throw new TypeError(`target has no method ${m}`);
+                }
+                return target[m](...args);
+            },
+        });
     }
     for (const m of MM_TAINT) {
         method('ModelManager.' + m, [BMM], m, { taint: true });
@@ -208,10 +234,11 @@ function opTable(core) {
     const dtu = core.dateTimeUtilModule;
     stat('DateTimeUtil.setCurrentTime', 'DateTimeUtil', [dtu, dtu.default].filter(Boolean), 'setCurrentTime');
 
-    // Serializer.new (task P2-11): the public Serializer constructor, so that
-    // its own argument checks (a missing factory or model manager) are
-    // recorded; a successful construction is summarised as an object.
-    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer']) {
+    // Serializer.new and TypeNotFoundException.new (task P2-11): public,
+    // exported constructors, recorded for their own argument handling (a
+    // missing factory or model manager; the default message). A successful
+    // Serializer is summarised as an object, an exception as an error value.
+    for (const cls of ['ModelManager', 'BaseModelManager', 'AstModelManager', 'ModelFile', 'Serializer', 'TypeNotFoundException']) {
         ops.set(cls + '.new', {
             op: cls + '.new', kind: 'ctor', cls,
             exec: (c, target, args) => new (c[cls])(...args),

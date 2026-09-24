@@ -122,6 +122,7 @@ for (const [f, cov] of Object.entries(corpus)) {
             const r = reasons[`${file}:${entry.line}:${entry.branch}`];
             if (r) {
                 entry.category = r.category;
+                entry.handed_to = r.handed_to || null;
                 entry.reason = r.reason;
             }
             gaps.push(entry);
@@ -139,9 +140,12 @@ const open = new Set(gaps.map((g) => `${g.file}:${g.line}:${g.branch}`));
 const staleReasons = Object.keys(reasons).filter((k) => !open.has(k));
 const unexplained = gaps.filter((g) => g.covered_by_suite && !g.reason).map((g) => `${g.file}:${g.line}:${g.branch}`);
 const byCategory = {};
+const byDestination = {};
 for (const g of gaps.filter((x) => x.covered_by_suite)) {
     const c = g.category || 'unexplained';
     byCategory[c] = (byCategory[c] || 0) + 1;
+    const d = g.handed_to || 'not handed off';
+    byDestination[d] = (byDestination[d] || 0) + 1;
 }
 
 const suiteNums = pick(suiteSummary) || (baseline && baseline.typescript_concerto_core && {
@@ -168,6 +172,7 @@ const summary = {
     uncovered_branches: gaps.length,
     uncovered_branches_covered_by_suite: suite ? gaps.filter((g) => g.covered_by_suite).length : null,
     covered_by_suite_by_category: suite ? byCategory : null,
+    covered_by_suite_by_destination: suite ? byDestination : null,
     unexplained_covered_by_suite: suite ? unexplained : null,
     stale_reasons: staleReasons,
 };
@@ -175,7 +180,7 @@ fs.mkdirSync(path.join(ORACLE_DIR, 'results'), { recursive: true });
 fs.writeFileSync(path.join(ORACLE_DIR, 'results', 'coverage.json'), JSON.stringify(summary, null, 1) + '\n');
 fs.writeFileSync(path.join(ORACLE_DIR, 'coverage-gaps.json'), JSON.stringify({
     summary,
-    note: 'Every branch of concerto-core src the oracle corpus does not reach on the frozen reference. covered_by_suite marks branches the unit suite does reach; each of those carries the category and verified reason from gap-reasons.json (categories are defined there).',
+    note: 'Every branch of concerto-core src the oracle corpus does not reach on the frozen reference. covered_by_suite marks branches the unit suite does reach; each of those carries the category, the task it is handed to and the verified reason from gap-reasons.json (categories are defined there).',
     categories: reasonsDoc.categories || null,
     per_file: perFile,
     branches: gaps,
@@ -189,7 +194,7 @@ if (summary.corpus_src) {
 if (summary.unit_suite) {
     console.log(`unit suite (src):   statements ${fmt(summary.unit_suite.statements)} branches ${fmt(summary.unit_suite.branches)} functions ${fmt(summary.unit_suite.functions)} lines ${fmt(summary.unit_suite.lines)}`);
 }
-console.log(`uncovered branches: ${gaps.length}${suite ? ` (${summary.uncovered_branches_covered_by_suite} of them covered by the unit suite: ${JSON.stringify(byCategory)})` : ''}`);
+console.log(`uncovered branches: ${gaps.length}${suite ? ` (${summary.uncovered_branches_covered_by_suite} of them covered by the unit suite: ${JSON.stringify(byCategory)}; handed to ${JSON.stringify(byDestination)})` : ''}`);
 if (suite && unexplained.length) {
     console.log(`covered by the suite but without a reason in ${path.basename(reasonsFile)}: ${unexplained.length}`);
 }

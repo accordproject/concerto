@@ -1,8 +1,8 @@
 {
  "fixtures": "fixtures",
  "baseline": {
-  "total": 15773,
-  "pass": 15773,
+  "total": 15794,
+  "pass": 15794,
   "fail": 0,
   "harness_error": 0
  },
@@ -126,7 +126,7 @@
    "name": "optional-field-rule-dropped",
    "description": "in-engine: Property.isOptional always returns true (missing required fields accepted)",
    "detected": true,
-   "failing_fixtures": 11288,
+   "failing_fixtures": 11290,
    "harness_errors": 0,
    "by_op": {
     "ModelManager.addCTOModel": 543,
@@ -146,7 +146,7 @@
     "DecoratorManager.extractDecorators": 59,
     "DecoratorManager.extractNonVocabDecorators": 55,
     "DecoratorManager.extractVocabularies": 69,
-    "Factory.newResource": 1150,
+    "Factory.newResource": 1152,
     "MetaModel.modelManagerFromMetaModel": 4,
     "ModelFile.getAllDeclarations": 65,
     "ModelManager.addModelFiles": 31,

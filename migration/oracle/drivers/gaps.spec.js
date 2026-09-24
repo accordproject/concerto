@@ -1326,4 +1326,91 @@ concept People {
             });
         }
     });
+
+    describe('resourcevalidator.ts / instancegenerator.ts / jsonpopulator.ts: enums and undefined values through the public API', () => {
+        const NS = 'gaps.enumvis@1.0.0';
+        const cto = `namespace ${NS}
+enum Color {
+  o RED
+  o GREEN
+}
+concept C {
+  o String s optional
+}
+concept D {
+  o C c
+}
+map M {
+  o String
+  o C
+}
+concept E {
+  o M m optional
+}
+concept F {
+  o String s
+}
+`;
+        const setup = () => {
+            const mm = new ModelManager();
+            mm.addCTOModel(cto, 'enumvis.cto');
+            const factory = new Factory(mm);
+            return { mm, factory, serializer: new Serializer(factory, mm) };
+        };
+
+        // A Factory-built instance is a ValidatedResource: setPropertyValue
+        // validates the raw value, so undefined reaches visitField's
+        // undefined/symbol check (resourcevalidator.ts 306).
+        it('Resource.setPropertyValue with undefined on a validated instance', () => {
+            const { factory } = setup();
+            const f = factory.newConcept(NS, 'F');
+            attempt(() => f.setPropertyValue('s', undefined));
+            attempt(() => f.setPropertyValue('s', 'x'));
+        });
+
+        // Factory.newResource resolves any declared type, including an enum;
+        // with generate options the InstanceGenerator then visits the enum
+        // declaration, which none of its visit() cases accepts
+        // (instancegenerator.ts 44).
+        it('Factory.newResource of an enum type with generate options', () => {
+            const { factory } = setup();
+            for (const generate of ['sample', 'empty']) {
+                attempt(() => factory.newResource(NS, 'Color', undefined, { generate }));
+            }
+        });
+
+        // A nested object whose $class names an enum makes JSONPopulator
+        // visit the enum declaration, which none of its visit() cases accepts
+        // (jsonpopulator.ts 154): as a field value and as a map value.
+        it('Serializer.fromJSON with an enum $class for a nested object and a map value', () => {
+            const { serializer } = setup();
+            attempt(() => serializer.fromJSON({ $class: `${NS}.D`, c: { $class: `${NS}.Color`, RED: 'x' } }));
+            attempt(() => serializer.fromJSON({ $class: `${NS}.E`, m: { k: { $class: `${NS}.Color`, RED: 'x' } } }));
+        });
+    });
+
+    describe('basemodelmanager.ts: ModelManager.writeModelsToFileSystem without a directory', () => {
+        // Only a falsy path is recorded (lib/ops.js WRITES_TO_DISK): the call
+        // then throws before anything is written, either for a model file
+        // with no file name or for the missing path.
+        it('named and unnamed model files, no path', () => {
+            const cto = 'namespace gaps.write@1.0.0\nconcept C {\n  o String s\n}\n';
+            const named = new ModelManager();
+            named.addCTOModel(cto, 'write.cto');
+            attempt(() => named.writeModelsToFileSystem(null));
+            attempt(() => named.writeModelsToFileSystem(undefined, { includeExternalModels: false }));
+            const unnamed = new ModelManager();
+            unnamed.addCTOModel(cto);
+            attempt(() => unnamed.writeModelsToFileSystem(null));
+        });
+    });
+
+    describe('typenotfoundexception.ts: the exported TypeNotFoundException constructor', () => {
+        it('with and without a message', () => {
+            const { TypeNotFoundException } = S('typenotfoundexception');
+            attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing'));
+            attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing', 'custom message'));
+            attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing', undefined, 'my-component'));
+        });
+    });
 });

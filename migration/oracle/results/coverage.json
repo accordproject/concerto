@@ -1,48 +1,48 @@
 {
- "generated_at": "2026-09-24T14:58:07.847Z",
+ "generated_at": "2026-09-24T16:09:48.856Z",
  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
-   "pct": 91.77,
-   "covered": 3145,
+   "pct": 92.12,
+   "covered": 3157,
    "total": 3427
   },
   "branches": {
-   "pct": 92.26,
-   "covered": 1693,
+   "pct": 92.86,
+   "covered": 1704,
    "total": 1835
   },
   "functions": {
-   "pct": 91.14,
-   "covered": 556,
+   "pct": 91.47,
+   "covered": 558,
    "total": 610
   },
   "lines": {
-   "pct": 91.69,
-   "covered": 3092,
+   "pct": 92.05,
+   "covered": 3104,
    "total": 3372
   }
  },
  "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
  "corpus_src": {
   "statements": {
-   "pct": 94.47,
-   "covered": 3145,
+   "pct": 94.83,
+   "covered": 3157,
    "total": 3329
   },
   "branches": {
-   "pct": 92.26,
-   "covered": 1693,
+   "pct": 92.86,
+   "covered": 1704,
    "total": 1835
   },
   "functions": {
-   "pct": 91.14,
-   "covered": 556,
+   "pct": 91.47,
+   "covered": 558,
    "total": 610
   },
   "lines": {
-   "pct": 94.44,
-   "covered": 3092,
+   "pct": 94.8,
+   "covered": 3104,
    "total": 3274
   }
  },
@@ -90,12 +90,17 @@
   "functions": 99,
   "lines": 99
  },
- "uncovered_branches": 142,
- "uncovered_branches_covered_by_suite": 74,
+ "uncovered_branches": 131,
+ "uncovered_branches_covered_by_suite": 65,
  "covered_by_suite_by_category": {
-  "unrecordable": 58,
+  "unrecordable": 51,
+  "plan-owner-decision": 2,
   "stub-only": 4,
-  "internal-only": 12
+  "internal-only": 8
+ },
+ "covered_by_suite_by_destination": {
+  "accordproject/concerto-rust#94": 53,
+  "P2-10 (accordproject/concerto-rust#54)": 12
  },
  "unexplained_covered_by_suite": [],
  "stale_reasons": []

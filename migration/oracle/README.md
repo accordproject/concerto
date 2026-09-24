@@ -139,10 +139,10 @@ status or error class differs from the recorded one is a **state divergence**, r
 
 | Family | Ops |
 |---|---|
-| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`; queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation` |
+| Model managers | `ModelManager.new`, `BaseModelManager.new`, `AstModelManager.new`; steps `addModel`, `addCTOModel`, `addModelFile`, `addModelFiles`, `updateModelFile`, `deleteModelFile`, `clearModelFiles`, `fromAst`, `validateModelFiles`; queries `validateModelFile`, `getType`, `resolveType`, `getAst`, `getModels`, `getNamespaces`, `derivesFrom`, `isAssignableTo`, `getAssignableConcreteTypes`, `resolveMetaModel`, `get*Declarations`, `getDecoratorValidation`, `writeModelsToFileSystem` (only with no directory) |
 | Model files | `ModelFile.new`, `validate`, `getType`, `resolveType`, `isLocalType`, `isImportedType`, `resolveImport`, `getFullyQualifiedTypeName`, `getLocalType`, `isDefined`, and every other public accessor |
 | Introspection | every public method of `Declaration`, `ClassDeclaration` and subclasses, `MapDeclaration`, `ScalarDeclaration`, `Property`, `Field`, `RelationshipDeclaration`, `EnumValueDeclaration`, `MapKeyType`, `MapValueType`, `Decorated`, `Decorator`, the validators, `Introspector` |
-| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
+| Instances | `Factory.newResource/newConcept/newRelationship/newTransaction/newEvent`, `TypeNotFoundException.new` (recorded as an error value), `Serializer.new` (the constructor; a successful one is summarised as `{"@@oracle":"object","ctor":"Serializer"}`), `Serializer.fromJSON/toJSON`, `Resource.validate/setPropertyValue/addArrayValue/instanceOf/toJSON`, `Typed`/`Identifiable`/`Resource`/`Relationship` accessors, `Relationship.fromURI` |
 | Statics | every `ModelUtil` static, every `DecoratorManager` static, `MetaModel.newMetaModelManager/validateMetaModel/modelManagerFromMetaModel`, `DcsConverter.jsonToYaml/yamlToJson`, `DateTimeUtil.setCurrentTime` |
 
 ## Adding an engine adapter
@@ -190,25 +190,26 @@ merging P2-10 part 1 (`lifted/`): `record-all.sh` (all five sources, `JOBS=5`), 
 
 | Source | Fixtures | Ops |
 |---|---:|---:|
-| unit | 4,113 | 207 |
+| unit | 4,117 | 208 |
 | data | 10,231 | 32 |
 | conformance | 839 | 9 |
-| gaps | 526 | 35 |
+| gaps | 543 | 38 |
 | lifted | 64 | 3 |
-| **total** | **15,773** (from 28,904 recorded calls; 620 blobs) | |
+| **total** | **15,794** (from 28,936 recorded calls; 620 blobs) | |
 
 Unit suite under the recorder: 1300 passing, 0 failing, 8 pending (the network test `ModelLoader
 #loadModelFromUrl`, failing in `baseline.json`, passes when the network is reachable).
 
-Skipped calls: 1,010 in `unit` (tainted model managers, declarations built outside a model file,
+Skipped calls: 978 in `unit` (tainted model managers, declarations built outside a model file,
 validators not owned by their field, properties built outside a declaration, cycles, a stubbed `ModelUtil`
-function, function arguments, async results, a stubbed CTO parser) and 1 in `gaps`: `ModelManager.filter`,
+function, function arguments, async results, a stubbed CTO parser, and 3 `writeModelsToFileSystem` calls given a real directory, skipped as
+`writes-to-disk`) and 1 in `gaps`: `ModelManager.filter`,
 whose predicate is a function (`nonplain:function`), so none of `filter()`'s branches can become a fixture.
 
 ### Replay
 
-`results/replay-reference.json`: **15,773 / 15,773 pass (100%)** against the frozen reference, 0 fail,
-0 harness errors. Against the workspace `src/`: also 15,773 / 15,773, 0 harness errors.
+`results/replay-reference.json`: **15,794 / 15,794 pass (100%)** against the frozen reference, 0 fail,
+0 harness errors. Against the workspace `src/`: also 15,794 / 15,794, 0 harness errors.
 
 The corpus recorded at the start of this round (15,384 fixtures) had one failing fixture on both engines,
 `gaps/Serializer.toJSON/504efcf4…`: `drivers/gaps.spec.js` built a DateTime with the `dayjs` that
@@ -227,10 +228,10 @@ can only run against `src/`.
 
 | Metric | Corpus → reference | Corpus → `src/` | Unit suite → `src/` |
 |---|---:|---:|---:|
-| Statements | 91.77% (3145/3427) | 94.47% (3145/3329) | 99.01% (3308/3341) |
-| Branches | **92.26% (1693/1835)** | 92.26% (1693/1835) | **95.80% (1758/1835)** |
-| Functions | 91.14% (556/610) | 91.14% (556/610) | 99.34% (606/610) |
-| Lines | 91.69% (3092/3372) | 94.44% (3092/3274) | 99.02% (3254/3286) |
+| Statements | 92.12% (3157/3427) | 94.83% (3157/3329) | 99.01% (3308/3341) |
+| Branches | **92.86% (1704/1835)** | 92.86% (1704/1835) | **95.80% (1758/1835)** |
+| Functions | 91.47% (558/610) | 91.47% (558/610) | 99.34% (606/610) |
+| Lines | 92.05% (3104/3372) | 94.80% (3104/3274) | 99.02% (3254/3286) |
 
 Branches and functions have the same totals in every run. Statement and line totals differ: on the
 reference, nyc also counts statements of the compiled `dist/*.js` (such as the module interop helpers tsc
@@ -239,7 +240,8 @@ without its source map. The covered counts of the two corpus runs are identical.
 
 History of corpus-only branch coverage: 80.92% (1485/1835) after P0-05; 88.99% (1633/1835) at the start of
 this round (15,384 fixtures, measured with this pipeline after merging P2-10 part 1; statements 89.78%
-3077/3427, functions 90.16% 550/610, lines 89.70% 3025/3372 on the reference); 92.26% (1693/1835) now.
+3077/3427, functions 90.16% 550/610, lines 89.70% 3025/3372 on the reference); 92.26% (1693/1835) after
+this round's first pass (15,773 fixtures); 92.86% (1704/1835) now.
 The README's earlier 85.83% predated the previous round's fix-up and was never re-measured.
 
 This round closed 60 branches, 58 of them covered by the unit suite: `jsongenerator.ts` 22 (all of its
@@ -252,28 +254,55 @@ namespace of a relationship to a primitive type). Two of these correct earlier c
 `jsonpopulator.ts` default-namespace branch, listed not-liftable in `lifted/MAP.tsv`, is reachable with a
 model added without validation whose relationship targets a primitive.
 
+A review of that pass then recorded fixtures for 9 more suite-covered branches it had listed as
+unrecordable or internal-only; the fix round closed them (11 branches in all, 9 of them suite-covered):
+
+* `resourcevalidator.ts` 306: `Resource.setPropertyValue('s', undefined)` on a Factory-built
+  (validated) instance, which validates the raw value.
+* `instancegenerator.ts` 44: `Factory.newResource` of an enum type with `generate: 'sample'` and
+  `'empty'`; the generator visits the enum declaration and none of its cases accepts it.
+* `jsonpopulator.ts` 154: `Serializer.fromJSON` of a nested object, and of a map value, whose `$class`
+  names an enum.
+* `basemodelmanager.ts` 499, 507 (33[0], 33[1], 34[0..2]) and 508: `writeModelsToFileSystem` is now an
+  op (`lib/ops.js` `MM_QUERIES`), recorded only with a falsy directory, where it throws before writing
+  (`` `path` is a required parameter`` or "has no file name"). A call with a directory is skipped by the
+  recorder (`writes-to-disk`) and refused by the adapter, so no recorded or replayed call writes to disk.
+* `typenotfoundexception.ts` 36: a `TypeNotFoundException.new` constructor op (the class is exported
+  from the package index), recorded like `Serializer.new`; `new TypeNotFoundException(name)` takes the
+  default-message branch. The exception is recorded as an error value.
+
+**Note for P2-10 (`lifted/MAP.tsv` is P2-10's file and is not edited here):** two of its `not-liftable`
+rows are wrong. Line 41 (`JSONPopulator #visit should throw an error for an unrecognized type`) is
+liftable: `Serializer.fromJSON` with a nested `$class` naming an enum reaches the same throw
+(`jsonpopulator.ts` 154, closed above). Line 53 (`#visitRelationshipDeclaration should get the
+relationship namespace if required`) is liftable too: a relationship to a primitive type in a model added
+without validation reaches it (`jsonpopulator.ts` 445, closed by `drivers/gaps.spec.js`).
+
 ### Remaining gaps
 
-`coverage-gaps.json` lists all 142 branches the corpus does not reach on the reference. 74 of them are
-covered by the unit suite; each carries a category and a verified reason from `gap-reasons.json`
-(`coverage-gaps.js` merges them and reports a stale or missing reason):
+`coverage-gaps.json` lists all 131 branches the corpus does not reach on the reference. 65 of them are
+covered by the unit suite. Each of the 65 carries a category, the task it is handed to and a verified
+reason from `gap-reasons.json` (`coverage-gaps.js` merges them, and reports a stale or missing reason: none):
 
-| Category | Branches | Where |
-|---|---:|---|
-| `unrecordable` | 58 | `ModelManager.filter` and the private `ModelFile.filter` it calls (30: the predicate is a function); `ModelLoader` (14: static async, reads files and URLs); `updateExternalModels` (4: async, taints the model manager); `writeModelsToFileSystem` (5: not an op, writes files); the decorator-factory path of `Decorated.process` (4: `addDecoratorFactory` takes code and taints the model manager); `resourcevalidator.ts` 306 (1: only a Symbol reaches it publicly) |
-| `internal-only` | 12 | `jsonpopulator.ts` 129, 154, 171, 281, 363, 439; `instancegenerator.ts` 44; `valuegenerator.ts` 80, 102, 171; `scalardeclaration.ts` 89; `typenotfoundexception.ts` 36 |
-| `stub-only` | 4 | `property.ts` 209, 213; `field.ts` 194; `relationshipdeclaration.ts` 79 |
+| Handed to | Category | Branches | Where |
+|---|---|---:|---|
+| accordproject/concerto-rust#94 | `unrecordable` | 30 | `ModelManager.filter` (`basemodelmanager.ts` 914, 918) and the private `ModelFile.filter` it calls (`modelfile.ts` 894–941): the predicate is a function |
+| accordproject/concerto-rust#94 | `unrecordable` | 14 | `modelloader.ts`: static async, reads files and URLs |
+| accordproject/concerto-rust#94 | `unrecordable` | 4 | `updateExternalModels` (`basemodelmanager.ts` 457, 473): async, taints the model manager |
+| accordproject/concerto-rust#94 | `unrecordable` | 3 | `decorated.ts` 107[0], 107[1], 112[1]: need a `DecoratorFactory` subclass carrying code |
+| accordproject/concerto-rust#94 | `plan-owner-decision` | 2 | `scalardeclaration.ts` 89[1] (reachable through the exported `ScalarDeclaration` constructor, but introspection constructors are deliberately not ops); `decorated.ts` 104[0] (reachable with the base `DecoratorFactory`, but needs a codec change: a factory encoding and `addDecoratorFactory` as a step) |
+| P2-10 (accordproject/concerto-rust#54) | `internal-only` | 8 | `jsonpopulator.ts` 129, 171, 281, 363, 439; `valuegenerator.ts` 80, 102, 171 |
+| P2-10 (accordproject/concerto-rust#54) | `stub-only` | 4 | `property.ts` 209, 213; `field.ts` 194; `relationshipdeclaration.ts` 79 |
+| | | **65** | 53 to #94, 12 to P2-10 |
 
-The 16 `internal-only` and `stub-only` branches are handed to P2-10. The 58 `unrecordable` ones are not
-stub-only: the public API reaches them, but only through a call this oracle does not record by design (an
-async result, a function argument, a Symbol, a tainted model manager, or file-system output). Covering them
-needs a change to the oracle, such as a predicate encoding in the fixture schema or async ops in the
-recorder and judge, not a new input. **So neither clause of P2-11's exit condition holds yet:** corpus-only
-branch coverage is 92.26% against the unit suite's 95.80%, and 58 remaining gaps are not stub-only.
+**Exit condition: met through the fallback clause**, as the plan owner extended it: every remaining
+suite-covered gap is either closed or handed off with a verified reason (53 to accordproject/concerto-rust#94,
+12 to P2-10). The first clause is not met: corpus-only branch coverage is 92.86% (1704/1835) against the
+unit suite's 95.80% (1758/1835).
 
 ### Judge self-check
 
-`results/self-check.json` (`bin/self-check.js`), run on this corpus: baseline 15,773 / 15,773 pass,
+`results/self-check.json` (`bin/self-check.js`), run on this corpus: baseline 15,794 / 15,794 pass,
 0 fail, 0 harness errors; every seeded mutant is detected.
 
 | Mutant | Kind | Fixtures that flag it |
@@ -284,7 +313,7 @@ branch coverage is 92.26% against the unit suite's 95.80%, and 58 remaining gaps
 | abstract-check-dropped: `ClassDeclaration.isAbstract` always false | in-engine patch | 180 |
 | canonical-result-altered: `Serializer.toJSON` results lose `$class` | adapter wrapper | 1,670 |
 | error-class-swapped: TypeNotFoundException reported as Error | adapter wrapper | 281 |
-| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,288 |
+| optional-field-rule-dropped: `Property.isOptional` always true | in-engine patch | 11,290 |
 | datetime-shifted: DateTime values serialised 1 ms late | in-engine patch | 585 |
 
 Harness checks, all reported as `harness-error`: a fixture whose input blob is missing, a fixture without
@@ -300,5 +329,6 @@ inputs, a fixture file that does not exist, a fixture referencing an unknown blo
   (100% replay), and plain-function overrides of methods on tracked objects are detected and skipped.
 * An op whose primary argument is a function (`ModelManager.filter`'s predicate) is never recorded
   (`nonplain:function`); nor is a call that would taint its model manager first, such as one made after
-  `addDecoratorFactory` (`lib/ops.js`'s `MM_TAINT`), nor `writeModelsToFileSystem`, whose effect is files
-  on disk. These, with the async calls above, are the `unrecordable` gaps in "Remaining gaps".
+  `addDecoratorFactory` (`lib/ops.js`'s `MM_TAINT`), nor `writeModelsToFileSystem` with a directory (it
+  would write files; only a call with no directory is recorded). The first two, with the async calls
+  above, are the `unrecordable` gaps in "Remaining gaps", handed to accordproject/concerto-rust#94.

@@ -1,7 +1,7 @@
 {
  "engine": "reference@5.0.0",
- "total": 15773,
- "pass": 15773,
+ "total": 15794,
+ "pass": 15794,
  "fail": 0,
  "harness_error": 0,
  "by_source": {
@@ -18,8 +18,8 @@
    "harness_error": 0
   },
   "gaps": {
-   "total": 526,
-   "pass": 526,
+   "total": 543,
+   "pass": 543,
    "fail": 0,
    "harness_error": 0
   },
@@ -30,8 +30,8 @@
    "harness_error": 0
   },
   "unit": {
-   "total": 4113,
-   "pass": 4113,
+   "total": 4117,
+   "pass": 4117,
    "fail": 0,
    "harness_error": 0
   }
@@ -50,8 +50,8 @@
    "harness_error": 0
   },
   "ModelManager.addCTOModel": {
-   "total": 1357,
-   "pass": 1357,
+   "total": 1360,
+   "pass": 1360,
    "fail": 0,
    "harness_error": 0
   },
@@ -74,14 +74,14 @@
    "harness_error": 0
   },
   "Serializer.fromJSON": {
-   "total": 2072,
-   "pass": 2072,
+   "total": 2074,
+   "pass": 2074,
    "fail": 0,
    "harness_error": 0
   },
   "Serializer.new": {
-   "total": 161,
-   "pass": 161,
+   "total": 162,
+   "pass": 162,
    "fail": 0,
    "harness_error": 0
   },
@@ -182,8 +182,8 @@
    "harness_error": 0
   },
   "Factory.newResource": {
-   "total": 1393,
-   "pass": 1393,
+   "total": 1395,
+   "pass": 1395,
    "fail": 0,
    "harness_error": 0
   },
@@ -272,8 +272,8 @@
    "harness_error": 0
   },
   "Factory.newConcept": {
-   "total": 46,
-   "pass": 46,
+   "total": 47,
+   "pass": 47,
    "fail": 0,
    "harness_error": 0
   },
@@ -331,6 +331,12 @@
    "fail": 0,
    "harness_error": 0
   },
+  "ModelManager.writeModelsToFileSystem": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0,
+   "harness_error": 0
+  },
   "ModelUtil.isAssignableTo": {
    "total": 6,
    "pass": 6,
@@ -373,6 +379,12 @@
    "fail": 0,
    "harness_error": 0
   },
+  "Resource.setPropertyValue": {
+   "total": 53,
+   "pass": 53,
+   "fail": 0,
+   "harness_error": 0
+  },
   "StringValidator.compatibleWith": {
    "total": 13,
    "pass": 13,
@@ -382,6 +394,12 @@
   "StringValidator.validate": {
    "total": 4,
    "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "TypeNotFoundException.new": {
+   "total": 7,
+   "pass": 7,
    "fail": 0,
    "harness_error": 0
   },
@@ -1207,12 +1225,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "Resource.setPropertyValue": {
-   "total": 51,
-   "pass": 51,
-   "fail": 0,
-   "harness_error": 0
-  },
   "Resource.toJSON": {
    "total": 7,
    "pass": 7,
@@ -1336,6 +1348,6 @@
  },
  "failures": [],
  "agreement_pct": 100,
- "seconds": 57,
+ "seconds": 67.3,
  "failures_truncated": false
 }
