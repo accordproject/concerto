@@ -1,0 +1,68 @@
+
+> concerto@5.0.0 build:level0
+> npm run build -w packages/concerto-util
+
+
+> @accordproject/concerto-util@5.0.0 prebuild
+> npm-run-all clean
+
+
+> @accordproject/concerto-util@5.0.0 clean
+> rimraf dist
+
+
+> @accordproject/concerto-util@5.0.0 build
+> tsc -p tsconfig.build.json && npm run build:esm
+
+
+> @accordproject/concerto-util@5.0.0 build:esm
+> node ../../scripts/build-esm.js
+
+
+  dist/esm/chunk-AIHKTZ7Z.mjs  5.0kb
+  dist/esm/chunk-T6ZBQYEB.mjs  3.7kb
+  dist/esm/chunk-Q6G4HQJ7.mjs  3.7kb
+  dist/esm/chunk-YQVUNOO6.mjs  2.5kb
+  dist/esm/chunk-K4OOJFK5.mjs  2.2kb
+  dist/esm/index.mjs           2.0kb
+  dist/esm/chunk-I33X6SGY.mjs  1.7kb
+  dist/esm/chunk-WPVG6LP3.mjs  1.7kb
+  dist/esm/chunk-3U4T7O4P.mjs  1.6kb
+  dist/esm/chunk-GOLEPEBI.mjs  1.6kb
+  dist/esm/chunk-7QMP3X2L.mjs  1.5kb
+  dist/esm/chunk-FK2LDKS6.mjs  1.3kb
+  dist/esm/chunk-D4MNWWBB.mjs  1.1kb
+  dist/esm/chunk-FHUVVHGR.mjs  1.1kb
+  dist/esm/chunk-TP3CT6S4.mjs  985b 
+  dist/esm/chunk-DTVQ7VXD.mjs  934b 
+  dist/esm/chunk-PBL5N3A2.mjs  924b 
+  dist/esm/chunk-3RJ6JXLX.mjs  696b 
+  dist/esm/errorcodes.mjs      616b 
+  dist/esm/chunk-PMP2SMHG.mjs  568b 
+  ...and 58 more output files...
+
+⚡ Done in 15ms
+
+  dist/esm-browser/chunk-YURYZDD2.mjs  14.2kb
+  dist/esm-browser/chunk-7LYWQ57N.mjs  13.1kb
+  dist/esm-browser/chunk-2GAFRJAB.mjs   4.9kb
+  dist/esm-browser/chunk-LZTTRWN3.mjs   3.7kb
+  dist/esm-browser/chunk-3XGAUT4O.mjs   2.5kb
+  dist/esm-browser/chunk-NSJTBLWA.mjs   2.4kb
+  dist/esm-browser/chunk-NQ5PDAAD.mjs   2.2kb
+  dist/esm-browser/index.mjs            2.0kb
+  dist/esm-browser/chunk-BDMF4RRF.mjs   1.7kb
+  dist/esm-browser/chunk-6SOOHVQB.mjs   1.7kb
+  dist/esm-browser/chunk-EGOFDABS.mjs   1.6kb
+  dist/esm-browser/chunk-MCUSZIV7.mjs   1.5kb
+  dist/esm-browser/chunk-BSBOEFWN.mjs   1.5kb
+  dist/esm-browser/chunk-MQTZMQMH.mjs   1.5kb
+  dist/esm-browser/chunk-NAP47VIV.mjs   1.2kb
+  dist/esm-browser/chunk-SU6SG5PJ.mjs   1.1kb
+  dist/esm-browser/chunk-7DYPHXUR.mjs   1.1kb
+  dist/esm-browser/chunk-N42BHUZ6.mjs   912b 
+  dist/esm-browser/chunk-WCGRUR5U.mjs   883b 
+  dist/esm-browser/chunk-S52XDDAF.mjs   656b 
+  ...and 62 more output files...
+
+⚡ Done in 23ms

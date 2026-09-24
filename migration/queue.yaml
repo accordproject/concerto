@@ -1,0 +1,457 @@
+# Migration work queue (plan §4). Committed on the concerto branch so
+# state lives in git and can be resumed (plan §5, D8).
+#
+# Fields per task:
+#   id       - task ID from plan §4
+#   title    - short task description
+#   deps     - task IDs this depends on (must be done, or at least
+#              unblocked/in progress, before this can merge)
+#   priority - P0 (blocking) .. P5, as in the plan's Pri column
+#   agent    - role from plan §5 (architect, rust-infra, rust-core,
+#              bindings, shim, harness, reviewer, runner)
+#   model    - O (Opus), S (Sonnet), H (Haiku), or "O(design)->S" style
+#              notation where the plan splits design/implementation
+#   status   - pending | in_progress | done | blocked
+#   exit_condition - the machine-checkable condition from the plan
+
+version: 1
+updated_at: "2026-09-24T09:20:00Z"
+
+tasks:
+  # ---- Phase 0: Harness, oracle and rulebook (gate) ----
+  - id: P0-01
+    title: "Baseline: build; TS suite and nyc; cargo test and llvm-cov in both Rust repos -> migration/baseline.json"
+    deps: []
+    priority: P0
+    agent: runner
+    model: H
+    status: done
+    exit_condition: "committed; TS suite green"
+
+  - id: P0-02
+    title: "Test tagging B/W/M (§2.1), plus guardrails: a CI step and hook that fail on changes to test/**, the nyc thresholds or the .d.ts/API snapshot"
+    deps: [P0-01]
+    priority: P0
+    agent: harness
+    model: S
+    status: in_progress
+    exit_condition: "tags cover all it(); a deliberately bad edit is caught"
+
+  - id: P0-03
+    title: "Seam ledger (RUST/HYBRID/TS, weights, reasons)"
+    deps: [P0-01]
+    priority: P0
+    agent: architect
+    model: O
+    status: in_progress
+    exit_condition: "every method classified; human review"
+
+  - id: P0-04
+    title: "PORTING.md rulebook, plus a trial port of ModelUtil, NumberValidator and ScalarDeclaration end to end (Rust, WASM, view, oracle)"
+    deps: [P0-03]
+    priority: P0
+    agent: architect
+    model: O
+    status: pending
+    exit_condition: "the trial units pass their oracle fixtures and unit test files"
+
+  - id: P0-05
+    title: "Oracle recorder and judge (§2.2, §2.4, §2.6): instrument the reference; record from the unit suite, the fixtures and conformance; canonicalise; measure the corpus's nyc coverage of the reference; judge self-check against mutants"
+    deps: [P0-01]
+    priority: P0
+    agent: harness
+    model: "O(design)->S"
+    status: in_progress
+    exit_condition: "corpus plus a coverage report; the judge rejects every seeded mutant"
+
+  - id: P0-06
+    title: "Status reporter and snapshot writer migration/status.mjs [--at <sha>]: queue state, B/W pass rates in rust mode, oracle pass % (native and WASM), oracle coverage of the reference, nyc, Rust tests, llvm-cov, mutants, ledger %, conformance. Appends a row to metrics.jsonl (§5.1)."
+    deps: [P0-01]
+    priority: P0
+    agent: harness
+    model: H
+    status: in_progress
+    exit_condition: "status.json in under 10 minutes; --at reproduces a past row"
+
+  - id: P0-07
+    title: "Update the concerto-conformance Rust harness to the current concerto-rust API (blog priority), so the conformance CI goes green on 62/65"
+    deps: [P0-01]
+    priority: P1
+    agent: rust-core
+    model: S
+    status: in_progress
+    exit_condition: "conformance job green"
+
+  - id: P0-08
+    title: "Telemetry, stuck detection and dashboard (§5.1): the event log and the emit script, test-run records with failure signatures, stuck rules plus a thresholds config, the migration-telemetry branch, the dashboard generator"
+    deps: [P0-06]
+    priority: P0
+    agent: "harness, review O"
+    model: S
+    status: in_progress
+    exit_condition: "a replayed synthetic run fires every stuck rule once; the dashboard renders from the logs"
+
+  # ---- Phase 1: Rust foundations ----
+  - id: P1-01
+    title: "Metamodel crate: build.rs downloads pinned+SHA-256 metamodels with vendored offline fallback; Rust-native codegen replaces npx; abstract types become $class-tagged serde enums; Debug derived (#24); align with TS ^3.17"
+    deps: [P0-04]
+    priority: P0
+    agent: rust-infra
+    model: O
+    status: pending
+    exit_condition: "offline build works; the corpus ASTs round-trip; #24 test passes"
+
+  - id: P1-02
+    title: "Core on top of the metamodel crate: newtypes over mm::*; root and decorator models deserialise into mm::Model; hand-built structs deleted; serde for serialisation"
+    deps: [P1-01]
+    priority: P0
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "existing tests green; no hand-built metamodel structs (grep)"
+
+  - id: P1-03
+    title: "Traits and derives: concerto-macros proc-macro crate re-exported as concerto_core::derive (D5); traits Named/FullyQualified/Decorated/HasValidators/Typed/Validate/DeclarationKind; error-builder macro"
+    deps: [P1-02]
+    priority: P0
+    agent: rust-core
+    model: O
+    status: pending
+    exit_condition: "the dup-impl script shows nothing over the thresholds"
+
+  - id: P1-04
+    title: "Graph and handle model for bindings: a stable DeclId/PropId arena in ModelManager; a context trait for the collaborator fallback"
+    deps: [P1-03]
+    priority: P0
+    agent: architect
+    model: O
+    status: pending
+    exit_condition: "existing tests green"
+
+  - id: P1-05
+    title: "Error contract and message catalogue: golden test per TS message; error locations carried from the AST"
+    deps: [P1-02]
+    priority: P0
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "every TS template has a golden test"
+
+  - id: P1-06
+    title: "Relax import order (#26): add all files, validate, roll back on error"
+    deps: [P1-04]
+    priority: P2
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "tests pass"
+
+  - id: P1-07
+    title: "Native oracle harness: cargo test runs migration/oracle/** fixtures"
+    deps: [P0-05, P1-05]
+    priority: P0
+    agent: harness
+    model: S
+    status: pending
+    exit_condition: "runs; failures reported per rule"
+
+  # ---- Phase 2: Introspection parity ----
+  - id: P2-01
+    title: "ModelUtil, ID_REGEX, namespace and semver"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-02
+    title: "Number, String (regress, flags, defaults) and CollectionSize validators, compatibleWith"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-03
+    title: "ClassDeclaration family: kind compatibility, identity rules, implicit Concept, system fields, getters"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-04
+    title: "Property, Field, Relationship, Enum and EnumValue"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-05
+    title: "ScalarDeclaration"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-06
+    title: "MapDeclaration, MapKeyType, MapValueType (#25)"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-07
+    title: "Decorator, Decorated, DecoratorFactory: validate arguments and type references, duplicates everywhere, log vs throw"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-08
+    title: "ModelFile and Introspector: imports, concertoVersion, filter(), dangerouslyAllow..., getters"
+    deps: [P1-04, P1-05, P1-07]
+    priority: P1
+    agent: rust-core
+    model: "S/O"
+    status: pending
+    exit_condition: "ported TS introspect tests and matching oracle fixtures pass"
+
+  - id: P2-09
+    title: "Gap audit: every TS validate() and validation-style method maps to Rust plus a test, or has a written reason"
+    deps: [P2-01, P2-02, P2-03, P2-04, P2-05, P2-06, P2-07, P2-08]
+    priority: P1
+    agent: architect
+    model: O
+    status: pending
+    exit_condition: "audit document complete and reviewed"
+
+  - id: P2-10
+    title: "Lift W tests (§2.3), batched by test file starting with jsonpopulator, modelmanager, resourcevalidator, modelfile; reference confirms each fixture"
+    deps: [P0-05]
+    priority: P1
+    agent: "S (lift) / O (review)"
+    model: "S/O"
+    status: pending
+    exit_condition: "each lifted fixture signed off against the reference; test files unchanged"
+
+  - id: P2-11
+    title: "Oracle coverage top-up: turn uncovered reference branches into fixtures until coverage >= the suite's own"
+    deps: [P0-05, P2-10]
+    priority: P1
+    agent: harness
+    model: S
+    status: pending
+    exit_condition: "oracle nyc coverage of the reference >= 99% statements/lines, 94.8% branches"
+
+  # ---- Phase 3: Instance validation and the modern API ----
+  - id: P3-01
+    title: "Instance validator in concerto-core::instance: fold in concerto-validate-rs (D3), fix its bugs, full type support (Long, DateTime, relationships, enums, maps, scalars), matching TS ResourceValidator/JSONPopulator checks and messages"
+    deps: [P2-03, P2-04]
+    priority: P0
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "instance oracle fixtures pass"
+
+  - id: P3-02
+    title: "#1273: DeserializeOptions (reject_unknown_keys, reject_required_null), the STRICT_VALIDATE_OPTIONS preset, structured details"
+    deps: [P3-01]
+    priority: P1
+    agent: architect
+    model: "O->S"
+    status: pending
+    exit_condition: "the #1273 scenario table is covered"
+
+  - id: P3-03
+    title: "#1239 foundation (Rust-only): Diagnostic (JSON pointer, code, severity), ValidationResult, collect-all, validate_instance(_or_throw) on ClassDeclaration and ModelManager"
+    deps: [P3-02]
+    priority: P2
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "a test per diagnostic code"
+
+  - id: P3-04
+    title: "validate_metamodel/validateAst rebuilt on P3-01 with the strict preset; concerto-validate-rs becomes a thin CLI over concerto-rust (D3)"
+    deps: [P3-02]
+    priority: P1
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "validate-rs tests pass on the new core"
+
+  # ---- Phase 4: Bindings and TS views ----
+  - id: P4-01
+    title: "concerto-wasm (#28): wasm-bindgen, synchronous instantiation from inlined bytes, handle API, npm @accordproject/concerto-engine via a local workspace link. Spike: browser sync-compile limits and boundary cost."
+    deps: [P1-04]
+    priority: P0
+    agent: bindings
+    model: O
+    status: pending
+    exit_condition: "Node and headless-Chromium smoke pass; spike report"
+
+  - id: P4-02
+    title: "src/engine/ in concerto-core: loader, handle registry, error mapper; CONCERTO_ENGINE=ts|rust flag during migration"
+    deps: [P4-01, P1-05]
+    priority: P0
+    agent: shim
+    model: S
+    status: pending
+    exit_condition: "P0-04 trial units green in rust mode"
+
+  - id: P4-03
+    title: "Convert to views: ModelUtil and ResourceId"
+    deps: [P2-01]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-04
+    title: "Convert to views: validators"
+    deps: [P2-02]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-05
+    title: "Convert to views: Declaration, Decorated and Decorator"
+    deps: [P2-07]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-06
+    title: "Convert to views: ClassDeclaration family"
+    deps: [P2-03]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-07
+    title: "Convert to views: Property, Map and Scalar"
+    deps: [P2-04, P2-05, P2-06]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-08
+    title: "Convert to views: ModelFile and BaseModelManager (addModel(s), validate, validateAst)"
+    deps: [P2-08]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-09
+    title: "Convert to views: DecoratorManager, DCS converter and extractor"
+    deps: [P2-07]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-10
+    title: "Convert to views: Serializer fast path plus the populator, generator and validator checks"
+    deps: [P3-01]
+    priority: P1
+    agent: shim
+    model: "S, review O"
+    status: pending
+    exit_condition: "the group's B tests and oracle fixtures pass in rust mode; the group's W tests pass, or each has a lifted replacement signed off"
+
+  - id: P4-11
+    title: "Build pipeline: tsc, ESM, the browser bundle, smoke-esm, Playwright e2e with WASM"
+    deps: [P4-02]
+    priority: P1
+    agent: bindings
+    model: S
+    status: pending
+    exit_condition: "build and e2e green"
+
+  - id: P4-12
+    title: "NAPI addon (only if WASM is too slow)"
+    deps: [P4-01]
+    priority: P3
+    agent: bindings
+    model: S
+    status: pending
+    exit_condition: "n/a"
+
+  # ---- Phase 5: Hardening and done ----
+  - id: P5-01
+    title: "Full gate against every §0 criterion"
+    deps: [P4-03, P4-04, P4-05, P4-06, P4-07, P4-08, P4-09, P4-10, P4-11, P4-12]
+    priority: P0
+    agent: "runner -> fixer"
+    model: "H->S"
+    status: pending
+    exit_condition: "all green"
+
+  - id: P5-02
+    title: "Delete the TS logic Rust now serves; remove the engine flag; nyc thresholds still met"
+    deps: [P5-01]
+    priority: P0
+    agent: shim
+    model: S
+    status: pending
+    exit_condition: "green; ledger >= 70%"
+
+  - id: P5-03
+    title: "Final adversarial review across the three repos; PR write-ups; follow-up issues for the TS-only remainder"
+    deps: [P5-02]
+    priority: P0
+    agent: reviewer
+    model: O
+    status: pending
+    exit_condition: "findings fixed or ticketed"
+
+  - id: P5-04
+    title: "Criterion benchmark of Rust vs TS on the same models (blog): model load and validate, instance validate"
+    deps: [P5-01]
+    priority: P2
+    agent: runner
+    model: S
+    status: pending
+    exit_condition: "report in the PR"
+
+  - id: P5-05
+    title: "Differential fuzzing with fast-check (models and instances); every divergence becomes a fixture plus a fix"
+    deps: [P4-10]
+    priority: P1
+    agent: harness
+    model: S
+    status: pending
+    exit_condition: "1M cases with no divergence"
+
+  - id: P5-06
+    title: "cargo-mutants on validation; surviving mutants become tests"
+    deps: [P2-09]
+    priority: P1
+    agent: rust-core
+    model: S
+    status: pending
+    exit_condition: "catch rate >= 85%"

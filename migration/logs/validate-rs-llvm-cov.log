@@ -1,0 +1,171 @@
+info: cargo-llvm-cov currently setting cfg(coverage); you can opt-out it by passing --no-cfg-coverage
+   Compiling proc-macro2 v1.0.101
+   Compiling unicode-ident v1.0.19
+   Compiling libc v0.2.175
+   Compiling stable_deref_trait v1.2.0
+   Compiling bytes v1.11.1
+   Compiling pin-project-lite v0.2.16
+   Compiling itoa v1.0.15
+   Compiling futures-core v0.3.31
+   Compiling shlex v1.3.0
+   Compiling find-msvc-tools v0.1.1
+   Compiling cc v1.2.37
+   Compiling pkg-config v0.3.32
+   Compiling quote v1.0.40
+   Compiling socket2 v0.6.0
+   Compiling syn v2.0.106
+   Compiling mio v1.0.4
+   Compiling futures-sink v0.3.31
+   Compiling vcpkg v0.2.15
+   Compiling once_cell v1.21.3
+   Compiling tokio v1.47.1
+   Compiling fnv v1.0.7
+   Compiling http v1.3.1
+   Compiling openssl-sys v0.9.109
+   Compiling litemap v0.8.0
+   Compiling smallvec v1.15.1
+   Compiling slab v0.4.11
+   Compiling writeable v0.6.1
+   Compiling serde_core v1.0.224
+   Compiling pin-utils v0.1.0
+   Compiling version_check v0.9.5
+   Compiling icu_normalizer_data v2.0.0
+   Compiling cfg-if v1.0.3
+   Compiling icu_properties_data v2.0.1
+   Compiling memchr v2.7.5
+   Compiling typenum v1.18.0
+   Compiling generic-array v0.14.7
+   Compiling http-body v1.0.1
+   Compiling tracing-core v0.1.34
+   Compiling synstructure v0.13.2
+   Compiling bitflags v2.9.4
+   Compiling foreign-types-shared v0.1.1
+   Compiling equivalent v1.0.2
+   Compiling futures-task v0.3.31
+   Compiling openssl v0.10.73
+   Compiling hashbrown v0.15.5
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.0
+   Compiling zerovec-derive v0.11.1
+   Compiling displaydoc v0.2.5
+   Compiling httparse v1.10.1
+   Compiling futures-io v0.3.31
+   Compiling percent-encoding v2.3.2
+   Compiling futures-util v0.3.31
+   Compiling zerofrom v0.1.6
+   Compiling indexmap v2.11.1
+   Compiling yoke v0.8.0
+   Compiling openssl-macros v0.1.1
+   Compiling zerovec v0.11.4
+   Compiling zerotrie v0.2.2
+   Compiling foreign-types v0.3.2
+   Compiling tokio-util v0.7.16
+   Compiling tracing v0.1.41
+   Compiling tinystr v0.8.1
+   Compiling icu_locale_core v2.0.0
+   Compiling potential_utf v0.1.3
+   Compiling icu_collections v2.0.0
+   Compiling icu_provider v2.0.0
+   Compiling try-lock v0.2.5
+   Compiling native-tls v0.2.14
+   Compiling tower-service v0.3.3
+   Compiling atomic-waker v1.1.2
+   Compiling serde v1.0.224
+   Compiling h2 v0.4.12
+   Compiling icu_normalizer v2.0.0
+   Compiling icu_properties v2.0.1
+   Compiling want v0.3.1
+   Compiling serde_derive v1.0.224
+   Compiling futures-channel v0.3.31
+   Compiling log v0.4.28
+   Compiling openssl-probe v0.1.6
+   Compiling ryu v1.0.20
+   Compiling idna_adapter v1.2.1
+   Compiling form_urlencoded v1.2.2
+   Compiling sync_wrapper v1.0.2
+   Compiling utf8_iter v1.0.4
+   Compiling base64 v0.22.1
+   Compiling hyper v1.7.0
+   Compiling serde_json v1.0.145
+   Compiling tower-layer v0.3.3
+   Compiling ipnet v2.11.0
+   Compiling tower v0.5.2
+   Compiling tokio-native-tls v0.3.1
+   Compiling hyper-util v0.1.17
+   Compiling idna v1.1.0
+   Compiling crypto-common v0.1.6
+   Compiling block-buffer v0.10.4
+   Compiling http-body-util v0.1.3
+   Compiling zeroize v1.8.1
+   Compiling utf8parse v0.2.2
+   Compiling iri-string v0.7.8
+   Compiling serde_urlencoded v0.7.1
+   Compiling url v2.5.7
+   Compiling hyper-tls v0.6.0
+   Compiling rustls-pki-types v1.12.0
+   Compiling anstyle-parse v0.2.7
+   Compiling digest v0.10.7
+   Compiling encoding_rs v0.8.35
+   Compiling anstyle v1.0.11
+   Compiling mime v0.3.17
+   Compiling cpufeatures v0.2.17
+   Compiling is_terminal_polyfill v1.70.1
+   Compiling colorchoice v1.0.4
+   Compiling tower-http v0.6.6
+   Compiling anstyle-query v1.1.4
+   Compiling anstream v0.6.20
+   Compiling sha2 v0.10.9
+   Compiling aho-corasick v1.1.3
+   Compiling clap_lex v0.7.5
+   Compiling reqwest v0.12.23
+   Compiling thiserror v1.0.69
+   Compiling strsim v0.11.1
+   Compiling regex-syntax v0.8.6
+   Compiling heck v0.5.0
+   Compiling clap_derive v4.5.47
+   Compiling clap_builder v4.5.48
+   Compiling regex-automata v0.4.11
+   Compiling concerto-validator-rs v0.1.0 (/home/user/concerto-validate-rs)
+   Compiling thiserror-impl v1.0.69
+warning: concerto-validator-rs@0.1.0: metamodel.json is up to date
+   Compiling regex v1.11.3
+   Compiling clap v4.5.48
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.39s
+     Running unittests src/lib.rs (target/llvm-cov-target/debug/deps/concerto_validator_rs-aefb897f987fc558)
+
+running 6 tests
+test tests::test_missing_class_property ... ok
+test tests::test_extra_properties ... ok
+test tests::test_invalid_json ... ok
+test tests::test_invalid_namespace ... ok
+test tests::test_simple_model_validation ... ok
+test tests::test_valid_metamodel_validation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running unittests src/main.rs (target/llvm-cov-target/debug/deps/concerto_validator-ed6c0336d0a1eb35)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli_tests.rs (target/llvm-cov-target/debug/deps/cli_tests-f926c3c8a2b59ade)
+
+running 5 tests
+test test_cli_no_input_files ... ok
+test test_cli_help ... ok
+test test_cli_version ... ok
+test test_cli_validate_invalid_json ... ok
+test test_cli_validate_valid_file ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+Filename                             Regions    Missed Regions     Cover   Functions  Missed Functions  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+lib.rs                                    76                 1    98.68%           8                 0   100.00%          89                 0   100.00%           0                 0         -
+main.rs                                   88                88     0.00%           8                 8     0.00%          72                72     0.00%           0                 0         -
+model_manager/mod.rs                     388                57    85.31%          38                 6    84.21%         257                50    80.54%           0                 0         -
+model_manager/type_definition.rs          46                 1    97.83%          11                 0   100.00%          33                 1    96.97%           0                 0         -
+validator.rs                              17                 1    94.12%           2                 0   100.00%          11                 0   100.00%           0                 0         -
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                    615               148    75.93%          67                14    79.10%         462               123    73.38%           0                 0         -

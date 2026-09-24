@@ -1,0 +1,38 @@
+   Compiling concerto-validator-rs v0.1.0 (/home/user/concerto-validate-rs)
+warning: concerto-validator-rs@0.1.0: Updated metamodel.json from official repository
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.52s
+     Running unittests src/lib.rs (target/debug/deps/concerto_validator_rs-aefb897f987fc558)
+
+running 6 tests
+test tests::test_missing_class_property ... ok
+test tests::test_extra_properties ... ok
+test tests::test_invalid_namespace ... ok
+test tests::test_invalid_json ... ok
+test tests::test_simple_model_validation ... ok
+test tests::test_valid_metamodel_validation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/main.rs (target/debug/deps/concerto_validator-ed6c0336d0a1eb35)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli_tests.rs (target/debug/deps/cli_tests-f926c3c8a2b59ade)
+
+running 5 tests
+test test_cli_no_input_files ... ok
+test test_cli_help ... ok
+test test_cli_version ... ok
+test test_cli_validate_invalid_json ... ok
+test test_cli_validate_valid_file ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Doc-tests concerto_validator_rs
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
