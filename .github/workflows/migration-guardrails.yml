@@ -37,6 +37,11 @@ jobs:
       - name: Install workspace dependencies
         run: npm ci
 
+      # concerto-core's .d.ts build (API snapshot rule) imports the other
+      # workspace packages, so they must be built first, as build.yml does.
+      - name: Build workspace packages
+        run: npm run build
+
       - name: Run migration guardrails
         run: |
           node migration/bin/check-guardrails.mjs --base-ref "origin/${{ github.base_ref }}"
