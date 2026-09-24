@@ -1,18 +1,18 @@
 {
   "$schema": "migration/status/status.json",
-  "generated_at": "2026-09-24T09:59:09.139Z",
+  "generated_at": "2026-09-24T10:15:11.092Z",
   "requested_at_sha": null,
-  "fast": false,
-  "runtime_ms": 39205,
+  "fast": true,
+  "runtime_ms": 47382,
   "repos": {
     "concerto": {
       "path": "/home/user/concerto",
-      "commit": "1240cb0e5399377d524bd2e8f420bdf838075eda",
-      "commit_used": "1240cb0e5399377d524bd2e8f420bdf838075eda"
+      "commit": "2402747a0a19c80247d2ddbe0e0dafa802679f0f",
+      "commit_used": "43614cbd8a8c9a3d395919b0b59d44f203b1df40"
     },
     "concerto-rust": {
       "path": "/home/user/concerto-rust",
-      "commit": "a80e56207606a8a5c579dec6a2923214bb4453e8"
+      "commit": "d8d3c9801d8c5d9542f4df83c3f4f94de6d0f27e"
     },
     "concerto-validate-rs": {
       "path": "/home/user/concerto-validate-rs",
@@ -59,32 +59,26 @@
         "passing": 1299,
         "failing": 1,
         "pending": 8,
-        "duration_ms": 6396
+        "duration_ms": 8527
       },
       "by_tag": {
         "available": true,
         "tally": {
           "B": {
-            "tests": 943,
-            "passing": 936,
+            "tests": 956,
+            "passing": 949,
             "failing": 1,
             "pending": 6
           },
           "M": {
-            "tests": 81,
-            "passing": 79,
+            "tests": 80,
+            "passing": 78,
             "failing": 0,
             "pending": 2
           },
           "W": {
-            "tests": 269,
-            "passing": 269,
-            "failing": 0,
-            "pending": 0
-          },
-          "untagged": {
-            "tests": 15,
-            "passing": 15,
+            "tests": 272,
+            "passing": 272,
             "failing": 0,
             "pending": 0
           }
@@ -99,7 +93,7 @@
           "passing": 1299,
           "failing": 1,
           "pending": 8,
-          "duration_ms": 6396
+          "duration_ms": 8527
         },
         "rust": {
           "available": false,
@@ -160,13 +154,8 @@
           }
         },
         "llvm_cov": {
-          "available": true,
-          "workspace_lines_pct": 83.4,
-          "per_crate_lines_pct": {
-            "concerto-core": 93.21,
-            "concerto-metamodel": 0,
-            "concerto-vocabulary": 0
-          }
+          "available": false,
+          "reason": "skipped by --fast"
         }
       },
       "concerto-validate-rs": {
@@ -193,14 +182,8 @@
           }
         },
         "llvm_cov": {
-          "available": true,
-          "workspace_lines_pct": 73.38,
-          "per_crate_lines_pct": {
-            "lib.rs": 100,
-            "main.rs": 0,
-            "model_manager": 82.41,
-            "validator.rs": 100
-          }
+          "available": false,
+          "reason": "skipped by --fast"
         }
       }
     },
@@ -221,7 +204,7 @@
     },
     "conformance": {
       "available": false,
-      "reason": "concerto-conformance has no installed dependencies (npm install has not been run) and its Rust harness has not been updated to the current concerto-rust API yet (P0-07 pending)"
+      "reason": "skipped by --fast"
     }
   }
 }
