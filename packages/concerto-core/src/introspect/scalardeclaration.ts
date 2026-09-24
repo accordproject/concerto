@@ -27,6 +27,25 @@ import type Validator from './validator';
 import type ClassDeclaration from './classdeclaration';
 /* eslint-enable no-unused-vars */
 
+// CONCERTO_ENGINE=rust: the Rust engine, or null in ts mode (src/engine/index.ts).
+// Its bindings are typed `never` so that a view leaves the member's inferred
+// return type, and so the .d.ts, exactly as the TS body makes it.
+//
+// dist/ does not ship src/engine/ (OD-11), so a bundler of dist/ must never
+// see a specifier it would resolve: `loadEngine` takes a non-literal one
+// (esbuild, rollup and browserify leave it alone), and webpack folds the
+// `typeof __webpack_require__` test and keeps only the dead-in-Node
+// `__non_webpack_require__` branch, so it neither resolves nor warns. ts mode
+// bundles exactly as before (PORTING.md 1.5).
+declare const __webpack_require__: unknown;
+declare const __non_webpack_require__: NodeRequire;
+/* istanbul ignore next */
+const loadEngine = (specifier: string) =>
+    typeof __webpack_require__ === 'function' ? __non_webpack_require__(specifier) : module.require(specifier);
+/* istanbul ignore next */
+const rust: { [binding: string]: (...args: any[]) => never } | null =
+    typeof process !== 'undefined' && process.env?.CONCERTO_ENGINE === 'rust' ? loadEngine('../engine').rust : null;
+
 /**
  * ScalarDeclaration defines the structure (model/schema) of composite data.
  * It is composed of a set of Properties, may have an identifying field, and may
@@ -60,6 +79,12 @@ class ScalarDeclaration extends Declaration {
      */
     process() {
         super.process();
+
+        /* istanbul ignore if */
+        if (rust) {
+            loadEngine('../engine/views').scalarDeclarationProcess(this);
+            return;
+        }
 
         const scalarName = this.getName(); // Get the local name of the scalar
         if (ModelUtil.isPrimitiveType(scalarName)) {
@@ -124,6 +149,12 @@ class ScalarDeclaration extends Declaration {
      */
     validate() {
         super.validate();
+
+        /* istanbul ignore if */
+        if (rust) {
+            rust.scalarDeclarationValidate(this);
+            return;
+        }
 
         const declarations = this.getModelFile().getAllDeclarations();
         const declarationNames = declarations.map(
@@ -219,6 +250,10 @@ class ScalarDeclaration extends Declaration {
      * @return {String} the string representation of the class
      */
     toString(): string {
+        /* istanbul ignore if */
+        if (rust) {
+            return rust.scalarDeclarationToString(this);
+        }
         return 'ScalarDeclaration {id=' + this.getFullyQualifiedName() + '}';
     }
 
