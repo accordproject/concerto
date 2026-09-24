@@ -22,10 +22,17 @@
  * direct call on an introspection object returned by that API) while the
  * recorder is active (ORACLE_SOURCE=gaps). This driver never asserts on the
  * outcome; the reference decides it on replay.
+ *
+ * Task accordproject/concerto-rust#94 added the last sections: filter
+ * predicates and decorator factories built with lib/encodable.js, the
+ * ScalarDeclaration constructor, and the async ops (ModelLoader,
+ * updateExternalModels) with the files they read and the network responses
+ * this driver serves them.
  */
 
 const path = require('path');
-const { SRC_ROOT } = require('../lib/core');
+const { SRC_ROOT, getSrcCore } = require('../lib/core');
+const encodable = require('../lib/encodable');
 
 const S = (m) => require(path.join(SRC_ROOT, m));
 const { ModelManager } = S('modelmanager');
@@ -1411,6 +1418,207 @@ concept F {
             attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing'));
             attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing', 'custom message'));
             attempt(() => new TypeNotFoundException('gaps.tnf@1.0.0.Missing', undefined, 'my-component'));
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // Task accordproject/concerto-rust#94: calls the oracle could not record
+    // before, now recorded through the encodings of lib/encodable.js
+    // (filter predicates, decorator factories), the ScalarDeclaration.new
+    // constructor op, and async ops with their files and network responses.
+    // -----------------------------------------------------------------------
+
+    describe('basemodelmanager.ts / modelfile.ts: ModelManager.filter with an encodable predicate', () => {
+        const fqnIn = (...names) => encodable.predicate({ kind: 'fqn-in', names });
+        const A = 'gaps.fa@1.0.0';
+        const E = 'gaps.fe@1.0.0';
+        const models = () => {
+            const mm = new ModelManager({ importAliasing: true });
+            attempt(() => mm.addCTOModel(`namespace ${A}\nconcept A1 {}\nconcept A2 {}\nconcept A3 {}\n`, 'fa.cto'));
+            // an import from the system namespace
+            attempt(() => mm.addCTOModel('namespace gaps.fc@1.0.0\nimport concerto@1.0.0.{Concept}\nconcept C1 {}\n', 'fc.cto'));
+            // ImportTypes with an alias, and ImportType
+            attempt(() => mm.addCTOModel(`namespace ${E}\nimport ${A}.{A2 as X, A3}\nimport ${A}.A1\n` +
+                'concept E1 {\n  o X x optional\n}\nconcept E2 {\n  o A3 a3 optional\n}\nconcept E3 {\n  o A1 a1 optional\n}\n', 'fe.cto'));
+            // imports whose namespace or type is not in the model manager
+            // (added without validation)
+            attempt(() => mm.addCTOModel('namespace gaps.fm@1.0.0\nimport gaps.nowhere@1.0.0.Z\nimport gaps.nowhere@1.0.0.{Y}\n' +
+                `import ${A}.Nope\nimport ${A}.{Nope2, A1}\nconcept M1 {}\n`, 'fm.cto', true));
+            return mm;
+        };
+        const predicates = {
+            'nothing': fqnIn(),
+            'every user type': fqnIn(`${A}.A1`, `${A}.A2`, `${A}.A3`, 'gaps.fc@1.0.0.C1', `${E}.E1`, `${E}.E2`, `${E}.E3`, 'gaps.fm@1.0.0.M1'),
+            'drops an imported type': fqnIn(`${A}.A1`, `${A}.A3`, 'gaps.fc@1.0.0.C1', `${E}.E2`, `${E}.E3`),
+            'drops every type of an ImportTypes': fqnIn(`${A}.A1`, `${E}.E3`, 'gaps.fm@1.0.0.M1'),
+            'keeps an alias': fqnIn(`${A}.A2`, `${E}.E1`),
+            'keeps a type whose import is dropped': fqnIn(`${E}.E1`, `${E}.E2`),
+        };
+        for (const [label, pred] of Object.entries(predicates)) {
+            for (const options of [undefined, { disableValidation: true }, {}]) {
+                it(`filter: ${label}, options ${JSON.stringify(options)}`, () => {
+                    const mm = models();
+                    attempt(() => options === undefined ? mm.filter(pred) : mm.filter(pred, options));
+                });
+            }
+        }
+
+        it('filter over model files with no imports and with a wildcard import (fromAst)', () => {
+            const decl = (name) => ({ $class: `${MM1}.ConceptDeclaration`, name, isAbstract: false, properties: [] });
+            const ast = {
+                $class: `${MM1}.Models`,
+                models: [
+                    { $class: `${MM1}.Model`, namespace: A, imports: [], declarations: [decl('A1'), decl('A2')] },
+                    { $class: `${MM1}.Model`, namespace: 'gaps.fall@1.0.0', imports: [{ $class: `${MM1}.ImportAll`, namespace: A }], declarations: [decl('L')] },
+                    { $class: `${MM1}.Model`, namespace: 'gaps.fnoimp@1.0.0', declarations: [decl('N')] },
+                ],
+            };
+            const mm = new ModelManager();
+            attempt(() => mm.fromAst(ast, { disableValidation: true }));
+            attempt(() => mm.filter(fqnIn(`${A}.A1`, 'gaps.fall@1.0.0.L', 'gaps.fnoimp@1.0.0.N')));
+            attempt(() => mm.filter(fqnIn('gaps.fall@1.0.0.L', 'gaps.fnoimp@1.0.0.N'), { disableValidation: true }));
+        });
+    });
+
+    describe('decorated.ts: decorator factories as model manager steps', () => {
+        const core = getSrcCore();
+        const cto = 'namespace gaps.df@1.0.0\n@foo\nconcept Plain {}\n@bar("x")\nconcept Bar {\n  @foo\n  o String s\n}\nconcept Undecorated {}\n';
+        const cases = {
+            // the exported base DecoratorFactory: its newDecorator throws
+            'base': [{ kind: 'base' }],
+            // returns a Decorator for @bar only: both ways through the loop
+            'names [bar]': [{ kind: 'names', names: ['bar'] }],
+            'names [none], then names [bar, foo]': [{ kind: 'names', names: [] }, { kind: 'names', names: ['bar', 'foo'] }],
+            'names [bar], then base': [{ kind: 'names', names: ['bar'] }, { kind: 'base' }],
+        };
+        for (const [label, specs] of Object.entries(cases)) {
+            it(`addDecoratorFactory: ${label}`, () => {
+                const mm = new ModelManager();
+                for (const spec of specs) {
+                    mm.addDecoratorFactory(encodable.decoratorFactory(core, spec));
+                }
+                attempt(() => mm.addCTOModel(cto, 'df.cto'));
+                const bar = attempt(() => mm.getType('gaps.df@1.0.0.Bar'));
+                if (bar) {
+                    attempt(() => bar.getDecorators());
+                    attempt(() => bar.getDecorator('bar'));
+                    const s = attempt(() => bar.getProperty('s'));
+                    if (s) {
+                        attempt(() => s.getDecorator('foo'));
+                    }
+                }
+                attempt(() => mm.getType('gaps.df@1.0.0.Plain'));
+                attempt(() => mm.getAst());
+            });
+        }
+
+        it('a factory added after the model: applies to models added later only', () => {
+            const mm = new ModelManager();
+            attempt(() => mm.addCTOModel(cto, 'df.cto'));
+            mm.addDecoratorFactory(encodable.decoratorFactory(core, { kind: 'base' }));
+            attempt(() => mm.getType('gaps.df@1.0.0.Bar'));
+            attempt(() => mm.addCTOModel('namespace gaps.df2@1.0.0\n@foo\nconcept Later {}\n', 'df2.cto'));
+        });
+    });
+
+    describe('scalardeclaration.ts: the exported ScalarDeclaration constructor (ScalarDeclaration.new)', () => {
+        const { ScalarDeclaration } = S('introspect/scalardeclaration');
+        const NS = 'gaps.sd@1.0.0';
+        const setup = () => {
+            const mm = new ModelManager();
+            attempt(() => mm.addCTOModel(`namespace ${NS}\nconcept C {}\n`, 'sd.cto'));
+            return mm.getModelFile(NS);
+        };
+        const asts = {
+            'no $class': { name: 'NoClass' },
+            'an unknown scalar $class': { $class: `${MM1}.FooScalar`, name: 'Foo' },
+            'a StringScalar': { $class: `${MM1}.StringScalar`, name: 'Code', defaultValue: 'x' },
+            'an IntegerScalar with a validator': { $class: `${MM1}.IntegerScalar`, name: 'Age', validator: { $class: `${MM1}.IntegerDomainValidator`, lower: 0, upper: 150 } },
+            'a primitive name': { $class: `${MM1}.StringScalar`, name: 'String' },
+        };
+        for (const [label, ast] of Object.entries(asts)) {
+            it(`new ScalarDeclaration with ${label}`, () => {
+                const mf = setup();
+                const d = attempt(() => new ScalarDeclaration(mf, ast));
+                if (d) {
+                    for (const m of ['getType', 'getName', 'getFullyQualifiedName', 'toString', 'getDefaultValue', 'getValidator', 'isScalarDeclaration']) {
+                        attempt(() => d[m]());
+                    }
+                }
+            });
+        }
+    });
+
+    describe('modelloader.ts / basemodelmanager.ts: async ops with files and network responses', () => {
+        const { ModelLoader } = S('modelloader');
+        // Files are read relative to the working directory, which is
+        // packages/concerto-core when record-all.sh runs this driver.
+        const FILE = 'test/data/model/model-base.cto';
+        const EXT = 'https://oracle.invalid/gaps/ext.cto';
+        const NET = {
+            [EXT]: { status: 200, body: 'namespace gaps.ext@1.0.0\nconcept E {}\n' },
+            'https://oracle.invalid/gaps/loader.cto': { status: 200, body: `namespace gaps.loader@1.0.0\nimport gaps.ext@1.0.0.{E} from ${EXT}\nconcept L {\n  o E e\n}\n` },
+            'https://raw.githubusercontent.com/oracle/gaps/main/gh.cto': { status: 200, body: 'namespace gaps.gh@1.0.0\nconcept G {}\n' },
+            'https://oracle.invalid/gaps/missing.cto': { status: 404, body: 'not found' },
+        };
+        // The driver serves the responses; the recorder captures whatever
+        // fetch returns during the op into the fixture (inputs.net).
+        const withNetwork = async (f) => {
+            const saved = global.fetch;
+            global.fetch = async (url) => {
+                const entry = NET[String(url)];
+                if (!entry) {
+                    throw new TypeError('fetch failed');
+                }
+                return new Response(entry.body, { status: entry.status });
+            };
+            try {
+                return await f();
+            } catch (e) {
+                return undefined;
+            } finally {
+                global.fetch = saved;
+            }
+        };
+
+        const loads = {
+            'a file, default options': () => ModelLoader.loadModelManager([FILE]),
+            'a file, null options': () => ModelLoader.loadModelManager([FILE], null),
+            'a file, offline': () => ModelLoader.loadModelManager([FILE], { offline: true }),
+            'a file, online': () => ModelLoader.loadModelManager([FILE], { offline: false }),
+            'a URL with an external import': () => ModelLoader.loadModelManager(['https://oracle.invalid/gaps/loader.cto']),
+            'a URL, offline': () => ModelLoader.loadModelManager(['https://oracle.invalid/gaps/loader.cto'], { offline: true }),
+            'a github:// URL': () => ModelLoader.loadModelManager(['github://oracle/gaps/main/gh.cto']),
+            'a URL answering 404': () => ModelLoader.loadModelManager(['https://oracle.invalid/gaps/missing.cto']),
+            'a file and a URL': () => ModelLoader.loadModelManager([FILE, 'github://oracle/gaps/main/gh.cto'], { offline: true }),
+            'model text, default options': () => ModelLoader.loadModelManagerFromModelFiles(['namespace gaps.mf@1.0.0\nconcept X {}\n']),
+            'model text and names, null options': () => ModelLoader.loadModelManagerFromModelFiles(['namespace gaps.mf@1.0.0\nconcept X {}\n'], ['x.cto'], null),
+            'model text, offline': () => ModelLoader.loadModelManagerFromModelFiles(['namespace gaps.mf@1.0.0\nconcept X {}\n'], undefined, { offline: true }),
+            'model text with an external import, online': () => ModelLoader.loadModelManagerFromModelFiles([NET['https://oracle.invalid/gaps/loader.cto'].body], ['l.cto']),
+            'invalid model text, offline': () => ModelLoader.loadModelManagerFromModelFiles([`namespace gaps.bad@1.0.0\nimport gaps.ext@1.0.0.{E} from ${EXT}\nconcept B {\n  o E e\n}\n`], ['b.cto'], { offline: true }),
+        };
+        for (const [label, f] of Object.entries(loads)) {
+            it(`ModelLoader: ${label}`, () => withNetwork(f));
+        }
+
+        const importing = `namespace gaps.uem@1.0.0\nimport gaps.ext@1.0.0.{E} from ${EXT}\nconcept U {\n  o E e\n}\n`;
+        it('updateExternalModels: a new external namespace, then the same one again', async () => {
+            const mm = new ModelManager();
+            attempt(() => mm.addCTOModel(importing, 'uem.cto', true));
+            await withNetwork(() => mm.updateExternalModels());
+            const mm2 = new ModelManager();
+            attempt(() => mm2.addCTOModel(importing, 'uem.cto', true));
+            attempt(() => mm2.addCTOModel('namespace gaps.ext@1.0.0\nconcept E {\n  o String old optional\n}\n', 'ext.cto'));
+            await withNetwork(() => mm2.updateExternalModels({}));
+        });
+
+        it('updateExternalModels: no external imports, and a dependency that answers 404', async () => {
+            const mm = new ModelManager();
+            attempt(() => mm.addCTOModel('namespace gaps.uem0@1.0.0\nconcept Z {}\n', 'uem0.cto'));
+            await withNetwork(() => mm.updateExternalModels());
+            const mm2 = new ModelManager();
+            attempt(() => mm2.addCTOModel('namespace gaps.uem404@1.0.0\nimport gaps.ext@1.0.0.{E} from https://oracle.invalid/gaps/missing.cto\nconcept U {\n  o E e\n}\n', 'uem404.cto', true));
+            await withNetwork(() => mm2.updateExternalModels());
         });
     });
 });

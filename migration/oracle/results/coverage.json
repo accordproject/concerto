@@ -1,55 +1,148 @@
 {
- "generated_at": "2026-09-24T16:09:48.856Z",
+ "generated_at": "2026-09-24T18:31:02.846Z",
  "driver": "oracle corpus only: bin/replay.js --engine reference under nyc, over the frozen reference dist/*.js remapped to src/*.ts through its source maps",
  "corpus": {
   "statements": {
-   "pct": 92.12,
-   "covered": 3157,
+   "pct": 95.36,
+   "covered": 3268,
    "total": 3427
   },
   "branches": {
-   "pct": 92.86,
-   "covered": 1704,
+   "pct": 95.85,
+   "covered": 1759,
    "total": 1835
   },
   "functions": {
-   "pct": 91.47,
-   "covered": 558,
+   "pct": 94.09,
+   "covered": 574,
    "total": 610
   },
   "lines": {
-   "pct": 92.05,
-   "covered": 3104,
+   "pct": 95.31,
+   "covered": 3214,
    "total": 3372
   }
  },
  "corpus_src_driver": "the same corpus, bin/replay.js --engine src under nyc (workspace src/ through ts-node)",
  "corpus_src": {
   "statements": {
-   "pct": 94.83,
-   "covered": 3157,
-   "total": 3329
+   "pct": 97.88,
+   "covered": 3292,
+   "total": 3363
   },
   "branches": {
-   "pct": 92.86,
-   "covered": 1704,
-   "total": 1835
+   "pct": 95.86,
+   "covered": 1783,
+   "total": 1860
   },
   "functions": {
-   "pct": 91.47,
-   "covered": 558,
+   "pct": 94.09,
+   "covered": 574,
    "total": 610
   },
   "lines": {
-   "pct": 94.8,
-   "covered": 3104,
-   "total": 3274
+   "pct": 97.88,
+   "covered": 3238,
+   "total": 3308
   }
  },
  "corpus_reference_vs_src": {
-  "branch_layout_mismatches": 0,
-  "branch_hit_disagreements": 0,
-  "disagreements": []
+  "branch_layout_mismatches": 58,
+  "branch_hit_disagreements": 18,
+  "disagreements": [
+   {
+    "file": "src/modelutil.ts",
+    "branch": "0[1]",
+    "reference": 9
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "2[1]",
+    "reference": 15
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "5[1]",
+    "reference": 13561
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "12[2]",
+    "reference": 193215
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "14[1]",
+    "reference": 2
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "15[1]",
+    "reference": 1
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[1]",
+    "reference": 351
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[2]",
+    "reference": 157
+   },
+   {
+    "file": "src/modelutil.ts",
+    "branch": "16[3]",
+    "reference": 130
+   },
+   {
+    "file": "src/introspect/numbervalidator.ts",
+    "branch": "0[1]",
+    "reference": 347
+   },
+   {
+    "file": "src/introspect/numbervalidator.ts",
+    "branch": "13[1]",
+    "reference": 78
+   },
+   {
+    "file": "src/introspect/numbervalidator.ts",
+    "branch": "19[0]",
+    "reference": 7,
+    "src": 0
+   },
+   {
+    "file": "src/introspect/numbervalidator.ts",
+    "branch": "19[1]",
+    "reference": 1
+   },
+   {
+    "file": "src/introspect/numbervalidator.ts",
+    "branch": "20[1]",
+    "reference": 1
+   },
+   {
+    "file": "src/introspect/scalardeclaration.ts",
+    "branch": "0[1]",
+    "reference": 5038
+   },
+   {
+    "file": "src/introspect/scalardeclaration.ts",
+    "branch": "7[2]",
+    "reference": 703
+   },
+   {
+    "file": "src/introspect/scalardeclaration.ts",
+    "branch": "7[3]",
+    "reference": 3819
+   },
+   {
+    "file": "src/introspect/scalardeclaration.ts",
+    "branch": "12[0]",
+    "reference": 0,
+    "src": 2664
+   }
+  ]
  },
  "unit_suite": {
   "statements": {
@@ -90,16 +183,13 @@
   "functions": 99,
   "lines": 99
  },
- "uncovered_branches": 131,
- "uncovered_branches_covered_by_suite": 65,
+ "uncovered_branches": 76,
+ "uncovered_branches_covered_by_suite": 12,
  "covered_by_suite_by_category": {
-  "unrecordable": 51,
-  "plan-owner-decision": 2,
   "stub-only": 4,
   "internal-only": 8
  },
  "covered_by_suite_by_destination": {
-  "accordproject/concerto-rust#94": 53,
   "P2-10 (accordproject/concerto-rust#54)": 12
  },
  "unexplained_covered_by_suite": [],

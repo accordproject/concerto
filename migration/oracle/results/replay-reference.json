@@ -1,13 +1,13 @@
 {
  "engine": "reference@5.0.0",
- "total": 15794,
- "pass": 15794,
+ "total": 15850,
+ "pass": 15850,
  "fail": 0,
  "harness_error": 0,
  "by_source": {
   "conformance": {
-   "total": 839,
-   "pass": 839,
+   "total": 815,
+   "pass": 815,
    "fail": 0,
    "harness_error": 0
   },
@@ -18,8 +18,8 @@
    "harness_error": 0
   },
   "gaps": {
-   "total": 543,
-   "pass": 543,
+   "total": 658,
+   "pass": 658,
    "fail": 0,
    "harness_error": 0
   },
@@ -30,28 +30,28 @@
    "harness_error": 0
   },
   "unit": {
-   "total": 4117,
-   "pass": 4117,
+   "total": 4082,
+   "pass": 4082,
    "fail": 0,
    "harness_error": 0
   }
  },
  "by_op": {
   "ModelFile.getName": {
-   "total": 91,
-   "pass": 91,
+   "total": 76,
+   "pass": 76,
    "fail": 0,
    "harness_error": 0
   },
   "ModelFile.new": {
-   "total": 211,
-   "pass": 211,
+   "total": 196,
+   "pass": 196,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.addCTOModel": {
-   "total": 1360,
-   "pass": 1360,
+   "total": 1375,
+   "pass": 1375,
    "fail": 0,
    "harness_error": 0
   },
@@ -62,14 +62,14 @@
    "harness_error": 0
   },
   "ModelManager.addModelFile": {
-   "total": 107,
-   "pass": 107,
+   "total": 92,
+   "pass": 92,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.validateModelFiles": {
-   "total": 385,
-   "pass": 385,
+   "total": 376,
+   "pass": 376,
    "fail": 0,
    "harness_error": 0
   },
@@ -122,14 +122,14 @@
    "harness_error": 0
   },
   "Declaration.getFullyQualifiedName": {
-   "total": 488,
-   "pass": 488,
+   "total": 493,
+   "pass": 493,
    "fail": 0,
    "harness_error": 0
   },
   "Declaration.getName": {
-   "total": 364,
-   "pass": 364,
+   "total": 369,
+   "pass": 369,
    "fail": 0,
    "harness_error": 0
   },
@@ -206,20 +206,20 @@
    "harness_error": 0
   },
   "ModelManager.addModelFiles": {
-   "total": 54,
-   "pass": 54,
+   "total": 52,
+   "pass": 52,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.fromAst": {
-   "total": 33,
-   "pass": 33,
+   "total": 34,
+   "pass": 34,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.getAst": {
-   "total": 125,
-   "pass": 125,
+   "total": 129,
+   "pass": 129,
    "fail": 0,
    "harness_error": 0
   },
@@ -230,14 +230,14 @@
    "harness_error": 0
   },
   "ModelManager.getType": {
-   "total": 640,
-   "pass": 640,
+   "total": 649,
+   "pass": 649,
    "fail": 0,
    "harness_error": 0
   },
   "ModelManager.new": {
-   "total": 13,
-   "pass": 13,
+   "total": 12,
+   "pass": 12,
    "fail": 0,
    "harness_error": 0
   },
@@ -254,8 +254,8 @@
    "harness_error": 0
   },
   "ClassDeclaration.getProperty": {
-   "total": 158,
-   "pass": 158,
+   "total": 160,
+   "pass": 160,
    "fail": 0,
    "harness_error": 0
   },
@@ -268,6 +268,18 @@
   "Declaration.getModelFile": {
    "total": 16,
    "pass": 16,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorator": {
+   "total": 78,
+   "pass": 78,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "Decorated.getDecorators": {
+   "total": 7,
+   "pass": 7,
    "fail": 0,
    "harness_error": 0
   },
@@ -313,9 +325,39 @@
    "fail": 0,
    "harness_error": 0
   },
+  "ModelLoader.loadModelManager": {
+   "total": 10,
+   "pass": 10,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelLoader.loadModelManagerFromModelFiles": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.addDecoratorFactory": {
+   "total": 6,
+   "pass": 6,
+   "fail": 0,
+   "harness_error": 0
+  },
   "ModelManager.deleteModelFile": {
    "total": 5,
    "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.filter": {
+   "total": 20,
+   "pass": 20,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ModelManager.updateExternalModels": {
+   "total": 6,
+   "pass": 6,
    "fail": 0,
    "harness_error": 0
   },
@@ -382,6 +424,42 @@
   "Resource.setPropertyValue": {
    "total": 53,
    "pass": 53,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getDefaultValue": {
+   "total": 7,
+   "pass": 7,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getType": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.getValidator": {
+   "total": 5,
+   "pass": 5,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.isScalarDeclaration": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.new": {
+   "total": 13,
+   "pass": 13,
+   "fail": 0,
+   "harness_error": 0
+  },
+  "ScalarDeclaration.toString": {
+   "total": 5,
+   "pass": 5,
    "fail": 0,
    "harness_error": 0
   },
@@ -550,18 +628,6 @@
   "Declaration.isScalarDeclaration": {
    "total": 50,
    "pass": 50,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Decorated.getDecorator": {
-   "total": 74,
-   "pass": 74,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "Decorated.getDecorators": {
-   "total": 5,
-   "pass": 5,
    "fail": 0,
    "harness_error": 0
   },
@@ -1052,8 +1118,8 @@
    "harness_error": 0
   },
   "ModelUtil.getFullyQualifiedName": {
-   "total": 12,
-   "pass": 12,
+   "total": 5,
+   "pass": 5,
    "fail": 0,
    "harness_error": 0
   },
@@ -1070,8 +1136,8 @@
    "harness_error": 0
   },
   "ModelUtil.isPrimitiveType": {
-   "total": 10,
-   "pass": 10,
+   "total": 7,
+   "pass": 7,
    "fail": 0,
    "harness_error": 0
   },
@@ -1088,8 +1154,8 @@
    "harness_error": 0
   },
   "ModelUtil.isValidIdentifier": {
-   "total": 16,
-   "pass": 16,
+   "total": 9,
+   "pass": 9,
    "fail": 0,
    "harness_error": 0
   },
@@ -1237,12 +1303,6 @@
    "fail": 0,
    "harness_error": 0
   },
-  "ScalarDeclaration.getDefaultValue": {
-   "total": 3,
-   "pass": 3,
-   "fail": 0,
-   "harness_error": 0
-  },
   "ScalarDeclaration.getIdentifierFieldName": {
    "total": 1,
    "pass": 1,
@@ -1256,12 +1316,6 @@
    "harness_error": 0
   },
   "ScalarDeclaration.getSuperTypeDeclaration": {
-   "total": 1,
-   "pass": 1,
-   "fail": 0,
-   "harness_error": 0
-  },
-  "ScalarDeclaration.getValidator": {
    "total": 1,
    "pass": 1,
    "fail": 0,
@@ -1348,6 +1402,6 @@
  },
  "failures": [],
  "agreement_pct": 100,
- "seconds": 67.3,
+ "seconds": 47.8,
  "failures_truncated": false
 }

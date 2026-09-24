@@ -101,6 +101,10 @@ function loadCore(root, label) {
         RelationshipDeclaration: pick(req('introspect/relationshipdeclaration'), 'RelationshipDeclaration'),
         EnumValueDeclaration: pick(req('introspect/enumvaluedeclaration'), 'EnumValueDeclaration'),
         TypeNotFoundException: pick(req('typenotfoundexception'), 'TypeNotFoundException'),
+        // task accordproject/concerto-rust#94: decorator factories as model
+        // manager steps, and the async ModelLoader statics.
+        DecoratorFactory: pick(req('introspect/decoratorfactory'), 'DecoratorFactory'),
+        ModelLoader: pick(req('modelloader'), 'ModelLoader'),
     };
     // ModelFile is looked up lazily: the recorder replaces the export with a
     // recording subclass, and every consumer must see the current binding.
